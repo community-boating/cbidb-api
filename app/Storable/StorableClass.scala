@@ -1,5 +1,3 @@
 package Storable
 
-abstract class StorableClass {
-
-}
+abstract class StorableClass {}

@@ -24,7 +24,7 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
   object fields extends FieldsObject {
     val signupId = new IntDatabaseField(self, "SIGNUP_ID")
     val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
-    val signupType = new StringDatabaseField(self, "SIGNUP_TYPE")
+    val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
   }
 
   val fieldList: List[DatabaseField] = List(
@@ -41,4 +41,6 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
       r.stringFields.get("SIGNUP_TYPE") match { case Some(Some(x)) => x; case _ => "" }
     )
   }
+
+  def getTestData: Set[ApClassSignup] = Set()
 }

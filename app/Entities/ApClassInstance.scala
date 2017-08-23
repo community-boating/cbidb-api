@@ -26,7 +26,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
   object fields extends FieldsObject {
     val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
     val formatId = new IntDatabaseField(self, "FORMAT_ID")
-    val locationString = new StringDatabaseField(self, "LOCATION_STRING")
+    val locationString = new StringDatabaseField(self, "LOCATION_STRING", 500)
   }
 
   val fieldList: List[DatabaseField] = List(
@@ -42,4 +42,8 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
       r.intFields.get("FORMAT_ID") match { case Some(Some(x)) => x; case _ => -1 },
       r.stringFields.get("LOCATION_STRING") match { case Some(Some(x)) => x; case _ => "" }
     )
+
+  def getTestData: Set[ApClassInstance] = Set(
+    ApClassInstance(1, 1, "Someplace")
+  )
 }

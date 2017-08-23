@@ -15,7 +15,7 @@ object ClassLocation extends StorableObject[ClassLocation] {
 
   object fields extends FieldsObject {
     val locationId = new IntDatabaseField(self, "LOCATION_ID")
-    val locationName = new StringDatabaseField(self, "LOCATION_NAME")
+    val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
   }
 
   val fieldList: List[DatabaseField] = List(
@@ -29,4 +29,6 @@ object ClassLocation extends StorableObject[ClassLocation] {
       r.intFields.get("LOCATION_ID") match { case Some(Some(x)) => x; case None => -1},
       r.stringFields.get("LOCATION_NAME") match { case Some(Some(x)) => x; case None => ""}
     )
+
+  def getTestData: Set[ClassLocation] = Set()
 }

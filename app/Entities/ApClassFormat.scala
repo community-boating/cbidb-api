@@ -25,7 +25,7 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
   object fields extends FieldsObject {
     val formatId = new IntDatabaseField(self, "FORMAT_ID")
     val typeId = new IntDatabaseField(self, "TYPE_ID")
-    val description = new StringDatabaseField(self, "DESCRIPTION")
+    val description = new StringDatabaseField(self, "DESCRIPTION", 100)
 
   }
 
@@ -42,4 +42,10 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
       r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1},
       r.stringFields.get("DESCRIPTION") match { case Some(Some(x)) => x; case _ => "" }
     )
+
+  def getTestData: Set[ApClassFormat] = Set(
+    ApClassFormat(1, 1, ""),
+    ApClassFormat(2, 2, ""),
+    ApClassFormat(3, 3, "")
+  )
 }

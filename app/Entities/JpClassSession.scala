@@ -45,4 +45,6 @@ object JpClassSession extends StorableObject[JpClassSession] {
       r.dateTimeFields.get("SESSION_DATETIME") match { case Some(Some(x)) => x; case _ => LocalDateTime.now }
     )
   }
+
+  def getTestData: Set[JpClassSession] = Set()
 }

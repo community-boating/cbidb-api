@@ -16,8 +16,8 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
 
   object fields extends FieldsObject {
     val instructorId = new IntDatabaseField(self, "INSTRUCTOR_ID")
-    val nameFirst = new StringDatabaseField(self, "NAME_FIRST")
-    val nameLast = new StringDatabaseField(self, "NAME_LAST")
+    val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
+    val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
   }
 
   val fieldList: List[DatabaseField] = List(
@@ -33,4 +33,6 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
       r.stringFields.get("NAME_FIRST") match { case Some(Some(x)) => x; case None => ""},
       r.stringFields.get("NAME_LAST") match { case Some(Some(x)) => x; case None => ""}
     )
+
+  def getTestData: Set[ClassInstructor] = Set()
 }

@@ -15,7 +15,7 @@ object JpTeam extends StorableObject[JpTeam] {
 
   object fields extends FieldsObject {
     val teamId = new IntDatabaseField(self, "TEAM_ID")
-    val teamName = new StringDatabaseField(self, "TEAM_NAME")
+    val teamName = new StringDatabaseField(self, "TEAM_NAME", 100)
   }
 
   val fieldList: List[DatabaseField] = List(
@@ -29,4 +29,6 @@ object JpTeam extends StorableObject[JpTeam] {
       r.intFields.get("TEAM_ID") match { case Some(Some(x)) => x; case _ => -1},
       r.stringFields.get("TEAM_NAME") match { case Some(Some(x)) => x; case _ => "" }
     )
+
+  def getTestData: Set[JpTeam] = Set()
 }

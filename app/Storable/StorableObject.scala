@@ -11,4 +11,6 @@ trait StorableObject[T <: StorableClass] {
   val primaryKeyName: String
 
   def construct(r: DatabaseRow): ThisClass
+
+  def getTestData: Set[T]
 }

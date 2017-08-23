@@ -35,4 +35,6 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
       r.intFields.get("TEAM_ID") match { case Some(Some(x)) => x; case _ => -1},
       r.intFields.get("POINTS") match { case Some(Some(x)) => x; case _ => 0}
     )
+
+  def getTestData: Set[JpTeamEventPoints] = Set()
 }

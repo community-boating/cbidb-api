@@ -16,7 +16,7 @@ object JpClassType extends StorableObject[JpClassType] {
 
   object fields extends FieldsObject {
     val typeId = new IntDatabaseField(self, "TYPE_ID")
-    val typeName = new StringDatabaseField(self, "TYPE_NAME")
+    val typeName = new StringDatabaseField(self, "TYPE_NAME", 50)
     val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
   }
 
@@ -33,4 +33,6 @@ object JpClassType extends StorableObject[JpClassType] {
       r.stringFields.get("TYPE_NAME") match { case Some(Some(x)) => x; case _ => "" },
       r.intFields.get("DISPLAY_ORDER") match { case Some(Some(x)) => x; case _ => -1}
     )
+
+  def getTestData: Set[JpClassType] = Set()
 }

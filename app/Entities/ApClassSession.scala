@@ -45,4 +45,8 @@ object ApClassSession extends StorableObject[ApClassSession] {
       r.dateTimeFields.get("SESSION_DATETIME") match { case Some(Some(x)) => x; case _ => LocalDateTime.now }
     )
   }
+
+  def getTestData: Set[ApClassSession] = Set(
+    ApClassSession(1, 1, LocalDateTime.of(2017, 7, 14, 14, 0, 0))
+  )
 }

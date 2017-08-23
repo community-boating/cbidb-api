@@ -50,4 +50,6 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
       r.intFields.get("LOCATION_ID") match { case Some(x) => x; case _ => None},
       r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1 }
     )
+
+  def getTestData: Set[JpClassInstance] = Set()
 }
