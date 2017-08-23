@@ -61,6 +61,6 @@ val createTables: String = entities.map(e => {
   }).mkString(", ") + ");"
 }).mkString("\n")
 
-val inserts: Set[_] = entities.flatMap(e => e.getTestData).map()
+//val inserts: Set[_] = entities.flatMap(e => e.getTestData).map()
 println(dropTables + "\n\n" + createTables)
 
