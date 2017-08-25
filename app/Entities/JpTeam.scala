@@ -8,6 +8,7 @@ case class JpTeam (
   teamId: Int,
   teamName: String
 ) extends StorableClass {
+  def companion: StorableObject[JpTeam] = JpTeam
   object references extends ReferencesObject {}
 
   def deconstruct: Set[FieldValue] = Set(
@@ -36,5 +37,5 @@ object JpTeam extends StorableObject[JpTeam] {
       r.stringFields.get("TEAM_NAME") match { case Some(Some(x)) => x; case _ => "" }
     )
 
-  def getTestData: Set[JpTeam] = Set()
+  def getSeedData: Set[JpTeam] = Set()
 }

@@ -12,6 +12,7 @@ case class ApClassSession(
   instanceId: Int,
   sessionDateTime: LocalDateTime
 ) extends StorableClass {
+  def companion: StorableObject[ApClassSession] = ApClassSession
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassInstance] = None
   }
@@ -53,7 +54,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
     )
   }
 
-  def getTestData: Set[ApClassSession] = Set(
+  def getSeedData: Set[ApClassSession] = Set(
     ApClassSession(1, 1, LocalDateTime.of(2017, 7, 14, 14, 0, 0))
   )
 }

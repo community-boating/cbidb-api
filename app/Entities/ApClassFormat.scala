@@ -9,6 +9,7 @@ case class ApClassFormat (
   typeId: Int,
   description: String
 ) extends StorableClass {
+  def companion: StorableObject[ApClassFormat] = ApClassFormat
   object references extends ReferencesObject {
     var apClassType: Option[ApClassType] = None
   }
@@ -50,7 +51,7 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
       r.stringFields.get("DESCRIPTION") match { case Some(Some(x)) => x; case _ => "" }
     )
 
-  def getTestData: Set[ApClassFormat] = Set(
+  def getSeedData: Set[ApClassFormat] = Set(
     ApClassFormat(1, 1, ""),
     ApClassFormat(2, 2, ""),
     ApClassFormat(3, 3, "")

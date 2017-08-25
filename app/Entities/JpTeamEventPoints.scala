@@ -9,6 +9,7 @@ case class JpTeamEventPoints (
   teamId: Int,
   points: Int
 ) extends StorableClass {
+  def companion: StorableObject[JpTeamEventPoints] = JpTeamEventPoints
   object references extends ReferencesObject {
     var jpTeam: Option[JpTeam] = None
   }
@@ -43,5 +44,5 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
       r.intFields.get("POINTS") match { case Some(Some(x)) => x; case _ => 0}
     )
 
-  def getTestData: Set[JpTeamEventPoints] = Set()
+  def getSeedData: Set[JpTeamEventPoints] = Set()
 }

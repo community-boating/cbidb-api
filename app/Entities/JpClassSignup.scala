@@ -9,6 +9,7 @@ case class JpClassSignup (
   instanceId: Int,
   signupType: String
 ) extends StorableClass {
+  def companion: StorableObject[JpClassSignup] = JpClassSignup
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }
@@ -49,5 +50,5 @@ object JpClassSignup extends StorableObject[JpClassSignup] {
     )
   }
 
-  def getTestData: Set[JpClassSignup] = Set()
+  def getSeedData: Set[JpClassSignup] = Set()
 }

@@ -9,6 +9,7 @@ case class ClassInstructor(
   nameFirst: String,
   nameLast: String
 ) extends StorableClass {
+  def companion: StorableObject[ClassInstructor] = ClassInstructor
   object references extends ReferencesObject {}
 
   def deconstruct: Set[FieldValue] = Set(
@@ -41,5 +42,5 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
       r.stringFields.get("NAME_LAST") match { case Some(Some(x)) => x; case None => ""}
     )
 
-  def getTestData: Set[ClassInstructor] = Set()
+  def getSeedData: Set[ClassInstructor] = Set()
 }

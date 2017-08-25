@@ -2,7 +2,8 @@ import java.io.File
 
 import Entities._
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.StorableObject
+import Storable.Fields.FieldValue.FieldValue
+import Storable.{StorableClass, StorableObject}
 import oracle.net.aso.e
 
 ////////////////////////////////////
@@ -61,6 +62,19 @@ val createTables: String = entities.map(e => {
   }).mkString(", ") + ");"
 }).mkString("\n")
 
-//val inserts: Set[_] = entities.flatMap(e => e.getTestData).map()
-println(dropTables + "\n\n" + createTables)
+val seedObjects: Set[_ <: StorableClass] = entities.flatMap(e => e.getSeedData)
+
+val inserts: String = seedObjects.map(obj => {
+  val fieldValues: List[FieldValue] = obj.deconstruct.toList
+  val sb = new StringBuilder
+  sb.append("INSERT INTO " + obj.companion.entityName + "(")
+  sb.append(fieldValues.map(_.getFieldName).mkString(", "))
+  sb.append(") values (")
+  sb.append(fieldValues.map(_.getInsertValue).mkString(", "))
+  sb.append(")")
+
+  sb.toString()
+}).mkString("\n")
+
+println(dropTables + "\n\n" + createTables + "\n\n" + inserts)
 

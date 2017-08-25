@@ -9,6 +9,7 @@ case class ApClassInstance (
   formatId: Int,
   locationString: String
 ) extends StorableClass {
+  def companion: StorableObject[ApClassInstance] = ApClassInstance
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None
   }
@@ -50,7 +51,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
       r.stringFields.get("LOCATION_STRING") match { case Some(Some(x)) => x; case _ => "" }
     )
 
-  def getTestData: Set[ApClassInstance] = Set(
+  def getSeedData: Set[ApClassInstance] = Set(
     ApClassInstance(1, 1, "Someplace")
   )
 }

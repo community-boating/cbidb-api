@@ -12,6 +12,7 @@ case class JpClassSession(
   instanceId: Int,
   sessionDateTime: LocalDateTime
 ) extends StorableClass {
+  def companion: StorableObject[JpClassSession] = JpClassSession
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }
@@ -53,5 +54,5 @@ object JpClassSession extends StorableObject[JpClassSession] {
     )
   }
 
-  def getTestData: Set[JpClassSession] = Set()
+  def getSeedData: Set[JpClassSession] = Set()
 }

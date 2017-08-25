@@ -10,6 +10,7 @@ case class JpClassInstance (
   locationId: Option[Int],
   typeId: Int
 ) extends StorableClass {
+  def companion: StorableObject[JpClassInstance] = JpClassInstance
   object references extends ReferencesObject {
     var classLocation: Option[Option[ClassLocation]] = None
     var classInstructor: Option[Option[ClassInstructor]] = None
@@ -59,5 +60,5 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
       r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1 }
     )
 
-  def getTestData: Set[JpClassInstance] = Set()
+  def getSeedData: Set[JpClassInstance] = Set()
 }

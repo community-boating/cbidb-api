@@ -12,5 +12,5 @@ trait StorableObject[T <: StorableClass] {
 
   def construct(r: DatabaseRow): ThisClass
 
-  def getTestData: Set[T]
+  def getSeedData: Set[T]
 }

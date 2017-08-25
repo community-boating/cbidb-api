@@ -8,6 +8,7 @@ case class ClassLocation(
   locationId: Int,
   locationName: String
 ) extends StorableClass {
+  def companion: StorableObject[ClassLocation] = ClassLocation
   object references extends ReferencesObject {}
 
   def deconstruct: Set[FieldValue] = Set(
@@ -36,5 +37,5 @@ object ClassLocation extends StorableObject[ClassLocation] {
       r.stringFields.get("LOCATION_NAME") match { case Some(Some(x)) => x; case None => ""}
     )
 
-  def getTestData: Set[ClassLocation] = Set()
+  def getSeedData: Set[ClassLocation] = Set()
 }

@@ -9,6 +9,7 @@ case class ApClassType (
   typeName: String,
   displayOrder: Int
 ) extends StorableClass {
+  def companion: StorableObject[ApClassType] = ApClassType
   object references extends ReferencesObject {}
 
   def deconstruct: Set[FieldValue] = Set(
@@ -41,7 +42,7 @@ object ApClassType extends StorableObject[ApClassType] {
       r.intFields.get("DISPLAY_ORDER") match { case Some(Some(x)) => x; case _ => -1}
     )
 
-  def getTestData: Set[ApClassType] = Set(
+  def getSeedData: Set[ApClassType] = Set(
     ApClassType(1, "Sailing 101", 1),
     ApClassType(2, "Sailing 102", 2),
     ApClassType(3, "Moar sailing", 3)
