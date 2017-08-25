@@ -1,5 +1,6 @@
 package Entities
 
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField}
 import Storable._
 
@@ -23,6 +24,13 @@ case class JpClassInstance (
     case Some(x) => x
     case None => throw new Exception("JpClassType unset for JpClassInstance " + instanceId)
   }
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(JpClassInstance.fields.instanceId, instanceId),
+    NullableIntFieldValue(JpClassInstance.fields.instructorId, instructorId),
+    NullableIntFieldValue(JpClassInstance.fields.locationId, locationId),
+    IntFieldValue(JpClassInstance.fields.typeId, typeId)
+  )
 }
 
 object JpClassInstance extends StorableObject[JpClassInstance] {

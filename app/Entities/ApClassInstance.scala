@@ -1,5 +1,6 @@
 package Entities
 
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
@@ -18,6 +19,12 @@ case class ApClassInstance (
     case Some(x) => x
     case None => throw new Exception("ApClassFormat unset for ApClassInstance " + instanceId)
   }
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(ApClassInstance.fields.instanceId, instanceId),
+    IntFieldValue(ApClassInstance.fields.formatId, formatId),
+    StringFieldValue(ApClassInstance.fields.locationString, locationString)
+  )
 }
 
 object ApClassInstance extends StorableObject[ApClassInstance] {

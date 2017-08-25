@@ -1,5 +1,6 @@
 package Entities
 
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
@@ -11,6 +12,12 @@ case class JpTeamEventPoints (
   object references extends ReferencesObject {
     var jpTeam: Option[JpTeam] = None
   }
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(JpTeamEventPoints.fields.rowId, rowId),
+    IntFieldValue(JpTeamEventPoints.fields.teamId, teamId),
+    IntFieldValue(JpTeamEventPoints.fields.points, points)
+  )
 }
 
 object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {

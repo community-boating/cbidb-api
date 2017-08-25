@@ -2,6 +2,7 @@ package Entities
 
 import java.time.LocalDateTime
 
+import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
@@ -19,6 +20,12 @@ case class JpClassSession(
     case Some(x) => x
     case None => throw new Exception("JpClassInstance unset for JpClassSession " + sessionId)
   }
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(JpClassSession.fields.sessionId, sessionId),
+    IntFieldValue(JpClassSession.fields.instanceId, instanceId),
+    DateTimeFieldValue(JpClassSession.fields.sessionDateTime, sessionDateTime)
+  )
 }
 
 object JpClassSession extends StorableObject[JpClassSession] {

@@ -1,5 +1,6 @@
 package Entities
 
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
@@ -16,6 +17,12 @@ case class ApClassSignup (
     case Some(x) => x
     case None => throw new Exception("ApClassInstance unset for ApClassSignup " + signupId)
   }
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(ApClassSignup.fields.signupId, signupId),
+    IntFieldValue(ApClassSignup.fields.instanceId, instanceId),
+    StringFieldValue(ApClassSignup.fields.signupType, signupType)
+  )
 }
 
 object ApClassSignup extends StorableObject[ApClassSignup] {

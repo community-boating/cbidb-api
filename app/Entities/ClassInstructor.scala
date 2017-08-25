@@ -1,5 +1,6 @@
 package Entities
 
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
@@ -9,6 +10,12 @@ case class ClassInstructor(
   nameLast: String
 ) extends StorableClass {
   object references extends ReferencesObject {}
+
+  def deconstruct: Set[FieldValue] = Set(
+    IntFieldValue(ClassInstructor.fields.instructorId, instructorId),
+    StringFieldValue(ClassInstructor.fields.nameFirst, nameFirst),
+    StringFieldValue(ClassInstructor.fields.nameLast, nameLast)
+  )
 }
 
 object ClassInstructor extends StorableObject[ClassInstructor] {
