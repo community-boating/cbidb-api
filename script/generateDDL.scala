@@ -10,9 +10,9 @@ import oracle.net.aso.e
 val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]
 ////////////////////////////////////
 
-type Entity = StorableObject[_]
+type Entity = StorableObject[_ <: StorableClass]
 
-val entities: Set[Entity] = Set(
+val entities: List[Entity] = List(
   ApClassFormat,
   ApClassInstance,
   ApClassSession,
@@ -46,7 +46,7 @@ val entityNamesFromFiles: Set[String] = {
 val entityNamesFromClasses: Set[String] = entities.map(e => {
   val rawName = e.getClass.getName
   rawName.substring(9, rawName.length-1)
-})
+}).toSet
 
 if (!entityNamesFromFiles.equals(entityNamesFromClasses)) throw new Exception("Entities are missing")
 
@@ -62,7 +62,8 @@ val createTables: String = entities.map(e => {
   }).mkString(", ") + ");"
 }).mkString("\n")
 
-val seedObjects: Set[_ <: StorableClass] = entities.flatMap(e => e.getSeedData)
+val getSeedData: (Entity => List[StorableClass]) = e => e.getSeedData.toList
+val seedObjects: List[StorableClass] = entities.flatMap(getSeedData)
 
 val inserts: String = seedObjects.map(obj => {
   val fieldValues: List[FieldValue] = obj.deconstruct.toList
