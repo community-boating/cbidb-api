@@ -15,6 +15,7 @@ import play.api.mvc.{Action, Controller}
 import scala.collection.mutable
 
 class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker) extends Controller {
+  implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
   def get(startDate: Option[String]) = Action {
     val request = JpClassInstancesRequest(startDate)
     Ok(request.get)
