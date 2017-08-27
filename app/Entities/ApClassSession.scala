@@ -55,6 +55,6 @@ object ApClassSession extends StorableObject[ApClassSession] {
   }
 
   def getSeedData: Set[ApClassSession] = Set(
-    ApClassSession(1, 1, LocalDateTime.of(2017, 7, 14, 14, 0, 0))
+    ApClassSession(1, 1, LocalDateTime.of(2017, 7, 14, 14, 24, 8))
   )
 }

@@ -7,7 +7,7 @@ import Storable.{StorableClass, StorableObject}
 import oracle.net.aso.e
 
 ////////////////////////////////////
-val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]
+implicit val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]
 ////////////////////////////////////
 
 type Entity = StorableObject[_ <: StorableClass]
@@ -58,7 +58,7 @@ val dropTables: String = entities.map("drop table " + _.entityName + ";").mkStri
 
 val createTables: String = entities.map(e => {
   "create table " + e.entityName + "(" + e.fieldList.map(f => {
-    f.getFieldName + " " + f.getFieldType(pbClass)
+    f.getFieldName + " " + f.getFieldType
   }).mkString(", ") + ");"
 }).mkString("\n")
 
@@ -72,7 +72,7 @@ val inserts: String = seedObjects.map(obj => {
   sb.append(fieldValues.map(_.getFieldName).mkString(", "))
   sb.append(") values (")
   sb.append(fieldValues.map(_.getInsertValue).mkString(", "))
-  sb.append(")")
+  sb.append(");")
 
   sb.toString()
 }).mkString("\n")
