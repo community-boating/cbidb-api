@@ -45,7 +45,8 @@ object User extends StorableObject[User] {
 
   def construct(r: DatabaseRow): ThisClass =
     new User(
-      r.intFields.get("USER_ID") match { case Some(Some(x)) => x; case _ => -1},
+      fields.userId.getValue(r),
+      //r.intFields.get("USER_ID") match { case Some(Some(x)) => x; case _ => -1},
       r.stringFields.get("USER_NAME") match { case Some(Some(x)) => x; case _ => "" },
       r.stringFields.get("NAME_FIRST") match { case Some(Some(x)) => x; case _ => "" },
       r.stringFields.get("NAME_LAST") match { case Some(Some(x)) => x; case _ => "" },
