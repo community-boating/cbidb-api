@@ -2,7 +2,6 @@ package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{Filter, StorableObject}
-import oracle.net.aso.q
 
 class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField(entity, fieldName) {
   def getFieldLength: Int = fieldLength

@@ -1,10 +1,9 @@
 import java.io.File
 
 import Entities._
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.{MysqlBroker, PersistenceBroker}
 import Storable.Fields.FieldValue.FieldValue
 import Storable.{StorableClass, StorableObject}
-import oracle.net.aso.e
 
 ////////////////////////////////////
 implicit val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]

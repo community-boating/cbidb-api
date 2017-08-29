@@ -3,11 +3,9 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequest, ApiRequestAsync}
-import CbiUtil.{Profiler, PropertiesWrapper}
-import Entities.{JpTeam, JpTeamEventPoints}
+import Api.ApiRequestAsync
+import CbiUtil.PropertiesWrapper
 import Services.CacheBroker
-import com.typesafe.config.ConfigFactory
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, Controller}

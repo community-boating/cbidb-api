@@ -1,20 +1,15 @@
 package Api.Endpoints
 
-import java.time.{LocalDate, LocalDateTime}
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequest, ApiRequestSync}
-import CbiUtil.{CascadeSort, Profiler}
+import Api.ApiRequestSync
+import CbiUtil.Profiler
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
-import oracle.net.aso.{e, i, l, r}
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
-
-import scala.collection.mutable
 
 class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker) extends Controller {
   def get() = Action {

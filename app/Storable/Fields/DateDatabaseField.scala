@@ -24,7 +24,7 @@ class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends Da
 
   def isDateConstant(date: LocalDate)(implicit pbClass: Class[_ <: PersistenceBroker]): Filter = pbClass match {
     case x if x == classOf[MysqlBroker] =>
-      Filter(getFullyQualifiedName + " = " + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      Filter(getFullyQualifiedName + " = '" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'")
     case x if x == classOf[OracleBroker] =>
       Filter("TRUNC(" + getFullyQualifiedName + ") = TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
   }

@@ -2,7 +2,7 @@ package Entities
 
 import java.time.LocalDateTime
 
-import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue, StringFieldValue}
+import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue}
 import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 

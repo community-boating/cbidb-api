@@ -1,8 +1,7 @@
 package Api
 
-import CbiUtil.JsonUtil
 import Services.CacheBroker
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, JsString}
 
 abstract class ApiRequestSync(cb: CacheBroker) extends ApiRequest(cb) {
   def getJSONResult: JsObject

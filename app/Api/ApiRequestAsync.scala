@@ -1,8 +1,7 @@
 package Api
 
-import CbiUtil.JsonUtil
 import Services.CacheBroker
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, JsString}
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -2,7 +2,7 @@ package Entities
 
 import java.time.LocalDateTime
 
-import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue, StringFieldValue}
+import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue}
 import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
@@ -55,6 +55,6 @@ object ApClassSession extends StorableObject[ApClassSession] {
   }
 
   def getSeedData: Set[ApClassSession] = Set(
-    ApClassSession(1, 1, LocalDateTime.of(2017, 7, 14, 14, 24, 8))
+    ApClassSession(1, 1, LocalDateTime.now)
   )
 }

@@ -1,8 +1,7 @@
 package Api
 
-import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
 import Services.CacheBroker

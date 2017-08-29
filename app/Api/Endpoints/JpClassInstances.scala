@@ -1,10 +1,10 @@
 package Api.Endpoints
 
-import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.{ApiRequest, ApiRequestSync}
+import Api.ApiRequestSync
 import CbiUtil.{CascadeSort, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
