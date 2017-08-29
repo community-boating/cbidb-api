@@ -7,7 +7,7 @@ trait StorableObject[T <: StorableClass] {
   val self: StorableObject[T] = this
   val entityName: String
   val fields: FieldsObject
-  val fieldList: List[DatabaseField]
+  val fieldList: List[DatabaseField[_]]
   val primaryKeyName: String
 
   def construct(r: DatabaseRow): ThisClass

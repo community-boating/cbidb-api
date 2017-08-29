@@ -3,7 +3,7 @@ package Storable.Fields
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{DatabaseRow, Filter, StorableObject}
 
-class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField(entity, fieldName) {
+class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Int](entity, fieldName) {
   def getValue(row: DatabaseRow): Int = getOptionValue(row) match {
     case Some(x) => x
     case None => throw new Exception("Non-null field was null")

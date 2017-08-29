@@ -37,7 +37,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
     val locationString = new StringDatabaseField(self, "LOCATION_STRING", 500)
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.instanceId,
     fields.formatId,
     fields.locationString

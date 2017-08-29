@@ -34,7 +34,7 @@ object User extends StorableObject[User] {
     val active = new BooleanDatabaseField(self, "ACTIVE")
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.userId,
     fields.userName,
     fields.nameFirst,

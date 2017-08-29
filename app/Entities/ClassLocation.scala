@@ -25,7 +25,7 @@ object ClassLocation extends StorableObject[ClassLocation] {
     val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.locationId,
     fields.locationName
   )

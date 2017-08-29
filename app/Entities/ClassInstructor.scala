@@ -28,7 +28,7 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
     val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.instructorId,
     fields.nameFirst,
     fields.nameLast

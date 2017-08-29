@@ -28,7 +28,7 @@ object JpClassType extends StorableObject[JpClassType] {
     val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.typeId,
     fields.typeName,
     fields.displayOrder

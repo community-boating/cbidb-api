@@ -3,7 +3,7 @@ package Storable.Fields
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{Filter, StorableObject}
 
-class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField(entity, fieldName) {
+class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField[String](entity, fieldName) {
   def getFieldLength: Int = fieldLength
 
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = getFieldLength match {

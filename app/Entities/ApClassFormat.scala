@@ -37,7 +37,7 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
 
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.formatId,
     fields.typeId,
     fields.description

@@ -38,7 +38,7 @@ object JpClassSession extends StorableObject[JpClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.sessionId,
     fields.instanceId,
     fields.sessionDateTime

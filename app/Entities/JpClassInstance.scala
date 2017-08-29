@@ -44,7 +44,7 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
     val typeId = new IntDatabaseField(self, "TYPE_ID")
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.instanceId,
     fields.instructorId,
     fields.locationId,

@@ -64,7 +64,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     }
   }
 
-  def executeSQL(sql: String, properties: List[DatabaseField], fetchSize: Int): List[DatabaseRow] = {
+  def executeSQL(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[DatabaseRow] = {
     println(sql)
     val profiler = new Profiler
     val c: Connection = pool.getConnection
@@ -88,7 +88,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
         val dateTimeFields = new HashMap[String, Option[LocalDateTime]]
         val row: DatabaseRow = DatabaseRow(intFields, doubleFields, stringFields, dateFields, dateTimeFields)
 
-        properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField, i: Int) => {
+        properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
           df match {
             case _: IntDatabaseField => {
               intFields += (df.getFieldName -> Some(rs.getInt(i)))

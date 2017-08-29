@@ -25,7 +25,7 @@ object JpTeam extends StorableObject[JpTeam] {
     val teamName = new StringDatabaseField(self, "TEAM_NAME", 100)
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.teamId,
     fields.teamName
   )

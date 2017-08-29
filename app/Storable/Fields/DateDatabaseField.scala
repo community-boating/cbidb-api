@@ -1,12 +1,12 @@
 package Storable.Fields
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{Filter, StorableObject}
 
-class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField(entity, fieldName) {
+class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[LocalDateTime](entity, fieldName) {
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
     case x if x == classOf[MysqlBroker] => "date"
     case x if x == classOf[OracleBroker] => "date"

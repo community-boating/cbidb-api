@@ -30,7 +30,7 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
     val points = new IntDatabaseField(self, "POINTS")
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.rowId,
     fields.teamId,
     fields.points

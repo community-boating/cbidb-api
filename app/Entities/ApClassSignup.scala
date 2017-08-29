@@ -35,7 +35,7 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
     val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
   }
 
-  val fieldList: List[DatabaseField] = List(
+  val fieldList: List[DatabaseField[_]] = List(
     fields.signupId,
     fields.instanceId,
     fields.signupType
