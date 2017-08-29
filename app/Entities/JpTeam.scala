@@ -33,8 +33,8 @@ object JpTeam extends StorableObject[JpTeam] {
 
   def construct(r: DatabaseRow): ThisClass =
     new JpTeam(
-      r.intFields.get("TEAM_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.stringFields.get("TEAM_NAME") match { case Some(Some(x)) => x; case _ => "" }
+      fields.teamId.getValue(r),
+      fields.teamName.getValue(r)
     )
 
   def getSeedData: Set[JpTeam] = Set()

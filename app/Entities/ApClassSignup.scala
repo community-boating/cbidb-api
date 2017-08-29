@@ -44,9 +44,9 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
 
   def construct(r: DatabaseRow): ThisClass = {
     new ApClassSignup(
-      r.intFields.get("SIGNUP_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.intFields.get("INSTANCE_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.stringFields.get("SIGNUP_TYPE") match { case Some(Some(x)) => x; case _ => "" }
+      fields.signupId.getValue(r),
+      fields.instanceId.getValue(r),
+      fields.signupType.getValue(r)
     )
   }
 

@@ -46,11 +46,10 @@ object User extends StorableObject[User] {
   def construct(r: DatabaseRow): ThisClass =
     new User(
       fields.userId.getValue(r),
-      //r.intFields.get("USER_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.stringFields.get("USER_NAME") match { case Some(Some(x)) => x; case _ => "" },
-      r.stringFields.get("NAME_FIRST") match { case Some(Some(x)) => x; case _ => "" },
-      r.stringFields.get("NAME_LAST") match { case Some(Some(x)) => x; case _ => "" },
-      r.stringFields.get("ACTIVE") match { case Some(Some("Y")) => true; case _ => false }
+      fields.userName.getValue(r),
+      fields.nameFirst.getValue(r),
+      fields.nameLast.getValue(r),
+      fields.active.getValue(r)
     )
 
   def getSeedData: Set[User] = Set(

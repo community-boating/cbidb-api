@@ -1,15 +1,27 @@
 package Storable.Fields
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{Filter, StorableObject}
+import Storable.{DatabaseRow, Filter, StorableObject}
 
-class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[LocalDateTime](entity, fieldName) {
+class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[LocalDate](entity, fieldName) {
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
     case x if x == classOf[MysqlBroker] => "date"
     case x if x == classOf[OracleBroker] => "date"
+  }
+
+  def getValue(row: DatabaseRow): LocalDate = getOptionValue(row) match {
+    case Some(x) => x
+    case None => throw new Exception("Non-null field was null")
+  }
+
+  def getOptionValue(row: DatabaseRow): Option[LocalDate] = {
+    row.dateFields.get(fieldName) match {
+      case Some(Some(x)) => Some(x)
+      case _ => None
+    }
   }
 
   def isYearConstant(year: Int)(implicit pbClass: Class[_ <: PersistenceBroker]): Filter = pbClass match {

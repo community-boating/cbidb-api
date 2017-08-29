@@ -37,9 +37,9 @@ object ApClassType extends StorableObject[ApClassType] {
 
   def construct(r: DatabaseRow): ThisClass =
     new ApClassType(
-      r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.stringFields.get("TYPE_NAME") match { case Some(Some(x)) => x; case _ => "" },
-      r.intFields.get("DISPLAY_ORDER") match { case Some(Some(x)) => x; case _ => -1}
+      fields.typeId.getValue(r),
+      fields.typeName.getValue(r),
+      fields.displayOrder.getValue(r)
     )
 
   def getSeedData: Set[ApClassType] = Set(

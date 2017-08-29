@@ -46,9 +46,9 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
 
   def construct(r: DatabaseRow): ThisClass =
     new ApClassFormat(
-      r.intFields.get("FORMAT_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.stringFields.get("DESCRIPTION") match { case Some(Some(x)) => x; case _ => "" }
+      fields.formatId.getValue(r),
+      fields.typeId.getValue(r),
+      fields.description.getValue(r)
     )
 
   def getSeedData: Set[ApClassFormat] = Set(

@@ -39,9 +39,9 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
 
   def construct(r: DatabaseRow): ThisClass =
     new JpTeamEventPoints(
-      r.intFields.get("ROW_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.intFields.get("TEAM_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.intFields.get("POINTS") match { case Some(Some(x)) => x; case _ => 0}
+      fields.rowId.getValue(r),
+      fields.teamId.getValue(r),
+      fields.points.getValue(r)
     )
 
   def getSeedData: Set[JpTeamEventPoints] = Set()

@@ -46,11 +46,10 @@ object ApClassSession extends StorableObject[ApClassSession] {
   val primaryKeyName: String = fieldList.head.getFieldName
 
   def construct(r: DatabaseRow): ThisClass = {
-    //println(r.intFields)
     new ApClassSession(
-      r.intFields.get("SESSION_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.intFields.get("INSTANCE_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.dateTimeFields.get("SESSION_DATETIME") match { case Some(Some(x)) => x; case _ => LocalDateTime.now }
+      fields.sessionId.getValue(r),
+      fields.instanceId.getValue(r),
+      fields.sessionDateTime.getValue(r)
     )
   }
 

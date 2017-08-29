@@ -37,9 +37,9 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
 
   def construct(r: DatabaseRow): ThisClass =
     new ClassInstructor(
-      r.intFields.get("INSTRUCTOR_ID") match { case Some(Some(x)) => x; case None => -1},
-      r.stringFields.get("NAME_FIRST") match { case Some(Some(x)) => x; case None => ""},
-      r.stringFields.get("NAME_LAST") match { case Some(Some(x)) => x; case None => ""}
+      fields.instructorId.getValue(r),
+      fields.nameFirst.getValue(r),
+      fields.nameLast.getValue(r)
     )
 
   def getSeedData: Set[ClassInstructor] = Set()

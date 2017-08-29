@@ -54,10 +54,10 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
 
   def construct(r: DatabaseRow): ThisClass =
     new JpClassInstance(
-      r.intFields.get("INSTANCE_ID") match { case Some(Some(x)) => x; case _ => -1},
-      r.intFields.get("INSTRUCTOR_ID") match { case Some(x) => x; case _ => None},
-      r.intFields.get("LOCATION_ID") match { case Some(x) => x; case _ => None},
-      r.intFields.get("TYPE_ID") match { case Some(Some(x)) => x; case _ => -1 }
+      fields.instanceId.getValue(r),
+      fields.instructorId.getOptionValue(r),
+      fields.locationId.getOptionValue(r),
+      fields.typeId.getValue(r)
     )
 
   def getSeedData: Set[JpClassInstance] = Set()

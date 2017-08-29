@@ -48,9 +48,9 @@ object JpClassSession extends StorableObject[JpClassSession] {
   def construct(r: DatabaseRow): ThisClass = {
     //println(r.intFields)
     new JpClassSession(
-      r.intFields.get("SESSION_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.intFields.get("INSTANCE_ID") match { case Some(Some(x)) => x; case _ => -1 },
-      r.dateTimeFields.get("SESSION_DATETIME") match { case Some(Some(x)) => x; case _ => LocalDateTime.now }
+      fields.sessionId.getValue(r),
+      fields.instanceId.getValue(r),
+      fields.sessionDateTime.getValue(r)
     )
   }
 

@@ -33,8 +33,8 @@ object ClassLocation extends StorableObject[ClassLocation] {
 
   def construct(r: DatabaseRow): ThisClass =
     new ClassLocation(
-      r.intFields.get("LOCATION_ID") match { case Some(Some(x)) => x; case None => -1},
-      r.stringFields.get("LOCATION_NAME") match { case Some(Some(x)) => x; case None => ""}
+      fields.locationId.getValue(r),
+      fields.locationName.getValue(r)
     )
 
   def getSeedData: Set[ClassLocation] = Set()
