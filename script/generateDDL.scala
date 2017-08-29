@@ -24,7 +24,8 @@ val entities: List[Entity] = List(
   JpClassSignup,
   JpClassType,
   JpTeam,
-  JpTeamEventPoints
+  JpTeamEventPoints,
+  User
 )
 
 // start: validate all entities are present

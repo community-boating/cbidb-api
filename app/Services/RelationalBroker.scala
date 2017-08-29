@@ -110,6 +110,10 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
               dateFields += (df.getFieldName -> Some(rs.getDate(i).toLocalDate))
               if (rs.wasNull()) dateFields += (df.getFieldName -> None)
             }
+            case _: BooleanDatabaseField => {
+              stringFields += (df.getFieldName -> Some(rs.getString(i)))
+              if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+            }
             case _ => {
               println(" *********** UNKNOWN COLUMN TYPE FOR COL " + df.getFieldName)
             }

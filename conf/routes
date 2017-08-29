@@ -6,6 +6,7 @@ GET     /jp-class-instances             Api.Endpoints.JpClassInstances.get(start
 GET     /ap-class-instances             Api.Endpoints.ApClassInstances.get(startDate: Option[String])
 GET     /jp-teams                       Api.Endpoints.JpTeams.get()
 GET     /weather                        Api.Endpoints.Weather.get()
+GET     /users                          Api.Endpoints.Users.get()
 
 
 
