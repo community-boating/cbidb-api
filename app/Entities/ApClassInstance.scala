@@ -1,13 +1,13 @@
 package Entities
 
-import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
 case class ApClassInstance (
   instanceId: Int,
   formatId: Int,
-  locationString: String
+  locationString: Option[String]
 ) extends StorableClass {
   def companion: StorableObject[ApClassInstance] = ApClassInstance
   object references extends ReferencesObject {
@@ -24,7 +24,7 @@ case class ApClassInstance (
   def deconstruct: Set[FieldValue] = Set(
     IntFieldValue(ApClassInstance.fields.instanceId, instanceId),
     IntFieldValue(ApClassInstance.fields.formatId, formatId),
-    StringFieldValue(ApClassInstance.fields.locationString, locationString)
+    NullableStringFieldValue(ApClassInstance.fields.locationString, locationString)
   )
 }
 
@@ -48,10 +48,10 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
     new ApClassInstance(
       fields.instanceId.getValue(r),
       fields.formatId.getValue(r),
-      fields.locationString.getValue(r)
+      fields.locationString.getOptionValue(r)
     )
 
   def getSeedData: Set[ApClassInstance] = Set(
-    ApClassInstance(1, 1, "Someplace")
+    ApClassInstance(1, 1, Some("Someplace"))
   )
 }

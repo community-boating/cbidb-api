@@ -136,7 +136,10 @@ class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
           JsString(t.typeName),
           JsString(s.sessionDateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
           JsString(s.sessionDateTime.format(DateTimeFormatter.ofPattern("hh:mma"))),
-          JsString(i.locationString),
+          i.locationString match {
+            case Some(x) => JsString(x)
+            case None => JsNull
+          },
           JsNumber(signups.count(signup => signup.instanceId == s.instanceId))
         ))
       }))

@@ -18,8 +18,8 @@ class Module extends AbstractModule {
   override def configure() = {
     bind(classOf[CacheBroker]).to(classOf[RedisBroker])
 
-  //  bind(classOf[PersistenceBroker]).to(classOf[OracleBroker])
-    bind(classOf[PersistenceBroker]).to(classOf[MysqlBroker])
+    bind(classOf[PersistenceBroker]).to(classOf[OracleBroker])
+  //  bind(classOf[PersistenceBroker]).to(classOf[MysqlBroker])
 
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)

@@ -8,7 +8,7 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             PropertiesWrapper props = new PropertiesWrapper(
-                    "conf/private/db-credentials",
+                    "conf/private/oracle-credentials",
                     new String[] {"username", "password", "host", "port", "sid"}
             );
             String connectionString = "jdbc:oracle:thin:" + props.getProperty("username") + "/" +

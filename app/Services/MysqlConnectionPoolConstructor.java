@@ -9,7 +9,7 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
         try {
             //mysql -u root -p -e "GRANT ALL PRIVILEGES ON $schema.* TO $user@localhost IDENTIFIED BY '$db_pass'"
             PropertiesWrapper props = new PropertiesWrapper(
-                    "conf/private/db-credentials",
+                    "conf/private/mysql-credentials",
                     new String[] {"username", "password", "host", "port", "schema"}
             );
             String connectionString = "jdbc:mysql://" + props.getProperty("host") + ":" + props.getProperty("port")

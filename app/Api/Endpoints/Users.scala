@@ -36,7 +36,7 @@ class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Per
       val users: List[User] = pb.getObjectsByFilters(
         User,
         List.empty,
-        10
+        200
       )
 
 
