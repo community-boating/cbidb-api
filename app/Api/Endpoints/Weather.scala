@@ -16,7 +16,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: ExecutionContext) extends Controller {
   def get() = Action.async {
     val request = WeatherRequest()
-    request.getFuture.map(s => Ok(s))
+    request.getFuture.map(s => {
+      Ok(s).withHeaders(
+        CONTENT_TYPE -> "application/json",
+        CONTENT_LENGTH -> s.length.toString
+      )
+    })
   }
 
   case class WeatherRequest() extends ApiRequestAsync(cb) {

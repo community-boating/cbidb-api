@@ -14,7 +14,11 @@ import play.api.mvc.{Action, Controller}
 class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker) extends Controller {
   def get() = Action {
     val request = UsersRequest()
-    Ok(request.get)
+    val response: String = request.get
+    Ok(response).withHeaders(
+      CONTENT_TYPE -> "application/json",
+      CONTENT_LENGTH -> response.length.toString
+    )
   }
 
   case class UsersRequest() extends ApiRequestSync(cb) {
