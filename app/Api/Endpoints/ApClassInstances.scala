@@ -18,7 +18,11 @@ class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
   def get(startDate: Option[String]) = Action {
     val request = ApClassInstancesRequest(startDate)
-    Ok(request.get)
+    val response: String = request.get
+    Ok(response).withHeaders(
+      CONTENT_TYPE -> "application/json",
+      CONTENT_LENGTH -> response.length.toString
+    )
   }
 
   case class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestSync(cb) {
