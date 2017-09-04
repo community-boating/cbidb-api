@@ -22,6 +22,9 @@ class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Per
   }
 
   case class UsersRequest() extends ApiRequestAsync(cb) {
+  /*  println("<<<<<<<<<<<<<<<<let's snooze")
+    Thread.sleep(2000)
+    println("ok im up lets do this>>>>>>>>>>>>>>>")*/
     def getCacheBrokerKey: String = "users"
 
     def getExpirationTime: LocalDateTime = {
