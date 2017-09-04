@@ -5,10 +5,12 @@ import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
 import Services.CacheBroker
+import oracle.net.aso.g
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.util.Try
 
 
 abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
@@ -64,7 +66,7 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
   // Once written to redis, cache will hit and no further threads will enter the queue (until next stale event)
   var inUse: mutable.Set[CacheKey] = mutable.Set.empty
   var waiting: mutable.Map[CacheKey, List[Promise[String]]] = mutable.Map.empty
-  var resultMap: mutable.Map[CacheKey, Future[String]] = _
+  var resultMap: mutable.Map[CacheKey, Try[String]] = _
 
   def tryGet: Future[String] = {
     println("here we go")
@@ -72,13 +74,12 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
       println("queueing; this is queue position " + waiting(getCacheBrokerKey).length)
       val p: Promise[String] = Promise[String]()
       waiting ++ (getCacheBrokerKey -> p :: waiting(getCacheBrokerKey))
-      p.completeWith(resultMap(getCacheBrokerKey))
-      resultMap(getCacheBrokerKey)
+      p.complete(resultMap(getCacheBrokerKey))
+      p.future
     } else {
       inUse.add(getCacheBrokerKey)
       println("got the go-ahead")
-      val jsonFuture: Future[JsObject] = getJSONResultFuture
-      val stringFuture: Future[String] = jsonFuture.map(json => {
+      val stringFuture: Future[String] = getJSONResultFuture.map(json => {
         val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
         val result: String = new JsObject(Map("data" -> newData)).toString()
         saveToCache(result)
@@ -87,7 +88,11 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
 
         result
       })
-      resultMap(getCacheBrokerKey) = stringFuture
+
+      stringFuture.onComplete(t => {
+        resultMap(getCacheBrokerKey) = t
+      })
+
       stringFuture
     }
   }
