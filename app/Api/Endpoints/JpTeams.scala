@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequestAsync
+import Api.{ApiRequest}
 import CbiUtil.Profiler
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
@@ -21,8 +21,8 @@ class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: P
     })
   }
 
-  class JpTeamsRequest extends ApiRequestAsync(cb) {
-    def getCacheBrokerKey: String = "jp-teams"
+  class JpTeamsRequest extends ApiRequest(cb) {
+    def getCacheBrokerKey: CacheKey = "jp-teams"
 
     def getExpirationTime: LocalDateTime = {
       LocalDateTime.now.plusSeconds(5)

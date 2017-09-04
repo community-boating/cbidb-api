@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.ApiRequestAsync
+import Api.{ApiRequest}
 import CbiUtil.{CascadeSort, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
@@ -24,8 +24,8 @@ class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
     })
   }
 
-  class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestAsync(cb) {
-    def getCacheBrokerKey: String =
+  class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequest(cb) {
+    def getCacheBrokerKey: CacheKey =
       "ap-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
     def getExpirationTime: LocalDateTime = {

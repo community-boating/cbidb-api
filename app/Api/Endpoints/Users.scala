@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequestAsync
+import Api.{ApiRequest}
 import CbiUtil.Profiler
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
@@ -21,11 +21,11 @@ class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Per
     })
   }
 
-  class UsersRequest extends ApiRequestAsync(cb) {
+  class UsersRequest extends ApiRequest(cb) {
   /*  println("<<<<<<<<<<<<<<<<let's snooze")
     Thread.sleep(2000)
     println("ok im up lets do this>>>>>>>>>>>>>>>")*/
-    def getCacheBrokerKey: String = "users"
+    def getCacheBrokerKey: CacheKey = "users"
 
     def getExpirationTime: LocalDateTime = {
       LocalDateTime.now.plusMinutes(10)

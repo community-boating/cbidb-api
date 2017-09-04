@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequestAsync
+import Api.{ApiRequest}
 import CbiUtil.PropertiesWrapper
 import Services.CacheBroker
 import play.api.libs.json._
@@ -21,8 +21,8 @@ class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: Execution
     })
   }
 
-  class WeatherRequest extends ApiRequestAsync(cb) {
-    def getCacheBrokerKey: String = "weather"
+  class WeatherRequest extends ApiRequest(cb) {
+    def getCacheBrokerKey: CacheKey = "weather"
 
     def getExpirationTime: LocalDateTime = {
       LocalDateTime.now.plusMinutes(10)
