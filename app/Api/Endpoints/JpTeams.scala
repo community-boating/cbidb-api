@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequestSync
+import Api.{ApiRequestAsync, ApiRequestSync}
 import CbiUtil.Profiler
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
@@ -11,17 +11,17 @@ import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 
-class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker) extends Controller {
-  def get() = Action {
+import scala.concurrent.{ExecutionContext, Future}
+
+class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+  def get() = Action.async {
     val request = JpTeamsRequest()
-    val response: String = request.get
-    Ok(response).withHeaders(
-      CONTENT_TYPE -> "application/json",
-      CONTENT_LENGTH -> response.length.toString
-    )
+    request.getFuture.map(s => {
+      Ok(s).as("application/json")
+    })
   }
 
-  case class JpTeamsRequest() extends ApiRequestSync(cb) {
+  case class JpTeamsRequest() extends ApiRequestAsync(cb) {
     def getCacheBrokerKey: String = "jp-teams"
 
     def getExpirationTime: LocalDateTime = {
@@ -30,7 +30,7 @@ class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: P
 
     object params {}
 
-    def getJSONResult: JsObject = {
+    def getJSONResultFuture: Future[JsObject] = Future {
       val profiler = new Profiler
 
       val teams: List[JpTeam] = pb.getObjectsByFilters(

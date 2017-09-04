@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.ApiRequestSync
+import Api.{ApiRequestAsync, ApiRequestSync}
 import CbiUtil.{CascadeSort, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
@@ -13,19 +13,18 @@ import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 
-class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker) extends Controller {
+class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
-  def get(startDate: Option[String]) = Action {
+  def get(startDate: Option[String]) = Action.async {
     val request = JpClassInstancesRequest(startDate)
-    val response: String = request.get
-    Ok(response).withHeaders(
-      CONTENT_TYPE -> "application/json",
-      CONTENT_LENGTH -> response.length.toString
-    )
+    request.getFuture.map(s => {
+      Ok(s).as("application/json")
+    })
   }
 
-  case class JpClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestSync(cb) {
+  case class JpClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestAsync(cb) {
     def getCacheBrokerKey: String =
       "jp-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
@@ -48,7 +47,7 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
       }
     }
 
-    def getJSONResult: JsObject = {
+    def getJSONResultFuture: Future[JsObject] = Future {
       val profiler = new Profiler
 
       val sessions: List[JpClassSession] = pb.getObjectsByFilters(

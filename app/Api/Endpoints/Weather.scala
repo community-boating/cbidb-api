@@ -17,10 +17,7 @@ class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: Execution
   def get() = Action.async {
     val request = WeatherRequest()
     request.getFuture.map(s => {
-      Ok(s).withHeaders(
-        CONTENT_TYPE -> "application/json",
-        CONTENT_LENGTH -> s.length.toString
-      )
+      Ok(s).as("application/json")
     })
   }
 
