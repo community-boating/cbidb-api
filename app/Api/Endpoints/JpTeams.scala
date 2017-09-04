@@ -15,13 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get() = Action.async {
-    val request = JpTeamsRequest()
+    val request = new JpTeamsRequest()
     request.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  case class JpTeamsRequest() extends ApiRequestAsync(cb) {
+  class JpTeamsRequest extends ApiRequestAsync(cb) {
     def getCacheBrokerKey: String = "jp-teams"
 
     def getExpirationTime: LocalDateTime = {

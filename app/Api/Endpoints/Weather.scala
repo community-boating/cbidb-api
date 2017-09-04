@@ -15,13 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: ExecutionContext) extends Controller {
   def get() = Action.async {
-    val request = WeatherRequest()
+    val request = new WeatherRequest()
     request.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  case class WeatherRequest() extends ApiRequestAsync(cb) {
+  class WeatherRequest extends ApiRequestAsync(cb) {
     def getCacheBrokerKey: String = "weather"
 
     def getExpirationTime: LocalDateTime = {

@@ -15,13 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get() = Action.async {
-    val request = UsersRequest()
+    val request = new UsersRequest()
     request.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  case class UsersRequest() extends ApiRequestAsync(cb) {
+  class UsersRequest extends ApiRequestAsync(cb) {
   /*  println("<<<<<<<<<<<<<<<<let's snooze")
     Thread.sleep(2000)
     println("ok im up lets do this>>>>>>>>>>>>>>>")*/

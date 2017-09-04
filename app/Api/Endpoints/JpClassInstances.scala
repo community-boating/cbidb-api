@@ -18,13 +18,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
   def get(startDate: Option[String]) = Action.async {
-    val request = JpClassInstancesRequest(startDate)
+    val request = new JpClassInstancesRequest(startDate)
     request.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  case class JpClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestAsync(cb) {
+  object JpClassInstancesRequest extends ApiRequestAsyncObject {
+
+  }
+
+  class JpClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequestAsync(cb) {
     def getCacheBrokerKey: String =
       "jp-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
