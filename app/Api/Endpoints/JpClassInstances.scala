@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.{ApiRequestAsync, ApiRequestSync}
+import Api.ApiRequestAsync
 import CbiUtil.{CascadeSort, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}

@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequestAsync, ApiRequestSync}
+import Api.ApiRequestAsync
 import CbiUtil.Profiler
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}

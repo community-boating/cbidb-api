@@ -1,6 +1,6 @@
 package Entities
 
-import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 

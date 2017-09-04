@@ -26,6 +26,5 @@ abstract class ApiRequestAsync (cb: CacheBroker)(implicit exec: ExecutionContext
       }
     }
     finalResult
-
   }
 }
