@@ -27,4 +27,12 @@ abstract class ApiRequestAsync (cb: CacheBroker)(implicit exec: ExecutionContext
     }
     finalResult
   }
+
+  // TODO: on cache miss, first request get the right to talk to the database
+  // all other requests wait for it to finish, semaphore stores them in a queue
+  // On complete, write to redis, then give result to all waiting threads
+  // Once written to redis, cache will hit and no further threads will enter the queue (until next stale event)
+  object persistenceSemaphore {
+
+  }
 }
