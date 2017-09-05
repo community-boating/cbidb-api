@@ -66,7 +66,7 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
   // Once written to redis, cache will hit and no further threads will enter the queue (until next stale event)
   var inUse: mutable.Set[CacheKey] = mutable.Set.empty
   var waiting: mutable.Map[CacheKey, List[Promise[String]]] = mutable.Map.empty
-  var resultMap: mutable.Map[CacheKey, Try[String]] = _
+  var resultMap: mutable.Map[CacheKey, Try[String]] = mutable.Map.empty
 
   def tryGet: Future[String] = {
     println("here we go")
@@ -79,20 +79,17 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
     } else {
       inUse.add(getCacheBrokerKey)
       println("got the go-ahead")
-      val stringFuture: Future[String] = getJSONResultFuture.map(json => {
+      val stringFuture: Future[String] = getJSONResultFuture.flatMap(json => {
         val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
         val result: String = new JsObject(Map("data" -> newData)).toString()
         saveToCache(result)
         inUse.remove(getCacheBrokerKey)
         println("done son; completing all queued")
-
-        result
+        println(result)
+        val ret = Future{result}
+        resultMap(getCacheBrokerKey) = Try{result}
+        ret
       })
-
-      stringFuture.onComplete(t => {
-        resultMap(getCacheBrokerKey) = t
-      })
-
       stringFuture
     }
   }
