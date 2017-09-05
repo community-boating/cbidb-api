@@ -1,11 +1,11 @@
 package Services
 
-import com.redis.RedisClient
+import com.redis.{ RedisClientPool}
 
 class RedisBroker extends CacheBroker {
-  val redisClient: RedisClient = new RedisClient("localhost", 6379)
+  val clientPool = new RedisClientPool("localhost", 6379)
 
-  def set(key: String, value: String): Unit = redisClient.set(key, value)
+  def set(key: String, value: String): Unit = clientPool.withClient(c => c.set(key, value))
 
-  def get(key: String): Option[String] = redisClient.get(key)
+  def get(key: String): Option[String] = clientPool.withClient(c => c.get(key))
 }

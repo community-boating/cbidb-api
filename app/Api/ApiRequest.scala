@@ -5,10 +5,12 @@ import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
 import Services.CacheBroker
+import com.google.common.collect.MultimapBuilder.ListMultimapBuilder
 import oracle.net.aso.g
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
 
@@ -60,38 +62,53 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
     finalResult
   }
 
-  // TODO: on cache miss, first request get the right to talk to the database
-  // all other requests wait for it to finish, semaphore stores them in a queue
-  // On complete, write to redis, then give result to all waiting threads
-  // Once written to redis, cache will hit and no further threads will enter the queue (until next stale event)
-  var inUse: mutable.Set[CacheKey] = mutable.Set.empty
-  var waiting: mutable.Map[CacheKey, List[Promise[String]]] = mutable.Map.empty
-  var resultMap: mutable.Map[CacheKey, Try[String]] = mutable.Map.empty
-
+  // basically works.  Not convinced its 100% threadsafe under heavy parallel load
   def tryGet: Future[String] = {
     println("here we go")
-    if (inUse.contains(getCacheBrokerKey)) {
-      println("queueing; this is queue position " + waiting(getCacheBrokerKey).length)
-      val p: Promise[String] = Promise[String]()
-      waiting ++ (getCacheBrokerKey -> p :: waiting(getCacheBrokerKey))
-      p.complete(resultMap(getCacheBrokerKey))
-      p.future
-    } else {
-      inUse.add(getCacheBrokerKey)
-      println("got the go-ahead")
-      val stringFuture: Future[String] = getJSONResultFuture.flatMap(json => {
-        val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
-        val result: String = new JsObject(Map("data" -> newData)).toString()
-        saveToCache(result)
-        inUse.remove(getCacheBrokerKey)
-        println("done son; completing all queued")
-        println(result)
-        val ret = Future{result}
-        resultMap(getCacheBrokerKey) = Try{result}
-        ret
-      })
-      stringFuture
+    synchronized {
+      val notFirst = ApiRequest.inUse.contains(getCacheBrokerKey)
+      ApiRequest.inUse.add(getCacheBrokerKey)
+      if (notFirst) {
+        println("queueing; this is queue position " + (ApiRequest.waiting.get(getCacheBrokerKey) match {
+          case Some(x) => x.length
+          case None => 0
+        }))
+        val p: Promise[String] = ApiRequest.resultMap(getCacheBrokerKey)
+        ApiRequest.waiting.get(getCacheBrokerKey) match {
+          case Some(x) => x += p
+          case None => ApiRequest.waiting(getCacheBrokerKey) = mutable.ListBuffer(p)
+        }
+        println("now waiting has size " + ApiRequest.waiting(getCacheBrokerKey).length)
+        p.future.onComplete(_ => {
+          ApiRequest.waiting(getCacheBrokerKey) -= p
+          if (ApiRequest.waiting(getCacheBrokerKey).isEmpty) {
+            println("$$$$$$$$  LAST ONE, removing old result")
+            ApiRequest.resultMap.remove(getCacheBrokerKey)
+          }
+        })
+        p.future
+      } else {
+        val p = Promise[String]()
+        ApiRequest.resultMap.put(getCacheBrokerKey, p)
+        println("got the go-ahead for " + getCacheBrokerKey)
+        p.completeWith(getJSONResultFuture.map(json => {
+          val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
+          val result: String = new JsObject(Map("data" -> newData)).toString()
+          saveToCache(result)
+          ApiRequest.inUse.remove(getCacheBrokerKey)
+          println("done son; completing all queued")
+          result
+        }))
+        p.future
+      }
     }
   }
 
+}
+
+object ApiRequest {
+  println("!@!@!@!@!@!@!@!@ creating the static things")
+  var inUse: mutable.Set[String] = mutable.Set.empty
+  var waiting: mutable.Map[String, mutable.ListBuffer[Promise[String]]] = mutable.Map.empty
+  var resultMap: mutable.Map[String, Promise[String]] = mutable.Map.empty
 }

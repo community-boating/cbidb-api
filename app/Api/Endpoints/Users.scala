@@ -28,7 +28,7 @@ class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Per
     def getCacheBrokerKey: CacheKey = "users"
 
     def getExpirationTime: LocalDateTime = {
-      LocalDateTime.now.plusMinutes(10)
+      LocalDateTime.now.plusSeconds(4)
     }
 
     object params {}
