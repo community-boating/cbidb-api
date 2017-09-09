@@ -13,7 +13,8 @@ import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+class
+Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get() = Action.async {
     val request = new UsersRequest()
     request.getFuture.map(s => {
@@ -28,7 +29,7 @@ class Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Per
     def getCacheBrokerKey: CacheKey = "users"
 
     def getExpirationTime: LocalDateTime = {
-      LocalDateTime.now.plusSeconds(4)
+      LocalDateTime.now.plusSeconds(2)
     }
 
     object params {}
