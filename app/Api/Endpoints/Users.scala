@@ -3,8 +3,8 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequest}
-import CbiUtil.Profiler
+import Api.ApiRequest
+import CbiUtil.{JsonUtil, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
@@ -56,12 +56,12 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
         ))
       }))
 
-      val metaData = JsArray(Seq(
-        JsObject(Map("name" -> JsString("USER_ID"))),
-        JsObject(Map("name" -> JsString("USER_NAME"))),
-        JsObject(Map("name" -> JsString("NAME_FIRST"))),
-        JsObject(Map("name" -> JsString("NAME_LAST"))),
-        JsObject(Map("name" -> JsString("ACTIVE")))
+      val metaData = JsonUtil.getMetaData(Seq(
+        "USER_ID",
+        "USER_NAME",
+        "NAME_FIRST",
+        "NAME_LAST",
+        "ACTIVE"
       ))
 
       val data = JsObject(Map(

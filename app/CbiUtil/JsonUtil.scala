@@ -1,6 +1,6 @@
 package CbiUtil
 
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.{JsArray, JsObject, JsString, JsValue}
 
 object JsonUtil {
   def getProperty[T](value: JsValue, prop: String): T = {
@@ -12,4 +12,11 @@ object JsonUtil {
       case _ => throw new Exception("Property didnt exist")
     }
   }
+
+  def getMetaData(fields: Seq[String]): JsArray =
+    JsArray(
+      fields.map(f =>
+        JsObject(Map("name" -> JsString(f)))
+      )
+    )
 }

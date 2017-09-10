@@ -3,8 +3,8 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequest}
-import CbiUtil.Profiler
+import Api.ApiRequest
+import CbiUtil.{JsonUtil, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
@@ -72,9 +72,9 @@ class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: P
         ))
       }))
 
-      val metaData = JsArray(Seq(
-        JsObject(Map("name" -> JsString("TEAM_NAME"))),
-        JsObject(Map("name" -> JsString("POINTS")))
+      val metaData = JsonUtil.getMetaData(Seq(
+        "TEAM_NAME",
+        "POINTS"
       ))
 
       val data = JsObject(Map(

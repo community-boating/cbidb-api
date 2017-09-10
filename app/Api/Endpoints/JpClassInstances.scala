@@ -4,8 +4,8 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.{ApiRequest}
-import CbiUtil.{CascadeSort, Profiler}
+import Api.ApiRequest
+import CbiUtil.{CascadeSort, JsonUtil, Profiler}
 import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
@@ -155,15 +155,15 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
         ))
       }))
 
-      val metaData = JsArray(Seq(
-        JsObject(Map("name" -> JsString("INSTANCE_ID"))),
-        JsObject(Map("name" -> JsString("TYPE_NAME"))),
-        JsObject(Map("name" -> JsString("START_DATE"))),
-        JsObject(Map("name" -> JsString("START_TIME"))),
-        JsObject(Map("name" -> JsString("LOCATION_NAME"))),
-        JsObject(Map("name" -> JsString("INSTRUCTOR_NAME_FIRST"))),
-        JsObject(Map("name" -> JsString("INSTRUCTOR_NAME_LAST"))),
-        JsObject(Map("name" -> JsString("ENROLLEES")))
+      val metaData = JsonUtil.getMetaData(Seq(
+        "INSTANCE_ID",
+        "TYPE_NAME",
+        "START_DATE",
+        "START_TIME",
+        "LOCATION_NAME",
+        "INSTRUCTOR_NAME_FIRST",
+        "INSTRUCTOR_NAME_LAST",
+        "ENROLLEES"
       ))
 
       val data = JsObject(Map(
