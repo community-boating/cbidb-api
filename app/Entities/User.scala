@@ -9,7 +9,8 @@ case class User (
   userName: String,
   nameFirst: String,
   nameLast: String,
-  active: Boolean
+  active: Boolean,
+  hideFromClose: Boolean
 ) extends StorableClass {
   def companion: StorableObject[User] = User
   object references extends ReferencesObject {}
@@ -19,7 +20,8 @@ case class User (
     StringFieldValue(User.fields.userName, userName),
     StringFieldValue(User.fields.nameFirst, nameFirst),
     StringFieldValue(User.fields.nameLast, nameLast),
-    BooleanFieldValue(User.fields.active, active)
+    BooleanFieldValue(User.fields.active, active),
+    BooleanFieldValue(User.fields.hideFromClose, hideFromClose)
   )
 }
 
@@ -32,6 +34,7 @@ object User extends StorableObject[User] {
     val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
     val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
     val active = new BooleanDatabaseField(self, "ACTIVE")
+    val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE")
   }
 
   val fieldList: List[DatabaseField[_]] = List(
@@ -39,7 +42,8 @@ object User extends StorableObject[User] {
     fields.userName,
     fields.nameFirst,
     fields.nameLast,
-    fields.active
+    fields.active,
+    fields.hideFromClose
   )
   val primaryKeyName: String = fieldList.head.getFieldName
 
@@ -49,13 +53,14 @@ object User extends StorableObject[User] {
       fields.userName.getValue(r),
       fields.nameFirst.getValue(r),
       fields.nameLast.getValue(r),
-      fields.active.getValue(r)
+      fields.active.getValue(r),
+      fields.hideFromClose.getValue(r)
     )
 
   def getSeedData: Set[User] = Set(
-    User(1, "jcole", "Jon", "Cole", true),
-    User(2, "gleib", "Ginger", "Leib", false),
-    User(3, "czechel", "Charlie", "Zechel", true),
-    User(4, "aalletag", "Andrew", "Alletag", true)
+    User(1, "jcole", "Jon", "Cole", true, false),
+    User(2, "gleib", "Ginger", "Leib", true, true),
+    User(3, "czechel", "Charlie", "Zechel", true, false),
+    User(4, "aalletag", "Andrew", "Alletag", true, false)
   )
 }

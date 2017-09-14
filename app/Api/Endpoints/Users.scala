@@ -23,9 +23,6 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
   }
 
   class UsersRequest extends ApiRequest(cb) {
-  /*  println("<<<<<<<<<<<<<<<<let's snooze")
-    Thread.sleep(2000)
-    println("ok im up lets do this>>>>>>>>>>>>>>>")*/
     def getCacheBrokerKey: CacheKey = "users"
 
     def getExpirationTime: LocalDateTime = {
@@ -52,7 +49,8 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
           JsString(u.userName),
           JsString(u.nameFirst),
           JsString(u.nameLast),
-          JsBoolean(u.active)
+          JsBoolean(u.active),
+          JsBoolean(u.hideFromClose)
         ))
       }))
 
@@ -61,7 +59,8 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
         "USER_NAME",
         "NAME_FIRST",
         "NAME_LAST",
-        "ACTIVE"
+        "ACTIVE",
+        "HIDE_FROM_CLOSE"
       ))
 
       val data = JsObject(Map(
