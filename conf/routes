@@ -7,10 +7,8 @@ GET     /ap-class-instances             Api.Endpoints.ApClassInstances.get(start
 GET     /jp-teams                       Api.Endpoints.JpTeams.get()
 GET     /weather                        Api.Endpoints.Weather.get()
 GET     /users                          Api.Endpoints.Users.get(userID: Option[Int])
-
 POST    /user                           Api.Endpoints.UserCrud.post()
-
-
+GET     /file                           Reporting.Report.getSampleFile()
 
 
 # Map static resources from the /public folder to the /assets URL path
