@@ -8,6 +8,8 @@ GET     /jp-teams                       Api.Endpoints.JpTeams.get()
 GET     /weather                        Api.Endpoints.Weather.get()
 GET     /users                          Api.Endpoints.Users.get()
 
+POST    /user                           Api.Endpoints.UserCrud.post()
+
 
 
 
