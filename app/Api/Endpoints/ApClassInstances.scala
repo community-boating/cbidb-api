@@ -122,12 +122,15 @@ class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
       val sessionsJsArray: JsArray = JsArray(sessionsSorted.map(s => {
         val i: ApClassInstance = s.references.apClassInstance match {
           case Some(i1) => i1
+          case None => throw new Exception()
         }
         val f: ApClassFormat = i.references.apClassFormat match {
           case Some(f1) => f1
+          case None => throw new Exception()
         }
         val t: ApClassType = f.references.apClassType match {
           case Some(t1) => t1
+          case None => throw new Exception()
         }
 
         JsArray(IndexedSeq(
