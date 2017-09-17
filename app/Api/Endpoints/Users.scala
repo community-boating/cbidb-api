@@ -24,7 +24,10 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
   }
 
   class UsersRequest(userID: Option[Int]) extends ApiRequest(cb) {
-    def getCacheBrokerKey: CacheKey = "users"
+    def getCacheBrokerKey: CacheKey = "users" + (userID match {
+      case None => ""
+      case Some(id) => id
+    })
 
     def getExpirationTime: LocalDateTime = {
       LocalDateTime.now.plusSeconds(2)
