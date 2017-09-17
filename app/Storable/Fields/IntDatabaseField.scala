@@ -29,4 +29,6 @@ class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends Dat
     if (l.isEmpty) Filter("")
     else Filter(getFullyQualifiedName + " in (" + l.mkString(", ") + ")")
   }
+
+  def equalsConstant(i: Int): Filter = Filter(getFullyQualifiedName + " = " + i)
 }

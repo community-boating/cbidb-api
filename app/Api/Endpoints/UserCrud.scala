@@ -10,7 +10,7 @@ import play.api.mvc.{Action, Controller}
 import scala.concurrent.ExecutionContext
 
 class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
-  def post = Action { request => {
+  def post() = Action { request => {
     val data = request.body.asFormUrlEncoded
     data match {
       case None => println("no body")
@@ -21,9 +21,16 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
         println(userFields)
         println(reqFields)
         println(unspecifiedFields)
+        if (unspecifiedFields.size == 1 && unspecifiedFields.contains("USER_ID")) {
+          println("Good to create")
+        } else if (unspecifiedFields.isEmpty) {
+          println("Good to update")
+        } else {
+          println("Missing fields: " + unspecifiedFields)
+        }
       }
       case _ => println("wasnt an object")
     }
-    Ok("yo\n")
+    new Status(OK)("cool\n")
   }}
 }
