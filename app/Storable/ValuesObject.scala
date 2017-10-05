@@ -1,0 +1,5 @@
+package Storable
+
+trait ValuesObject {
+
+}

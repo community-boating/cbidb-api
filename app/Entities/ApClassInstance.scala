@@ -1,31 +1,36 @@
 package Entities
 
-import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue}
+import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class ApClassInstance (
-  instanceId: Int,
-  formatId: Int,
-  locationString: Option[String]
-) extends StorableClass {
+class ApClassInstance() extends StorableClass {
   def companion: StorableObject[ApClassInstance] = ApClassInstance
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None
   }
 
+  object values extends ValuesObject {
+    val instanceId = new IntFieldValue(ApClassInstance.fields.instanceId)
+    val formatId = new IntFieldValue(ApClassInstance.fields.formatId)
+    val locationString = new StringFieldValue(ApClassInstance.fields.locationString)
+  }
+
+  val intValueMap: Map[String, IntFieldValue] = Map(
+    "instanceId" -> values.instanceId,
+    "formatId" -> values.formatId
+  )
+
+  val stringValueMap: Map[String, StringFieldValue] = Map(
+    "locationString" -> values.locationString
+  )
+
   def setApClassFormat(v: ApClassFormat): Unit = references.apClassFormat = Some(v)
 
   def getApClassFormat: ApClassFormat = references.apClassFormat match {
     case Some(x) => x
-    case None => throw new Exception("ApClassFormat unset for ApClassInstance " + instanceId)
+    case None => throw new Exception("ApClassFormat unset for ApClassInstance " + values.instanceId.get)
   }
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(ApClassInstance.fields.instanceId, instanceId),
-    IntFieldValue(ApClassInstance.fields.formatId, formatId),
-    NullableStringFieldValue(ApClassInstance.fields.locationString, locationString)
-  )
 }
 
 object ApClassInstance extends StorableObject[ApClassInstance] {
@@ -37,21 +42,18 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
     val locationString = new StringDatabaseField(self, "LOCATION_STRING", 500)
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.instanceId,
-    fields.formatId,
-    fields.locationString
+  val intFieldMap: Map[String, IntDatabaseField] = Map(
+    "instanceId" -> fields.instanceId,
+    "formatId" -> fields.formatId
   )
-  val primaryKeyName: String = fieldList.head.getFieldName
 
-  def construct(r: DatabaseRow): ThisClass =
-    new ApClassInstance(
-      fields.instanceId.getValue(r),
-      fields.formatId.getValue(r),
-      fields.locationString.getOptionValue(r)
-    )
+  val stringFieldMap: Map[String, DatabaseField[String]] = Map(
+    "locationString" -> fields.locationString
+  )
+
+  val primaryKeyName: String = fields.instanceId.getFieldName
 
   def getSeedData: Set[ApClassInstance] = Set(
-    ApClassInstance(1, 1, Some("Someplace"))
+    // ApClassInstance(1, 1, Some("Someplace"))
   )
 }
