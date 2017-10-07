@@ -1,8 +1,9 @@
 package Storable.Fields.FieldValue
 
 import Services.PersistenceBroker
+import Storable.Fields.DatabaseField
 
-abstract class FieldValue[T] {
+abstract class FieldValue[T](field: DatabaseField[T]) {
   var value: Option[T] = None
 
   def set(v: T): Unit = {
@@ -14,6 +15,6 @@ abstract class FieldValue[T] {
     case Some(v: T) => v
   }
 
-  def getFieldName: String
+  def getFieldName: String = field.getFieldName
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String
 }

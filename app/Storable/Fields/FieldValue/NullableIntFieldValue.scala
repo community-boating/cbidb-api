@@ -1,10 +1,9 @@
 package Storable.Fields.FieldValue
 
 import Services.PersistenceBroker
-import Storable.Fields.IntDatabaseField
+import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 
-class NullableIntFieldValue(field: IntDatabaseField) extends FieldValue[Option[Int]] {
-  def getFieldName: String = field.getFieldName
+class NullableIntFieldValue(field: NullableIntDatabaseField) extends FieldValue[Option[Int]](field) {
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String = value.get match {
     case Some(x) => x.toString
     case None => "NULL"
