@@ -1,29 +1,27 @@
 package Entities
 
+import Entities.ApClassSignup.self
 import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class ApClassSignup (
-  signupId: Int,
-  instanceId: Int,
-  signupType: String
-) extends StorableClass {
+class ApClassSignup extends StorableClass {
   def companion: StorableObject[ApClassSignup] = ApClassSignup
+
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassSignup] = None
   }
+  object values extends ValuesObject {
+    val signupId = new IntFieldValue(ApClassSignup.fields.signupId)
+    val instanceId = new IntFieldValue(ApClassSignup.fields.instanceId)
+    val signupType = new StringFieldValue(ApClassSignup.fields.signupType)
+  }
+
   def setJpClassInstance(v: ApClassSignup): Unit = references.apClassInstance = Some(v)
   def getJpClassInstance: ApClassSignup = references.apClassInstance match {
     case Some(x) => x
-    case None => throw new Exception("ApClassInstance unset for ApClassSignup " + signupId)
+    case None => throw new Exception("ApClassInstance unset for ApClassSignup " + values.signupId.get)
   }
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(ApClassSignup.fields.signupId, signupId),
-    IntFieldValue(ApClassSignup.fields.instanceId, instanceId),
-    StringFieldValue(ApClassSignup.fields.signupType, signupType)
-  )
 }
 
 object ApClassSignup extends StorableObject[ApClassSignup] {
@@ -35,20 +33,7 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
     val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.signupId,
-    fields.instanceId,
-    fields.signupType
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass = {
-    new ApClassSignup(
-      fields.signupId.getValue(r),
-      fields.instanceId.getValue(r),
-      fields.signupType.getValue(r)
-    )
-  }
+  val primaryKeyName: String = fields.signupId.getFieldName
 
   def getSeedData: Set[ApClassSignup] = Set()
 }

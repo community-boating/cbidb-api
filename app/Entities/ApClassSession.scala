@@ -2,31 +2,28 @@ package Entities
 
 import java.time.LocalDateTime
 
+import Entities.ApClassSession.self
 import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue}
 import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
+class ApClassSession extends StorableClass {
+  val companion: StorableObject[ApClassSession] = ApClassSession
 
-case class ApClassSession(
-  sessionId: Int,
-  instanceId: Int,
-  sessionDateTime: LocalDateTime
-) extends StorableClass {
-  def companion: StorableObject[ApClassSession] = ApClassSession
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassInstance] = None
   }
+  object values extends ValuesObject {
+    val sessionId = new IntFieldValue(ApClassSession.fields.sessionId)
+    val instanceId = new IntFieldValue(ApClassSession.fields.instanceId)
+    val sessionDateTime = new DateTimeFieldValue(ApClassSession.fields.sessionDateTime)
+  }
+
   def setApClassInstance(v: ApClassInstance): Unit = references.apClassInstance = Some(v)
   def getApClassInstance: ApClassInstance = references.apClassInstance match {
     case Some(x) => x
-    case None => throw new Exception("JpClassInstance unset for JpClassSession " + sessionId)
+    case None => throw new Exception("JpClassInstance unset for JpClassSession " + values.sessionId.get)
   }
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(ApClassSession.fields.sessionId, sessionId),
-    IntFieldValue(ApClassSession.fields.instanceId, instanceId),
-    DateTimeFieldValue(ApClassSession.fields.sessionDateTime, sessionDateTime)
-  )
 }
 
 object ApClassSession extends StorableObject[ApClassSession] {
@@ -38,22 +35,9 @@ object ApClassSession extends StorableObject[ApClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.sessionId,
-    fields.instanceId,
-    fields.sessionDateTime
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass = {
-    new ApClassSession(
-      fields.sessionId.getValue(r),
-      fields.instanceId.getValue(r),
-      fields.sessionDateTime.getValue(r)
-    )
-  }
+  val primaryKeyName: String = fields.sessionId.getFieldName
 
   def getSeedData: Set[ApClassSession] = Set(
-    ApClassSession(1, 1, LocalDateTime.now)
+    //  ApClassSession(1, 1, LocalDateTime.now)
   )
 }

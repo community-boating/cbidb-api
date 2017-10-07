@@ -1,7 +1,7 @@
 package Storable.Fields.FieldValue
 
 import Services.PersistenceBroker
-import Storable.Fields.{NullableStringDatabaseField, StringDatabaseField}
+import Storable.Fields.NullableStringDatabaseField
 
 class NullableStringFieldValue(field: NullableStringDatabaseField) extends FieldValue[Option[String]](field) {
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String = value.get match {

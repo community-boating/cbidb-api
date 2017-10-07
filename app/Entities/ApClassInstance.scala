@@ -1,10 +1,10 @@
 package Entities
 
-import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
-import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
-class ApClassInstance() extends StorableClass {
+class ApClassInstance extends StorableClass {
   def companion: StorableObject[ApClassInstance] = ApClassInstance
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None
@@ -15,15 +15,6 @@ class ApClassInstance() extends StorableClass {
     val formatId = new IntFieldValue(ApClassInstance.fields.formatId)
     val locationString = new StringFieldValue(ApClassInstance.fields.locationString)
   }
-
-  val intValueMap: Map[String, IntFieldValue] = Map(
-    "instanceId" -> values.instanceId,
-    "formatId" -> values.formatId
-  )
-
-  val stringValueMap: Map[String, StringFieldValue] = Map(
-    "locationString" -> values.locationString
-  )
 
   def setApClassFormat(v: ApClassFormat): Unit = references.apClassFormat = Some(v)
 
@@ -41,15 +32,6 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
     val formatId = new IntDatabaseField(self, "FORMAT_ID")
     val locationString = new StringDatabaseField(self, "LOCATION_STRING", 500)
   }
-
-  val intFieldMap: Map[String, IntDatabaseField] = Map(
-    "instanceId" -> fields.instanceId,
-    "formatId" -> fields.formatId
-  )
-
-  val stringFieldMap: Map[String, DatabaseField[String]] = Map(
-    "locationString" -> fields.locationString
-  )
 
   val primaryKeyName: String = fields.instanceId.getFieldName
 

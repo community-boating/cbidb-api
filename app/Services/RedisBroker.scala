@@ -1,6 +1,6 @@
 package Services
 
-import com.redis.{ RedisClientPool}
+import com.redis.RedisClientPool
 
 class RedisBroker extends CacheBroker {
   val clientPool = new RedisClientPool("localhost", 6379)

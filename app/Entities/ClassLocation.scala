@@ -4,17 +4,13 @@ import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class ClassLocation(
-  locationId: Int,
-  locationName: String
-) extends StorableClass {
+class ClassLocation extends StorableClass {
   def companion: StorableObject[ClassLocation] = ClassLocation
   object references extends ReferencesObject {}
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(ClassLocation.fields.locationId, locationId),
-    StringFieldValue(ClassLocation.fields.locationName, locationName)
-  )
+  object values extends ValuesObject {
+    val locationId = new IntFieldValue(ClassLocation.fields.locationId)
+    val locationName = new StringFieldValue(ClassLocation.fields.locationName)
+  }
 }
 
 object ClassLocation extends StorableObject[ClassLocation] {
@@ -25,17 +21,7 @@ object ClassLocation extends StorableObject[ClassLocation] {
     val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.locationId,
-    fields.locationName
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass =
-    new ClassLocation(
-      fields.locationId.getValue(r),
-      fields.locationName.getValue(r)
-    )
+  val primaryKeyName: String = fields.locationId.getFieldName
 
   def getSeedData: Set[ClassLocation] = Set()
 }

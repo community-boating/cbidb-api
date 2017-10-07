@@ -2,31 +2,28 @@ package Entities
 
 import java.time.LocalDateTime
 
-import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue}
+import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
 
-case class JpClassSession(
-  sessionId: Int,
-  instanceId: Int,
-  sessionDateTime: LocalDateTime
-) extends StorableClass {
+class JpClassSession extends StorableClass {
   def companion: StorableObject[JpClassSession] = JpClassSession
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }
+  object fields extends FieldsObject {
+    val sessionId = new IntDatabaseField(self, "SESSION_ID")
+    val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
+    val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
+
+  }
+
   def setJpClassInstance(v: JpClassInstance): Unit = references.jpClassInstance = Some(v)
   def getJpClassInstance: JpClassInstance = references.jpClassInstance match {
     case Some(x) => x
     case None => throw new Exception("JpClassInstance unset for JpClassSession " + sessionId)
   }
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(JpClassSession.fields.sessionId, sessionId),
-    IntFieldValue(JpClassSession.fields.instanceId, instanceId),
-    DateTimeFieldValue(JpClassSession.fields.sessionDateTime, sessionDateTime)
-  )
 }
 
 object JpClassSession extends StorableObject[JpClassSession] {
@@ -38,21 +35,8 @@ object JpClassSession extends StorableObject[JpClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.sessionId,
-    fields.instanceId,
-    fields.sessionDateTime
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
+  val primaryKeyName: String = fields.sessionId.getFieldName
 
-  def construct(r: DatabaseRow): ThisClass = {
-    //println(r.intFields)
-    new JpClassSession(
-      fields.sessionId.getValue(r),
-      fields.instanceId.getValue(r),
-      fields.sessionDateTime.getValue(r)
-    )
-  }
 
   def getSeedData: Set[JpClassSession] = Set()
 }

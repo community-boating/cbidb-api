@@ -4,19 +4,14 @@ import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class ClassInstructor(
-  instructorId: Int,
-  nameFirst: String,
-  nameLast: String
-) extends StorableClass {
+class ClassInstructor extends StorableClass {
   def companion: StorableObject[ClassInstructor] = ClassInstructor
   object references extends ReferencesObject {}
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(ClassInstructor.fields.instructorId, instructorId),
-    StringFieldValue(ClassInstructor.fields.nameFirst, nameFirst),
-    StringFieldValue(ClassInstructor.fields.nameLast, nameLast)
-  )
+  object fields extends FieldsObject {
+    val instructorId = new IntFieldValue(ClassInstructor.fields.instructorId)
+    val nameFirst = new StringFieldValue(ClassInstructor.fields.nameFirst)
+    val nameLast = new StringFieldValue(ClassInstructor.fields.nameLast)
+  }
 }
 
 object ClassInstructor extends StorableObject[ClassInstructor] {
@@ -28,19 +23,8 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
     val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.instructorId,
-    fields.nameFirst,
-    fields.nameLast
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
+  val primaryKeyName: String = fields.instructorId.getFieldName
 
-  def construct(r: DatabaseRow): ThisClass =
-    new ClassInstructor(
-      fields.instructorId.getValue(r),
-      fields.nameFirst.getValue(r),
-      fields.nameLast.getValue(r)
-    )
 
   def getSeedData: Set[ClassInstructor] = Set()
 }

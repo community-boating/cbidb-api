@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiRequest}
+import Api.ApiRequest
 import CbiUtil.PropertiesWrapper
 import Services.CacheBroker
 import play.api.libs.json._

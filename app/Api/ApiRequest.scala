@@ -5,14 +5,10 @@ import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
 import Services.CacheBroker
-import com.google.common.collect.MultimapBuilder.ListMultimapBuilder
-import oracle.net.aso.g
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.Try
 
 
 abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
