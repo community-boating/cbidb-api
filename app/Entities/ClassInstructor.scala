@@ -7,7 +7,7 @@ import Storable._
 class ClassInstructor extends StorableClass {
   def companion: StorableObject[ClassInstructor] = ClassInstructor
   object references extends ReferencesObject {}
-  object fields extends FieldsObject {
+  object values extends ValuesObject {
     val instructorId = new IntFieldValue(ClassInstructor.fields.instructorId)
     val nameFirst = new StringFieldValue(ClassInstructor.fields.nameFirst)
     val nameLast = new StringFieldValue(ClassInstructor.fields.nameLast)

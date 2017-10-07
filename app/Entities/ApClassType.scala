@@ -25,8 +25,6 @@ object ApClassType extends StorableObject[ApClassType] {
 
   val primaryKeyName: String = fields.typeId.getFieldName
 
-  def construct(r: DatabaseRow): ThisClass =
-
   def getSeedData: Set[ApClassType] = Set(
     //  ApClassType(1, "Sailing 101", 1),
     //  ApClassType(2, "Sailing 102", 2),

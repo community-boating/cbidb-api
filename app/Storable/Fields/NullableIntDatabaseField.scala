@@ -4,15 +4,15 @@ import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{DatabaseRow, Filter, StorableObject}
 
 class NullableIntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Option[Int]](entity, fieldName) {
-  def getValue(row: DatabaseRow): Int = getOptionValue(row) match {
+  def getValue(row: DatabaseRow): Option[Int] = getOptionValue(row) match {
     case Some(x) => x
     case None => throw new Exception("Non-null field was null")
   }
 
-  def getOptionValue(row: DatabaseRow): Option[Int] = {
+  def getOptionValue(row: DatabaseRow): Option[Option[Int]] = {
     row.intFields.get(fieldName) match {
-      case Some(Some(x)) => Some(x)
-      case _ => None
+      case Some(Some(x)) => Some(Some(x))
+      case _ => Some(None)
     }
   }
 

@@ -13,7 +13,7 @@ class JpClassInstance extends StorableClass {
   }
   object values extends ValuesObject {
     val instanceId = new IntFieldValue(JpClassInstance.fields.instanceId)
-    val instructorId = new (JpClassInstance.fields.instructorId)
+    val instructorId = new IntFieldValue(JpClassInstance.fields.instructorId)
     val locationId = new IntFieldValue(JpClassInstance.fields.locationId)
     val typeId = new IntFieldValue(JpClassInstance.fields.typeId)
   }

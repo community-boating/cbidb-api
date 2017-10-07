@@ -8,7 +8,7 @@ abstract class StorableClass {
   type IntFieldValueMap = Map[String, IntFieldValue]
   type StringFieldValueMap = Map[String, StringFieldValue]
 
-  object values extends ValuesObject
+  val values: ValuesObject
 
   private val valueMaps = {
     val rm = scala.reflect.runtime.currentMirror
