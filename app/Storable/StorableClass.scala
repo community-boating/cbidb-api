@@ -1,12 +1,14 @@
 package Storable
 
-import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import Storable.Fields.FieldValue.{BooleanFieldValue, IntFieldValue, StringFieldValue}
+import oracle.net.aso.s
 
 import scala.reflect.runtime.universe._
 
 abstract class StorableClass {
   type IntFieldValueMap = Map[String, IntFieldValue]
   type StringFieldValueMap = Map[String, StringFieldValue]
+  type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 
   val values: ValuesObject
 
@@ -20,6 +22,7 @@ abstract class StorableClass {
 
     var intMap: IntFieldValueMap = Map()
     var stringMap: StringFieldValueMap = Map()
+    var booleanMap: BooleanFieldValueMap = Map()
 
     for(acc <- accessors) {
       val symbol = instanceMirror.reflectMethod(acc).symbol.toString
@@ -31,15 +34,15 @@ abstract class StorableClass {
       instanceMirror.reflectMethod(acc).apply() match {
         case i: IntFieldValue => intMap += (name -> i)
         case s: StringFieldValue => stringMap += (name -> s)
+        case b: BooleanFieldValue => booleanMap += (name -> b)
         case _ => throw new Exception("Unrecognized field type")
       }
     }
 
-    (intMap, stringMap)
+    (intMap, stringMap, booleanMap)
   }
 
   val intValueMap: IntFieldValueMap = valueMaps._1
   val stringValueMap: StringFieldValueMap = valueMaps._2
-
-  def companion: StorableObject[_]
+  val booleanValueMap: BooleanFieldValueMap = valueMaps._3
 }

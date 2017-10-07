@@ -20,7 +20,7 @@ class User extends StorableClass {
 object User extends StorableObject[User] {
   val entityName: String = "USERS"
 
-  object fields extends FieldsObject {
+  class Fields extends FieldsObject {
     val userId = new IntDatabaseField(self, "USER_ID")
     val userName = new StringDatabaseField(self, "USER_NAME", 50)
     val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
@@ -28,6 +28,8 @@ object User extends StorableObject[User] {
     val active = new BooleanDatabaseField(self, "ACTIVE")
     val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE")
   }
+  println("def in concrete")
+  val fields = new Fields
 
   val primaryKeyName: String = fields.userId.getFieldName
 
@@ -37,6 +39,4 @@ object User extends StorableObject[User] {
   //  User(3, "czechel", "Charlie", "Zechel", true, false),
   //  User(4, "aalletag", "Andrew", "Alletag", true, false)
   )
-
-  def construct(r: DatabaseRow)(implicit manifest: scala.reflect.Manifest[User]): User = super.construct(r)
 }
