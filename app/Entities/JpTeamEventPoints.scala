@@ -1,24 +1,20 @@
 package Entities
 
-import Storable.Fields.FieldValue.FieldValue
-import Storable.Fields.{DatabaseField, IntDatabaseField}
+import Storable.Fields.FieldValue.IntFieldValue
+import Storable.Fields.IntDatabaseField
 import Storable._
 
-case class JpTeamEventPoints (
-  rowId: Int,
-  teamId: Int,
-  points: Int
-) extends StorableClass {
+class JpTeamEventPoints extends StorableClass {
   def companion: StorableObject[JpTeamEventPoints] = JpTeamEventPoints
   object references extends ReferencesObject {
     var jpTeam: Option[JpTeam] = None
   }
+  object values extends ValuesObject {
+    val rowId = new IntFieldValue(JpTeamEventPoints.fields.rowId)
+    val teamId = new IntFieldValue(JpTeamEventPoints.fields.teamId)
+    val points = new IntFieldValue(JpTeamEventPoints.fields.points)
+  }
 
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(JpTeamEventPoints.fields.rowId, rowId),
-    IntFieldValue(JpTeamEventPoints.fields.teamId, teamId),
-    IntFieldValue(JpTeamEventPoints.fields.points, points)
-  )
 }
 
 object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
@@ -30,19 +26,7 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
     val points = new IntDatabaseField(self, "POINTS")
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.rowId,
-    fields.teamId,
-    fields.points
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass =
-    new JpTeamEventPoints(
-      fields.rowId.getValue(r),
-      fields.teamId.getValue(r),
-      fields.points.getValue(r)
-    )
+  val primaryKeyName: String = fields.rowId.getFieldName
 
   def getSeedData: Set[JpTeamEventPoints] = Set()
 }

@@ -1,10 +1,7 @@
 package Entities
 
-import java.time.LocalDateTime
-
-import Entities.ApClassSession.self
-import Storable.Fields.FieldValue.{DateTimeFieldValue, FieldValue, IntFieldValue}
-import Storable.Fields.{DatabaseField, DateTimeDatabaseField, IntDatabaseField}
+import Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
+import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
 class ApClassSession extends StorableClass {

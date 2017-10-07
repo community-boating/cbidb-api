@@ -1,22 +1,17 @@
 package Entities
 
-import Storable.Fields.FieldValue.FieldValue
-import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class JpClassType (
-  typeId: Int,
-  typeName: String,
-  displayOrder: Int
-) extends StorableClass {
+class JpClassType extends StorableClass {
   def companion: StorableObject[JpClassType] = JpClassType
   object references extends ReferencesObject {}
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(JpClassType.fields.typeId, typeId),
-    StringFieldValue(JpClassType.fields.typeName, typeName),
-    IntFieldValue(JpClassType.fields.displayOrder, displayOrder)
-  )
+  object values extends ValuesObject {
+    val typeId = new IntFieldValue(JpClassType.fields.typeId)
+    val typeName = new StringFieldValue(JpClassType.fields.typeName)
+    val displayOrder = new IntFieldValue(JpClassType.fields.displayOrder)
+  }
 }
 
 object JpClassType extends StorableObject[JpClassType] {
@@ -28,19 +23,7 @@ object JpClassType extends StorableObject[JpClassType] {
     val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.typeId,
-    fields.typeName,
-    fields.displayOrder
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass =
-    new JpClassType(
-      fields.typeId.getValue(r),
-      fields.typeName.getValue(r),
-      fields.displayOrder.getValue(r)
-    )
+  val primaryKeyName: String = fields.typeId.getFieldName
 
   def getSeedData: Set[JpClassType] = Set()
 }

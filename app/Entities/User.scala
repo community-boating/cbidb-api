@@ -1,28 +1,20 @@
 package Entities
 
-import Storable.Fields.FieldValue.FieldValue
-import Storable.Fields.{BooleanDatabaseField, DatabaseField, IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{BooleanFieldValue, IntFieldValue, StringFieldValue}
+import Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseField}
 import Storable._
 
-case class User (
-  userId: Int,
-  userName: String,
-  nameFirst: String,
-  nameLast: String,
-  active: Boolean,
-  hideFromClose: Boolean
-) extends StorableClass {
+class User extends StorableClass {
   def companion: StorableObject[User] = User
   object references extends ReferencesObject {}
-
-  def deconstruct: Set[FieldValue] = Set(
-    IntFieldValue(User.fields.userId, userId),
-    StringFieldValue(User.fields.userName, userName),
-    StringFieldValue(User.fields.nameFirst, nameFirst),
-    StringFieldValue(User.fields.nameLast, nameLast),
-    BooleanFieldValue(User.fields.active, active),
-    BooleanFieldValue(User.fields.hideFromClose, hideFromClose)
-  )
+  object values extends ValuesObject {
+    val userId = new IntFieldValue(User.fields.userId)
+    val userName = new StringFieldValue(User.fields.userName)
+    val nameFirst = new StringFieldValue(User.fields.nameFirst)
+    val nameLast = new StringFieldValue(User.fields.nameLast)
+    val active = new BooleanFieldValue(User.fields.active)
+    val hideFromClose = new BooleanFieldValue(User.fields.hideFromClose)
+  }
 }
 
 object User extends StorableObject[User] {
@@ -37,30 +29,12 @@ object User extends StorableObject[User] {
     val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE")
   }
 
-  val fieldList: List[DatabaseField[_]] = List(
-    fields.userId,
-    fields.userName,
-    fields.nameFirst,
-    fields.nameLast,
-    fields.active,
-    fields.hideFromClose
-  )
-  val primaryKeyName: String = fieldList.head.getFieldName
-
-  def construct(r: DatabaseRow): ThisClass =
-    new User(
-      fields.userId.getValue(r),
-      fields.userName.getValue(r),
-      fields.nameFirst.getValue(r),
-      fields.nameLast.getValue(r),
-      fields.active.getValue(r),
-      fields.hideFromClose.getValue(r)
-    )
+  val primaryKeyName: String = fields.userId.getFieldName
 
   def getSeedData: Set[User] = Set(
-    User(1, "jcole", "Jon", "Cole", true, false),
-    User(2, "gleib", "Ginger", "Leib", true, true),
-    User(3, "czechel", "Charlie", "Zechel", true, false),
-    User(4, "aalletag", "Andrew", "Alletag", true, false)
+  //  User(1, "jcole", "Jon", "Cole", true, false),
+  //  User(2, "gleib", "Ginger", "Leib", true, true),
+  //  User(3, "czechel", "Charlie", "Zechel", true, false),
+  //  User(4, "aalletag", "Andrew", "Alletag", true, false)
   )
 }

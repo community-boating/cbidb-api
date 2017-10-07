@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{FieldValue, IntFieldValue, StringFieldValue}
-import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ClassLocation extends StorableClass {
