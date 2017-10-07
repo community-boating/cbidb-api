@@ -58,32 +58,32 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
 
       val instances: List[JpClassInstance] = pb.getObjectsByIds(
         JpClassInstance,
-        sessions.map(s => s.instanceId).distinct,
+        sessions.map(s => s.values.instanceId.get).distinct,
         500
       )
 
       val types: List[JpClassType] = pb.getObjectsByIds(
         JpClassType,
-        instances.map(i => i.typeId).distinct,
+        instances.map(i => i.values.typeId.get).distinct,
         500
       )
 
       val locations: List[ClassLocation] = pb.getObjectsByIds(
         ClassLocation,
-        instances.flatMap(i => i.locationId).distinct,
+        instances.flatMap(i => i.values.locationId.value).distinct,
         500
       )
 
       val instructors: List[ClassInstructor] = pb.getObjectsByIds(
         ClassInstructor,
-        instances.flatMap(i => i.instructorId).distinct,
+        instances.flatMap(i => i.values.instructorId.value).distinct,
         500
       )
 
       val signups: List[JpClassSignup] = pb.getObjectsByFilters(
         JpClassSignup,
         List(
-          JpClassSignup.fields.instanceId.inList(instances.map(i => i.instanceId).distinct),
+          JpClassSignup.fields.instanceId.inList(instances.map(i => i.values.instanceId.get).distinct),
           JpClassSignup.fields.signupType.equalsConstant("E")
         ),
         500
@@ -94,37 +94,37 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
 
       val instancesHash: mutable.HashMap[Int, JpClassInstance] = {
         val h = new mutable.HashMap[Int, JpClassInstance]
-        instances.foreach(i => h.put(i.instanceId, i))
+        instances.foreach(i => h.put(i.values.instanceId.get, i))
         h
       }
 
       instances.foreach(i => {
-        i.setJpClassType(types.filter(t => t.typeId == i.typeId).head)
+        i.setJpClassType(types.filter(t => t.values.typeId.get == i.values.typeId.get).head)
 
-        i.instructorId match {
-          case Some(x) => i.setClassInstructor(Some(instructors.filter(ins => ins.instructorId == x).head))
+        i.values.instructorId.value match {
+          case Some(x) => i.setClassInstructor(Some(instructors.filter(ins => ins.values.instructorId.get == x).head))
           case None => i.setClassInstructor(None)
         }
 
-        i.locationId match {
-          case Some(x) => i.setClassLocation(Some(locations.filter(l => l.locationId == x).head))
+        i.values.locationId.value match {
+          case Some(x) => i.setClassLocation(Some(locations.filter(l => l.values.locationId.get == x).head))
           case None => i.setClassLocation(None)
         }
       })
 
       sessions.foreach(s => {
-        instancesHash.get(s.instanceId) match {
+        instancesHash.get(s.values.instanceId.get) match {
           case Some(i) => s.setJpClassInstance(i);
           case None =>
         }
       })
 
       val sessionsSorted = sessions.sortWith((s1: JpClassSession, s2: JpClassSession) => {
-        val displayOrder1 = s1.getJpClassInstance.getJpClassType.displayOrder
-        val displayOrder2 = s2.getJpClassInstance.getJpClassType.displayOrder
-        val instanceId1 = s1.getJpClassInstance.instanceId
-        val instanceId2 = s2.getJpClassInstance.instanceId
-        CascadeSort.sort(s1.sessionDateTime, s2.sessionDateTime)
+        val displayOrder1 = s1.getJpClassInstance.getJpClassType.values.displayOrder.get
+        val displayOrder2 = s2.getJpClassInstance.getJpClassType.values.displayOrder.get
+        val instanceId1 = s1.getJpClassInstance.values.instanceId.get
+        val instanceId2 = s2.getJpClassInstance.values.instanceId.get
+        CascadeSort.sort(s1.values.sessionDateTime.get, s2.values.sessionDateTime.get)
           .sort(displayOrder1, displayOrder2)
           .sort(instanceId1, instanceId2)
           .end()
@@ -144,14 +144,14 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
           case Some(ins1) => ins1
         }
         JsArray(IndexedSeq(
-          JsNumber(i.instanceId),
-          JsString(t.typeName),
-          JsString(s.sessionDateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
-          JsString(s.sessionDateTime.format(DateTimeFormatter.ofPattern("hh:mma"))),
-          l match { case Some(l1) => JsString(l1.locationName); case None => JsNull },
-          ins match { case Some(ins1) => JsString(ins1.nameFirst); case None => JsNull },
-          ins match { case Some(ins1) => JsString(ins1.nameLast); case None => JsNull },
-          JsNumber(signups.count(signup => signup.instanceId == s.instanceId))
+          JsNumber(i.values.instanceId.get),
+          JsString(t.values.typeName.get),
+          JsString(s.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
+          JsString(s.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("hh:mma"))),
+          l match { case Some(l1) => JsString(l1.values.locationName.get); case None => JsNull },
+          ins match { case Some(ins1) => JsString(ins1.values.nameFirst.get); case None => JsNull },
+          ins match { case Some(ins1) => JsString(ins1.values.nameLast.get); case None => JsNull },
+          JsNumber(signups.count(signup => signup.values.instanceId.get == s.values.instanceId.get))
         ))
       }))
 

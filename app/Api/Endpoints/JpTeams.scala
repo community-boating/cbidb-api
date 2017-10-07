@@ -50,17 +50,17 @@ class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: P
       // There's probably a functional way to do this
       var teamsToPoints: Map[Int, Int] = Map()
       teams.foreach(t => {
-        teamsToPoints += (t.teamId -> 0)
+        teamsToPoints += (t.values.teamId.get -> 0)
       })
       points.foreach(p => {
-        teamsToPoints.get(p.teamId) match {
-          case Some(x) => teamsToPoints += (p.teamId -> (x + p.points))
-          case None => throw new Exception("Found points for nonexistant team " + p.teamId)
+        teamsToPoints.get(p.values.teamId.get) match {
+          case Some(x) => teamsToPoints += (p.values.teamId.get -> (x + p.values.points.get))
+          case None => throw new Exception("Found points for nonexistant team " + p.values.teamId.get)
         }
       })
 
       val result: List[(String, Int)] = teamsToPoints.toIndexedSeq.toList.map(e => {
-        val teamName: String = teams.filter(_.teamId == e._1).head.teamName
+        val teamName: String = teams.filter(_.values.teamId.get == e._1).head.values.teamName.get
         (teamName, e._2)
       })
 

@@ -1,10 +1,10 @@
 package Storable
 
-import Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 
 import scala.reflect.runtime.universe._
 
-abstract class StorableObject[T <: StorableClass](implicit m: scala.reflect.Manifest[T]) {
+trait StorableObject[T <: StorableClass] {
   type IntFieldMap = Map[String, IntDatabaseField]
   type StringFieldMap = Map[String, StringDatabaseField]
 
@@ -45,8 +45,10 @@ abstract class StorableObject[T <: StorableClass](implicit m: scala.reflect.Mani
   val intFieldMap: IntFieldMap = fieldMaps._1
   val stringFieldMap: StringFieldMap  = fieldMaps._2
 
+  val fieldList: List[DatabaseField[_]] = intFieldMap.values.toList ++ stringFieldMap.values.toList
+
   def construct(r: DatabaseRow): T = {
-    val embryo: T = m.runtimeClass.newInstance.asInstanceOf[T]
+    val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
     intFieldMap.foreach(f => {
       embryo.intValueMap.get(f._1) match {

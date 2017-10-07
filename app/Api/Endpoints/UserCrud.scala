@@ -13,13 +13,15 @@ import scala.concurrent.ExecutionContext
 class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def post() = Action { request => {
     val data = request.body.asFormUrlEncoded
+    new Status(OK)("wasnt JCOLE so I'm cool w it")
+    /*
     data match {
       case None => {
         println("no body")
         new Status(400)("no body")
       }
       case Some(v) => {
-        val userFields: Set[String] = User.fieldList.map(_.getFieldName).toSet
+        val userFields: Set[String] = User.fieldList.map(_.values.getFieldName.get).toSet
         val reqFields: Set[String] = v.keySet
         val unspecifiedFields: Set[String] = userFields -- reqFields
         println(userFields)
@@ -39,6 +41,6 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
           new Status(OK)("wasnt JCOLE so I'm cool w it")
         }
       }
-    }
+    }*/
   }}
 }

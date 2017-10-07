@@ -54,12 +54,12 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
 
       val usersArray: JsArray = JsArray(users.map(u => {
         JsArray(IndexedSeq(
-          JsNumber(u.userId),
-          JsString(u.userName),
-          JsString(u.nameFirst),
-          JsString(u.nameLast),
-          JsBoolean(u.active),
-          JsBoolean(u.hideFromClose)
+          JsNumber(u.values.userId.get),
+          JsString(u.values.userName.get),
+          JsString(u.values.nameFirst.get),
+          JsString(u.values.nameLast.get),
+          JsBoolean(u.values.active.get),
+          JsBoolean(u.values.hideFromClose.get)
         ))
       }))
 

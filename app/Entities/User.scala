@@ -37,4 +37,6 @@ object User extends StorableObject[User] {
   //  User(3, "czechel", "Charlie", "Zechel", true, false),
   //  User(4, "aalletag", "Andrew", "Alletag", true, false)
   )
+
+  def construct(r: DatabaseRow)(implicit manifest: scala.reflect.Manifest[User]): User = super.construct(r)
 }
