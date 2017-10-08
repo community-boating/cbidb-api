@@ -3,22 +3,18 @@ package Storable.Fields
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{ProtoStorable, Filter, StorableObject}
 
-class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Int](entity, fieldName) {
-  def getValue(row: ProtoStorable): Int = getOptionValue(row) match {
-    case Some(x) => x
-    case None => throw new Exception("Non-null field was null: " + fieldName)
-  }
-
-  def getOptionValue(row: ProtoStorable): Option[Int] = {
-    row.intFields.get(fieldName) match {
-      case Some(Some(x)) => Some(x)
-      case _ => None
-    }
-  }
-
+class IntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Int](entity, persistenceFieldName) {
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
     case x if x == classOf[MysqlBroker] => "integer"
     case x if x == classOf[OracleBroker] => "number"
+  }
+
+  def findValueInProtoStorable(row: ProtoStorable): Option[Int] = {
+    row.intFields.get(this.getRuntimeFieldName) match {
+      case Some(Some(x)) => Some(x)
+      case Some(None) => throw new Exception("non-null Int field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
+      case _ => None
+    }
   }
 
   def lessThanConstant(c: Int): Filter = {

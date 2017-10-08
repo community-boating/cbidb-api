@@ -3,7 +3,7 @@ package Storable.Fields
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{ProtoStorable, Filter, StorableObject}
 
-class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField[String](entity, fieldName) {
+class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
   def getFieldLength: Int = fieldLength
 
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = getFieldLength match {
@@ -14,14 +14,10 @@ class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLen
     }
   }
 
-  def getValue(row: ProtoStorable): String = getOptionValue(row) match {
-    case Some(x) => x
-    case None => throw new Exception("Non-null field was null")
-  }
-
-  def getOptionValue(row: ProtoStorable): Option[String] = {
-    row.stringFields.get(fieldName) match {
+  def findValueInProtoStorable(row: ProtoStorable): Option[String] = {
+    row.stringFields.get(this.getRuntimeFieldName) match {
       case Some(Some(x)) => Some(x)
+      case Some(None) => throw new Exception("non-null String field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
       case _ => None
     }
   }

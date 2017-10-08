@@ -103,7 +103,6 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
 }
 
 object ApiRequest {
-  println("!@!@!@!@!@!@!@!@ creating the static things")
   var inUse: mutable.Set[String] = mutable.Set.empty
   var waiting: mutable.Map[String, mutable.ListBuffer[Promise[String]]] = mutable.Map.empty
   var resultMap: mutable.Map[String, Promise[String]] = mutable.Map.empty

@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import Entities.User
 import Services.{CacheBroker, PersistenceBroker}
+import Storable.ProtoStorable
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc.{Action, Controller}
 
@@ -24,10 +25,18 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
           println("value: " + ss.mkString(""))
         }))
 
+        val postParams: Map[String, String] = v.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
+
+        val ps: ProtoStorable = ProtoStorable.constructFromStrings(User, postParams)
+        println(ps)
+
+        val newUser: User = User.construct(ps, false)
+
+        println("$$$ " + newUser.values.nameFirst.get)
 
 
 
-        val userFields: Set[String] = User.fieldList.map(_.getFieldName).toSet
+        val userFields: Set[String] = User.fieldList.map(_.getPersistenceFieldName).toSet
         val reqFields: Set[String] = v.keySet
         val unspecifiedFields: Set[String] = userFields -- reqFields
         println(userFields)

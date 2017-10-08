@@ -18,7 +18,7 @@ case class ProtoStorable(
 )
 
 object ProtoStorable {
-  def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): Option[ProtoStorable] = {
+  def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable = {
     var intFields: Map[String, Option[Int]] = Map()
     var doubleFields: Map[String, Option[Double]] = Map()
     var stringFields: Map[String, Option[String]] = Map()
@@ -103,6 +103,6 @@ object ProtoStorable {
       }
     }))
 
-    Some(ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, ignored))
+    ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, ignored)
   }
 }

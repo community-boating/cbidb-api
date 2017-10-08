@@ -25,7 +25,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
   def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
-    sb.append(obj.fieldList.map(f => f.getFieldName).mkString(", "))
+    sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKeyName + " = " + id)
     val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, 6)
@@ -38,7 +38,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     else {
       val sb: StringBuilder = new StringBuilder
       sb.append("SELECT ")
-      sb.append(obj.fieldList.map(f => f.getFieldName).mkString(", "))
+      sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
       sb.append(" WHERE " + obj.primaryKeyName + " in (" + ids.mkString(", ") + ")")
       val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
@@ -54,7 +54,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     else {
       val sb: StringBuilder = new StringBuilder
       sb.append("SELECT ")
-      sb.append(obj.fieldList.map(f => f.getFieldName).mkString(", "))
+      sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
       if (filters.nonEmpty) {
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
@@ -91,39 +91,39 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
         properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
           df match {
             case _: IntDatabaseField => {
-              intFields += (df.getFieldName -> Some(rs.getInt(i)))
-              if (rs.wasNull()) intFields += (df.getFieldName -> None)
+              intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
+              if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
             }
             case _: NullableIntDatabaseField => {
-              intFields += (df.getFieldName -> Some(rs.getInt(i)))
-              if (rs.wasNull()) intFields += (df.getFieldName -> None)
+              intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
+              if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
             }
             case _: StringDatabaseField => {
-              stringFields += (df.getFieldName -> Some(rs.getString(i)))
-              if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+              stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
+              if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
             }
             case _: NullableStringDatabaseField => {
-              stringFields += (df.getFieldName -> Some(rs.getString(i)))
-              if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+              stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
+              if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
             }
             case _: DoubleDatabaseField => {
-              doubleFields += (df.getFieldName -> Some(rs.getDouble(i)))
-              if (rs.wasNull()) doubleFields += (df.getFieldName -> None)
+              doubleFields += (df.getRuntimeFieldName -> Some(rs.getDouble(i)))
+              if (rs.wasNull()) doubleFields += (df.getRuntimeFieldName -> None)
             }
             case _: DateTimeDatabaseField => {
-              dateTimeFields += (df.getFieldName -> Some(rs.getTimestamp(i).toLocalDateTime))
-              if (rs.wasNull()) dateTimeFields += (df.getFieldName -> None)
+              dateTimeFields += (df.getRuntimeFieldName -> Some(rs.getTimestamp(i).toLocalDateTime))
+              if (rs.wasNull()) dateTimeFields += (df.getRuntimeFieldName -> None)
             }
             case _: DateDatabaseField => {
-              dateFields += (df.getFieldName -> Some(rs.getDate(i).toLocalDate))
-              if (rs.wasNull()) dateFields += (df.getFieldName -> None)
+              dateFields += (df.getRuntimeFieldName -> Some(rs.getDate(i).toLocalDate))
+              if (rs.wasNull()) dateFields += (df.getRuntimeFieldName -> None)
             }
             case _: BooleanDatabaseField => {
-              stringFields += (df.getFieldName -> Some(rs.getString(i)))
-              if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+              stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
+              if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
             }
             case _ => {
-              println(" *********** UNKNOWN COLUMN TYPE FOR COL " + df.getFieldName)
+              println(" *********** UNKNOWN COLUMN TYPE FOR COL " + df.getPersistenceFieldName)
             }
           }
         }))

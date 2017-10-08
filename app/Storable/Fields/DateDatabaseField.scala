@@ -6,21 +6,17 @@ import java.time.format.DateTimeFormatter
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{ProtoStorable, Filter, StorableObject}
 
-class DateDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[LocalDate](entity, fieldName) {
+class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
   val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
     case x if x == classOf[MysqlBroker] => "date"
     case x if x == classOf[OracleBroker] => "date"
   }
 
-  def getValue(row: ProtoStorable): LocalDate = getOptionValue(row) match {
-    case Some(x) => x
-    case None => throw new Exception("Non-null field was null")
-  }
-
-  def getOptionValue(row: ProtoStorable): Option[LocalDate] = {
-    row.dateFields.get(fieldName) match {
+  def findValueInProtoStorable(row: ProtoStorable): Option[LocalDate] = {
+    row.dateFields.get(this.getRuntimeFieldName) match {
       case Some(Some(x)) => Some(x)
+      case Some(None) => throw new Exception("non-null Date field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
       case _ => None
     }
   }

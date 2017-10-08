@@ -14,9 +14,9 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
   def peek: Option[T] = value
   def get: T = value match {
     case Some(v) => v
-    case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue")
+    case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + field.getPersistenceFieldName)
   }
 
-  def getFieldName: String = field.getFieldName
+  def getFieldName: String = field.getPersistenceFieldName
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String
 }

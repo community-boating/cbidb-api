@@ -58,7 +58,7 @@ val dropTables: String = entities.map("drop table " + _.entityName + ";").mkStri
 
 val createTables: String = entities.map(e => {
   "create table " + e.entityName + "(" + e.fieldList.map(f => {
-    f.getFieldName + " " + f.getFieldType
+    f.getPersistenceFieldName + " " + f.getFieldType
   }).mkString(", ") + ");"
 }).mkString("\n")
 

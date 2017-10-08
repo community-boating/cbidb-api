@@ -3,7 +3,7 @@ package Storable.Fields
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{ProtoStorable, Filter, StorableObject}
 
-class NullableBooleanDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Option[Boolean]](entity, fieldName) {
+class NullableBooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
   def getFieldLength: Int = 1
 
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = getFieldLength match {
@@ -14,12 +14,12 @@ class NullableBooleanDatabaseField(entity: StorableObject[_], fieldName: String)
     }
   }
 
-  def getValue(row: ProtoStorable): Option[Boolean] = {
-    row.stringFields.get(fieldName) match {
-      case Some(Some("Y")) => Some(true)
-      case Some(Some("N")) => Some(false)
-      case Some(None) => None
-      case _ => throw new Exception("Nullable Boolean did not exist in ProtoStorable")
+  def findValueInProtoStorable(row: ProtoStorable): Option[Option[Boolean]] = {
+    row.stringFields.get(this.getRuntimeFieldName) match {
+      case Some(Some("Y")) => Some(Some(true))
+      case Some(Some("N")) => Some(Some(false))
+      case Some(None) => Some(None)
+      case _ => None
     }
   }
 
