@@ -27,4 +27,11 @@ class NullableBooleanDatabaseField(entity: StorableObject[_], fieldName: String)
     case Some(x) => Filter(getFullyQualifiedName + " = '" + (if (x) "Y" else "N") + "'")
     case None => Filter(getFullyQualifiedName + " IS NULL")
   }
+
+  def getValueFromString(s: String): Option[Option[Boolean]] = s.toLowerCase match {
+    case "true" => Some(Some(true))
+    case "false" => Some(Some(false))
+    case "" => Some(None)
+    case _ => None
+  }
 }

@@ -19,6 +19,14 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
         new Status(400)("no body")
       }
       case Some(v) => {
+        v.foreach(Function.tupled((s: String, ss: Seq[String]) => {
+          println("key: "+  s)
+          println("value: " + ss.mkString(""))
+        }))
+
+
+
+
         val userFields: Set[String] = User.fieldList.map(_.getFieldName).toSet
         val reqFields: Set[String] = v.keySet
         val unspecifiedFields: Set[String] = userFields -- reqFields

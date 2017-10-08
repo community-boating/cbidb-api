@@ -30,4 +30,10 @@ class BooleanDatabaseField(entity: StorableObject[_], fieldName: String) extends
 
   def equals(b: Boolean): Filter  =
     Filter(getFullyQualifiedName + " = '" + (if (b) "Y" else "N") + "'")
+
+  def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
+    case "true" => Some(true)
+    case "false" => Some(false)
+    case _ => None
+  }
 }

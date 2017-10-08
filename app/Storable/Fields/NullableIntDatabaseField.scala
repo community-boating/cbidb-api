@@ -30,4 +30,16 @@ class NullableIntDatabaseField(entity: StorableObject[_], fieldName: String) ext
     case Some(x: Int) => Filter(getFullyQualifiedName + " = " + i)
     case None => Filter(getFullyQualifiedName + " IS NULL")
   }
+
+  def getValueFromString(s: String): Option[Option[Int]] = {
+    if (s == "") Some(None)
+    else {
+      try {
+        val d = s.toInt
+        Some(Some(d))
+      } catch {
+        case _ => None
+      }
+    }
+  }
 }

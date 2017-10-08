@@ -81,12 +81,12 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       profiler.lap("starting rows")
       while (rs.next) {
         rowCounter += 1
-        val intFields = new HashMap[String, Option[Int]]
-        val doubleFields = new HashMap[String, Option[Double]]
-        val stringFields = new HashMap[String, Option[String]]
-        val dateFields = new HashMap[String, Option[LocalDate]]
-        val dateTimeFields = new HashMap[String, Option[LocalDateTime]]
-        val row: ProtoStorable = ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields)
+        var intFields: Map[String, Option[Int]] = Map()
+        var doubleFields: Map[String, Option[Double]] = Map()
+        var stringFields: Map[String, Option[String]] = Map()
+        var dateFields: Map[String, Option[LocalDate]] = Map()
+        var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
+
 
         properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
           df match {
@@ -128,7 +128,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
           }
         }))
 
-        rows += row
+        rows += ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
       }
       profiler.lap("finsihed rows")
       val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt

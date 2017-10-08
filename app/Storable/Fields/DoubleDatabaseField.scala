@@ -20,4 +20,13 @@ class DoubleDatabaseField(entity: StorableObject[_], fieldName: String) extends 
       case _ => None
     }
   }
+
+  def getValueFromString(s: String): Option[Double] = {
+    try {
+      val d = s.toDouble
+      Some(d)
+    } catch {
+      case _ => None
+    }
+  }
 }

@@ -28,4 +28,6 @@ class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLen
 
   def equalsConstant(c: String): Filter  =
     Filter(getFullyQualifiedName + " = '" + c + "'")
+
+  def getValueFromString(s: String): Option[String] = Some(s)
 }

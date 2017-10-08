@@ -12,4 +12,6 @@ abstract class DatabaseField[T](entity: StorableObject[_], fieldName: String) {
 
   def isNull: Filter = Filter(getFullyQualifiedName + " IS NULL")
   def isNotNull: Filter = Filter(getFullyQualifiedName + " IS NOT NULL")
+
+  def getValueFromString(s: String): Option[T]
 }

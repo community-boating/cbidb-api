@@ -26,4 +26,6 @@ class NullableStringDatabaseField(entity: StorableObject[_], fieldName: String, 
     case Some(s: String) => Filter(getFullyQualifiedName + " = '" + s + "'")
     case None => Filter(getFullyQualifiedName + " IS NULL")
   }
+
+  def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))
 }

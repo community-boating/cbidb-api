@@ -6,7 +6,7 @@ import Storable.{ProtoStorable, Filter, StorableObject}
 class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Int](entity, fieldName) {
   def getValue(row: ProtoStorable): Int = getOptionValue(row) match {
     case Some(x) => x
-    case None => throw new Exception("Non-null field was null")
+    case None => throw new Exception("Non-null field was null: " + fieldName)
   }
 
   def getOptionValue(row: ProtoStorable): Option[Int] = {
@@ -31,4 +31,13 @@ class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends Dat
   }
 
   def equalsConstant(i: Int): Filter = Filter(getFullyQualifiedName + " = " + i)
+
+  def getValueFromString(s: String): Option[Int] = {
+    try {
+      val d = s.toInt
+      Some(d)
+    } catch {
+      case _ => None
+    }
+  }
 }
