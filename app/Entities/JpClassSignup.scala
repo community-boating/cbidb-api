@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class JpClassSignup extends StorableClass {
+  this.setCompanion(JpClassSignup)
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }

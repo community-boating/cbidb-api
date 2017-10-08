@@ -49,7 +49,6 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
         200
       )
 
-
       profiler.lap("did all the databasing")
 
       val usersArray: JsArray = JsArray(users.map(u => {

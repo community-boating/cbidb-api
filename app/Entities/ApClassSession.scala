@@ -5,6 +5,7 @@ import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
 class ApClassSession extends StorableClass {
+  this.setCompanion(ApClassSession)
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassInstance] = None
   }

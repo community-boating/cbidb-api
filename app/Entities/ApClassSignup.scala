@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ApClassSignup extends StorableClass {
+  this.setCompanion(ApClassSignup)
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassSignup] = None
   }

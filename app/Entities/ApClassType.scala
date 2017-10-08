@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ApClassType extends StorableClass {
+  this.setCompanion(ApClassType)
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val typeId = new IntFieldValue(self, ApClassType.fields.typeId)

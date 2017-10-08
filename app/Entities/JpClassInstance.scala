@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._
 
 class JpClassInstance extends StorableClass {
+  this.setCompanion(JpClassInstance)
   object references extends ReferencesObject {
     var classLocation: Option[Option[ClassLocation]] = None
     var classInstructor: Option[Option[ClassInstructor]] = None

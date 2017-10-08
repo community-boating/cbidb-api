@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ClassLocation extends StorableClass {
+  this.setCompanion(ClassLocation)
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val locationId = new IntFieldValue(self, ClassLocation.fields.locationId)

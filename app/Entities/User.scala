@@ -5,6 +5,7 @@ import Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseFi
 import Storable._
 
 class User extends StorableClass {
+  this.setCompanion(User)
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val userId = new IntFieldValue(self, User.fields.userId)

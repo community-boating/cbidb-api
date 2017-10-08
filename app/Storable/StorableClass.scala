@@ -13,16 +13,34 @@ abstract class StorableClass {
   type DateFieldValueMap = Map[String, DateFieldValue]
   type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
 
+  type Companion = StorableObject[_ <: StorableClass]
+
   val self: StorableClass = this
   val values: ValuesObject
+
+  private var companion: Option[Companion] = None
+  def getCompanion: Companion = companion match {
+    case None => throw new Exception("Companion object never set for entity")
+    case Some(c: Companion) => c
+  }
+  def setCompanion(c: Companion): Unit = companion match {
+    case Some(_) => throw new Exception("Multiple calls to set companion of entity instance")
+    case None => companion = Some(c)
+  }
+
+  def getID: Int = {
+    val primaryKeyFieldRuntimeName: String = getCompanion.primaryKey.getRuntimeFieldName
+    val primaryKeyFieldValue: IntFieldValue = intValueMap(primaryKeyFieldRuntimeName)
+    primaryKeyFieldValue.get
+  }
 
   // "clean" = internal state of this instance is consistent with the state of the database
   // On construction, assume dirty; the codepath used by the DB adapter will set clean afterconstructing
   private var clean: Boolean = false
   def isClean: Boolean = clean
-  def setClean: Unit =
+  def setClean(): Unit =
     clean = true
-  def setDirty: Unit =
+  def setDirty(): Unit =
     clean = false
 
   private val valueMaps = {

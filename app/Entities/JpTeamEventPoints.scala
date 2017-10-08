@@ -5,6 +5,7 @@ import Storable.Fields.IntDatabaseField
 import Storable._
 
 class JpTeamEventPoints extends StorableClass {
+  this.setCompanion(JpTeamEventPoints)
   object references extends ReferencesObject {
     var jpTeam: Option[JpTeam] = None
   }

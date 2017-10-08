@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class ApClassInstance extends StorableClass {
+  this.setCompanion(ApClassInstance)
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None
   }

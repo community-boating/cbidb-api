@@ -141,6 +141,10 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     }
   }
 
+  def commitObjectToDatabase(i: StorableClass): Unit = {
+    //val isUpdate =
+  }
+
   private def dateToLocalDate(d: Date): LocalDate =
     d.toInstant.atZone(ZoneId.systemDefault).toLocalDate
 

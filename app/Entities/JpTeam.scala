@@ -5,6 +5,7 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class JpTeam extends StorableClass {
+  this.setCompanion(JpTeam)
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val teamId = new IntFieldValue(self, JpTeam.fields.teamId)

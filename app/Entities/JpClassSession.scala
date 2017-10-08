@@ -6,6 +6,7 @@ import Storable._
 
 
 class JpClassSession extends StorableClass {
+  this.setCompanion(JpClassSession)
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }
