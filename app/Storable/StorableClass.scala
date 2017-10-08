@@ -13,7 +13,17 @@ abstract class StorableClass {
   type DateFieldValueMap = Map[String, DateFieldValue]
   type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
 
+  val self: StorableClass = this
   val values: ValuesObject
+
+  // "clean" = internal state of this instance is consistent with the state of the database
+  // On construction, assume dirty; the codepath used by the DB adapter will set clean afterconstructing
+  private var clean: Boolean = false
+  def isClean: Boolean = clean
+  def setClean: Unit =
+    clean = true
+  def setDirty: Unit =
+    clean = false
 
   private val valueMaps = {
     val rm = scala.reflect.runtime.currentMirror

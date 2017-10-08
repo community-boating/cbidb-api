@@ -9,9 +9,9 @@ class ApClassSignup extends StorableClass {
     var apClassInstance: Option[ApClassSignup] = None
   }
   object values extends ValuesObject {
-    val signupId = new IntFieldValue(ApClassSignup.fields.signupId)
-    val instanceId = new IntFieldValue(ApClassSignup.fields.instanceId)
-    val signupType = new StringFieldValue(ApClassSignup.fields.signupType)
+    val signupId = new IntFieldValue(self, ApClassSignup.fields.signupId)
+    val instanceId = new IntFieldValue(self, ApClassSignup.fields.instanceId)
+    val signupType = new StringFieldValue(self, ApClassSignup.fields.signupType)
   }
 
   def setJpClassInstance(v: ApClassSignup): Unit = references.apClassInstance = Some(v)

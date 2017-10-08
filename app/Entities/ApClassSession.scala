@@ -9,9 +9,9 @@ class ApClassSession extends StorableClass {
     var apClassInstance: Option[ApClassInstance] = None
   }
   object values extends ValuesObject {
-    val sessionId = new IntFieldValue(ApClassSession.fields.sessionId)
-    val instanceId = new IntFieldValue(ApClassSession.fields.instanceId)
-    val sessionDateTime = new DateTimeFieldValue(ApClassSession.fields.sessionDateTime)
+    val sessionId = new IntFieldValue(self, ApClassSession.fields.sessionId)
+    val instanceId = new IntFieldValue(self, ApClassSession.fields.instanceId)
+    val sessionDateTime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDateTime)
   }
 
   def setApClassInstance(v: ApClassInstance): Unit = references.apClassInstance = Some(v)

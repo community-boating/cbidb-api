@@ -9,9 +9,9 @@ class JpClassSignup extends StorableClass {
     var jpClassInstance: Option[JpClassInstance] = None
   }
   object values extends ValuesObject {
-    val signupId = new IntFieldValue(JpClassSignup.fields.signupId)
-    val instanceId = new IntFieldValue(JpClassSignup.fields.instanceId)
-    val signupType = new StringFieldValue(JpClassSignup.fields.signupType)
+    val signupId = new IntFieldValue(self, JpClassSignup.fields.signupId)
+    val instanceId = new IntFieldValue(self, JpClassSignup.fields.instanceId)
+    val signupType = new StringFieldValue(self, JpClassSignup.fields.signupType)
   }
 
   def setJpClassInstance(v: JpClassInstance): Unit = references.jpClassInstance = Some(v)

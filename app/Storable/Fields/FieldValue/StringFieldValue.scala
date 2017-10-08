@@ -2,7 +2,8 @@ package Storable.Fields.FieldValue
 
 import Services.PersistenceBroker
 import Storable.Fields.StringDatabaseField
+import Storable.StorableClass
 
-class StringFieldValue(field: StringDatabaseField) extends FieldValue[String](field) {
+class StringFieldValue(instance: StorableClass, field: StringDatabaseField) extends FieldValue[String](instance, field) {
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String = "'" + super.get + "'"
 }

@@ -7,12 +7,12 @@ import Storable._
 class User extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val userId = new IntFieldValue(User.fields.userId)
-    val userName = new StringFieldValue(User.fields.userName)
-    val nameFirst = new StringFieldValue(User.fields.nameFirst)
-    val nameLast = new StringFieldValue(User.fields.nameLast)
-    val active = new BooleanFieldValue(User.fields.active)
-    val hideFromClose = new BooleanFieldValue(User.fields.hideFromClose)
+    val userId = new IntFieldValue(self, User.fields.userId)
+    val userName = new StringFieldValue(self, User.fields.userName)
+    val nameFirst = new StringFieldValue(self, User.fields.nameFirst)
+    val nameLast = new StringFieldValue(self, User.fields.nameLast)
+    val active = new BooleanFieldValue(self, User.fields.active)
+    val hideFromClose = new BooleanFieldValue(self, User.fields.hideFromClose)
   }
 }
 

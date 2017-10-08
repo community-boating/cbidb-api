@@ -9,9 +9,9 @@ class JpTeamEventPoints extends StorableClass {
     var jpTeam: Option[JpTeam] = None
   }
   object values extends ValuesObject {
-    val rowId = new IntFieldValue(JpTeamEventPoints.fields.rowId)
-    val teamId = new IntFieldValue(JpTeamEventPoints.fields.teamId)
-    val points = new IntFieldValue(JpTeamEventPoints.fields.points)
+    val rowId = new IntFieldValue(self, JpTeamEventPoints.fields.rowId)
+    val teamId = new IntFieldValue(self, JpTeamEventPoints.fields.teamId)
+    val points = new IntFieldValue(self, JpTeamEventPoints.fields.points)
   }
 
 }

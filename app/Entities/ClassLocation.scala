@@ -7,8 +7,8 @@ import Storable._
 class ClassLocation extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val locationId = new IntFieldValue(ClassLocation.fields.locationId)
-    val locationName = new StringFieldValue(ClassLocation.fields.locationName)
+    val locationId = new IntFieldValue(self, ClassLocation.fields.locationId)
+    val locationName = new StringFieldValue(self, ClassLocation.fields.locationName)
   }
 }
 

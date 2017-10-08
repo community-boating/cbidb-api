@@ -20,7 +20,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     }))
   })
 
-  val pool = RelationalBroker.getPool
+  private val pool = RelationalBroker.getPool
 
   def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
@@ -29,7 +29,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKeyName + " = " + id)
     val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, 6)
-    if (rows.length == 1) Some(obj.construct(rows.head))
+    if (rows.length == 1) Some(obj.construct(rows.head, true))
     else None
   }
 
@@ -42,7 +42,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       sb.append(" FROM " + obj.entityName)
       sb.append(" WHERE " + obj.primaryKeyName + " in (" + ids.mkString(", ") + ")")
       val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
-      rows.map(r => obj.construct(r))
+      rows.map(r => obj.construct(r, true))
     }
   }
 
@@ -60,7 +60,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
       val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
-      rows.map(r => obj.construct(r))
+      rows.map(r => obj.construct(r, true))
     }
   }
 
@@ -168,7 +168,7 @@ object RelationalBroker {
     case None => throw new Exception("Tried to get db connection pool but it wasn't instantiated yet.")
   }
 
-  def closePool: Unit = pool match {
+  def closePool(): Unit = pool match {
     case Some(p) => p.close()
     case None =>
   }

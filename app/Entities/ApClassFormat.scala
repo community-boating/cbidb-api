@@ -9,9 +9,9 @@ class ApClassFormat extends StorableClass {
     var apClassType: Option[ApClassType] = None
   }
   object values extends ValuesObject {
-    val formatId = new IntFieldValue(ApClassFormat.fields.formatId)
-    val typeId = new IntFieldValue(ApClassFormat.fields.typeId)
-    val description = new NullableStringFieldValue(ApClassFormat.fields.description)
+    val formatId = new IntFieldValue(self, ApClassFormat.fields.formatId)
+    val typeId = new IntFieldValue(self, ApClassFormat.fields.typeId)
+    val description = new NullableStringFieldValue(self, ApClassFormat.fields.description)
   }
 
   def setApClassType(v: ApClassType): Unit = references.apClassType = Some(v)

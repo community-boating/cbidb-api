@@ -2,8 +2,9 @@ package Storable.Fields.FieldValue
 
 import Services.PersistenceBroker
 import Storable.Fields.NullableStringDatabaseField
+import Storable.StorableClass
 
-class NullableStringFieldValue(field: NullableStringDatabaseField) extends FieldValue[Option[String]](field) {
+class NullableStringFieldValue(instance: StorableClass, field: NullableStringDatabaseField) extends FieldValue[Option[String]](instance, field) {
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String = super.get match {
     case Some("") => throw new Exception("Empty string not allowed in non-null string fields")
     case Some(x) => "'" + x + "'"

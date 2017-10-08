@@ -10,9 +10,9 @@ class ApClassInstance extends StorableClass {
   }
 
   object values extends ValuesObject {
-    val instanceId = new IntFieldValue(ApClassInstance.fields.instanceId)
-    val formatId = new IntFieldValue(ApClassInstance.fields.formatId)
-    val locationString = new NullableStringFieldValue(ApClassInstance.fields.locationString)
+    val instanceId = new IntFieldValue(self, ApClassInstance.fields.instanceId)
+    val formatId = new IntFieldValue(self, ApClassInstance.fields.formatId)
+    val locationString = new NullableStringFieldValue(self, ApClassInstance.fields.locationString)
   }
 
   def setApClassFormat(v: ApClassFormat): Unit = references.apClassFormat = Some(v)

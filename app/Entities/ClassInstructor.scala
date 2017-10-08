@@ -7,9 +7,9 @@ import Storable._
 class ClassInstructor extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val instructorId = new IntFieldValue(ClassInstructor.fields.instructorId)
-    val nameFirst = new StringFieldValue(ClassInstructor.fields.nameFirst)
-    val nameLast = new StringFieldValue(ClassInstructor.fields.nameLast)
+    val instructorId = new IntFieldValue(self, ClassInstructor.fields.instructorId)
+    val nameFirst = new StringFieldValue(self, ClassInstructor.fields.nameFirst)
+    val nameLast = new StringFieldValue(self, ClassInstructor.fields.nameLast)
   }
 }
 

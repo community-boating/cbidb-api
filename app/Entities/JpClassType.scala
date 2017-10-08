@@ -7,9 +7,9 @@ import Storable._
 class JpClassType extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val typeId = new IntFieldValue(JpClassType.fields.typeId)
-    val typeName = new StringFieldValue(JpClassType.fields.typeName)
-    val displayOrder = new IntFieldValue(JpClassType.fields.displayOrder)
+    val typeId = new IntFieldValue(self, JpClassType.fields.typeId)
+    val typeName = new StringFieldValue(self, JpClassType.fields.typeName)
+    val displayOrder = new IntFieldValue(self, JpClassType.fields.displayOrder)
   }
 }
 

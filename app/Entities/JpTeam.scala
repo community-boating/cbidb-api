@@ -7,8 +7,8 @@ import Storable._
 class JpTeam extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val teamId = new IntFieldValue(JpTeam.fields.teamId)
-    val teamName = new StringFieldValue(JpTeam.fields.teamName)
+    val teamId = new IntFieldValue(self, JpTeam.fields.teamId)
+    val teamName = new StringFieldValue(self, JpTeam.fields.teamName)
   }
 }
 

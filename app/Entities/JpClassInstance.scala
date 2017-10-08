@@ -11,10 +11,10 @@ class JpClassInstance extends StorableClass {
     var jpClassType: Option[JpClassType] = None
   }
   object values extends ValuesObject {
-    val instanceId = new IntFieldValue(JpClassInstance.fields.instanceId)
-    val instructorId = new NullableIntFieldValue(JpClassInstance.fields.instructorId)
-    val locationId = new NullableIntFieldValue(JpClassInstance.fields.locationId)
-    val typeId = new IntFieldValue(JpClassInstance.fields.typeId)
+    val instanceId = new IntFieldValue(self, JpClassInstance.fields.instanceId)
+    val instructorId = new NullableIntFieldValue(self, JpClassInstance.fields.instructorId)
+    val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
+    val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
   }
 
   def setClassLocation(v: Option[ClassLocation]): Unit = references.classLocation = Some(v)

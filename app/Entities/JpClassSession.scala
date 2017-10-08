@@ -10,9 +10,9 @@ class JpClassSession extends StorableClass {
     var jpClassInstance: Option[JpClassInstance] = None
   }
   object values extends ValuesObject {
-    val sessionId = new IntFieldValue(JpClassSession.fields.sessionId)
-    val instanceId = new IntFieldValue(JpClassSession.fields.instanceId)
-    val sessionDateTime = new DateTimeFieldValue(JpClassSession.fields.sessionDateTime)
+    val sessionId = new IntFieldValue(self, JpClassSession.fields.sessionId)
+    val instanceId = new IntFieldValue(self, JpClassSession.fields.instanceId)
+    val sessionDateTime = new DateTimeFieldValue(self, JpClassSession.fields.sessionDateTime)
 
   }
 

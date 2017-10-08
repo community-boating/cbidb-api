@@ -7,9 +7,9 @@ import Storable._
 class ApClassType extends StorableClass {
   object references extends ReferencesObject {}
   object values extends ValuesObject {
-    val typeId = new IntFieldValue(ApClassType.fields.typeId)
-    val typeName = new StringFieldValue(ApClassType.fields.typeName)
-    val displayOrder = new IntFieldValue(ApClassType.fields.displayOrder)
+    val typeId = new IntFieldValue(self, ApClassType.fields.typeId)
+    val typeName = new StringFieldValue(self, ApClassType.fields.typeName)
+    val displayOrder = new IntFieldValue(self, ApClassType.fields.displayOrder)
   }
 }
 
