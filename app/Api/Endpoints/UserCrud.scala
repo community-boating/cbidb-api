@@ -2,12 +2,10 @@ package Api.Endpoints
 
 import javax.inject.Inject
 
-import Entities.User
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc.{Action, Controller}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
 class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {

@@ -1,6 +1,6 @@
 package Storable
 
-import Storable.Fields.{BooleanDatabaseField, DatabaseField, IntDatabaseField, StringDatabaseField}
+import Storable.Fields._
 
 import scala.reflect.runtime.universe._
 
@@ -8,6 +8,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   type IntFieldMap = Map[String, IntDatabaseField]
   type StringFieldMap = Map[String, StringDatabaseField]
   type BooleanFieldMap = Map[String, BooleanDatabaseField]
+  type DateFieldMap = Map[String, DateDatabaseField]
+  type DateTimeFieldMap =Map[String, DateTimeDatabaseField]
+
+  type NullableIntFieldMap = Map[String, NullableIntDatabaseField]
+  type NullableStringFieldMap = Map[String, NullableStringDatabaseField]
+  type NullableBooleanFieldMap = Map[String, NullableBooleanDatabaseField]
 
   val self: StorableObject[T] = this
   val entityName: String
@@ -27,8 +33,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     val regex = "^(value|method) (.*)$".r
 
     var intMap: IntFieldMap = Map()
+    var nullableIntMap: NullableIntFieldMap = Map()
     var stringMap: StringFieldMap = Map()
-    var booleanMap : BooleanFieldMap = Map()
+    var nullableStringMap: NullableStringFieldMap = Map()
+    var booleanMap: BooleanFieldMap = Map()
+    var dateMap: DateFieldMap = Map()
+    var dateTimeMap: DateTimeFieldMap = Map()
 
     for(acc <- accessors) {
       val symbol = instanceMirror.reflectMethod(acc).symbol.toString
@@ -39,23 +49,35 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
       instanceMirror.reflectMethod(acc).apply() match {
         case i: IntDatabaseField => intMap += (name -> i)
+        case ni: NullableIntDatabaseField => nullableIntMap += (name -> ni)
         case s: StringDatabaseField => stringMap += (name -> s)
+        case ns: NullableStringDatabaseField => nullableStringMap += (name -> ns)
         case b: BooleanDatabaseField => booleanMap += (name -> b)
+        case d: DateDatabaseField => dateMap += (name -> d)
+        case dt: DateTimeDatabaseField => dateTimeMap += (name -> dt)
         case _ => throw new Exception("Unrecognized field type")
       }
     }
 
-    (intMap, stringMap, booleanMap)
+    (intMap, nullableIntMap, stringMap, nullableStringMap, booleanMap, dateMap, dateTimeMap)
   }
 
   lazy val intFieldMap: IntFieldMap = fieldMaps._1
-  lazy val stringFieldMap: StringFieldMap  = fieldMaps._2
-  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._3
+  lazy val nullableIntFieldMap: NullableIntFieldMap = fieldMaps._2
+  lazy val stringFieldMap: StringFieldMap  = fieldMaps._3
+  lazy val nullableStringFieldMap: NullableStringFieldMap  = fieldMaps._4
+  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._5
+  lazy val dateFieldMap: DateFieldMap = fieldMaps._6
+  lazy val dateTimeFieldMap: DateTimeFieldMap = fieldMaps._7
 
   lazy val fieldList: List[DatabaseField[_]] =
     intFieldMap.values.toList ++
+    nullableIntFieldMap.values.toList ++
     stringFieldMap.values.toList ++
-    booleanFieldMap.values.toList
+    nullableStringFieldMap.values.toList ++
+    booleanFieldMap.values.toList ++
+    dateFieldMap.values.toList ++
+    dateTimeFieldMap.values.toList
 
   def construct(r: DatabaseRow): T = {
     val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
@@ -66,14 +88,38 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     })
 
+    nullableIntFieldMap.foreach(f => {
+      embryo.nullableIntValueMap.get(f._1) match {
+        case Some(v) => v.set(f._2.getValue(r))
+      }
+    })
+
     stringFieldMap.foreach(f => {
       embryo.stringValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
       }
     })
 
+    nullableStringFieldMap.foreach(f => {
+      embryo.nullableStringValueMap.get(f._1) match {
+        case Some(v) => v.set(f._2.getValue(r))
+      }
+    })
+
     booleanFieldMap.foreach(f => {
       embryo.booleanValueMap.get(f._1) match {
+        case Some(v) => v.set(f._2.getValue(r))
+      }
+    })
+
+    dateFieldMap.foreach(f => {
+      embryo.dateValueMap.get(f._1) match {
+        case Some(v) => v.set(f._2.getValue(r))
+      }
+    })
+
+    dateTimeFieldMap.foreach(f => {
+      embryo.dateTimeValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
       }
     })

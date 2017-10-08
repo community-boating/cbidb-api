@@ -5,5 +5,5 @@ import Storable.Fields.BooleanDatabaseField
 
 class BooleanFieldValue(field: BooleanDatabaseField) extends FieldValue[Boolean](field) {
   def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String =
-    if (value.get) "'Y'" else "'N'"
+    if (super.get) "'Y'" else "'N'"
 }

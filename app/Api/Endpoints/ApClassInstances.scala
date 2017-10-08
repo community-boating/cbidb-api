@@ -138,7 +138,7 @@ class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
           JsString(t.values.typeName.get),
           JsString(s.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
           JsString(s.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("hh:mma"))),
-          i.values.locationString.value match {
+          i.values.locationString.get match {
             case Some(x) => JsString(x)
             case None => JsNull
           },

@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.IntFieldValue
-import Storable.Fields.IntDatabaseField
+import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._
 
 class JpClassInstance extends StorableClass {
@@ -13,8 +13,8 @@ class JpClassInstance extends StorableClass {
   }
   object values extends ValuesObject {
     val instanceId = new IntFieldValue(JpClassInstance.fields.instanceId)
-    val instructorId = new IntFieldValue(JpClassInstance.fields.instructorId)
-    val locationId = new IntFieldValue(JpClassInstance.fields.locationId)
+    val instructorId = new NullableIntFieldValue(JpClassInstance.fields.instructorId)
+    val locationId = new NullableIntFieldValue(JpClassInstance.fields.locationId)
     val typeId = new IntFieldValue(JpClassInstance.fields.typeId)
   }
 
@@ -33,8 +33,8 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
 
   object fields extends FieldsObject {
     val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
-    val instructorId = new IntDatabaseField(self, "INSTRUCTOR_ID")
-    val locationId = new IntDatabaseField(self, "LOCATION_ID")
+    val instructorId = new NullableIntDatabaseField(self, "INSTRUCTOR_ID")
+    val locationId = new NullableIntDatabaseField(self, "LOCATION_ID")
     val typeId = new IntDatabaseField(self, "TYPE_ID")
   }
 

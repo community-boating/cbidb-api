@@ -1,9 +1,7 @@
 package Entities
 
-import javassist.bytecode.SignatureAttribute.ClassType
-
-import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
-import Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class ApClassFormat extends StorableClass {
@@ -15,7 +13,7 @@ class ApClassFormat extends StorableClass {
   object values extends ValuesObject {
     val formatId = new IntFieldValue(ApClassFormat.fields.formatId)
     val typeId = new IntFieldValue(ApClassFormat.fields.typeId)
-    val description = new StringFieldValue(ApClassFormat.fields.description)
+    val description = new NullableStringFieldValue(ApClassFormat.fields.description)
   }
 
   def setApClassType(v: ApClassType): Unit = references.apClassType = Some(v)
@@ -32,7 +30,7 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
   object fields extends FieldsObject {
     val formatId = new IntDatabaseField(self, "FORMAT_ID")
     val typeId = new IntDatabaseField(self, "TYPE_ID")
-    val description = new StringDatabaseField(self, "DESCRIPTION", 100)
+    val description = new NullableStringDatabaseField(self, "DESCRIPTION", 100)
   }
 
   val primaryKeyName: String = fields.formatId.getFieldName

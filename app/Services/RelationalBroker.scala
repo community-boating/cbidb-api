@@ -94,13 +94,21 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
               intFields += (df.getFieldName -> Some(rs.getInt(i)))
               if (rs.wasNull()) intFields += (df.getFieldName -> None)
             }
-            case _: DoubleDatabaseField => {
-              doubleFields += (df.getFieldName -> Some(rs.getDouble(i)))
-              if (rs.wasNull()) doubleFields += (df.getFieldName -> None)
+            case _: NullableIntDatabaseField => {
+              intFields += (df.getFieldName -> Some(rs.getInt(i)))
+              if (rs.wasNull()) intFields += (df.getFieldName -> None)
             }
             case _: StringDatabaseField => {
               stringFields += (df.getFieldName -> Some(rs.getString(i)))
               if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+            }
+            case _: NullableStringDatabaseField => {
+              stringFields += (df.getFieldName -> Some(rs.getString(i)))
+              if (rs.wasNull()) stringFields += (df.getFieldName -> None)
+            }
+            case _: DoubleDatabaseField => {
+              doubleFields += (df.getFieldName -> Some(rs.getDouble(i)))
+              if (rs.wasNull()) doubleFields += (df.getFieldName -> None)
             }
             case _: DateTimeDatabaseField => {
               dateTimeFields += (df.getFieldName -> Some(rs.getTimestamp(i).toLocalDateTime))

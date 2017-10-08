@@ -14,18 +14,16 @@ class NullableStringDatabaseField(entity: StorableObject[_], fieldName: String, 
     }
   }
 
-  def getValue(row: DatabaseRow): Option[String] = getOptionValue(row) match {
-    case Some(x) => x
-    case None => throw new Exception("Non-null field was null")
-}
+  def getValue(row: DatabaseRow): Option[String] = {
+    row.stringFields.get(fieldName) match {
+      case Some(Some(x)) => Some(x)
+      case Some(None) => None
+      case None => throw new Exception("Nullable String did not exist in DatabaseRow: " + fieldName)
+    }
+  }
 
-def getOptionValue(row: DatabaseRow): Option[Option[String]] = {
-  row.stringFields.get(fieldName) match {
-  case Some(Some(x)) => Some(Some(x))
-  case _ => Some(None)
-}
-}
-
-  def equalsConstant(c: String): Filter  =
-  Filter(getFullyQualifiedName + " = '" + c + "'")
+  def equalsConstant(os: Option[String]): Filter = os match {
+    case Some(s: String) => Filter(getFullyQualifiedName + " = '" + s + "'")
+    case None => Filter(getFullyQualifiedName + " IS NULL")
+  }
 }

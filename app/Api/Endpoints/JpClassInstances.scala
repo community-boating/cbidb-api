@@ -70,13 +70,13 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
 
       val locations: List[ClassLocation] = pb.getObjectsByIds(
         ClassLocation,
-        instances.flatMap(i => i.values.locationId.value).distinct,
+        instances.flatMap(i => i.values.locationId.get).distinct,
         500
       )
 
       val instructors: List[ClassInstructor] = pb.getObjectsByIds(
         ClassInstructor,
-        instances.flatMap(i => i.values.instructorId.value).distinct,
+        instances.flatMap(i => i.values.instructorId.get).distinct,
         500
       )
 
@@ -101,12 +101,12 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
       instances.foreach(i => {
         i.setJpClassType(types.filter(t => t.values.typeId.get == i.values.typeId.get).head)
 
-        i.values.instructorId.value match {
+        i.values.instructorId.get match {
           case Some(x) => i.setClassInstructor(Some(instructors.filter(ins => ins.values.instructorId.get == x).head))
           case None => i.setClassInstructor(None)
         }
 
-        i.values.locationId.value match {
+        i.values.locationId.get match {
           case Some(x) => i.setClassLocation(Some(locations.filter(l => l.values.locationId.get == x).head))
           case None => i.setClassLocation(None)
         }

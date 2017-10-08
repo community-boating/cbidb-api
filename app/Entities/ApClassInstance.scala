@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
-import Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class ApClassInstance extends StorableClass {
@@ -13,7 +13,7 @@ class ApClassInstance extends StorableClass {
   object values extends ValuesObject {
     val instanceId = new IntFieldValue(ApClassInstance.fields.instanceId)
     val formatId = new IntFieldValue(ApClassInstance.fields.formatId)
-    val locationString = new StringFieldValue(ApClassInstance.fields.locationString)
+    val locationString = new NullableStringFieldValue(ApClassInstance.fields.locationString)
   }
 
   def setApClassFormat(v: ApClassFormat): Unit = references.apClassFormat = Some(v)
@@ -30,7 +30,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
   object fields extends FieldsObject {
     val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
     val formatId = new IntDatabaseField(self, "FORMAT_ID")
-    val locationString = new StringDatabaseField(self, "LOCATION_STRING", 500)
+    val locationString = new NullableStringDatabaseField(self, "LOCATION_STRING", 500)
   }
 
   val primaryKeyName: String = fields.instanceId.getFieldName
