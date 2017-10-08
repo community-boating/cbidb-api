@@ -5,8 +5,6 @@ import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class ApClassFormat extends StorableClass {
-  def companion: StorableObject[ApClassFormat] = ApClassFormat
-
   object references extends ReferencesObject {
     var apClassType: Option[ApClassType] = None
   }
@@ -33,7 +31,7 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
     val description = new NullableStringDatabaseField(self, "DESCRIPTION", 100)
   }
 
-  val primaryKeyName: String = fields.formatId.getFieldName
+  val primaryKey: IntDatabaseField = fields.formatId
 
   def getSeedData: Set[ApClassFormat] = Set(
   //  ApClassFormat(1, 1, None),

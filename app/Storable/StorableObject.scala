@@ -17,15 +17,14 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
   val self: StorableObject[T] = this
   val entityName: String
-  println("def in abstract")
   val fields: FieldsObject
 
-  val primaryKeyName: String
+  val primaryKey: IntDatabaseField
+  def primaryKeyName: String = primaryKey.getFieldName
 
   // Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
   private lazy val fieldMaps = {
     val rm = scala.reflect.runtime.currentMirror
-    println("about to use")
     val accessors = rm.classSymbol(fields.getClass).toType.members.collect {
       case m: MethodSymbol if m.isGetter && m.isPublic => m
     }
@@ -85,42 +84,49 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     intFieldMap.foreach(f => {
       embryo.intValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     nullableIntFieldMap.foreach(f => {
       embryo.nullableIntValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     stringFieldMap.foreach(f => {
       embryo.stringValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     nullableStringFieldMap.foreach(f => {
       embryo.nullableStringValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     booleanFieldMap.foreach(f => {
       embryo.booleanValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     dateFieldMap.foreach(f => {
       embryo.dateValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 
     dateTimeFieldMap.foreach(f => {
       embryo.dateTimeValueMap.get(f._1) match {
         case Some(v) => v.set(f._2.getValue(r))
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + f._1)
       }
     })
 

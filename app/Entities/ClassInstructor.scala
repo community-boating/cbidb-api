@@ -5,7 +5,6 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ClassInstructor extends StorableClass {
-  def companion: StorableObject[ClassInstructor] = ClassInstructor
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val instructorId = new IntFieldValue(ClassInstructor.fields.instructorId)
@@ -23,7 +22,7 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
     val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
   }
 
-  val primaryKeyName: String = fields.instructorId.getFieldName
+  val primaryKey: IntDatabaseField = fields.instructorId
 
 
   def getSeedData: Set[ClassInstructor] = Set()

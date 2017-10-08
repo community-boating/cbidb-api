@@ -5,7 +5,6 @@ import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._
 
 class JpClassInstance extends StorableClass {
-  def companion: StorableObject[JpClassInstance] = JpClassInstance
   object references extends ReferencesObject {
     var classLocation: Option[Option[ClassLocation]] = None
     var classInstructor: Option[Option[ClassInstructor]] = None
@@ -38,7 +37,7 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
     val typeId = new IntDatabaseField(self, "TYPE_ID")
   }
 
-  val primaryKeyName: String = fields.instanceId.getFieldName
+  val primaryKey: IntDatabaseField = fields.instanceId
 
   def getSeedData: Set[JpClassInstance] = Set()
 }

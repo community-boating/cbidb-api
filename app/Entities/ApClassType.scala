@@ -5,7 +5,6 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ApClassType extends StorableClass {
-  def companion: StorableObject[ApClassType] = ApClassType
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val typeId = new IntFieldValue(ApClassType.fields.typeId)
@@ -23,7 +22,7 @@ object ApClassType extends StorableObject[ApClassType] {
     val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
   }
 
-  val primaryKeyName: String = fields.typeId.getFieldName
+  val primaryKey: IntDatabaseField = fields.typeId
 
   def getSeedData: Set[ApClassType] = Set(
     //  ApClassType(1, "Sailing 101", 1),

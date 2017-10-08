@@ -5,7 +5,6 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class JpTeam extends StorableClass {
-  def companion: StorableObject[JpTeam] = JpTeam
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val teamId = new IntFieldValue(JpTeam.fields.teamId)
@@ -21,7 +20,7 @@ object JpTeam extends StorableObject[JpTeam] {
     val teamName = new StringDatabaseField(self, "TEAM_NAME", 100)
   }
 
-  val primaryKeyName: String = fields.teamId.getFieldName
+  val primaryKey: IntDatabaseField = fields.teamId
 
   def getSeedData: Set[JpTeam] = Set()
 }

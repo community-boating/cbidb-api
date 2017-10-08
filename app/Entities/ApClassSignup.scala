@@ -5,8 +5,6 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ApClassSignup extends StorableClass {
-  def companion: StorableObject[ApClassSignup] = ApClassSignup
-
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassSignup] = None
   }
@@ -32,7 +30,7 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
     val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
   }
 
-  val primaryKeyName: String = fields.signupId.getFieldName
+  val primaryKey: IntDatabaseField = fields.signupId
 
   def getSeedData: Set[ApClassSignup] = Set()
 }

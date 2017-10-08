@@ -6,7 +6,6 @@ import Storable._
 
 
 class JpClassSession extends StorableClass {
-  def companion: StorableObject[JpClassSession] = JpClassSession
   object references extends ReferencesObject {
     var jpClassInstance: Option[JpClassInstance] = None
   }
@@ -33,7 +32,7 @@ object JpClassSession extends StorableObject[JpClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val primaryKeyName: String = fields.sessionId.getFieldName
+  val primaryKey: IntDatabaseField = fields.sessionId
 
 
   def getSeedData: Set[JpClassSession] = Set()

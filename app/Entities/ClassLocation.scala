@@ -5,7 +5,6 @@ import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class ClassLocation extends StorableClass {
-  def companion: StorableObject[ClassLocation] = ClassLocation
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val locationId = new IntFieldValue(ClassLocation.fields.locationId)
@@ -21,7 +20,7 @@ object ClassLocation extends StorableObject[ClassLocation] {
     val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
   }
 
-  val primaryKeyName: String = fields.locationId.getFieldName
+  val primaryKey: IntDatabaseField = fields.locationId
 
   def getSeedData: Set[ClassLocation] = Set()
 }

@@ -10,14 +10,14 @@ import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
-  def get(startDate: Option[String]) = Action.async {
+  def get(startDate: Option[String]): Action[AnyContent] = Action.async {
     val request = new JpClassInstancesRequest(startDate)
     request.getFuture.map(s => {
       Ok(s).as("application/json")
@@ -133,15 +133,19 @@ class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBrok
       val sessionsJsArray: JsArray = JsArray(sessionsSorted.map(s => {
         val i: JpClassInstance = s.references.jpClassInstance match {
           case Some(i1) => i1
+          case None => throw new Exception("wut")
         }
         val t: JpClassType = i.references.jpClassType match {
           case Some(t1) => t1
+          case None => throw new Exception("wut")
         }
         val l: Option[ClassLocation] = i.references.classLocation match {
           case Some(l1) => l1
+          case None => throw new Exception("wut")
         }
         val ins: Option[ClassInstructor] = i.references.classInstructor match {
           case Some(ins1) => ins1
+          case None => throw new Exception("wut")
         }
         JsArray(IndexedSeq(
           JsNumber(i.values.instanceId.get),

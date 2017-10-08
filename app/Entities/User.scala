@@ -5,7 +5,6 @@ import Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseFi
 import Storable._
 
 class User extends StorableClass {
-  def companion: StorableObject[User] = User
   object references extends ReferencesObject {}
   object values extends ValuesObject {
     val userId = new IntFieldValue(User.fields.userId)
@@ -20,7 +19,7 @@ class User extends StorableClass {
 object User extends StorableObject[User] {
   val entityName: String = "USERS"
 
-  class Fields extends FieldsObject {
+  object fields extends FieldsObject {
     val userId = new IntDatabaseField(self, "USER_ID")
     val userName = new StringDatabaseField(self, "USER_NAME", 50)
     val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
@@ -28,10 +27,8 @@ object User extends StorableObject[User] {
     val active = new BooleanDatabaseField(self, "ACTIVE")
     val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE")
   }
-  println("def in concrete")
-  val fields = new Fields
 
-  val primaryKeyName: String = fields.userId.getFieldName
+  val primaryKey: IntDatabaseField = fields.userId
 
   def getSeedData: Set[User] = Set(
   //  User(1, "jcole", "Jon", "Cole", true, false),

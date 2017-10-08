@@ -10,14 +10,14 @@ import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
-  def get(startDate: Option[String]) = Action.async {
+  def get(startDate: Option[String]): Action[AnyContent] = Action.async {
     val request = new ApClassInstancesRequest(startDate)
     request.getFuture.map(s => {
       Ok(s).as("application/json")

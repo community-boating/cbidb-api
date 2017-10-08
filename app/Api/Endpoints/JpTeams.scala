@@ -9,12 +9,12 @@ import Entities._
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class JpTeams @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
-  def get() = Action.async {
+  def get(): Action[AnyContent] = Action.async {
     val request = new JpTeamsRequest()
     request.getFuture.map(s => {
       Ok(s).as("application/json")

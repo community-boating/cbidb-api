@@ -5,8 +5,6 @@ import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import Storable._
 
 class ApClassSession extends StorableClass {
-  val companion: StorableObject[ApClassSession] = ApClassSession
-
   object references extends ReferencesObject {
     var apClassInstance: Option[ApClassInstance] = None
   }
@@ -32,7 +30,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val primaryKeyName: String = fields.sessionId.getFieldName
+  val primaryKey: IntDatabaseField = fields.sessionId
 
   def getSeedData: Set[ApClassSession] = Set(
     //  ApClassSession(1, 1, LocalDateTime.now)

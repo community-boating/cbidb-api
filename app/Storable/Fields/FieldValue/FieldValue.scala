@@ -12,7 +12,7 @@ abstract class FieldValue[T](field: DatabaseField[T]) {
   def peek: Option[T] = value
   def get: T = value match {
     case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue")
-    case Some(v: T) => v
+    case Some(v) => v
   }
 
   def getFieldName: String = field.getFieldName

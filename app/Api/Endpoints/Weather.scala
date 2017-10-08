@@ -8,13 +8,13 @@ import CbiUtil.PropertiesWrapper
 import Services.CacheBroker
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
 class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: ExecutionContext) extends Controller {
-  def get() = Action.async {
+  def get(): Action[AnyContent] = Action.async {
     val request = new WeatherRequest()
     request.getFuture.map(s => {
       Ok(s).as("application/json")

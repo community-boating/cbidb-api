@@ -10,13 +10,13 @@ import Services.{CacheBroker, PersistenceBroker}
 import Storable.Filter
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class
 Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
-  def get(userID: Option[Int]) = Action.async {
+  def get(userID: Option[Int]): Action[AnyContent] = Action.async {
     val request = new UsersRequest(userID)
     request.getFuture.map(s => {
       Ok(s).as("application/json")
