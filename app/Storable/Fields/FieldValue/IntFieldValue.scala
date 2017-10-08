@@ -5,5 +5,5 @@ import Storable.Fields.IntDatabaseField
 import Storable.StorableClass
 
 class IntFieldValue(instance: StorableClass, field: IntDatabaseField) extends FieldValue[Int](instance, field) {
-  def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String = super.get.toString
+  def getPersistenceLiteral(implicit pbClass: Class[_ <: PersistenceBroker]): String = super.get.toString
 }

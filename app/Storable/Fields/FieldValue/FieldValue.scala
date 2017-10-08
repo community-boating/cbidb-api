@@ -16,7 +16,11 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
     case Some(v) => v
     case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + field.getPersistenceFieldName)
   }
+  def isSet: Boolean = value match {
+    case Some(_) => true
+    case None => false
+  }
 
-  def getFieldName: String = field.getPersistenceFieldName
-  def getInsertValue(implicit pbClass: Class[_ <: PersistenceBroker]): String
+  def getPersistenceFieldName: String = field.getPersistenceFieldName
+  def getPersistenceLiteral(implicit pbClass: Class[_ <: PersistenceBroker]): String
 }

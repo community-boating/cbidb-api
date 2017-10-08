@@ -69,9 +69,9 @@ val inserts: String = seedObjects.map(obj => {
   val fieldValues: List[FieldValue] = obj.deconstruct.toList
   val sb = new StringBuilder
   sb.append("INSERT INTO " + obj.companion.entityName + "(")
-  sb.append(fieldValues.map(_.getFieldName).mkString(", "))
+  sb.append(fieldValues.map(_.getPersistenceFieldName).mkString(", "))
   sb.append(") values (")
-  sb.append(fieldValues.map(_.getInsertValue).mkString(", "))
+  sb.append(fieldValues.map(_.getPersistenceLiteral).mkString(", "))
   sb.append(");")
 
   sb.toString()

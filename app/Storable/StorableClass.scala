@@ -28,10 +28,17 @@ abstract class StorableClass {
     case None => companion = Some(c)
   }
 
-  def getID: Int = {
+  private def getPrimaryKeyFieldValue(): IntFieldValue = {
     val primaryKeyFieldRuntimeName: String = getCompanion.primaryKey.getRuntimeFieldName
-    val primaryKeyFieldValue: IntFieldValue = intValueMap(primaryKeyFieldRuntimeName)
-    primaryKeyFieldValue.get
+    intValueMap(primaryKeyFieldRuntimeName)
+  }
+
+  def getID: Int = getPrimaryKeyFieldValue().get
+
+
+  def hasID: Boolean = getPrimaryKeyFieldValue().peek match {
+    case Some(_) => true
+    case None => false
   }
 
   // "clean" = internal state of this instance is consistent with the state of the database

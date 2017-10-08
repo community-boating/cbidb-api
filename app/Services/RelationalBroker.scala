@@ -4,11 +4,14 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.Profiler
+import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields._
 import Storable._
 import com.mchange.v2.c3p0.ComboPooledDataSource
+import oracle.net.aso.i
 import play.api.inject.ApplicationLifecycle
 
+import scala.collection.mutable
 import scala.collection.mutable.{HashMap, ListBuffer}
 import scala.concurrent.Future
 
@@ -142,7 +145,34 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
   }
 
   def commitObjectToDatabase(i: StorableClass): Unit = {
-    //val isUpdate =
+    if (i.hasID) updateObject(i) else insertObject(i)
+  }
+
+
+  private def insertObject(i: StorableClass): Unit = {
+    println("inserting woooo")
+  }
+
+  private def updateObject(i: StorableClass): Unit = {
+    println("lets update some shiz")
+    implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
+    def getUpdateExpressions(vm: Map[String, FieldValue[_]]) =
+      vm.values.filter(fv => fv.isSet).map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral).toList
+
+    val updateExpressions: List[String] =
+      getUpdateExpressions(i.intValueMap) ++
+      getUpdateExpressions(i.nullableIntValueMap) ++
+      getUpdateExpressions(i.stringValueMap) ++
+      getUpdateExpressions(i.nullableStringValueMap) ++
+      getUpdateExpressions(i.booleanValueMap) ++
+      getUpdateExpressions(i.dateValueMap) ++
+      getUpdateExpressions(i.dateTimeValueMap)
+    var sb = new StringBuilder()
+    sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
+    sb.append(updateExpressions.mkString(", "))
+    sb.append(" WHERE " + i.getCompanion.primaryKeyName + " = " + i.getID)
+    println(sb.toString())
+
   }
 
   private def dateToLocalDate(d: Date): LocalDate =

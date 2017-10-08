@@ -31,10 +31,8 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
         println(ps)
 
         val newUser: User = User.construct(ps, false)
-
-        println("$$$ " + newUser.values.nameFirst.get)
-
-
+        println("committing!")
+        pb.commitObjectToDatabase(newUser)
 
         val userFields: Set[String] = User.fieldList.map(_.getPersistenceFieldName).toSet
         val reqFields: Set[String] = v.keySet
