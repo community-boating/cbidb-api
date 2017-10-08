@@ -2,24 +2,24 @@ package Api.Endpoints
 
 import javax.inject.Inject
 
+import Entities.User
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc.{Action, Controller}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
 class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def post() = Action { request => {
     val data = request.body.asFormUrlEncoded
-    new Status(OK)("wasnt JCOLE so I'm cool w it")
-    /*
     data match {
       case None => {
         println("no body")
         new Status(400)("no body")
       }
       case Some(v) => {
-        val userFields: Set[String] = User.fieldList.map(_.values.getFieldName.get).toSet
+        val userFields: Set[String] = User.fieldList.map(_.getFieldName).toSet
         val reqFields: Set[String] = v.keySet
         val unspecifiedFields: Set[String] = userFields -- reqFields
         println(userFields)
@@ -39,6 +39,6 @@ class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
           new Status(OK)("wasnt JCOLE so I'm cool w it")
         }
       }
-    }*/
+    }
   }}
 }

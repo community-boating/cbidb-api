@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{DatabaseRow, Filter, StorableObject}
+import Storable.{ProtoStorable, Filter, StorableObject}
 
 class NullableStringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, fieldName) {
   def getFieldLength: Int = fieldLength
@@ -14,11 +14,11 @@ class NullableStringDatabaseField(entity: StorableObject[_], fieldName: String, 
     }
   }
 
-  def getValue(row: DatabaseRow): Option[String] = {
+  def getValue(row: ProtoStorable): Option[String] = {
     row.stringFields.get(fieldName) match {
       case Some(Some(x)) => Some(x)
       case Some(None) => None
-      case None => throw new Exception("Nullable String did not exist in DatabaseRow: " + fieldName)
+      case None => throw new Exception("Nullable String did not exist in ProtoStorable: " + fieldName)
     }
   }
 

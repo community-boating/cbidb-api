@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{DatabaseRow, Filter, StorableObject}
+import Storable.{ProtoStorable, Filter, StorableObject}
 
 class DateTimeDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[LocalDateTime](entity, fieldName) {
   def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
@@ -12,12 +12,12 @@ class DateTimeDatabaseField(entity: StorableObject[_], fieldName: String) extend
     case x if x == classOf[OracleBroker] => "date"
   }
 
-  def getValue(row: DatabaseRow): LocalDateTime = getOptionValue(row) match {
+  def getValue(row: ProtoStorable): LocalDateTime = getOptionValue(row) match {
     case Some(x) => x
     case None => throw new Exception("Non-null field was null")
   }
 
-  def getOptionValue(row: DatabaseRow): Option[LocalDateTime] = {
+  def getOptionValue(row: ProtoStorable): Option[LocalDateTime] = {
     row.dateTimeFields.get(fieldName) match {
       case Some(Some(x)) => Some(x)
       case _ => None

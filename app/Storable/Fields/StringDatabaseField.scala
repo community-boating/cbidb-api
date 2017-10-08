@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{DatabaseRow, Filter, StorableObject}
+import Storable.{ProtoStorable, Filter, StorableObject}
 
 class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLength: Int) extends DatabaseField[String](entity, fieldName) {
   def getFieldLength: Int = fieldLength
@@ -14,12 +14,12 @@ class StringDatabaseField(entity: StorableObject[_], fieldName: String, fieldLen
     }
   }
 
-  def getValue(row: DatabaseRow): String = getOptionValue(row) match {
+  def getValue(row: ProtoStorable): String = getOptionValue(row) match {
     case Some(x) => x
     case None => throw new Exception("Non-null field was null")
   }
 
-  def getOptionValue(row: DatabaseRow): Option[String] = {
+  def getOptionValue(row: ProtoStorable): Option[String] = {
     row.stringFields.get(fieldName) match {
       case Some(Some(x)) => Some(x)
       case _ => None

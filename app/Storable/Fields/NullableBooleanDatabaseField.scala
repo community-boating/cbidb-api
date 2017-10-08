@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{DatabaseRow, Filter, StorableObject}
+import Storable.{ProtoStorable, Filter, StorableObject}
 
 class NullableBooleanDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Option[Boolean]](entity, fieldName) {
   def getFieldLength: Int = 1
@@ -14,12 +14,12 @@ class NullableBooleanDatabaseField(entity: StorableObject[_], fieldName: String)
     }
   }
 
-  def getValue(row: DatabaseRow): Option[Boolean] = {
+  def getValue(row: ProtoStorable): Option[Boolean] = {
     row.stringFields.get(fieldName) match {
       case Some(Some("Y")) => Some(true)
       case Some(Some("N")) => Some(false)
       case Some(None) => None
-      case _ => throw new Exception("Nullable Boolean did not exist in DatabaseRow")
+      case _ => throw new Exception("Nullable Boolean did not exist in ProtoStorable")
     }
   }
 

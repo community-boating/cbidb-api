@@ -78,7 +78,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     dateFieldMap.values.toList ++
     dateTimeFieldMap.values.toList
 
-  def construct(r: DatabaseRow, isClean: Boolean): T = {
+  def construct(r: ProtoStorable, isClean: Boolean): T = {
     val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
     intFieldMap.foreach(f => {

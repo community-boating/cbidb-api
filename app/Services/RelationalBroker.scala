@@ -28,7 +28,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append(obj.fieldList.map(f => f.getFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKeyName + " = " + id)
-    val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, 6)
+    val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, 6)
     if (rows.length == 1) Some(obj.construct(rows.head, true))
     else None
   }
@@ -41,7 +41,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       sb.append(obj.fieldList.map(f => f.getFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
       sb.append(" WHERE " + obj.primaryKeyName + " in (" + ids.mkString(", ") + ")")
-      val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
   }
@@ -59,12 +59,12 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       if (filters.nonEmpty) {
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
-      val rows: List[DatabaseRow] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
   }
 
-  def executeSQL(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[DatabaseRow] = {
+  def executeSQL(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
     println(sql)
     val profiler = new Profiler
     val c: Connection = pool.getConnection
@@ -76,7 +76,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       val rsmd: ResultSetMetaData = rs.getMetaData
 
 
-      val rows: ListBuffer[DatabaseRow] = ListBuffer()
+      val rows: ListBuffer[ProtoStorable] = ListBuffer()
       var rowCounter = 0
       profiler.lap("starting rows")
       while (rs.next) {
@@ -86,7 +86,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
         val stringFields = new HashMap[String, Option[String]]
         val dateFields = new HashMap[String, Option[LocalDate]]
         val dateTimeFields = new HashMap[String, Option[LocalDateTime]]
-        val row: DatabaseRow = DatabaseRow(intFields, doubleFields, stringFields, dateFields, dateTimeFields)
+        val row: ProtoStorable = ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields)
 
         properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
           df match {

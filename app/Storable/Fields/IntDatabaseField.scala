@@ -1,15 +1,15 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{DatabaseRow, Filter, StorableObject}
+import Storable.{ProtoStorable, Filter, StorableObject}
 
 class IntDatabaseField(entity: StorableObject[_], fieldName: String) extends DatabaseField[Int](entity, fieldName) {
-  def getValue(row: DatabaseRow): Int = getOptionValue(row) match {
+  def getValue(row: ProtoStorable): Int = getOptionValue(row) match {
     case Some(x) => x
     case None => throw new Exception("Non-null field was null")
   }
 
-  def getOptionValue(row: DatabaseRow): Option[Int] = {
+  def getOptionValue(row: ProtoStorable): Option[Int] = {
     row.intFields.get(fieldName) match {
       case Some(Some(x)) => Some(x)
       case _ => None
