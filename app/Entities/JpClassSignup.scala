@@ -31,7 +31,7 @@ object JpClassSignup extends StorableObject[JpClassSignup] {
     val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
   }
 
-  val primaryKey: IntDatabaseField = fields.signupId
+  def primaryKey: IntDatabaseField = fields.signupId
 
   def getSeedData: Set[JpClassSignup] = Set()
 }

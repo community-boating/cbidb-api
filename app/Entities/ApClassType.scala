@@ -23,7 +23,7 @@ object ApClassType extends StorableObject[ApClassType] {
     val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
   }
 
-  val primaryKey: IntDatabaseField = fields.typeId
+  def primaryKey: IntDatabaseField = fields.typeId
 
   def getSeedData: Set[ApClassType] = Set(
     //  ApClassType(1, "Sailing 101", 1),

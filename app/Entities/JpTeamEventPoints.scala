@@ -26,7 +26,7 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
     val points = new IntDatabaseField(self, "POINTS")
   }
 
-  val primaryKey: IntDatabaseField = fields.rowId
+  def primaryKey: IntDatabaseField = fields.rowId
 
   def getSeedData: Set[JpTeamEventPoints] = Set()
 }

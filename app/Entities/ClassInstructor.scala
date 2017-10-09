@@ -23,7 +23,7 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
     val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
   }
 
-  val primaryKey: IntDatabaseField = fields.instructorId
+  def primaryKey: IntDatabaseField = fields.instructorId
 
 
   def getSeedData: Set[ClassInstructor] = Set()

@@ -38,7 +38,7 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
     val typeId = new IntDatabaseField(self, "TYPE_ID")
   }
 
-  val primaryKey: IntDatabaseField = fields.instanceId
+  def primaryKey: IntDatabaseField = fields.instanceId
 
   def getSeedData: Set[JpClassInstance] = Set()
 }

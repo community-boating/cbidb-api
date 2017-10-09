@@ -31,7 +31,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val primaryKey: IntDatabaseField = fields.sessionId
+  def primaryKey: IntDatabaseField = fields.sessionId
 
   def getSeedData: Set[ApClassSession] = Set(
     //  ApClassSession(1, 1, LocalDateTime.now)

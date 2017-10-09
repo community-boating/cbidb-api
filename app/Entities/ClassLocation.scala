@@ -21,7 +21,7 @@ object ClassLocation extends StorableObject[ClassLocation] {
     val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
   }
 
-  val primaryKey: IntDatabaseField = fields.locationId
+  def primaryKey: IntDatabaseField = fields.locationId
 
   def getSeedData: Set[ClassLocation] = Set()
 }

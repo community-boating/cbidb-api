@@ -33,7 +33,7 @@ object JpClassSession extends StorableObject[JpClassSession] {
     val sessionDateTime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
   }
 
-  val primaryKey: IntDatabaseField = fields.sessionId
+  def primaryKey: IntDatabaseField = fields.sessionId
 
 
   def getSeedData: Set[JpClassSession] = Set()

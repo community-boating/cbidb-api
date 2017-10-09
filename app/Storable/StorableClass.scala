@@ -29,16 +29,19 @@ abstract class StorableClass {
     case None => companion = Some(c)
   }
 
-  private def getPrimaryKeyFieldValue(): IntFieldValue = {
-    val primaryKey: IntDatabaseField = getCompanion.primaryKey
+  private def getPrimaryKeyFieldValue: IntFieldValue = {
+    val companion: Companion = getCompanion
+    val primaryKey: IntDatabaseField = companion.primaryKey
+    println(primaryKey.getPersistenceFieldName)
+    println(primaryKey.getRuntimeFieldName)
     val primaryKeyFieldRuntimeName: String = primaryKey.getRuntimeFieldName
     intValueMap(primaryKeyFieldRuntimeName)
   }
 
-  def getID: Int = getPrimaryKeyFieldValue().get
+  def getID: Int = getPrimaryKeyFieldValue.get
 
 
-  def hasID: Boolean = getPrimaryKeyFieldValue().peek match {
+  def hasID: Boolean = getPrimaryKeyFieldValue.peek match {
     case Some(_) => true
     case None => false
   }

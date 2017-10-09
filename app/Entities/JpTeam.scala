@@ -21,7 +21,7 @@ object JpTeam extends StorableObject[JpTeam] {
     val teamName = new StringDatabaseField(self, "TEAM_NAME", 100)
   }
 
-  val primaryKey: IntDatabaseField = fields.teamId
+  def primaryKey: IntDatabaseField = fields.teamId
 
   def getSeedData: Set[JpTeam] = Set()
 }

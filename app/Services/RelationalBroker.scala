@@ -29,7 +29,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKeyPersistenceName + " = " + id)
-    val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, 6)
+    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
     if (rows.length == 1) Some(obj.construct(rows.head, true))
     else None
   }
@@ -42,7 +42,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
       sb.append(" WHERE " + obj.primaryKeyPersistenceName + " in (" + ids.mkString(", ") + ")")
-      val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
   }
@@ -60,12 +60,22 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       if (filters.nonEmpty) {
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
-      val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
   }
 
-  def executeSQL(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
+  private def executeSQLForUpdate(sql: String): Int = {
+    val c: Connection = pool.getConnection
+    try {
+      val st: Statement = c.createStatement()
+      st.executeUpdate(sql) // returns # of rows updated
+    } finally {
+      c.close()
+    }
+  }
+
+  private def executeSQLForSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
     println(sql)
     val profiler = new Profiler
     val c: Connection = pool.getConnection
@@ -152,13 +162,13 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
   }
 
   private def updateObject(i: StorableClass): Unit = {
-    println("lets update some shiz")
     implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
-    def getUpdateExpressions(vm: Map[String, FieldValue[_]]) =
+
+    def getUpdateExpressions(vm: Map[String, FieldValue[_]]): List[String] =
       vm.values
-        .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKeyPersistenceName)
-        .map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral)
-        .toList
+      .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKeyPersistenceName)
+      .map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral)
+      .toList
 
     val updateExpressions: List[String] =
       getUpdateExpressions(i.intValueMap) ++
@@ -173,8 +183,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
     sb.append(updateExpressions.mkString(", "))
     sb.append(" WHERE " + i.getCompanion.primaryKeyPersistenceName + " = " + i.getID)
-    println(sb.toString())
-
+    executeSQLForUpdate(sb.toString())
   }
 
   private def dateToLocalDate(d: Date): LocalDate =

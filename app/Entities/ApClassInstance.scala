@@ -33,7 +33,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
     val locationString = new NullableStringDatabaseField(self, "LOCATION_STRING", 500)
   }
 
-  val primaryKey: IntDatabaseField = fields.instanceId
+  def primaryKey: IntDatabaseField = fields.instanceId
 
   def getSeedData: Set[ApClassInstance] = Set(
     // ApClassInstance(1, 1, Some("Someplace"))
