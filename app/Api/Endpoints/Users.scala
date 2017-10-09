@@ -57,6 +57,7 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
           JsString(u.values.userName.get),
           JsString(u.values.nameFirst.get),
           JsString(u.values.nameLast.get),
+          JsString(u.values.email.get),
           JsBoolean(u.values.active.get),
           JsBoolean(u.values.hideFromClose.get)
         ))
@@ -67,6 +68,7 @@ Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Persisten
         "USER_NAME",
         "NAME_FIRST",
         "NAME_LAST",
+        "EMAIL",
         "ACTIVE",
         "HIDE_FROM_CLOSE"
       ))
