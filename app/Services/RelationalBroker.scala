@@ -28,7 +28,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
-    sb.append(" WHERE " + obj.primaryKeyPersistenceName + " = " + id)
+    sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
     val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
     if (rows.length == 1) Some(obj.construct(rows.head, true))
     else None
@@ -41,7 +41,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       sb.append("SELECT ")
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
-      sb.append(" WHERE " + obj.primaryKeyPersistenceName + " in (" + ids.mkString(", ") + ")")
+      sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
@@ -62,6 +62,21 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       }
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
+    }
+  }
+
+  private def executeSQLForInsert(sql: String, pkPersistenceName: String): Int = {
+    val c: Connection = pool.getConnection
+    try {
+      val arr: scala.Array[String] = scala.Array(pkPersistenceName)
+      val ps: PreparedStatement = c.prepareStatement(sql, arr)
+      ps.executeUpdate()
+      val rs = ps.getGeneratedKeys
+      if (rs.next) {
+        rs.getLong(1).toInt
+      } else throw new Exception("No pk value came back from insert statement")
+    } finally {
+      c.close()
     }
   }
 
@@ -158,7 +173,30 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
 
 
   private def insertObject(i: StorableClass): Unit = {
+    implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
     println("inserting woooo")
+    def getFieldValues(vm: Map[String, FieldValue[_]]): List[FieldValue[_]] =
+      vm.values
+        .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName)
+        .toList
+
+    val fieldValues: List[FieldValue[_]] =
+      getFieldValues(i.intValueMap) ++
+      getFieldValues(i.nullableIntValueMap) ++
+      getFieldValues(i.stringValueMap) ++
+      getFieldValues(i.nullableStringValueMap) ++
+      getFieldValues(i.booleanValueMap) ++
+      getFieldValues(i.dateValueMap) ++
+      getFieldValues(i.dateTimeValueMap)
+
+    var sb = new StringBuilder()
+    sb.append("INSERT INTO " + i.getCompanion.entityName + " ( ")
+    sb.append(fieldValues.map(fv => fv.getPersistenceFieldName).mkString(", "))
+    sb.append(") VALUES (")
+    sb.append(fieldValues.map(fv => fv.getPersistenceLiteral).mkString(", "))
+    sb.append(")")
+    println(sb.toString())
+    executeSQLForInsert(sb.toString(), i.getCompanion.primaryKey.getPersistenceFieldName)
   }
 
   private def updateObject(i: StorableClass): Unit = {
@@ -166,7 +204,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
 
     def getUpdateExpressions(vm: Map[String, FieldValue[_]]): List[String] =
       vm.values
-      .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKeyPersistenceName)
+      .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName)
       .map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral)
       .toList
 
@@ -182,7 +220,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     var sb = new StringBuilder()
     sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
     sb.append(updateExpressions.mkString(", "))
-    sb.append(" WHERE " + i.getCompanion.primaryKeyPersistenceName + " = " + i.getID)
+    sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)
     executeSQLForUpdate(sb.toString())
   }
 

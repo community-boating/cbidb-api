@@ -24,7 +24,6 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val fields: FieldsObject
 
   def primaryKey: IntDatabaseField
-  def primaryKeyPersistenceName: String = primaryKey.getPersistenceFieldName
 
   // Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
   private lazy val fieldMaps = {
