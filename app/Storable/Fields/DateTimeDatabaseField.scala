@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{ProtoStorable, Filter, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableObject}
 
 class DateTimeDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
   val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

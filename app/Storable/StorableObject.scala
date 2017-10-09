@@ -4,7 +4,6 @@ import java.time.{LocalDate, LocalDateTime}
 
 import Storable.Fields.FieldValue._
 import Storable.Fields._
-import oracle.net.aso.i
 
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
@@ -25,7 +24,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val fields: FieldsObject
 
   val primaryKey: IntDatabaseField
-  def primaryKeyName: String = primaryKey.getPersistenceFieldName
+  def primaryKeyPersistenceName: String = primaryKey.getPersistenceFieldName
 
   // Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
   private lazy val fieldMaps = {

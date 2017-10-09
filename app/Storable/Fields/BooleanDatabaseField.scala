@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{ProtoStorable, Filter, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableObject}
 
 class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
   def getFieldLength: Int = 1

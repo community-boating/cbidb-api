@@ -8,11 +8,9 @@ import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields._
 import Storable._
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import oracle.net.aso.i
 import play.api.inject.ApplicationLifecycle
 
-import scala.collection.mutable
-import scala.collection.mutable.{HashMap, ListBuffer}
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
@@ -30,7 +28,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
-    sb.append(" WHERE " + obj.primaryKeyName + " = " + id)
+    sb.append(" WHERE " + obj.primaryKeyPersistenceName + " = " + id)
     val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, 6)
     if (rows.length == 1) Some(obj.construct(rows.head, true))
     else None
@@ -43,7 +41,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       sb.append("SELECT ")
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
-      sb.append(" WHERE " + obj.primaryKeyName + " in (" + ids.mkString(", ") + ")")
+      sb.append(" WHERE " + obj.primaryKeyPersistenceName + " in (" + ids.mkString(", ") + ")")
       val rows: List[ProtoStorable] = executeSQL(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
@@ -157,7 +155,10 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
     println("lets update some shiz")
     implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
     def getUpdateExpressions(vm: Map[String, FieldValue[_]]) =
-      vm.values.filter(fv => fv.isSet).map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral).toList
+      vm.values
+        .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKeyPersistenceName)
+        .map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral)
+        .toList
 
     val updateExpressions: List[String] =
       getUpdateExpressions(i.intValueMap) ++
@@ -167,10 +168,11 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       getUpdateExpressions(i.booleanValueMap) ++
       getUpdateExpressions(i.dateValueMap) ++
       getUpdateExpressions(i.dateTimeValueMap)
+
     var sb = new StringBuilder()
     sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
     sb.append(updateExpressions.mkString(", "))
-    sb.append(" WHERE " + i.getCompanion.primaryKeyName + " = " + i.getID)
+    sb.append(" WHERE " + i.getCompanion.primaryKeyPersistenceName + " = " + i.getID)
     println(sb.toString())
 
   }

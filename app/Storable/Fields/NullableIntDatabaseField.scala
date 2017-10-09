@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{ProtoStorable, Filter, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableIntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
   def findValueInProtoStorable(row: ProtoStorable): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)

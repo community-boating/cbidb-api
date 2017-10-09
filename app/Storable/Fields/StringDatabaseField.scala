@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.{ProtoStorable, Filter, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableObject}
 
 class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
   def getFieldLength: Int = fieldLength

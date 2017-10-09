@@ -1,6 +1,7 @@
 package Storable
 
 import Storable.Fields.FieldValue._
+import Storable.Fields.IntDatabaseField
 
 import scala.reflect.runtime.universe._
 
@@ -29,7 +30,8 @@ abstract class StorableClass {
   }
 
   private def getPrimaryKeyFieldValue(): IntFieldValue = {
-    val primaryKeyFieldRuntimeName: String = getCompanion.primaryKey.getRuntimeFieldName
+    val primaryKey: IntDatabaseField = getCompanion.primaryKey
+    val primaryKeyFieldRuntimeName: String = primaryKey.getRuntimeFieldName
     intValueMap(primaryKeyFieldRuntimeName)
   }
 

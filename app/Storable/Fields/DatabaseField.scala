@@ -1,7 +1,7 @@
 package Storable.Fields
 
 import Services.PersistenceBroker
-import Storable.{ProtoStorable, Filter, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableObject}
 
 abstract class DatabaseField[T](entity: StorableObject[_], persistenceFieldName: String) {
   def getPersistenceFieldName: String = persistenceFieldName
