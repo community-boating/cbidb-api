@@ -9,6 +9,7 @@ GET     /weather                        Api.Endpoints.Weather.get()
 GET     /users                          Api.Endpoints.Users.get(userID: Option[Int])
 POST    /user                           Api.Endpoints.UserCrud.post()
 GET     /file                           Reporting.TestReport.getSampleFile()
+GET     /report                         Api.Endpoints.Report.get()
 
 
 # Map static resources from the /public folder to the /assets URL path
