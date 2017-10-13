@@ -3,13 +3,13 @@ package Reporting.ReportingFilters
 import Storable.StorableClass
 
 abstract class ReportingFilter[T <: StorableClass] {
-  val primaryKeyValues: Set[Int]
+  val instances: Set[T]
 
-  def and(other: ReportingFilter[T]) = new CompositeReportingFilter[T](this.primaryKeyValues.intersect(other.primaryKeyValues))
+  def and(other: ReportingFilter[T]) = new CompositeReportingFilter[T](this.instances.intersect(other.instances))
 
-  def or(other: ReportingFilter[T]) = new CompositeReportingFilter[T](this.primaryKeyValues.union(other.primaryKeyValues))
+  def or(other: ReportingFilter[T]) = new CompositeReportingFilter[T](this.instances.union(other.instances))
 
-  class CompositeReportingFilter[T <: StorableClass](val primaryKeyValues: Set[Int]) extends ReportingFilter[T]
+  class CompositeReportingFilter[T <: StorableClass](val instances: Set[T]) extends ReportingFilter[T]
 
   class BadReportingFilterArgumentsException(
     private val message: String = "",

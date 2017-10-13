@@ -2,7 +2,9 @@ package Api.Endpoints
 
 import javax.inject.Inject
 
-import CbiUtil.Profiler
+import Entities.{ApClassFormat, ApClassInstance, ApClassType}
+import Reporting.ReportingFields.ApClassInstance.ApClassInstanceReportingFieldSessionCount
+import Reporting.ReportingFields.ReportingField
 import Reporting.ReportingFilters.ApClassInstance.{ApClassInstanceFilter, ApClassInstanceFilterType, ApClassInstanceFilterYear}
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
@@ -12,22 +14,39 @@ import scala.concurrent.ExecutionContext
 
 class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
-    val profiler = new Profiler
-    val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
-    profiler.lap("did this year")
-    val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 7)
-    profiler.lap("did jib 1")
-    val jib2Classes: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 8)
-    profiler.lap("did jib 2")
+    val instances: Set[ApClassInstance] = {
+      val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
+      val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 7)
+      val jib2Classes: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 8)
+      println("this year " + thisYear.instances.size)
+      println("jib " + jibClasses.instances.size)
+      println("jib2 " + jib2Classes.instances.size)
+      println("jib union jib2 " + jibClasses.or(jib2Classes).instances.size)
+      println("thisyear union jib " + thisYear.or(jibClasses).instances.size)
+      println("thisyear intersect jib " + thisYear.and(jibClasses).instances.size)
 
-    println("# instances this year: " + thisYear.primaryKeyValues.size)
-    println("# jib classes: " + jibClasses.primaryKeyValues.size)
-    println("# jib 2 classes: " + jib2Classes.primaryKeyValues.size)
-    println("# jib this year: " + thisYear.and(jibClasses).primaryKeyValues.size)
-    println("# jib 2 this year: " + thisYear.and(jib2Classes).primaryKeyValues.size)
-    println(" any jib this year: " + thisYear.and(jibClasses.or(jib2Classes)).primaryKeyValues.size)
+      thisYear.and(jibClasses.or(jib2Classes)).instances
+    }
 
-    profiler.lap("done")
+    instances.foreach(i => {
+      pb.getObjectById(ApClassFormat, i.values.formatId.get) match {
+        case Some(f: ApClassFormat) => i.setApClassFormat(f)
+      }
+      val format: ApClassFormat = i.references.apClassFormat.get
+      pb.getObjectById(ApClassType, format.values.typeId.get) match {
+        case Some(t: ApClassType) => format.setApClassType(t)
+      }
+    })
+
+    println("@#@#@# " + instances.size)
+
+    val fields: List[ReportingField[ApClassInstance]] = List(
+      ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](ApClassFormat.fields.typeId, i => i.references.apClassFormat.get),
+      ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId),
+      new ApClassInstanceReportingFieldSessionCount
+    )
+
+    println(new Reporting.Report[ApClassInstance](instances, fields).getReport(pb))
 
     Ok("hi")
   }

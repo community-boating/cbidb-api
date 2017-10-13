@@ -29,11 +29,15 @@ abstract class StorableClass {
     case None => companion = Some(c)
   }
 
+  override def equals(that: Any): Boolean = that match {
+    case i: StorableClass => this.getID == i.getID
+    case _ => false
+  }
+  override def hashCode: Int = (this.getClass.toString.hashCode, this.getID).hashCode()
+
   private def getPrimaryKeyFieldValue: IntFieldValue = {
     val companion: Companion = getCompanion
     val primaryKey: IntDatabaseField = companion.primaryKey
-    println(primaryKey.getPersistenceFieldName)
-    println(primaryKey.getRuntimeFieldName)
     val primaryKeyFieldRuntimeName: String = primaryKey.getRuntimeFieldName
     intValueMap(primaryKeyFieldRuntimeName)
   }

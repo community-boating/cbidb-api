@@ -4,7 +4,7 @@ import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Services.PersistenceBroker
 
 class ApClassInstanceFilterType(pb: PersistenceBroker, classTypeID: Int) extends ApClassInstanceFilter {
-  val primaryKeyValues: Set[Int] = {
+  val instances: Set[ApClassInstance] = {
     val typeID: Int = {
       val ts: List[ApClassType] = pb.getObjectsByFilters(
         ApClassType,
@@ -24,12 +24,10 @@ class ApClassInstanceFilterType(pb: PersistenceBroker, classTypeID: Int) extends
       fs.map(f => f.values.formatId.get)
     }
 
-    val is: List[ApClassInstance] = pb.getObjectsByFilters(
+    pb.getObjectsByFilters(
       ApClassInstance,
       List(ApClassInstance.fields.formatId.inList(formatIDs)),
       100
-    )
-
-    is.map(i => i.values.instanceId.get).toSet
+    ).toSet
   }
 }

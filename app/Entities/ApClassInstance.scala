@@ -1,5 +1,6 @@
 package Entities
 
+import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
@@ -21,6 +22,15 @@ class ApClassInstance extends StorableClass {
   def getApClassFormat: ApClassFormat = references.apClassFormat match {
     case Some(x) => x
     case None => throw new Exception("ApClassFormat unset for ApClassInstance " + values.instanceId.get)
+  }
+
+  def getApClassSessions(pb: PersistenceBroker): List[ApClassSession] = {
+    val id = values.instanceId.get
+    pb.getObjectsByFilters(
+      ApClassSession,
+      List(ApClassSession.fields.instanceId.equalsConstant(id)),
+      5
+    )
   }
 }
 
