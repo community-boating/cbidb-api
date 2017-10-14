@@ -7,8 +7,12 @@ import Reporting.ReportingFields.ApClassInstance.ApClassInstanceReportingFieldSe
 import Reporting.ReportingFields.ReportingField
 import Reporting.ReportingFilters.ApClassInstance.{ApClassInstanceFilter, ApClassInstanceFilterType, ApClassInstanceFilterYear}
 import Services.{CacheBroker, PersistenceBroker}
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import oracle.net.aso.s
+import play.api.http.HttpEntity
 import play.api.inject.ApplicationLifecycle
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
@@ -46,8 +50,15 @@ class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Pe
       new ApClassInstanceReportingFieldSessionCount
     )
 
-    println(new Reporting.Report[ApClassInstance](instances, fields).getReport(pb))
+    val result: String = new Reporting.Report[ApClassInstance](instances, fields).getReport(pb)
 
-    Ok("hi")
+    val source: Source[ByteString, _] = Source.single(ByteString(result))
+
+    Result(
+      header = ResponseHeader(200, Map(
+        CONTENT_DISPOSITION -> "attachment; filename=report.tsv"
+      )),
+      body = HttpEntity.Streamed(source, Some(result.length), Some("application/text"))
+    )
   }
 }
