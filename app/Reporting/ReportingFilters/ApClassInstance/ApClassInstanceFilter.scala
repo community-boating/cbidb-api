@@ -1,6 +1,0 @@
-package Reporting.ReportingFilters.ApClassInstance
-
-import Entities.ApClassInstance
-import Reporting.ReportingFilters.ReportingFilter
-
-abstract class ApClassInstanceFilter extends ReportingFilter[ApClassInstance]

@@ -5,7 +5,7 @@ import javax.inject.Inject
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.ReportingFields.ApClassInstance.ApClassInstanceReportingFieldSessionCount
 import Reporting.ReportingFields.ReportingField
-import Reporting.ReportingFilters.ApClassInstance.{ApClassInstanceFilter, ApClassInstanceFilterType, ApClassInstanceFilterYear}
+import Reporting.ReportingFilters.{ApClassInstanceFilter, ApClassInstanceFilterType, ApClassInstanceFilterYear}
 import Services.{CacheBroker, PersistenceBroker}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString

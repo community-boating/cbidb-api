@@ -2,14 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /jp-class-instances             Api.Endpoints.JpClassInstances.get(startDate: Option[String])
-GET     /ap-class-instances             Api.Endpoints.ApClassInstances.get(startDate: Option[String])
-GET     /jp-teams                       Api.Endpoints.JpTeams.get()
-GET     /weather                        Api.Endpoints.Weather.get()
-GET     /users                          Api.Endpoints.Users.get(userID: Option[Int])
-POST    /user                           Api.Endpoints.UserCrud.post()
-GET     /file                           Reporting.TestReport.getSampleFile()
-GET     /report                         Api.Endpoints.Report.get()
+GET     /jp-class-instances                 Api.Endpoints.JpClassInstances.get(startDate: Option[String])
+GET     /ap-class-instances                 Api.Endpoints.ApClassInstances.get(startDate: Option[String])
+GET     /jp-teams                           Api.Endpoints.JpTeams.get()
+GET     /weather                            Api.Endpoints.Weather.get()
+GET     /users                              Api.Endpoints.Users.get(userID: Option[Int])
+POST    /user                               Api.Endpoints.UserCrud.post()
+GET     /report                             Api.Endpoints.Report.get()
+GET     /reporting/getFiltersForStorable    Api.Endpoints.ReportingAPI.GetFiltersForStorable.get(storableName: String)
 
 
 # Map static resources from the /public folder to the /assets URL path
