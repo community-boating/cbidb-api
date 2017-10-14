@@ -17,6 +17,19 @@ import scala.concurrent.ExecutionContext
 
 class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
+    val baseEntityString: String = "ApClassInstance"
+    val filtersString: String = "ApClassInstanceYear:2017%(ApClassInstanceType:7|ApClassInstanceType:8)"
+
+
+
+
+
+
+
+
+
+
+
     val instances: Set[ApClassInstance] = {
       val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
       val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 7)

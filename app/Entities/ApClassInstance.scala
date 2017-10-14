@@ -1,16 +1,12 @@
 package Entities
 
-import Reporting.ReportableStorableClass
-import Reporting.ReportingFilters.{ApClassInstanceFilter, ReportingFilter}
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
-class ApClassInstance extends ReportableStorableClass {
+class ApClassInstance extends StorableClass {
   this.setCompanion(ApClassInstance)
-
-  val ReportingFilterSubclass: Class[_ <: ReportingFilter[ApClassInstance]] = classOf[ApClassInstanceFilter]
 
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None
