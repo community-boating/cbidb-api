@@ -1,11 +1,12 @@
 package Entities
 
+import Reporting.ReportableStorableClass
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
-class ApClassInstance extends StorableClass {
+class ApClassInstance extends ReportableStorableClass {
   this.setCompanion(ApClassInstance)
   object references extends ReferencesObject {
     var apClassFormat: Option[ApClassFormat] = None

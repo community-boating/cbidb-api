@@ -4,7 +4,7 @@ import Entities.{ApClassInstance, ApClassSession}
 import Reporting.ReportingFields.ReportingField
 import Services.PersistenceBroker
 
-class ApClassInstanceReportingFieldSessionCount extends ReportingField[ApClassInstance] {
+class ApClassInstanceReportingFieldSessionCount(fieldDisplayName: String) extends ReportingField[ApClassInstance](fieldDisplayName) {
   def getValueFunction(pb: PersistenceBroker, instances: List[ApClassInstance]): ApClassInstance => String = {
     val sessions: List[ApClassSession] = pb.getObjectsByFilters(
       ApClassSession,

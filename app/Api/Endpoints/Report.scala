@@ -9,7 +9,6 @@ import Reporting.ReportingFilters.ApClassInstance.{ApClassInstanceFilter, ApClas
 import Services.{CacheBroker, PersistenceBroker}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import oracle.net.aso.s
 import play.api.http.HttpEntity
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc._
@@ -45,9 +44,13 @@ class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Pe
     println("@#@#@# " + instances.size)
 
     val fields: List[ReportingField[ApClassInstance]] = List(
-      ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](ApClassFormat.fields.typeId, i => i.references.apClassFormat.get),
-      ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId),
-      new ApClassInstanceReportingFieldSessionCount
+      ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](
+        ApClassFormat.fields.typeId,
+        i => i.references.apClassFormat.get,
+        "Type ID"
+      ),
+      ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID"),
+      new ApClassInstanceReportingFieldSessionCount("Session Ct")
     )
 
     val result: String = new Reporting.Report[ApClassInstance](instances, fields).getReport(pb)
