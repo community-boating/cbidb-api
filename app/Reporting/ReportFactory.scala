@@ -8,6 +8,10 @@ import Storable.StorableClass
 abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSpec: String, fieldSpec: String) {
   type ValueFunction = (T => String)
 
+  val FIELD_MAP: Map[String, ReportingField[T]]
+
+  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[T]]
+
   def getReportText: String = {
     val fields = getFields
     val filter = getCombinedFilter
@@ -27,7 +31,7 @@ abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSp
   protected def decorateInstancesWithParentReferences(instances: List[T]): Unit
 
   private def getCombinedFilter: ReportingFilter[T] = {
-    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb)
+    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, getFilterMap(pb))
     parser.parse(filterSpec)
   }
 
