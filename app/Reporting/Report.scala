@@ -1,14 +1,14 @@
 package Reporting
 
 import Entities.ApClassInstance
+import Reporting.ReportFactories.ReportFactoryApClassInstance
 import Reporting.ReportingFields.ReportingField
 import Reporting.ReportingFilters.{ApClassInstanceFilterType, ApClassInstanceFilterYear, ReportingFilter, ReportingFilterSpecParser}
 import Services.PersistenceBroker
-import Storable.{StorableClass, StorableObject}
-import ReportingFields._
+import Storable.StorableClass
 
 class Report[T <: StorableClass](instances: Set[T], fields: List[ReportingField[T]]) {
-  type ValueFunction = (T => String)
+/*
   val instancesList: List[T] = instances.toList
 
   def getReport(pb: PersistenceBroker): String = {
@@ -21,7 +21,7 @@ class Report[T <: StorableClass](instances: Set[T], fields: List[ReportingField[
         fn(i)
       }).mkString("\t")
     }).mkString("\n")
-  }
+  }*/
 }
 
 object Report {
@@ -36,6 +36,13 @@ object Report {
     "ApClassInstanceFilterType" -> classOf[ApClassInstanceFilterType],
     "ApClassInstanceFilterYear" -> classOf[ApClassInstanceFilterYear]
   )
+
+  def getReport(pb: PersistenceBroker, baseEntityName: String, filterSpec: String, fieldSpec: String): String = {
+    val factory = baseEntityName match {
+      case "ApClassInstance" => new ReportFactoryApClassInstance(pb, filterSpec, fieldSpec)
+    }
+    factory.getReportText
+  }
 
   class BadReportingBaseEntityException(
     private val message: String = "",

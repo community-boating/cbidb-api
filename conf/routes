@@ -8,7 +8,7 @@ GET     /jp-teams                           Api.Endpoints.JpTeams.get()
 GET     /weather                            Api.Endpoints.Weather.get()
 GET     /users                              Api.Endpoints.Users.get(userID: Option[Int])
 POST    /user                               Api.Endpoints.UserCrud.post()
-GET     /report                             Api.Endpoints.Report.get()
+GET     /report                             Api.Endpoints.RunReport.get()
 GET     /reporting/getFiltersForStorable    Api.Endpoints.ReportingAPI.GetFiltersForStorable.get(storableName: String)
 
 

@@ -5,7 +5,7 @@ import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue, Nullabl
 import Storable.Fields._
 import Storable.StorableClass
 
-abstract class ReportingField[T](val fieldDisplayName: String) {
+abstract class ReportingField[T <: StorableClass](val fieldDisplayName: String) {
   def getValueFunction(pb: PersistenceBroker, instances: List[T]): T => String
 }
 
@@ -43,4 +43,10 @@ object ReportingField {
       }
     }, fieldDisplayName)
   }
+
+  def getReportingFieldsFromSpec[T <: StorableClass](spec: String): List[ReportingField[T]] = ??? /*{
+    val FIELD_NAME_SEPARATOR: Char = ','
+    val fieldNames: List[String] = spec.split(FIELD_NAME_SEPARATOR).toList
+
+  }*/
 }
