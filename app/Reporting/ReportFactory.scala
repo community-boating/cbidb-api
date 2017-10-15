@@ -35,5 +35,8 @@ abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSp
     parser.parse(filterSpec)
   }
 
-  def getFields: List[ReportingField[T]]
+  def getFields: List[ReportingField[T]] = {
+    val FIELD_SEPARATOR: Char = ','
+    fieldSpec.split(FIELD_SEPARATOR).toList.map(FIELD_MAP(_))
+  }
 }

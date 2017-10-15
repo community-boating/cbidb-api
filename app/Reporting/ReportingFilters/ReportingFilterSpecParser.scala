@@ -34,6 +34,7 @@ class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filte
   case object ARG extends Mode
   case object MODE_EQUALS extends Mode
   case object COLLECTING_RECURSE extends Mode
+  case object CLOSED_EXPR extends Mode
 
   def parse(spec: String): ReportingFilter[T] = {
     var mode: Mode = FILTER_NAME
@@ -45,7 +46,10 @@ class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filte
 
     (spec + CONTROL_CHARS.EOL.char).toCharArray.map(c => Token(c)).foreach(t => t match {
       case CONTROL_CHARS.START_EXPR => mode match {
-        case COLLECTING_RECURSE => endExprCharactersNeeded += 1 // nested (
+        case COLLECTING_RECURSE => {
+          sb.append(t.char)
+          endExprCharactersNeeded += 1
+        } // nested (
         case FILTER_NAME => mode = COLLECTING_RECURSE  // open a () to recurse its contents
         case _ => throw new BadReportingFilterSpecException("Found an erroneous (")
       }
@@ -58,6 +62,7 @@ class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filte
           } else {
             // Recurse!
             filterList = parse(sb.toString()) :: filterList
+            mode = CLOSED_EXPR
             sb = new StringBuilder
           }
         }
@@ -74,13 +79,15 @@ class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filte
       }
       case CONTROL_CHARS.AND | CONTROL_CHARS.OR => mode match {
         case COLLECTING_RECURSE => sb.append(t.char)
-        case MODE_EQUALS | ARG => {
+        case MODE_EQUALS | ARG| CLOSED_EXPR => {
           currentOperator match {
             case None => currentOperator = Some(t)
             case Some(oc: Token) => if (oc != t) throw new BadReportingFilterSpecException("Different operators found in the same expression")
           }
           // finish the current filter...
-          filterList = getFilter(filterName, sb.toString()) :: filterList
+          if (mode != CLOSED_EXPR) {
+            filterList = getFilter(filterName, sb.toString()) :: filterList
+          }
           // ... and reset everything for a new one
           mode = FILTER_NAME
           sb = new StringBuilder

@@ -15,9 +15,6 @@ class ReportFactoryApClassInstance(
 
   def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[ApClassInstance]] = ReportFactoryApClassInstance.getFilterMap(pb)
 
-  // TODO: im temporary
-  override def getFields: List[ReportingField[ApClassInstance]] = FIELD_MAP.values.toList
-
   def decorateInstancesWithParentReferences(instances: List[ApClassInstance]): Unit = {
     val formats: Map[Int, ApClassFormat] =
       pb.getObjectsByFilters(ApClassFormat, List(), 20)
@@ -43,12 +40,12 @@ class ReportFactoryApClassInstance(
 
 object ReportFactoryApClassInstance {
   val FIELD_MAP: Map[String, ReportingField[ApClassInstance]] = Map(
-    "TypeID" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](
+    "TypeId" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](
       ApClassFormat.fields.typeId,
       i => i.references.apClassFormat.get,
       "Type ID"
     ),
-    "InstanceID" -> ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID"),
+    "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID"),
     "SessionCt" -> new CustomReportingField[ApClassInstance](
       (pb: PersistenceBroker, instances: List[ApClassInstance]) => {
         val sessions: List[ApClassSession] = pb.getObjectsByFilters(
