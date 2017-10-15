@@ -89,7 +89,9 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
         }
         case _ => throw new BadReportingFilterSpecException
       }
-      case CONTROL_CHARS.EOL => filterList = getFilter[T](filterName, sb.toString()) :: filterList
+      case CONTROL_CHARS.EOL =>
+        if (filterName.length > 0)
+          filterList = getFilter[T](filterName, sb.toString()) :: filterList
       case Token(c: Char) => {
         sb.append(c)
         mode match {

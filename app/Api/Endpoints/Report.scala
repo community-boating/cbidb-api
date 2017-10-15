@@ -19,28 +19,15 @@ import scala.concurrent.ExecutionContext
 class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
     val baseEntityString: String = "ApClassInstance"
-    val filtersString: String = "ApClassInstanceYear:2017%(ApClassInstanceType:7|ApClassInstanceType:8)"
+    val filtersString: String =
 
 
     val parser = new ReportingFilterSpecParser(pb)
 
 
+    val instances: Set[ApClassInstance] =
+      parser.parse[ApClassInstance]("ApClassInstanceFilterYear:2017%(ApClassInstanceFilterType:7|ApClassInstanceFilterType:8)").instances
 
-
-    val instances: Set[ApClassInstance] = {
-      //val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
-      val thisYear: ApClassInstanceFilter = parser.getFilter("ApClassInstanceFilterYear", "2017").asInstanceOf[ApClassInstanceFilter]
-      val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, "7")
-      val jib2Classes: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, "8")
-      println("this year " + thisYear.instances.size)
-      println("jib " + jibClasses.instances.size)
-      println("jib2 " + jib2Classes.instances.size)
-      println("jib union jib2 " + jibClasses.or(jib2Classes).instances.size)
-      println("thisyear union jib " + thisYear.or(jibClasses).instances.size)
-      println("thisyear intersect jib " + thisYear.and(jibClasses).instances.size)
-
-      thisYear.and(jibClasses.or(jib2Classes)).instances
-    }
 
     instances.foreach(i => {
       pb.getObjectById(ApClassFormat, i.values.formatId.get) match {
