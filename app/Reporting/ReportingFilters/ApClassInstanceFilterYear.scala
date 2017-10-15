@@ -3,12 +3,12 @@ package Reporting.ReportingFilters
 import Entities.{ApClassInstance, ApClassSession}
 import Services.PersistenceBroker
 
-class ApClassInstanceFilterYear(pb: PersistenceBroker, year: Int) extends ApClassInstanceFilter {
+class ApClassInstanceFilterYear(pb: PersistenceBroker, year: String) extends ApClassInstanceFilter {
   implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
   val instances: Set[ApClassInstance] = {
     val ss: List[ApClassSession] = pb.getObjectsByFilters(
       ApClassSession,
-      List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),
+      List(ApClassSession.fields.sessionDateTime.isYearConstant(year.toInt)),
       1000
     )
     val instanceIDs = ss.map(s => s.values.instanceId.get)

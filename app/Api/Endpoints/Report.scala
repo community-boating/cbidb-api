@@ -12,6 +12,7 @@ import akka.util.ByteString
 import play.api.http.HttpEntity
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc._
+import Reporting.ReportingFilters.ReportingFilterSpecParser
 
 import scala.concurrent.ExecutionContext
 
@@ -21,19 +22,16 @@ class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: Pe
     val filtersString: String = "ApClassInstanceYear:2017%(ApClassInstanceType:7|ApClassInstanceType:8)"
 
 
-
-
-
-
-
+    val parser = new ReportingFilterSpecParser(pb)
 
 
 
 
     val instances: Set[ApClassInstance] = {
-      val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
-      val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 7)
-      val jib2Classes: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, 8)
+      //val thisYear: ApClassInstanceFilter = new ApClassInstanceFilterYear(pb, 2017)
+      val thisYear: ApClassInstanceFilter = parser.getFilter("ApClassInstanceFilterYear", "2017").asInstanceOf[ApClassInstanceFilter]
+      val jibClasses: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, "7")
+      val jib2Classes: ApClassInstanceFilter = new ApClassInstanceFilterType(pb, "8")
       println("this year " + thisYear.instances.size)
       println("jib " + jibClasses.instances.size)
       println("jib2 " + jib2Classes.instances.size)

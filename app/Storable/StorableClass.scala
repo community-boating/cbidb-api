@@ -1,6 +1,5 @@
 package Storable
 
-import Reporting.ReportingFilters.ReportingFilter
 import Storable.Fields.FieldValue._
 import Storable.Fields.IntDatabaseField
 

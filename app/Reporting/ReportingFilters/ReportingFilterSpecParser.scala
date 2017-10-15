@@ -1,9 +1,11 @@
 package Reporting.ReportingFilters
 
+import Reporting.Report.FILTER_MAP
+import Services.PersistenceBroker
 import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
-object ReportingFilterSpecParser {
+class ReportingFilterSpecParser(pb: PersistenceBroker) {
   case class Token(c: Char) {
     def char: Char = c
   }
@@ -109,7 +111,12 @@ object ReportingFilterSpecParser {
     else throw new BadReportingFilterSpecException("No filters could be created")
   }
 
-  def getFilter[T <: StorableClass](filterName: String, filterArgs: String): ReportingFilter[T] = ???
+  def getFilter[T <: StorableClass](filterName: String, filterArgs: String): ReportingFilter[T] = {
+    val filterClass: Class[ReportingFilter[T]] = FILTER_MAP(filterName).asInstanceOf[Class[ReportingFilter[T]]]
+    val rawArgs: Array[String] = filterArgs.split(",")
+    val args: Array[_ <: Object] = Array(pb) ++ rawArgs
+    filterClass.getConstructors()(0).newInstance(args: _*).asInstanceOf[ReportingFilter[T]]
+  }
 
   class BadReportingFilterSpecException(
     private val message: String = "",
