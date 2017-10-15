@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
-import Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import Storable._
 
 class JpClassType extends StorableClass {
@@ -10,7 +10,7 @@ class JpClassType extends StorableClass {
   object values extends ValuesObject {
     val typeId = new IntFieldValue(self, JpClassType.fields.typeId)
     val typeName = new StringFieldValue(self, JpClassType.fields.typeName)
-    val displayOrder = new IntFieldValue(self, JpClassType.fields.displayOrder)
+    val displayOrder = new NullableIntFieldValue(self, JpClassType.fields.displayOrder)
   }
 }
 
@@ -20,7 +20,7 @@ object JpClassType extends StorableObject[JpClassType] {
   object fields extends FieldsObject {
     val typeId = new IntDatabaseField(self, "TYPE_ID")
     val typeName = new StringDatabaseField(self, "TYPE_NAME", 50)
-    val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
+    val displayOrder = new NullableIntDatabaseField(self, "DISPLAY_ORDER")
   }
 
   def primaryKey: IntDatabaseField = fields.typeId
