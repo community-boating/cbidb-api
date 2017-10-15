@@ -5,29 +5,27 @@ import javax.inject.Inject
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.ReportingFields.ApClassInstance.ApClassInstanceReportingFieldSessionCount
 import Reporting.ReportingFields.ReportingField
-import Reporting.ReportingFilters.{ApClassInstanceFilter, ApClassInstanceFilterType, ApClassInstanceFilterYear}
+import Reporting.ReportingFilters._
 import Services.{CacheBroker, PersistenceBroker}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import play.api.http.HttpEntity
 import play.api.inject.ApplicationLifecycle
 import play.api.mvc._
-import Reporting.ReportingFilters.ReportingFilterSpecParser
+import Storable.StorableClass
 
 import scala.concurrent.ExecutionContext
 
 class Report @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
     val baseEntityString: String = "ApClassInstance"
-    val filtersString: String =
 
-
-    val parser = new ReportingFilterSpecParser(pb)
-
+    val parser: ReportingFilterSpecParser[_ <: StorableClass] = Reporting.Report.BASE_ENTITY_MAP(baseEntityString)(pb)
 
     val instances: Set[ApClassInstance] =
-      parser.parse[ApClassInstance]("ApClassInstanceFilterYear:2017%(ApClassInstanceFilterType:7|ApClassInstanceFilterType:8)").instances
-
+      parser.parse("ApClassInstanceFilterYear:2017%(ApClassInstanceFilterType:7|ApClassInstanceFilterType:8)")
+        .instances
+        .asInstanceOf[Set[ApClassInstance]]
 
     instances.foreach(i => {
       pb.getObjectById(ApClassFormat, i.values.formatId.get) match {

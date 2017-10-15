@@ -5,7 +5,7 @@ import Services.PersistenceBroker
 import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
-class ReportingFilterSpecParser(pb: PersistenceBroker) {
+class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker) {
   case class Token(c: Char) {
     def char: Char = c
   }
@@ -36,7 +36,7 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
   case object MODE_EQUALS extends Mode
   case object COLLECTING_RECURSE extends Mode
 
-  def parse[T <: StorableClass](spec: String): ReportingFilter[T] = {
+  def parse(spec: String): ReportingFilter[T] = {
     var mode: Mode = FILTER_NAME
     var sb = new StringBuilder
     var filterName: String = ""
@@ -58,7 +58,7 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
             sb.append(t.char)
           } else {
             // Recurse!
-            filterList = parse[T](sb.toString()) :: filterList
+            filterList = parse(sb.toString()) :: filterList
             sb = new StringBuilder
           }
         }
@@ -81,7 +81,7 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
             case Some(oc: Token) => if (oc != t) throw new BadReportingFilterSpecException("Different operators found in the same expression")
           }
           // finish the current filter...
-          filterList = getFilter[T](filterName, sb.toString()) :: filterList
+          filterList = getFilter(filterName, sb.toString()) :: filterList
           // ... and reset everything for a new one
           mode = FILTER_NAME
           sb = new StringBuilder
@@ -91,7 +91,7 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
       }
       case CONTROL_CHARS.EOL =>
         if (filterName.length > 0)
-          filterList = getFilter[T](filterName, sb.toString()) :: filterList
+          filterList = getFilter(filterName, sb.toString()) :: filterList
       case Token(c: Char) => {
         sb.append(c)
         mode match {
@@ -113,7 +113,7 @@ class ReportingFilterSpecParser(pb: PersistenceBroker) {
     else throw new BadReportingFilterSpecException("No filters could be created")
   }
 
-  def getFilter[T <: StorableClass](filterName: String, filterArgs: String): ReportingFilter[T] = {
+  private def getFilter(filterName: String, filterArgs: String): ReportingFilter[T] = {
     val filterClass: Class[ReportingFilter[T]] = FILTER_MAP(filterName).asInstanceOf[Class[ReportingFilter[T]]]
     val rawArgs: Array[String] = filterArgs.split(",")
     val args: Array[_ <: Object] = Array(pb) ++ rawArgs

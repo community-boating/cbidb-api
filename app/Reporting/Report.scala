@@ -2,7 +2,7 @@ package Reporting
 
 import Entities.ApClassInstance
 import Reporting.ReportingFields.ReportingField
-import Reporting.ReportingFilters.{ApClassInstanceFilterType, ApClassInstanceFilterYear, ReportingFilter}
+import Reporting.ReportingFilters.{ApClassInstanceFilterType, ApClassInstanceFilterYear, ReportingFilter, ReportingFilterSpecParser}
 import Services.PersistenceBroker
 import Storable.{StorableClass, StorableObject}
 import ReportingFields._
@@ -28,21 +28,14 @@ object Report {
   type StorableClassType = Class[_ <: StorableClass]
   type ReportingFilterType = Class[_ <: ReportingFilter[_]]
 
-  val BASE_ENTITY_MAP: Map[String, StorableClassType] = Map(
-    "ApClassInstance" -> classOf[ApClassInstance]
+  val BASE_ENTITY_MAP: Map[String, PersistenceBroker => ReportingFilterSpecParser[_ <: StorableClass]] = Map(
+    "ApClassInstance" -> ((pb: PersistenceBroker) => new ReportingFilterSpecParser[ApClassInstance](pb))
   )
 
   val FILTER_MAP: Map[String, ReportingFilterType] = Map(
     "ApClassInstanceFilterType" -> classOf[ApClassInstanceFilterType],
     "ApClassInstanceFilterYear" -> classOf[ApClassInstanceFilterYear]
   )
-
-  def getBaseEntity(entityName: String): StorableClassType = {
-    BASE_ENTITY_MAP.get(entityName) match {
-      case Some(o: StorableClassType) => o
-      case None => throw new BadReportingBaseEntityException("No such reporting base entity " + entityName)
-    }
-  }
 
   class BadReportingBaseEntityException(
     private val message: String = "",
