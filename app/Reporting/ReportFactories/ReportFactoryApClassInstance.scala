@@ -1,10 +1,11 @@
 package Reporting.ReportFactories
 
 import Entities.{ApClassFormat, ApClassInstance, ApClassSession, ApClassType}
-import Reporting.Report.BadReportingFilterArgumentsException
 import Reporting.ReportFactory
 import Reporting.ReportingFields.{CustomReportingField, ReportingField}
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
+import Reporting.ReportingFilters.ReportingFilter
+import Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApClassInstanceFilterFactoryType, ApClassInstanceFilterFactoryYear}
+import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
 
 class ReportFactoryApClassInstance(
@@ -13,7 +14,7 @@ class ReportFactoryApClassInstance(
 {
   val FIELD_MAP: Map[String, ReportingField[ApClassInstance]] = ReportFactoryApClassInstance.FIELD_MAP
 
-  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[ApClassInstance]] = ReportFactoryApClassInstance.getFilterMap(pb)
+  val FILTER_MAP: Map[String, ReportingFilterFactory[ApClassInstance]] = ReportFactoryApClassInstance.FILTER_MAP
 
   def decorateInstancesWithParentReferences(instances: List[ApClassInstance]): Unit = {
     val formats: Map[Int, ApClassFormat] =
@@ -59,47 +60,8 @@ object ReportFactoryApClassInstance {
     )
   )
 
-  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[ApClassInstance]] = Map(
-    "ApClassInstanceFilterYear" -> ((args: String) => new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
-      implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
-      val ss: List[ApClassSession] = pb.getObjectsByFilters(
-        ApClassSession,
-        List(ApClassSession.fields.sessionDateTime.isYearConstant(args.toInt)),
-        1000
-      )
-      val instanceIDs = ss.map(s => s.values.instanceId.get)
-
-      pb.getObjectsByFilters(
-        ApClassInstance,
-        List(ApClassInstance.fields.instanceId.inList(instanceIDs)),
-        1000
-      ).toSet
-    })),
-    "ApClassInstanceFilterType" -> ((args: String) => new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
-      val typeID: Int = {
-        val ts: List[ApClassType] = pb.getObjectsByFilters(
-          ApClassType,
-          List(ApClassType.fields.typeId.equalsConstant(args.toInt)),
-          5
-        )
-        if (ts.size != 1) throw new BadReportingFilterArgumentsException("No such ApClassType with ID " + args)
-        ts.head.values.typeId.get
-      }
-
-      val formatIDs: List[Int] = {
-        val fs: List[ApClassFormat] = pb.getObjectsByFilters(
-          ApClassFormat,
-          List(ApClassFormat.fields.typeId.equalsConstant(typeID)),
-          5
-        )
-        fs.map(f => f.values.formatId.get)
-      }
-
-      pb.getObjectsByFilters(
-        ApClassInstance,
-        List(ApClassInstance.fields.formatId.inList(formatIDs)),
-        100
-      ).toSet
-    }))
+  val FILTER_MAP: Map[String, ReportingFilterFactory[ApClassInstance]] = Map(
+    "ApClassInstanceFilterYear" -> new ApClassInstanceFilterFactoryYear(),
+    "ApClassInstanceFilterType" -> new ApClassInstanceFilterFactoryType()
   )
 }
