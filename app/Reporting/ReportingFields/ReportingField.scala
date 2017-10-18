@@ -18,25 +18,25 @@ object ReportingField {
     getParent: (T => U),
     fieldDisplayName: String
   ): ReportingField[T] = f match {
-    case i: IntDatabaseField => new CustomReportingField[T]((_: PersistenceBroker, _: List[T]) => (t: T) => {
+    case i: IntDatabaseField => new CustomReportingField[T]((t: T) => {
       getParent(t).intValueMap.get(i.getRuntimeFieldName) match {
         case Some(v: IntFieldValue) => v.get.toString
         case None => ""
       }
     }, fieldDisplayName)
-    case i: NullableIntDatabaseField => new CustomReportingField[T]((_: PersistenceBroker, _: List[T]) => (t: T) => {
+    case i: NullableIntDatabaseField => new CustomReportingField[T]((t: T) => {
       getParent(t).nullableIntValueMap.get(i.getRuntimeFieldName) match {
         case Some(v: NullableIntFieldValue) => v.get.toString
         case None => ""
       }
     }, fieldDisplayName)
-    case i: StringDatabaseField => new CustomReportingField[T]((_: PersistenceBroker, _: List[T]) => (t: T) => {
+    case i: StringDatabaseField => new CustomReportingField[T]((t: T) => {
       getParent(t).stringValueMap.get(i.getRuntimeFieldName) match {
         case Some(v: StringFieldValue) => v.get.toString
         case None => ""
       }
     }, fieldDisplayName)
-    case i: NullableStringDatabaseField => new CustomReportingField[T]((_: PersistenceBroker, _: List[T]) => (t: T) => {
+    case i: NullableStringDatabaseField => new CustomReportingField[T]((t: T) => {
       getParent(t).nullableStringValueMap.get(i.getRuntimeFieldName) match {
         case Some(v: NullableStringFieldValue) => v.get.toString
         case None => ""

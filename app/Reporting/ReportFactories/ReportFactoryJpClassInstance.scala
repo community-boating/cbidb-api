@@ -1,20 +1,25 @@
 package Reporting.ReportFactories
 
+import java.time.format.DateTimeFormatter
+
 import Entities._
 import Reporting.ReportFactory
 import Reporting.ReportingFields.{CustomReportingField, ReportingField}
 import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class ReportFactoryJpClassInstance(
   pb: PersistenceBroker, filterSpec: String, fieldSpec: String
 ) extends ReportFactory[JpClassInstance](pb, filterSpec, fieldSpec)
 {
-  val FIELD_MAP: Map[String, ReportingField[JpClassInstance]] = ReportFactoryJpClassInstance.FIELD_MAP
+  lazy val jpClassTypes: List[JpClassType] = pb.getObjectsByFilters(JpClassType, List(), 20)
 
-  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance]] = ReportFactoryJpClassInstance.FILTER_MAP
+  lazy val jpClassSessions: List[JpClassSession] = pb.getObjectsByFilters(
+    JpClassSession,
+    List(JpClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
+    1000
+  )
 
   def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
     val types: Map[Int, JpClassType] =
@@ -26,22 +31,22 @@ class ReportFactoryJpClassInstance(
       i.setJpClassType(types(i.values.typeId.get))
     })
   }
-}
 
-object ReportFactoryJpClassInstance {
   val FIELD_MAP: Map[String, ReportingField[JpClassInstance]] = Map(
     "TypeId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Type ID"),
     "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Instance ID"),
     "SessionCt" -> new CustomReportingField[JpClassInstance](
-      (pb: PersistenceBroker, instances: List[JpClassInstance]) => {
-        val sessions: List[JpClassSession] = pb.getObjectsByFilters(
-          JpClassSession,
-          List(JpClassSession.fields.instanceId.inList(instances.map(i => i.values.instanceId.get))),
-          100
-        )
-        (i: JpClassInstance) => sessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString
-      },
+      (i: JpClassInstance) => jpClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
       "Session Ct1"
+    ),
+    "FirstSessionDatetime" -> new CustomReportingField[JpClassInstance](
+      (i: JpClassInstance) =>
+        jpClassSessions
+          .filter(_.values.instanceId.get == i.getID)
+          .map(_.values.sessionDateTime.get)
+          .min
+          .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+      "First Session"
     ),
     "TypeDisplayOrder" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
       JpClassType.fields.displayOrder,
@@ -53,31 +58,6 @@ object ReportFactoryJpClassInstance {
       i => i.references.jpClassType.get,
       "TypeName"
     )
-  )
-
-  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[JpClassInstance]] = Map(
-    "JpClassInstanceFilterYear" -> ((args: String) => new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
-      implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
-      val ss: List[JpClassSession] = pb.getObjectsByFilters(
-        JpClassSession,
-        List(JpClassSession.fields.sessionDateTime.isYearConstant(args.toInt)),
-        1000
-      )
-      val instanceIDs = ss.map(s => s.values.instanceId.get).distinct
-
-      pb.getObjectsByFilters(
-        JpClassInstance,
-        List(JpClassInstance.fields.instanceId.inList(instanceIDs)),
-        1000
-      ).toSet
-    })),
-    "JpClassInstanceFilterType" -> ((args: String) => new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
-      pb.getObjectsByFilters(
-        JpClassInstance,
-        List(JpClassInstance.fields.typeId.equalsConstant(args.toInt)),
-        100
-      ).toSet
-    }))
   )
 
   val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance]] = Map(
