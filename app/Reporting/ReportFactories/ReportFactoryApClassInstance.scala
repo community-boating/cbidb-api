@@ -3,8 +3,7 @@ package Reporting.ReportFactories
 import java.time.format.DateTimeFormatter
 
 import Entities._
-import Reporting.ReportFactory
-import Reporting.ReportingFields.{CustomReportingField, ReportingField}
+import Reporting.{ReportFactory, ReportingField}
 import Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApClassInstanceFilterFactoryType, ApClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
@@ -52,11 +51,11 @@ class ReportFactoryApClassInstance(
       "Type ID"
     ),
     "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID"),
-    "SessionCt" -> new CustomReportingField[ApClassInstance](
+    "SessionCt" -> new ReportingField[ApClassInstance](
       (i: ApClassInstance) => apClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
       "Session Ct1"
     ),
-    "FirstSessionDatetime" -> new CustomReportingField[ApClassInstance](
+    "FirstSessionDatetime" -> new ReportingField[ApClassInstance](
       (i: ApClassInstance) =>
         apClassSessions
           .filter(_.values.instanceId.get == i.getID)

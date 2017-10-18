@@ -3,8 +3,7 @@ package Reporting.ReportFactories
 import java.time.format.DateTimeFormatter
 
 import Entities._
-import Reporting.ReportFactory
-import Reporting.ReportingFields.{CustomReportingField, ReportingField}
+import Reporting.{ReportFactory, ReportingField}
 import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
@@ -33,13 +32,13 @@ class ReportFactoryJpClassInstance(
   }
 
   val FIELD_MAP: Map[String, ReportingField[JpClassInstance]] = Map(
-    "TypeId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Type ID"),
+    "TypeId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.typeId, "Type ID"),
     "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Instance ID"),
-    "SessionCt" -> new CustomReportingField[JpClassInstance](
+    "SessionCt" -> new ReportingField[JpClassInstance](
       (i: JpClassInstance) => jpClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
       "Session Ct1"
     ),
-    "FirstSessionDatetime" -> new CustomReportingField[JpClassInstance](
+    "FirstSessionDatetime" -> new ReportingField[JpClassInstance](
       (i: JpClassInstance) =>
         jpClassSessions
           .filter(_.values.instanceId.get == i.getID)

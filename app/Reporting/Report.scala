@@ -5,6 +5,7 @@ import Services.PersistenceBroker
 
 case class Report(baseEntityName: String, filterSpec: String, fieldSpec: String) {
   def getReport(pb: PersistenceBroker): String = {
+
     val factory = baseEntityName match {
       case "ApClassInstance" => new ReportFactoryApClassInstance(pb, filterSpec, fieldSpec)
       case "JpClassInstance" => new ReportFactoryJpClassInstance(pb, filterSpec, fieldSpec)

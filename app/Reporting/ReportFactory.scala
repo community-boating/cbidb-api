@@ -2,7 +2,6 @@ package Reporting
 
 import java.time.{LocalDateTime, ZoneId}
 
-import Reporting.ReportingFields.ReportingField
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterSpecParser}
 import Services.PersistenceBroker
@@ -43,7 +42,7 @@ abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSp
 
   def getReportText: String = {
     setInstances()
-    val valueFunctions: List[ValueFunction] = getFields.map(f => f.getValueFunction(pb, getInstances))
+    val valueFunctions: List[ValueFunction] = getFields.map(f => f.valueFunction)
 
     getFields.map(f => f.fieldDisplayName).mkString("\t") +
       "\n" +

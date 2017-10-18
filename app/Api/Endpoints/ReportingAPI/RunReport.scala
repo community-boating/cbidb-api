@@ -1,4 +1,4 @@
-package Api.Endpoints
+package Api.Endpoints.ReportingAPI
 
 import javax.inject.Inject
 

@@ -30,7 +30,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
     pb.getObjectsByFilters(
       ApClassInstance,
       List(ApClassInstance.fields.formatId.inList(formatIDs)),
-      100
+      500
     ).toSet
   })
 }
