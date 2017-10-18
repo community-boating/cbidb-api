@@ -1,6 +1,7 @@
 package Reporting
 
 import Reporting.ReportingFields.ReportingField
+import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterSpecParser}
 import Services.PersistenceBroker
 import Storable.StorableClass
@@ -10,7 +11,7 @@ abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSp
 
   val FIELD_MAP: Map[String, ReportingField[T]]
 
-  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[T]]
+  val FILTER_MAP: Map[String, ReportingFilterFactory[T]]
 
   def getReportText: String = {
     val fields = getFields
@@ -31,7 +32,7 @@ abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSp
   protected def decorateInstancesWithParentReferences(instances: List[T]): Unit
 
   private def getCombinedFilter: ReportingFilter[T] = {
-    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, getFilterMap(pb))
+    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, FILTER_MAP)
     parser.parse(filterSpec)
   }
 

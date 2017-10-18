@@ -2,8 +2,8 @@ package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.Report.BadReportingFilterArgumentsException
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
+import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] {

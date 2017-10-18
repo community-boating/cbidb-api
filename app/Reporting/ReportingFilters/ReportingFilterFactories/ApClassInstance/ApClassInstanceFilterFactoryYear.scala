@@ -1,8 +1,8 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassInstance, ApClassSession}
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
+import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassInstance] {

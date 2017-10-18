@@ -1,9 +1,10 @@
 package Reporting.ReportFactories
 
 import Entities._
-import Reporting.Report.BadReportingFilterArgumentsException
 import Reporting.ReportFactory
 import Reporting.ReportingFields.{CustomReportingField, ReportingField}
+import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
+import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
@@ -13,7 +14,7 @@ class ReportFactoryJpClassInstance(
 {
   val FIELD_MAP: Map[String, ReportingField[JpClassInstance]] = ReportFactoryJpClassInstance.FIELD_MAP
 
-  def getFilterMap(pb: PersistenceBroker): Map[String, String => ReportingFilter[JpClassInstance]] = ReportFactoryJpClassInstance.getFilterMap(pb)
+  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance]] = ReportFactoryJpClassInstance.FILTER_MAP
 
   def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
     val types: Map[Int, JpClassType] =
@@ -50,7 +51,7 @@ object ReportFactoryJpClassInstance {
     "TypeName" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
       JpClassType.fields.typeName,
       i => i.references.jpClassType.get,
-      "TypeDisplayOrder"
+      "TypeName"
     )
   )
 
@@ -77,5 +78,10 @@ object ReportFactoryJpClassInstance {
         100
       ).toSet
     }))
+  )
+
+  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance]] = Map(
+    "JpClassInstanceFilterYear" -> new JpClassInstanceFilterFactoryYear(),
+    "JpClassInstanceFilterType" -> new JpClassInstanceFilterFactoryType()
   )
 }

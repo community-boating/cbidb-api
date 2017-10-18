@@ -14,7 +14,6 @@ import com.google.inject.AbstractModule
  * configuration file.
  */
 class Module extends AbstractModule {
-
   override def configure() = {
     bind(classOf[CacheBroker]).to(classOf[RedisBroker])
 
