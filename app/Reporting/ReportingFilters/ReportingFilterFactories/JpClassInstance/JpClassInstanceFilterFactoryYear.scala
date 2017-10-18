@@ -6,6 +6,7 @@ import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class JpClassInstanceFilterFactoryYear extends ReportingFilterFactory[JpClassInstance] {
+  val displayName: String = "By Season"
   def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[JpClassInstance] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
     implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
     val ss: List[JpClassSession] = pb.getObjectsByFilters(

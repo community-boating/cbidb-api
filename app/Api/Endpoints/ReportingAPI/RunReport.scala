@@ -15,7 +15,7 @@ class RunReport @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: 
     val filterSpec: String = "ApClassInstanceFilterType:1"
     val fieldSpec: String = "TypeName,TypeId,InstanceId,SessionCt,TypeDisplayOrder,FirstSessionDatetime"
 
-    val reportResult: String = Report(baseEntityString, filterSpec, fieldSpec).getReport(pb)
+    val reportResult: String = Report.getReport(pb, baseEntityString, filterSpec, fieldSpec)
     Ok(reportResult)
 
    /* val source: Source[ByteString, _] = Source.single(ByteString(reportResult))

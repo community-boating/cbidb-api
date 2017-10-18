@@ -7,6 +7,7 @@ import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] {
+  val displayName: String = "By Class Type"
   def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
     val typeID: Int = {
       val ts: List[ApClassType] = pb.getObjectsByFilters(
