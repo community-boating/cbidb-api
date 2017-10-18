@@ -8,10 +8,7 @@ import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpCl
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
 
-class ReportFactoryJpClassInstance(
-  pb: PersistenceBroker, filterSpec: String, fieldSpec: String
-) extends ReportFactory[JpClassInstance](pb, filterSpec, fieldSpec)
-{
+class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
   lazy val jpClassTypes: List[JpClassType] = pb.getObjectsByFilters(JpClassType, List(), 20)
 
   lazy val jpClassSessions: List[JpClassSession] = pb.getObjectsByFilters(

@@ -7,7 +7,30 @@ import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterSpecParser}
 import Services.PersistenceBroker
 import Storable.StorableClass
 
-abstract class ReportFactory[T <: StorableClass](pb: PersistenceBroker, filterSpec: String, fieldSpec: String) {
+abstract class ReportFactory[T <: StorableClass] {
+  private var pbWrapper: Option[PersistenceBroker] = None
+  private var filterSpecWrapper: Option[String] = None
+  private var fieldSpecWrapper: Option[String] = None
+  def setParameters(pb: PersistenceBroker, filterSpec: String, fieldSpec: String): Unit = {
+    pbWrapper = Some(pb)
+    filterSpecWrapper = Some(filterSpec)
+    fieldSpecWrapper = Some(fieldSpec)
+  }
+  def pb: PersistenceBroker = pbWrapper match {
+    case Some(x: PersistenceBroker) => x
+    case None => throw new Exception("Referenced ReportFactory params before they were set")
+  }
+  def filterSpec: String = filterSpecWrapper match {
+    case Some(x: String) => x
+    case None => throw new Exception("Referenced ReportFactory params before they were set")
+  }
+  def fieldSpec: String = fieldSpecWrapper match {
+    case Some(x: String) => x
+    case None => throw new Exception("Referenced ReportFactory params before they were set")
+  }
+
+
+
   type ValueFunction = (T => String)
   implicit val localDateTimeOrdering: Ordering[LocalDateTime] = Ordering.by(
     (d: LocalDateTime) => d.atZone(ZoneId.systemDefault).toInstant.toEpochMilli

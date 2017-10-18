@@ -8,10 +8,7 @@ import Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApCl
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
 
-class ReportFactoryApClassInstance(
-  pb: PersistenceBroker, filterSpec: String, fieldSpec: String
-) extends ReportFactory[ApClassInstance](pb, filterSpec, fieldSpec)
-{
+class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
   lazy val apClassFormats: List[ApClassFormat] = pb.getObjectsByFilters(ApClassFormat, List(), 20)
 
   lazy val apClassTypes: List[ApClassType] = pb.getObjectsByFilters(ApClassType, List(), 20)
