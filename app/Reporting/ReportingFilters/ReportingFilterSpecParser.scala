@@ -5,7 +5,7 @@ import Services.PersistenceBroker
 import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
-class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filterMap: Map[String, ReportingFilterFactory[T]]) {
+class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filterMap: Map[String, ReportingFilterFactory[T, _]]) {
   case class Token(c: Char) {
     def char: Char = c
   }

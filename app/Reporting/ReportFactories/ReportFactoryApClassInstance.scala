@@ -73,7 +73,7 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
     )
   )
 
-  val FILTER_MAP: Map[String, ReportingFilterFactory[ApClassInstance]] = Map(
+  val FILTER_MAP: Map[String, ReportingFilterFactory[ApClassInstance, _]] = Map(
     "ApClassInstanceFilterYear" -> new ApClassInstanceFilterFactoryYear(),
     "ApClassInstanceFilterType" -> new ApClassInstanceFilterFactoryType()
   )

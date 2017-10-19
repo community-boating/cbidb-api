@@ -29,15 +29,13 @@ abstract class ReportFactory[T <: StorableClass] {
     case None => throw new Exception("Referenced ReportFactory params before they were set")
   }
 
-
-
   type ValueFunction = (T => String)
   implicit val localDateTimeOrdering: Ordering[LocalDateTime] = Ordering.by(
     (d: LocalDateTime) => d.atZone(ZoneId.systemDefault).toInstant.toEpochMilli
   )
 
   val FIELD_MAP: Map[String, ReportingField[T]]
-  val FILTER_MAP: Map[String, ReportingFilterFactory[T]]
+  val FILTER_MAP: Map[String, ReportingFilterFactory[T, _]]
 
   lazy val getFields: List[ReportingField[T]] = {
     val FIELD_SEPARATOR: Char = ','

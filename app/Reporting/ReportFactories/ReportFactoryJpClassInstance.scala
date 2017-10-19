@@ -56,7 +56,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
     )
   )
 
-  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance]] = Map(
+  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance, _]] = Map(
     "JpClassInstanceFilterYear" -> new JpClassInstanceFilterFactoryYear(),
     "JpClassInstanceFilterType" -> new JpClassInstanceFilterFactoryType()
   )

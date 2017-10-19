@@ -2,20 +2,20 @@ package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.Report.BadReportingFilterArgumentsException
-import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
+import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactory, ReportingFilterFactoryInt}
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
-class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] {
+class ApClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[ApClassInstance] {
   val displayName: String = "By Class Type"
-  def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
+  def getFilterCastArg(pb: PersistenceBroker, typeId: Int): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
     val typeID: Int = {
       val ts: List[ApClassType] = pb.getObjectsByFilters(
         ApClassType,
-        List(ApClassType.fields.typeId.equalsConstant(args.toInt)),
+        List(ApClassType.fields.typeId.equalsConstant(typeId)),
         5
       )
-      if (ts.size != 1) throw new BadReportingFilterArgumentsException("No such ApClassType with ID " + args)
+      if (ts.size != 1) throw new BadReportingFilterArgumentsException("No such ApClassType with ID " + typeId)
       ts.head.values.typeId.get
     }
 

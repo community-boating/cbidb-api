@@ -2,6 +2,7 @@ package Api.Endpoints.ReportingAPI
 
 import javax.inject.Inject
 
+import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactoryInt
 import Reporting.{Report, ReportFactory}
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.StorableClass
@@ -23,7 +24,11 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
 
       // Field name and display name
       val fieldData: List[(String, String)] = factoryInstance.FIELD_MAP.map(f => (f._1, f._2.fieldDisplayName)).toList
-      val filterData: List[(String, String)] = factoryInstance.FILTER_MAP.map(f => (f._1, f._2.displayName)).toList
+      val filterData: List[(String, String, String)] = factoryInstance.FILTER_MAP.map(f => (f._1, f._2.displayName, f._2 match {
+        case _: ReportingFilterFactoryInt[_] => "Int"
+        case _ => throw new Exception("Unconfigured filter factory type for " + f._1)
+      })).toList
+
       m ++ JsObject(Map(
         entityName -> JsObject(Map(
           "displayName" -> JsString(entityDisplayName),
@@ -34,7 +39,10 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
           }),
           "filterData" -> filterData.foldLeft(new JsObject(Map()))((m, t) => {
             m ++ JsObject(Map(
-              t._1 -> JsString(t._2)
+              t._1 -> JsObject(Map(
+                "displayName" -> JsString(t._2),
+                "type" -> JsString(t._3)
+              ))
             ))
           })
         ))

@@ -189,7 +189,7 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
       getFieldValues(i.dateValueMap) ++
       getFieldValues(i.dateTimeValueMap)
 
-    var sb = new StringBuilder()
+    val sb = new StringBuilder()
     sb.append("INSERT INTO " + i.getCompanion.entityName + " ( ")
     sb.append(fieldValues.map(fv => fv.getPersistenceFieldName).mkString(", "))
     sb.append(") VALUES (")
