@@ -6,11 +6,11 @@ import Storable.{Filter, ProtoStorable, StorableObject}
 class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
   def getFieldLength: Int = fieldLength
 
-  def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = getFieldLength match {
+  def getFieldType(implicit pb: PersistenceBroker): String = getFieldLength match {
     case l if l == 1 => "char(" + getFieldLength + ")"
-    case _ => pbClass match {
-      case x if x == classOf[MysqlBroker] => "varchar(" + getFieldLength + ")"
-      case x if x == classOf[OracleBroker]  => "varchar2(" + getFieldLength + ")"
+    case _ => pb match {
+      case _: MysqlBroker => "varchar(" + getFieldLength + ")"
+      case _: OracleBroker  => "varchar2(" + getFieldLength + ")"
     }
   }
 

@@ -14,6 +14,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
+  implicit val pb: PersistenceBroker = this
   RelationalBroker.createPool(cp, () => {
     lifecycle.addStopHook(() => Future.successful({
       println("  ************    Shutting down!  Closing pool!!  *************  ")
@@ -55,7 +56,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       //sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
       sb.append(" WHERE (" + groupIDs(ids).map(group => {
         obj.primaryKey.getPersistenceFieldName + " in (" + group.mkString(", ") + ")"
-      })).mkString(" OR ") + " ) "
+      }).mkString(" OR ") + " ) ")
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }
@@ -187,7 +188,6 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
 
 
   private def insertObject(i: StorableClass): Unit = {
-    implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
     println("inserting woooo")
     def getFieldValues(vm: Map[String, FieldValue[_]]): List[FieldValue[_]] =
       vm.values
@@ -214,8 +214,6 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   }
 
   private def updateObject(i: StorableClass): Unit = {
-    implicit val pbClass: Class[_ <: PersistenceBroker] = this.getClass
-
     def getUpdateExpressions(vm: Map[String, FieldValue[_]]): List[String] =
       vm.values
       .filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName)

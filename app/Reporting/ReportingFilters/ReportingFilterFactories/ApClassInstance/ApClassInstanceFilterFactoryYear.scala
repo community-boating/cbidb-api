@@ -1,14 +1,14 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassInstance, ApClassSession}
-import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactory, ReportingFilterFactoryInt}
+import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactoryInt
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
 class ApClassInstanceFilterFactoryYear extends ReportingFilterFactoryInt[ApClassInstance] {
   val displayName: String = "By Season"
-  def getFilterCastArg(pb: PersistenceBroker, year: Int): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
-    implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
+  def getFilterCastArg(pb: PersistenceBroker, year: Int): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+    implicit val pb: PersistenceBroker = _pb
     val ss: List[ApClassSession] = pb.getObjectsByFilters(
       ApClassSession,
       List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),

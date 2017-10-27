@@ -3,10 +3,9 @@ package Reporting.ReportFactories
 import java.time.format.DateTimeFormatter
 
 import Entities._
-import Reporting.{ReportFactory, ReportingField}
 import Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApClassInstanceFilterFactoryType, ApClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
-import Services.PersistenceBroker
+import Reporting.{ReportFactory, ReportingField}
 
 class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
   lazy val apClassFormats: List[ApClassFormat] = pb.getObjectsByFilters(ApClassFormat, List(), 20)

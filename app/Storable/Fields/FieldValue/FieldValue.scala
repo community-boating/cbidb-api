@@ -22,6 +22,6 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
   }
 
   def getPersistenceFieldName: String = field.getPersistenceFieldName
-  def getPersistenceLiteral(implicit pbClass: Class[_ <: PersistenceBroker]): String
+  def getPersistenceLiteral(implicit pb: PersistenceBroker): String
   def getField: DatabaseField[T] = field
 }

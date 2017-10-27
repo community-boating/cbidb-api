@@ -3,14 +3,13 @@ package Storable.Fields
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.{MysqlBroker, OracleBroker, PersistenceBroker, RelationalBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
   val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-  def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
-    case x if x == classOf[MysqlBroker] => "date"
-    case x if x == classOf[OracleBroker] => "date"
+  def getFieldType(implicit pb: PersistenceBroker): String = pb match {
+    case _: RelationalBroker => "date"
   }
 
   def findValueInProtoStorable(row: ProtoStorable): Option[LocalDate] = {
@@ -21,19 +20,19 @@ class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String)
     }
   }
 
-  def isYearConstant(year: Int)(implicit pbClass: Class[_ <: PersistenceBroker]): Filter = pbClass match {
-    case x if x == classOf[MysqlBroker] => {
+  def isYearConstant(year: Int)(implicit pb: PersistenceBroker): Filter = pb match {
+    case _: MysqlBroker => {
       val jan1 = LocalDate.of(year, 1, 1)
       val nextJan1 = LocalDate.of(year+1, 1, 1)
       Filter(getFullyQualifiedName + ">= " + jan1.format(standardPattern) + " AND " + getFullyQualifiedName + " < " + nextJan1.format(standardPattern))
     }
-    case x if x == classOf[OracleBroker] => Filter("TO_CHAR(" + getFullyQualifiedName + ", 'YYYY') = " + year)
+    case _: OracleBroker => Filter("TO_CHAR(" + getFullyQualifiedName + ", 'YYYY') = " + year)
   }
 
-  def isDateConstant(date: LocalDate)(implicit pbClass: Class[_ <: PersistenceBroker]): Filter = pbClass match {
-    case x if x == classOf[MysqlBroker] =>
+  def isDateConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = pb match {
+    case _: MysqlBroker =>
       Filter(getFullyQualifiedName + " = '" + date.format(standardPattern) + "'")
-    case x if x == classOf[OracleBroker] =>
+    case _: OracleBroker =>
       Filter("TRUNC(" + getFullyQualifiedName + ") = TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
   }
 
@@ -41,7 +40,7 @@ class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String)
     try {
       Some(LocalDate.parse(s, standardPattern))
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 }

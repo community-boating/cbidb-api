@@ -7,7 +7,7 @@ import Reporting.{Report, ReportFactory}
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.StorableClass
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsNull, JsObject, JsString}
+import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext

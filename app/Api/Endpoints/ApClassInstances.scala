@@ -15,8 +15,7 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
-  implicit val pbClass: Class[_ <: PersistenceBroker] = pb.getClass
+class ApClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, implicit val pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(startDate: Option[String]): Action[AnyContent] = Action.async {
     val request = new ApClassInstancesRequest(startDate)
     request.getFuture.map(s => {

@@ -5,7 +5,7 @@ import Storable.Fields.NullableIntDatabaseField
 import Storable.StorableClass
 
 class NullableIntFieldValue(instance: StorableClass, field: NullableIntDatabaseField) extends FieldValue[Option[Int]](instance, field) {
-  def getPersistenceLiteral(implicit pbClass: Class[_ <: PersistenceBroker]): String = super.get match {
+  def getPersistenceLiteral(implicit pb: PersistenceBroker): String = super.get match {
     case Some(x) => x.toString
     case None => "NULL"
   }

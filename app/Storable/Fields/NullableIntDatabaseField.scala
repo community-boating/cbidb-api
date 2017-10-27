@@ -6,9 +6,9 @@ import Storable.{Filter, ProtoStorable, StorableObject}
 class NullableIntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
   def findValueInProtoStorable(row: ProtoStorable): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)
 
-  def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
-    case x if x == classOf[MysqlBroker] => "integer"
-    case x if x == classOf[OracleBroker] => "number"
+  def getFieldType(implicit pb: PersistenceBroker): String = pb match {
+    case _: MysqlBroker => "integer"
+    case _: OracleBroker => "number"
   }
 
   def lessThanConstant(c: Int): Filter = {
@@ -43,7 +43,7 @@ class NullableIntDatabaseField(entity: StorableObject[_], persistenceFieldName: 
         val d = s.toInt
         Some(Some(d))
       } catch {
-        case _ => None
+        case _: Throwable => None
       }
     }
   }

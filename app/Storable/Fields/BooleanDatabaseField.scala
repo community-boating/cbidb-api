@@ -1,16 +1,15 @@
 package Storable.Fields
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.{PersistenceBroker, RelationalBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
   def getFieldLength: Int = 1
 
-  def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = getFieldLength match {
+  def getFieldType(implicit pb: PersistenceBroker): String = getFieldLength match {
     case l if l == 1 => "char(" + getFieldLength + ")"
-    case _ => pbClass match {
-      case x if x == classOf[MysqlBroker] => "char(1)"
-      case x if x == classOf[OracleBroker]  => "char(1)"
+    case _ => pb match {
+      case _: RelationalBroker => "char(1)"
     }
   }
 

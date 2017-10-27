@@ -16,10 +16,11 @@ abstract class ReportFactory[T <: StorableClass] {
     filterSpecWrapper = Some(filterSpec)
     fieldSpecWrapper = Some(fieldSpec)
   }
-  def pb: PersistenceBroker = pbWrapper match {
+  implicit def pb: PersistenceBroker = pbWrapper match {
     case Some(x: PersistenceBroker) => x
     case None => throw new Exception("Referenced ReportFactory params before they were set")
   }
+
   def filterSpec: String = filterSpecWrapper match {
     case Some(x: String) => x
     case None => throw new Exception("Referenced ReportFactory params before they were set")

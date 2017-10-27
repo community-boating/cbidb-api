@@ -4,9 +4,9 @@ import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
 import Storable.{ProtoStorable, StorableObject}
 
 class DoubleDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Double](entity, persistenceFieldName) {
-  def getFieldType(implicit pbClass: Class[_ <: PersistenceBroker]): String = pbClass match {
-    case x if x == classOf[MysqlBroker] => "decimal"
-    case x if x == classOf[OracleBroker] => "number"
+  def getFieldType(implicit pb: PersistenceBroker): String = pb match {
+    case _: MysqlBroker => "decimal"
+    case _: OracleBroker => "number"
   }
 
   def findValueInProtoStorable(row: ProtoStorable): Option[Double] = {
@@ -22,7 +22,7 @@ class DoubleDatabaseField(entity: StorableObject[_], persistenceFieldName: Strin
       val d = s.toDouble
       Some(d)
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 }
