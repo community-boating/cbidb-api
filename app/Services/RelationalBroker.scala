@@ -13,7 +13,7 @@ import play.api.inject.ApplicationLifecycle
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
+abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
   RelationalBroker.createPool(cp, () => {
     lifecycle.addStopHook(() => Future.successful({
       println("  ************    Shutting down!  Closing pool!!  *************  ")
@@ -22,6 +22,8 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
   })
 
   private val pool = RelationalBroker.getPool
+
+  val MAX_EXPR_IN_LIST: Int
 
   def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
@@ -35,13 +37,25 @@ class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstr
   }
 
   def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+    def groupIDs(ids: List[Int]): List[List[Int]] = {
+      val MAX_IDS = 900
+      if (ids.length <= MAX_IDS) List(ids)
+      else {
+        val splitList = ids.splitAt(MAX_IDS)
+        splitList._1 :: groupIDs(splitList._2)
+      }
+    }
+
     if (ids.isEmpty) List.empty
     else {
       val sb: StringBuilder = new StringBuilder
       sb.append("SELECT ")
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
-      sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
+      //sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
+      sb.append(" WHERE (" + groupIDs(ids).map(group => {
+        obj.primaryKey.getPersistenceFieldName + " in (" + group.mkString(", ") + ")"
+      })).mkString(" OR ") + " ) "
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, true))
     }

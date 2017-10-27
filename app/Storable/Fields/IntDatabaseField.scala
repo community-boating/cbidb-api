@@ -21,9 +21,20 @@ class IntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) 
     Filter(getFullyQualifiedName + " < " + c)
   }
 
-  def inList(l: List[Int]): Filter =  {
+  def inList(l: List[Int]): Filter = {
+    def groupIDs(ids: List[Int]): List[List[Int]] = {
+      val MAX_IDS = 900
+      if (ids.length <= MAX_IDS) List(ids)
+      else {
+        val splitList = ids.splitAt(MAX_IDS)
+        splitList._1 :: groupIDs(splitList._2)
+      }
+    }
+
     if (l.isEmpty) Filter("")
-    else Filter(getFullyQualifiedName + " in (" + l.mkString(", ") + ")")
+    else Filter(groupIDs(l).map(group => {
+      getFullyQualifiedName + " in (" + group.mkString(", ") + ")"
+    }).mkString(" OR "))
   }
 
   def equalsConstant(i: Int): Filter = Filter(getFullyQualifiedName + " = " + i)
