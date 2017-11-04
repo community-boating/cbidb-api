@@ -7,7 +7,7 @@ import Reporting.{Report, ReportFactory}
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.StorableClass
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsObject, JsString}
+import play.api.libs.json.{JsArray, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
     // Tuples of (displayName, keyCode)
-    val resultData: JsObject = Report.reportFactoryMap.foldLeft(new JsObject(Map()))((m, e) => {
+    val resultData: JsArray = Report.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
       val entityName: String = e._1
       val entityDisplayName: String = e._2._1
 
@@ -29,23 +29,22 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
         case _ => throw new Exception("Unconfigured filter factory type for " + f._1)
       })).toList
 
-      m ++ JsObject(Map(
-        entityName -> JsObject(Map(
-          "displayName" -> JsString(entityDisplayName),
-          "fieldData" -> fieldData.foldLeft(new JsObject(Map()))((m, t) => {
-            m ++ JsObject(Map(
-              t._1 -> JsString(t._2)
-            ))
-          }),
-          "filterData" -> filterData.foldLeft(new JsObject(Map()))((m, t) => {
-            m ++ JsObject(Map(
-              t._1 -> JsObject(Map(
-                "displayName" -> JsString(t._2),
-                "type" -> JsString(t._3)
-              ))
-            ))
-          })
-        ))
+      arr append JsObject(Map(
+        "entityName" -> JsString(entityName),
+        "displayName" -> JsString(entityDisplayName),
+        "fieldData" -> fieldData.foldLeft(new JsArray)((arr, t) => {
+         arr append JsObject(Map(
+           "fieldName" -> JsString(t._1),
+           "fieldDisplayName" -> JsString(t._2)
+          ))
+        }),
+        "filterData" -> filterData.foldLeft(new JsArray)((arr, t) => {
+          arr append JsObject(Map(
+            "filterName" -> JsString(t._1),
+            "displayName" -> JsString(t._2),
+            "filterType" -> JsString(t._3)
+          ))
+        })
       ))
     })
     println(resultData)
@@ -54,5 +53,3 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
     Ok(resultData).as("application/json")
   }
 }
-
-/**/
