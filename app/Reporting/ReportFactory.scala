@@ -71,17 +71,15 @@ abstract class ReportFactory[T <: StorableClass] {
     case None => throw new Exception("Tried to get instances before they were set")
   }
 
-  def getReportText: String = {
+  def getHeaders: List[String] = getFields.map(f => f.fieldDisplayName)
+  def getRows: List[List[String]] = {
     setInstances()
     val valueFunctions: List[ValueFunction] = getFields.map(f => f.valueFunction)
-
-    getFields.map(f => f.fieldDisplayName).mkString("\t") +
-      "\n" +
-      instances.get.map(i => {
-        valueFunctions.map(fn => {
-          fn(i)
-        }).mkString("\t")
-      }).mkString("\n")
+    instances.get.map(i => {
+      valueFunctions.map(fn => {
+        fn(i)
+      })
+    })
   }
 
   protected def decorateInstancesWithParentReferences(instances: List[T]): Unit

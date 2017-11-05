@@ -8,7 +8,8 @@ GET     /jp-teams                           Api.Endpoints.JpTeams.get()
 GET     /weather                            Api.Endpoints.Weather.get()
 GET     /users                              Api.Endpoints.Users.get(userID: Option[Int])
 POST    /user                               Api.Endpoints.UserCrud.post()
-GET     /report                             Api.Endpoints.ReportingAPI.RunReport.get()
+GET     /reporttest                         Api.Endpoints.ReportingAPI.RunReport.getTest()
+GET     /report                             Api.Endpoints.ReportingAPI.RunReport.get(baseEntityString: String, filterSpec: String, fieldSpec: String)
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
 
 

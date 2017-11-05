@@ -13,6 +13,7 @@ object JsonUtil {
     }
   }
 
+  // TODO: convert all apis to report runs, get rid of this
   def getMetaData(fields: Seq[String]): JsArray =
     JsArray(
       fields.map(f =>
