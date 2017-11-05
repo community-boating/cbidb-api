@@ -26,6 +26,15 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
 
   val MAX_EXPR_IN_LIST: Int
 
+  def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
+    val sb: StringBuilder = new StringBuilder
+    sb.append("SELECT ")
+    sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
+    sb.append(" FROM " + obj.entityName)
+    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
+    rows.map(r => obj.construct(r, true))
+  }
+
   def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")

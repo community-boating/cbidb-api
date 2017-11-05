@@ -6,6 +6,7 @@ import Entities._
 import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
+import Storable.StorableObject
 
 class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
   lazy val jpClassTypes: List[JpClassType] = pb.getObjectsByFilters(JpClassType, List(), 20)
@@ -15,6 +16,8 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
     List(JpClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
     1000
   )
+
+  val entityCompanion: StorableObject[JpClassInstance] = JpClassInstance
 
   def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
     val types: Map[Int, JpClassType] =

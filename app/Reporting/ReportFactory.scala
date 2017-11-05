@@ -3,9 +3,9 @@ package Reporting
 import java.time.{LocalDateTime, ZoneId}
 
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterSpecParser}
+import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction, ReportingFilterSpecParser}
 import Services.PersistenceBroker
-import Storable.StorableClass
+import Storable.{StorableClass, StorableObject}
 
 abstract class ReportFactory[T <: StorableClass] {
   private var pbWrapper: Option[PersistenceBroker] = None
@@ -38,13 +38,22 @@ abstract class ReportFactory[T <: StorableClass] {
   val FIELD_MAP: Map[String, ReportingField[T]]
   val FILTER_MAP: Map[String, ReportingFilterFactory[T, _]]
 
+  val entityCompanion: StorableObject[T]
+  // TODO: some sanity check that this can't be more than like 100 things or something
+  val getAllFilter: (PersistenceBroker => ReportingFilter[T]) = pb =>
+    new ReportingFilterFunction[T](pb, pb => {
+      pb.getAllObjectsOfClass(
+        entityCompanion
+      ).toSet
+    })
+
   lazy val getFields: List[ReportingField[T]] = {
     val FIELD_SEPARATOR: Char = ','
     fieldSpec.split(FIELD_SEPARATOR).toList.map(FIELD_MAP(_))
   }
 
   lazy private val getCombinedFilter: ReportingFilter[T] = {
-    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, FILTER_MAP)
+    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, FILTER_MAP, getAllFilter)
     parser.parse(filterSpec)
   }
 

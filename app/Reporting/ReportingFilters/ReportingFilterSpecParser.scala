@@ -5,7 +5,11 @@ import Services.PersistenceBroker
 import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
-class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filterMap: Map[String, ReportingFilterFactory[T, _]]) {
+class ReportingFilterSpecParser[T <: StorableClass](
+  pb: PersistenceBroker,
+  filterMap: Map[String, ReportingFilterFactory[T, _]],
+  getAllFilter: (PersistenceBroker => ReportingFilter[T])
+) {
   case class Token(c: Char) {
     def char: Char = c
   }
@@ -38,6 +42,11 @@ class ReportingFilterSpecParser[T <: StorableClass](pb: PersistenceBroker, filte
   case object CLOSED_EXPR extends Mode
 
   def parse(spec: String): ReportingFilter[T] = {
+    if (spec.length == 0) getAllFilter(pb)
+    else parseNotEmpty(spec)
+  }
+
+  private def parseNotEmpty(spec: String): ReportingFilter[T] = {
     var mode: Mode = FILTER_NAME
     var sb = new StringBuilder
     var filterName: String = ""
