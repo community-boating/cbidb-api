@@ -11,9 +11,9 @@ import scala.concurrent.ExecutionContext
 
 class RunReport @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action {
-    val baseEntityString: String = "JpClassInstance"
+    val baseEntityString: String = "ApClassType"
     val filterSpec: String = ""
-    val fieldSpec: String = "TypeName,TypeId,InstanceId,SessionCt,TypeDisplayOrder,FirstSessionDatetime"
+    val fieldSpec: String = "TypeName,TypeId" //,InstanceId,SessionCt,TypeDisplayOrder,FirstSessionDatetime"
 
     val reportResult: String = Report.getReport(pb, baseEntityString, filterSpec, fieldSpec)
     Ok(reportResult)
