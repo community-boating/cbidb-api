@@ -4,12 +4,10 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
-import CbiUtil.{JsonUtil, Profiler}
-import Entities.{JpTeam, JpTeamEventPoints}
 import Reporting.Report
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsArray, JsNumber, JsObject, JsString}
+import play.api.libs.json.JsObject
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,6 +1,5 @@
 package Reporting
 
-import CbiUtil.JsonUtil
 import Reporting.ReportFactories.{ReportFactoryApClassInstance, ReportFactoryApClassType, ReportFactoryJpClassInstance, ReportFactoryJpClassType}
 import Services.PersistenceBroker
 import Storable.StorableClass
