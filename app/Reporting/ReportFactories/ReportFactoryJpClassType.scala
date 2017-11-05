@@ -1,11 +1,8 @@
 package Reporting.ReportFactories
 
-import java.time.format.DateTimeFormatter
-
-import Entities.{JpClassInstance, JpClassType}
-import Reporting.{ReportFactory, ReportingField}
-import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
+import Entities.JpClassType
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
+import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
 
 class ReportFactoryJpClassType extends ReportFactory[JpClassType] {

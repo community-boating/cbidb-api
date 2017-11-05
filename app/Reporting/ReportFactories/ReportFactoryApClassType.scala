@@ -1,6 +1,6 @@
 package Reporting.ReportFactories
 
-import Entities.{ApClassInstance, ApClassType, JpClassType}
+import Entities.ApClassType
 import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
