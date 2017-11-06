@@ -18,7 +18,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   RelationalBroker.createPool(cp, () => {
     lifecycle.addStopHook(() => Future.successful({
       println("  ************    Shutting down!  Closing pool!!  *************  ")
-      RelationalBroker.closePool
+      RelationalBroker.closePool()
     }))
   })
 
@@ -31,8 +31,8 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
-    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
-    rows.map(r => obj.construct(r, true))
+    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 50)
+    rows.map(r => obj.construct(r, isClean = true))
   }
 
   def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
@@ -42,7 +42,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
     val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
-    if (rows.length == 1) Some(obj.construct(rows.head, true))
+    if (rows.length == 1) Some(obj.construct(rows.head, isClean = true))
     else None
   }
 
@@ -67,7 +67,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
         obj.primaryKey.getPersistenceFieldName + " in (" + group.mkString(", ") + ")"
       }).mkString(" OR ") + " ) ")
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
-      rows.map(r => obj.construct(r, true))
+      rows.map(r => obj.construct(r, isClean = true))
     }
   }
 
@@ -85,7 +85,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
-      rows.map(r => obj.construct(r, true))
+      rows.map(r => obj.construct(r, isClean = true))
     }
   }
 
@@ -123,8 +123,6 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       val st: Statement = c.createStatement()
       val rs: ResultSet = st.executeQuery(sql)
       rs.setFetchSize(fetchSize)
-      val rsmd: ResultSetMetaData = rs.getMetaData
-
 
       val rows: ListBuffer[ProtoStorable] = ListBuffer()
       var rowCounter = 0

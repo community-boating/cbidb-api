@@ -69,7 +69,10 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
             arr append JsObject(Map(
               "filterName" -> JsString(t._1),
               "displayName" -> JsString(t._2),
-              "filterType" -> JsString(t._3),
+              "filterType" -> (t._4 match {
+                case Some(_) => JsString("dropdown")
+                case None => JsString(t._3)
+              }),
               "values" -> (t._4 match {
                 case Some(l: List[(String, String)]) => JsArray(l.map(v => JsObject(Map(
                   "display" -> JsString(v._2),
