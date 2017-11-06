@@ -10,6 +10,10 @@ sealed abstract class ReportingFilterFactory[T <: StorableClass, U] {
   def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[T]
 }
 
+trait ReportingFilterFactoryDropdown {
+  def getDropdownValues(pb: PersistenceBroker): List[(String, String)]
+}
+
 abstract class ReportingFilterFactoryInt[T <: StorableClass] extends ReportingFilterFactory[T, Int] {
   def getFilterCastArg(pb: PersistenceBroker, arg: Int): ReportingFilter[T]
   final def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[T] = {

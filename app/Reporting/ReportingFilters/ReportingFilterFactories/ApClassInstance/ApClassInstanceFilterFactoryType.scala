@@ -2,11 +2,11 @@ package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.Report.BadReportingFilterArgumentsException
-import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactoryInt
+import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactoryDropdown, ReportingFilterFactoryInt}
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
 import Services.PersistenceBroker
 
-class ApClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[ApClassInstance] {
+class ApClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[ApClassInstance] with ReportingFilterFactoryDropdown {
   val displayName: String = "By Class Type"
   def getFilterCastArg(pb: PersistenceBroker, typeId: Int): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
@@ -35,4 +35,9 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[ApClass
       500
     ).toSet
   })
+
+  def getDropdownValues(pb: PersistenceBroker): List[(String, String)] = {
+    val types: List[ApClassType] = pb.getAllObjectsOfClass(ApClassType)
+    types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2)
+  }
 }
