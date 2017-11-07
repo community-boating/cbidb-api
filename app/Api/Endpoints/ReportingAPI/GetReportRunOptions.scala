@@ -78,7 +78,7 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
                   "display" -> JsString(v._2),
                   "return" -> JsString(v._1)
                 ))).toSeq)
-                case _ => JsNull
+                case _ => JsArray()
               })
             ))
           })
