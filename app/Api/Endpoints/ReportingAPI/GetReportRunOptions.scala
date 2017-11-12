@@ -70,7 +70,7 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
               "filterName" -> JsString(t._1),
               "displayName" -> JsString(t._2),
               "filterType" -> (t._4 match {
-                case Some(_) => JsString("dropdown")
+                case Some(_) => JsString("Dropdown")
                 case None => JsString(t._3)
               }),
               "values" -> (t._4 match {
