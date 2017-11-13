@@ -6,6 +6,7 @@ import Services.PersistenceBroker
 
 class JpClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[JpClassInstance] with ReportingFilterFactoryDropdown {
   val displayName: String = "By Class Type"
+  val defaultValue: String = "1"
   def getFilterCastArg(pb: PersistenceBroker, typeId: Int): ReportingFilter[JpClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
     pb.getObjectsByFilters(

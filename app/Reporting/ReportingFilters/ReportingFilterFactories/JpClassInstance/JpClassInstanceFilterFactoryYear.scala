@@ -7,6 +7,8 @@ import Services.PersistenceBroker
 
 class JpClassInstanceFilterFactoryYear extends ReportingFilterFactoryInt[JpClassInstance] {
   val displayName: String = "By Season"
+  // TODO: replace with current calendar/season year
+  val defaultValue: String = "2017"
   def getFilterCastArg(pb: PersistenceBroker, year: Int): ReportingFilter[JpClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
     val ss: List[JpClassSession] = pb.getObjectsByFilters(

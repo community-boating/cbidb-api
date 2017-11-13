@@ -33,6 +33,13 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
     object params {}
 
     def getJSONResultFuture: Future[JsObject] = Future {
+      case class FilterDataForJSON(
+        filterName: String,
+        displayName: String,
+        filterType: String,
+        defaultValue: String,
+        dropdownValues: Option[List[(String, String)]]
+      )
       val resultData: JsArray = Report.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
         val entityName: String = e._1
         val entityDisplayName: String = e._2._1
@@ -42,14 +49,16 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
 
         // Field name and display name
         val fieldData: List[(String, String)] = factoryInstance.FIELD_MAP.map(f => (f._1, f._2.fieldDisplayName)).toList
-        val filterData: List[(String, String, String, Option[List[(String, String)]])] =
-          factoryInstance.FILTER_MAP.map(f => (
+        val filterData: List[FilterDataForJSON] =
+          factoryInstance.FILTER_MAP.map(f => FilterDataForJSON(
             f._1,
             f._2.displayName,
             f._2 match {
+                // TODO: right here it should be dropdown, not later
               case _: ReportingFilterFactoryInt[_] => "Int"
               case _ => throw new Exception("Unconfigured filter factory type for " + f._1)
             },
+            f._2.defaultValue,
             f._2 match {
               case d: ReportingFilterFactoryDropdown => Some(d.getDropdownValues(pb))
               case _ => None
@@ -67,13 +76,14 @@ class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBr
           }),
           "filterData" -> filterData.foldLeft(new JsArray)((arr, t) => {
             arr append JsObject(Map(
-              "filterName" -> JsString(t._1),
-              "displayName" -> JsString(t._2),
-              "filterType" -> (t._4 match {
+              "filterName" -> JsString(t.filterName),
+              "displayName" -> JsString(t.displayName),
+              "filterType" -> (t.dropdownValues match {
                 case Some(_) => JsString("Dropdown")
-                case None => JsString(t._3)
+                case None => JsString(t.filterType)
               }),
-              "values" -> (t._4 match {
+              "default" -> JsString(t.defaultValue),
+              "values" -> (t.dropdownValues match {
                 case Some(l: List[(String, String)]) => JsArray(l.map(v => JsObject(Map(
                   "display" -> JsString(v._2),
                   "return" -> JsString(v._1)

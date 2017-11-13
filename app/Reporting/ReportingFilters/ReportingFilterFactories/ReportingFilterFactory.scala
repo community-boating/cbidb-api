@@ -8,6 +8,9 @@ sealed abstract class ReportingFilterFactory[T <: StorableClass, U] {
   val displayName: String
   def getFilterCastArg(pb: PersistenceBroker, arg: U): ReportingFilter[T]
   def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[T]
+  // Even though it should be a U, make it a string since
+  // the only thing it will be used for is the get-report-options JSON
+  val defaultValue: String
 }
 
 trait ReportingFilterFactoryDropdown {
