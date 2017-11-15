@@ -7,9 +7,9 @@ import play.api.libs.json.{JsArray, JsObject, JsString}
 
 case class Report(headers: List[String], rows: List[List[String]]) {
   def formatTSV: String = {
-    (headers ++ rows.map(row => {
+    (headers :: rows).map(row => {
       row.mkString("\t")
-    })).mkString("\n")
+    }).mkString("\n")
   }
 
   def formatJSCON: JsObject = {
