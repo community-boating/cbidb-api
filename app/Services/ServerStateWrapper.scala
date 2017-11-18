@@ -9,6 +9,8 @@ class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstru
   def get: ServerState = {
     if (ServerStateWrapper.isSet) ServerStateWrapper.get
     else {
+      println(" ***************     SETTING SERVER STATE   ***************  ")
+      println("Using runmode: ROOT_MODE")
       val pb: PersistenceBroker = new OracleBroker(lifecycle, poolConstructor)
       val cb: CacheBroker = new RedisBroker()
       ServerStateWrapper.init(new PermissionsAuthority(ServerRunMode.ROOT_MODE, pb, cb))
