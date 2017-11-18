@@ -1,6 +1,6 @@
 package Reporting
 
-import Reporting.ReportFactories.{ReportFactoryApClassInstance, ReportFactoryApClassType, ReportFactoryJpClassInstance, ReportFactoryJpClassType}
+import Reporting.ReportFactories.{ReportFactoryApClassInstance, ReportFactoryJpClassInstance}
 import Services.PersistenceBroker
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
@@ -22,10 +22,10 @@ case class Report(headers: List[String], rows: List[List[String]]) {
 
 object Report {
   val reportFactoryMap: Map[String, (String, Class[_ <: ReportFactory[_]])] = Map(
-    "ApClassInstance" -> ("AP Class Instances", classOf[ReportFactoryApClassInstance]),
-    "JpClassInstance" -> ("JP Class Instances", classOf[ReportFactoryJpClassInstance]),
-    "JpClassType" -> ("JP Class Types", classOf[ReportFactoryJpClassType]),
-    "ApClassType" -> ("AP Class Types", classOf[ReportFactoryApClassType])
+    "ApClassInstance" -> ("AP Class Instance", classOf[ReportFactoryApClassInstance]),
+    "JpClassInstance" -> ("JP Class Instance", classOf[ReportFactoryJpClassInstance])
+    //"JpClassType" -> ("JP Class Types", classOf[ReportFactoryJpClassType]),
+    //"ApClassType" -> ("AP Class Types", classOf[ReportFactoryApClassType])
   )
 
   def getReport(pb: PersistenceBroker, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {

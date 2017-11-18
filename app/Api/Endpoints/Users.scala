@@ -6,16 +6,20 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities._
-import Services.{CacheBroker, PersistenceBroker}
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import Storable.Filter
-import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class
-Users @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+Users @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {
     val request = new UsersRequest(userID)
     request.getFuture.map(s => {

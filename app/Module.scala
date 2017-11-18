@@ -1,6 +1,3 @@
-import java.time.Clock
-
-import Services._
 import com.google.inject.AbstractModule
 
 /**
@@ -14,14 +11,17 @@ import com.google.inject.AbstractModule
  * configuration file.
  */
 class Module extends AbstractModule {
-  override def configure() = {
-    bind(classOf[CacheBroker]).to(classOf[RedisBroker])
+  override def configure(): Unit = {
+    //bind(classOf[ServerStateWrapper]).to(classOf[ServerStateWrapper])
+    // Select active database type
+    //bind(classOf[PersistenceBroker]).to(classOf[OracleBroker])
+    //  bind(classOf[PersistenceBroker]).to(classOf[MysqlBroker])
 
-    bind(classOf[PersistenceBroker]).to(classOf[OracleBroker])
-  //  bind(classOf[PersistenceBroker]).to(classOf[MysqlBroker])
+    // Select server run mode
+    //bind(classOf[ServerRunMode]).toInstance(ServerRunMode.ROOT_MODE)
 
-    // Use the system clock as the default implementation of Clock
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+    // Select active cache application
+    //bind(classOf[CacheBroker]).to(classOf[RedisBroker])
+    //bind(classOf[PermissionsAuthority]).toInstance(new PermissionsAuthority())
   }
-
 }

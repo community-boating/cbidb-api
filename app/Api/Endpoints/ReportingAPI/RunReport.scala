@@ -5,17 +5,21 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import Reporting.Report
-import Services.{CacheBroker, PersistenceBroker}
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import play.api.http.HttpEntity
-import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RunReport @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+class RunReport @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   object OUTPUT_TYPE {
     val JSCON = "jscon"
     val TSV = "tsv"

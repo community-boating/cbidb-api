@@ -6,15 +6,19 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactoryDropdown, ReportingFilterFactoryInt}
 import Reporting.{Report, ReportFactory}
-import Services.{CacheBroker, PersistenceBroker}
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import Storable.StorableClass
-import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsArray, JsNull, JsObject, JsString}
+import play.api.libs.json.{JsArray, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetReportRunOptions @Inject()(lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   def get(): Action[AnyContent] = Action.async {
     //val fieldSpec: String = "TypeName,TypeId" //,InstanceId,SessionCt,TypeDisplayOrder,FirstSessionDatetime"
     val request = new ReportRunOptionsRequest()

@@ -3,15 +3,19 @@ package Api.Endpoints
 import javax.inject.Inject
 
 import Entities.User
-import Services.{CacheBroker, PersistenceBroker}
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import Storable.ProtoStorable
-import play.api.inject.ApplicationLifecycle
 import play.api.mvc.{Action, Controller}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
-class UserCrud @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+class UserCrud @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   def post() = Action { request => {
     val data = request.body.asFormUrlEncoded
     data match {

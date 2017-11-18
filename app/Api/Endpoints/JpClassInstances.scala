@@ -7,7 +7,8 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{CascadeSort, JsonUtil, Profiler}
 import Entities._
-import Services.{CacheBroker, PersistenceBroker}
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -15,7 +16,11 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, cb: CacheBroker, implicit val pb: PersistenceBroker)(implicit exec: ExecutionContext) extends Controller {
+class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   def get(startDate: Option[String]): Action[AnyContent] = Action.async {
     val request = new JpClassInstancesRequest(startDate)
     request.getFuture.map(s => {

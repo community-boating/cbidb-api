@@ -5,7 +5,8 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.PropertiesWrapper
-import Services.CacheBroker
+import Services.ServerStateWrapper.ServerState
+import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -13,7 +14,11 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class Weather @Inject() (cb: CacheBroker, ws: WSClient)(implicit exec: ExecutionContext) extends Controller {
+class Weather @Inject() (ssw: ServerStateWrapper, ws: WSClient) (implicit exec: ExecutionContext) extends Controller {
+  implicit val ss: ServerState = ssw.get
+  implicit val pb: PersistenceBroker = ss.pa.pb
+  implicit val cb: CacheBroker = ss.pa.cb
+
   def get(): Action[AnyContent] = Action.async {
     val request = new WeatherRequest()
     request.getFuture.map(s => {
