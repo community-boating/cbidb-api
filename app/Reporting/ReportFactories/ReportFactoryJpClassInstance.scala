@@ -30,36 +30,40 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
     })
   }
 
-  val FIELD_MAP: Map[String, ReportingField[JpClassInstance]] = Map(
-    "TypeId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.typeId, "Type ID"),
-    "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Instance ID"),
-    "SessionCt" -> new ReportingField[JpClassInstance](
-      (i: JpClassInstance) => jpClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
-      "Session Ct1"
-    ),
-    "FirstSessionDatetime" -> new ReportingField[JpClassInstance](
+  val fieldList: List[(String, ReportingField[JpClassInstance])] = List(
+    ("TypeId", ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.typeId, "Type ID", isDefault = true)),
+    ("TypeName", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
+      JpClassType.fields.typeName,
+      i => i.references.jpClassType.get,
+      "Type Name",
+      isDefault = true
+    )),
+    ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(JpClassInstance.fields.instanceId, "Instance ID", isDefault = true)),
+    ("FirstSessionDatetime", new ReportingField[JpClassInstance](
       (i: JpClassInstance) =>
         jpClassSessions
           .filter(_.values.instanceId.get == i.getID)
           .map(_.values.sessionDateTime.get)
           .min
           .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-      "First Session"
-    ),
-    "TypeDisplayOrder" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
+      "First Session Datetime",
+      isDefault = true
+    )),
+    ("SessionCt", new ReportingField[JpClassInstance](
+      (i: JpClassInstance) => jpClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
+      "# Sessions",
+      isDefault = false
+    )),
+    ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
       JpClassType.fields.displayOrder,
       i => i.references.jpClassType.get,
-      "TypeDisplayOrder"
-    ),
-    "TypeName" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
-      JpClassType.fields.typeName,
-      i => i.references.jpClassType.get,
-      "TypeName"
-    )
+      "Type DisplayOrder",
+      isDefault = false
+    ))
   )
 
-  val FILTER_MAP: Map[String, ReportingFilterFactory[JpClassInstance, _]] = Map(
-    "JpClassInstanceFilterYear" -> new JpClassInstanceFilterFactoryYear(),
-    "JpClassInstanceFilterType" -> new JpClassInstanceFilterFactoryType()
+  val filterList: List[(String, ReportingFilterFactory[JpClassInstance, _])] = List(
+    ("JpClassInstanceFilterYear", new JpClassInstanceFilterFactoryYear()),
+    ("JpClassInstanceFilterType", new JpClassInstanceFilterFactoryType())
   )
 }

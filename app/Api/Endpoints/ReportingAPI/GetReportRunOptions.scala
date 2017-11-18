@@ -9,7 +9,7 @@ import Reporting.{Report, ReportFactory}
 import Services.ServerStateWrapper.ServerState
 import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
 import Storable.StorableClass
-import play.api.libs.json.{JsArray, JsObject, JsString}
+import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,9 +52,9 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
           Class.forName(e._2._2.getCanonicalName).newInstance.asInstanceOf[ReportFactory[_ <: StorableClass]]
 
         // Field name and display name
-        val fieldData: List[(String, String)] = factoryInstance.FIELD_MAP.map(f => (f._1, f._2.fieldDisplayName)).toList
+        val fieldData: List[(String, String, Boolean)] = factoryInstance.fieldList.map(f => (f._1, f._2.fieldDisplayName, f._2.isDefault))
         val filterData: List[FilterDataForJSON] =
-          factoryInstance.FILTER_MAP.map(f => FilterDataForJSON(
+          factoryInstance.filterList.map(f => FilterDataForJSON(
             f._1,
             f._2.displayName,
             f._2 match {
@@ -75,7 +75,8 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
           "fieldData" -> fieldData.foldLeft(new JsArray)((arr, t) => {
             arr append JsObject(Map(
               "fieldName" -> JsString(t._1),
-              "fieldDisplayName" -> JsString(t._2)
+              "fieldDisplayName" -> JsString(t._2),
+              "isDefault" -> JsBoolean(t._3)
             ))
           }),
           "filterData" -> filterData.foldLeft(new JsArray)((arr, t) => {

@@ -43,40 +43,45 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
     })
   }
 
-  val FIELD_MAP: Map[String, ReportingField[ApClassInstance]] = Map(
-    "TypeId" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](
+  val fieldList: List[(String, ReportingField[ApClassInstance])] = List(
+    ("TypeId", ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassFormat](
       ApClassFormat.fields.typeId,
       i => i.references.apClassFormat.get,
-      "Type ID"
-    ),
-    "InstanceId" -> ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID"),
-    "SessionCt" -> new ReportingField[ApClassInstance](
-      (i: ApClassInstance) => apClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
-      "Session Ct1"
-    ),
-    "FirstSessionDatetime" -> new ReportingField[ApClassInstance](
+      "Type ID",
+      isDefault = true
+    )),
+    ("TypeName", ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
+      ApClassType.fields.typeName,
+      i => i.references.apClassFormat.get.references.apClassType.get,
+      "Type Name",
+      isDefault = true
+    )),
+    ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID", isDefault = true)),
+    ("FirstSessionDatetime", new ReportingField[ApClassInstance](
       (i: ApClassInstance) =>
         apClassSessions
           .filter(_.values.instanceId.get == i.getID)
           .map(_.values.sessionDateTime.get)
           .min
           .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-      "First Session"
-    ),
-    "TypeName" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
-      ApClassType.fields.typeName,
-      i => i.references.apClassFormat.get.references.apClassType.get,
-      "TypeName"
-    ),
-    "TypeDisplayOrder" -> ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
+      "First Session Datetime",
+      isDefault = true
+    )),
+    ("SessionCt", new ReportingField[ApClassInstance](
+      (i: ApClassInstance) => apClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
+      "# Sessions",
+      isDefault = false
+    )),
+    ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
       ApClassType.fields.displayOrder,
       i => i.references.apClassFormat.get.references.apClassType.get,
-      "TypeDisplayOrder"
-    )
+      "Type DisplayOrder",
+      isDefault = false
+    ))
   )
 
-  val FILTER_MAP: Map[String, ReportingFilterFactory[ApClassInstance, _]] = Map(
-    "ApClassInstanceFilterYear" -> new ApClassInstanceFilterFactoryYear(),
-    "ApClassInstanceFilterType" -> new ApClassInstanceFilterFactoryType()
+  val filterList: List[(String, ReportingFilterFactory[ApClassInstance, _])] = List(
+    ("ApClassInstanceFilterYear", new ApClassInstanceFilterFactoryYear()),
+    ("ApClassInstanceFilterType", new ApClassInstanceFilterFactoryType())
   )
 }

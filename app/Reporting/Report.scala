@@ -24,8 +24,6 @@ object Report {
   val reportFactoryMap: Map[String, (String, Class[_ <: ReportFactory[_]])] = Map(
     "ApClassInstance" -> ("AP Class Instance", classOf[ReportFactoryApClassInstance]),
     "JpClassInstance" -> ("JP Class Instance", classOf[ReportFactoryJpClassInstance])
-    //"JpClassType" -> ("JP Class Types", classOf[ReportFactoryJpClassType]),
-    //"ApClassType" -> ("AP Class Types", classOf[ReportFactoryApClassType])
   )
 
   def getReport(pb: PersistenceBroker, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {

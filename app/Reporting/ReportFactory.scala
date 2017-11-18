@@ -35,9 +35,6 @@ abstract class ReportFactory[T <: StorableClass] {
     (d: LocalDateTime) => d.atZone(ZoneId.systemDefault).toInstant.toEpochMilli
   )
 
-  val FIELD_MAP: Map[String, ReportingField[T]]
-  val FILTER_MAP: Map[String, ReportingFilterFactory[T, _]]
-
   val entityCompanion: StorableObject[T]
   // TODO: some sanity check that this can't be more than like 100 things or something
   val getAllFilter: (PersistenceBroker => ReportingFilter[T]) = pb =>
@@ -47,13 +44,14 @@ abstract class ReportFactory[T <: StorableClass] {
       ).toSet
     })
 
-  lazy val getFields: List[ReportingField[T]] = {
-    val FIELD_SEPARATOR: Char = ','
-    fieldSpec.split(FIELD_SEPARATOR).toList.map(FIELD_MAP(_))
-  }
+  val filterList: List[(String, ReportingFilterFactory[T, _])]
+  val fieldList: List[(String, ReportingField[T])]
+
+  lazy val filterMap: Map[String, ReportingFilterFactory[T, _]] = filterList.toMap
+  lazy val fieldMap: Map[String, ReportingField[T]] = fieldList.toMap
 
   lazy private val getCombinedFilter: ReportingFilter[T] = {
-    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, FILTER_MAP, getAllFilter)
+    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, filterMap, getAllFilter)
     parser.parse(filterSpec)
   }
 
@@ -71,10 +69,17 @@ abstract class ReportFactory[T <: StorableClass] {
     case None => throw new Exception("Tried to get instances before they were set")
   }
 
-  def getHeaders: List[String] = getFields.map(f => f.fieldDisplayName)
+  lazy val getFieldsToUse: List[ReportingField[T]] = {
+    fieldSpecWrapper.get.split(",").map(name => fieldMap.get(name) match {
+      case Some(rf: ReportingField[T]) => rf
+      case None => throw new Exception("Couldn't find reporting field " + name)
+    }).toList
+  }
+
+  def getHeaders: List[String] = getFieldsToUse.map(_.fieldDisplayName)
   def getRows: List[List[String]] = {
     setInstances()
-    val valueFunctions: List[ValueFunction] = getFields.map(f => f.valueFunction)
+    val valueFunctions: List[ValueFunction] = getFieldsToUse.map(_.valueFunction)
     instances.get.map(i => {
       valueFunctions.map(fn => {
         fn(i)
