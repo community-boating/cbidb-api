@@ -1,7 +1,6 @@
 package Reporting.ReportFactories
 
 import Entities._
-import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.JpClassInstanceFilterFactoryType
 import Reporting.ReportingFilters.ReportingFilterFactories.Person.PersonFilterFactoryMemProgramYear
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}

@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
-import Reporting.ReportingFilters.{ARG_DROPDOWN, ARG_INT, ReportingFilterFactory, ReportingFilterFactoryDropdown}
+import Reporting.ReportingFilters.{ARG_DROPDOWN, ARG_INT, ReportingFilterFactoryDropdown}
 import Reporting.{Report, ReportFactory}
 import Services.ServerStateWrapper.ServerState
 import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
