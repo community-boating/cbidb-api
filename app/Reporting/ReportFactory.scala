@@ -2,8 +2,7 @@ package Reporting
 
 import java.time.{LocalDateTime, ZoneId}
 
-import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction, ReportingFilterSpecParser}
+import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
 import Services.PersistenceBroker
 import Storable.{StorableClass, StorableObject}
 
@@ -44,10 +43,10 @@ abstract class ReportFactory[T <: StorableClass] {
       ).toSet
     })
 
-  val filterList: List[(String, ReportingFilterFactory[T, _])]
+  val filterList: List[(String, ReportingFilterFactory[T])]
   val fieldList: List[(String, ReportingField[T])]
 
-  lazy val filterMap: Map[String, ReportingFilterFactory[T, _]] = filterList.toMap
+  lazy val filterMap: Map[String, ReportingFilterFactory[T]] = filterList.toMap
   lazy val fieldMap: Map[String, ReportingField[T]] = fieldList.toMap
 
   lazy private val getCombinedFilter: ReportingFilter[T] = {

@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 
 import Entities._
 import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
-import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
+import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
 
@@ -62,7 +62,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
     ))
   )
 
-  val filterList: List[(String, ReportingFilterFactory[JpClassInstance, _])] = List(
+  val filterList: List[(String, ReportingFilterFactory[JpClassInstance])] = List(
     ("JpClassInstanceFilterYear", new JpClassInstanceFilterFactoryYear()),
     ("JpClassInstanceFilterType", new JpClassInstanceFilterFactoryType())
   )

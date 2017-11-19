@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
-import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactoryDropdown, ReportingFilterFactoryInt}
+import Reporting.ReportingFilters.{ARG_DROPDOWN, ARG_INT, ReportingFilterFactory, ReportingFilterFactoryDropdown}
 import Reporting.{Report, ReportFactory}
 import Services.ServerStateWrapper.ServerState
 import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
@@ -57,11 +57,11 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
           factoryInstance.filterList.map(f => FilterDataForJSON(
             f._1,
             f._2.displayName,
-            f._2 match {
-                // TODO: right here it should be dropdown, not later
-              case _: ReportingFilterFactoryInt[_] => "Int"
-              case _ => throw new Exception("Unconfigured filter factory type for " + f._1)
-            },
+            f._2.argTypes.map({
+              case ARG_INT => "Int"
+              case ARG_DROPDOWN => "Dropdown"
+              case t: Any => throw new Exception("Unconfigured arg type " + t)
+            }).mkString(","),
             f._2.defaultValue,
             f._2 match {
               case d: ReportingFilterFactoryDropdown => Some(d.getDropdownValues(pb))

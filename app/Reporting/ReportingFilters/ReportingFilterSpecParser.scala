@@ -1,13 +1,12 @@
 package Reporting.ReportingFilters
 
-import Reporting.ReportingFilters.ReportingFilterFactories.ReportingFilterFactory
 import Services.PersistenceBroker
 import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
   pb: PersistenceBroker,
-  filterMap: Map[String, ReportingFilterFactory[T, _]],
+  filterMap: Map[String, ReportingFilterFactory[T]],
   getAllFilter: (PersistenceBroker => ReportingFilter[T])
 ) {
   case class Token(c: Char) {

@@ -2,14 +2,15 @@ package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.Report.BadReportingFilterArgumentsException
-import Reporting.ReportingFilters.ReportingFilterFactories.{ReportingFilterFactoryDropdown, ReportingFilterFactoryInt}
-import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFunction}
+import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 
-class ApClassInstanceFilterFactoryType extends ReportingFilterFactoryInt[ApClassInstance] with ReportingFilterFactoryDropdown {
+class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] with ReportingFilterFactoryDropdown {
+  val argTypes: List[ReportingFilterArgType] = List(ARG_DROPDOWN)
   val displayName: String = "By Class Type"
   val defaultValue: String = "1"
-  def getFilterCastArg(pb: PersistenceBroker, typeId: Int): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+  def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+    val typeId: Int = arg.toInt
     implicit val pb: PersistenceBroker = _pb
     val typeID: Int = {
       val ts: List[ApClassType] = pb.getObjectsByFilters(
