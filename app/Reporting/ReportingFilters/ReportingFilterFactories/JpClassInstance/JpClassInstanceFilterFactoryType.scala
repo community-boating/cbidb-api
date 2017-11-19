@@ -17,8 +17,8 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
     ).toSet
   })
 
-  def getDropdownValues(pb: PersistenceBroker): List[(String, String)] = {
+  def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
     val types: List[JpClassType] = pb.getAllObjectsOfClass(JpClassType)
-    types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2)
+    List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
   }
 }

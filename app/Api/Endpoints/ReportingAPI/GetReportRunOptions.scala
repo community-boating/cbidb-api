@@ -42,7 +42,7 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
         displayName: String,
         filterType: String,
         defaultValue: String,
-        dropdownValues: Option[List[(String, String)]]
+        dropdownValues: Option[List[List[(String, String)]]]
       )
       val resultData: JsArray = Report.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
         val entityName: String = e._1
@@ -89,10 +89,10 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
               }),
               "default" -> JsString(t.defaultValue),
               "values" -> (t.dropdownValues match {
-                case Some(l: List[(String, String)]) => JsArray(l.map(v => JsObject(Map(
+                case Some(ll: List[List[(String, String)]]) => JsArray(ll.map(l => JsArray(l.map(v => JsObject(Map(
                   "display" -> JsString(v._2),
                   "return" -> JsString(v._1)
-                ))).toSeq)
+                ))))))
                 case _ => JsArray()
               })
             ))

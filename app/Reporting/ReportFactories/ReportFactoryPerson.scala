@@ -1,6 +1,8 @@
 package Reporting.ReportFactories
 
 import Entities._
+import Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.JpClassInstanceFilterFactoryType
+import Reporting.ReportingFilters.ReportingFilterFactories.Person.PersonFilterFactoryMemProgramYear
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
@@ -14,5 +16,7 @@ class ReportFactoryPerson extends ReportFactory[Person] {
     ("PersonId", ReportingField.getReportingFieldFromDatabaseField(Person.fields.personId, "Person ID", isDefault = true))
   )
 
-  val filterList: List[(String, ReportingFilterFactory[Person])] = List()
+  val filterList: List[(String, ReportingFilterFactory[Person])] = List(
+    ("PersonFilterFactoryMemProgramYear", new PersonFilterFactoryMemProgramYear())
+  )
 }
