@@ -30,6 +30,11 @@ class RunReport @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionCon
   def getTest(): Action[AnyContent] = get("ApClassType", "", "TypeName,TypeId", "jscon")
 
   def get(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String): Action[AnyContent] = Action.async {
+    println("Running a report with the following parameters: ")
+    println("Base entity: " + baseEntityString)
+    println("filter spec: " + filterSpec)
+    println("field spec: " + fieldSpec)
+    println("output type: " + outputType)
     lazy val request = new ReportRequest(baseEntityString, filterSpec, fieldSpec, outputType)
     outputType match {
       case OUTPUT_TYPE.JSCON => request.getFuture.map(s => Ok(s).as("application/json"))

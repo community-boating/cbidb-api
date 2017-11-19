@@ -83,10 +83,7 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
             arr append JsObject(Map(
               "filterName" -> JsString(t.filterName),
               "displayName" -> JsString(t.displayName),
-              "filterType" -> (t.dropdownValues match {
-                case Some(_) => JsString("Dropdown")
-                case None => JsString(t.filterType)
-              }),
+              "filterType" -> JsString(t.filterType),
               "default" -> JsString(t.defaultValue),
               "values" -> (t.dropdownValues match {
                 case Some(ll: List[List[(String, String)]]) => JsArray(ll.map(l => JsArray(l.map(v => JsObject(Map(

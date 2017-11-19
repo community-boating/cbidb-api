@@ -10,7 +10,6 @@ import Storable.Fields._
 // If it came from a POST or something, ignored is the post parameters that were not able to be matched to a single field (for debugging)
 case class ProtoStorable(
   intFields: Map[String, Option[Int]],
-  doubleFields: Map[String, Option[Double]],
   stringFields: Map[String, Option[String]],
   dateFields: Map[String, Option[LocalDate]],
   dateTimeFields: Map[String, Option[LocalDateTime]],
@@ -20,7 +19,6 @@ case class ProtoStorable(
 object ProtoStorable {
   def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable = {
     var intFields: Map[String, Option[Int]] = Map()
-    var doubleFields: Map[String, Option[Double]] = Map()
     var stringFields: Map[String, Option[String]] = Map()
     var dateFields: Map[String, Option[LocalDate]] = Map()
     var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
@@ -31,9 +29,10 @@ object ProtoStorable {
       val nullableIntFieldMatch: Option[NullableIntDatabaseField] = storable.nullableIntFieldMap.get(key)
       val stringFieldMatch: Option[StringDatabaseField] = storable.stringFieldMap.get(key)
       val nullableStringFieldMatch: Option[NullableStringDatabaseField] = storable.nullableStringFieldMap.get(key)
-      val booleanFieldMatch: Option[BooleanDatabaseField] = storable.booleanFieldMap.get(key)
       val dateFieldMatch: Option[DateDatabaseField] = storable.dateFieldMap.get(key)
+      val nullableDateFieldMatch: Option[NullableDateDatabaseField] = storable.nullableDateFieldMap.get(key)
       val dateTimeFieldMatch: Option[DateTimeDatabaseField] = storable.dateTimeFieldMap.get(key)
+      val booleanFieldMatch: Option[BooleanDatabaseField] = storable.booleanFieldMap.get(key)
 
       def wasMatch(o: Option[_]): Int = o match { case Some(_) => 1; case None => 0; }
 
@@ -79,16 +78,17 @@ object ProtoStorable {
           }
           case None =>
         }
-        /*booleanFieldMatch match {
-          case None => _
-          case Some(f: BooleanDatabaseField) => f.getValueFromString(value) match {
-            case Some(i: Boolean) => booleanFields += (key -> Some(i))
-            case None => ignored += (key -> value)
-          }
-        }*/
         dateFieldMatch match {
           case Some(f: DateDatabaseField) => f.getValueFromString(value) match {
             case Some(d: LocalDate) => dateFields += (key -> Some(d))
+            case None => ignored += (key -> value)
+          }
+          case None =>
+        }
+        nullableDateFieldMatch match {
+          case Some(f: NullableDateDatabaseField) => f.getValueFromString(value) match {
+            case Some(Some(d: LocalDate)) => dateFields += (key -> Some(d))
+            case Some(None) => dateFields += (key -> None)
             case None => ignored += (key -> value)
           }
           case None =>
@@ -103,6 +103,6 @@ object ProtoStorable {
       }
     }))
 
-    ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, ignored)
+    ProtoStorable(intFields, stringFields, dateFields, dateTimeFields, ignored)
   }
 }

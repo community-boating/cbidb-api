@@ -5,7 +5,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.Profiler
 import Storable.Fields.FieldValue.FieldValue
-import Storable.Fields._
+import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import play.api.inject.ApplicationLifecycle
@@ -130,7 +130,6 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       while (rs.next) {
         rowCounter += 1
         var intFields: Map[String, Option[Int]] = Map()
-        var doubleFields: Map[String, Option[Double]] = Map()
         var stringFields: Map[String, Option[String]] = Map()
         var dateFields: Map[String, Option[LocalDate]] = Map()
         var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
@@ -138,33 +137,27 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
 
         properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
           df match {
-            case _: IntDatabaseField => {
+            case _: IntDatabaseField | _: NullableIntDatabaseField => {
               intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
               if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
             }
-            case _: NullableIntDatabaseField => {
-              intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
-              if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
-            }
-            case _: StringDatabaseField => {
+            case _: StringDatabaseField | _: NullableStringDatabaseField => {
               stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
               if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
             }
-            case _: NullableStringDatabaseField => {
-              stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
-              if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
-            }
-            case _: DoubleDatabaseField => {
-              doubleFields += (df.getRuntimeFieldName -> Some(rs.getDouble(i)))
-              if (rs.wasNull()) doubleFields += (df.getRuntimeFieldName -> None)
+            case _: DateDatabaseField | _: NullableDateDatabaseField => {
+              dateFields += (df.getRuntimeFieldName -> {
+                try {
+                  Some(rs.getDate(i).toLocalDate)
+                } catch {
+                  case _: Throwable => None
+                }
+              })
+              if (rs.wasNull()) dateFields += (df.getRuntimeFieldName -> None)
             }
             case _: DateTimeDatabaseField => {
               dateTimeFields += (df.getRuntimeFieldName -> Some(rs.getTimestamp(i).toLocalDateTime))
               if (rs.wasNull()) dateTimeFields += (df.getRuntimeFieldName -> None)
-            }
-            case _: DateDatabaseField => {
-              dateFields += (df.getRuntimeFieldName -> Some(rs.getDate(i).toLocalDate))
-              if (rs.wasNull()) dateFields += (df.getRuntimeFieldName -> None)
             }
             case _: BooleanDatabaseField => {
               stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
@@ -176,7 +169,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
           }
         }))
 
-        rows += ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
+        rows += ProtoStorable(intFields, stringFields, dateFields, dateTimeFields, Map())
       }
       profiler.lap("finsihed rows")
       val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
@@ -206,9 +199,10 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       getFieldValues(i.nullableIntValueMap) ++
       getFieldValues(i.stringValueMap) ++
       getFieldValues(i.nullableStringValueMap) ++
-      getFieldValues(i.booleanValueMap) ++
       getFieldValues(i.dateValueMap) ++
-      getFieldValues(i.dateTimeValueMap)
+      getFieldValues(i.nullableDateValueMap) ++
+      getFieldValues(i.dateTimeValueMap) ++
+      getFieldValues(i.booleanValueMap)
 
     val sb = new StringBuilder()
     sb.append("INSERT INTO " + i.getCompanion.entityName + " ( ")
@@ -232,11 +226,12 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       getUpdateExpressions(i.nullableIntValueMap) ++
       getUpdateExpressions(i.stringValueMap) ++
       getUpdateExpressions(i.nullableStringValueMap) ++
-      getUpdateExpressions(i.booleanValueMap) ++
       getUpdateExpressions(i.dateValueMap) ++
-      getUpdateExpressions(i.dateTimeValueMap)
+      getUpdateExpressions(i.nullableDateValueMap) ++
+      getUpdateExpressions(i.dateTimeValueMap) ++
+      getUpdateExpressions(i.booleanValueMap)
 
-    var sb = new StringBuilder()
+    val sb = new StringBuilder()
     sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
     sb.append(updateExpressions.mkString(", "))
     sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)

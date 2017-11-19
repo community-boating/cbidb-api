@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue}
-import Storable.Fields.{DateDatabaseField, IntDatabaseField}
+import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDateFieldValue}
+import Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDateDatabaseField}
 import Storable._
 
 class PersonMembership extends StorableClass {
@@ -14,7 +14,8 @@ class PersonMembership extends StorableClass {
     val assignId = new IntFieldValue(self, PersonMembership.fields.assignId)
     val personId = new IntFieldValue(self, PersonMembership.fields.personId)
     val membershipTypeId = new IntFieldValue(self, PersonMembership.fields.membershipTypeId)
-    val expirationDate = new DateFieldValue(self, PersonMembership.fields.expirationDate)
+    val startDate = new NullableDateFieldValue(self, PersonMembership.fields.startDate)
+    val expirationDate = new NullableDateFieldValue(self, PersonMembership.fields.expirationDate)
   }
 }
 
@@ -25,7 +26,8 @@ object PersonMembership extends StorableObject[PersonMembership] {
     val assignId = new IntDatabaseField(self, "ASSIGN_ID")
     val personId = new IntDatabaseField(self, "PERSON_ID")
     val membershipTypeId = new IntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
-    val expirationDate = new DateDatabaseField(self, "EXPIRATION_DATE")
+    val startDate = new NullableDateDatabaseField(self, "START_DATE")
+    val expirationDate = new NullableDateDatabaseField(self, "EXPIRATION_DATE")
   }
 
   def primaryKey: IntDatabaseField = fields.assignId

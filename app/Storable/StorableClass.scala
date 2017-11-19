@@ -10,9 +10,10 @@ abstract class StorableClass {
   type NullableIntFieldValueMap = Map[String, NullableIntFieldValue]
   type StringFieldValueMap = Map[String, StringFieldValue]
   type NullableStringFieldValueMap = Map[String, NullableStringFieldValue]
-  type BooleanFieldValueMap = Map[String, BooleanFieldValue]
   type DateFieldValueMap = Map[String, DateFieldValue]
+  type NullableDateFieldValueMap = Map[String, NullableDateFieldValue]
   type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
+  type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 
   type Companion = StorableObject[_ <: StorableClass]
 
@@ -71,9 +72,10 @@ abstract class StorableClass {
     var nullableIntMap: NullableIntFieldValueMap = Map()
     var stringMap: StringFieldValueMap = Map()
     var nullableStringMap: NullableStringFieldValueMap = Map()
-    var booleanMap: BooleanFieldValueMap = Map()
     var dateMap: DateFieldValueMap = Map()
+    var nullableDateMap: NullableDateFieldValueMap = Map()
     var dateTimeMap: DateTimeFieldValueMap = Map()
+    var booleanMap: BooleanFieldValueMap = Map()
 
     for(acc <- accessors) {
       val symbol = instanceMirror.reflectMethod(acc).symbol.toString
@@ -87,21 +89,23 @@ abstract class StorableClass {
         case ni: NullableIntFieldValue => nullableIntMap += (name -> ni)
         case s: StringFieldValue => stringMap += (name -> s)
         case ns: NullableStringFieldValue => nullableStringMap += (name -> ns)
-        case b: BooleanFieldValue => booleanMap += (name -> b)
         case d: DateFieldValue => dateMap += (name -> d)
+        case nd: NullableDateFieldValue => nullableDateMap += (name -> nd)
         case dt: DateTimeFieldValue => dateTimeMap += (name -> dt)
+        case b: BooleanFieldValue => booleanMap += (name -> b)
         case _ => throw new Exception("Unrecognized field type")
       }
     }
 
-    (intMap, nullableIntMap, stringMap, nullableStringMap, booleanMap, dateMap, dateTimeMap)
+    (intMap, nullableIntMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
   }
 
   val intValueMap: IntFieldValueMap = valueMaps._1
   val nullableIntValueMap: NullableIntFieldValueMap = valueMaps._2
   val stringValueMap: StringFieldValueMap = valueMaps._3
   val nullableStringValueMap: NullableStringFieldValueMap = valueMaps._4
-  val booleanValueMap: BooleanFieldValueMap = valueMaps._5
-  val dateValueMap: DateFieldValueMap = valueMaps._6
+  val dateValueMap: DateFieldValueMap = valueMaps._5
+  val nullableDateValueMap: NullableDateFieldValueMap = valueMaps._6
   val dateTimeValueMap: DateTimeFieldValueMap = valueMaps._7
+  val booleanValueMap: BooleanFieldValueMap = valueMaps._8
 }

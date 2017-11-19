@@ -11,13 +11,13 @@ import scala.reflect.runtime.universe._
 abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T]) {
   type IntFieldMap = Map[String, IntDatabaseField]
   type StringFieldMap = Map[String, StringDatabaseField]
-  type BooleanFieldMap = Map[String, BooleanDatabaseField]
   type DateFieldMap = Map[String, DateDatabaseField]
   type DateTimeFieldMap =Map[String, DateTimeDatabaseField]
+  type BooleanFieldMap = Map[String, BooleanDatabaseField]
 
   type NullableIntFieldMap = Map[String, NullableIntDatabaseField]
   type NullableStringFieldMap = Map[String, NullableStringDatabaseField]
-  type NullableBooleanFieldMap = Map[String, NullableBooleanDatabaseField]
+  type NullableDateFieldMap = Map[String, NullableDateDatabaseField]
 
   val self: StorableObject[T] = this
   val entityName: String
@@ -38,9 +38,10 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     var nullableIntMap: NullableIntFieldMap = Map()
     var stringMap: StringFieldMap = Map()
     var nullableStringMap: NullableStringFieldMap = Map()
-    var booleanMap: BooleanFieldMap = Map()
     var dateMap: DateFieldMap = Map()
+    var nullableDateMap: NullableDateFieldMap = Map()
     var dateTimeMap: DateTimeFieldMap = Map()
+    var booleanMap: BooleanFieldMap = Map()
 
     for(acc <- accessors) {
       val symbol = instanceMirror.reflectMethod(acc).symbol.toString
@@ -68,6 +69,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
         case d: DateDatabaseField =>
           d.setRuntimeFieldName(name)
           dateMap += (name -> d)
+        case nd: NullableDateDatabaseField =>
+          nd.setRuntimeFieldName(name)
+          nullableDateMap += (name -> nd)
         case dt: DateTimeDatabaseField =>
           dt.setRuntimeFieldName(name)
           dateTimeMap += (name -> dt)
@@ -77,25 +81,27 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 
 
-    (intMap, nullableIntMap, stringMap, nullableStringMap, booleanMap, dateMap, dateTimeMap)
+    (intMap, nullableIntMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
   }
 
   lazy val intFieldMap: IntFieldMap = fieldMaps._1
   lazy val nullableIntFieldMap: NullableIntFieldMap = fieldMaps._2
   lazy val stringFieldMap: StringFieldMap  = fieldMaps._3
   lazy val nullableStringFieldMap: NullableStringFieldMap  = fieldMaps._4
-  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._5
-  lazy val dateFieldMap: DateFieldMap = fieldMaps._6
+  lazy val dateFieldMap: DateFieldMap = fieldMaps._5
+  lazy val nullableDateFieldMap: NullableDateFieldMap = fieldMaps._6
   lazy val dateTimeFieldMap: DateTimeFieldMap = fieldMaps._7
+  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._8
 
   lazy val fieldList: List[DatabaseField[_]] =
     intFieldMap.values.toList ++
     nullableIntFieldMap.values.toList ++
     stringFieldMap.values.toList ++
     nullableStringFieldMap.values.toList ++
-    booleanFieldMap.values.toList ++
     dateFieldMap.values.toList ++
-    dateTimeFieldMap.values.toList
+    nullableDateFieldMap.values.toList ++
+    dateTimeFieldMap.values.toList ++
+    booleanFieldMap.values.toList
 
   def construct(ps: ProtoStorable, isClean: Boolean): T = {
     val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
@@ -142,16 +148,6 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    booleanFieldMap.foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
-      embryo.booleanValueMap.get(fieldName) match {
-        case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(ps) match {
-          case Some(b: Boolean) => fv.set(b)
-          case None =>
-        }
-        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
-      }
-    }))
-
     dateFieldMap.foreach(tupled((fieldName: String, field: DateDatabaseField) => {
       embryo.dateValueMap.get(fieldName) match {
         case Some(fv: DateFieldValue) => field.findValueInProtoStorable(ps) match {
@@ -162,10 +158,31 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
+    nullableDateFieldMap.foreach(tupled((fieldName: String, field: NullableDateDatabaseField) => {
+      embryo.nullableDateValueMap.get(fieldName) match {
+        case Some(fv: NullableDateFieldValue) => field.findValueInProtoStorable(ps) match {
+          case Some(Some(d: LocalDate)) => fv.set(Some(d))
+          case Some(None) => fv.set(None)
+          case None =>
+        }
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
+      }
+    }))
+
     dateTimeFieldMap.foreach(tupled((fieldName: String, field: DateTimeDatabaseField) => {
       embryo.dateTimeValueMap.get(fieldName) match {
         case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(dt: LocalDateTime) => fv.set(dt)
+          case None =>
+        }
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
+      }
+    }))
+
+    booleanFieldMap.foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
+      embryo.booleanValueMap.get(fieldName) match {
+        case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(ps) match {
+          case Some(b: Boolean) => fv.set(b)
           case None =>
         }
         case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
