@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
-import Storable.Fields.{DateDatabaseField, NullableDateDatabaseField}
+import Storable.Fields.NullableDateDatabaseField
 import Storable.StorableClass
 
 class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField) extends FieldValue[Option[LocalDate]](instance, field) {

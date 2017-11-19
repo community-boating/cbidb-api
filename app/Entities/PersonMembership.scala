@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDateFieldValue}
-import Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDateDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, NullableDateFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableDateDatabaseField}
 import Storable._
 
 class PersonMembership extends StorableClass {
