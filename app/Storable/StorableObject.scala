@@ -191,6 +191,4 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
     embryo
   }
-
-  def getSeedData: Set[T]
 }

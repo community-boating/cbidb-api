@@ -1,5 +1,6 @@
 package Entities
 
+import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
 import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
@@ -27,5 +28,21 @@ object MembershipType extends StorableObject[MembershipType] {
 
   def primaryKey: IntDatabaseField = fields.membershipTypeId
 
-  def getSeedData: Set[MembershipType] = Set()
+  object specialTypes {
+    val MEM_TYPE_ID_FULL_YEAR: Int = 1
+    val MEM_TYPE_ID_30_DAY: Int = 4
+    val MEM_TYPE_ID_60_DAY: Int = 5
+    val MEM_TYPE_ID_1_DAY_MERC: Int = 6
+    val MEM_TYPE_ID_1_DAY_KAYAK: Int = 7
+    val MEM_TYPE_ID_LIFETIME: Int = 9
+    val MEM_TYPE_ID_JUNIOR_SUMMER: Int = 10
+    val MEM_TYPE_ID_UAP: Int = 13
+    val MEM_TYPE_ID_HS_SPRING: Int = 14
+    val MEM_TYPE_ID_HS_FALL: Int = 15
+    val MEM_TYPE_ID_COMP_SEASONAL: Int = 61
+    val MEM_TYPE_ID_1_DAY_SUP: Int = 521
+    val MEM_TYPE_ID_1_DAY_RHODES: Int = 761
+  }
+
+  def getMembership(typeId: Int, pb: PersistenceBroker): MembershipType = pb.getObjectById(MembershipType, typeId).get
 }
