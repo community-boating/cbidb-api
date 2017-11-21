@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
-import Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import Storable._
 
 class Rating extends StorableClass {
@@ -10,6 +10,7 @@ class Rating extends StorableClass {
   object values extends ValuesObject {
     val ratingId = new IntFieldValue(self, Rating.fields.ratingId)
     val ratingName = new StringFieldValue(self, Rating.fields.ratingName)
+    val overriddenBy = new NullableIntFieldValue(self, Rating.fields.overriddenBy)
   }
 }
 
@@ -19,6 +20,7 @@ object Rating extends StorableObject[Rating] {
   object fields extends FieldsObject {
     val ratingId = new IntDatabaseField(self, "RATING_ID")
     val ratingName = new StringDatabaseField(self, "RATING_NAME", 100)
+    val overriddenBy = new NullableIntDatabaseField(self, "OVERRIDDEN_BY")
   }
 
   def primaryKey: IntDatabaseField = fields.ratingId

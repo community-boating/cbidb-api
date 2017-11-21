@@ -1,5 +1,6 @@
 package Entities
 
+import Entities.PersonRating.CasePersonRating
 import Storable.Fields.FieldValue.IntFieldValue
 import Storable.Fields.IntDatabaseField
 import Storable._
@@ -17,6 +18,12 @@ class PersonRating extends StorableClass {
     val ratingId = new IntFieldValue(self, PersonRating.fields.ratingId)
     val programId = new IntFieldValue(self, PersonRating.fields.programId)
   }
+
+  lazy val asCaseClass = CasePersonRating(
+    this.values.personId.get,
+    this.values.ratingId.get,
+    this.values.programId.get
+  )
 }
 
 object PersonRating extends StorableObject[PersonRating] {
@@ -31,5 +38,5 @@ object PersonRating extends StorableObject[PersonRating] {
 
   def primaryKey: IntDatabaseField = fields.assignId
 
-  def getSeedData: Set[PersonRating] = Set()
+  case class CasePersonRating(personId: Int, ratingId: Int, programId: Int)
 }
