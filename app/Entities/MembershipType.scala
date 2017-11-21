@@ -28,7 +28,7 @@ object MembershipType extends StorableObject[MembershipType] {
 
   def primaryKey: IntDatabaseField = fields.membershipTypeId
 
-  object specialTypes {
+  object specialIDs {
     val MEM_TYPE_ID_FULL_YEAR: Int = 1
     val MEM_TYPE_ID_30_DAY: Int = 4
     val MEM_TYPE_ID_60_DAY: Int = 5
@@ -43,6 +43,4 @@ object MembershipType extends StorableObject[MembershipType] {
     val MEM_TYPE_ID_1_DAY_SUP: Int = 521
     val MEM_TYPE_ID_1_DAY_RHODES: Int = 761
   }
-
-  def getMembership(typeId: Int, pb: PersistenceBroker): MembershipType = pb.getObjectById(MembershipType, typeId).get
 }

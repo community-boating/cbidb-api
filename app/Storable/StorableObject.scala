@@ -2,6 +2,7 @@ package Storable
 
 import java.time.{LocalDate, LocalDateTime}
 
+import Services.PersistenceBroker
 import Storable.Fields.FieldValue._
 import Storable.Fields._
 
@@ -24,6 +25,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val fields: FieldsObject
 
   def primaryKey: IntDatabaseField
+
+  def peekInstanceForID(id: Int, pb: PersistenceBroker): Option[T] = pb.getObjectById(this, id)
+  def getInstanceForID(id: Int, pb: PersistenceBroker): T = peekInstanceForID(id, pb).get
 
   // Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
   private lazy val fieldMaps = {

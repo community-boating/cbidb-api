@@ -20,6 +20,4 @@ object Person extends StorableObject[Person] {
   }
 
   def primaryKey: IntDatabaseField = fields.personId
-
-  def getSeedData: Set[Person] = Set()
 }

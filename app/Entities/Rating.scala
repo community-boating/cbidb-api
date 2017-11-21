@@ -23,5 +23,23 @@ object Rating extends StorableObject[Rating] {
 
   def primaryKey: IntDatabaseField = fields.ratingId
 
-  def getSeedData: Set[Rating] = Set()
+  object specialIDs {
+    val RATING_ID_KAYAK: Int = 4
+    val RATING_ID_SUP: Int = 28
+    val RATING_ID_RIGGING: Int = 61
+    val RATING_ID_VERBAL: Int = 62
+    val RATING_ID_MERC_GREEN: Int = 261
+  }
+
+  def ratingIsUsableWithMembership(ratingId: Int, membershipTypeId: Int): Boolean = membershipTypeId match {
+    case MembershipType.specialIDs.MEM_TYPE_ID_30_DAY => ratingId match {
+      case Rating.specialIDs.RATING_ID_KAYAK => true
+      case Rating.specialIDs.RATING_ID_SUP => true
+      case Rating.specialIDs.RATING_ID_RIGGING => true
+      case Rating.specialIDs.RATING_ID_VERBAL => true
+      case Rating.specialIDs.RATING_ID_MERC_GREEN => true
+      case _ => false
+    }
+    case _ => true
+  }
 }
