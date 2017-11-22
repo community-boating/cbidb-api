@@ -7,7 +7,7 @@ import Services.PersistenceBroker
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
   val argTypes: List[ReportingFilterArgType] = List(ARG_DROPDOWN)
   val displayName: String = "Has Rating"
-  val defaultValue: String = "261"
+  val defaultValue: String = Rating.specialIDs.RATING_ID_MERC_GREEN.toString
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
 
