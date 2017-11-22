@@ -1,6 +1,5 @@
 package Entities
 
-import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
 import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._

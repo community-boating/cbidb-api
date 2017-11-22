@@ -6,15 +6,15 @@ import Services.ServerStateWrapper.ServerState
 import play.api.inject.ApplicationLifecycle
 
 class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstructor: OracleConnectionPoolConstructor) {
-  def get: ServerState = {
-    if (ServerStateWrapper.isSet) ServerStateWrapper.get
+  def ss: ServerState = {
+    if (ServerStateWrapper.isSet) ServerStateWrapper.ss
     else {
       println(" ***************     SETTING SERVER STATE   ***************  ")
       println("Using runmode: ROOT_MODE")
       val pb: PersistenceBroker = new OracleBroker(lifecycle, poolConstructor)
       val cb: CacheBroker = new RedisBroker()
       ServerStateWrapper.init(new PermissionsAuthority(ServerRunMode.ROOT_MODE, pb, cb))
-      ServerStateWrapper.get
+      ServerStateWrapper.ss
     }
   }
 }
@@ -22,7 +22,7 @@ class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstru
 object ServerStateWrapper {
   private var serverState: Option[ServerState] = None
 
-  def get: ServerState = serverState match {
+  implicit def ss: ServerState = serverState match {
     case Some(s) => s
     case None => throw new Exception("Server state not yet initialized")
   }

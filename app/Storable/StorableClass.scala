@@ -17,7 +17,7 @@ abstract class StorableClass {
 
   type Companion = StorableObject[_ <: StorableClass]
 
-  val self: StorableClass = this
+  final val self: StorableClass = this
   val values: ValuesObject
 
   private var companion: Option[Companion] = None

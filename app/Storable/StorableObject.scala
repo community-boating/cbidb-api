@@ -110,6 +110,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   def construct(ps: ProtoStorable, isClean: Boolean): T = {
     val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
+
     intFieldMap.foreach(tupled((fieldName: String, field: IntDatabaseField) => {
       embryo.intValueMap.get(fieldName) match {
         case Some(fv: IntFieldValue) => field.findValueInProtoStorable(ps) match {

@@ -17,7 +17,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class JpClassInstances @Inject() (lifecycle: ApplicationLifecycle, ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
-  implicit val ss: ServerState = ssw.get
+  implicit val ss: ServerState = ssw.ss
   implicit val pb: PersistenceBroker = ss.pa.pb
   implicit val cb: CacheBroker = ss.pa.cb
 
