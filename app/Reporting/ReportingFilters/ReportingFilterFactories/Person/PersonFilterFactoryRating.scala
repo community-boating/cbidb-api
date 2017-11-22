@@ -15,14 +15,17 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 
     val ratingId: Int = arg.toInt
 
+    val allRatings = pb.getAllObjectsOfClass(Rating)
 
-    // TODO: This is wrong, this is directs only
+    val ratingsToHave: List[Int] = Rating.getAllHigherRatingsThanRating(allRatings, ratingId).map(_.values.ratingId.get)
+
     val personIDs: List[Int] = pb.getObjectsByFilters(
       PersonRating,
-      List(PersonRating.fields.ratingId.equalsConstant(ratingId))
+      List(PersonRating.fields.ratingId.inList(ratingsToHave)),
+      10000
     ).map(_.values.personId.get)
 
-    pb.getObjectsByIds(Person, personIDs, 1000).toSet
+    pb.getObjectsByIds(Person, personIDs, 10000).toSet
   })
 
   // TODO: exclude inactive?  Filter them to the bottom?
