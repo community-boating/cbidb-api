@@ -3,7 +3,7 @@ package Services
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-import CbiUtil.Profiler
+import CbiUtil.{Initializable, Profiler}
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -15,14 +15,15 @@ import scala.concurrent.Future
 
 abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
   implicit val pb: PersistenceBroker = this
-  RelationalBroker.createPool(cp, () => {
+  RelationalBroker.initialize(cp, () => {
     lifecycle.addStopHook(() => Future.successful({
-      println("  ************    Shutting down!  Closing pool!!  *************  ")
-      RelationalBroker.closePool()
+      println("****************************    Stop hook: closing pools  **********************")
+      RelationalBroker.shutdown()
     }))
   })
 
-  private val pool = RelationalBroker.getPool
+  private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get
+  private val tempTablePool: ComboPooledDataSource = RelationalBroker.tempTablePool.get
 
   val MAX_EXPR_IN_LIST: Int
 
@@ -47,27 +48,19 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   }
 
   def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
-    def groupIDs(ids: List[Int]): List[List[Int]] = {
-      val MAX_IDS = 900
-      if (ids.length <= MAX_IDS) List(ids)
-      else {
-        val splitList = ids.splitAt(MAX_IDS)
-        splitList._1 :: groupIDs(splitList._2)
-      }
-    }
+    val MAX_IDS_NO_TEMP_TABLE = 50
 
     if (ids.isEmpty) List.empty
-    else {
+    else if (ids.length < MAX_IDS_NO_TEMP_TABLE) {
       val sb: StringBuilder = new StringBuilder
       sb.append("SELECT ")
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
-      //sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-      sb.append(" WHERE (" + groupIDs(ids).map(group => {
-        obj.primaryKey.getPersistenceFieldName + " in (" + group.mkString(", ") + ")"
-      }).mkString(" OR ") + " ) ")
+      sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, isClean = true))
+    } else {
+      throw new Exception("Too many ids!")
     }
   }
 
@@ -90,7 +83,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   }
 
   private def executeSQLForInsert(sql: String, pkPersistenceName: String): Int = {
-    val c: Connection = pool.getConnection
+    val c: Connection = mainPool.getConnection
     try {
       val arr: scala.Array[String] = scala.Array(pkPersistenceName)
       val ps: PreparedStatement = c.prepareStatement(sql, arr)
@@ -105,7 +98,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   }
 
   private def executeSQLForUpdate(sql: String): Int = {
-    val c: Connection = pool.getConnection
+    val c: Connection = mainPool.getConnection
     try {
       val st: Statement = c.createStatement()
       st.executeUpdate(sql) // returns # of rows updated
@@ -117,7 +110,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   private def executeSQLForSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
     println(sql)
     val profiler = new Profiler
-    val c: Connection = pool.getConnection
+    val c: Connection = mainPool.getConnection
     profiler.lap("got connection")
     try {
       val st: Statement = c.createStatement()
@@ -246,27 +239,23 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
 }
 
 object RelationalBroker {
-  var pool: Option[ComboPooledDataSource] = None
+  val mainPool = new Initializable[ComboPooledDataSource]
+  val tempTablePool = new Initializable[ComboPooledDataSource]
+  private val cp = new Initializable[ConnectionPoolConstructor]
 
-  def createPool(cp: ConnectionPoolConstructor, shutdownCallback: (() => Unit)): Unit = {
-    println("trying to create a pool...")
-    pool match {
-      case None => pool = {
-        println("...going for it!")
-        shutdownCallback()
-        Some(cp.getPool)
-      }
+  def initialize(_cp: ConnectionPoolConstructor, registerShutdownCallback: (() => Unit)): Unit = {
+    println("RelationalBroker trying to initialize...")
+    cp.peek match {
       case Some(_) => println("...NOOPing that shit")
+      case None => {
+        println("...going for it!")
+        registerShutdownCallback()
+        cp.set(_cp)
+        mainPool.set(_cp.getMainDataSource)
+        tempTablePool.set(_cp.getTempTableDataSource)
+      }
     }
   }
 
-  def getPool: ComboPooledDataSource = pool match {
-    case Some(p) => p
-    case None => throw new Exception("Tried to get db connection pool but it wasn't instantiated yet.")
-  }
-
-  def closePool(): Unit = pool match {
-    case Some(p) => p.close()
-    case None =>
-  }
+  def shutdown(): Unit = cp.get.closePools()
 }

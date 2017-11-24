@@ -4,7 +4,23 @@ import CbiUtil.PropertiesWrapper;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor {
-    public ComboPooledDataSource getPool() {
+    private ComboPooledDataSource pool = null;
+
+    public ComboPooledDataSource getMainDataSource() {
+        if (null == this.pool) init();
+        return this.pool;
+    }
+
+    public ComboPooledDataSource getTempTableDataSource() {
+        return getMainDataSource();
+    }
+
+    public void closePools() {
+        pool.close();
+        System.out.println("  ************    Shutting down!  Closing mysql pool!!  *************  ");
+    }
+
+    private ComboPooledDataSource init() {
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             //mysql -u root -p -e "GRANT ALL PRIVILEGES ON $schema.* TO $user@localhost IDENTIFIED BY '$db_pass'"
@@ -12,6 +28,7 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
                     "conf/private/mysql-credentials",
                     new String[] {"username", "password", "host", "port", "schema"}
             );
+
             String connectionString = "jdbc:mysql://" + props.getProperty("host") + ":" + props.getProperty("port")
                     + "/" + props.getProperty("schema")
                     + "?user=" + props.getProperty("username")
