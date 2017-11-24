@@ -102,24 +102,13 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       p.lap("Created table")
       println("about to do " + ids.length + " ids....")
 
-      def groupIDs(ids: List[Int]): List[List[Int]] = {
-        val MAX_IDS = 2000
-        if (ids.length <= MAX_IDS) List(ids)
-        else {
-          val splitList = ids.splitAt(MAX_IDS)
-          splitList._1 :: groupIDs(splitList._2)
-        }
-      }
-
-      groupIDs(ids.distinct).foreach(g => {
-        val insertIDsSQL =
-          "INSERT ALL " +
-            g.map("INTO " + tableName + "(ID) VALUES (" + _ + ")").mkString(" ") +
-            " SELECT * FROM DUAL "
-        c.createStatement().executeUpdate(insertIDsSQL)
+      val ps = c.prepareStatement("INSERT INTO " + tableName + " VALUES (?)")
+      ids.distinct.foreach(i => {
+        ps.setInt(1, i)
+        ps.addBatch()
+        ps.clearParameters()
       })
-
-
+      ps.executeBatch()
       p.lap("inserted ids")
 
       val indexName = tableName + "_IDX1"
