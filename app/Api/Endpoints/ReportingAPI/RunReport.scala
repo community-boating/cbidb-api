@@ -27,7 +27,7 @@ class RunReport @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionCon
 
   val errorResult = JsObject(Map("data" -> JsString("error")))
 
-  def getTest(): Action[AnyContent] = get("ApClassType", "", "TypeName,TypeId", "jscon")
+  def getTest(): Action[AnyContent] = get("ApClassInstance", "", "TypeName,TypeId", "jscon")
 
   def get(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String): Action[AnyContent] = Action.async {
     println("Running a report with the following parameters: ")
