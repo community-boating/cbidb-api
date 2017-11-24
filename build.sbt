@@ -1,4 +1,4 @@
-name := """cbidb-api"""
+name := """CBI DB API"""
 
 version := "1.0-SNAPSHOT"
 
