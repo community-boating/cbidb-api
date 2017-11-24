@@ -4,7 +4,20 @@ import CbiUtil.PropertiesWrapper;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor {
+    private PropertiesWrapper pw = null;
     private ComboPooledDataSource pool = null;
+
+    public String getMainSchemaName() {
+        return pw.getProperty("schema");
+    }
+
+    public String getTempTableSchemaName() {
+        return pw.getProperty("schema");
+    }
+
+    public String getMainUserName() {
+        return pw.getProperty("username");
+    }
 
     public ComboPooledDataSource getMainDataSource() {
         if (null == this.pool) init();
@@ -24,15 +37,15 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             //mysql -u root -p -e "GRANT ALL PRIVILEGES ON $schema.* TO $user@localhost IDENTIFIED BY '$db_pass'"
-            PropertiesWrapper props = new PropertiesWrapper(
+            this.pw = new PropertiesWrapper(
                     "conf/private/mysql-credentials",
                     new String[] {"username", "password", "host", "port", "schema"}
             );
 
-            String connectionString = "jdbc:mysql://" + props.getProperty("host") + ":" + props.getProperty("port")
-                    + "/" + props.getProperty("schema")
-                    + "?user=" + props.getProperty("username")
-                    + "&password=" + props.getProperty("password")
+            String connectionString = "jdbc:mysql://" + this.pw.getProperty("host") + ":" + this.pw.getProperty("port")
+                    + "/" + this.pw.getProperty("schema")
+                    + "?user=" + this.pw.getProperty("username")
+                    + "&password=" + this.pw.getProperty("password")
                     + "&useSSL=false";
 
 

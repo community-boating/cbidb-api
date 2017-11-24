@@ -1,5 +1,6 @@
 package Services
 
+import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
@@ -48,10 +49,13 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
   }
 
   def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+    println("#################################################")
+    println("About to get " + ids.length + " instances of " + obj.entityName)
+    println("#################################################")
     val MAX_IDS_NO_TEMP_TABLE = 50
 
     if (ids.isEmpty) List.empty
-    else if (ids.length < MAX_IDS_NO_TEMP_TABLE) {
+    else if (ids.length <= MAX_IDS_NO_TEMP_TABLE) {
       val sb: StringBuilder = new StringBuilder
       sb.append("SELECT ")
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
@@ -60,7 +64,8 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, isClean = true))
     } else {
-      throw new Exception("Too many ids!")
+      // Too many IDs; make a filter table
+      getObjectsByIdsWithFilterTable(obj, ids, fetchSize)
     }
   }
 
@@ -79,6 +84,71 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       }
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, isClean = true))
+    }
+  }
+
+  private def getObjectsByIdsWithFilterTable[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+    val tableName: String = {
+      val now: String = System.currentTimeMillis().toString
+      val md5: String = MessageDigest.getInstance("MD5").digest(now.getBytes).map("%02x".format(_)).mkString
+      "FILTER_" + md5.substring(0, 10).toUpperCase
+    }
+    println(" ======   Creating filter table " + tableName + "    =======")
+    val p = new Profiler
+    val c: Connection = tempTablePool.getConnection
+    try {
+      val createTableSQL = "CREATE TABLE " + tableName + " (ID Number)"
+      c.createStatement().executeUpdate(createTableSQL)
+      p.lap("Created table")
+      println("about to do " + ids.length + " ids....")
+
+      def groupIDs(ids: List[Int]): List[List[Int]] = {
+        val MAX_IDS = 2000
+        if (ids.length <= MAX_IDS) List(ids)
+        else {
+          val splitList = ids.splitAt(MAX_IDS)
+          splitList._1 :: groupIDs(splitList._2)
+        }
+      }
+
+      groupIDs(ids.distinct).foreach(g => {
+        val insertIDsSQL =
+          "INSERT ALL " +
+            g.map("INTO " + tableName + "(ID) VALUES (" + _ + ")").mkString(" ") +
+            " SELECT * FROM DUAL "
+        c.createStatement().executeUpdate(insertIDsSQL)
+      })
+
+
+      p.lap("inserted ids")
+
+      val indexName = tableName + "_IDX1"
+
+      val createIndexSQL = "CREATE UNIQUE INDEX " + indexName + " on " + tableName + " (\"ID\") "
+      c.createStatement().executeUpdate(createIndexSQL)
+      p.lap("created index")
+
+      val grantSQL = "GRANT INDEX,SELECT ON \"" + tableName + "\" to " + RelationalBroker.getMainUserName
+      c.createStatement().executeUpdate(grantSQL)
+      p.lap("created Grant")
+
+      val sb: StringBuilder = new StringBuilder
+      val ms = RelationalBroker.getMainSchemaName
+      val tts = RelationalBroker.getTempTableSchemaName
+      sb.append("SELECT ")
+      sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
+      sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
+      sb.append(" WHERE " + ms + "." +  obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
+      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
+
+      val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
+      c.createStatement().executeUpdate(dropTableSQL)
+
+      println(" =======   cleaned up filter table   =======")
+      rows.map(r => obj.construct(r, isClean = true))
+    } finally {
+      c.close()
+      Nil
     }
   }
 
@@ -242,6 +312,10 @@ object RelationalBroker {
   val mainPool = new Initializable[ComboPooledDataSource]
   val tempTablePool = new Initializable[ComboPooledDataSource]
   private val cp = new Initializable[ConnectionPoolConstructor]
+
+  def getMainSchemaName: String = cp.get.getMainSchemaName
+  def getTempTableSchemaName: String = cp.get.getTempTableSchemaName
+  def getMainUserName: String = cp.get.getMainUserName
 
   def initialize(_cp: ConnectionPoolConstructor, registerShutdownCallback: (() => Unit)): Unit = {
     println("RelationalBroker trying to initialize...")

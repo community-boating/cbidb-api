@@ -10,6 +10,18 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
     private ComboPooledDataSource mainDataSource = null;
     private ComboPooledDataSource tempTableDataSource = null;
 
+    public String getMainSchemaName() {
+        return pw.getProperty("schema");
+    }
+
+    public String getTempTableSchemaName() {
+        return pw.getProperty("temptableschema");
+    }
+
+    public String getMainUserName() {
+        return pw.getProperty("username");
+    }
+
     public ComboPooledDataSource getMainDataSource() {
         if (null == mainDataSource) init();
         return mainDataSource;

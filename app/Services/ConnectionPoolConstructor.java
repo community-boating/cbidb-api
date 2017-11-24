@@ -6,6 +6,7 @@ public interface ConnectionPoolConstructor {
     public ComboPooledDataSource getMainDataSource();
     public ComboPooledDataSource getTempTableDataSource();
     public void closePools();
-    //public String getSchemaName();
-    //public String getTempTableSchemaName();
+    public String getMainSchemaName();
+    public String getTempTableSchemaName();
+    public String getMainUserName();
 }
