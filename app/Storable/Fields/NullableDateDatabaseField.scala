@@ -3,6 +3,7 @@ package Storable.Fields
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import CbiUtil._
 import Services.{MysqlBroker, OracleBroker, PersistenceBroker, RelationalBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
@@ -23,13 +24,6 @@ class NullableDateDatabaseField (entity: StorableObject[_], persistenceFieldName
     case _: OracleBroker => Filter("TO_CHAR(" + getFullyQualifiedName + ", 'YYYY') = " + year)
   }
 
-  def isDateConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = pb match {
-    case _: MysqlBroker =>
-      Filter(getFullyQualifiedName + " = '" + date.format(standardPattern) + "'")
-    case _: OracleBroker =>
-      Filter("TRUNC(" + getFullyQualifiedName + ") = TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
-  }
-
   def getValueFromString(s: String): Option[Option[LocalDate]] = {
     if (s == "") Some(None)
     else {
@@ -40,4 +34,20 @@ class NullableDateDatabaseField (entity: StorableObject[_], persistenceFieldName
       }
     }
   }
+
+  private def dateComparison(date: LocalDate, comp: DateComparison)(implicit pb: PersistenceBroker): Filter = {
+    val comparator: String = comp.comparator
+    pb match {
+      case _: MysqlBroker =>
+        Filter(getFullyQualifiedName + " " + comparator + " '" + date.format(standardPattern) + "'")
+      case _: OracleBroker =>
+        Filter("TRUNC(" + getFullyQualifiedName + ") = TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
+    }
+  }
+
+  def isDateConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = dateComparison(date, DATE_=)
+  def greaterThanConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = dateComparison(date, DATE_>)
+  def lessThanConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = dateComparison(date, DATE_<)
+  def greaterEqualConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = dateComparison(date, DATE_>=)
+  def lassEqualConstant(date: LocalDate)(implicit pb: PersistenceBroker): Filter = dateComparison(date, DATE_<=)
 }

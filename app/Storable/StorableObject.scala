@@ -11,12 +11,14 @@ import scala.reflect.runtime.universe._
 
 abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T]) {
   type IntFieldMap = Map[String, IntDatabaseField]
+  type DoubleFieldMap = Map[String, DoubleDatabaseField]
   type StringFieldMap = Map[String, StringDatabaseField]
   type DateFieldMap = Map[String, DateDatabaseField]
   type DateTimeFieldMap =Map[String, DateTimeDatabaseField]
   type BooleanFieldMap = Map[String, BooleanDatabaseField]
 
   type NullableIntFieldMap = Map[String, NullableIntDatabaseField]
+  type NullableDoubleFieldMap = Map[String, NullableDoubleDatabaseField]
   type NullableStringFieldMap = Map[String, NullableStringDatabaseField]
   type NullableDateFieldMap = Map[String, NullableDateDatabaseField]
 
@@ -40,6 +42,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
     var intMap: IntFieldMap = Map()
     var nullableIntMap: NullableIntFieldMap = Map()
+    var doubleMap: DoubleFieldMap = Map()
+    var nullableDoubleMap: NullableDoubleFieldMap = Map()
     var stringMap: StringFieldMap = Map()
     var nullableStringMap: NullableStringFieldMap = Map()
     var dateMap: DateFieldMap = Map()
@@ -61,6 +65,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
         case ni: NullableIntDatabaseField =>
           ni.setRuntimeFieldName(name)
           nullableIntMap += (name -> ni)
+        case d: DoubleDatabaseField =>
+          d.setRuntimeFieldName(name)
+          doubleMap += (name -> d)
+        case nd: NullableDoubleDatabaseField =>
+          nd.setRuntimeFieldName(name)
+          nullableDoubleMap += (name -> nd)
         case s: StringDatabaseField =>
           s.setRuntimeFieldName(name)
           stringMap += (name -> s)
@@ -85,21 +95,25 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 
 
-    (intMap, nullableIntMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
+    (intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
   }
 
   lazy val intFieldMap: IntFieldMap = fieldMaps._1
   lazy val nullableIntFieldMap: NullableIntFieldMap = fieldMaps._2
-  lazy val stringFieldMap: StringFieldMap  = fieldMaps._3
-  lazy val nullableStringFieldMap: NullableStringFieldMap  = fieldMaps._4
-  lazy val dateFieldMap: DateFieldMap = fieldMaps._5
-  lazy val nullableDateFieldMap: NullableDateFieldMap = fieldMaps._6
-  lazy val dateTimeFieldMap: DateTimeFieldMap = fieldMaps._7
-  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._8
+  lazy val doubleFieldMap: DoubleFieldMap = fieldMaps._3
+  lazy val nullableDoubleFieldMap: NullableDoubleFieldMap = fieldMaps._4
+  lazy val stringFieldMap: StringFieldMap  = fieldMaps._5
+  lazy val nullableStringFieldMap: NullableStringFieldMap  = fieldMaps._6
+  lazy val dateFieldMap: DateFieldMap = fieldMaps._7
+  lazy val nullableDateFieldMap: NullableDateFieldMap = fieldMaps._8
+  lazy val dateTimeFieldMap: DateTimeFieldMap = fieldMaps._9
+  lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._10
 
   lazy val fieldList: List[DatabaseField[_]] =
     intFieldMap.values.toList ++
     nullableIntFieldMap.values.toList ++
+    doubleFieldMap.values.toList ++
+    nullableDoubleFieldMap.values.toList ++
     stringFieldMap.values.toList ++
     nullableStringFieldMap.values.toList ++
     dateFieldMap.values.toList ++
@@ -125,6 +139,27 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       embryo.nullableIntValueMap.get(fieldName) match {
         case Some(fv: NullableIntFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(Some(i: Int)) => fv.set(Some(i))
+          case Some(None) => fv.set(None)
+          case None =>
+        }
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
+      }
+    }))
+
+    doubleFieldMap.foreach(tupled((fieldName: String, field: DoubleDatabaseField) => {
+      embryo.doubleValueMap.get(fieldName) match {
+        case Some(fv: DoubleFieldValue) => field.findValueInProtoStorable(ps) match {
+          case Some(d: Double) => fv.set(d)
+          case None =>
+        }
+        case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
+      }
+    }))
+
+    nullableDoubleFieldMap.foreach(tupled((fieldName: String, field: NullableDoubleDatabaseField) => {
+      embryo.nullableDoubleValueMap.get(fieldName) match {
+        case Some(fv: NullableDoubleFieldValue) => field.findValueInProtoStorable(ps) match {
+          case Some(Some(d: Double)) => fv.set(Some(d))
           case Some(None) => fv.set(None)
           case None =>
         }

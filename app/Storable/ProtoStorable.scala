@@ -10,6 +10,7 @@ import Storable.Fields._
 // If it came from a POST or something, ignored is the post parameters that were not able to be matched to a single field (for debugging)
 case class ProtoStorable(
   intFields: Map[String, Option[Int]],
+  doubleFields: Map[String, Option[Double]],
   stringFields: Map[String, Option[String]],
   dateFields: Map[String, Option[LocalDate]],
   dateTimeFields: Map[String, Option[LocalDateTime]],
@@ -19,6 +20,7 @@ case class ProtoStorable(
 object ProtoStorable {
   def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable = {
     var intFields: Map[String, Option[Int]] = Map()
+    var doubleFields: Map[String, Option[Double]] = Map()
     var stringFields: Map[String, Option[String]] = Map()
     var dateFields: Map[String, Option[LocalDate]] = Map()
     var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
@@ -27,6 +29,8 @@ object ProtoStorable {
     formData.foreach(Function.tupled((key: String, value: String) => {
       val intFieldMatch: Option[IntDatabaseField] = storable.intFieldMap.get(key)
       val nullableIntFieldMatch: Option[NullableIntDatabaseField] = storable.nullableIntFieldMap.get(key)
+      val doubleFieldMatch: Option[DoubleDatabaseField] = storable.doubleFieldMap.get(key)
+      val nullableDoubleFieldMatch: Option[NullableDoubleDatabaseField] = storable.nullableDoubleFieldMap.get(key)
       val stringFieldMatch: Option[StringDatabaseField] = storable.stringFieldMap.get(key)
       val nullableStringFieldMatch: Option[NullableStringDatabaseField] = storable.nullableStringFieldMap.get(key)
       val dateFieldMatch: Option[DateDatabaseField] = storable.dateFieldMap.get(key)
@@ -39,6 +43,8 @@ object ProtoStorable {
       val matches: List[Option[_]] = List(
         intFieldMatch,
         nullableIntFieldMatch,
+        doubleFieldMatch,
+        nullableDoubleFieldMatch,
         stringFieldMatch,
         nullableStringFieldMatch,
         booleanFieldMatch,
@@ -62,6 +68,21 @@ object ProtoStorable {
           case Some(f: NullableIntDatabaseField) => f.getValueFromString(value) match {
             case Some(Some(i: Int)) => intFields += (key -> Some(i))
             case Some(None) =>  intFields += (key -> None)
+            case None => ignored += (key -> value)
+          }
+          case None =>
+        }
+        doubleFieldMatch match {
+          case Some(f: DoubleDatabaseField) => f.getValueFromString(value) match {
+            case Some(i: Double) => doubleFields += (key -> Some(i))
+            case None => ignored += (key -> value)
+          }
+          case None =>
+        }
+        nullableDoubleFieldMatch match {
+          case Some(f: NullableDoubleDatabaseField) => f.getValueFromString(value) match {
+            case Some(Some(i: Double)) => doubleFields += (key -> Some(i))
+            case Some(None) =>  doubleFields += (key -> None)
             case None => ignored += (key -> value)
           }
           case None =>
@@ -103,6 +124,6 @@ object ProtoStorable {
       }
     }))
 
-    ProtoStorable(intFields, stringFields, dateFields, dateTimeFields, ignored)
+    ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, ignored)
   }
 }

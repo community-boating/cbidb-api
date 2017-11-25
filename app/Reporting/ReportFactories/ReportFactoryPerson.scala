@@ -1,7 +1,7 @@
 package Reporting.ReportFactories
 
 import Entities._
-import Reporting.ReportingFilters.ReportingFilterFactories.Person.{PersonFilterFactoryJpParentSeason, PersonFilterFactoryMemProgramYear, PersonFilterFactoryRating, PersonFilterFactoryTag}
+import Reporting.ReportingFilters.ReportingFilterFactories.Person._
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
@@ -22,6 +22,7 @@ class ReportFactoryPerson extends ReportFactory[Person] {
     ("PersonFilterFactoryMemProgramYear", new PersonFilterFactoryMemProgramYear),
     ("PersonFilterFactoryRating", new PersonFilterFactoryRating),
     ("PersonFilterFactoryTag", new PersonFilterFactoryTag),
-    ("PersonFilterFactoryJpParentSeason", new PersonFilterFactoryJpParentSeason)
+    ("PersonFilterFactoryJpParentSeason", new PersonFilterFactoryJpParentSeason),
+    ("PersonFilterFactoryDonation", new PersonFilterFactoryDonation)
   )
 }

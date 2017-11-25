@@ -182,6 +182,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
       while (rs.next) {
         rowCounter += 1
         var intFields: Map[String, Option[Int]] = Map()
+        var doubleFields: Map[String, Option[Double]] = Map()
         var stringFields: Map[String, Option[String]] = Map()
         var dateFields: Map[String, Option[LocalDate]] = Map()
         var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
@@ -192,6 +193,10 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
             case _: IntDatabaseField | _: NullableIntDatabaseField => {
               intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
               if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
+            }
+            case _: DoubleDatabaseField | _: NullableDoubleDatabaseField => {
+              doubleFields += (df.getRuntimeFieldName -> Some(rs.getDouble(i)))
+              if (rs.wasNull()) doubleFields += (df.getRuntimeFieldName -> None)
             }
             case _: StringDatabaseField | _: NullableStringDatabaseField => {
               stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
@@ -221,7 +226,7 @@ abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionP
           }
         }))
 
-        rows += ProtoStorable(intFields, stringFields, dateFields, dateTimeFields, Map())
+        rows += ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
       }
       profiler.lap("finsihed rows")
       val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt

@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
-import Reporting.ReportingFilters.{ARG_DROPDOWN, ARG_INT, ReportingFilterFactoryDropdown}
+import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
 import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PersistenceBroker}
@@ -58,6 +58,8 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
             f._2.displayName,
             f._2.argTypes.map({
               case ARG_INT => "Int"
+              case ARG_DOUBLE => "Double"
+              case ARG_DATE => "Date"
               case ARG_DROPDOWN => "Dropdown"
               case t: Any => throw new Exception("Unconfigured arg type " + t)
             }).mkString(","),

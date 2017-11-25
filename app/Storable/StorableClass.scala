@@ -9,6 +9,8 @@ import scala.reflect.runtime.universe._
 abstract class StorableClass {
   type IntFieldValueMap = Map[String, IntFieldValue]
   type NullableIntFieldValueMap = Map[String, NullableIntFieldValue]
+  type DoubleFieldValueMap = Map[String, DoubleFieldValue]
+  type NullableDoubleFieldValueMap = Map[String, NullableDoubleFieldValue]
   type StringFieldValueMap = Map[String, StringFieldValue]
   type NullableStringFieldValueMap = Map[String, NullableStringFieldValue]
   type DateFieldValueMap = Map[String, DateFieldValue]
@@ -64,6 +66,8 @@ abstract class StorableClass {
 
     var intMap: IntFieldValueMap = Map()
     var nullableIntMap: NullableIntFieldValueMap = Map()
+    var doubleMap: DoubleFieldValueMap = Map()
+    var nullableDoubleMap: NullableDoubleFieldValueMap = Map()
     var stringMap: StringFieldValueMap = Map()
     var nullableStringMap: NullableStringFieldValueMap = Map()
     var dateMap: DateFieldValueMap = Map()
@@ -81,6 +85,8 @@ abstract class StorableClass {
       instanceMirror.reflectMethod(acc).apply() match {
         case i: IntFieldValue => intMap += (name -> i)
         case ni: NullableIntFieldValue => nullableIntMap += (name -> ni)
+        case d: DoubleFieldValue => doubleMap += (name -> d)
+        case nd: NullableDoubleFieldValue => nullableDoubleMap += (name -> nd)
         case s: StringFieldValue => stringMap += (name -> s)
         case ns: NullableStringFieldValue => nullableStringMap += (name -> ns)
         case d: DateFieldValue => dateMap += (name -> d)
@@ -91,15 +97,17 @@ abstract class StorableClass {
       }
     }
 
-    (intMap, nullableIntMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
+    (intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
   }
 
   val intValueMap: IntFieldValueMap = valueMaps._1
   val nullableIntValueMap: NullableIntFieldValueMap = valueMaps._2
-  val stringValueMap: StringFieldValueMap = valueMaps._3
-  val nullableStringValueMap: NullableStringFieldValueMap = valueMaps._4
-  val dateValueMap: DateFieldValueMap = valueMaps._5
-  val nullableDateValueMap: NullableDateFieldValueMap = valueMaps._6
-  val dateTimeValueMap: DateTimeFieldValueMap = valueMaps._7
-  val booleanValueMap: BooleanFieldValueMap = valueMaps._8
+  val doubleValueMap: DoubleFieldValueMap = valueMaps._3
+  val nullableDoubleValueMap: NullableDoubleFieldValueMap = valueMaps._4
+  val stringValueMap: StringFieldValueMap = valueMaps._5
+  val nullableStringValueMap: NullableStringFieldValueMap = valueMaps._6
+  val dateValueMap: DateFieldValueMap = valueMaps._7
+  val nullableDateValueMap: NullableDateFieldValueMap = valueMaps._8
+  val dateTimeValueMap: DateTimeFieldValueMap = valueMaps._9
+  val booleanValueMap: BooleanFieldValueMap = valueMaps._10
 }
