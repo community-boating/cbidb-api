@@ -3,8 +3,8 @@ package Entities
 import CbiUtil.SelfInitializable
 import Entities.PersonRating.CasePersonRating
 import Services.ServerStateWrapper.ss
-import Storable.Fields.FieldValue.IntFieldValue
-import Storable.Fields.IntDatabaseField
+import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
+import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class Person extends StorableClass {
@@ -18,6 +18,9 @@ class Person extends StorableClass {
   }
   object values extends ValuesObject {
     val personId = new IntFieldValue(self, Person.fields.personId)
+    val nameFirst = new NullableStringFieldValue(self, Person.fields.nameFirst)
+    val nameLast = new NullableStringFieldValue(self, Person.fields.nameLast)
+    val email = new NullableStringFieldValue(self, Person.fields.email)
   }
 
   lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
@@ -42,6 +45,9 @@ object Person extends StorableObject[Person] {
 
   object fields extends FieldsObject {
     val personId = new IntDatabaseField(self, "PERSON_ID")
+    val nameFirst = new NullableStringDatabaseField(self, "NAME_FIRST", 100)
+    val nameLast = new NullableStringDatabaseField(self, "NAME_LAST", 100)
+    val email = new NullableStringDatabaseField(self, "EMAIL", 100)
   }
 
   def primaryKey: IntDatabaseField = fields.personId

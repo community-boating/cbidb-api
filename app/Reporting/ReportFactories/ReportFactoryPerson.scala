@@ -1,7 +1,7 @@
 package Reporting.ReportFactories
 
 import Entities._
-import Reporting.ReportingFilters.ReportingFilterFactories.Person.{PersonFilterFactoryMemProgramYear, PersonFilterFactoryRating, PersonFilterFactoryTag}
+import Reporting.ReportingFilters.ReportingFilterFactories.Person.{PersonFilterFactoryJpParentSeason, PersonFilterFactoryMemProgramYear, PersonFilterFactoryRating, PersonFilterFactoryTag}
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
@@ -12,12 +12,16 @@ class ReportFactoryPerson extends ReportFactory[Person] {
   def decorateInstancesWithParentReferences(instances: List[Person]): Unit = {}
 
   val fieldList: List[(String, ReportingField[Person])] = List(
-    ("PersonId", ReportingField.getReportingFieldFromDatabaseField(Person.fields.personId, "Person ID", isDefault = true))
+    ("PersonId", ReportingField.getReportingFieldFromDatabaseField(Person.fields.personId, "Person ID", isDefault = true)),
+    ("NameFirst", ReportingField.getReportingFieldFromDatabaseField(Person.fields.nameFirst, "First Name", isDefault = true)),
+    ("NameLast", ReportingField.getReportingFieldFromDatabaseField(Person.fields.nameLast, "Last Name", isDefault = true)),
+    ("Email", ReportingField.getReportingFieldFromDatabaseField(Person.fields.email, "Email", isDefault = true))
   )
 
   val filterList: List[(String, ReportingFilterFactory[Person])] = List(
-    ("PersonFilterFactoryMemProgramYear", new PersonFilterFactoryMemProgramYear()),
-    ("PersonFilterFactoryRating", new PersonFilterFactoryRating()),
-    ("PersonFilterFactoryTag", new PersonFilterFactoryTag())
+    ("PersonFilterFactoryMemProgramYear", new PersonFilterFactoryMemProgramYear),
+    ("PersonFilterFactoryRating", new PersonFilterFactoryRating),
+    ("PersonFilterFactoryTag", new PersonFilterFactoryTag),
+    ("PersonFilterFactoryJpParentSeason", new PersonFilterFactoryJpParentSeason)
   )
 }

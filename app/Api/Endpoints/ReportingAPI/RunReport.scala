@@ -5,8 +5,8 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import Reporting.Report
-import Services.ServerStateWrapper.ServerState
-import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
+import Services.ServerStateWrapper.ss
+import Services.{CacheBroker, PersistenceBroker}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import play.api.http.HttpEntity
@@ -15,8 +15,7 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RunReport @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
-  implicit val ss: ServerState = ssw.ss
+class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
   implicit val pb: PersistenceBroker = ss.pa.pb
   implicit val cb: CacheBroker = ss.pa.cb
 

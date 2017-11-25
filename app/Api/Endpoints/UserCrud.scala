@@ -3,16 +3,15 @@ package Api.Endpoints
 import javax.inject.Inject
 
 import Entities.User
-import Services.ServerStateWrapper.ServerState
-import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
+import Services.ServerStateWrapper.ss
+import Services.{CacheBroker, PersistenceBroker}
 import Storable.ProtoStorable
 import play.api.mvc.{Action, Controller}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
-class UserCrud @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
-  implicit val ss: ServerState = ssw.ss
+class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
   implicit val pb: PersistenceBroker = ss.pa.pb
   implicit val cb: CacheBroker = ss.pa.cb
 

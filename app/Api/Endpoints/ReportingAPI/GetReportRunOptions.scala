@@ -6,16 +6,15 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters.{ARG_DROPDOWN, ARG_INT, ReportingFilterFactoryDropdown}
 import Reporting.{Report, ReportFactory}
-import Services.ServerStateWrapper.ServerState
-import Services.{CacheBroker, PersistenceBroker, ServerStateWrapper}
+import Services.ServerStateWrapper.ss
+import Services.{CacheBroker, PersistenceBroker}
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: ExecutionContext) extends Controller {
-  implicit val ss: ServerState = ssw.ss
+class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
   implicit val pb: PersistenceBroker = ss.pa.pb
   implicit val cb: CacheBroker = ss.pa.cb
 
@@ -27,7 +26,7 @@ class GetReportRunOptions @Inject() (ssw: ServerStateWrapper) (implicit exec: Ex
     })
   }
 
-  class ReportRunOptionsRequest() extends ApiRequest(cb) {
+  class ReportRunOptionsRequest extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "reportRunOptions"
 
     def getExpirationTime: LocalDateTime = {

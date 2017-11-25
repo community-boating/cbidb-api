@@ -46,7 +46,10 @@ object ReportingField {
     }, fieldDisplayName, isDefault)
     case i: NullableStringDatabaseField => new ReportingField[T]((t: T) => {
       getParent(t).nullableStringValueMap.get(i.getRuntimeFieldName) match {
-        case Some(v: NullableStringFieldValue) => v.get.toString
+        case Some(v: NullableStringFieldValue) => v.get match {
+          case Some(s: String) => s
+          case _ => ""
+        }
         case None => ""
       }
     }, fieldDisplayName, isDefault)
