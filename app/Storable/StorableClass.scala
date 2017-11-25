@@ -1,5 +1,6 @@
 package Storable
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue._
 import Storable.Fields.IntDatabaseField
 
@@ -20,15 +21,9 @@ abstract class StorableClass {
   final val self: StorableClass = this
   val values: ValuesObject
 
-  private var companion: Option[Companion] = None
-  def getCompanion: Companion = companion match {
-    case None => throw new Exception("Companion object never set for entity")
-    case Some(c: Companion) => c
-  }
-  def setCompanion(c: Companion): Unit = companion match {
-    case Some(_) => throw new Exception("Multiple calls to set companion of entity instance")
-    case None => companion = Some(c)
-  }
+  private val companion = new Initializable[Companion]
+  def getCompanion: Companion = companion.get
+  def setCompanion(c: Companion): Unit = companion.set(c)
 
   override def equals(that: Any): Boolean = that match {
     case i: StorableClass => this.getID == i.getID
@@ -44,7 +39,6 @@ abstract class StorableClass {
   }
 
   def getID: Int = getPrimaryKeyFieldValue.get
-
 
   def hasID: Boolean = getPrimaryKeyFieldValue.peek match {
     case Some(_) => true

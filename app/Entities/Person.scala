@@ -2,10 +2,10 @@ package Entities
 
 import CbiUtil.SelfInitializable
 import Entities.PersonRating.CasePersonRating
+import Services.ServerStateWrapper.ss
 import Storable.Fields.FieldValue.IntFieldValue
 import Storable.Fields.IntDatabaseField
 import Storable._
-import Services.ServerStateWrapper.ss
 
 class Person extends StorableClass {
   val instance: Person = this
