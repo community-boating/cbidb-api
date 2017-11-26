@@ -6,7 +6,7 @@ import Storable.{Filter, ProtoStorable, StorableObject}
 abstract class DatabaseField[T](entity: StorableObject[_], persistenceFieldName: String) {
   def getPersistenceFieldName: String = persistenceFieldName
   def getFullyQualifiedName: String = entity.entityName + "." + persistenceFieldName
-  def getFieldType(implicit pb: PersistenceBroker): String
+  def getFieldType: String
 
   private var runtimeFieldName: Option[String] = None
   def getRuntimeFieldName: String = runtimeFieldName match {

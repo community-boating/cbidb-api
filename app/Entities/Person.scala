@@ -1,6 +1,8 @@
 package Entities
 
+import CbiUtil.Initializable
 import Entities.PersonRating.CasePersonRating
+import Services.PersistenceBroker
 import Services.ServerStateWrapper.ss
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
@@ -10,10 +12,7 @@ class Person extends StorableClass {
   val instance: Person = this
   this.setCompanion(Person)
   object references extends ReferencesObject {
-    lazy val personRatings: Set[PersonRating] = ss.pa.pb.getObjectsByFilters(
-      PersonRating,
-      List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
-    ).toSet
+    val personRatings = new Initializable[Set[PersonRating]]
   }
   object values extends ValuesObject {
     val personId = new IntFieldValue(self, Person.fields.personId)
@@ -22,7 +21,14 @@ class Person extends StorableClass {
     val email = new NullableStringFieldValue(self, Person.fields.email)
   }
 
-  lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.map(_.asCaseClass)
+  def setPersonRatings(pb: PersistenceBroker): Unit = {
+    references.personRatings set pb.getObjectsByFilters(
+      PersonRating,
+      List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
+    ).toSet
+  }
+
+  lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
 
   def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
     this.values.personId.get,

@@ -1,15 +1,15 @@
 package Storable.Fields
 
-import Services.{PersistenceBroker, RelationalBroker}
+import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
+import Services.{PermissionsAuthority, PersistenceBroker, RelationalBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
   def getFieldLength: Int = 1
 
-  def getFieldType(implicit pb: PersistenceBroker): String = getFieldLength match {
-    case l if l == 1 => "char(" + getFieldLength + ")"
-    case _ => pb match {
-      case _: RelationalBroker => "char(1)"
+  def getFieldType: String = getFieldLength match {
+    case _ => PermissionsAuthority.getPersistenceSystem match {
+      case _: PERSISTENCE_SYSTEM_RELATIONAL => "char(1)"
     }
   }
 

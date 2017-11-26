@@ -22,13 +22,13 @@ class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
     val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    val apiRequest = new ApClassInstancesRequest(startDate)
+    val apiRequest = new ApClassInstancesRequest(pb, cb, startDate)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequest(cb) {
+  class ApClassInstancesRequest(pb: PersistenceBroker, cb: CacheBroker, startDateRaw: Option[String]) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey =
       "ap-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 

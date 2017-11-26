@@ -1,16 +1,17 @@
 package Storable.Fields
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableBooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
   def getFieldLength: Int = 1
 
-  def getFieldType(implicit pb: PersistenceBroker): String = getFieldLength match {
+  def getFieldType: String = getFieldLength match {
     case l if l == 1 => "char(" + getFieldLength + ")"
-    case _ => pb match {
-      case _: MysqlBroker => "char(1)"
-      case _: OracleBroker  => "char(1)"
+    case _ => PermissionsAuthority.getPersistenceSystem match {
+      case PERSISTENCE_SYSTEM_MYSQL => "char(1)"
+      case PERSISTENCE_SYSTEM_ORACLE  => "char(1)"
     }
   }
 

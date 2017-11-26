@@ -1,16 +1,17 @@
 package Storable.Fields
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
   def getFieldLength: Int = fieldLength
 
-  def getFieldType(implicit pb: PersistenceBroker): String = getFieldLength match {
+  def getFieldType: String = getFieldLength match {
     case l if l == 1 => "char(" + getFieldLength + ")"
-    case _ => pb match {
-      case _: MysqlBroker => "varchar(" + getFieldLength + ")"
-      case _: OracleBroker  => "varchar2(" + getFieldLength + ")"
+    case _ => PermissionsAuthority.getPersistenceSystem match {
+      case PERSISTENCE_SYSTEM_MYSQL => "varchar(" + getFieldLength + ")"
+      case PERSISTENCE_SYSTEM_ORACLE  => "varchar2(" + getFieldLength + ")"
     }
   }
 

@@ -18,8 +18,6 @@ abstract class RelationalBroker private[Services] extends PersistenceBroker {
   private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: ComboPooledDataSource = RelationalBroker.tempTablePool.get
 
-  val MAX_EXPR_IN_LIST: Int
-
   def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")

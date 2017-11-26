@@ -21,13 +21,13 @@ class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends
     val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    val apiRequest = new WeatherRequest()
+    val apiRequest = new WeatherRequest(pb, cb)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  class WeatherRequest extends ApiRequest(cb) {
+  class WeatherRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "weather"
 
     def getExpirationTime: LocalDateTime = {

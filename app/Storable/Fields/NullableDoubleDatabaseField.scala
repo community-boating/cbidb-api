@@ -1,14 +1,15 @@
 package Storable.Fields
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableDoubleDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
   def findValueInProtoStorable(row: ProtoStorable): Option[Option[Double]] = row.doubleFields.get(this.getRuntimeFieldName)
 
-  def getFieldType(implicit pb: PersistenceBroker): String = pb match {
-    case _: MysqlBroker => "decimal"
-    case _: OracleBroker => "number"
+  def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
+    case PERSISTENCE_SYSTEM_MYSQL => "decimal"
+    case PERSISTENCE_SYSTEM_ORACLE => "number"
   }
 
   def lessThanConstant(c: Double): Filter = {

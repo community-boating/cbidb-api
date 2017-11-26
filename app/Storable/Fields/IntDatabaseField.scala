@@ -1,12 +1,13 @@
 package Storable.Fields
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker, RelationalBroker}
+import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
+import Services._
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class IntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Int](entity, persistenceFieldName) {
-  def getFieldType(implicit pb: PersistenceBroker): String = pb match {
-    case _: MysqlBroker => "integer"
-    case _: OracleBroker => "number"
+  def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
+    case PERSISTENCE_SYSTEM_MYSQL => "integer"
+    case PERSISTENCE_SYSTEM_ORACLE => "number"
   }
 
   def findValueInProtoStorable(row: ProtoStorable): Option[Int] = {
@@ -21,12 +22,12 @@ class IntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) 
     Filter(getFullyQualifiedName + " < " + c)
   }
 
-  def inList(l: List[Int])(implicit pb: PersistenceBroker): Filter = pb match {
-    case rl: RelationalBroker => {
+  def inList(l: List[Int]): Filter = PermissionsAuthority.getPersistenceSystem match {
+    case ps: PERSISTENCE_SYSTEM_RELATIONAL => {
       def groupIDs(ids: List[Int]): List[List[Int]] = {
-        if (ids.length <= rl.MAX_EXPR_IN_LIST) List(ids)
+        if (ids.length <= ps.pbs.MAX_EXPR_IN_LIST) List(ids)
         else {
-          val splitList = ids.splitAt(rl.MAX_EXPR_IN_LIST)
+          val splitList = ids.splitAt(ps.pbs.MAX_EXPR_IN_LIST)
           splitList._1 :: groupIDs(splitList._2)
         }
       }

@@ -20,13 +20,13 @@ class JpTeams @Inject() (implicit exec: ExecutionContext) extends Controller {
     val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    val apiRequest = new JpTeamsRequest()
+    val apiRequest = new JpTeamsRequest(pb, cb)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  class JpTeamsRequest extends ApiRequest(cb) {
+  class JpTeamsRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "jp-teams"
 
     def getExpirationTime: LocalDateTime = {

@@ -22,13 +22,13 @@ Users @Inject() (implicit exec: ExecutionContext) extends Controller {
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
 
-    val apiRequest = new UsersRequest(userID)
+    val apiRequest = new UsersRequest(pb, cb, userID)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  class UsersRequest(userID: Option[Int]) extends ApiRequest(cb) {
+  class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "users" + (userID match {
       case None => ""
       case Some(id) => id

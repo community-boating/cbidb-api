@@ -3,18 +3,19 @@ package Storable.Fields.FieldValue
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import Services.{MysqlBroker, OracleBroker, PersistenceBroker}
+import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.Fields.NullableDateDatabaseField
 import Storable.StorableClass
 
 class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField) extends FieldValue[Option[LocalDate]](instance, field) {
-  def getPersistenceLiteral(implicit pb: PersistenceBroker): String = {
+  def getPersistenceLiteral: String = {
     val d = super.get
     d match {
       case None => "NULL"
-      case Some(d) => pb match {
-        case _: MysqlBroker => "'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'"
-        case _: OracleBroker => "TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
+      case Some(d) => PermissionsAuthority.getPersistenceSystem match {
+        case PERSISTENCE_SYSTEM_MYSQL => "'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'"
+        case PERSISTENCE_SYSTEM_ORACLE => "TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
       }
     }
   }

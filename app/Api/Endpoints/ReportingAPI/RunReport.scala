@@ -34,7 +34,7 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
     println("filter spec: " + filterSpec)
     println("field spec: " + fieldSpec)
     println("output type: " + outputType)
-    lazy val apiRequest = new ReportRequest(baseEntityString, filterSpec, fieldSpec, outputType)
+    lazy val apiRequest = new ReportRequest(pb, cb, baseEntityString, filterSpec, fieldSpec, outputType)
     outputType match {
       case OUTPUT_TYPE.JSCON => apiRequest.getFuture.map(s => Ok(s).as("application/json"))
       case OUTPUT_TYPE.TSV => Future {
@@ -51,7 +51,7 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
     }
   }
 
-  class ReportRequest(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String) extends ApiRequest(cb) {
+  class ReportRequest(pb: PersistenceBroker, cb: CacheBroker, baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "report_" + baseEntityString + "_" + filterSpec + "_" + fieldSpec + "_" + outputType
 
     def getExpirationTime: LocalDateTime = {

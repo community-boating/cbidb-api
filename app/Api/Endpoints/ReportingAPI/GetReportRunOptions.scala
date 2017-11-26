@@ -21,13 +21,13 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
     val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    val apiRequest = new ReportRunOptionsRequest()
+    val apiRequest = new ReportRunOptionsRequest(pb, cb)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }
 
-  class ReportRunOptionsRequest extends ApiRequest(cb) {
+  class ReportRunOptionsRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "reportRunOptions"
 
     def getExpirationTime: LocalDateTime = {
