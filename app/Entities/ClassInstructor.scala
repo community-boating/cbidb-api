@@ -24,7 +24,4 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
   }
 
   def primaryKey: IntDatabaseField = fields.instructorId
-
-
-  def getSeedData: Set[ClassInstructor] = Set()
 }

@@ -24,6 +24,4 @@ object JpClassType extends StorableObject[JpClassType] {
   }
 
   def primaryKey: IntDatabaseField = fields.typeId
-
-  def getSeedData: Set[JpClassType] = Set()
 }

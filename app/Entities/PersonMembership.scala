@@ -31,6 +31,4 @@ object PersonMembership extends StorableObject[PersonMembership] {
   }
 
   def primaryKey: IntDatabaseField = fields.assignId
-
-  def getSeedData: Set[PersonMembership] = Set()
 }

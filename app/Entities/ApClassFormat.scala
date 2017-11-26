@@ -33,10 +33,4 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
   }
 
   def primaryKey: IntDatabaseField = fields.formatId
-
-  def getSeedData: Set[ApClassFormat] = Set(
-  //  ApClassFormat(1, 1, None),
-  //  ApClassFormat(2, 2, None),
-  //  ApClassFormat(3, 3, None)
-  )
 }

@@ -34,7 +34,4 @@ object JpClassSession extends StorableObject[JpClassSession] {
   }
 
   def primaryKey: IntDatabaseField = fields.sessionId
-
-
-  def getSeedData: Set[JpClassSession] = Set()
 }

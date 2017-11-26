@@ -22,6 +22,4 @@ object ClassLocation extends StorableObject[ClassLocation] {
   }
 
   def primaryKey: IntDatabaseField = fields.locationId
-
-  def getSeedData: Set[ClassLocation] = Set()
 }

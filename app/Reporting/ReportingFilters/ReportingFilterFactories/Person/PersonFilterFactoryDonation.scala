@@ -6,11 +6,14 @@ import java.time.format.DateTimeFormatter
 import Entities.{Donation, Person}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
+import Services.ServerStateWrapper.ss
 
 class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
-  val argTypes: List[ReportingFilterArgType] = List(ARG_DOUBLE, ARG_DATE)
   val displayName: String = "Donated at least $X since Y"
-  val defaultValue: String = "4"
+  val argDefinitions = List(
+    (ARG_DOUBLE, "0"), // donated amount
+    (ARG_DATE, ss.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
+  )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
 

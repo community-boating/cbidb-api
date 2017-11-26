@@ -22,4 +22,8 @@ object Tag extends StorableObject[Tag] {
   }
 
   def primaryKey: IntDatabaseField = fields.tagId
+
+  object specialIDs {
+    val TAG_ID_CORPORATION: Int = 5
+  }
 }

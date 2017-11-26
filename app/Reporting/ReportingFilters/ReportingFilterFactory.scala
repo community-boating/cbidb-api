@@ -4,10 +4,10 @@ import Services.PersistenceBroker
 import Storable.StorableClass
 
 abstract class ReportingFilterFactory[T <: StorableClass] {
+  type ArgDefinition = (ReportingFilterArgType, String) // type and default value
   val displayName: String
   def getFilter(pb: PersistenceBroker, args: String): ReportingFilter[T]
-  val defaultValue: String
-  val argTypes: List[ReportingFilterArgType]
+  val argDefinitions: List[ArgDefinition]
 }
 
 object ReportingFilterFactory {

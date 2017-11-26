@@ -23,5 +23,10 @@ object ProgramType extends StorableObject[ProgramType] {
 
   def primaryKey: IntDatabaseField = fields.programId
 
-  def getSeedData: Set[ProgramType] = Set()
+  object specialIDs {
+    val PROGRAM_TYPE_ID_AP: Int = 1
+    val PROGRAM_TYPE_ID_JP: Int = 2
+    val PROGRAM_TYPE_ID_UAP: Int = 3
+    val PROGRAM_TYPE_ID_HS: Int = 4
+  }
 }

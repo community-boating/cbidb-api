@@ -56,14 +56,14 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
           factoryInstance.filterList.map(f => FilterDataForJSON(
             f._1,
             f._2.displayName,
-            f._2.argTypes.map({
+            f._2.argDefinitions.map(_._1).map({
               case ARG_INT => "Int"
               case ARG_DOUBLE => "Double"
               case ARG_DATE => "Date"
               case ARG_DROPDOWN => "Dropdown"
               case t: Any => throw new Exception("Unconfigured arg type " + t)
             }).mkString(","),
-            f._2.defaultValue,
+            f._2.argDefinitions.map(_._2).mkString(","),
             f._2 match {
               case d: ReportingFilterFactoryDropdown => Some(d.getDropdownValues(pb))
               case _ => None

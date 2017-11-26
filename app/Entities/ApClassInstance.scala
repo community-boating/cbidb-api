@@ -45,8 +45,4 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
   }
 
   def primaryKey: IntDatabaseField = fields.instanceId
-
-  def getSeedData: Set[ApClassInstance] = Set(
-    // ApClassInstance(1, 1, Some("Someplace"))
-  )
 }

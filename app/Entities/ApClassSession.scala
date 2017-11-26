@@ -32,8 +32,4 @@ object ApClassSession extends StorableObject[ApClassSession] {
   }
 
   def primaryKey: IntDatabaseField = fields.sessionId
-
-  def getSeedData: Set[ApClassSession] = Set(
-    //  ApClassSession(1, 1, LocalDateTime.now)
-  )
 }

@@ -5,17 +5,16 @@ import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 
 class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
-  val argTypes: List[ReportingFilterArgType] = List(ARG_DROPDOWN)
   val displayName: String = "Has Tag"
-  val defaultValue: String = "4"
+  val argDefinitions = List(
+    (ARG_DROPDOWN, Tag.specialIDs.TAG_ID_CORPORATION.toString),
+  )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
 
     type PersonID = Int
 
     val tagId: Int = arg.toInt
-
-    val allTags = pb.getAllObjectsOfClass(Tag)
 
     val personIDs: List[Int] = pb.getObjectsByFilters(
       PersonTag,

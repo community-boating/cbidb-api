@@ -3,13 +3,16 @@ package Reporting.ReportingFilters.ReportingFilterFactories.Person
 import Entities.{MembershipType, Person, PersonMembership, ProgramType}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
+import Services.ServerStateWrapper.ss
 
 // First arg is program
 // second arg is year
 class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
-  val argTypes: List[ReportingFilterArgType] = List(ARG_DROPDOWN, ARG_INT)
   val displayName: String = "Had mem in prog X, year Y"
-  val defaultValue: String = "1,2017"
+  val argDefinitions = List(
+    (ARG_DROPDOWN, ProgramType.specialIDs.PROGRAM_TYPE_ID_AP.toString),
+    (ARG_INT, ss.currentSeason().toString)
+  )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
 

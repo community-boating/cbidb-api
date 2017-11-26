@@ -1,14 +1,17 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.Person
 
+import java.time.format.DateTimeFormatter
+
 import Entities._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 import Services.ServerStateWrapper.ss
 
 class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
-  val argTypes: List[ReportingFilterArgType] = List(ARG_DROPDOWN)
   val displayName: String = "JP Parent in Season"
-  val defaultValue: String = ss.currentSeason().toString
+  val argDefinitions = List(
+    (ARG_DROPDOWN, ss.currentSeason().toString)
+  )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
 

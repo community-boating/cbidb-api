@@ -27,6 +27,4 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
   }
 
   def primaryKey: IntDatabaseField = fields.rowId
-
-  def getSeedData: Set[JpTeamEventPoints] = Set()
 }

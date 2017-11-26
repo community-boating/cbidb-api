@@ -39,6 +39,4 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
   }
 
   def primaryKey: IntDatabaseField = fields.instanceId
-
-  def getSeedData: Set[JpClassInstance] = Set()
 }

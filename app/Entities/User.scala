@@ -31,13 +31,5 @@ object User extends StorableObject[User] {
     val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE", nullImpliesFalse = true)
   }
 
-  println("#$#$#$#$#$       SETTING USERS PRIMARY KEY     #$#$#$#$#$#$#$")
   def primaryKey: IntDatabaseField = fields.userId
-
-  def getSeedData: Set[User] = Set(
-  //  User(1, "jcole", "Jon", "Cole", true, false),
-  //  User(2, "gleib", "Ginger", "Leib", true, true),
-  //  User(3, "czechel", "Charlie", "Zechel", true, false),
-  //  User(4, "aalletag", "Andrew", "Alletag", true, false)
-  )
 }

@@ -24,10 +24,4 @@ object ApClassType extends StorableObject[ApClassType] {
   }
 
   def primaryKey: IntDatabaseField = fields.typeId
-
-  def getSeedData: Set[ApClassType] = Set(
-    //  ApClassType(1, "Sailing 101", 1),
-    //  ApClassType(2, "Sailing 102", 2),
-  //   ApClassType(3, "Moar sailing", 3)
-  )
 }

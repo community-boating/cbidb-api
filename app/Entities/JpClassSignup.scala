@@ -32,6 +32,4 @@ object JpClassSignup extends StorableObject[JpClassSignup] {
   }
 
   def primaryKey: IntDatabaseField = fields.signupId
-
-  def getSeedData: Set[JpClassSignup] = Set()
 }
