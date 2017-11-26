@@ -41,7 +41,7 @@ class NullableDateDatabaseField (entity: StorableObject[_], persistenceFieldName
       case _: MysqlBroker =>
         Filter(getFullyQualifiedName + " " + comparator + " '" + date.format(standardPattern) + "'")
       case _: OracleBroker =>
-        Filter("TRUNC(" + getFullyQualifiedName + ") = TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
+        Filter("TRUNC(" + getFullyQualifiedName + ") " + comparator + " TO_DATE('" + date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "','MM/DD/YYYY')")
     }
   }
 

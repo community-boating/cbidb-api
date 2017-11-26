@@ -18,13 +18,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Controller {
   implicit val pb: PersistenceBroker = ss.pa.pb
   implicit val cb: CacheBroker = ss.pa.cb
-
-  def get(startDate: Option[String]): Action[AnyContent] = Action.async {
-    val request = new ApClassInstancesRequest(startDate)
-    request.getFuture.map(s => {
+  def get(startDate: Option[String]): Action[AnyContent] = Action.async{request => {
+    val apiRequest = new ApClassInstancesRequest(startDate)
+    apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
-  }
+  }}
 
   class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey =

@@ -20,7 +20,7 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
     type PersonID = Int
 
     val amount: Double = arg.split(",")(0).toDouble
-    val sinceDate: LocalDate = LocalDate.parse(arg.split(", ")(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+    val sinceDate: LocalDate = LocalDate.parse(arg.split(",")(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
     val donationsSinceDate: List[Donation] = pb.getObjectsByFilters(
       Donation,
@@ -28,6 +28,8 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
         Donation.fields.donationDate.greaterEqualConstant(sinceDate)
       )
     )
+
+    println("found " + donationsSinceDate.length + " donations")
 
     val byPersonId: Map[Int, List[Donation]] = donationsSinceDate.groupBy(_.values.personId.get)
 
