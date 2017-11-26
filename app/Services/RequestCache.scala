@@ -1,13 +1,10 @@
 package Services
 
-import CbiUtil.SelfInitializable
 import Entities.Rating
+import play.api.mvc.Request
 
-class RequestCache(implicit pb: PersistenceBroker) {
+class RequestCache private[Services] (val request: Request[_], val pb: PersistenceBroker, val cb: CacheBroker) {
   println("Spawning new RequestCache")
-  val ratings: SelfInitializable[Set[Rating]] = new SelfInitializable[Set[Rating]](() => {
-    pb.getAllObjectsOfClass(Rating).toSet
-  })
-
-
+  // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
+  lazy val ratings: Set[Rating] = pb.getAllObjectsOfClass(Rating).toSet
 }

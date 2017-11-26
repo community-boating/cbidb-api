@@ -1,5 +1,18 @@
 package Services
 
-class PermissionsAuthority(val rm: ServerRunMode, val pb: PersistenceBroker, val cb: CacheBroker) {
-  println("Spawning new PermissionsAuthority")
+import CbiUtil.Initializable
+import play.api.mvc.Request
+
+class PermissionsAuthority (val rm: ServerRunMode) {
+  println("############## SETTING RUN MODE ############")
+  PermissionsAuthority.rm.set(rm)
+}
+
+object PermissionsAuthority {
+  val rm = new Initializable[ServerRunMode]
+  def spawnRequestCache(request: Request[_]): RequestCache = {
+    val pb = new OracleBroker
+    val cb = new RedisBroker
+    new RequestCache(request, pb, cb)
+  }
 }

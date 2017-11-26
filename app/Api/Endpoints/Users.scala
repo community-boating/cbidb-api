@@ -7,7 +7,7 @@ import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities._
 import Services.ServerStateWrapper.ss
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.Filter
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -16,12 +16,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class
 Users @Inject() (implicit exec: ExecutionContext) extends Controller {
-  implicit val pb: PersistenceBroker = ss.pa.pb
-  implicit val cb: CacheBroker = ss.pa.cb
 
-  def get(userID: Option[Int]): Action[AnyContent] = Action.async {
-    val request = new UsersRequest(userID)
-    request.getFuture.map(s => {
+  def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
+    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+    val pb: PersistenceBroker = rc.pb
+    val cb: CacheBroker = rc.cb
+
+    val apiRequest = new UsersRequest(userID)
+    apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
   }

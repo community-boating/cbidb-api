@@ -9,19 +9,11 @@ import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import play.api.inject.ApplicationLifecycle
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 
-abstract class RelationalBroker(lifecycle: ApplicationLifecycle, cp: ConnectionPoolConstructor) extends PersistenceBroker {
+abstract class RelationalBroker private[Services] extends PersistenceBroker {
   implicit val pb: PersistenceBroker = this
-  RelationalBroker.initialize(cp, () => {
-    lifecycle.addStopHook(() => Future.successful({
-      println("****************************    Stop hook: closing pools  **********************")
-      RelationalBroker.shutdown()
-    }))
-  })
 
   private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: ComboPooledDataSource = RelationalBroker.tempTablePool.get
@@ -318,6 +310,7 @@ object RelationalBroker {
       case None => {
         println("...going for it!")
         registerShutdownCallback()
+        println("! Shutdown callback registered.")
         cp.set(_cp)
         mainPool.set(_cp.getMainDataSource)
         tempTablePool.set(_cp.getTempTableDataSource)

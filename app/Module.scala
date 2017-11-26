@@ -15,5 +15,6 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     println("RUNNING MODULE CODE")
     bind(classOf[ServerStateWrapper]).asEagerSingleton()
+    //bind(classOf[ConnectionPoolConstructor]).to(classOf[OracleConnectionPoolConstructor])
   }
 }

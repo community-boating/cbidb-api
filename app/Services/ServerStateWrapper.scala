@@ -5,6 +5,8 @@ import javax.inject.Inject
 import CbiUtil.Initializable
 import play.api.inject.ApplicationLifecycle
 
+import scala.concurrent.Future
+
 // No idea if this is the right way to do what I'm trying to do.
 // I'm hoping to avoid having to learn how the fuck Guice actually works for as long as possible
 class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstructor: OracleConnectionPoolConstructor) {
@@ -13,10 +15,16 @@ class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstru
     case None => {
       println(" ***************     SETTING SERVER STATE   ***************  ")
       println("Using runmode: ROOT_MODE")
-      val pb: PersistenceBroker = new OracleBroker(lifecycle, poolConstructor)
+      RelationalBroker.initialize(poolConstructor, () => {
+        lifecycle.addStopHook(() => Future.successful({
+          println("****************************    Stop hook: closing pools  **********************")
+          RelationalBroker.shutdown()
+        }))
+      })
+      val pb: PersistenceBroker = new OracleBroker()
       val cb: CacheBroker = new RedisBroker()
       ServerStateWrapper.serverState.set(ServerState(
-        new PermissionsAuthority(ServerRunMode.ROOT_MODE, pb, cb),
+        new PermissionsAuthority(ServerRunMode.ROOT_MODE),
         0
       ))
     }

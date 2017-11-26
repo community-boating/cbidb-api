@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import Entities.User
 import Services.ServerStateWrapper.ss
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
 import play.api.mvc.{Action, Controller}
 
@@ -12,10 +12,12 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
 class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
-  implicit val pb: PersistenceBroker = ss.pa.pb
-  implicit val cb: CacheBroker = ss.pa.cb
 
-  def post() = Action { request => {
+
+  def post() = Action { request =>
+    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+    val pb: PersistenceBroker = rc.pb
+    val cb: CacheBroker = rc.cb
     val data = request.body.asFormUrlEncoded
     data match {
       case None => {
@@ -58,5 +60,5 @@ class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
         }
       }
     }
-  }}
+  }
 }

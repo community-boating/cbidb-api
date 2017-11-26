@@ -8,7 +8,7 @@ import Api.ApiRequest
 import CbiUtil.{CascadeSort, JsonUtil, Profiler}
 import Entities._
 import Services.ServerStateWrapper.ss
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -16,21 +16,24 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Controller {
-  implicit val pb: PersistenceBroker = ss.pa.pb
-  implicit val cb: CacheBroker = ss.pa.cb
-  def get(startDate: Option[String]): Action[AnyContent] = Action.async{request => {
+
+
+  def get(startDate: Option[String]): Action[AnyContent] = Action.async { request =>
+    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+    val pb: PersistenceBroker = rc.pb
+    val cb: CacheBroker = rc.cb
     val apiRequest = new ApClassInstancesRequest(startDate)
     apiRequest.getFuture.map(s => {
       Ok(s).as("application/json")
     })
-  }}
+  }
 
   class ApClassInstancesRequest(startDateRaw: Option[String]) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey =
       "ap-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
     def getExpirationTime: LocalDateTime = {
-      LocalDateTime.now.plusSeconds(10)
+      LocalDateTime.now.plusSeconds(5)
     }
 
     object params {

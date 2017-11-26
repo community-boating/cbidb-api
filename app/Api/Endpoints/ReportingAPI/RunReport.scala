@@ -6,7 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.Report
 import Services.ServerStateWrapper.ss
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import play.api.http.HttpEntity
@@ -16,9 +16,6 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
-  implicit val pb: PersistenceBroker = ss.pa.pb
-  implicit val cb: CacheBroker = ss.pa.cb
-
   object OUTPUT_TYPE {
     val JSCON = "jscon"
     val TSV = "tsv"
@@ -28,17 +25,20 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def getTest(): Action[AnyContent] = get("ApClassInstance", "", "TypeName,TypeId", "jscon")
 
-  def get(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String): Action[AnyContent] = Action.async {
+  def get(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String): Action[AnyContent] = Action.async {request =>
+    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+    val pb: PersistenceBroker = rc.pb
+    val cb: CacheBroker = rc.cb
     println("Running a report with the following parameters: ")
     println("Base entity: " + baseEntityString)
     println("filter spec: " + filterSpec)
     println("field spec: " + fieldSpec)
     println("output type: " + outputType)
-    lazy val request = new ReportRequest(baseEntityString, filterSpec, fieldSpec, outputType)
+    lazy val apiRequest = new ReportRequest(baseEntityString, filterSpec, fieldSpec, outputType)
     outputType match {
-      case OUTPUT_TYPE.JSCON => request.getFuture.map(s => Ok(s).as("application/json"))
+      case OUTPUT_TYPE.JSCON => apiRequest.getFuture.map(s => Ok(s).as("application/json"))
       case OUTPUT_TYPE.TSV => Future {
-        val reportResult: String = request.report.formatTSV
+        val reportResult: String = apiRequest.report.formatTSV
         val source: Source[ByteString, _] = Source.single(ByteString(reportResult))
         Result(
           header = ResponseHeader(200, Map(

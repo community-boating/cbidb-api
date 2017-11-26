@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue, NullableIntFieldValue}
-import Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, NullableIntDatabaseField}
+import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
+import Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
 import Storable._
 
 class Donation extends StorableClass {

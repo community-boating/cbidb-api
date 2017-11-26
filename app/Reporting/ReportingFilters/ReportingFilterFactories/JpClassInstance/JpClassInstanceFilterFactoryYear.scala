@@ -1,6 +1,6 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance
 
-import Entities.{JpClassInstance, JpClassSession, ProgramType}
+import Entities.{JpClassInstance, JpClassSession}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 import Services.ServerStateWrapper.ss

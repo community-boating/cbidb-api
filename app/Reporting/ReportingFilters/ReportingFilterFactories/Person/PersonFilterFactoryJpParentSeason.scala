@@ -1,7 +1,5 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.Person
 
-import java.time.format.DateTimeFormatter
-
 import Entities._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker

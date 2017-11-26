@@ -8,9 +8,11 @@ class Initializable[T] {
     case None => throw new Exception("Attempted to get() an uninitialized value")
   }
 
-  def set(t: T): Unit = value match {
-    case None => value = Some(t)
-    case Some(_) => throw new Exception("Attempted to set() an initialized value")
+  def set(t: T): Unit = synchronized {
+    value match {
+      case None => value = Some(t)
+      case Some(_) => throw new Exception("Attempted to set() an initialized value")
+    }
   }
 
   def peek: Option[T] = value

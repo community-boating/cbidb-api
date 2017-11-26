@@ -3,7 +3,6 @@ package Reporting.ReportingFilters.ReportingFilterFactories.Person
 import Entities._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
-import Services.ServerStateWrapper.ss
 
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
   val displayName: String = "Has Rating"

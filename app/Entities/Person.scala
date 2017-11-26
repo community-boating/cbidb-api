@@ -1,6 +1,5 @@
 package Entities
 
-import CbiUtil.SelfInitializable
 import Entities.PersonRating.CasePersonRating
 import Services.ServerStateWrapper.ss
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
@@ -11,10 +10,10 @@ class Person extends StorableClass {
   val instance: Person = this
   this.setCompanion(Person)
   object references extends ReferencesObject {
-    var personRatings = new SelfInitializable[Set[PersonRating]](() => ss.pa.pb.getObjectsByFilters(
+    lazy val personRatings: Set[PersonRating] = ss.pa.pb.getObjectsByFilters(
       PersonRating,
       List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
-    ).toSet)
+    ).toSet
   }
   object values extends ValuesObject {
     val personId = new IntFieldValue(self, Person.fields.personId)
@@ -23,7 +22,7 @@ class Person extends StorableClass {
     val email = new NullableStringFieldValue(self, Person.fields.email)
   }
 
-  lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
+  lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.map(_.asCaseClass)
 
   def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
     this.values.personId.get,
