@@ -1,7 +1,7 @@
 package Storable.Fields
 
+import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
@@ -25,6 +25,11 @@ class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: Strin
 
   def equalsConstant(c: String): Filter  =
     Filter(getFullyQualifiedName + " = '" + c + "'")
+
+
+
+  def equalsConstantLowercase(c: String): Filter =
+    Filter("lower(" + getFullyQualifiedName + ")" + " = '" + c.toLowerCase() + "'")
 
   def getValueFromString(s: String): Option[String] = Some(s)
 }

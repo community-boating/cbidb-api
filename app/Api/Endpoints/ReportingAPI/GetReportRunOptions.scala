@@ -6,7 +6,6 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
-import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}

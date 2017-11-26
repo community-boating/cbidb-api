@@ -1,7 +1,7 @@
 package Storable.Fields
 
+import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
@@ -19,6 +19,11 @@ class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldNam
 
   def equalsConstant(os: Option[String]): Filter = os match {
     case Some(s: String) => Filter(getFullyQualifiedName + " = '" + s + "'")
+    case None => Filter(getFullyQualifiedName + " IS NULL")
+  }
+
+  def equalsConstantLowercase(os: Option[String]): Filter = os match {
+    case Some(s: String) => Filter("lower(" + getFullyQualifiedName + ")" + " = '" + s.toLowerCase() + "'")
     case None => Filter(getFullyQualifiedName + " IS NULL")
   }
 

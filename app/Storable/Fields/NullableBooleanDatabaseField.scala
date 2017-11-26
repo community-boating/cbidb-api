@@ -1,7 +1,7 @@
 package Storable.Fields
 
+import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Services.{MysqlBroker, OracleBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class NullableBooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {

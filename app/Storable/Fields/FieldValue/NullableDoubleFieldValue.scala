@@ -1,6 +1,5 @@
 package Storable.Fields.FieldValue
 
-import Services.PersistenceBroker
 import Storable.Fields.NullableDoubleDatabaseField
 import Storable.StorableClass
 

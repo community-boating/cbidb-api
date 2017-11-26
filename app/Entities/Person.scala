@@ -3,7 +3,6 @@ package Entities
 import CbiUtil.Initializable
 import Entities.PersonRating.CasePersonRating
 import Services.PersistenceBroker
-import Services.ServerStateWrapper.ss
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
@@ -19,6 +18,7 @@ class Person extends StorableClass {
     val nameFirst = new NullableStringFieldValue(self, Person.fields.nameFirst)
     val nameLast = new NullableStringFieldValue(self, Person.fields.nameLast)
     val email = new NullableStringFieldValue(self, Person.fields.email)
+    val pwHash = new NullableStringFieldValue(self, Person.fields.pwHash)
   }
 
   def setPersonRatings(pb: PersistenceBroker): Unit = {
@@ -53,6 +53,7 @@ object Person extends StorableObject[Person] {
     val nameFirst = new NullableStringDatabaseField(self, "NAME_FIRST", 100)
     val nameLast = new NullableStringDatabaseField(self, "NAME_LAST", 100)
     val email = new NullableStringDatabaseField(self, "EMAIL", 100)
+    val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
   }
 
   def primaryKey: IntDatabaseField = fields.personId

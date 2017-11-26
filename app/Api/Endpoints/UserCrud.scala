@@ -3,7 +3,6 @@ package Api.Endpoints
 import javax.inject.Inject
 
 import Entities.User
-import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
 import play.api.mvc.{Action, Controller}

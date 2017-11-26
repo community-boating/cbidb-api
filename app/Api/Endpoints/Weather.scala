@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.PropertiesWrapper
-import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}

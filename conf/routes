@@ -11,6 +11,7 @@ POST    /user                               Api.Endpoints.UserCrud.post()
 GET     /reporttest                         Api.Endpoints.ReportingAPI.RunReport.getTest()
 GET     /report                             Api.Endpoints.ReportingAPI.RunReport.get(baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String)
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
+GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForPerson.get(email: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

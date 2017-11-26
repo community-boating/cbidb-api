@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import Reporting.Report
-import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString

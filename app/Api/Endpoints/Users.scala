@@ -6,7 +6,6 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities._
-import Services.ServerStateWrapper.ss
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.Filter
 import play.api.libs.json._

@@ -1,7 +1,7 @@
 package Storable.Fields
 
+import Services.PermissionsAuthority
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
-import Services.{PermissionsAuthority, PersistenceBroker, RelationalBroker}
 import Storable.{Filter, ProtoStorable, StorableObject}
 
 class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
