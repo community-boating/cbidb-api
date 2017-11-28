@@ -19,6 +19,12 @@ class Person extends StorableClass {
     val nameLast = new NullableStringFieldValue(self, Person.fields.nameLast)
     val email = new NullableStringFieldValue(self, Person.fields.email)
     val pwHash = new NullableStringFieldValue(self, Person.fields.pwHash)
+    val addr1 = new NullableStringFieldValue(self, Person.fields.addr1)
+    val addr2 = new NullableStringFieldValue(self, Person.fields.addr2)
+    val addr3 = new NullableStringFieldValue(self, Person.fields.addr3)
+    val city = new NullableStringFieldValue(self, Person.fields.city)
+    val state = new NullableStringFieldValue(self, Person.fields.state)
+    val zip = new NullableStringFieldValue(self, Person.fields.zip)
   }
 
   def setPersonRatings(pb: PersistenceBroker): Unit = {
@@ -54,6 +60,12 @@ object Person extends StorableObject[Person] {
     val nameLast = new NullableStringDatabaseField(self, "NAME_LAST", 100)
     val email = new NullableStringDatabaseField(self, "EMAIL", 100)
     val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
+    val addr1 = new NullableStringDatabaseField(self, "ADDR_1", 100)
+    val addr2 = new NullableStringDatabaseField(self, "ADDR_2", 100)
+    val addr3 = new NullableStringDatabaseField(self, "ADDR_3", 100)
+    val city = new NullableStringDatabaseField(self, "CITY", 100)
+    val state = new NullableStringDatabaseField(self, "STATE", 50)
+    val zip = new NullableStringDatabaseField(self, "ZIP", 15)
   }
 
   def primaryKey: IntDatabaseField = fields.personId
