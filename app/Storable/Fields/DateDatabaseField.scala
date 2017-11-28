@@ -53,5 +53,5 @@ class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String)
   def greaterThanConstant(date: LocalDate): Filter = dateComparison(date, DATE_>)
   def lessThanConstant(date: LocalDate): Filter = dateComparison(date, DATE_<)
   def greaterEqualConstant(date: LocalDate): Filter = dateComparison(date, DATE_>=)
-  def lassEqualConstant(date: LocalDate): Filter = dateComparison(date, DATE_<=)
+  def lessEqualConstant(date: LocalDate): Filter = dateComparison(date, DATE_<=)
 }

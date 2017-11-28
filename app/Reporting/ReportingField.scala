@@ -1,6 +1,9 @@
 package Reporting
 
-import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue, NullableStringFieldValue, StringFieldValue}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+import Storable.Fields.FieldValue._
 import Storable.Fields._
 import Storable.StorableClass
 
@@ -38,6 +41,21 @@ object ReportingField {
         case None => ""
       }
     }, fieldDisplayName, isDefault)
+    case i: DoubleDatabaseField => new ReportingField[T]((t: T) => {
+      getParent(t).doubleValueMap.get(i.getRuntimeFieldName) match {
+        case Some(v: DoubleFieldValue) => v.get.toString
+        case None => ""
+      }
+    }, fieldDisplayName, isDefault)
+    case i: NullableDoubleDatabaseField => new ReportingField[T]((t: T) => {
+      getParent(t).nullableDoubleValueMap.get(i.getRuntimeFieldName) match {
+        case Some(v: NullableDoubleFieldValue) => v.get match {
+          case Some(vi: Double) => vi.toString
+          case None => ""
+        }
+        case None => ""
+      }
+    }, fieldDisplayName, isDefault)
     case i: StringDatabaseField => new ReportingField[T]((t: T) => {
       getParent(t).stringValueMap.get(i.getRuntimeFieldName) match {
         case Some(v: StringFieldValue) => v.get.toString
@@ -53,5 +71,21 @@ object ReportingField {
         case None => ""
       }
     }, fieldDisplayName, isDefault)
+    case i: DateDatabaseField => new ReportingField[T]((t: T) => {
+      getParent(t).dateValueMap.get(i.getRuntimeFieldName) match {
+        case Some(v: DateFieldValue) => v.get.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+        case None => ""
+      }
+    }, fieldDisplayName, isDefault)
+    case i: NullableDateDatabaseField => new ReportingField[T]((t: T) => {
+      getParent(t).nullableDateValueMap.get(i.getRuntimeFieldName) match {
+        case Some(v: NullableDateFieldValue) => v.get match {
+          case Some(s: LocalDate) => s.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+          case _ => ""
+        }
+        case None => ""
+      }
+    }, fieldDisplayName, isDefault)
+    case _ => throw new Exception("Unconfigured Reporting field type " + fieldDisplayName)
   }
 }
