@@ -71,13 +71,13 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
       (i: ApClassInstance) => apClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
       "# Sessions",
       isDefault = false
-    )),
-    ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
+    ))
+    /*, ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[ApClassInstance, ApClassType](
       ApClassType.fields.displayOrder,
       i => i.references.apClassFormat.get.references.apClassType.get,
       "Type DisplayOrder",
       isDefault = false
-    ))
+    ))*/
   )
 
   val filterList: List[(String, ReportingFilterFactory[ApClassInstance])] = List(

@@ -53,13 +53,13 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
       (i: JpClassInstance) => jpClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
       "# Sessions",
       isDefault = false
-    )),
-    ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
+    ))
+    /*, ("TypeDisplayOrder", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassInstance, JpClassType](
       JpClassType.fields.displayOrder,
       i => i.references.jpClassType.get,
       "Type DisplayOrder",
       isDefault = false
-    ))
+    ))*/
   )
 
   val filterList: List[(String, ReportingFilterFactory[JpClassInstance])] = List(

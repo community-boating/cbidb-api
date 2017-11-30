@@ -15,7 +15,13 @@ class ReportFactoryPerson extends ReportFactory[Person] {
     ("PersonId", ReportingField.getReportingFieldFromDatabaseField(Person.fields.personId, "Person ID", isDefault = true)),
     ("NameFirst", ReportingField.getReportingFieldFromDatabaseField(Person.fields.nameFirst, "First Name", isDefault = true)),
     ("NameLast", ReportingField.getReportingFieldFromDatabaseField(Person.fields.nameLast, "Last Name", isDefault = true)),
-    ("Email", ReportingField.getReportingFieldFromDatabaseField(Person.fields.email, "Email", isDefault = true))
+    ("Email", ReportingField.getReportingFieldFromDatabaseField(Person.fields.email, "Email", isDefault = true)),
+    ("Addr_1", ReportingField.getReportingFieldFromDatabaseField(Person.fields.addr1, "Addr 1", isDefault = false)),
+    ("Addr_2", ReportingField.getReportingFieldFromDatabaseField(Person.fields.addr2, "Addr 2", isDefault = false)),
+    ("Addr_3", ReportingField.getReportingFieldFromDatabaseField(Person.fields.addr3, "Addr 3", isDefault = false)),
+    ("City", ReportingField.getReportingFieldFromDatabaseField(Person.fields.city, "City", isDefault = false)),
+    ("State", ReportingField.getReportingFieldFromDatabaseField(Person.fields.state, "State", isDefault = false)),
+    ("Zip", ReportingField.getReportingFieldFromDatabaseField(Person.fields.zip, "Zip", isDefault = false))
   )
 
   val filterList: List[(String, ReportingFilterFactory[Person])] = List(
