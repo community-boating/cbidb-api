@@ -3,6 +3,8 @@ package Services;
 import CbiUtil.PropertiesWrapper;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import java.io.File;
+
 public class OracleConnectionPoolConstructor implements ConnectionPoolConstructor {
     private PropertiesWrapper pw = null;
     private String mainSchemaName = null;
@@ -42,9 +44,20 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
     }
 
     private void init() {
+        String devLocation = "conf/private/oracle-credentials";
+        String prodLocation = "../conf/private/oracle-credentials";
+        File devFile = new File(devLocation);
+        File prodFile = new File(prodLocation);
+        String locationToUse = null;
+
         try {
+            if (devFile.exists()) {
+                locationToUse = devLocation;
+            } else if (prodFile.exists()) {
+                locationToUse = prodLocation;
+            } else throw new Exception("Unable to location Oracle conf file");
             this.pw = new PropertiesWrapper(
-                    "conf/private/oracle-credentials",
+                    locationToUse,
                     new String[] {"username", "password", "host", "port", "sid", "schema", "temptableschema"}
             );
             this.mainSchemaName = pw.getProperty("schema");
