@@ -10,7 +10,7 @@ GET     /users                              Api.Endpoints.Users.get(userID: Opti
 POST    /user                               Api.Endpoints.UserCrud.post()
 POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
-GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForPerson.get(email: String)
+GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

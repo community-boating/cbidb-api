@@ -24,7 +24,7 @@ class ServerStateWrapper @Inject() (lifecycle: ApplicationLifecycle, poolConstru
       val pb: PersistenceBroker = new OracleBroker()
       val cb: CacheBroker = new RedisBroker()
       ServerStateWrapper.serverState.set(ServerState(
-        new PermissionsAuthority(ServerRunMode.ROOT_MODE),
+        new PermissionsAuthority(ServerRunMode.STAFF_MODE),
         0
       ))
     }

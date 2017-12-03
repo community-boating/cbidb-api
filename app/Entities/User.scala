@@ -15,6 +15,7 @@ class User extends StorableClass {
     val email = new StringFieldValue(self, User.fields.email)
     val active = new BooleanFieldValue(self, User.fields.active)
     val hideFromClose = new BooleanFieldValue(self, User.fields.hideFromClose)
+    val pwHash = new StringFieldValue(self, User.fields.pwHash)
   }
 }
 
@@ -29,6 +30,7 @@ object User extends StorableObject[User] {
     val email = new StringDatabaseField(self, "EMAIL", 100)
     val active = new BooleanDatabaseField(self, "ACTIVE")
     val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE", nullImpliesFalse = true)
+    val pwHash = new StringDatabaseField(self, "PW_HASH", 100)
   }
 
   def primaryKey: IntDatabaseField = fields.userId
