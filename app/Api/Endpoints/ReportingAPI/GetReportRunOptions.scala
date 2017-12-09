@@ -6,6 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
@@ -14,17 +15,20 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
-
-
-  def get(): Action[AnyContent] = Action.async {request =>
-    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
-    val pb: PersistenceBroker = rc.pb
-    val cb: CacheBroker = rc.cb
-    val apiRequest = new ReportRunOptionsRequest(pb, cb)
-    apiRequest.getFuture.map(s => {
-      Ok(s).as("application/json")
-    })
-  }
+    def get(): Action[AnyContent] = Action.async {request =>
+      try {
+        val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+        val pb: PersistenceBroker = rc.pb
+        val cb: CacheBroker = rc.cb
+        val apiRequest = new ReportRunOptionsRequest(pb, cb)
+        apiRequest.getFuture.map(s => {
+          Ok(s).as("application/json")
+        })
+      } catch {
+        case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
+        case _: Throwable => Future{ Ok("Internal Error") }
+      }
+    }
 
   class ReportRunOptionsRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
     def getCacheBrokerKey: CacheKey = "reportRunOptions"

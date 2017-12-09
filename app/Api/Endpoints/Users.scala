@@ -6,6 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities._
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.Filter
 import play.api.libs.json._
@@ -13,18 +14,22 @@ import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class
-Users @Inject() (implicit exec: ExecutionContext) extends Controller {
+class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
-    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
-    val pb: PersistenceBroker = rc.pb
-    val cb: CacheBroker = rc.cb
+    try {
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val pb: PersistenceBroker = rc.pb
+      val cb: CacheBroker = rc.cb
 
-    val apiRequest = new UsersRequest(pb, cb, userID)
-    apiRequest.getFuture.map(s => {
-      Ok(s).as("application/json")
-    })
+      val apiRequest = new UsersRequest(pb, cb, userID)
+      apiRequest.getFuture.map(s => {
+        Ok(s).as("application/json")
+      })
+    } catch {
+      case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
+      case _: Throwable => Future{ Ok("Internal Error") }
+    }
   }
 
   class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends ApiRequest(cb) {

@@ -7,6 +7,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{CascadeSort, JsonUtil, Profiler}
 import Entities._
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -18,13 +19,18 @@ class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
 
 
   def get(startDate: Option[String]): Action[AnyContent] = Action.async { request =>
-    val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
-    val pb: PersistenceBroker = rc.pb
-    val cb: CacheBroker = rc.cb
-    val apiRequest = new ApClassInstancesRequest(pb, cb, startDate)
-    apiRequest.getFuture.map(s => {
-      Ok(s).as("application/json")
-    })
+    try {
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val pb: PersistenceBroker = rc.pb
+      val cb: CacheBroker = rc.cb
+      val apiRequest = new ApClassInstancesRequest(pb, cb, startDate)
+      apiRequest.getFuture.map(s => {
+        Ok(s).as("application/json")
+      })
+    } catch {
+      case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
+      case _: Throwable => Future{ Ok("Internal Error") }
+    }
   }
 
   class ApClassInstancesRequest(pb: PersistenceBroker, cb: CacheBroker, startDateRaw: Option[String]) extends ApiRequest(cb) {

@@ -1,7 +1,7 @@
 package Services
 
 import CbiUtil.Initializable
-import Entities.{Person, User}
+import Entities.User
 import Services.ServerRunMode.{ROOT_MODE, STAFF_MODE}
 import play.api.mvc.{AnyContent, Request}
 
@@ -27,7 +27,7 @@ object PermissionsAuthority {
       val pb = new OracleBroker
       val cb = new RedisBroker
       new RequestCache(request, pb, cb)
-    } else throw new Exception("Unauthorized access denied")
+    } else throw new UnauthorizedAccessException
   }
 
   def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
@@ -97,4 +97,9 @@ object PermissionsAuthority {
   case object PERSISTENCE_SYSTEM_MYSQL extends PERSISTENCE_SYSTEM_RELATIONAL {
     val pbs: RelationalBrokerStatic = MysqlBrokerStatic
   }
+
+  class UnauthorizedAccessException(
+    private val message: String = "Unauthorized Access Denied",
+    private val cause: Throwable = None.orNull
+  ) extends Exception(message, cause)
 }
