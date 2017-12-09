@@ -26,7 +26,8 @@ object PermissionsAuthority {
     if (proceed) {
       val pb = new OracleBroker
       val cb = new RedisBroker
-      new RequestCache(request, pb, cb)
+      val userName = if(authenticatedUserName.isDefined) authenticatedUserName.get else ""
+      new RequestCache(userName, request, pb, cb)
     } else throw new UnauthorizedAccessException
   }
 
