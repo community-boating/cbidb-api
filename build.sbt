@@ -1,10 +1,17 @@
 name := """CBI DB API"""
 
-version := "1.0-SNAPSHOT"
+version := "0.1.0"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
 scalaVersion := "2.12.4"
+
+maintainer in Linux := "Jonathan Cole <jon@community-boating.org>"
+
+packageSummary in Linux := "API Provider for Community Boating, Inc"
+
+packageDescription := "API Provider for Community Boating, Inc"
+
 
 libraryDependencies += jdbc
 libraryDependencies += cache
