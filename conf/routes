@@ -12,6 +12,7 @@ POST    /report                             Api.Endpoints.ReportingAPI.RunReport
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
 GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String)
 GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
+POST    /oome                               Api.Endpoints.OOME.post()
 
 
 # Map static resources from the /public folder to the /assets URL path
