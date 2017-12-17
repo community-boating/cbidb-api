@@ -6,6 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.GetPostParams
 import Reporting.Report
+import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import akka.stream.scaladsl.Source
@@ -26,7 +27,7 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def post(): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(StaffUserType, request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       // TODO: assert expected post params

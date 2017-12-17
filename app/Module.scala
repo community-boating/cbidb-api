@@ -1,4 +1,4 @@
-import Services.ServerStateWrapper
+import Services.ServerBootLoader
 import com.google.inject.AbstractModule
 
 /**
@@ -13,8 +13,6 @@ import com.google.inject.AbstractModule
   */
 class Module extends AbstractModule {
   override def configure(): Unit = {
-    println("RUNNING MODULE CODE")
-    bind(classOf[ServerStateWrapper]).asEagerSingleton()
-    //bind(classOf[ConnectionPoolConstructor]).to(classOf[OracleConnectionPoolConstructor])
+    bind(classOf[ServerBootLoader]).asEagerSingleton()
   }
 }

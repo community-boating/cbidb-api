@@ -3,7 +3,7 @@ package Reporting.ReportingFilters.ReportingFilterFactories.Person
 import Entities.{MembershipType, Person, PersonMembership, ProgramType}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
-import Services.ServerStateWrapper.ss
+import Services.ServerBootLoader.ssc
 
 // First arg is program
 // second arg is year
@@ -11,7 +11,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
   val displayName: String = "Had mem in prog X, year Y"
   val argDefinitions = List(
     (ARG_DROPDOWN, ProgramType.specialIDs.PROGRAM_TYPE_ID_AP.toString),
-    (ARG_INT, ss.currentSeason().toString)
+    (ARG_INT, ssc.currentSeason().toString)
   )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb

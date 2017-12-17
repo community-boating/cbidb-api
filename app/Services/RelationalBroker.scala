@@ -5,6 +5,7 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.{Initializable, Profiler}
+import Services.Authentication.UserType
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -12,7 +13,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services] extends PersistenceBroker {
+abstract class RelationalBroker private[Services] (ut: UserType) extends PersistenceBroker(ut) {
   implicit val pb: PersistenceBroker = this
 
   private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get

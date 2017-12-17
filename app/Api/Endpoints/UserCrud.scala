@@ -3,6 +3,7 @@ package Api.Endpoints
 import javax.inject.Inject
 
 import Entities.User
+import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
@@ -16,7 +17,7 @@ class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def post() = Action { request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(StaffUserType, request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val data = request.body.asFormUrlEncoded

@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import play.api.mvc.{Action, AnyContent, Controller}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class OOME @Inject() (implicit exec: ExecutionContext) extends Controller {
   def post(): Action[AnyContent] = Action {_ => {

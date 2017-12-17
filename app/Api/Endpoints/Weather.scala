@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.PropertiesWrapper
+import Services.Authentication.PublicUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
@@ -19,7 +20,7 @@ class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends
 
   def get(): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(PublicUserType, request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val apiRequest = new WeatherRequest(pb, cb)

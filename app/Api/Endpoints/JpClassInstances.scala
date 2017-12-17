@@ -7,6 +7,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{CascadeSort, JsonUtil, Profiler}
 import Entities._
+import Services.Authentication.PublicUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
@@ -18,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Controller {
   def get(startDate: Option[String]): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(PublicUserType, request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val apiRequest = new JpClassInstancesRequest(pb, cb, startDate)

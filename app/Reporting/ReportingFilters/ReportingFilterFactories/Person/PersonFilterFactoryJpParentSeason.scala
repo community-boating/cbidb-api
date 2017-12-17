@@ -3,12 +3,12 @@ package Reporting.ReportingFilters.ReportingFilterFactories.Person
 import Entities._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
-import Services.ServerStateWrapper.ss
+import Services.ServerBootLoader.ssc
 
 class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
   val displayName: String = "JP Parent in Season"
   val argDefinitions = List(
-    (ARG_DROPDOWN, ss.currentSeason().toString)
+    (ARG_DROPDOWN, ssc.currentSeason().toString)
   )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     implicit val pb: PersistenceBroker = _pb
@@ -38,7 +38,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 
   def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
     val GO_BACK = 5
-    val currentSeason = ss.currentSeason()
+    val currentSeason = ssc.currentSeason()
     val start = currentSeason - GO_BACK
     List(
       (start to currentSeason).toList.map(_.toString).map(i => (i, i))

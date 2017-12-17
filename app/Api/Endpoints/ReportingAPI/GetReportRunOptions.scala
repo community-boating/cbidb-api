@@ -6,8 +6,9 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
+import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import Services._
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -17,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
     def get(): Action[AnyContent] = Action.async {request =>
       try {
-        val rc: RequestCache = PermissionsAuthority.spawnRequestCache(request)
+        val rc: RequestCache = PermissionsAuthority.spawnRequestCache(StaffUserType, request)
         val pb: PersistenceBroker = rc.pb
         val cb: CacheBroker = rc.cb
         val apiRequest = new ReportRunOptionsRequest(pb, cb)
@@ -26,7 +27,7 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
         })
       } catch {
         case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
-        case _: Throwable => Future{ Ok("Internal Error") }
+    //    case _: Throwable => Future{ Ok("Internal Error") }
       }
     }
 

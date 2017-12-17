@@ -6,13 +6,13 @@ import java.time.format.DateTimeFormatter
 import Entities.Donation
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
-import Services.ServerStateWrapper.ss
+import Services.ServerBootLoader.ssc
 
 class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
   val displayName: String = "Within Date Range"
   val argDefinitions = List(
-    (ARG_DATE, ss.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
-    (ARG_DATE, ss.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
+    (ARG_DATE, ssc.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))),
+    (ARG_DATE, ssc.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
   )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Donation] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
     val split = arg.split(",")
