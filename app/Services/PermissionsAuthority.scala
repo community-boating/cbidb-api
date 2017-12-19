@@ -8,6 +8,7 @@ import play.api.mvc.{AnyContent, Request}
 object PermissionsAuthority {
   val allowableAuthenticationMechanisms = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
+  val playMode = new Initializable[Mode]
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
   val SEC_COOKIE_NAME = "CBIDB-SEC"

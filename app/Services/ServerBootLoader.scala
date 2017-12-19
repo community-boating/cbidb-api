@@ -5,21 +5,29 @@ import javax.inject.Inject
 import CbiUtil.Initializable
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE
+import play.api.{Application, Mode}
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future
 
 
-class ServerBootLoader @Inject()(lifecycle: ApplicationLifecycle, poolConstructor: OracleConnectionPoolConstructor) {
+class ServerBootLoader @Inject()(
+  lifecycle: ApplicationLifecycle,
+  poolConstructor: OracleConnectionPoolConstructor,
+  application: Application
+) {
   // Boot up the server
   ServerBootLoader.serverStateContainer.peek match {
     case None => {
       println(" ***************     BOOTING UP SERVER   ***************  ")
+      // Play runmode, i.e. Prod, Dev, or Test
+      val playMode: Mode = application.mode
+      PermissionsAuthority.playMode.set(playMode)
+      println("Running in mode: " + playMode)
 
       // Get server instance properties
       val serverProps = new ServerInstanceProperties("conf/private/server-properties")
       println(serverProps.enabledAuthMechanisms)
-
 
       // Initialize database connections; provide shutdown callback
       RelationalBroker.initialize(poolConstructor, () => {
