@@ -20,7 +20,7 @@ class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends
 
   def get(): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(PublicUserType, request)
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val apiRequest = new WeatherRequest(pb, cb)

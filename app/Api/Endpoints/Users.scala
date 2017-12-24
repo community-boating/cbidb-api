@@ -19,7 +19,7 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.spawnRequestCache(StaffUserType, request)
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
 

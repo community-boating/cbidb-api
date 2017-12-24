@@ -20,14 +20,9 @@ class ServerBootLoader @Inject()(
   ServerBootLoader.serverStateContainer.peek match {
     case None => {
       println(" ***************     BOOTING UP SERVER   ***************  ")
-      // Play runmode, i.e. Prod, Dev, or Test
-      val playMode: Mode = application.mode
-      PermissionsAuthority.playMode.set(playMode)
-      println("Running in mode: " + playMode)
 
       // Get server instance properties
       val serverProps = new ServerInstanceProperties("conf/private/server-properties")
-      println(serverProps.enabledAuthMechanisms)
 
       // Initialize database connections; provide shutdown callback
       RelationalBroker.initialize(poolConstructor, () => {
@@ -37,15 +32,18 @@ class ServerBootLoader @Inject()(
         }))
       })
 
+      // Play runmode, i.e. Prod, Dev, or Test
+      val playMode: Mode = application.mode
+      PermissionsAuthority.playMode.set(playMode)
+      println("Running in mode: " + playMode)
+
       // Initialize server state container
       ServerBootLoader.serverStateContainer.set(ServerStateContainer(
         serverTimeOffsetSeconds = 0
       ))
 
       // Initialize PermissionsAuthority with activated AuthenticationMechanisms
-      PermissionsAuthority.allowableAuthenticationMechanisms.set(Set(
-        StaffUserType
-      ))
+      PermissionsAuthority.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)

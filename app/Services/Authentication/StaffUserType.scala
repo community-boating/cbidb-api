@@ -35,7 +35,7 @@ object StaffUserType extends UserType {
     }
   }
 
-  def getPwHashForUser(request: Request[AnyContent], userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
+  def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
     val users = rootPB.getObjectsByFilters(
       User,
       List(User.fields.userName.equalsConstantLowercase(userName))
@@ -43,19 +43,5 @@ object StaffUserType extends UserType {
 
     if (users.length == 1) Some(1, users.head.values.pwHash.get)
     else None
-  }
-
-  def spawnRequestCache(request: Request[AnyContent], rootCB: CacheBroker): RequestCache = {
-    val authenticatedUserName = getAuthenticatedUsernameInRequest(request, rootCB)
-    println("AUTHENTICATED: " + authenticatedUserName)
-    println("Prod mode? " + PermissionsAuthority.serverRunMode)
-    if (authenticatedUserName.isDefined) {
-      val pb = getPB
-      val cb = new RedisBroker
-      val userName = if(authenticatedUserName.isDefined) authenticatedUserName.get else ""
-      new RequestCache(userName, request, pb, cb)
-    } else {
-      throw new UnauthorizedAccessException
-    }
   }
 }

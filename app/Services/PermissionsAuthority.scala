@@ -6,7 +6,7 @@ import play.api.Mode
 import play.api.mvc.{AnyContent, Request}
 
 object PermissionsAuthority {
-  val allowableAuthenticationMechanisms = new Initializable[Set[UserType]]
+  val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
@@ -23,21 +23,12 @@ object PermissionsAuthority {
     allowedIPs.contains(request.remoteAddress)
   }
 
+  def getRequestCache(request: Request[AnyContent]): RequestCache = RequestCache.construct(request, rootCB)
 
-  def spawnRequestCache(userType: UserType, request: Request[AnyContent]): RequestCache =
-    userType.spawnRequestCache(request, rootCB)
-
-  def getPwHashForUser(userType: UserType, request: Request[AnyContent], userName: String): Option[(Int, String)] = {
-    if (requestIsFromLocalHost(request)) {
-      println(userType)
-      userType.getPwHashForUser(request, userName, rootPB)
-    } else None
+  def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
+    if (requestIsFromLocalHost(request)) userType.getPwHashForUser(userName, rootPB)
+    else None
   }
-
-  def serverRunMode: Mode = play.api.Play.current.mode
-
-  // TODO: replace with initializable set on server bootup (read from conf or something)
-
 
   trait PersistenceSystem {
     val pbs: PersistenceBrokerStatic

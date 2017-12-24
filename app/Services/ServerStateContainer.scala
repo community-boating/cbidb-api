@@ -2,7 +2,9 @@ package Services
 
 import java.time.{LocalDate, LocalDateTime, Month}
 
-case class ServerStateContainer private[Services](serverTimeOffsetSeconds: Long) {
+case class ServerStateContainer private[Services](
+  serverTimeOffsetSeconds: Long
+) {
   def now: LocalDateTime = LocalDateTime.now.plusSeconds(serverTimeOffsetSeconds)
 
   def currentSeason(asOf: LocalDate = now.toLocalDate): Int = {

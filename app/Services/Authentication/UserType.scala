@@ -9,9 +9,7 @@ abstract class UserType {
   def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker): Option[String]
 
   // Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
-  def getPwHashForUser(request: Request[AnyContent], userName: String, rootPB: PersistenceBroker): Option[(Int, String)]
+  def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)]
 
-  def spawnRequestCache(request: Request[AnyContent], rootCB: CacheBroker): RequestCache
-
-  protected def getPB: PersistenceBroker = new OracleBroker(this)
+  private[Services] def getPB: PersistenceBroker = new OracleBroker(this)
 }

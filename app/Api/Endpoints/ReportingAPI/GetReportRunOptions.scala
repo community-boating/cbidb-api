@@ -6,7 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
-import Services.Authentication.StaffUserType
+import Services.Authentication.{StaffUserType, UserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services._
 import Storable.StorableClass
@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
     def get(): Action[AnyContent] = Action.async {request =>
       try {
-        val rc: RequestCache = PermissionsAuthority.spawnRequestCache(StaffUserType, request)
+        val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
         val pb: PersistenceBroker = rc.pb
         val cb: CacheBroker = rc.cb
         val apiRequest = new ReportRunOptionsRequest(pb, cb)
