@@ -23,6 +23,7 @@ abstract class StorableClass {
   final val self: StorableClass = this
   val values: ValuesObject
 
+  // TODO: unit test that verifies these are all correct.  Or some reflection hotness so they must be correct
   private val companion = new Initializable[Companion]
   def getCompanion: Companion = companion.get
   def setCompanion(c: Companion): Unit = companion.set(c)

@@ -2,6 +2,7 @@ package Storable
 
 import java.time.{LocalDate, LocalDateTime}
 
+import Services.Authentication._
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue._
 import Storable.Fields._
@@ -30,6 +31,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val publicVisibility: EntityVisibility = VISIBLE_NEVER
   val memberVisibility: EntityVisibility = VISIBLE_NEVER
   val staffVisibility: EntityVisibility = VISIBLE_ALWAYS
+
+  final def getVisiblity(userType: UserType): EntityVisibility = userType match {
+    case PublicUserType => publicVisibility
+    case MemberUserType => memberVisibility
+    case StaffUserType | RootUserType => staffVisibility
+  }
 
   def primaryKey: IntDatabaseField
 
