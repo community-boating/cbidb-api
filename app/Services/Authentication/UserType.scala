@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Services.{CacheBroker, OracleBroker, PersistenceBroker}
+import Services.{CacheBroker, PersistenceBroker}
 import play.api.mvc.{AnyContent, Request}
 
 abstract class UserType {
@@ -10,6 +10,4 @@ abstract class UserType {
 
   // Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)]
-
-  private[Services] def getPB: PersistenceBroker = new OracleBroker(this)
 }

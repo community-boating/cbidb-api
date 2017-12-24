@@ -1,5 +1,3 @@
 package Services
 
-import Services.Authentication.UserType
-
-class OracleBroker private[Services] (ut: UserType) extends RelationalBroker(ut)
+class OracleBroker private[Services] (rc: RequestCache) extends RelationalBroker(rc)

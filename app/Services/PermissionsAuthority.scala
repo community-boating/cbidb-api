@@ -1,7 +1,7 @@
 package Services
 
 import CbiUtil.Initializable
-import Services.Authentication.{StaffUserType, UserType}
+import Services.Authentication.UserType
 import play.api.Mode
 import play.api.mvc.{AnyContent, Request}
 
@@ -12,7 +12,7 @@ object PermissionsAuthority {
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
   val SEC_COOKIE_NAME = "CBIDB-SEC"
-  private val rootPB = new OracleBroker(StaffUserType)
+  private val rootPB = RequestCache.getRootRC.pb
   private val rootCB = new RedisBroker
 
   def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {

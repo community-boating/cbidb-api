@@ -26,6 +26,11 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val entityName: String
   val fields: FieldsObject
 
+  // True if the entity can be queried by public users
+  val publicVisibility: EntityVisibility = VISIBLE_NEVER
+  val memberVisibility: EntityVisibility = VISIBLE_NEVER
+  val staffVisibility: EntityVisibility = VISIBLE_ALWAYS
+
   def primaryKey: IntDatabaseField
 
   def peekInstanceForID(id: Int, pb: PersistenceBroker): Option[T] = pb.getObjectById(this, id)

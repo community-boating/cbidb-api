@@ -1,16 +1,16 @@
 package Services
 
 import Entities.Rating
-import Services.Authentication.{PublicUserType, UserType}
+import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 class RequestCache private[RequestCache] (
   val authenticatedUserName: String,
-  val authenticatedUserType: UserType,
-  val pb: PersistenceBroker,
-  val cb: CacheBroker
+  val authenticatedUserType: UserType
 ) {
+  val pb: PersistenceBroker = new OracleBroker(this)
+  val cb: CacheBroker = new RedisBroker
   println("Spawning new RequestCache")
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
@@ -27,13 +27,15 @@ object RequestCache {
         case Some(x) => Some(x)
         case None => ut.getAuthenticatedUsernameInRequest(request, rootCB) match {
           case None => None
-          case Some(x: String) => Some(new RequestCache(x, ut, ut.getPB, new RedisBroker()))
+          case Some(x: String) => Some(new RequestCache(x, ut))
         }
       })
 
     ret match {
       case Some(x) => x
-      case None => new RequestCache("", PublicUserType, PublicUserType.getPB, new RedisBroker())
+      case None => new RequestCache("", PublicUserType)
     }
   }
+
+   lazy private[Services] val getRootRC: RequestCache = new RequestCache("", RootUserType)
 }
