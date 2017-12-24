@@ -2,7 +2,6 @@ package Services
 
 import Entities.Rating
 import Services.Authentication.{PublicUserType, UserType}
-import play.api.libs.ws.ahc.cache.CacheableHttpResponseBodyPart
 import play.api.mvc.{AnyContent, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens

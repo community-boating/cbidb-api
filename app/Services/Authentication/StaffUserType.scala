@@ -1,7 +1,6 @@
 package Services.Authentication
 
 import Entities.User
-import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services._
 import play.api.mvc.{AnyContent, Request}
 

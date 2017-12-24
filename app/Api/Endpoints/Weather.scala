@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.PropertiesWrapper
-import Services.Authentication.PublicUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._

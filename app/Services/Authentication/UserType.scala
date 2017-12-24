@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Services.{CacheBroker, OracleBroker, PersistenceBroker, RequestCache}
+import Services.{CacheBroker, OracleBroker, PersistenceBroker}
 import play.api.mvc.{AnyContent, Request}
 
 abstract class UserType {

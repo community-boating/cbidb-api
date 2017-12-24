@@ -3,10 +3,9 @@ package Services
 import javax.inject.Inject
 
 import CbiUtil.Initializable
-import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE
-import play.api.{Application, Mode}
 import play.api.inject.ApplicationLifecycle
+import play.api.{Application, Mode}
 
 import scala.concurrent.Future
 

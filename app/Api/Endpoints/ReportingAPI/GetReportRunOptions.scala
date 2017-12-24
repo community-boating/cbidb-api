@@ -6,7 +6,6 @@ import javax.inject.Inject
 import Api.ApiRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
-import Services.Authentication.{StaffUserType, UserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services._
 import Storable.StorableClass

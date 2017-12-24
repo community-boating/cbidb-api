@@ -2,8 +2,8 @@ package Api.Endpoints.Security
 
 import javax.inject.Inject
 
-import Services.Authentication.{StaffUserType, UserType}
-import Services.{PermissionsAuthority, RequestCache}
+import Services.Authentication.StaffUserType
+import Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}

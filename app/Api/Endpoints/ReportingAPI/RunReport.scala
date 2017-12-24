@@ -6,7 +6,6 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.GetPostParams
 import Reporting.Report
-import Services.Authentication.{StaffUserType, UserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import akka.stream.scaladsl.Source
