@@ -1,28 +1,29 @@
 package Services
 
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Storable._
 
 abstract class PersistenceBroker private[Services] (rc: RequestCache) {
   // All public requests need to go through user type-based security
   final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     if (entityVisible(obj)) getObjectByIdImplementation(obj, id)
-    else None
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
     if (entityVisible(obj)) getObjectsByIdsImplementation(obj, ids)
-    else Nil
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
     if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
-    else Nil
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj)
-    else Nil
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def commitObjectToDatabase(i: StorableClass): Unit = {
     if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
-    else throw new Exception("commitObjectToDatabase request denied due to entity security")
+    else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
   }
 
   // Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these

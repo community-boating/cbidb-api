@@ -43,6 +43,7 @@ class ServerBootLoader @Inject()(
 
       // Initialize PermissionsAuthority with activated AuthenticationMechanisms
       PermissionsAuthority.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
+      println("Set enabled auth mechanisms: " + serverProps.enabledAuthMechanisms)
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)

@@ -26,7 +26,7 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
         })
       } catch {
         case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
-    //    case _: Throwable => Future{ Ok("Internal Error") }
+        case _: Throwable => Future{ Ok("Internal Error") }
       }
     }
 

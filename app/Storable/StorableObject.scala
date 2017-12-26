@@ -2,6 +2,7 @@ package Storable
 
 import java.time.{LocalDate, LocalDateTime}
 
+import Entities._
 import Services.Authentication._
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue._
@@ -27,10 +28,24 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val entityName: String
   val fields: FieldsObject
 
+  final val publicVisible: Set[(
+    StorableObject[_ <: StorableClass], // Entity
+    Option[Set[DatabaseField[_]]]       // Set of entity fields that is visible.  If None, all fields are visible
+  )] = Set(
+    (ApClassInstance, Some(Set.empty)),
+    (ApClassFormat, Some(Set.empty)),
+    (ApClassSession, Some(Set.empty)),
+    (ApClassType, Some(Set.empty)),
+    (ApClassSignup, Some(Set.empty))
+  )
+
   // True if the entity can be queried by public users
-  val publicVisibility: EntityVisibility = VISIBLE_NEVER
-  val memberVisibility: EntityVisibility = VISIBLE_NEVER
-  val staffVisibility: EntityVisibility = VISIBLE_ALWAYS
+  final def publicVisibility: EntityVisibility = {
+    if (publicVisible.map(_._1) contains this) VISIBLE_ALWAYS
+    else VISIBLE_NEVER
+  }
+  final val memberVisibility: EntityVisibility = VISIBLE_NEVER
+  final val staffVisibility: EntityVisibility = VISIBLE_ALWAYS
 
   final def getVisiblity(userType: UserType): EntityVisibility = userType match {
     case PublicUserType => publicVisibility

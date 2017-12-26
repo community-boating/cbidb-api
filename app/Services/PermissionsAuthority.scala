@@ -26,7 +26,10 @@ object PermissionsAuthority {
   def getRequestCache(request: Request[AnyContent]): RequestCache = RequestCache.construct(request, rootCB)
 
   def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
-    if (requestIsFromLocalHost(request)) userType.getPwHashForUser(userName, rootPB)
+    if (
+      allowableUserTypes.get.contains(userType) &&  // requested user type is enabled in this server instance
+      requestIsFromLocalHost(request)               // request came from localhost, i.e. the bouncer
+    ) userType.getPwHashForUser(userName, rootPB)
     else None
   }
 
