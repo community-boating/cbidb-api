@@ -1,6 +1,6 @@
 package Reporting.ReportFactories
 
-import Entities.Entities._
+import Entities.EntityDefinitions._
 import Reporting.ReportingFilters.ReportingFilterFactories.Person._
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}

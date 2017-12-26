@@ -1,7 +1,7 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.Person
 
 
-import Entities.Entities._
+import Entities.EntityDefinitions._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 

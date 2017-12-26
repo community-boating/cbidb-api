@@ -3,7 +3,7 @@ package Reporting.ReportingFilters.ReportingFilterFactories.Donation
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import Entities.Entities.Donation
+import Entities.EntityDefinitions.Donation
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 import Services.ServerBootLoader.ssc

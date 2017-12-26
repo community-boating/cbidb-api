@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
-import Entities.Entities._
+import Entities.EntityDefinitions._
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._

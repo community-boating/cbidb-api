@@ -1,6 +1,6 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
-import Entities.Entities.{ApClassFormat, ApClassInstance, ApClassType}
+import Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassType}
 import Reporting.Report.BadReportingFilterArgumentsException
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker

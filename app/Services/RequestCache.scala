@@ -1,6 +1,6 @@
 package Services
 
-import Entities.Entities.Rating
+import Entities.EntityDefinitions.Rating
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 

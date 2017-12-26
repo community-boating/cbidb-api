@@ -1,4 +1,4 @@
-package Entities.Entities
+package Entities.EntityDefinitions
 
 import Storable.Fields.FieldValue.{BooleanFieldValue, IntFieldValue, StringFieldValue}
 import Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseField}

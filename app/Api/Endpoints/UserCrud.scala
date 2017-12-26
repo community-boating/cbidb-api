@@ -2,7 +2,7 @@ package Api.Endpoints
 
 import javax.inject.Inject
 
-import Entities.Entities.User
+import Entities.EntityDefinitions.User
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable

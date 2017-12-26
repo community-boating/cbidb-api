@@ -1,6 +1,6 @@
 package Entities
 
-import Entities._
+import Entities.EntityDefinitions._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object EntitySecurity {
