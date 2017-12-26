@@ -5,6 +5,7 @@ import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
+// TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
 class RequestCache private[RequestCache] (
   val authenticatedUserName: String,
   val authenticatedUserType: UserType

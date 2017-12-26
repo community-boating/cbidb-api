@@ -18,7 +18,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
   private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: ComboPooledDataSource = RelationalBroker.tempTablePool.get
 
-  def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
+  def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
@@ -27,7 +27,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     rows.map(r => obj.construct(r, isClean = true))
   }
 
-  def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+  def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
@@ -38,7 +38,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     else None
   }
 
-  def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+  def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
     println("#################################################")
     println("About to get " + ids.length + " instances of " + obj.entityName)
     println("#################################################")
@@ -59,7 +59,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     }
   }
 
-  def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
+  def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
     // Filter("") means a filter that can't possibly match anything.
     // E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
     // If there are any short circuit filters, don't bother talking to the database
@@ -229,7 +229,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     }
   }
 
-  def commitObjectToDatabase(i: StorableClass): Unit = {
+  def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
     if (i.hasID) updateObject(i) else insertObject(i)
   }
 
