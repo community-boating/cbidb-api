@@ -1,4 +1,4 @@
-package Entities
+package Entities.Entities
 
 import Entities.PersonRating.CasePersonRating
 import Storable.Fields.FieldValue.IntFieldValue

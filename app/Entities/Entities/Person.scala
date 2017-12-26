@@ -1,4 +1,4 @@
-package Entities
+package Entities.Entities
 
 import CbiUtil.Initializable
 import Entities.PersonRating.CasePersonRating

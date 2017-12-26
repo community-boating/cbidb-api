@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Entities.User
+import Entities.Entities.User
 import Services._
 import play.api.mvc.{AnyContent, Request}
 

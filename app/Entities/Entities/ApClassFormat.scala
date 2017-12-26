@@ -1,4 +1,4 @@
-package Entities
+package Entities.Entities
 
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}

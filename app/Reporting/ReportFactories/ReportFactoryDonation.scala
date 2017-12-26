@@ -1,6 +1,6 @@
 package Reporting.ReportFactories
 
-import Entities.Donation
+import Entities.Entities.Donation
 import Reporting.ReportingFilters.ReportingFilterFactories.Donation.DonationFilterFactoryDateRange
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}

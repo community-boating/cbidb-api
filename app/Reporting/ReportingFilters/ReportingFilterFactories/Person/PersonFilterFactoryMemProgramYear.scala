@@ -1,6 +1,7 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.Person
 
-import Entities.{MembershipType, Person, PersonMembership, ProgramType}
+import Entities.Entities.{Person, ProgramType}
+import Entities.{PersonMembership, ProgramType}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 import Services.ServerBootLoader.ssc

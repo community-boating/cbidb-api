@@ -28,24 +28,13 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val entityName: String
   val fields: FieldsObject
 
-  final val publicVisible: Set[(
-    StorableObject[_ <: StorableClass], // Entity
-    Option[Set[DatabaseField[_]]]       // Set of entity fields that is visible.  If None, all fields are visible
-  )] = Set(
-    (ApClassInstance, Some(Set.empty)),
-    (ApClassFormat, Some(Set.empty)),
-    (ApClassSession, Some(Set.empty)),
-    (ApClassType, Some(Set.empty)),
-    (ApClassSignup, Some(Set.empty))
-  )
-
   // True if the entity can be queried by public users
-  final def publicVisibility: EntityVisibility = {
-    if (publicVisible.map(_._1) contains this) VISIBLE_ALWAYS
-    else VISIBLE_NEVER
+  final def publicVisibility: EntityVisibility = EntitySecurity.publicSecurity.get(this) match {
+    case Some(x) => x
+    case None => ZERO_VISIBILITY
   }
-  final val memberVisibility: EntityVisibility = VISIBLE_NEVER
-  final val staffVisibility: EntityVisibility = VISIBLE_ALWAYS
+  final val memberVisibility: EntityVisibility = ZERO_VISIBILITY
+  final val staffVisibility: EntityVisibility = FULL_VISIBILITY
 
   final def getVisiblity(userType: UserType): EntityVisibility = userType match {
     case PublicUserType => publicVisibility
