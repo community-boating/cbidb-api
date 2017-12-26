@@ -34,8 +34,5 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache) {
   protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
 
   // TODO: implement some IDs
-  private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.authenticatedUserType) match {
-    case VISIBLE_ALWAYS => true
-    case VISIBLE_NEVER | VISIBLE_SOME_IDS(_) => false
-  }
+  private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.authenticatedUserType).entityVisible
 }

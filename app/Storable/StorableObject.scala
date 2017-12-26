@@ -31,10 +31,10 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   // True if the entity can be queried by public users
   final def publicVisibility: EntityVisibility = EntitySecurity.publicSecurity.get(this) match {
     case Some(x) => x
-    case None => ZERO_VISIBILITY
+    case None => EntityVisibility.ZERO_VISIBILITY
   }
-  final val memberVisibility: EntityVisibility = ZERO_VISIBILITY
-  final val staffVisibility: EntityVisibility = FULL_VISIBILITY
+  final val memberVisibility: EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+  final val staffVisibility: EntityVisibility = EntityVisibility.FULL_VISIBILITY
 
   final def getVisiblity(userType: UserType): EntityVisibility = userType match {
     case PublicUserType => publicVisibility

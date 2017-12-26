@@ -1,6 +1,5 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
-import Entities.ApClassSession
 import Entities.Entities.{ApClassInstance, ApClassSession}
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker

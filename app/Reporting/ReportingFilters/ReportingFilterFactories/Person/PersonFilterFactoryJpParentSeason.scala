@@ -1,6 +1,7 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.Person
 
-import Entities._
+
+import Entities.Entities._
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 import Services.ServerBootLoader.ssc

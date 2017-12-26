@@ -1,6 +1,6 @@
 package Entities.Entities
 
-import Entities.PersonRating.CasePersonRating
+import Entities.Entities.PersonRating.CasePersonRating
 import Storable.Fields.FieldValue.IntFieldValue
 import Storable.Fields.IntDatabaseField
 import Storable._

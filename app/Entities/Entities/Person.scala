@@ -1,7 +1,7 @@
 package Entities.Entities
 
 import CbiUtil.Initializable
-import Entities.PersonRating.CasePersonRating
+import Entities.Entities.PersonRating.CasePersonRating
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}

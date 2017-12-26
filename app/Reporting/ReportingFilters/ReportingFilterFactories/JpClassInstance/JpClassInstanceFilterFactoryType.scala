@@ -1,6 +1,5 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance
 import Entities.Entities.{JpClassInstance, JpClassType}
-import Entities.JpClassType
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 

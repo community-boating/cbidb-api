@@ -10,11 +10,13 @@ case class EntityVisibility(
   fieldList: Option[Set[DatabaseField[_]]]            // Set of fields the user can get data from.  If None, no restriction
 )
 
-// Entity is fully queryable
-case object FULL_VISIBILITY extends EntityVisibility(true, None, None)
+object EntityVisibility {
+  // Entity is fully queryable
+  val FULL_VISIBILITY = EntityVisibility(entityVisible=true, None, None)
 
-// Entity with this visibility is not queryable
-case object ZERO_VISIBILITY extends EntityVisibility(false, Some((rc: RequestCache) => Set.empty), Some(Set.empty))
+  // Entity with this visibility is not queryable
+  val ZERO_VISIBILITY = EntityVisibility(entityVisible=false, Some((rc: RequestCache) => Set.empty), Some(Set.empty))
 
-// Can get all rows, but cannot get any data point on them
-case object ROW_COUNT_VISIBILITY extends EntityVisibility(true, None, Some(Set.empty))
+  // Can get all rows, but cannot get any data point on them
+  val ROW_COUNT_VISIBILITY = EntityVisibility(entityVisible=true, None, Some(Set.empty))
+}

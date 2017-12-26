@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
-import Entities._
+import Entities.Entities._
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.Filter

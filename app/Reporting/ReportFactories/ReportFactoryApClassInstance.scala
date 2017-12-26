@@ -2,7 +2,7 @@ package Reporting.ReportFactories
 
 import java.time.format.DateTimeFormatter
 
-import Entities._
+import Entities.Entities._
 import Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApClassInstanceFilterFactoryType, ApClassInstanceFilterFactoryYear}
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}

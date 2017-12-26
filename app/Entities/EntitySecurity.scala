@@ -1,7 +1,7 @@
 package Entities
 
-import Storable.{EntityVisibility, FULL_VISIBILITY, StorableClass, StorableObject}
 import Entities._
+import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object EntitySecurity {
   val publicSecurity: Map[StorableObject[_ <: StorableClass], EntityVisibility] = Map(
