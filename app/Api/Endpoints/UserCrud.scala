@@ -34,7 +34,7 @@ class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
           val ps: ProtoStorable = ProtoStorable.constructFromStrings(User, postParams)
           println(ps)
 
-          val newUser: User = User.construct(ps, false)
+          val newUser: User = User.construct(ps, rc, false)
           println("committing!")
           pb.commitObjectToDatabase(newUser)
 

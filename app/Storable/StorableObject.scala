@@ -4,7 +4,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 import Entities._
 import Services.Authentication._
-import Services.PersistenceBroker
+import Services.{PersistenceBroker, RequestCache}
 import Storable.Fields.FieldValue._
 import Storable.Fields._
 
@@ -109,8 +109,6 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }
 
-
-
     (intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
   }
 
@@ -137,11 +135,23 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     dateTimeFieldMap.values.toList ++
     booleanFieldMap.values.toList
 
-  def construct(ps: ProtoStorable, isClean: Boolean): T = {
+  def construct(ps: ProtoStorable, rc: RequestCache, isClean: Boolean): T = {
     val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
+    type FieldDefinition = (String, DatabaseField[_])
 
-    intFieldMap.foreach(tupled((fieldName: String, field: IntDatabaseField) => {
+    val filterFunction: (FieldDefinition => Boolean) = rc.authenticatedUserType match {
+      case StaffUserType | RootUserType => (t: FieldDefinition) => true
+      case MemberUserType => (t: FieldDefinition) => false
+      case PublicUserType => EntitySecurity.publicSecurity(self).fieldList match {
+        case None => (t: FieldDefinition) => true
+        case Some(s) => (t: FieldDefinition) => s contains t._2
+      }
+    }
+
+    intFieldMap.filter(t => {
+      t._2 == self.primaryKey || filterFunction(t)
+    }).foreach(tupled((fieldName: String, field: IntDatabaseField) => {
       embryo.intValueMap.get(fieldName) match {
         case Some(fv: IntFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(i: Int) => fv.set(i)
@@ -151,7 +161,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    nullableIntFieldMap.foreach(tupled((fieldName: String, field: NullableIntDatabaseField) => {
+    nullableIntFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableIntDatabaseField) => {
       embryo.nullableIntValueMap.get(fieldName) match {
         case Some(fv: NullableIntFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(Some(i: Int)) => fv.set(Some(i))
@@ -162,7 +172,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    doubleFieldMap.foreach(tupled((fieldName: String, field: DoubleDatabaseField) => {
+    doubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DoubleDatabaseField) => {
       embryo.doubleValueMap.get(fieldName) match {
         case Some(fv: DoubleFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(d: Double) => fv.set(d)
@@ -172,7 +182,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    nullableDoubleFieldMap.foreach(tupled((fieldName: String, field: NullableDoubleDatabaseField) => {
+    nullableDoubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDoubleDatabaseField) => {
       embryo.nullableDoubleValueMap.get(fieldName) match {
         case Some(fv: NullableDoubleFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(Some(d: Double)) => fv.set(Some(d))
@@ -183,7 +193,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    stringFieldMap.foreach(tupled((fieldName: String, field: StringDatabaseField) => {
+    stringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: StringDatabaseField) => {
       embryo.stringValueMap.get(fieldName) match {
         case Some(fv: StringFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(s: String) => fv.set(s)
@@ -193,7 +203,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    nullableStringFieldMap.foreach(tupled((fieldName: String, field: NullableStringDatabaseField) => {
+    nullableStringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableStringDatabaseField) => {
       embryo.nullableStringValueMap.get(fieldName) match {
         case Some(fv: NullableStringFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(Some(s: String)) => fv.set(Some(s))
@@ -204,7 +214,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    dateFieldMap.foreach(tupled((fieldName: String, field: DateDatabaseField) => {
+    dateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateDatabaseField) => {
       embryo.dateValueMap.get(fieldName) match {
         case Some(fv: DateFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(d: LocalDate) => fv.set(d)
@@ -214,7 +224,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    nullableDateFieldMap.foreach(tupled((fieldName: String, field: NullableDateDatabaseField) => {
+    nullableDateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDateDatabaseField) => {
       embryo.nullableDateValueMap.get(fieldName) match {
         case Some(fv: NullableDateFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(Some(d: LocalDate)) => fv.set(Some(d))
@@ -225,7 +235,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    dateTimeFieldMap.foreach(tupled((fieldName: String, field: DateTimeDatabaseField) => {
+    dateTimeFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateTimeDatabaseField) => {
       embryo.dateTimeValueMap.get(fieldName) match {
         case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(dt: LocalDateTime) => fv.set(dt)
@@ -235,7 +245,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
     }))
 
-    booleanFieldMap.foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
+    booleanFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
       embryo.booleanValueMap.get(fieldName) match {
         case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(ps) match {
           case Some(b: Boolean) => fv.set(b)

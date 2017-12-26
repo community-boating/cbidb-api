@@ -59,6 +59,8 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
   }
 
   // basically works.  Not convinced its 100% threadsafe under heavy parallel load
+  // TODO: confirm crash recovery works, especially when there are queued waiters
+  // TODO: if waiters are waiting and a crash happens, they should all try themselves?
   def tryGet: Future[String] = {
     println("here we go")
     synchronized {
@@ -69,12 +71,16 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
           case Some(x) => x.length
           case None => 0
         }))
+        // You're not the first, and whoever was the first is still computing the result.
+        // They should have stashed a promise that they will complete with the result, grab it
         val p: Promise[String] = ApiRequest.resultMap(getCacheBrokerKey)
         ApiRequest.waiting.get(getCacheBrokerKey) match {
           case Some(x) => x += p
           case None => ApiRequest.waiting(getCacheBrokerKey) = mutable.ListBuffer(p)
         }
         println("now waiting has size " + ApiRequest.waiting(getCacheBrokerKey).length)
+        // Nothing to do now but wait for that first person to finish getting the result.
+        // Whenever that happens, return that result
         p.future.onComplete(_ => {
           ApiRequest.waiting(getCacheBrokerKey) -= p
           if (ApiRequest.waiting(getCacheBrokerKey).isEmpty) {
@@ -82,19 +88,36 @@ abstract class ApiRequest(cb: CacheBroker)(implicit exec: ExecutionContext) {
             ApiRequest.resultMap.remove(getCacheBrokerKey)
           }
         })
+        p.future.onFailure({
+          case _: Throwable => {
+            ApiRequest.waiting(getCacheBrokerKey) -= p
+            if (ApiRequest.waiting(getCacheBrokerKey).isEmpty) {
+              ApiRequest.resultMap.remove(getCacheBrokerKey)
+            }
+          }
+        })
         p.future
       } else {
+        // first person to go stores a promise that all queued's will use
         val p = Promise[String]()
         ApiRequest.resultMap.put(getCacheBrokerKey, p)
         println("got the go-ahead for " + getCacheBrokerKey)
+        // get the result and complete the promise with it
         p.completeWith(getJSONResultFuture.map(json => {
+          // Whether it crashed or not, release the hold on this cache key
+          ApiRequest.inUse.remove(getCacheBrokerKey)
           val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
           val result: String = new JsObject(Map("data" -> newData)).toString()
           saveToCache(result)
-          ApiRequest.inUse.remove(getCacheBrokerKey)
           println("done son; completing all queued")
           result
         }))
+        p.future.onFailure({
+          case _: Throwable => {
+            println("Failure detected; cleaning up")
+            ApiRequest.inUse.remove(getCacheBrokerKey)
+          }
+        })
         p.future
       }
     }

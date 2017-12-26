@@ -13,7 +13,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
   def peek: Option[T] = value
   def get: T = value match {
     case Some(v) => v
-    case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + field.getPersistenceFieldName)
+    case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + instance.getCompanion.entityName + "." + field.getPersistenceFieldName)
   }
   def isSet: Boolean = value match {
     case Some(_) => true
