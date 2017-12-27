@@ -94,6 +94,7 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
     }
 
     private ComboPooledDataSource getPool(String connectionString) {
+        System.out.println("Starting to construct pool");
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             cpds.setDriverClass( "oracle.jdbc.driver.OracleDriver" ); //loads the jdbc driver
@@ -106,6 +107,7 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("done constructing pool");
         return cpds;
     }
 }

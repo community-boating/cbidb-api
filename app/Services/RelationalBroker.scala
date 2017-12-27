@@ -318,6 +318,7 @@ object RelationalBroker {
         cp.set(_cp)
         mainPool.set(_cp.getMainDataSource)
         tempTablePool.set(_cp.getTempTableDataSource)
+        println("Pool set")
       }
     }
   }

@@ -19,6 +19,10 @@ class ServerBootLoader @Inject()(
   ServerBootLoader.serverStateContainer.peek match {
     case None => {
       println(" ***************     BOOTING UP SERVER   ***************  ")
+      // Initialize server state container
+      ServerBootLoader.serverStateContainer.set(ServerStateContainer(
+        serverTimeOffsetSeconds = 0
+      ))
 
       // Get server instance properties
       val serverProps = new ServerInstanceProperties("conf/private/server-properties")
@@ -36,10 +40,7 @@ class ServerBootLoader @Inject()(
       PermissionsAuthority.playMode.set(playMode)
       println("Running in mode: " + playMode)
 
-      // Initialize server state container
-      ServerBootLoader.serverStateContainer.set(ServerStateContainer(
-        serverTimeOffsetSeconds = 0
-      ))
+
 
       // Initialize PermissionsAuthority with activated AuthenticationMechanisms
       PermissionsAuthority.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
