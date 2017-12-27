@@ -73,7 +73,10 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
       val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
-      rows.map(r => obj.construct(r, rc, isClean = true))
+      val p = new Profiler
+      val ret = rows.map(r => obj.construct(r, rc, isClean = true))
+      p.lap("finished construction")
+      ret
     }
   }
 
@@ -124,7 +127,10 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
       c.createStatement().executeUpdate(dropTableSQL)
 
       println(" =======   cleaned up filter table   =======")
-      rows.map(r => obj.construct(r, rc, isClean = true))
+      val p2 = new Profiler
+      val ret = rows.map(r => obj.construct(r, rc, isClean = true))
+      p2.lap("finished construction")
+      ret
     } finally {
       c.close()
       Nil
