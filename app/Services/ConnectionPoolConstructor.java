@@ -1,10 +1,11 @@
 package Services;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import com.zaxxer.hikari.HikariDataSource;
 
 public interface ConnectionPoolConstructor {
-    public ComboPooledDataSource getMainDataSource();
-    public ComboPooledDataSource getTempTableDataSource();
+    public HikariDataSource getMainDataSource();
+    public HikariDataSource getTempTableDataSource();
     public void closePools();
     public String getMainSchemaName();
     public String getTempTableSchemaName();

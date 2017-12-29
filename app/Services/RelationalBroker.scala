@@ -8,15 +8,15 @@ import CbiUtil.{Initializable, Profiler}
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
-import com.mchange.v2.c3p0.ComboPooledDataSource
+import com.zaxxer.hikari.HikariDataSource
 
 import scala.collection.mutable.ListBuffer
 
 abstract class RelationalBroker private[Services] (rc: RequestCache) extends PersistenceBroker(rc) {
   implicit val pb: PersistenceBroker = this
 
-  private val mainPool: ComboPooledDataSource = RelationalBroker.mainPool.get
-  private val tempTablePool: ComboPooledDataSource = RelationalBroker.tempTablePool.get
+  private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
+  private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
 
   def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     val sb: StringBuilder = new StringBuilder
@@ -299,8 +299,8 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
 }
 
 object RelationalBroker {
-  val mainPool = new Initializable[ComboPooledDataSource]
-  val tempTablePool = new Initializable[ComboPooledDataSource]
+  val mainPool = new Initializable[HikariDataSource]
+  val tempTablePool = new Initializable[HikariDataSource]
   private val cp = new Initializable[ConnectionPoolConstructor]
 
   def getMainSchemaName: String = cp.get.getMainSchemaName

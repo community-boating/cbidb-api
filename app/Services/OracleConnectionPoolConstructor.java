@@ -1,16 +1,15 @@
 package Services;
 
 import CbiUtil.PropertiesWrapper;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.File;
 
 public class OracleConnectionPoolConstructor implements ConnectionPoolConstructor {
     private PropertiesWrapper pw = null;
-    private String mainSchemaName = null;
-    private String tempTableSchemaName = null;
-    private ComboPooledDataSource mainDataSource = null;
-    private ComboPooledDataSource tempTableDataSource = null;
+    private HikariDataSource mainDataSource = null;
+    private HikariDataSource tempTableDataSource = null;
 
     public String getMainSchemaName() {
         return pw.getProperty("schema");
@@ -24,12 +23,12 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
         return pw.getProperty("username");
     }
 
-    public ComboPooledDataSource getMainDataSource() {
+    public HikariDataSource getMainDataSource() {
         if (null == mainDataSource) init();
         return mainDataSource;
     }
 
-    public ComboPooledDataSource getTempTableDataSource() {
+    public HikariDataSource getTempTableDataSource() {
         if (null == tempTableDataSource) init();
         return tempTableDataSource;
     }
@@ -60,19 +59,14 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
                     locationToUse,
                     new String[] {"username", "password", "host", "port", "sid", "schema", "temptableschema"}
             );
-            this.mainSchemaName = pw.getProperty("schema");
-            this.tempTableSchemaName = pw.getProperty("temptableschema");
-            this.mainDataSource = getPool(this.mainDataSourceConnectionString());
-            if (this.mainDataSourceConnectionString().equals(this.tempTableDataSourceConnectionString())) {
-                this.tempTableDataSource = this.mainDataSource;
-            } else {
-                this.tempTableDataSource = getPool(this.tempTableDataSourceConnectionString());
-            }
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            this.mainDataSource = getPool(getMainDataSourceConfig());
+            this.tempTableDataSource = getPool(getTempTableDataSourceConfig());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
+/*
     private String mainDataSourceConnectionString() {
         return "jdbc:oracle:thin:" + pw.getProperty("username") + "/" +
                 pw.getProperty("password") + "@" +
@@ -92,22 +86,25 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
                     pw.getProperty("sid");
         }
     }
+*/
 
-    private ComboPooledDataSource getPool(String connectionString) {
-        System.out.println("Starting to construct pool");
-        ComboPooledDataSource cpds = new ComboPooledDataSource();
-        try {
-            cpds.setDriverClass( "oracle.jdbc.driver.OracleDriver" ); //loads the jdbc driver
-            cpds.setJdbcUrl(connectionString);
+    private HikariConfig getMainDataSourceConfig() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
+        config.setUsername(pw.getProperty("username"));
+        config.setPassword(pw.getProperty("password"));
+        return config;
+    }
 
-            // the settings below are optional -- c3p0 can work with defaults
-            cpds.setMinPoolSize(5);
-            cpds.setAcquireIncrement(5);
-            cpds.setMaxPoolSize(20);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println("done constructing pool");
-        return cpds;
+    private HikariConfig getTempTableDataSourceConfig() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
+        config.setUsername(pw.getProperty("temptableusername"));
+        config.setPassword(pw.getProperty("temptablepassword"));
+        return config;
+    }
+
+    private HikariDataSource getPool(HikariConfig config) {
+        return new HikariDataSource(config);
     }
 }

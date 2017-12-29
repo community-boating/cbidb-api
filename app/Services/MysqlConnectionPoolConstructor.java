@@ -1,11 +1,11 @@
 package Services;
 
 import CbiUtil.PropertiesWrapper;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor {
     private PropertiesWrapper pw = null;
-    private ComboPooledDataSource pool = null;
+    private HikariDataSource pool = null;
 
     public String getMainSchemaName() {
         return pw.getProperty("schema");
@@ -19,12 +19,12 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
         return pw.getProperty("username");
     }
 
-    public ComboPooledDataSource getMainDataSource() {
+    public HikariDataSource getMainDataSource() {
         if (null == this.pool) init();
         return this.pool;
     }
 
-    public ComboPooledDataSource getTempTableDataSource() {
+    public HikariDataSource getTempTableDataSource() {
         return getMainDataSource();
     }
 
@@ -33,9 +33,9 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
         System.out.println("  ************    Shutting down!  Closing mysql pool!!  *************  ");
     }
 
-    private ComboPooledDataSource init() {
-        ComboPooledDataSource cpds = new ComboPooledDataSource();
-        try {
+    private HikariDataSource init() {
+        HikariDataSource ds = new HikariDataSource();
+        /*try {
             //mysql -u root -p -e "GRANT ALL PRIVILEGES ON $schema.* TO $user@localhost IDENTIFIED BY '$db_pass'"
             this.pw = new PropertiesWrapper(
                     "conf/private/mysql-credentials",
@@ -59,7 +59,7 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
             cpds.setMaxPoolSize(20);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        return cpds;
+        }*/
+        return ds;
     }
 }
