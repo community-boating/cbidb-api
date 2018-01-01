@@ -1,6 +1,6 @@
 package Reporting
 
-import Reporting.ReportFactories.{ReportFactoryApClassInstance, ReportFactoryDonation, ReportFactoryJpClassInstance, ReportFactoryPerson}
+import Reporting.ReportFactories._
 import Services.PersistenceBroker
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
@@ -24,6 +24,7 @@ object Report {
   val reportFactoryMap: Map[String, (String, Class[_ <: ReportFactory[_]])] = Map(
     "ApClassInstance" -> ("AP Class Instance", classOf[ReportFactoryApClassInstance]),
     "JpClassInstance" -> ("JP Class Instance", classOf[ReportFactoryJpClassInstance]),
+    "JpClassSignup" -> ("JP Class Signup", classOf[ReportFactoryJpClassSignup]),
     "Person" -> ("Person", classOf[ReportFactoryPerson]),
     "Donation" -> ("Donation", classOf[ReportFactoryDonation])
   )
