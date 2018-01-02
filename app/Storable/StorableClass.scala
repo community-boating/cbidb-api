@@ -20,6 +20,8 @@ abstract class StorableClass {
 
   type Companion = StorableObject[_ <: StorableClass]
 
+  // If you need a self in the entity, call it myself or something
+  // Can't take the final off this and override it, or everything crashes horribly.
   final val self: StorableClass = this
   val values: ValuesObject
 

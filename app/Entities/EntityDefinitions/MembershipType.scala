@@ -1,14 +1,15 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.Initializable
+import CbiUtil.{Initializable, InitializableFromCollection}
 import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
 import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
 
 class MembershipType extends StorableClass {
+  val myself = this
   this.setCompanion(MembershipType)
   object references extends ReferencesObject {
-    var program = new Initializable[ProgramType]
+    var program = new InitializableFromCollection[ProgramType](_.values.programId.get == myself.values.programId.get)
   }
   object values extends ValuesObject {
     val membershipTypeId = new IntFieldValue(self, MembershipType.fields.membershipTypeId)

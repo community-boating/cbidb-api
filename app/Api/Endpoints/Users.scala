@@ -1,6 +1,6 @@
 package Api.Endpoints
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
 import Api.ApiRequest
@@ -17,19 +17,25 @@ import scala.concurrent.{ExecutionContext, Future}
 class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
-    try {
+  //  try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
+
+      var startDate: LocalDate = LocalDate.now.minusYears(4)
+      while(startDate.toEpochDay < LocalDate.now.toEpochDay) {
+        println(startDate.toString + "  -  " + rc.logic.dateLogic.getJpWeek(startDate))
+        startDate = startDate.plusDays(1)
+      }
 
       val apiRequest = new UsersRequest(pb, cb, userID)
       apiRequest.getFuture.map(s => {
         Ok(s).as("application/json")
       })
-    } catch {
+   /* } catch {
       case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
       case _: Throwable => Future{ Ok("Internal Error") }
-    }
+    }*/
   }
 
   class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends ApiRequest(cb) {

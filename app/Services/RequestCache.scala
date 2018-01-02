@@ -1,6 +1,6 @@
 package Services
 
-import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, Rating}
+import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
@@ -18,9 +18,23 @@ class RequestCache private[RequestCache] (
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
   object cachedEntities {
-    lazy val membershipTypes: Set[MembershipType] = pb.getAllObjectsOfClass(MembershipType).toSet
-    lazy val membershipTypeExps: Set[MembershipTypeExp] = pb.getAllObjectsOfClass(MembershipTypeExp).toSet
-    lazy val ratings: Set[Rating] = pb.getAllObjectsOfClass(Rating).toSet
+    lazy val programTypes: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
+    lazy val membershipTypes: List[MembershipType] = {
+      println("$$$$$$$$$$  getting all mem types")
+      pb.getAllObjectsOfClass(MembershipType).map(m => {
+        m.references.program.setFromCollection(programTypes)
+        m
+      })
+    }
+    lazy val membershipTypeExps: List[MembershipTypeExp] = {
+      println("$$$$$$$$$$   getting all exps")
+      pb.getAllObjectsOfClass(MembershipTypeExp).map(me => {
+        println("er6734576ergyydfgh")
+        me.references.membershipType.setFromCollection(membershipTypes)
+        me
+      })
+    }
+    lazy val ratings: List[Rating] = pb.getAllObjectsOfClass(Rating)
   }
 
   object logic {
