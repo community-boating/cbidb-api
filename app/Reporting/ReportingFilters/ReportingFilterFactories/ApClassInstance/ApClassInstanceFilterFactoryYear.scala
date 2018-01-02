@@ -1,14 +1,14 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance
 
 import Entities.EntityDefinitions.{ApClassInstance, ApClassSession}
+import Logic.DateLogic
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker
-import Services.ServerBootLoader.ssc
 
 class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassInstance] {
   val displayName: String = "By Season"
   val argDefinitions = List(
-    (ARG_INT, ssc.currentSeason().toString)
+    (ARG_INT, DateLogic.currentSeason().toString)
   )
   def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
     val year: Int = arg.toInt

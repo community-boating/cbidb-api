@@ -1,6 +1,7 @@
 package Services
 
-import Entities.EntityDefinitions.Rating
+import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, Rating}
+import Logic.DateLogic
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 
@@ -10,12 +11,21 @@ class RequestCache private[RequestCache] (
   val authenticatedUserName: String,
   val authenticatedUserType: UserType
 ) {
+  private val self = this
   val pb: PersistenceBroker = new OracleBroker(this)
   val cb: CacheBroker = new RedisBroker
   println("Spawning new RequestCache")
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
-  lazy val ratings: Set[Rating] = pb.getAllObjectsOfClass(Rating).toSet
+  object cachedEntities {
+    lazy val membershipTypes: Set[MembershipType] = pb.getAllObjectsOfClass(MembershipType).toSet
+    lazy val membershipTypeExps: Set[MembershipTypeExp] = pb.getAllObjectsOfClass(MembershipTypeExp).toSet
+    lazy val ratings: Set[Rating] = pb.getAllObjectsOfClass(Rating).toSet
+  }
+
+  object logic {
+    val dateLogic: DateLogic = new DateLogic(self)
+  }
 }
 
 object RequestCache {
