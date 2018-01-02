@@ -1,6 +1,6 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.{ InitializableFromCollection}
+import CbiUtil.{ InitializableFromCollectionElement}
 import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue}
 import Storable.Fields.{DateDatabaseField, IntDatabaseField}
 import Storable._
@@ -9,7 +9,7 @@ class MembershipTypeExp extends StorableClass {
   val myself = this
   this.setCompanion(MembershipTypeExp)
   object references extends ReferencesObject {
-    var membershipType = new InitializableFromCollection[MembershipType](_.values.membershipTypeId.get == myself.values.membershipTypeId.get)
+    var membershipType = new InitializableFromCollectionElement[MembershipType](_.values.membershipTypeId.get == myself.values.membershipTypeId.get)
   }
   object values extends ValuesObject {
     val expirationId = new IntFieldValue(self, MembershipTypeExp.fields.expirationId)

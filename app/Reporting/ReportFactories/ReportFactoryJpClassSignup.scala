@@ -34,7 +34,6 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
     ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.instanceId, "Instance ID", isDefault = true)),
     ("PersonId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.personId, "Person ID", isDefault = true)),
     ("SignupType", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupType, "Signup Type", isDefault = true)),
-
     ("TypeId", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassSignup, JpClassInstance](
       JpClassInstance.fields.typeId,
       i => i.references.jpClassInstance.get,

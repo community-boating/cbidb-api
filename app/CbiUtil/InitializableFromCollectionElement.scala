@@ -1,7 +1,7 @@
 package CbiUtil
 
-class InitializableFromCollection[T](find: (T => Boolean)) extends Initializable[T] {
-  def setFromCollection(collection: Traversable[T]): T = value match {
+class InitializableFromCollectionElement[T](find: (T => Boolean)) extends Initializable[T] {
+  def findOneInCollection(collection: Traversable[T]): T = value match {
     case None => {
       collection.find(find) match {
         case Some(t) => {

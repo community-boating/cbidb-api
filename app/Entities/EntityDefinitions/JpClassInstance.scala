@@ -1,11 +1,13 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.Initializable
+import CbiUtil.{DefinedInitializable, Initializable, InitializableFromCollectionElement, InitializableFromCollectionSubset}
+import Services.RequestCache
 import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._
 
 class JpClassInstance extends StorableClass {
+  val myself = this
   this.setCompanion(JpClassInstance)
   object references extends ReferencesObject {
     var classLocation = new Initializable[Option[ClassLocation]]
@@ -17,6 +19,11 @@ class JpClassInstance extends StorableClass {
     val instructorId = new NullableIntFieldValue(self, JpClassInstance.fields.instructorId)
     val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
     val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
+  }
+  object calculatedValues extends CalculatedValuesObject {
+    val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {
+      s.values.instanceId.get == myself.values.instanceId.get
+    })
   }
 }
 

@@ -22,7 +22,7 @@ class RequestCache private[RequestCache] (
     lazy val membershipTypes: List[MembershipType] = {
       println("$$$$$$$$$$  getting all mem types")
       pb.getAllObjectsOfClass(MembershipType).map(m => {
-        m.references.program.setFromCollection(programTypes)
+        m.references.program.findOneInCollection(programTypes)
         m
       })
     }
@@ -30,7 +30,7 @@ class RequestCache private[RequestCache] (
       println("$$$$$$$$$$   getting all exps")
       pb.getAllObjectsOfClass(MembershipTypeExp).map(me => {
         println("er6734576ergyydfgh")
-        me.references.membershipType.setFromCollection(membershipTypes)
+        me.references.membershipType.findOneInCollection(membershipTypes)
         me
       })
     }
