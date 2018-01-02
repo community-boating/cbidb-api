@@ -16,6 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 
+  // TODO: remove this test harness, put the trycatch back!
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
   //  try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
