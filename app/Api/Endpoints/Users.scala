@@ -25,7 +25,7 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 
       var startDate: LocalDate = LocalDate.now.minusYears(7)
       while(startDate.toEpochDay < LocalDate.now.toEpochDay) {
-        println(startDate.toString + "  -  " + rc.logic.dateLogic.getJpWeek(startDate))
+        println(startDate.toString + "  -  " + rc.logic.dateLogic.getJpWeekAlias(startDate))
         startDate = startDate.plusDays(1)
       }
 
