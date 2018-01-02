@@ -34,12 +34,12 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
 
     formats.values.foreach(f => {
       val classType = types(f.values.typeId.get)
-      f.setApClassType(classType)
+      f.references.apClassType.set(classType)
     })
 
     instances.foreach(i => {
       val classFormat = formats(i.values.formatId.get)
-      i.setApClassFormat(classFormat)
+      i.references.apClassFormat.set(classFormat)
     })
   }
 

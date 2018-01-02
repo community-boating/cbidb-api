@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
@@ -9,20 +10,13 @@ class ApClassInstance extends StorableClass {
   this.setCompanion(ApClassInstance)
 
   object references extends ReferencesObject {
-    var apClassFormat: Option[ApClassFormat] = None
+    var apClassFormat = new Initializable[ApClassFormat]
   }
 
   object values extends ValuesObject {
     val instanceId = new IntFieldValue(self, ApClassInstance.fields.instanceId)
     val formatId = new IntFieldValue(self, ApClassInstance.fields.formatId)
     val locationString = new NullableStringFieldValue(self, ApClassInstance.fields.locationString)
-  }
-
-  def setApClassFormat(v: ApClassFormat): Unit = references.apClassFormat = Some(v)
-
-  def getApClassFormat: ApClassFormat = references.apClassFormat match {
-    case Some(x) => x
-    case None => throw new Exception("ApClassFormat unset for ApClassInstance " + values.instanceId.get)
   }
 
   def getApClassSessions(pb: PersistenceBroker): List[ApClassSession] = {

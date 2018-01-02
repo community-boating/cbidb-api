@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._
@@ -7,24 +8,15 @@ import Storable._
 class JpClassInstance extends StorableClass {
   this.setCompanion(JpClassInstance)
   object references extends ReferencesObject {
-    var classLocation: Option[Option[ClassLocation]] = None
-    var classInstructor: Option[Option[ClassInstructor]] = None
-    var jpClassType: Option[JpClassType] = None
+    var classLocation = new Initializable[Option[ClassLocation]]
+    var classInstructor = new Initializable[Option[ClassInstructor]]
+    var jpClassType = new Initializable[JpClassType]
   }
   object values extends ValuesObject {
     val instanceId = new IntFieldValue(self, JpClassInstance.fields.instanceId)
     val instructorId = new NullableIntFieldValue(self, JpClassInstance.fields.instructorId)
     val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
     val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
-  }
-
-  def setClassLocation(v: Option[ClassLocation]): Unit = references.classLocation = Some(v)
-  def setClassInstructor(v: Option[ClassInstructor]): Unit = references.classInstructor = Some(v)
-  def setJpClassType(v: JpClassType): Unit = references.jpClassType = Some(v)
-
-  def getJpClassType: JpClassType = references.jpClassType match {
-    case Some(x) => x
-    case None => throw new Exception("JpClassType unset for JpClassInstance " + values.instanceId.get)
   }
 }
 

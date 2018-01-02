@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
 import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
@@ -7,19 +8,13 @@ import Storable._
 class JpClassSignup extends StorableClass {
   this.setCompanion(JpClassSignup)
   object references extends ReferencesObject {
-    var jpClassInstance: Option[JpClassInstance] = None
+    var jpClassInstance = new Initializable[JpClassInstance]
   }
   object values extends ValuesObject {
     val signupId = new IntFieldValue(self, JpClassSignup.fields.signupId)
     val instanceId = new IntFieldValue(self, JpClassSignup.fields.instanceId)
     val signupType = new StringFieldValue(self, JpClassSignup.fields.signupType)
     val personId = new IntFieldValue(self, JpClassSignup.fields.personId)
-  }
-
-  def setJpClassInstance(v: JpClassInstance): Unit = references.jpClassInstance = Some(v)
-  def getJpClassInstance: JpClassInstance = references.jpClassInstance match {
-    case Some(x) => x
-    case None => throw new Exception("JpClassInstance unset for JpClassSignup " + values.signupId.get)
   }
 }
 

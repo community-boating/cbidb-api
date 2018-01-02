@@ -1,6 +1,6 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.DefinedInitializable
+import CbiUtil.{DefinedInitializable, Initializable}
 import Services.RequestCache
 import Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
 import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
@@ -10,7 +10,7 @@ import Storable._
 class JpClassSession extends StorableClass {
   this.setCompanion(JpClassSession)
   object references extends ReferencesObject {
-    var jpClassInstance: Option[JpClassInstance] = None
+    var jpClassInstance = new Initializable[JpClassInstance]
   }
   object values extends ValuesObject {
     val sessionId = new IntFieldValue(self, JpClassSession.fields.sessionId)
@@ -19,12 +19,6 @@ class JpClassSession extends StorableClass {
   }
   object calculatedValues extends CalculatedValuesObject {
     //lazy val jpWeek = new DefinedInitializable[RequestCache, Int]((rc: RequestCache) => rc.cachedEntities.membershipTypes)
-  }
-
-  def setJpClassInstance(v: JpClassInstance): Unit = references.jpClassInstance = Some(v)
-  def getJpClassInstance: JpClassInstance = references.jpClassInstance match {
-    case Some(x) => x
-    case None => throw new Exception("JpClassInstance unset for JpClassSession " + values.sessionId.get)
   }
 }
 

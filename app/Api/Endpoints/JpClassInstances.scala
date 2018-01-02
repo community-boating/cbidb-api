@@ -106,31 +106,31 @@ class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
       }
 
       instances.foreach(i => {
-        i.setJpClassType(types.filter(t => t.values.typeId.get == i.values.typeId.get).head)
+        i.references.jpClassType.set(types.filter(t => t.values.typeId.get == i.values.typeId.get).head)
 
         i.values.instructorId.get match {
-          case Some(x) => i.setClassInstructor(Some(instructors.filter(ins => ins.values.instructorId.get == x).head))
-          case None => i.setClassInstructor(None)
+          case Some(x) => i.references.classInstructor.set(Some(instructors.filter(ins => ins.values.instructorId.get == x).head))
+          case None => i.references.classInstructor.set(None)
         }
 
         i.values.locationId.get match {
-          case Some(x) => i.setClassLocation(Some(locations.filter(l => l.values.locationId.get == x).head))
-          case None => i.setClassLocation(None)
+          case Some(x) => i.references.classLocation.set(Some(locations.filter(l => l.values.locationId.get == x).head))
+          case None => i.references.classLocation.set(None)
         }
       })
 
       sessions.foreach(s => {
         instancesHash.get(s.values.instanceId.get) match {
-          case Some(i) => s.setJpClassInstance(i);
+          case Some(i) => s.references.jpClassInstance.set(i);
           case None =>
         }
       })
 
       val sessionsSorted = sessions.sortWith((s1: JpClassSession, s2: JpClassSession) => {
-        val displayOrder1 = s1.getJpClassInstance.getJpClassType.values.displayOrder.get
-        val displayOrder2 = s2.getJpClassInstance.getJpClassType.values.displayOrder.get
-        val instanceId1 = s1.getJpClassInstance.values.instanceId.get
-        val instanceId2 = s2.getJpClassInstance.values.instanceId.get
+        val displayOrder1 = s1.references.jpClassInstance.get.references.jpClassType.get.values.displayOrder.get
+        val displayOrder2 = s2.references.jpClassInstance.get.references.jpClassType.get.values.displayOrder.get
+        val instanceId1 = s1.references.jpClassInstance.get.values.instanceId.get
+        val instanceId2 = s2.references.jpClassInstance.get.values.instanceId.get
         CascadeSort.sort(s1.values.sessionDateTime.get, s2.values.sessionDateTime.get)
           .sort(displayOrder1, displayOrder2)
           .sort(instanceId1, instanceId2)
@@ -138,19 +138,19 @@ class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
       })
 
       val sessionsJsArray: JsArray = JsArray(sessionsSorted.map(s => {
-        val i: JpClassInstance = s.references.jpClassInstance match {
+        val i: JpClassInstance = s.references.jpClassInstance.peek match {
           case Some(i1) => i1
           case None => throw new Exception("wut")
         }
-        val t: JpClassType = i.references.jpClassType match {
+        val t: JpClassType = i.references.jpClassType.peek match {
           case Some(t1) => t1
           case None => throw new Exception("wut")
         }
-        val l: Option[ClassLocation] = i.references.classLocation match {
+        val l: Option[ClassLocation] = i.references.classLocation.peek match {
           case Some(l1) => l1
           case None => throw new Exception("wut")
         }
-        val ins: Option[ClassInstructor] = i.references.classInstructor match {
+        val ins: Option[ClassInstructor] = i.references.classInstructor.peek match {
           case Some(ins1) => ins1
           case None => throw new Exception("wut")
         }

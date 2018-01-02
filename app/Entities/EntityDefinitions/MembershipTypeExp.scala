@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue}
 import Storable.Fields.{DateDatabaseField, IntDatabaseField}
 import Storable._
@@ -7,7 +8,7 @@ import Storable._
 class MembershipTypeExp extends StorableClass {
   this.setCompanion(MembershipTypeExp)
   object references extends ReferencesObject {
-    var membershipType: Option[MembershipType] = None
+    var membershipType = new Initializable[MembershipType]
   }
   object values extends ValuesObject {
     val expirationId = new IntFieldValue(self, MembershipTypeExp.fields.expirationId)

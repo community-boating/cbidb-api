@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
 import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import Storable._
@@ -7,18 +8,12 @@ import Storable._
 class ApClassSession extends StorableClass {
   this.setCompanion(ApClassSession)
   object references extends ReferencesObject {
-    var apClassInstance: Option[ApClassInstance] = None
+    var apClassInstance = new Initializable[ApClassInstance]
   }
   object values extends ValuesObject {
     val sessionId = new IntFieldValue(self, ApClassSession.fields.sessionId)
     val instanceId = new IntFieldValue(self, ApClassSession.fields.instanceId)
     val sessionDateTime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDateTime)
-  }
-
-  def setApClassInstance(v: ApClassInstance): Unit = references.apClassInstance = Some(v)
-  def getApClassInstance: ApClassInstance = references.apClassInstance match {
-    case Some(x) => x
-    case None => throw new Exception("JpClassInstance unset for JpClassSession " + values.sessionId.get)
   }
 }
 

@@ -26,7 +26,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
         .foldLeft(Map(): Map[Int, JpClassType])((m: Map[Int, JpClassType], x: (Int, JpClassType)) => m + x)
 
     instances.foreach(i => {
-      i.setJpClassType(types(i.values.typeId.get))
+      i.references.jpClassType.set(types(i.values.typeId.get))
     })
   }
 

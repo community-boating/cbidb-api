@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
 import Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import Storable._
@@ -7,7 +8,7 @@ import Storable._
 class MembershipType extends StorableClass {
   this.setCompanion(MembershipType)
   object references extends ReferencesObject {
-    var program: Option[ProgramType] = None
+    var program = new Initializable[ProgramType]
   }
   object values extends ValuesObject {
     val membershipTypeId = new IntFieldValue(self, MembershipType.fields.membershipTypeId)

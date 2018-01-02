@@ -103,25 +103,25 @@ class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
       }
 
       formats.foreach(f => {
-        f.setApClassType(types.filter(_.values.typeId.get == f.values.typeId.get).head)
+        f.references.apClassType.set(types.filter(_.values.typeId.get == f.values.typeId.get).head)
       })
 
       instances.foreach(i => {
-        i.setApClassFormat(formats.filter(_.values.formatId.get == i.values.formatId.get).head)
+        i.references.apClassFormat.set(formats.filter(_.values.formatId.get == i.values.formatId.get).head)
       })
 
       sessions.foreach(s => {
         instancesHash.get(s.values.instanceId.get) match {
-          case Some(i) => s.setApClassInstance(i);
+          case Some(i) => s.references.apClassInstance.set(i);
           case None =>
         }
       })
 
       val sessionsSorted = sessions.sortWith((s1: ApClassSession, s2: ApClassSession) => {
-        val displayOrder1 = s1.getApClassInstance.getApClassFormat.getApClassType.values.displayOrder.get
-        val displayOrder2 = s2.getApClassInstance.getApClassFormat.getApClassType.values.displayOrder.get
-        val instanceId1 = s1.getApClassInstance.values.instanceId.get
-        val instanceId2 = s2.getApClassInstance.values.instanceId.get
+        val displayOrder1 = s1.references.apClassInstance.get.references.apClassFormat.get.references.apClassType.get.values.displayOrder.get
+        val displayOrder2 = s2.references.apClassInstance.get.references.apClassFormat.get.references.apClassType.get.values.displayOrder.get
+        val instanceId1 = s1.references.apClassInstance.get.values.instanceId.get
+        val instanceId2 = s2.references.apClassInstance.get.values.instanceId.get
         CascadeSort.sort(s1.values.sessionDateTime.get, s2.values.sessionDateTime.get)
           .sort(displayOrder1, displayOrder2)
           .sort(instanceId1, instanceId2)
@@ -129,15 +129,15 @@ class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
       })
 
       val sessionsJsArray: JsArray = JsArray(sessionsSorted.map(s => {
-        val i: ApClassInstance = s.references.apClassInstance match {
+        val i: ApClassInstance = s.references.apClassInstance.peek match {
           case Some(i1) => i1
           case None => throw new Exception()
         }
-        val f: ApClassFormat = i.references.apClassFormat match {
+        val f: ApClassFormat = i.references.apClassFormat.peek match {
           case Some(f1) => f1
           case None => throw new Exception()
         }
-        val t: ApClassType = f.references.apClassType match {
+        val t: ApClassType = f.references.apClassType.peek match {
           case Some(t1) => t1
           case None => throw new Exception()
         }

@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
 import Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
 import Storable._
@@ -7,7 +8,7 @@ import Storable._
 class Donation extends StorableClass {
   this.setCompanion(Donation)
   object references extends ReferencesObject {
-    var person: Option[Person] = None
+    var person = new Initializable[Person]
   }
   object values extends ValuesObject {
     val donationId = new IntFieldValue(self, Donation.fields.donationId)

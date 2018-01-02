@@ -1,5 +1,6 @@
 package Entities.EntityDefinitions
 
+import CbiUtil.Initializable
 import Storable.Fields.FieldValue.IntFieldValue
 import Storable.Fields.IntDatabaseField
 import Storable._
@@ -7,7 +8,7 @@ import Storable._
 class JpTeamEventPoints extends StorableClass {
   this.setCompanion(JpTeamEventPoints)
   object references extends ReferencesObject {
-    var jpTeam: Option[JpTeam] = None
+    var jpTeam = new Initializable[JpTeam]
   }
   object values extends ValuesObject {
     val rowId = new IntFieldValue(self, JpTeamEventPoints.fields.rowId)

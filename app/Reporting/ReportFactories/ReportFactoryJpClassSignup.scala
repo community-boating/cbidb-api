@@ -17,7 +17,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
     classInstances.foreach(i => {
       val typeId = i.values.typeId.get
       val typeInstance = jpClassTypes.find(_.values.typeId.get == typeId)
-      i.setJpClassType(typeInstance.get)
+      i.references.jpClassType.set(typeInstance.get)
     })
     classInstances
   }
@@ -25,7 +25,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
   def decorateInstancesWithParentReferences(signups: List[JpClassSignup]): Unit = {
     signups.foreach(s => {
       val instance = jpClassInstances.find(_.values.instanceId.get == s.values.instanceId.get)
-      s.setJpClassInstance(instance.get)
+      s.references.jpClassInstance.set(instance.get)
     })
   }
 
