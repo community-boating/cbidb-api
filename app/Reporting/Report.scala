@@ -1,7 +1,7 @@
 package Reporting
 
 import Reporting.ReportFactories._
-import Services.PersistenceBroker
+import Services.{PersistenceBroker, RequestCache}
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
@@ -29,11 +29,11 @@ object Report {
     "Donation" -> ("Donation", classOf[ReportFactoryDonation])
   )
 
-  def getReport(pb: PersistenceBroker, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
+  def getReport(rc: RequestCache, pb: PersistenceBroker, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
     val c: Class[_ <: ReportFactory[_]] = reportFactoryMap(baseEntityName)._2
     val factory: ReportFactory[_ <: StorableClass] =
       Class.forName(c.getCanonicalName).newInstance.asInstanceOf[ReportFactory[_ <: StorableClass]]
-    factory.setParameters(pb, filterSpec, fieldSpec)
+    factory.setParameters(rc, pb, filterSpec, fieldSpec)
     Report(factory.getHeaders, factory.getRows)
   }
 

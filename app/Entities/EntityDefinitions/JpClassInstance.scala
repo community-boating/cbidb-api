@@ -24,6 +24,11 @@ class JpClassInstance extends StorableClass {
     val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {
       s.values.instanceId.get == myself.values.instanceId.get
     })
+
+    // TODO: is there a way to make this not compile if you call it unsafely?  Better way to structure this?
+    lazy val firstSession: JpClassSession = sessions.get.sortWith((a: JpClassSession, b: JpClassSession) => {
+      a.values.sessionDateTime.get.isBefore(b.values.sessionDateTime.get)
+    }).head
   }
 }
 

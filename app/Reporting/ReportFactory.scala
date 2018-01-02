@@ -2,32 +2,28 @@ package Reporting
 
 import java.time.{LocalDateTime, ZoneId}
 
+import CbiUtil.Initializable
 import Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
-import Services.PersistenceBroker
+import Services.{PersistenceBroker, RequestCache}
 import Storable.{StorableClass, StorableObject}
 
 abstract class ReportFactory[T <: StorableClass] {
-  private var pbWrapper: Option[PersistenceBroker] = None
-  private var filterSpecWrapper: Option[String] = None
-  private var fieldSpecWrapper: Option[String] = None
-  def setParameters(pb: PersistenceBroker, filterSpec: String, fieldSpec: String): Unit = {
-    pbWrapper = Some(pb)
-    filterSpecWrapper = Some(filterSpec)
-    fieldSpecWrapper = Some(fieldSpec)
-  }
-  implicit def pb: PersistenceBroker = pbWrapper match {
-    case Some(x: PersistenceBroker) => x
-    case None => throw new Exception("Referenced ReportFactory params before they were set")
+  private val rcWrapper = new Initializable[RequestCache]
+  private val pbWrapper = new Initializable[PersistenceBroker]
+  private val filterSpecWrapper = new Initializable[String]
+  private val fieldSpecWrapper = new Initializable[String]
+
+  def setParameters(rc: RequestCache, pb: PersistenceBroker, filterSpec: String, fieldSpec: String): Unit = {
+    rcWrapper.set(rc)
+    pbWrapper.set(pb)
+    filterSpecWrapper.set(filterSpec)
+    fieldSpecWrapper.set(fieldSpec)
   }
 
-  def filterSpec: String = filterSpecWrapper match {
-    case Some(x: String) => x
-    case None => throw new Exception("Referenced ReportFactory params before they were set")
-  }
-  def fieldSpec: String = fieldSpecWrapper match {
-    case Some(x: String) => x
-    case None => throw new Exception("Referenced ReportFactory params before they were set")
-  }
+  def rc: RequestCache = rcWrapper.get
+  def pb: PersistenceBroker = pbWrapper.get
+  def filterSpec: String = filterSpecWrapper.get
+  def fieldSpec: String = fieldSpecWrapper.get
 
   type ValueFunction = (T => String)
   implicit val localDateTimeOrdering: Ordering[LocalDateTime] = Ordering.by(

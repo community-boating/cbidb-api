@@ -18,7 +18,20 @@ object ReportingField {
     f: DatabaseField[_],
     fieldDisplayName: String,
     isDefault: Boolean
-): ReportingField[T] = getReportingFieldFromDatabaseFieldParentObject[T, T](f, t => t, fieldDisplayName, isDefault)
+  ): ReportingField[T] = getReportingFieldFromDatabaseFieldParentObject[T, T](f, t => t, fieldDisplayName, isDefault)
+
+  def getReportingFieldFromCalculatedValue[T <: StorableClass, U <: StorableClass](
+    getValue: (U => String),
+    getParent: (T => U),
+    fieldDisplayName: String,
+    isDefault: Boolean
+  ): ReportingField[T] = {
+    new ReportingField[T](
+      (t: T) => getValue(getParent(t)),
+      fieldDisplayName,
+      isDefault
+    )
+  }
 
   def getReportingFieldFromDatabaseFieldParentObject[T <: StorableClass, U <: StorableClass](
     f: DatabaseField[_],
