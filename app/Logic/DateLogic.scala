@@ -17,7 +17,8 @@ class DateLogic(rc: RequestCache) {
       (d: LocalDate) => {
         val daysBetween: Long = ChronoUnit.DAYS.between(startDate, d)
         val week: Long = daysBetween / 7
-        if (week >= 0 && week <= 11) Some(week.toInt + 1)
+        println(daysBetween + " / 7 = " + week)
+        if (daysBetween >= 0 && week >= 0 && week <= 9) Some(week.toInt + 1)
         else None
       }
     })).toMap
