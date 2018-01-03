@@ -3,6 +3,7 @@ package Reporting.ReportFactories
 import java.time.format.DateTimeFormatter
 
 import Entities.EntityDefinitions._
+import Reporting.ReportingFilters.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
 import Storable.StorableObject
@@ -72,7 +73,6 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
   )
 
   val filterList: List[(String, ReportingFilterFactory[JpClassSignup])] = List(
-  //  ("ApClassInstanceFilterYear", new ApClassInstanceFilterFactoryYear()),
-  //  ("ApClassInstanceFilterType", new ApClassInstanceFilterFactoryType())
+    ("JpClassSignupFilterYear", new JpClassSignupFilterFactoryYear())
   )
 }
