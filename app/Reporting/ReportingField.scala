@@ -99,6 +99,12 @@ object ReportingField {
         case None => ""
       }
     }, fieldDisplayName, isDefault)
+    case i: DateTimeDatabaseField => new ReportingField[T]((t: T) => {
+      getParent(t).dateTimeValueMap.get(i.getRuntimeFieldName) match {
+        case Some(v: DateTimeFieldValue) => v.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        case None => ""
+      }
+    }, fieldDisplayName, isDefault)
     case _ => throw new Exception("Unconfigured Reporting field type " + fieldDisplayName)
   }
 }

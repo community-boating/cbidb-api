@@ -1,5 +1,7 @@
 package Reporting.ReportFactories
 
+import java.time.format.DateTimeFormatter
+
 import Entities.EntityDefinitions._
 import Reporting.ReportingFilters.ReportingFilterFactory
 import Reporting.{ReportFactory, ReportingField}
@@ -30,7 +32,6 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
   )
 
   def decorateInstancesWithParentReferences(signups: List[JpClassSignup]): Unit = {
-    println("*&$&*(%&(#$*%&)#$%&(#$*&%(#*$&(8")
     signups.foreach(s => {
       val instance = jpClassInstances.find(_.values.instanceId.get == s.values.instanceId.get)
       s.references.jpClassInstance.set(instance.get)
@@ -39,14 +40,19 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
   }
 
   val fieldList: List[(String, ReportingField[JpClassSignup])] = List(
-    ("SignupID", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupId, "Signup ID", isDefault = true)),
-    ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.instanceId, "Instance ID", isDefault = true)),
-    ("PersonId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.personId, "Person ID", isDefault = true)),
-    ("SignupType", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupType, "Signup Type", isDefault = true)),
     ("TypeId", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassSignup, JpClassInstance](
       JpClassInstance.fields.typeId,
       i => i.references.jpClassInstance.get,
       "Type ID",
+      isDefault = true
+    )),
+    ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.instanceId, "Instance ID", isDefault = true)),
+    ("SignupID", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupId, "Signup ID", isDefault = true)),
+    ("PersonId", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.personId, "Person ID", isDefault = true)),
+    ("TypeName", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassSignup, JpClassType](
+      JpClassType.fields.typeName,
+      i => i.references.jpClassInstance.get.references.jpClassType.get,
+      "Type Name",
       isDefault = true
     )),
     ("WeekAlias", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
@@ -55,29 +61,14 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
       "Week",
       isDefault = true
     )),
-    ("TypeName", ReportingField.getReportingFieldFromDatabaseFieldParentObject[JpClassSignup, JpClassType](
-      JpClassType.fields.typeName,
-      i => i.references.jpClassInstance.get.references.jpClassType.get,
-      "Type Name",
-      isDefault = true
-    ))
-    /*
-    ("InstanceId", ReportingField.getReportingFieldFromDatabaseField(ApClassInstance.fields.instanceId, "Instance ID", isDefault = true)),
-    ("FirstSessionDatetime", new ReportingField[ApClassInstance](
-      (i: ApClassInstance) =>
-        apClassSessions
-          .filter(_.values.instanceId.get == i.getID)
-          .map(_.values.sessionDateTime.get)
-          .min
-          .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+    ("FirstSessionDatetime", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
+      (session: JpClassSession) => session.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+      (signup: JpClassSignup) => signup.references.jpClassInstance.get.calculatedValues.firstSession,
       "First Session Datetime",
       isDefault = true
     )),
-    ("SessionCt", new ReportingField[ApClassInstance](
-      (i: ApClassInstance) => apClassSessions.count(s => s.values.instanceId.get == i.values.instanceId.get).toString,
-      "# Sessions",
-      isDefault = false
-    ))*/
+    ("SignupType", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupType, "Signup Type", isDefault = true)),
+    ("SignupDatetime", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupDatetime, "Signup Datetime", isDefault = true))
   )
 
   val filterList: List[(String, ReportingFilterFactory[JpClassSignup])] = List(
