@@ -18,15 +18,6 @@ class ApClassInstance extends StorableClass {
     val formatId = new IntFieldValue(self, ApClassInstance.fields.formatId)
     val locationString = new NullableStringFieldValue(self, ApClassInstance.fields.locationString)
   }
-
-  def getApClassSessions(pb: PersistenceBroker): List[ApClassSession] = {
-    val id = values.instanceId.get
-    pb.getObjectsByFilters(
-      ApClassSession,
-      List(ApClassSession.fields.instanceId.equalsConstant(id)),
-      5
-    )
-  }
 }
 
 object ApClassInstance extends StorableObject[ApClassInstance] {

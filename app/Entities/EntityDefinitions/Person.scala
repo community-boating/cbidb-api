@@ -36,6 +36,7 @@ class Person extends StorableClass {
 
   lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
 
+  // TODO: move to logic
   def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
     this.values.personId.get,
     ratingId,

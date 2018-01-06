@@ -33,6 +33,7 @@ object Rating extends StorableObject[Rating] {
     val RATING_ID_MERC_GREEN: Int = 261
   }
 
+  // TODO: move to logic
   def getAllHigherRatingsThanRating(ratings: List[Rating], targetRatingId: Int): List[Rating] = {
     val targetRating: Rating = ratings.filter(_.values.ratingId.get == targetRatingId).head
     targetRating.values.overriddenBy.get match {
