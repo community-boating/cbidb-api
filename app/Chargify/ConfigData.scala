@@ -5,7 +5,7 @@ import CbiUtil.PropertiesWrapper
 case class ConfigData(subdomain: String, apiKey: String)
 
 object ConfigData {
-  def getFromPropertiesWrapper(propsLocation: String) = {
+  def getFromPropertiesWrapper(propsLocation: String): ConfigData = {
     val pw = new PropertiesWrapper(propsLocation)
     ConfigData(pw.getProperty("subdomain"), pw.getProperty("apiKey"))
   }
