@@ -23,11 +23,11 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
 
-      var startDate: LocalDate = LocalDate.now.minusYears(7)
+  /*    var startDate: LocalDate = LocalDate.now.minusYears(7)
       while(startDate.toEpochDay < LocalDate.now.toEpochDay) {
         println(startDate.toString + "  -  " + rc.logic.dateLogic.getJpWeekAlias(startDate))
         startDate = startDate.plusDays(1)
-      }
+      }*/
 
       val apiRequest = new UsersRequest(pb, cb, userID)
       apiRequest.getFuture.map(s => {

@@ -28,19 +28,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
   val entityName: String
   val fields: FieldsObject
 
-  // True if the entity can be queried by public users
-  final def publicVisibility: EntityVisibility = EntitySecurity.publicSecurity.get(this) match {
-    case Some(x) => x
-    case None => EntityVisibility.ZERO_VISIBILITY
-  }
-  final val memberVisibility: EntityVisibility = EntityVisibility.ZERO_VISIBILITY
-  final val staffVisibility: EntityVisibility = EntityVisibility.FULL_VISIBILITY
-
-  final def getVisiblity(userType: UserType): EntityVisibility = userType match {
-    case PublicUserType => publicVisibility
-    case MemberUserType => memberVisibility
-    case StaffUserType | RootUserType => staffVisibility
-  }
+  final def getVisiblity(userType: UserType): EntityVisibility = userType.getEntityVisibility(self)
 
   def primaryKey: IntDatabaseField
 
@@ -140,12 +128,18 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
     type FieldDefinition = (String, DatabaseField[_])
 
-    val filterFunction: (FieldDefinition => Boolean) = rc.authenticatedUserType match {
-      case StaffUserType | RootUserType => (t: FieldDefinition) => true
-      case MemberUserType => (t: FieldDefinition) => false
-      case PublicUserType => EntitySecurity.publicSecurity(self).fieldList match {
-        case None => (t: FieldDefinition) => true
-        case Some(s) => (t: FieldDefinition) => s contains t._2
+    val filterFunction: (FieldDefinition => Boolean) = {
+      val visibility = rc.authenticatedUserType.getEntityVisibility(self)
+      if (!visibility.entityVisible) (t: FieldDefinition) => {
+        println("whole entity not visible for " + t._2.getPersistenceFieldName)
+        false
+      }
+      else visibility.fieldList match {
+        case None => (fd: FieldDefinition) => true
+        case Some(s) => (fd: FieldDefinition) => {
+          println("entity visible, does list " + s.map(_.getPersistenceFieldName) + " contain " + fd._2.getPersistenceFieldName + " ? " + (s.contains(fd._2)))
+          s.contains(fd._2)
+        }
       }
     }
 
