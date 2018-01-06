@@ -1,12 +1,13 @@
 package Services
 
 import CbiUtil.PropertiesWrapper
-import Services.Authentication.{MemberUserType, StaffUserType, UserType}
+import Services.Authentication.{ApexUserType, MemberUserType, StaffUserType, UserType}
 
 class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation) {
   private val definedAuthMechanisms: Set[(UserType, String)] = Set(
     (MemberUserType, "MemberAuthEnabled"),
-    (StaffUserType, "StaffAuthEnabled")
+    (StaffUserType, "StaffAuthEnabled"),
+    (ApexUserType, "ApexAuthEnabled")
   )
 
   val enabledAuthMechanisms:Set[UserType] =

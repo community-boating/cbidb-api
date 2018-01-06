@@ -2,7 +2,7 @@ package Services
 
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
-import Services.Authentication.{PublicUserType, RootUserType, UserType}
+import Services.Authentication.{ApexUserType, PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
@@ -17,6 +17,11 @@ class RequestCache private[RequestCache] (
   println("Spawning new RequestCache")
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
+
+  def getChargifyConfig: Option[Chargify.ConfigData] = authenticatedUserType match {
+    case ApexUserType => Some(Chargify.ConfigData.getFromPropertiesWrapper("conf/private/chargify.conf"))
+    case _ => None
+  }
   object cachedEntities {
     lazy val programTypes: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
     lazy val membershipTypes: List[MembershipType] = {
@@ -52,7 +57,10 @@ object RequestCache {
         case Some(x) => Some(x)
         case None => ut.getAuthenticatedUsernameInRequest(request, rootCB) match {
           case None => None
-          case Some(x: String) => Some(new RequestCache(x, ut))
+          case Some(x: String) => {
+            println("@@@ Request is authenticated as " + ut)
+            Some(new RequestCache(x, ut))
+          }
         }
       })
 
