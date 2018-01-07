@@ -22,7 +22,10 @@ class Customers @Inject() (ws: WSClient) (implicit exec: ExecutionContext) exten
     Customers.createCustomerValidator(request) match {
       case None => Future{ Ok("bad req") }
       case Some(params) => {
-        Future { Ok(params.toString) }
+        val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
+        Chargify.Request.createCustomer(rc, ws).map(s => {
+          Ok(s).as("application/json")
+        })
       }
     }
   }
