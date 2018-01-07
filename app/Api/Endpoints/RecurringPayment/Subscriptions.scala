@@ -1,4 +1,4 @@
-package Api.Endpoints.Chargify
+package Api.Endpoints.RecurringPayment
 
 import javax.inject.Inject
 

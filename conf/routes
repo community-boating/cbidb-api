@@ -17,8 +17,10 @@ POST    /report                             Api.Endpoints.ReportingAPI.RunReport
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
 
-###############   Chargify endpoints   #########################
-GET     /chargify/subscriptions             Api.Endpoints.Chargify.Subscriptions.get()
+###############   Recurring Payment endpoints   #########################
+GET     /recurringpayment/subscriptions             Api.Endpoints.RecurringPayment.Subscriptions.get()
+GET     /recurringpayment/customers                 Api.Endpoints.RecurringPayment.Customers.get()
+POST    /recurringpayment/customers                 Api.Endpoints.RecurringPayment.Customers.post()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

@@ -13,6 +13,9 @@ object Request {
   def getSubscriptions(rc: RequestCache, ws: WSClient) (implicit exec: ExecutionContext): Future[JsObject] =
     get(rc, "subscriptions", ws)
 
+  def getCustomers(rc: RequestCache, ws: WSClient) (implicit exec: ExecutionContext): Future[JsObject] =
+    get(rc, "customers", ws)
+
   private def getChargifyProps(rc: RequestCache) = rc.getChargifyConfig.get
 
   private def get(rc: RequestCache, endpoint: String, ws: WSClient) (implicit exec: ExecutionContext): Future[JsObject] = {
