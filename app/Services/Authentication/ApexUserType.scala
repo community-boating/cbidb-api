@@ -12,5 +12,5 @@ object ApexUserType extends UserType {
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 
-  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.FULL_VISIBILITY
 }

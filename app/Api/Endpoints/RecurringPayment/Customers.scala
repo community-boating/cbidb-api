@@ -3,6 +3,7 @@ package Api.Endpoints.RecurringPayment
 import javax.inject.Inject
 
 import CbiUtil.ValidateRequest
+import Entities.EntityDefinitions.Person
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -23,8 +24,10 @@ class Customers @Inject() (ws: WSClient) (implicit exec: ExecutionContext) exten
       case None => Future{ Ok("bad req") }
       case Some(params) => {
         val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
-        Chargify.Request.createCustomer(rc, ws).map(s => {
-          Ok(s).as("application/json")
+        val pb = rc.pb
+        val p = pb.getObjectById(Person, params("personId").toInt).get
+        Chargify.Request.createCustomer(p, rc, ws).map(s => {
+          Ok(s.toString).as("application/json")
         })
       }
     }
