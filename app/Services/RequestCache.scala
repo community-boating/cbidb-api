@@ -66,7 +66,10 @@ object RequestCache {
 
     ret match {
       case Some(x) => x
-      case None => new RequestCache("", PublicUserType)
+      case None => {
+        println("No auth mechanisms matched; this is a Public request")
+        new RequestCache("", PublicUserType)
+      }
     }
   }
 

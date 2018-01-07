@@ -2,6 +2,7 @@ package Services.Authentication
 
 import Entities.EntityDefinitions.User
 import Services._
+import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{AnyContent, Request}
 
 object StaffUserType extends UserType {
@@ -43,4 +44,6 @@ object StaffUserType extends UserType {
     if (users.length == 1) Some(1, users.head.values.pwHash.get)
     else None
   }
+
+  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.FULL_VISIBILITY
 }
