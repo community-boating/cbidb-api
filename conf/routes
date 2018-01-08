@@ -20,6 +20,7 @@ POST    /report                             Api.Endpoints.ReportingAPI.RunReport
 ###############   Recurring Payment endpoints   #########################
 GET     /recurringpayment/subscriptions             Api.Endpoints.RecurringPayment.Subscriptions.get()
 GET     /recurringpayment/customers                 Api.Endpoints.RecurringPayment.Customers.get()
+GET     /recurringpayment/payment_profiles          Api.Endpoints.RecurringPayment.PaymentProfiles.get()
 POST    /recurringpayment/customers                 Api.Endpoints.RecurringPayment.Customers.post()
 
 # Map static resources from the /public folder to the /assets URL path

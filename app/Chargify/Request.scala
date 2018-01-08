@@ -17,6 +17,9 @@ object Request {
   def getCustomers(rc: RequestCache, ws: WSClient) (implicit exec: ExecutionContext): Future[JsObject] =
     get(rc, "customers", ws)
 
+  def getPaymentProfiles(rc: RequestCache, ws: WSClient) (implicit exec: ExecutionContext): Future[JsObject] =
+    get(rc, "payment_profiles", ws)
+
   /**
     *
     * @param p    Person to create in chargify
