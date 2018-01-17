@@ -5,6 +5,7 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.{Initializable, Profiler}
+import Logic.PreparedQueries.PreparedQuery
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -18,12 +19,40 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
   private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
 
+  def executePreparedQueryImplementation[T](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
+    println(pq.getQuery)
+    val profiler = new Profiler
+    val c: Connection = mainPool.getConnection
+    profiler.lap("got connection")
+    try {
+      val st: Statement = c.createStatement()
+      val rs: ResultSet = st.executeQuery(pq.getQuery)
+      rs.setFetchSize(fetchSize)
+
+      val resultObjects: ListBuffer[T] = ListBuffer()
+      var rowCounter = 0
+      profiler.lap("starting rows")
+      while (rs.next) {
+        rowCounter += 1
+        resultObjects += pq.mapResultSetRowToCaseObject(rs)
+      }
+      profiler.lap("finsihed rows")
+      val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
+      if (fetchCount > 2) println(" ***********  QUERY EXECUTED " + fetchCount + " FETCHES!!  Rowcount was " + rowCounter + ":  " + pq.getQuery)
+      resultObjects.toList
+    } finally {
+      profiler.lap("about to close")
+      c.close()
+      profiler.lap("closed")
+    }
+  }
+
   def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
-    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 50)
+    val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 50)
     rows.map(r => obj.construct(r, rc, isClean = true))
   }
 
@@ -33,7 +62,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
     sb.append(" FROM " + obj.entityName)
     sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-    val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, 6)
+    val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 6)
     if (rows.length == 1) Some(obj.construct(rows.head, rc, isClean = true))
     else None
   }
@@ -51,7 +80,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
       sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + obj.entityName)
       sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
       rows.map(r => obj.construct(r, rc, isClean = true))
     } else {
       // Too many IDs; make a filter table
@@ -72,7 +101,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
       if (filters.nonEmpty) {
         sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
       }
-      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
       val p = new Profiler
       val ret = rows.map(r => obj.construct(r, rc, isClean = true))
       p.lap("finished construction")
@@ -121,7 +150,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
       sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
       sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
       sb.append(" WHERE " + ms + "." +  obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
-      val rows: List[ProtoStorable] = executeSQLForSelect(sb.toString(), obj.fieldList, fetchSize)
+      val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
 
       val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
       c.createStatement().executeUpdate(dropTableSQL)
@@ -162,7 +191,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
     }
   }
 
-  private def executeSQLForSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
+  private def getProtoStorablesFromSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
     println(sql)
     val profiler = new Profiler
     val c: Connection = mainPool.getConnection

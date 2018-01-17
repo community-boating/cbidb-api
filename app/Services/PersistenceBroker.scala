@@ -1,8 +1,10 @@
 package Services
 
+import Logic.PreparedQueries.PreparedQuery
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Storable._
 
+// TODO: decide on one place for all the fetchSize defaults and delete the rest
 abstract class PersistenceBroker private[Services] (rc: RequestCache) {
   // All public requests need to go through user type-based security
   final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
@@ -26,12 +28,19 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache) {
     else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
   }
 
+  final def executePreparedQuery[T](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
+    if (pq.allowedUserTypes.contains(rc.authenticatedUserType)) executePreparedQueryImplementation(pq, fetchSize)
+    else throw new UnauthorizedAccessException("executePreparedQuery denied to userType " + rc.authenticatedUserType)
+  }
+
   // Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
   protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T]
   protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T]
   protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T]
   protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T]
   protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
+  protected def executePreparedQueryImplementation[T](pq: PreparedQuery[T], fetchSize: Int = 50): List[T]
+
 
   // TODO: implement some IDs
   private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.authenticatedUserType).entityVisible

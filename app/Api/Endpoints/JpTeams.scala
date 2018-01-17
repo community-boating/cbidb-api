@@ -6,6 +6,7 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
+import Logic.PreparedQueries.GetJpTeams
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
@@ -19,6 +20,7 @@ class JpTeams @Inject() (implicit exec: ExecutionContext) extends Controller {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
+      println(pb.executePreparedQuery(new GetJpTeams))
       val apiRequest = new JpTeamsRequest(pb, cb)
       apiRequest.getFuture.map(s => {
         Ok(s).as("application/json")
