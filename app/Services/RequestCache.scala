@@ -18,10 +18,6 @@ class RequestCache private[RequestCache] (
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
 
-  def getChargifyConfig: Option[Chargify.ConfigData] = authenticatedUserType match {
-    case ApexUserType => Some(Chargify.ConfigData.getFromPropertiesWrapper("conf/private/chargify.conf"))
-    case _ => None
-  }
   object cachedEntities {
     lazy val programTypes: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
     lazy val membershipTypes: List[MembershipType] = {
