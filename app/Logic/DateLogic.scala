@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime, Month}
 
 import CbiUtil.DateUtil
-import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp}
+import Entities.EntityDefinitions.MembershipType
 import Services.{RequestCache, ServerStateContainer}
 
 class DateLogic(rc: RequestCache) {

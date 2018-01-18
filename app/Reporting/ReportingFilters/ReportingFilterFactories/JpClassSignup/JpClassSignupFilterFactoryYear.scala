@@ -1,6 +1,6 @@
 package Reporting.ReportingFilters.ReportingFilterFactories.JpClassSignup
 
-import Entities.EntityDefinitions.{JpClassInstance, JpClassSession, JpClassSignup}
+import Entities.EntityDefinitions.{JpClassSession, JpClassSignup}
 import Logic.DateLogic
 import Reporting.ReportingFilters._
 import Services.PersistenceBroker

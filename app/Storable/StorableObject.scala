@@ -2,7 +2,6 @@ package Storable
 
 import java.time.{LocalDate, LocalDateTime}
 
-import Entities._
 import Services.Authentication._
 import Services.{PersistenceBroker, RequestCache}
 import Storable.Fields.FieldValue._

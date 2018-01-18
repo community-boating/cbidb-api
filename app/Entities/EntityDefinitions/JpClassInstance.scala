@@ -1,7 +1,6 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.{DefinedInitializable, Initializable, InitializableFromCollectionElement, InitializableFromCollectionSubset}
-import Services.RequestCache
+import CbiUtil.{Initializable, InitializableFromCollectionSubset}
 import Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import Storable._

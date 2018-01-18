@@ -9,6 +9,7 @@ object PermissionsAuthority {
   val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
+  val apexToken = new Initializable[String]
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
   val SEC_COOKIE_NAME = "CBIDB-SEC"

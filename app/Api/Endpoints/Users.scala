@@ -1,12 +1,11 @@
 package Api.Endpoints
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
-import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.Filter
 import play.api.libs.json._

@@ -6,8 +6,6 @@ import javax.inject.Inject
 import Api.ApiRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
-import Logic.PreparedQueries.GetJpTeams
-import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -16,19 +14,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class JpTeams @Inject() (implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action.async {request =>
-    try {
+   // try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
-      println(pb.executePreparedQuery(new GetJpTeams))
+   //   println(pb.executePreparedQuery(new GetJpTeams))
       val apiRequest = new JpTeamsRequest(pb, cb)
       apiRequest.getFuture.map(s => {
         Ok(s).as("application/json")
       })
-    } catch {
+   /* } catch {
       case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
       case _: Throwable => Future{ Ok("Internal Error") }
-    }
+    }*/
   }
 
   class JpTeamsRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {

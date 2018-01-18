@@ -1,6 +1,6 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.{ InitializableFromCollectionElement}
+import CbiUtil.InitializableFromCollectionElement
 import Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue}
 import Storable.Fields.{DateDatabaseField, IntDatabaseField}
 import Storable._

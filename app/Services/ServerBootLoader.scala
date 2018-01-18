@@ -40,11 +40,12 @@ class ServerBootLoader @Inject()(
       PermissionsAuthority.playMode.set(playMode)
       println("Running in mode: " + playMode)
 
-
-
       // Initialize PermissionsAuthority with activated AuthenticationMechanisms
       PermissionsAuthority.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
       println("Set enabled auth mechanisms: " + serverProps.enabledAuthMechanisms)
+
+      // Init PA with APEX access token
+      PermissionsAuthority.apexToken.set(serverProps.getProperty("ApexToken"))
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)

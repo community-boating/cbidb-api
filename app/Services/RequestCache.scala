@@ -2,7 +2,7 @@ package Services
 
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
-import Services.Authentication.{ApexUserType, PublicUserType, RootUserType, UserType}
+import Services.Authentication.{PublicUserType, RootUserType, UserType}
 import play.api.mvc.{AnyContent, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens

@@ -1,7 +1,6 @@
 package Entities.EntityDefinitions
 
 import CbiUtil.Initializable
-import Services.PersistenceBroker
 import Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
 import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._

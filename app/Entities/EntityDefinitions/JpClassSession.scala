@@ -1,6 +1,6 @@
 package Entities.EntityDefinitions
 
-import CbiUtil.{DateUtil, DefinedInitializable, Initializable}
+import CbiUtil.{DefinedInitializable, Initializable}
 import Services.RequestCache
 import Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
 import Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
