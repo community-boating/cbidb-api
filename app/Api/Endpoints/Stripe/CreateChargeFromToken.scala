@@ -2,11 +2,8 @@ package Api.Endpoints.Stripe
 
 import javax.inject.Inject
 
-import Api.ApiRequest
-import CbiUtil.{GetPostParams, PropertiesWrapper}
-import Services.PermissionsAuthority.UnauthorizedAccessException
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json.{JsObject, JsValue}
+import CbiUtil.GetPostParams
+import Services.PermissionsAuthority
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Controller}
 
