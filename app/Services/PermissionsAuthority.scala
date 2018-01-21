@@ -9,7 +9,10 @@ object PermissionsAuthority {
   val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
+
+  // TODO: make these private, expose getters to apex/root auth only (or whatever)
   val apexToken = new Initializable[String]
+  val stripeAPIKey = new Initializable[String]
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
   val SEC_COOKIE_NAME = "CBIDB-SEC"

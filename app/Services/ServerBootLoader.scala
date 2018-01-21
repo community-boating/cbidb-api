@@ -47,6 +47,9 @@ class ServerBootLoader @Inject()(
       // Init PA with APEX access token
       PermissionsAuthority.apexToken.set(serverProps.getProperty("ApexToken"))
 
+      PermissionsAuthority.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
+
+
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)
     }
