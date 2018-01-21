@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PersistenceBroker, RequestCache}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{AnyContent, Request}
 
@@ -11,6 +11,12 @@ object ApexUserType extends UserType {
     if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some("APEX")
     else None
   }
+
+  def getAuthenticatedUsernameFromSuperiorAuth(
+    request: Request[AnyContent],
+    rc: RequestCache,
+    desiredUserName: String
+  ): Option[String] = None
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

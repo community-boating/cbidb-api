@@ -6,7 +6,15 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{AnyContent, Request}
 
 object PublicUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = None
+  val publicUserName = "PUBLIC"
+  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = Some(publicUserName)
+
+  // Anyone can downgrade from anything to public
+  def getAuthenticatedUsernameFromSuperiorAuth(
+    request: Request[AnyContent],
+    rc: RequestCache,
+    desiredUserName: String
+  ): Option[String] = Some(publicUserName)
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

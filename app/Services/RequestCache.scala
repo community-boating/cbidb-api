@@ -67,10 +67,22 @@ object RequestCache {
       case Some(x) => x
       case None => {
         println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
-        new RequestCache("", PublicUserType)
+        new RequestCache(PublicUserType.publicUserName, PublicUserType)
       }
     }
   }
 
-   lazy private[Services] val getRootRC: RequestCache = new RequestCache("", RootUserType)
+  def constructFromSuperiorAuth(
+    request: Request[AnyContent],
+    rc: RequestCache,
+    desiredUserType: UserType,
+    desiredUserName: String
+  ): Option[RequestCache] = {
+    desiredUserType.getAuthenticatedUsernameFromSuperiorAuth(request, rc, desiredUserName) match {
+      case Some(s: String) => Some(new RequestCache(s, desiredUserType))
+      case None => None
+    }
+  }
+
+  lazy private[Services] val getRootRC: RequestCache = new RequestCache("", RootUserType)
 }

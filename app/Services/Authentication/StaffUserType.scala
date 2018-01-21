@@ -7,7 +7,6 @@ import play.api.mvc.{AnyContent, Request}
 
 object StaffUserType extends UserType {
   def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = {
-    println(request.cookies)
     val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None
     else if (secCookies.size > 1) None
@@ -34,6 +33,12 @@ object StaffUserType extends UserType {
       }
     }
   }
+
+  def getAuthenticatedUsernameFromSuperiorAuth(
+    request: Request[AnyContent],
+    rc: RequestCache,
+    desiredUserName: String
+  ): Option[String] = None
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
     val users = rootPB.getObjectsByFilters(

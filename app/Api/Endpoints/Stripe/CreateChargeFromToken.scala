@@ -2,7 +2,9 @@ package Api.Endpoints.Stripe
 
 import javax.inject.Inject
 
+import Api.AuthenticatedRequest
 import CbiUtil.GetPostParams
+import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -10,9 +12,9 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends Controller {
+class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest(ApexUserType) {
   def post(): Action[AnyContent] = Action.async { request => {
-    val rc = PermissionsAuthority.getRequestCache(request)
+    val rc = getRC(request)
     val params = GetPostParams(request).get
     val token: String = params("token")
 

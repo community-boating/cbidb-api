@@ -135,10 +135,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
       }
       else visibility.fieldList match {
         case None => (fd: FieldDefinition) => true
-        case Some(s) => (fd: FieldDefinition) => {
-          println("entity visible, does list " + s.map(_.getPersistenceFieldName) + " contain " + fd._2.getPersistenceFieldName + " ? " + (s.contains(fd._2)))
-          s.contains(fd._2)
-        }
+        case Some(s) => (fd: FieldDefinition) => s.contains(fd._2)
       }
     }
 

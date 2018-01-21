@@ -3,19 +3,20 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequest
+import Api.{ApiRequest, AuthenticatedRequest}
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
+import Services.Authentication.PublicUserType
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class JpTeams @Inject() (implicit exec: ExecutionContext) extends Controller {
+class JpTeams @Inject() (implicit exec: ExecutionContext) extends AuthenticatedRequest(PublicUserType) {
   def get(): Action[AnyContent] = Action.async {request =>
    // try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
+      val rc = getRC(request)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
    //   println(pb.executePreparedQuery(new GetJpTeams))
