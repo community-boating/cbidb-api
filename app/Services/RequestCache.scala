@@ -1,5 +1,8 @@
 package Services
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
@@ -14,23 +17,19 @@ class RequestCache private[RequestCache] (
   private val self = this
   val pb: PersistenceBroker = new OracleBroker(this)
   val cb: CacheBroker = new RedisBroker
-  println("Spawning new RequestCache")
+
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
   // TODO: dont do this every request.
-
   object cachedEntities {
     lazy val programTypes: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
     lazy val membershipTypes: List[MembershipType] = {
-      println("$$$$$$$$$$  getting all mem types")
       pb.getAllObjectsOfClass(MembershipType).map(m => {
         m.references.program.findOneInCollection(programTypes)
         m
       })
     }
     lazy val membershipTypeExps: List[MembershipTypeExp] = {
-      println("$$$$$$$$$$   getting all exps")
       pb.getAllObjectsOfClass(MembershipTypeExp).map(me => {
-        println("er6734576ergyydfgh")
         me.references.membershipType.findOneInCollection(membershipTypes)
         me
       })
@@ -45,16 +44,20 @@ class RequestCache private[RequestCache] (
 
 object RequestCache {
   // TODO: better way to handle requests authenticated against multiple mechanisms?
-  def construct(request: Request[AnyContent], rootCB: CacheBroker): RequestCache = {
+  def construct(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): RequestCache = {
+    println("\n\n====================================================")
+    println("====================================================")
+    println("====================================================")
+    println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
     // For all the enabled user types (besides public), see if the request is authenticated against any of them.
     val ret: Option[RequestCache] = PermissionsAuthority.allowableUserTypes.get
       .filter(_ != PublicUserType)
       .foldLeft(None: Option[RequestCache])((retInner: Option[RequestCache], ut: UserType) => retInner match {
         case Some(x) => Some(x)
-        case None => ut.getAuthenticatedUsernameInRequest(request, rootCB) match {
+        case None => ut.getAuthenticatedUsernameInRequest(request, rootCB, apexToken) match {
           case None => None
           case Some(x: String) => {
-            println("@@@ Request is authenticated as " + ut)
+            println("AUTHENTICATION:  Request is authenticated as " + ut)
             Some(new RequestCache(x, ut))
           }
         }
@@ -63,7 +66,7 @@ object RequestCache {
     ret match {
       case Some(x) => x
       case None => {
-        println("No auth mechanisms matched; this is a Public request")
+        println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
         new RequestCache("", PublicUserType)
       }
     }

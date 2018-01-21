@@ -6,7 +6,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{AnyContent, Request}
 
 object StaffUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker): Option[String] = {
+  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = {
     println(request.cookies)
     val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None

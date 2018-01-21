@@ -2,6 +2,7 @@ package Services
 
 import CbiUtil.Initializable
 import Services.Authentication.UserType
+import Services.Secrets.SecretsObject
 import play.api.Mode
 import play.api.mvc.{AnyContent, Request}
 
@@ -10,9 +11,10 @@ object PermissionsAuthority {
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
 
-  // TODO: make these private, expose getters to apex/root auth only (or whatever)
-  val apexToken = new Initializable[String]
-  val stripeAPIKey = new Initializable[String]
+  private val apexToken = new Initializable[String]
+  def setApexToken(s: String) = apexToken.set(s)
+  val secrets = new SecretsObject
+
   def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
   val SEC_COOKIE_NAME = "CBIDB-SEC"
@@ -27,7 +29,7 @@ object PermissionsAuthority {
     allowedIPs.contains(request.remoteAddress)
   }
 
-  def getRequestCache(request: Request[AnyContent]): RequestCache = RequestCache.construct(request, rootCB)
+  def getRequestCache(request: Request[AnyContent]): RequestCache = RequestCache.construct(request, rootCB, apexToken.get)
 
   def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
     if (

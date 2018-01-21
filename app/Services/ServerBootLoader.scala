@@ -45,9 +45,9 @@ class ServerBootLoader @Inject()(
       println("Set enabled auth mechanisms: " + serverProps.enabledAuthMechanisms)
 
       // Init PA with APEX access token
-      PermissionsAuthority.apexToken.set(serverProps.getProperty("ApexToken"))
+      PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
 
-      PermissionsAuthority.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
+      PermissionsAuthority.secrets.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
 
 
       // Init PA with persistence system
