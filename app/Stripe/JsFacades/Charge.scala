@@ -1,6 +1,6 @@
 package Stripe.JsFacades
 
-import play.api.libs.json.{JsString, JsValue}
+import play.api.libs.json.{JsString, JsValue, Json}
 
 case class Charge(
   id: String,
@@ -8,10 +8,8 @@ case class Charge(
 )
 
 object Charge {
-  def apply(v: JsValue): Charge = Charge(
-    v("id").as[JsString].value,
-    v("amount").toString().toInt
-  )
+  implicit val chargeJSONFormat = Json.format[Charge]
+  def apply(v: JsValue): Charge = v.as[Charge]
 }
 
 /*
