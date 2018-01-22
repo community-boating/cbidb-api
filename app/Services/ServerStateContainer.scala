@@ -1,9 +1,18 @@
 package Services
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+import org.joda.time.format.DateTimeFormat
+
 
 case class ServerStateContainer private[Services](
   serverTimeOffsetSeconds: Long
-)
+) {
+  def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)
+  val dateTimeFormatDefault: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+  def nowDateTImeString: String = nowDateTime.format(dateTimeFormatDefault)
+}
 
 object ServerStateContainer {
   def get: ServerStateContainer = ServerBootLoader.ssc

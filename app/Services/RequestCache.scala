@@ -79,8 +79,14 @@ object RequestCache {
     desiredUserName: String
   ): Option[RequestCache] = {
     desiredUserType.getAuthenticatedUsernameFromSuperiorAuth(request, rc, desiredUserName) match {
-      case Some(s: String) => Some(new RequestCache(s, desiredUserType))
-      case None => None
+      case Some(s: String) => {
+        println("@@@ Successfully downgraded to " + desiredUserType)
+        Some(new RequestCache(s, desiredUserType))
+      }
+      case None => {
+        println("@@@ Unable to downgrade auth to " + desiredUserType)
+        None
+      }
     }
   }
 
