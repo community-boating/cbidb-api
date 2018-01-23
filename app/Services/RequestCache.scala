@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
@@ -44,7 +44,7 @@ class RequestCache private[RequestCache] (
 
 object RequestCache {
   // TODO: better way to handle requests authenticated against multiple mechanisms?
-  def construct(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): RequestCache = {
+  def construct(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): RequestCache = {
     println("\n\n====================================================")
     println("====================================================")
     println("====================================================")
@@ -54,7 +54,7 @@ object RequestCache {
       .filter(_ != PublicUserType)
       .foldLeft(None: Option[RequestCache])((retInner: Option[RequestCache], ut: UserType) => retInner match {
         case Some(x) => Some(x)
-        case None => ut.getAuthenticatedUsernameInRequest(request, rootCB, apexToken) match {
+        case None => ut.getAuthenticatedUsernameInRequest(requestHeaders, requestCookies, rootCB, apexToken) match {
           case None => None
           case Some(x: String) => {
             println("AUTHENTICATION:  Request is authenticated as " + ut)
@@ -73,12 +73,11 @@ object RequestCache {
   }
 
   def constructFromSuperiorAuth(
-    request: Request[AnyContent],
     rc: RequestCache,
     desiredUserType: UserType,
     desiredUserName: String
   ): Option[RequestCache] = {
-    desiredUserType.getAuthenticatedUsernameFromSuperiorAuth(request, rc, desiredUserName) match {
+    desiredUserType.getAuthenticatedUsernameFromSuperiorAuth(rc, desiredUserName) match {
       case Some(s: String) => {
         println("@@@ Successfully downgraded to " + desiredUserType)
         Some(new RequestCache(s, desiredUserType))

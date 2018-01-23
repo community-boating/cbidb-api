@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Controller {
   def get(startDate: Option[String]): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val apiRequest = new JpClassInstancesRequest(pb, cb, startDate)

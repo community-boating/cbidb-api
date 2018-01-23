@@ -16,7 +16,7 @@ import scala.util.Try
 class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest(ApexUserType) {
   def post(): Action[AnyContent] = Action.async { request => {
     // TODO: wrap in try, e.g. what if orderID doesnt exist
-    val rc = getRC(request)
+    val rc = getRC(request.headers, request.cookies)
     val pb = rc.pb
     val params = GetPostParams(request).get
     val token: String = params("token")

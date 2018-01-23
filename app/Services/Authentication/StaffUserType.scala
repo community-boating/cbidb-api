@@ -3,11 +3,11 @@ package Services.Authentication
 import Entities.EntityDefinitions.User
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 object StaffUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
+  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    val secCookies = requestCookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None
     else if (secCookies.size > 1) None
     else {
@@ -35,7 +35,6 @@ object StaffUserType extends UserType {
   }
 
   def getAuthenticatedUsernameFromSuperiorAuth(
-    request: Request[AnyContent],
     rc: RequestCache,
     desiredUserName: String
   ): Option[String] = None

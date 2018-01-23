@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class JpTeams @Inject() (implicit exec: ExecutionContext) extends AuthenticatedRequest(PublicUserType) {
   def get(): Action[AnyContent] = Action.async {request =>
    // try {
-      val rc = getRC(request)
+      val rc = getRC(request.headers, request.cookies)
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
    //   println(pb.executePreparedQuery(new GetJpTeams))

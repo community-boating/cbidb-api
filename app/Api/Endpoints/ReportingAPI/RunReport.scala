@@ -26,7 +26,7 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
   val errorResult = JsObject(Map("data" -> JsString("error")))
 
   def post(): Action[AnyContent] = Action.async {request =>
-    val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
+    val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
     println(rc.authenticatedUserType)
     if (rc.authenticatedUserType != StaffUserType) {
       Future{ Ok("Access Denied") }

@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IsLoggedInAsStaff @Inject() (implicit exec: ExecutionContext) extends Controller {
   def get(): Action[AnyContent] = Action.async {request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(request)
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
       if (rc.authenticatedUserType == StaffUserType) Future { Ok(rc.authenticatedUserName) }
       else Future{ Ok("false") }
     } catch {

@@ -2,18 +2,17 @@ package Services.Authentication
 
 import Services.{CacheBroker, PersistenceBroker, RequestCache}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 object ApexUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val headers = request.headers.toMap
+  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    val headers = requestHeaders.toMap
     val headerKey = "apex-token"
     if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some("APEX")
     else None
   }
 
   def getAuthenticatedUsernameFromSuperiorAuth(
-    request: Request[AnyContent],
     rc: RequestCache,
     desiredUserName: String
   ): Option[String] = None

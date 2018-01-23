@@ -3,15 +3,15 @@ package Services.Authentication
 import Entities.EntityDefinitions._
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 object PublicUserType extends UserType {
   val publicUserName = "PUBLIC"
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = Some(publicUserName)
+  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] =
+    Some(publicUserName)
 
   // Anyone can downgrade from anything to public
   def getAuthenticatedUsernameFromSuperiorAuth(
-    request: Request[AnyContent],
     rc: RequestCache,
     desiredUserName: String
   ): Option[String] = Some(publicUserName)

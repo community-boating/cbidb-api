@@ -2,13 +2,12 @@ package Services.Authentication
 
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 object MemberUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: Request[AnyContent], rootCB: CacheBroker, apexToken: String): Option[String] = None
+  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
-    request: Request[AnyContent],
     rc: RequestCache,
     desiredUserName: String
   ): Option[String] = None
