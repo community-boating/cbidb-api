@@ -7,9 +7,9 @@ import Api.{ApiRequest, AuthenticatedRequest}
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
 import Services.Authentication.PublicUserType
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
 

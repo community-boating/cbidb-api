@@ -1,6 +1,6 @@
 package Stripe.JsFacades
 
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
   id: String,

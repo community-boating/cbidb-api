@@ -3,8 +3,6 @@ package Services
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import org.joda.time.format.DateTimeFormat
-
 
 case class ServerStateContainer private[Services](
   serverTimeOffsetSeconds: Long

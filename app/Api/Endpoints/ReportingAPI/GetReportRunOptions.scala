@@ -4,20 +4,23 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
+import CbiUtil.ParsedRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services._
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, Controller, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
-    def get(): Action[AnyContent] = Action.async {request =>
+    def get(): Action[AnyContent] = Action.async {r => doGet(ParsedRequest(r))}
+
+    def doGet(req: ParsedRequest): Future[Result] = {
       try {
-        val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
+        val rc: RequestCache = PermissionsAuthority.getRequestCache(req.headers, req.cookies)
         val pb: PersistenceBroker = rc.pb
         val cb: CacheBroker = rc.cb
         val apiRequest = new ReportRunOptionsRequest(pb, cb)

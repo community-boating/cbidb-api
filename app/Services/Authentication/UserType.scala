@@ -2,7 +2,7 @@ package Services.Authentication
 
 import Services.{CacheBroker, PersistenceBroker, RequestCache}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Cookies, Headers, Request}
+import play.api.mvc.{Cookies, Headers}
 
 abstract class UserType {
   // Given a request (and an unrestricted CacheBroker), determine if the request is authenticated against this mechanism.

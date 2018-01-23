@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.ApiRequest
-import CbiUtil.GetPostParams
+import CbiUtil.ParsedRequest
 import Reporting.Report
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
@@ -25,8 +25,10 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
 
   val errorResult = JsObject(Map("data" -> JsString("error")))
 
-  def post(): Action[AnyContent] = Action.async {request =>
-    val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
+  def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
+
+  def doPost(req: ParsedRequest): Future[Result] = {
+    val rc: RequestCache = PermissionsAuthority.getRequestCache(req.headers, req.cookies)
     println(rc.authenticatedUserType)
     if (rc.authenticatedUserType != StaffUserType) {
       Future{ Ok("Access Denied") }
@@ -35,36 +37,32 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
         val pb: PersistenceBroker = rc.pb
         val cb: CacheBroker = rc.cb
         // TODO: assert expected post params
-        GetPostParams(request) match {
-          case None => Future {
-            new Status(400)("no body")
-          }
-          case Some(params) => {
-            val baseEntityString = params.get("baseEntityString").get
-            val filterSpec = params.get("filterSpec").get
-            val fieldSpec = params.get("fieldSpec").get
-            val outputType = params.get("outputType").get
-            println("Running a report with the following parameters: ")
-            println("Base entity: " + baseEntityString)
-            println("filter spec: " + filterSpec)
-            println("field spec: " + fieldSpec)
-            println("output type: " + outputType)
-            lazy val apiRequest = new ReportRequest(rc, pb, cb, baseEntityString, filterSpec, fieldSpec, outputType)
-            outputType match {
-              case OUTPUT_TYPE.JSCON => apiRequest.getFuture.map(s => Ok(s).as("application/json"))
-              case OUTPUT_TYPE.TSV => Future {
-                val reportResult: String = apiRequest.report.formatTSV
-                val source: Source[ByteString, _] = Source.single(ByteString(reportResult))
-                Result(
-                  header = ResponseHeader(200, Map(
-                    CONTENT_DISPOSITION -> "attachment; filename=report.tsv"
-                  )),
-                  body = HttpEntity.Streamed(source, Some(reportResult.length), Some("application/text"))
-                )
-              }
-              case _ => Future {
-                Ok(errorResult).as("application/json")
-              }
+        if (req.postParams.isEmpty) Future { new Status(400)("no body")}
+        else {
+          val baseEntityString = req.postParams("baseEntityString")
+          val filterSpec = req.postParams("filterSpec")
+          val fieldSpec = req.postParams("fieldSpec")
+          val outputType = req.postParams("outputType")
+          println("Running a report with the following parameters: ")
+          println("Base entity: " + baseEntityString)
+          println("filter spec: " + filterSpec)
+          println("field spec: " + fieldSpec)
+          println("output type: " + outputType)
+          lazy val apiRequest = new ReportRequest(rc, pb, cb, baseEntityString, filterSpec, fieldSpec, outputType)
+          outputType match {
+            case OUTPUT_TYPE.JSCON => apiRequest.getFuture.map(s => Ok(s).as("application/json"))
+            case OUTPUT_TYPE.TSV => Future {
+              val reportResult: String = apiRequest.report.formatTSV
+              val source: Source[ByteString, _] = Source.single(ByteString(reportResult))
+              Result(
+                header = ResponseHeader(200, Map(
+                  CONTENT_DISPOSITION -> "attachment; filename=report.tsv"
+                )),
+                body = HttpEntity.Streamed(source, Some(reportResult.length), Some("application/text"))
+              )
+            }
+            case _ => Future {
+              Ok(errorResult).as("application/json")
             }
           }
         }

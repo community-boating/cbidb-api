@@ -3,7 +3,7 @@ package Services.Authentication
 import Entities.EntityDefinitions._
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{AnyContent, Cookies, Headers, Request}
+import play.api.mvc.{Cookies, Headers}
 
 object PublicUserType extends UserType {
   val publicUserName = "PUBLIC"

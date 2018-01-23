@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
 import Services.Authentication.{PublicUserType, RootUserType, UserType}
-import play.api.mvc.{AnyContent, Cookies, Headers, Request}
+import play.api.mvc.{Cookies, Headers}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
