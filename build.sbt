@@ -20,6 +20,9 @@ libraryDependencies += filters
 libraryDependencies += guice
 //libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
 
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+
 libraryDependencies ++= Seq(
 	"net.debasishg" %% "redisclient" % "3.4"
 )
