@@ -21,7 +21,7 @@ class GetCartDetailsForOrderId(orderId: Int) extends PreparedQuery[GetCartDetail
   )
 }
 
-case class GetCartDetailsForOrderIdResult(
+case class GetCartDetailsForOrderIdResult (
   orderId: Int,
   priceInCents: Int
-)
+) extends PreparedQueryCaseResult

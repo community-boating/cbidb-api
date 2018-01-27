@@ -3,7 +3,7 @@ package Api.Endpoints.ReportingAPI
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequest
+import Api.CacheableRequest
 import CbiUtil.ParsedRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
@@ -16,6 +16,7 @@ import play.api.mvc.{Action, AnyContent, Controller, Result}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Controller {
+  /*
     def get(): Action[AnyContent] = Action.async {r => doGet(ParsedRequest(r))}
 
     def doGet(req: ParsedRequest): Future[Result] = {
@@ -33,7 +34,7 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
       }
     }
 
-  class ReportRunOptionsRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
+  class ReportRunOptionsRequest(pb: PersistenceBroker, cb: CacheBroker) extends CacheableRequest(cb) {
     def getCacheBrokerKey: CacheKey = "reportRunOptions"
 
     def getExpirationTime: LocalDateTime = {
@@ -111,4 +112,5 @@ class GetReportRunOptions @Inject() (implicit exec: ExecutionContext) extends Co
       ))
     }
   }
+  */
 }

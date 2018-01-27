@@ -1,0 +1,5 @@
+package Api
+
+trait ParamsObject {
+
+}

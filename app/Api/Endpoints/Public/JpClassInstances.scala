@@ -1,21 +1,13 @@
-package Api.Endpoints
+package Api.Endpoints.Public
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
-import Api.ApiRequest
-import CbiUtil.{CascadeSort, JsonUtil, Profiler}
-import Entities.EntityDefinitions._
-import Services.PermissionsAuthority.UnauthorizedAccessException
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.Controller
 
-import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Controller {
+  /*
   def get(startDate: Option[String]): Action[AnyContent] = Action.async {request =>
     try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
@@ -31,7 +23,7 @@ class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
     }
   }
 
-  class JpClassInstancesRequest(pb: PersistenceBroker, cb: CacheBroker, startDateRaw: Option[String]) extends ApiRequest(cb) {
+  class JpClassInstancesRequest(pb: PersistenceBroker, cb: CacheBroker, startDateRaw: Option[String]) extends CacheableRequest(cb) {
     def getCacheBrokerKey: CacheKey =
       "jp-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
@@ -184,4 +176,5 @@ class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends Contr
       data
     }
   }
+  */
 }

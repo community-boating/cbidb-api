@@ -18,6 +18,8 @@ object PublicUserType extends UserType {
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 
+  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+  /*
   def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
     case ApClassFormat => EntityVisibility(entityVisible=true, None, Some(Set(
       ApClassFormat.fields.typeId
@@ -69,4 +71,5 @@ object PublicUserType extends UserType {
     )))
     case _ => EntityVisibility.ZERO_VISIBILITY
   }
+  */
 }

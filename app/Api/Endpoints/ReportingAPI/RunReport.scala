@@ -3,7 +3,7 @@ package Api.Endpoints.ReportingAPI
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequest
+import Api.CacheableRequest
 import CbiUtil.ParsedRequest
 import Reporting.Report
 import Services.Authentication.StaffUserType
@@ -18,6 +18,7 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
+  /*
   object OUTPUT_TYPE {
     val JSCON = "jscon"
     val TSV = "tsv"
@@ -77,7 +78,7 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
     }
   }
 
-  class ReportRequest(rc: RequestCache, pb: PersistenceBroker, cb: CacheBroker, baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String) extends ApiRequest(cb) {
+  class ReportRequest(rc: RequestCache, pb: PersistenceBroker, cb: CacheBroker, baseEntityString: String, filterSpec: String, fieldSpec: String, outputType: String) extends CacheableRequest(cb) {
     def getCacheBrokerKey: CacheKey = "report_" + baseEntityString + "_" + filterSpec + "_" + fieldSpec + "_" + outputType
 
     def getExpirationTime: LocalDateTime = {
@@ -98,4 +99,5 @@ class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
       }
     }
   }
+  */
 }

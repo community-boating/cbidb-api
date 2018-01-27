@@ -1,21 +1,15 @@
-package Api.Endpoints
+package Api.Endpoints.Public
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequest
-import CbiUtil.PropertiesWrapper
-import Services.PermissionsAuthority.UnauthorizedAccessException
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json._
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.libs.ws.WSClient
+import play.api.mvc.Controller
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 
 class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends Controller {
-
+/*
 
   def get(): Action[AnyContent] = Action.async {request =>
     try {
@@ -32,7 +26,7 @@ class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends
     }
   }
 
-  class WeatherRequest(pb: PersistenceBroker, cb: CacheBroker) extends ApiRequest(cb) {
+  class WeatherRequest(pb: PersistenceBroker, cb: CacheBroker) extends CacheableRequest(cb) {
     def getCacheBrokerKey: CacheKey = "weather"
 
     def getExpirationTime: LocalDateTime = {
@@ -54,4 +48,5 @@ class Weather @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends
       jsonFuture
     }
   }
+  */
 }

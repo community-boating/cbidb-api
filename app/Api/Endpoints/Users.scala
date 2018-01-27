@@ -3,7 +3,7 @@ package Api.Endpoints
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.ApiRequest
+import Api.CacheableRequest
 import CbiUtil.{JsonUtil, Profiler}
 import Entities.EntityDefinitions._
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
@@ -14,7 +14,7 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
-
+/*
   // TODO: remove this test harness, put the trycatch back!
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
   //  try {
@@ -38,7 +38,7 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
     }*/
   }
 
-  class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends ApiRequest(cb) {
+  class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends CacheableRequest {
     def getCacheBrokerKey: CacheKey = "users" + (userID match {
       case None => ""
       case Some(id) => id
@@ -94,5 +94,5 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
       ))
       data
     }
-  }
+  }*/
 }

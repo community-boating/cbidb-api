@@ -2,19 +2,22 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /jp-class-instances                 Api.Endpoints.JpClassInstances.get(startDate: Option[String])
-GET     /ap-class-instances                 Api.Endpoints.ApClassInstances.get(startDate: Option[String])
-GET     /jp-teams                           Api.Endpoints.JpTeams.get()
-GET     /weather                            Api.Endpoints.Weather.get()
-GET     /users                              Api.Endpoints.Users.get(userID: Option[Int])
-GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
-GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String)
-GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
-GET     /ping                               Api.Endpoints.Ping.get()
+### PUBLIC ###
+#GET     /jp-class-instances                 Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
+GET     /ap-class-instances                 Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
+GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
+#GET     /weather                            Api.Endpoints.Public.Weather.get()
 
-POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
 
-POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
+#GET     /users                              Api.Endpoints.Users.get(userID: Option[Int])
+#GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
+#GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String)
+#GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
+#GET     /ping                               Api.Endpoints.Ping.get()
+
+#POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
+
+#POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
