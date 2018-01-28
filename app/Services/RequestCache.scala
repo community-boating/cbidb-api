@@ -15,7 +15,10 @@ class RequestCache private[RequestCache] (
   val authenticatedUserType: UserType
 ) {
   private val self = this
-  val pb: PersistenceBroker = new OracleBroker(this)
+  val pb: PersistenceBroker = {
+    if (authenticatedUserType == RootUserType) new OracleBroker(this, true)
+    else new OracleBroker(this, PermissionsAuthority.preparedQueriesOnly.get)
+  }
   val cb: CacheBroker = new RedisBroker
 
   // TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)

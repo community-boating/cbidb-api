@@ -1,3 +1,3 @@
 package Services
 
-class MysqlBroker private[Services] (rc: RequestCache) extends RelationalBroker(rc)
+class MysqlBroker private[Services] (rc: RequestCache, preparedQueriesOnly: Boolean) extends RelationalBroker(rc, preparedQueriesOnly)

@@ -49,6 +49,14 @@ class ServerBootLoader @Inject()(
 
       PermissionsAuthority.secrets.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
 
+      val preparedQueriesOnly = {
+        try {
+          serverProps.getProperty("PreparedQueriesOnly").toBoolean
+        } catch {
+          case _: Throwable => true // default to secure option
+        }
+      }
+      PermissionsAuthority.preparedQueriesOnly.set(preparedQueriesOnly)
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)

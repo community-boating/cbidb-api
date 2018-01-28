@@ -10,6 +10,9 @@ object PermissionsAuthority {
   val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
+  val preparedQueriesOnly = new Initializable[Boolean]
+
+  val stripeURL: String = "https://api.stripe.com/v1/"
 
   private val apexToken = new Initializable[String]
   def setApexToken(s: String) = apexToken.set(s)

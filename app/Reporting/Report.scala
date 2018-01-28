@@ -1,7 +1,7 @@
 package Reporting
 
 import Reporting.ReportFactories._
-import Services.{PersistenceBroker, RequestCache}
+import Services.RequestCache
 import Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
 

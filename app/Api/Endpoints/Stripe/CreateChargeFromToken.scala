@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import Api.AuthenticatedRequest
 import CbiUtil.ParsedRequest
-import Logic.PreparedQueries.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult}
+import Logic.PreparedQueries.Apex._
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
@@ -24,18 +24,16 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
     val token: String = params("token")
     val orderId: Int = params("orderId").toInt
 
-    // TODO: price isnt coming out correctly
-    // TODO: also validate that token is associated with requested orderid
     val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQuery(new GetCartDetailsForOrderId(orderId)).head
+    val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQuery(new ValidateTokenInOrder(orderId, token)).head
 
-    val url = "https://api.stripe.com/v1/charges"
-
-    val stripeRequest: WSRequest = ws.url(url).withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
+    val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "charges")
+      .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
     val futureResponse: Future[WSResponse] = stripeRequest.post(Map(
       "amount" -> orderDetails.priceInCents.toString,
       "currency" -> "usd",
       "source" -> token,
-      "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTImeString)
+      "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString)
     ))
     futureResponse.map(r => {
       println(r.json.toString())

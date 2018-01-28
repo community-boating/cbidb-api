@@ -14,7 +14,7 @@ import com.zaxxer.hikari.HikariDataSource
 
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services] (rc: RequestCache) extends PersistenceBroker(rc) {
+abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQueriesOnly: Boolean) extends PersistenceBroker(rc, preparedQueriesOnly) {
   implicit val pb: PersistenceBroker = this
 
   private val mainPool: HikariDataSource = RelationalBroker.mainPool.get

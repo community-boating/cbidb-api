@@ -9,7 +9,7 @@ case class ServerStateContainer private[Services](
 ) {
   def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)
   val dateTimeFormatDefault: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-  def nowDateTImeString: String = nowDateTime.format(dateTimeFormatDefault)
+  def nowDateTimeString: String = nowDateTime.format(dateTimeFormatDefault)
 }
 
 object ServerStateContainer {

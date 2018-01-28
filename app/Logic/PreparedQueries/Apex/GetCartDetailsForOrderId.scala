@@ -1,8 +1,9 @@
-package Logic.PreparedQueries
+package Logic.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
 import Api.ApiDataObject
+import Logic.PreparedQueries.PreparedQuery
 import Services.Authentication.{ApexUserType, UserType}
 
 class GetCartDetailsForOrderId(orderId: Int) extends PreparedQuery[GetCartDetailsForOrderIdResult]{

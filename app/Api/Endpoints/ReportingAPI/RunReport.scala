@@ -3,9 +3,9 @@ package Api.Endpoints.ReportingAPI
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.{ApiDataObject, AuthenticatedRequest, CacheableResult, ParamsObject}
-import Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
+import Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
+import Api.{ApiDataObject, AuthenticatedRequest, CacheableResult, ParamsObject}
 import CbiUtil.ParsedRequest
 import Reporting.Report
 import Services.Authentication.StaffUserType
@@ -16,6 +16,7 @@ import akka.util.ByteString
 import play.api.http.{HeaderNames, HttpEntity}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class RunReport @Inject() (implicit val exec: ExecutionContext)

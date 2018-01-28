@@ -1,3 +1,3 @@
 package Services
 
-class OracleBroker private[Services] (rc: RequestCache) extends RelationalBroker(rc)
+class OracleBroker private[Services] (rc: RequestCache, preparedQueriesOnly: Boolean) extends RelationalBroker(rc, preparedQueriesOnly)

@@ -6,26 +6,31 @@ import Services.PermissionsAuthority.UnauthorizedAccessException
 import Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services] (rc: RequestCache) {
+abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQueriesOnly: Boolean) {
   // All public requests need to go through user type-based security
   final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
-    if (entityVisible(obj)) getObjectByIdImplementation(obj, id)
+    if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+    else if (entityVisible(obj)) getObjectByIdImplementation(obj, id)
     else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
-    if (entityVisible(obj)) getObjectsByIdsImplementation(obj, ids)
+    if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+    else if (entityVisible(obj)) getObjectsByIdsImplementation(obj, ids)
     else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
-    if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
+    if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+    else if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
     else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
-    if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj)
+    if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+    else if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj)
     else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
   }
   final def commitObjectToDatabase(i: StorableClass): Unit = {
-    if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
+    if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+    else if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
     else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
   }
 
