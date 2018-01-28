@@ -1,10 +1,9 @@
 package Api
 
-import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.UserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PersistenceBroker}
-import play.api.libs.json.{JsArray, JsObject, JsValue}
+import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent}
 

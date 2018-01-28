@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import Api.ApiDataObject
 import Logic.PreparedQueries.PreparedQueryCastableToJSObject
-import Services.Authentication.{PublicUserType, StaffUserType, UserType}
+import Services.Authentication.{StaffUserType, UserType}
 import play.api.libs.json.{JsArray, JsString}
 
 class GetUsers extends PreparedQueryCastableToJSObject[GetUsersResult]{

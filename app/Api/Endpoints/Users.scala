@@ -1,16 +1,13 @@
 package Api.Endpoints
 
-import java.time.{LocalDate, LocalDateTime}
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.Endpoints.Users.UsersParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
-import CbiUtil.DateUtil
-import Logic.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult}
 import Logic.PreparedQueries.Staff.{GetUsers, GetUsersResult}
-import Services.Authentication.{PublicUserType, StaffUserType}
-import play.api.mvc.{Action, AnyContent, Controller}
+import Services.Authentication.StaffUserType
+import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 

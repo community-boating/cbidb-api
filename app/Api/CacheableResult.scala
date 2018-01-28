@@ -21,6 +21,7 @@ trait CacheableResult[T <: ParamsObject, U <: ApiDataObject] {
     zonedTime.withZoneSameInstant(ZoneOffset.UTC).format(cacheExpirationDatePattern)
   }
 
+  // TODO: some way to ensure these are unique?
   def getCacheBrokerKey(params: T): CacheKey
   def getExpirationTime: LocalDateTime
 
