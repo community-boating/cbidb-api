@@ -7,6 +7,8 @@ import CbiUtil.ParsedRequest
 import Logic.PreparedQueries.Apex._
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
+import play.api.libs.json
+import play.api.libs.json.JsObject
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Result}
 
@@ -33,7 +35,8 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
       "amount" -> orderDetails.priceInCents.toString,
       "currency" -> "usd",
       "source" -> token,
-      "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString)
+      "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
+      "metadata[closeId]" -> "1"
     ))
     futureResponse.map(r => {
       println(r.json.toString())
