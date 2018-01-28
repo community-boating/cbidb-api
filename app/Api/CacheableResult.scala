@@ -4,7 +4,6 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
-import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json._
 
@@ -12,9 +11,9 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 
-sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](implicit exec: ExecutionContext) {
+trait CacheableResult[T <: ParamsObject, U <: ApiDataObject] {
+  implicit val exec: ExecutionContext
   type CacheKey = String
-  type PQ = PreparedQueryCastableToJSObject[U]
   val cacheExpirationDatePattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ")
   protected val cacheExpiresKeyName = "$cacheExpires"
   protected def formatTime(time: LocalDateTime): String = {
@@ -68,35 +67,35 @@ sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](im
     val cacheKey = getCacheBrokerKey(params)
     println("here we go")
     synchronized {
-      val notFirst = CacheableRequest.inUse.contains(cacheKey)
-      CacheableRequest.inUse.add(cacheKey)
+      val notFirst = CacheableResult.inUse.contains(cacheKey)
+      CacheableResult.inUse.add(cacheKey)
       if (notFirst) {
-        println("queueing; this is queue position " + (CacheableRequest.waiting.get(cacheKey) match {
+        println("queueing; this is queue position " + (CacheableResult.waiting.get(cacheKey) match {
           case Some(x) => x.length
           case None => 0
         }))
         // You're not the first, and whoever was the first is still computing the result.
         // They should have stashed a promise that they will complete with the result, grab it
-        val p: Promise[String] = CacheableRequest.resultMap(cacheKey)
-        CacheableRequest.waiting.get(cacheKey) match {
+        val p: Promise[String] = CacheableResult.resultMap(cacheKey)
+        CacheableResult.waiting.get(cacheKey) match {
           case Some(x) => x += p
-          case None => CacheableRequest.waiting(cacheKey) = mutable.ListBuffer(p)
+          case None => CacheableResult.waiting(cacheKey) = mutable.ListBuffer(p)
         }
-        println("now waiting has size " + CacheableRequest.waiting(cacheKey).length)
+        println("now waiting has size " + CacheableResult.waiting(cacheKey).length)
         // Nothing to do now but wait for that first person to finish getting the result.
         // Whenever that happens, return that result
         p.future.onComplete(_ => {
-          CacheableRequest.waiting(cacheKey) -= p
-          if (CacheableRequest.waiting(cacheKey).isEmpty) {
+          CacheableResult.waiting(cacheKey) -= p
+          if (CacheableResult.waiting(cacheKey).isEmpty) {
             println("$$$$$$$$  LAST ONE, removing old result")
-            CacheableRequest.resultMap.remove(cacheKey)
+            CacheableResult.resultMap.remove(cacheKey)
           }
         })
         p.future.onFailure({
           case _: Throwable => {
-            CacheableRequest.waiting(cacheKey) -= p
-            if (CacheableRequest.waiting(cacheKey).isEmpty) {
-              CacheableRequest.resultMap.remove(cacheKey)
+            CacheableResult.waiting(cacheKey) -= p
+            if (CacheableResult.waiting(cacheKey).isEmpty) {
+              CacheableResult.resultMap.remove(cacheKey)
             }
           }
         })
@@ -104,12 +103,12 @@ sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](im
       } else {
         // first person to go stores a promise that all queued's will use
         val p = Promise[String]()
-        CacheableRequest.resultMap.put(cacheKey, p)
+        CacheableResult.resultMap.put(cacheKey, p)
         println("got the go-ahead for " + cacheKey)
         // get the result and complete the promise with it
         p.completeWith(calculateValue().map(json => {
           // Whether it crashed or not, release the hold on this cache key
-          CacheableRequest.inUse.remove(cacheKey)
+          CacheableResult.inUse.remove(cacheKey)
           val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
           val result: String = new JsObject(Map("data" -> newData)).toString()
           saveToCache(cb, result, params)
@@ -119,7 +118,7 @@ sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](im
         p.future.onFailure({
           case _: Throwable => {
             println("Failure detected; cleaning up")
-            CacheableRequest.inUse.remove(cacheKey)
+            CacheableResult.inUse.remove(cacheKey)
           }
         })
         p.future
@@ -128,22 +127,7 @@ sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](im
   }
 }
 
-abstract class CacheableRequestFromPreparedQuery[T <: ParamsObject, U <: ApiDataObject](implicit exec: ExecutionContext) extends CacheableRequest[T, U] {
-  def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
-    val calculateValue: (() => Future[JsObject]) = () => Future {
-      val queryResults = pb.executePreparedQuery(pq)
-
-      JsObject(Map(
-        "rows" -> JsArray(queryResults.map(r => pq.mapCaseObjectToJsArray(r))),
-        "metaData" -> pq.getColumnsNamesAsJSObject
-      ))
-    }
-    getFuture(cb, pb, params, calculateValue)
-  }
-}
-
-
-object CacheableRequest {
+object CacheableResult {
   var inUse: mutable.Set[String] = mutable.Set.empty
   var waiting: mutable.Map[String, mutable.ListBuffer[Promise[String]]] = mutable.Map.empty
   var resultMap: mutable.Map[String, Promise[String]] = mutable.Map.empty

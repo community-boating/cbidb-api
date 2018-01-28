@@ -2,19 +2,12 @@ package Api.Endpoints.Stripe
 
 import javax.inject.Inject
 
-import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
-import Logic.PreparedQueries.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult}
-import Services.Authentication.ApexUserType
-import Services.{PermissionsAuthority, ServerStateContainer}
-import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.libs.ws.WSClient
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.concurrent.ExecutionContext
 
-class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest(ApexUserType) {
-  def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
+class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) /*extends AuthenticatedRequest(ApexUserType)*/ {
+ /* def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
 
   def doPost(req: ParsedRequest): Future[Result] = {
     // TODO: wrap in try, e.g. what if orderID doesnt exist
@@ -54,6 +47,6 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
 
       Ok(msg)
     })
-  }
+  }*/
 }
 

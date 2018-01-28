@@ -5,18 +5,20 @@ import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
 import Api.Endpoints.Public.JpClassInstances.JpClassInstancesParamsObject
-import Api.{ParamsObject, PublicRequestFromPreparedQuery}
+import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import CbiUtil.DateUtil
 import Logic.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
+import Services.Authentication.PublicUserType
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 
-class JpClassInstances @Inject() (implicit exec: ExecutionContext) extends PublicRequestFromPreparedQuery[JpClassInstancesParamsObject, GetJpClassInstancesResult] {
+class JpClassInstances @Inject() (implicit val exec: ExecutionContext)
+extends AuthenticatedRequest with CacheableResultFromPreparedQuery[JpClassInstancesParamsObject, GetJpClassInstancesResult] {
   def get(startDate: Option[String]): Action[AnyContent] = {
     val params = JpClassInstancesParamsObject(DateUtil.parseWithDefault(startDate))
     val pq = new GetJpClassInstances(params.startDate)
-    evaluate(params, pq)
+    evaluate(PublicUserType, params, pq)
   }
 
   def getCacheBrokerKey(params: JpClassInstancesParamsObject): CacheKey =

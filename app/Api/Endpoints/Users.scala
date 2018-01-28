@@ -1,12 +1,39 @@
 package Api.Endpoints
 
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-import play.api.mvc.Controller
+import Api.Endpoints.Users.UsersParamsObject
+import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
+import CbiUtil.DateUtil
+import Logic.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult}
+import Logic.PreparedQueries.Staff.{GetUsers, GetUsersResult}
+import Services.Authentication.{PublicUserType, StaffUserType}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext
 
-class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
+class Users @Inject() (implicit val exec: ExecutionContext)
+extends AuthenticatedRequest with CacheableResultFromPreparedQuery[UsersParamsObject, GetUsersResult] {
+  def get(): Action[AnyContent] = {
+    val params = new UsersParamsObject()
+    val pq = new GetUsers
+    evaluate(StaffUserType, params, pq)
+  }
+
+  def getCacheBrokerKey(params: UsersParamsObject): CacheKey =
+    "users"
+
+  def getExpirationTime: LocalDateTime = {
+    LocalDateTime.now.plusSeconds(5)
+  }
+}
+
+object Users {
+  class UsersParamsObject extends ParamsObject
+}
+
 /*
   // TODO: remove this test harness, put the trycatch back!
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
@@ -88,4 +115,3 @@ class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
       data
     }
   }*/
-}

@@ -4,8 +4,11 @@ import Services.Authentication.UserType
 import Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
-abstract class AuthenticatedRequest(ut: UserType) extends Controller {
-  def getRC(requestHeaders: Headers, requestCookies: Cookies): RequestCache = {
+trait AuthenticatedRequest {
+  class RequestClass extends Controller
+  protected val requestClass = new RequestClass
+  protected val Ok = requestClass.Ok
+  protected def getRC(ut: UserType, requestHeaders: Headers, requestCookies: Cookies): RequestCache = {
     val ret = PermissionsAuthority.getRequestCache(requestHeaders, requestCookies)
     if (ret.authenticatedUserType == ut) ret
     else {
@@ -19,5 +22,3 @@ abstract class AuthenticatedRequest(ut: UserType) extends Controller {
     }
   }
 }
-
-//
