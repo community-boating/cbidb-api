@@ -13,7 +13,7 @@ GET     /users                              Api.Endpoints.Users.get()
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
 GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String)
 GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
-#GET     /ping                               Api.Endpoints.Ping.get()
+GET     /ping                               Api.Endpoints.Ping.get()
 
 #POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
 
