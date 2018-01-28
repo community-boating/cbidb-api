@@ -13,9 +13,9 @@ abstract class ReportFactory[T <: StorableClass] {
   private val filterSpecWrapper = new Initializable[String]
   private val fieldSpecWrapper = new Initializable[String]
 
-  def setParameters(rc: RequestCache, pb: PersistenceBroker, filterSpec: String, fieldSpec: String): Unit = {
+  def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
     rcWrapper.set(rc)
-    pbWrapper.set(pb)
+    pbWrapper.set(rc.pb)
     filterSpecWrapper.set(filterSpec)
     fieldSpecWrapper.set(fieldSpec)
   }

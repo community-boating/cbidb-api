@@ -8,6 +8,7 @@ trait AuthenticatedRequest {
   class RequestClass extends Controller
   protected val requestClass = new RequestClass
   protected val Ok = requestClass.Ok
+  protected def Status(code: Int) = requestClass.Status(code)
   protected def getRC(ut: UserType, requestHeaders: Headers, requestCookies: Cookies): RequestCache = {
     val ret = PermissionsAuthority.getRequestCache(requestHeaders, requestCookies)
     if (ret.authenticatedUserType == ut) ret

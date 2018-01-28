@@ -15,9 +15,9 @@ GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForU
 GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
 GET     /ping                               Api.Endpoints.Ping.get()
 
-#POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
+POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
 
-#POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
+POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
