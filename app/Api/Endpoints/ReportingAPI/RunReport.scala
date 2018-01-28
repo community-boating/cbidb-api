@@ -1,21 +1,10 @@
 package Api.Endpoints.ReportingAPI
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.CacheableRequest
-import CbiUtil.ParsedRequest
-import Reporting.Report
-import Services.Authentication.StaffUserType
-import Services.PermissionsAuthority.UnauthorizedAccessException
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import play.api.http.HttpEntity
-import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class RunReport @Inject() (implicit exec: ExecutionContext) extends Controller {
   /*

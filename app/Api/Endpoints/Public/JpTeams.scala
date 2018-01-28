@@ -4,15 +4,13 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
-import Api.{ParamsObject, PublicRequest}
+import Api.{ParamsObject, PublicRequestFromPreparedQuery}
 import Logic.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
-import Services.PersistenceBroker
-import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class JpTeams @Inject() (implicit exec: ExecutionContext) extends PublicRequest[JpTeamsParamsObject, GetJpTeamsResult] {
+class JpTeams @Inject() (implicit exec: ExecutionContext) extends PublicRequestFromPreparedQuery[JpTeamsParamsObject, GetJpTeamsResult] {
   def get: Action[AnyContent] = {
     evaluate(new JpTeamsParamsObject, new GetJpTeams)
   }

@@ -5,33 +5,16 @@ import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
 import Api.Endpoints.Public.ApClassInstances.ApClassInstancesParamsObject
-import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
-import Api.{ParamsObject, PublicRequest}
-import CbiUtil.Profiler
-import Entities.EntityDefinitions.ApClassSession
-import Logic.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult, GetJpTeams}
-import Services.PersistenceBroker
-import play.api.libs.json.{JsArray, JsObject, JsString}
-import play.api.mvc.{Action, AnyContent, Controller}
+import Api.{ParamsObject, PublicRequestFromPreparedQuery}
+import CbiUtil.DateUtil
+import Logic.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult}
+import play.api.mvc.{Action, AnyContent}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends PublicRequest[ApClassInstancesParamsObject, GetApClassInstancesResult] {
+class ApClassInstances @Inject() (implicit exec: ExecutionContext) extends PublicRequestFromPreparedQuery[ApClassInstancesParamsObject, GetApClassInstancesResult] {
   def get(startDate: Option[String]): Action[AnyContent] = {
-    val startDateCast: LocalDate = {
-      val startDateDefault = LocalDate.now
-      startDate match {
-        case None => startDateDefault
-        case Some(d) => {
-          "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$".r.findFirstIn(d)
-          match {
-            case Some(_) => LocalDate.parse(d, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
-            case None => startDateDefault
-          }
-        }
-      }
-    }
-    val params = ApClassInstancesParamsObject(startDateCast)
+    val params = ApClassInstancesParamsObject(DateUtil.parseWithDefault(startDate))
     val pq = new GetApClassInstances(params.startDate)
     evaluate(params, pq)
   }

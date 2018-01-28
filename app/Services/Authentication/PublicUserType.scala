@@ -1,6 +1,5 @@
 package Services.Authentication
 
-import Entities.EntityDefinitions._
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}

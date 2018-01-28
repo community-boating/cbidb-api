@@ -1,17 +1,10 @@
 package Api.Endpoints
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 
-import Api.CacheableRequest
-import CbiUtil.{JsonUtil, Profiler}
-import Entities.EntityDefinitions._
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import Storable.Filter
-import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.Controller
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class Users @Inject() (implicit exec: ExecutionContext) extends Controller {
 /*

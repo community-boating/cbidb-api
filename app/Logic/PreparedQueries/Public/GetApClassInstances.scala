@@ -4,9 +4,10 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import Logic.PreparedQueries.{CastableToJSObject, PreparedQuery, PreparedQueryCaseResult, PreparedQueryCastableToJSObject}
+import Api.ApiDataObject
+import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.{PublicUserType, UserType}
-import play.api.libs.json.{JsArray, JsObject, JsString}
+import play.api.libs.json.{JsArray, JsString}
 
 class GetApClassInstances(startDate: LocalDate) extends PreparedQueryCastableToJSObject[GetApClassInstancesResult] {
   override val allowedUserTypes: Set[UserType] = Set(PublicUserType)
@@ -61,4 +62,4 @@ case class GetApClassInstancesResult(
   sessionTime: String,
   location: String,
   enrollees: Int
-) extends PreparedQueryCaseResult
+) extends ApiDataObject

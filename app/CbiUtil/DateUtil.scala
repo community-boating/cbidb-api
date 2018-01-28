@@ -16,4 +16,17 @@ object DateUtil {
     )
   }
 
+  def parseWithDefault(literal: Option[String], default: LocalDate = LocalDate.now): LocalDate = {
+    literal match {
+      case None => default
+      case Some(d) => {
+        "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$".r.findFirstIn(d)
+        match {
+          case Some(_) => LocalDate.parse(d, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+          case None => default
+        }
+      }
+    }
+  }
+
 }

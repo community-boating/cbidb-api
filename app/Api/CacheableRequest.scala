@@ -4,8 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 import CbiUtil.JsonUtil
-import Logic.PreparedQueries.{PreparedQueryCaseResult, PreparedQueryCastableToJSObject}
-import Logic.PreparedQueries.Public.GetJpTeams
+import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json._
 
@@ -13,7 +12,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 
-abstract class CacheableRequest[T <: ParamsObject, U <: PreparedQueryCaseResult](implicit exec: ExecutionContext) {
+sealed abstract class CacheableRequest[T <: ParamsObject, U <: ApiDataObject](implicit exec: ExecutionContext) {
   type CacheKey = String
   type PQ = PreparedQueryCastableToJSObject[U]
   val cacheExpirationDatePattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -26,24 +25,16 @@ abstract class CacheableRequest[T <: ParamsObject, U <: PreparedQueryCaseResult]
   def getCacheBrokerKey(params: T): CacheKey
   def getExpirationTime: LocalDateTime
 
-  def getJSONResultFuture(pb: PersistenceBroker, params: T, pq: PQ): Future[JsObject] = Future {
-    val queryResults = pb.executePreparedQuery(pq)
+  //def getJSONResultFuture(pb: PersistenceBroker, params: T): Future[JsObject]
 
-    JsObject(Map(
-      "rows" -> JsArray(queryResults.map(r => pq.mapCaseObjectToJsArray(r))),
-      "metaData" -> pq.getColumnsNamesAsJSObject
-    ))
-  }
-
-
-  def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
+  def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
     val finalResult: Future[String] = tryCache(cb, params) match {
       case Some(s) => {
         Future{s}
       }
       case None => {
         println("cache miss")
-        tryGet(cb, pb, params, pq)
+        tryGet(cb, pb, params, calculateValue)
       }
     }
     finalResult
@@ -73,7 +64,7 @@ abstract class CacheableRequest[T <: ParamsObject, U <: PreparedQueryCaseResult]
   // basically works.  Not convinced its 100% threadsafe under heavy parallel load
   // TODO: confirm crash recovery works, especially when there are queued waiters
   // TODO: if waiters are waiting and a crash happens, they should all try themselves?
-  private def tryGet(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
+  private def tryGet(cb: CacheBroker, pb: PersistenceBroker, params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
     val cacheKey = getCacheBrokerKey(params)
     println("here we go")
     synchronized {
@@ -116,7 +107,7 @@ abstract class CacheableRequest[T <: ParamsObject, U <: PreparedQueryCaseResult]
         CacheableRequest.resultMap.put(cacheKey, p)
         println("got the go-ahead for " + cacheKey)
         // get the result and complete the promise with it
-        p.completeWith(getJSONResultFuture(pb, params, pq).map(json => {
+        p.completeWith(calculateValue().map(json => {
           // Whether it crashed or not, release the hold on this cache key
           CacheableRequest.inUse.remove(cacheKey)
           val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
@@ -135,8 +126,22 @@ abstract class CacheableRequest[T <: ParamsObject, U <: PreparedQueryCaseResult]
       }
     }
   }
-
 }
+
+abstract class CacheableRequestFromPreparedQuery[T <: ParamsObject, U <: ApiDataObject](implicit exec: ExecutionContext) extends CacheableRequest[T, U] {
+  def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
+    val calculateValue: (() => Future[JsObject]) = () => Future {
+      val queryResults = pb.executePreparedQuery(pq)
+
+      JsObject(Map(
+        "rows" -> JsArray(queryResults.map(r => pq.mapCaseObjectToJsArray(r))),
+        "metaData" -> pq.getColumnsNamesAsJSObject
+      ))
+    }
+    getFuture(cb, pb, params, calculateValue)
+  }
+}
+
 
 object CacheableRequest {
   var inUse: mutable.Set[String] = mutable.Set.empty

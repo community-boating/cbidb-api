@@ -4,8 +4,9 @@ import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
+import Api.ApiDataObject
 import CbiUtil.{Initializable, Profiler}
-import Logic.PreparedQueries.{PreparedQuery, PreparedQueryCaseResult}
+import Logic.PreparedQueries.PreparedQuery
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -19,7 +20,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache) extends Per
   private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
 
-  def executePreparedQueryImplementation[T <: PreparedQueryCaseResult](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
+  def executePreparedQueryImplementation[T <: ApiDataObject](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
     println(pq.getQuery)
     val profiler = new Profiler
     val c: Connection = mainPool.getConnection

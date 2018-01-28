@@ -2,6 +2,7 @@ package Logic.PreparedQueries
 
 import java.sql.ResultSet
 
+import Api.ApiDataObject
 import Services.Authentication.{ApexUserType, UserType}
 
 class GetCartDetailsForOrderId(orderId: Int) extends PreparedQuery[GetCartDetailsForOrderIdResult]{
@@ -24,4 +25,4 @@ class GetCartDetailsForOrderId(orderId: Int) extends PreparedQuery[GetCartDetail
 case class GetCartDetailsForOrderIdResult (
   orderId: Int,
   priceInCents: Int
-) extends PreparedQueryCaseResult
+) extends ApiDataObject

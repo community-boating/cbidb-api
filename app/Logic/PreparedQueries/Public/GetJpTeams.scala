@@ -2,7 +2,8 @@ package Logic.PreparedQueries.Public
 
 import java.sql.ResultSet
 
-import Logic.PreparedQueries.{PreparedQuery, PreparedQueryCaseResult, PreparedQueryCastableToJSObject}
+import Api.ApiDataObject
+import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.{PublicUserType, UserType}
 import play.api.libs.json.{JsArray, JsString}
 
@@ -38,4 +39,4 @@ case class GetJpTeamsResult(
   teamId: Int,
   teamName: String,
   points: Int
-) extends PreparedQueryCaseResult
+) extends ApiDataObject
