@@ -33,7 +33,8 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
           tokenObject.used,
           tokenObject.card.last4,
           tokenObject.card.exp_month,
-          tokenObject.card.exp_year
+          tokenObject.card.exp_year,
+          tokenObject.card.address_zip
         ).mkString("$$")
       }
 
