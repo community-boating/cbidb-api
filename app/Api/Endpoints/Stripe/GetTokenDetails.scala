@@ -24,15 +24,19 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
     futureResponse.map(r => {
       println(r.json.toString())
       val tokenObject = r.json.as[Token]
-      println("did it")
+
       def parseAsSuccess: Try[String] = Try {
-        println("here we go")
         val tokenObject = r.json.as[Token]
-        println(tokenObject)
-        println("bnbnbn")
-        println(tokenObject.card.address_zip)
-        List("success").mkString("$$")
+        List(
+          "success",
+          tokenObject.id,
+          tokenObject.used,
+          tokenObject.card.last4,
+          tokenObject.card.exp_month,
+          tokenObject.card.exp_year
+        ).mkString("$$")
       }
+
       def parseAsFailure: Try[String] = Try {
         val errorObject = Stripe.JsFacades.Error(r.json)
         List("failure", errorObject.`type`, errorObject.message).mkString("$$")
