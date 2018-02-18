@@ -44,6 +44,7 @@ class RequestCache private[RequestCache] (val auth: AuthenticationInstance) {
 
 object RequestCache {
   // TODO: better way to handle requests authenticated against multiple mechanisms?
+  // TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things
   def construct(
     requiredUserType: UserType,
     requiredUserName: Option[String],
@@ -61,6 +62,7 @@ object RequestCache {
       val ret: Option[AuthenticationInstance] = PermissionsAuthority.allowableUserTypes.get
         .filter(_ != PublicUserType)
         .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
+          // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
           case Some(x) => Some(x)
           case None => ut.getAuthenticatedUsernameInRequest(requestHeaders, requestCookies, rootCB, apexToken) match {
             case None => None
@@ -71,6 +73,7 @@ object RequestCache {
           }
         })
 
+      // If after looping through all auth mechs we still didnt find a match, this request is Public
       ret match {
         case Some(x) => x
         case None => {
@@ -79,38 +82,49 @@ object RequestCache {
         }
       }
     }
-    if (authentication.userType == requiredUserType) {
-      (authentication, Some(new RequestCache(authentication)))
-    } else {
-      requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
-        case Some(lowerAuth: AuthenticationInstance) => {
-          println("@@@ Successfully downgraded to " + lowerAuth.userType)
-          (authentication, Some(new RequestCache(lowerAuth)))
+
+    // Cross-site request?
+    // Someday I'll flesh this out more
+    // For now, non-public requests may not be cross site
+    val shortCircuitResult = {
+      if (requiredUserType != PublicUserType) {
+        CORS.getCORSStatus(requestHeaders) match {
+          case Some(CROSS_SITE) | Some(UNKNOWN) | None => {
+            println("@@@  Nuking RC due to potential CSRF")
+            Some((authentication, None))
+          }
+          case _ => None
         }
-        case None => {
-          println("@@@ Unable to downgrade auth to " + requiredUserType)
-          (authentication, None)
+      } else None
+    }
+
+    shortCircuitResult match {
+      case Some(r) => r
+      case None => {
+        println("@@@  CSRF check passed")
+
+        // requiredUserType says what this request endpoint requires
+        // If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
+        // attempt to downgrade to the desired auth
+        // For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
+        // so this architecture will make that request behave exactly as if the member requested it themselves
+        if (authentication.userType == requiredUserType) {
+          (authentication, Some(new RequestCache(authentication)))
+        } else {
+          requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
+            case Some(lowerAuth: AuthenticationInstance) => {
+              println("@@@ Successfully downgraded to " + lowerAuth.userType)
+              (authentication, Some(new RequestCache(lowerAuth)))
+            }
+            case None => {
+              println("@@@ Unable to downgrade auth to " + requiredUserType)
+              (authentication, None)
+            }
+          }
         }
       }
     }
   }
-/*
-  def constructFromSuperiorAuth(
-    rc: RequestCache,
-    desiredUserType: UserType,
-    desiredUserName: String
-  ): Option[RequestCache] = {
-    desiredUserType.getAuthenticatedUsernameFromSuperiorAuth(rc, desiredUserName) match {
-      case Some(s: String) => {
-        println("@@@ Successfully downgraded to " + desiredUserType)
-        Some(new RequestCache(s, desiredUserType))
-      }
-      case None => {
-        println("@@@ Unable to downgrade auth to " + desiredUserType)
-        None
-      }
-    }
-  }*/
 
   lazy private[Services] val getRootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT)
 }
