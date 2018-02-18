@@ -35,8 +35,8 @@ object StaffUserType extends UserType {
   }
 
   def getAuthenticatedUsernameFromSuperiorAuth(
-    rc: RequestCache,
-    desiredUserName: String
+    currentAuthentication: AuthenticationInstance,
+    requiredUserName: Option[String]
   ): Option[String] = None
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {

@@ -51,9 +51,14 @@ class ServerBootLoader @Inject()(
 
       val preparedQueriesOnly = {
         try {
+          println("raw:" + serverProps.getProperty("PreparedQueriesOnly"))
+          println("case: " + serverProps.getProperty("PreparedQueriesOnly").toBoolean)
           serverProps.getProperty("PreparedQueriesOnly").toBoolean
         } catch {
-          case _: Throwable => true // default to secure option
+          case t: Throwable => {
+            println("error setting prepared queries only mode: " + t)
+            true
+          } // default to secure option
         }
       }
       PermissionsAuthority.preparedQueriesOnly.set(preparedQueriesOnly)

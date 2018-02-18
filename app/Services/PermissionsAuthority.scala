@@ -1,7 +1,7 @@
 package Services
 
 import CbiUtil.Initializable
-import Services.Authentication.UserType
+import Services.Authentication.{AuthenticationInstance, UserType}
 import Services.Secrets.SecretsObject
 import play.api.Mode
 import play.api.mvc.{AnyContent, Cookies, Headers, Request}
@@ -32,7 +32,13 @@ object PermissionsAuthority {
     allowedIPs.contains(request.remoteAddress)
   }
 
-  def getRequestCache(requestHeaders: Headers, requestCookies: Cookies): RequestCache = RequestCache.construct(requestHeaders, requestCookies, rootCB, apexToken.get)
+  def getRequestCache(
+    requiredUserType: UserType,
+    requiredUserName: Option[String],
+    requestHeaders: Headers,
+    requestCookies: Cookies
+  ): (AuthenticationInstance, Option[RequestCache]) =
+    RequestCache.construct(requiredUserType, requiredUserName, requestHeaders, requestCookies, rootCB, apexToken.get)
 
   def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
     if (

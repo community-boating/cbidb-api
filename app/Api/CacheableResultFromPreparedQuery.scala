@@ -24,6 +24,7 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U <: ApiDataObject] ex
   }
 
   protected def evaluate(ut: UserType, params: T, pq: PQ): Action[AnyContent] = Action.async {request =>
+    println("HEADERS: " + request.headers)
     try {
       val rc = getRC(ut, request.headers, request.cookies)
       val cb: CacheBroker = rc.cb

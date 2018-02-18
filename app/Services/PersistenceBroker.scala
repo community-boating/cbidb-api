@@ -11,22 +11,22 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
   final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
     else if (entityVisible(obj)) getObjectByIdImplementation(obj, id)
-    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
   }
   final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
     if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
     else if (entityVisible(obj)) getObjectsByIdsImplementation(obj, ids)
-    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
   }
   final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
     if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
     else if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
-    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
   }
   final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
     else if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj)
-    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.authenticatedUserType)
+    else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
   }
   final def commitObjectToDatabase(i: StorableClass): Unit = {
     if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -35,8 +35,8 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
   }
 
   final def executePreparedQuery[T <: ApiDataObject](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
-    if (pq.allowedUserTypes.contains(rc.authenticatedUserType)) executePreparedQueryImplementation(pq, fetchSize)
-    else throw new UnauthorizedAccessException("executePreparedQuery denied to userType " + rc.authenticatedUserType)
+    if (pq.allowedUserTypes.contains(rc.auth.userType)) executePreparedQueryImplementation(pq, fetchSize)
+    else throw new UnauthorizedAccessException("executePreparedQuery denied to userType " + rc.auth.userType)
   }
 
   // Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
@@ -49,5 +49,5 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
 
 
   // TODO: implement some IDs
-  private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.authenticatedUserType).entityVisible
+  private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible
 }

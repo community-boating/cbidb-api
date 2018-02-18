@@ -31,9 +31,9 @@ extends AuthenticatedRequest with CacheableResult[RunReportParamsObject, GetRepo
   def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
 
   def doPost(req: ParsedRequest): Future[Result] = {
-    val rc: RequestCache = PermissionsAuthority.getRequestCache(req.headers, req.cookies)
-    println(rc.authenticatedUserType)
-    if (rc.authenticatedUserType != StaffUserType) {
+    val rc: RequestCache = PermissionsAuthority.getRequestCache(StaffUserType, None, req.headers, req.cookies)._2.get
+    println(rc.auth.userName)
+    if (rc.auth.userType != StaffUserType) {
       Future{ Ok("Access Denied") }
     } else {
       try {

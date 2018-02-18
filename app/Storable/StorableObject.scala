@@ -128,7 +128,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
     type FieldDefinition = (String, DatabaseField[_])
 
     val filterFunction: (FieldDefinition => Boolean) = {
-      val visibility = rc.authenticatedUserType.getEntityVisibility(self)
+      val visibility = rc.auth.userType.getEntityVisibility(self)
       if (!visibility.entityVisible) (t: FieldDefinition) => {
         println("whole entity not visible for " + t._2.getPersistenceFieldName)
         false

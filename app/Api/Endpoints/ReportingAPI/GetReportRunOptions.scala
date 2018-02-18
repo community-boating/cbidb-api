@@ -25,6 +25,7 @@ extends AuthenticatedRequest with CacheableResult[GetReportRunOptionsParamsObjec
   }
 
   def get(): Action[AnyContent] = Action.async { request =>
+    println("HEADERS: " + request.headers)
     try {
       val rc = getRC(StaffUserType, request.headers, request.cookies)
       val cb = rc.cb

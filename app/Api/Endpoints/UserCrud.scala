@@ -3,6 +3,7 @@ package Api.Endpoints
 import javax.inject.Inject
 
 import Entities.EntityDefinitions.User
+import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
@@ -14,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class UserCrud @Inject() (implicit exec: ExecutionContext) extends Controller {
   def post() = Action { request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(StaffUserType, None, request.headers, request.cookies)._2.get
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val data = request.body.asFormUrlEncoded
