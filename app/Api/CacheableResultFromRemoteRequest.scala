@@ -1,5 +1,6 @@
 package Api
 
+import CbiUtil.ParsedRequest
 import Services.Authentication.UserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PersistenceBroker}
@@ -27,7 +28,7 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U <: ApiDataObject] ex
 
   protected def evaluate(ut: UserType, params: T, ws: WSClient, url: String): Action[AnyContent] = Action.async {request =>
     try {
-      val rc = getRC(ut, request.headers, request.cookies)
+      val rc = getRC(ut, ParsedRequest(request))
       val cb: CacheBroker = rc.cb
       val pb = rc.pb
       getFuture(cb, pb, params, ws, url).map(s => {

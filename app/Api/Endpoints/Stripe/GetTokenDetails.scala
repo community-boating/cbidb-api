@@ -5,7 +5,7 @@ import javax.inject.Inject
 import Api.AuthenticatedRequest
 import CbiUtil.ParsedRequest
 import Services.Authentication.ApexUserType
-import Services.{PermissionsAuthority, ServerStateContainer}
+import Services.PermissionsAuthority
 import Stripe.JsFacades.Token
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent}
@@ -15,7 +15,7 @@ import scala.util.Try
 
 class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def get(token: String): Action[AnyContent] = Action.async {req => {
-    val rc = getRC(ApexUserType, req.headers, req.cookies)
+    val rc = getRC(ApexUserType, ParsedRequest(req))
     val pb = rc.pb
 
     val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "tokens/" + token)

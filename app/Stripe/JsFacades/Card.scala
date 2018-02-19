@@ -1,7 +1,6 @@
 package Stripe.JsFacades
 
-import play.api.libs.json.{JsPath, JsValue, Json, Reads}
-import play.api.libs.functional.syntax._
+import play.api.libs.json.Json
 
 case class Card (
   id: String,

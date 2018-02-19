@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Services.{CacheBroker, PersistenceBroker, RequestCache}
+import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 

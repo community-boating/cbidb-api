@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
 import Api.{ApiDataObject, AuthenticatedRequest, CacheableResult, ParamsObject}
+import CbiUtil.ParsedRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
 import Services.Authentication.StaffUserType
@@ -27,7 +28,7 @@ extends AuthenticatedRequest with CacheableResult[GetReportRunOptionsParamsObjec
   def get(): Action[AnyContent] = Action.async { request =>
     println("HEADERS: " + request.headers)
     try {
-      val rc = getRC(StaffUserType, request.headers, request.cookies)
+      val rc = getRC(StaffUserType, ParsedRequest(request))
       val cb = rc.cb
       val pb = rc.pb
       val params = new GetReportRunOptionsParamsObject

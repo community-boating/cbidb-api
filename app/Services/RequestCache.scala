@@ -3,10 +3,10 @@ package Services
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
 import Services.Authentication.{AuthenticationInstance, PublicUserType, RootUserType, UserType}
-import play.api.mvc.{Cookies, Headers}
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
@@ -48,15 +48,16 @@ object RequestCache {
   def construct(
     requiredUserType: UserType,
     requiredUserName: Option[String],
-    requestHeaders: Headers,
-    requestCookies: Cookies,
+    parsedRequest: ParsedRequest,
     rootCB: CacheBroker,
     apexToken: String
   ): (AuthenticationInstance, Option[RequestCache]) = {
     println("\n\n====================================================")
     println("====================================================")
     println("====================================================")
+    println("Path: " + parsedRequest.path)
     println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+    println("Headers: " + parsedRequest.headers)
     // For all the enabled user types (besides public), see if the request is authenticated against any of them.
     val authentication: AuthenticationInstance = {
       val ret: Option[AuthenticationInstance] = PermissionsAuthority.allowableUserTypes.get
@@ -64,7 +65,7 @@ object RequestCache {
         .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
           // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
           case Some(x) => Some(x)
-          case None => ut.getAuthenticatedUsernameInRequest(requestHeaders, requestCookies, rootCB, apexToken) match {
+          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest.headers, parsedRequest.cookies, rootCB, apexToken) match {
             case None => None
             case Some(x: String) => {
               println("AUTHENTICATION:  Request is authenticated as " + ut)
@@ -86,13 +87,16 @@ object RequestCache {
     // Cross-site request?
     // Someday I'll flesh this out more
     // For now, non-public requests may not be cross site
-    val shortCircuitResult = {
+    // auth'd GETs are ok if the CORS status is Unknown
+    val shortCircuitResult: Option[(AuthenticationInstance, Option[RequestCache])] = {
+      def nuke(): Option[(AuthenticationInstance, Option[RequestCache])] = {
+        println("@@@  Nuking RC due to potential CSRF")
+        Some((authentication, None))
+      }
       if (requiredUserType != PublicUserType) {
-        CORS.getCORSStatus(requestHeaders) match {
-          case Some(CROSS_SITE) | Some(UNKNOWN) | None => {
-            println("@@@  Nuking RC due to potential CSRF")
-            Some((authentication, None))
-          }
+        CORS.getCORSStatus(parsedRequest.headers) match {
+          case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
+          case Some(CROSS_SITE) | None => nuke()
           case _ => None
         }
       } else None

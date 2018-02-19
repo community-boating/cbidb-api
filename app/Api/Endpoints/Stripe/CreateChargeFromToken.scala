@@ -7,8 +7,6 @@ import CbiUtil.ParsedRequest
 import Logic.PreparedQueries.Apex._
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
-import play.api.libs.json
-import play.api.libs.json.JsObject
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Result}
 
@@ -20,7 +18,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
 
   def doPost(req: ParsedRequest): Future[Result] = {
     // TODO: wrap in try, e.g. what if orderID doesnt exist
-    val rc = getRC(ApexUserType, req.headers, req.cookies)
+    val rc = getRC(ApexUserType, req)
     val pb = rc.pb
     val params = req.postParams
     val token: String = params("token")

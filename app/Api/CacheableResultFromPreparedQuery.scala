@@ -1,5 +1,6 @@
 package Api
 
+import CbiUtil.ParsedRequest
 import Logic.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.UserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
@@ -24,9 +25,8 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U <: ApiDataObject] ex
   }
 
   protected def evaluate(ut: UserType, params: T, pq: PQ): Action[AnyContent] = Action.async {request =>
-    println("HEADERS: " + request.headers)
     try {
-      val rc = getRC(ut, request.headers, request.cookies)
+      val rc = getRC(ut, ParsedRequest(request))
       val cb: CacheBroker = rc.cb
       val pb = rc.pb
       getFuture(cb, pb, params, pq).map(s => {

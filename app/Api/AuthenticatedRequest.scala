@@ -1,6 +1,7 @@
 package Api
 
-import Services.Authentication.{AuthenticationInstance, UserType}
+import CbiUtil.ParsedRequest
+import Services.Authentication.UserType
 import Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
@@ -9,8 +10,8 @@ trait AuthenticatedRequest {
   protected val requestClass = new RequestClass
   protected val Ok = requestClass.Ok
   protected def Status(code: Int) = requestClass.Status(code)
-  protected def getRC(ut: UserType, requestHeaders: Headers, requestCookies: Cookies): RequestCache = {
-    val authResult = PermissionsAuthority.getRequestCache(ut, None, requestHeaders, requestCookies)
+  protected def getRC(ut: UserType, parsedRequest: ParsedRequest): RequestCache = {
+    val authResult = PermissionsAuthority.getRequestCache(ut, None, parsedRequest)
     authResult._2 match {
       case Some(rc) => rc
       case None => throw new Exception("Unable to generate RC of type " + ut + " for request authenticated as " + authResult._1)

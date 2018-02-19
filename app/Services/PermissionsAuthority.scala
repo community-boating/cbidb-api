@@ -1,10 +1,10 @@
 package Services
 
-import CbiUtil.Initializable
+import CbiUtil.{Initializable, ParsedRequest}
 import Services.Authentication.{AuthenticationInstance, UserType}
 import Services.Secrets.SecretsObject
 import play.api.Mode
-import play.api.mvc.{AnyContent, Cookies, Headers, Request}
+import play.api.mvc.{AnyContent, Request}
 
 object PermissionsAuthority {
   val allowableUserTypes = new Initializable[Set[UserType]]
@@ -32,18 +32,25 @@ object PermissionsAuthority {
     allowedIPs.contains(request.remoteAddress)
   }
 
+  def requestIsVIP(request: Request[AnyContent]): Boolean = {
+    request.headers.get("Is-VIP-Request") match {
+      case Some("true") => true
+      case _ => false
+    }
+  }
+
   def getRequestCache(
     requiredUserType: UserType,
     requiredUserName: Option[String],
-    requestHeaders: Headers,
-    requestCookies: Cookies
+    parsedRequest: ParsedRequest
   ): (AuthenticationInstance, Option[RequestCache]) =
-    RequestCache.construct(requiredUserType, requiredUserName, requestHeaders, requestCookies, rootCB, apexToken.get)
+    RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get)
 
   def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
     if (
       allowableUserTypes.get.contains(userType) &&  // requested user type is enabled in this server instance
-      requestIsFromLocalHost(request)               // request came from localhost, i.e. the bouncer
+      requestIsFromLocalHost(request) &&               // request came from localhost, i.e. the bouncer
+      requestIsVIP(request)
     ) userType.getPwHashForUser(userName, rootPB)
     else None
   }

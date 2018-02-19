@@ -1,6 +1,6 @@
 package Services
 
-sealed abstract class CORSStatus(s: String)
+sealed abstract class CORSStatus(val status: String)
 case object SAME_SITE extends CORSStatus("SameSite")
 case object CROSS_SITE extends CORSStatus("CrossSite")
 case object UNKNOWN extends CORSStatus("Unknown")
