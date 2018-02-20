@@ -51,7 +51,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
 
       def msgTry: Try[String] = parseAsSuccess orElse parseAsFailure
 
-      val msg: String = msgTry.getOrElse(List("failure", "Unknown error").mkString("$$"))
+      val msg: String = msgTry.getOrElse(List("failure", "cbi-api-error", "An internal error occurred.  Please do not attempt to resubmit payment.").mkString("$$"))
 
       Ok(msg)
     })
