@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import Logic.DateLogic
-import Services.Authentication.{AuthenticationInstance, PublicUserType, RootUserType, UserType}
+import Services.Authentication._
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
@@ -93,7 +93,7 @@ object RequestCache {
         println("@@@  Nuking RC due to potential CSRF")
         Some((authentication, None))
       }
-      if (requiredUserType != PublicUserType) {
+      if (requiredUserType != PublicUserType && requiredUserType != ApexUserType) {
         CORS.getCORSStatus(parsedRequest.headers) match {
           case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
           case Some(CROSS_SITE) | None => nuke()
