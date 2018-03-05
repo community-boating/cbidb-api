@@ -49,6 +49,8 @@ class ServerBootLoader @Inject()(
 
       PermissionsAuthority.secrets.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
 
+      PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
+
       val preparedQueriesOnly = {
         try {
           println("raw:" + serverProps.getProperty("PreparedQueriesOnly"))

@@ -37,7 +37,8 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
         "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
         "metadata[closeId]" -> "1",
         "metadata[orderId]" -> orderId.toString,
-        "metadata[token]" -> token
+        "metadata[token]" -> token,
+        "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
       ))
       futureResponse.map(r => {
         println(r.json.toString())

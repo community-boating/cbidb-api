@@ -11,6 +11,7 @@ object PermissionsAuthority {
   val persistenceSystem = new Initializable[PersistenceSystem]
   val playMode = new Initializable[Mode]
   val preparedQueriesOnly = new Initializable[Boolean]
+  val instanceName = new Initializable[String]
 
   val stripeURL: String = "https://api.stripe.com/v1/"
 
