@@ -4,7 +4,11 @@ import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
   id: String,
-  amount: Int
+  amount: Int,
+  metadata: ChargeMetadata,
+  created: Int,
+  paid: Boolean,
+  status: String
 )
 
 object Charge {
