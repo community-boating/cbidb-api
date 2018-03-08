@@ -27,6 +27,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
 
       val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQuery(new GetCartDetailsForOrderId(orderId)).head
       val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQuery(new ValidateTokenInOrder(orderId, token)).head
+      val closeID: Int = pb.executePreparedQuery(new GetCurrentOnlineClose).head.closeId
 
       val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "charges")
         .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
@@ -35,7 +36,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
         "currency" -> "usd",
         "source" -> token,
         "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
-        "metadata[closeId]" -> "1",
+        "metadata[closeId]" -> closeID.toString,
         "metadata[orderId]" -> orderId.toString,
         "metadata[token]" -> token,
         "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
