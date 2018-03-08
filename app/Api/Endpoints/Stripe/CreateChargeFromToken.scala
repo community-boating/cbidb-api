@@ -11,7 +11,6 @@ import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
@@ -43,27 +42,34 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
       ))
       futureResponse.map(r => {
         println(r.json.toString())
-        def parseAsSuccess: Try[String] = Try {
+        try {
           val chargeObject = Stripe.JsFacades.Charge(r.json)
-          List("success", chargeObject.id, chargeObject.amount).mkString("$$")
+          val msg = List("success", chargeObject.id, chargeObject.amount).mkString("$$")
+          Ok(msg)
+        }catch {
+          case e: Throwable => {
+            println(e)
+            try {
+              val errorObject = Stripe.JsFacades.Error(r.json)
+              val msg = List("failure", errorObject.`type`, errorObject.message).mkString("$$")
+              Ok(msg)
+            } catch {
+              case f: Throwable => {
+                println(f)
+                Ok(List("failure", "cbi-api-error", f.getMessage).mkString("$$"))
+              }
+            }
+          }
         }
-        def parseAsFailure: Try[String] = Try {
-          val errorObject = Stripe.JsFacades.Error(r.json)
-          List("failure", errorObject.`type`, errorObject.message).mkString("$$")
-        }
-
-        def msgTry: Try[String] = parseAsSuccess orElse parseAsFailure
-
-        val msg: String = msgTry.getOrElse(List("failure", "cbi-api-error", ultimateErrMsg).mkString("$$"))
-
-        Ok(msg)
       })
     } catch {
       case e: Throwable => {
+        println(e)
         Future {Ok(List("failure", "cbi-api-error", e.getMessage).mkString("$$"))}
       }
     }
 
   }
 }
+
 
