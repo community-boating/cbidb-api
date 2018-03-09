@@ -1,6 +1,6 @@
 package CbiUtil
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
 object DateUtil {
@@ -29,4 +29,6 @@ object DateUtil {
     }
   }
 
+  def toBostonTime(ldt: LocalDateTime): ZonedDateTime = ldt.atZone(ZoneId.of("America/New_York"))
+  def getTimestamp(ldt: LocalDateTime): Long = toBostonTime(ldt).toEpochSecond
 }
