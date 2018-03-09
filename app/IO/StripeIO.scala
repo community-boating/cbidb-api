@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StripeIO(baseURL: String, secretKey: String, ws: WSClient) (implicit exec: ExecutionContext) {
   def getCharges(since: Option[LocalDateTime]): Future[List[Charge]] = {
-    def makeRequest(url: String, params: List[String], lastID: Option[String]): Future[List[Charge]] = {
+    def makeRequest(url: String, params: List[String], lastID: Option[String], results: List[Charge]): Future[List[Charge]] = {
       val finalParams: String = (lastID match {
         case None => params
         case Some(id) => ("starting_after=" + id) :: params
@@ -22,22 +22,19 @@ class StripeIO(baseURL: String, secretKey: String, ws: WSClient) (implicit exec:
       val stripeRequest: WSRequest = ws.url(finalURL)
         .withAuth(secretKey, "", WSAuthScheme.BASIC)
 
-      stripeRequest.get.map(res => {
+      stripeRequest.get.flatMap(res => {
         val json = res.json.as[JsArray].value
-        json.map(e => Stripe.JsFacades.Charge(e)).toList
+        json.map(e => Stripe.JsFacades.Charge(e)).toList match {
+          case Nil => Future {results}
+          case l => makeRequest(url, params, Some(l.last.id), l ++ results)
+        }
       })
     }
 
     val params = since match {
-      case None => ""
-      case Some(d) => "?created[gte]=" + DateUtil.toBostonTime(d).toEpochSecond
+      case None => List.empty
+      case Some(d) => List("created[gte]=" + DateUtil.toBostonTime(d).toEpochSecond)
     }
-    val url = baseURL + "charges" + params
-
-
-
-    stripeRequest.get.map(res => {
-
-    })
+    makeRequest(baseURL + "charges", params, None, List.empty)
   }
 }
