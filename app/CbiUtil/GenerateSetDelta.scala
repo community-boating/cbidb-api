@@ -18,11 +18,17 @@ object GenerateSetDelta {
     val toCreateIDs = authoritativeIDs -- slaveIDs
     val toDeleteIDs = slaveIDs -- authoritativeIDs
     val toUpdateIDs = (authoritativeIDs intersect slaveIDs).filter(id => authoritativeById(id)._1 != slaveById(id)._1)
+    toUpdateIDs.foreach(id => {
+      println("authoritative: " + authoritativeById(id)._1)
+      println(authoritativeById(id)._2)
+      println("slave: " + slaveById(id)._1)
+      println(slaveById(id)._2)
+    })
 
     SetDelta(
       toCreate = toCreateIDs.map(id => authoritativeById(id)._2),
       toUpdate = toUpdateIDs.map(id => authoritativeById(id)._2),
-      toDestroy = toDeleteIDs.map(id => authoritativeById(id)._2)
+      toDestroy = toDeleteIDs.map(id => slaveById(id)._2)
     )
   }
 }

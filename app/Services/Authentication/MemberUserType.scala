@@ -10,7 +10,7 @@ object MemberUserType extends UserType {
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,
     requiredUserName: Option[String]
-  ): Option[String] = None
+  ): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

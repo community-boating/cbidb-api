@@ -2,15 +2,15 @@ package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQuery
-import Services.Authentication.{ApexUserType, UserType}
-import Stripe.JsFacades.{Charge, ChargeMetadata}
+import Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
+import IO.PreparedQueries.PreparedQueryForSelect
+import Services.Authentication.ApexUserType
+import Services.PermissionsAuthority
 
-class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQuery[Charge]{
-  override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
+class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect[Charge](Set(ApexUserType)) {
   val getQuery: String =
     s"""
-       |select CHARGE_ID, AMOUNT, CLOSE_ID, orderId, token, CREATED_EPOCH, PAID, status
+       |select CHARGE_ID, AMOUNT, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status
        |from STRIPE_CHARGES
        |where CLOSE_ID = $closeId
        |order by created_datetime
@@ -22,7 +22,7 @@ class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQuery[Charge]{
       closeId = Some(rs.getInt(3).toString),
       orderId = Some(rs.getInt(4).toString),
       token = Some(rs.getString(5)),
-      cbiInstance = None
+      cbiInstance = PermissionsAuthority.instanceName.peek
     )
 
     Charge(

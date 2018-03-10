@@ -3,11 +3,10 @@ package IO.PreparedQueries.Apex
 import java.sql.ResultSet
 import java.time.LocalDateTime
 
-import IO.PreparedQueries.PreparedQuery
-import Services.Authentication.{ApexUserType, UserType}
+import IO.PreparedQueries.PreparedQueryForSelect
+import Services.Authentication.ApexUserType
 
-class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQuery[ValidateTokenInOrderResult]{
-  override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
+class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryForSelect[ValidateTokenInOrderResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
        |select order_id, token, created_datetime

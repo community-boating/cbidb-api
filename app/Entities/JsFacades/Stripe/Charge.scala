@@ -1,5 +1,8 @@
-package Stripe.JsFacades
+package Entities.JsFacades.Stripe
 
+import CbiUtil.GetSQLLiteral
+import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
+import Services.Authentication.ApexUserType
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -9,7 +12,49 @@ case class Charge(
   created: Int,
   paid: Boolean,
   status: String
-)
+) {
+  private val self = this
+  val apexTableName = "STRIPE_CHARGES"
+  val persistenceFields: Map[String, String] = Map(
+    "CHARGE_ID" -> GetSQLLiteral(id),
+    "AMOUNT" -> GetSQLLiteral(amount),
+    "CREATED_EPOCH" -> GetSQLLiteral(created),
+    "PAID" -> GetSQLLiteral(paid),
+    "STATUS" -> GetSQLLiteral(status),
+    "CLOSE_ID" -> GetSQLLiteral(metadata.closeId),
+    "ORDER_ID" -> GetSQLLiteral(metadata.orderId),
+    "TOKEN" -> GetSQLLiteral(metadata.token)
+  )
+  val pkColumnName = "CHARGE_ID"
+  def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType)) {
+    override val pkName: Option[String] = Some(pkColumnName)
+    val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
+    val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
+    val values: String = columnNamesAndValues.map(_._2).mkString(", ")
+    override def getQuery: String =
+      s"""
+         |insert into $apexTableName ($columnNames) values ($values)
+         |
+      """.stripMargin
+  }
+
+  def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType)) {
+    val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
+    override def getQuery: String =
+      s"""
+         |update $apexTableName set $setStatements where $pkColumnName = ${GetSQLLiteral(self.id)}
+         |
+      """.stripMargin
+  }
+
+  def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType)) {
+    override def getQuery: String =
+      s"""
+         |delete from $apexTableName where $pkColumnName = ${GetSQLLiteral(self.id)}
+         |
+      """.stripMargin
+  }
+}
 
 object Charge {
   implicit val chargeJSONFormat = Json.format[Charge]

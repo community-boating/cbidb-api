@@ -1,4 +1,4 @@
-package main.Sample
+package ScalaTest.Sample
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

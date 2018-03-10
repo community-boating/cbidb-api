@@ -2,13 +2,13 @@ package IO.Stripe.StripeAPIIO
 
 import java.time.ZonedDateTime
 
+import Entities.JsFacades.Stripe.Charge
 import IO.HTTP.{GET, HTTPMechanism}
-import Stripe.JsFacades.Charge
 import play.api.libs.json.{JsArray, JsObject}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends {
+class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
   def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] = {
     def makeRequest(url: String, params: List[String], lastID: Option[String], results: List[Charge]): Future[List[Charge]] = {
       val finalParams: String = (lastID match {

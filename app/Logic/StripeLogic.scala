@@ -1,6 +1,6 @@
 package Logic
 
-import Stripe.JsFacades.Charge
+import Entities.JsFacades.Stripe.Charge
 
 object StripeLogic {
   def groupChargesByCloseID(charges: List[Charge]): Map[Option[Int], List[Charge]] =

@@ -4,12 +4,11 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import IO.PreparedQueries.PreparedQueryCastableToJSObject
-import Services.Authentication.{PublicUserType, UserType}
+import IO.PreparedQueries.PreparedQueryForSelectCastableToJSObject
+import Services.Authentication.PublicUserType
 import play.api.libs.json.{JsArray, JsString}
 
-class GetJpClassInstances(startDate: LocalDate) extends PreparedQueryCastableToJSObject[GetJpClassInstancesResult] {
-  override val allowedUserTypes: Set[UserType] = Set(PublicUserType)
+class GetJpClassInstances(startDate: LocalDate) extends PreparedQueryForSelectCastableToJSObject[GetJpClassInstancesResult](Set(PublicUserType))  {
   val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
   val getQuery: String =
     s"""

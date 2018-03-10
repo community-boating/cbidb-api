@@ -1,4 +1,4 @@
-package Stripe.JsFacades
+package Entities.JsFacades.Stripe
 
 import play.api.libs.json._
 

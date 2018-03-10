@@ -2,11 +2,10 @@ package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQuery
-import Services.Authentication.{ApexUserType, UserType}
+import IO.PreparedQueries.PreparedQueryForSelect
+import Services.Authentication.ApexUserType
 
-class GetCartDetailsForOrderId(orderId: Int) extends PreparedQuery[GetCartDetailsForOrderIdResult]{
-  override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
+class GetCartDetailsForOrderId(orderId: Int) extends PreparedQueryForSelect[GetCartDetailsForOrderIdResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
       |select order_id, round(sum(price)*100)

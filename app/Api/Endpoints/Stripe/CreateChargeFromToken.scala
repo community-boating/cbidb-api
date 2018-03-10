@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import Api.AuthenticatedRequest
 import CbiUtil.ParsedRequest
+import Entities.JsFacades.Stripe.{Charge, StripeError}
 import IO.PreparedQueries.Apex._
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
@@ -24,9 +25,9 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
       val token: String = params("token")
       val orderId: Int = params("orderId").toInt
 
-      val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQuery(new GetCartDetailsForOrderId(orderId)).head
-      val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQuery(new ValidateTokenInOrder(orderId, token)).head
-      val closeID: Int = pb.executePreparedQuery(new GetCurrentOnlineClose).head.closeId
+      val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
+      val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
+      val closeID: Int = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
       val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "charges")
         .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
@@ -43,14 +44,14 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
       futureResponse.map(r => {
         println(r.json.toString())
         try {
-          val chargeObject = Stripe.JsFacades.Charge(r.json)
+          val chargeObject = Charge(r.json)
           val msg = List("success", chargeObject.id, chargeObject.amount).mkString("$$")
           Ok(msg)
         }catch {
           case e: Throwable => {
             println(e)
             try {
-              val errorObject = Stripe.JsFacades.Error(r.json)
+              val errorObject = StripeError(r.json)
               val msg = List("failure", errorObject.`type`, errorObject.message).mkString("$$")
               Ok(msg)
             } catch {

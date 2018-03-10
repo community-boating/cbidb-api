@@ -1,4 +1,4 @@
-package main
+package ScalaTest
 
 import IO.HTTP.{FromScalajHTTP, GET}
 import org.junit.runner.RunWith

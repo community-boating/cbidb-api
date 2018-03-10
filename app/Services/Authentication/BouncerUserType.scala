@@ -4,14 +4,14 @@ import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
-object ApexUserType extends UserType {
-  val uniqueUserName = "APEX"
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val headers = requestHeaders.toMap
-    val headerKey = "apex-token"
-    if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
-    else None
-  }
+object BouncerUserType extends UserType {
+  val uniqueUserName = ""
+  def getAuthenticatedUsernameInRequest(
+    requestHeaders: Headers,
+    requestCookies: Cookies,
+    rootCB: CacheBroker,
+    apexToken: String
+  ): Option[String] = None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,

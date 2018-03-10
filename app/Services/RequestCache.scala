@@ -14,7 +14,7 @@ class RequestCache private[RequestCache] (val auth: AuthenticationInstance) {
   private val self = this
   val pb: PersistenceBroker = {
     if (auth.userType == RootUserType) new OracleBroker(this, false)
-    else new OracleBroker(this, PermissionsAuthority.preparedQueriesOnly.get)
+    else new OracleBroker(this, PermissionsAuthority.preparedQueriesOnly.getOrElse(true))
   }
   val cb: CacheBroker = new RedisBroker
 
@@ -131,4 +131,5 @@ object RequestCache {
   }
 
   lazy private[Services] val getRootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT)
+  lazy private[Services] val getBouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER)
 }

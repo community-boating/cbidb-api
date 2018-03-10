@@ -2,11 +2,10 @@ package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQuery
-import Services.Authentication.{ApexUserType, UserType}
+import IO.PreparedQueries.PreparedQueryForSelect
+import Services.Authentication.ApexUserType
 
-class GetCurrentOnlineClose extends PreparedQuery[GetCurrentOnlineCloseResult]{
-  override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
+class GetCurrentOnlineClose extends PreparedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
        |select cc_pkg.get_current_online_close from dual

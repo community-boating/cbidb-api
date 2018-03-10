@@ -4,9 +4,9 @@ import javax.inject.Inject
 
 import Api.AuthenticatedRequest
 import CbiUtil.ParsedRequest
+import Entities.JsFacades.Stripe.{StripeError, Token}
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
-import Stripe.JsFacades.Token
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent}
 
@@ -39,7 +39,7 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
       }
 
       def parseAsFailure: Try[String] = Try {
-        val errorObject = Stripe.JsFacades.Error(r.json)
+        val errorObject = StripeError(r.json)
         List("failure", errorObject.`type`, errorObject.message).mkString("$$")
       }
 

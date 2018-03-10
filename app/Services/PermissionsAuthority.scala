@@ -24,6 +24,23 @@ object PermissionsAuthority {
   val SEC_COOKIE_NAME = "CBIDB-SEC"
   private val rootPB = RequestCache.getRootRC.pb
   private val rootCB = new RedisBroker
+  private val bouncerPB = RequestCache.getBouncerRC.pb
+
+  // This should only be called by the unit tester.
+  // If it's ever called when the application is runnning, it shoudl return None.
+  // If the unit tester is running then the initializables aren't set,
+  // so try to get their value, catch the exception, and return the PB
+  def getRootPB: Option[PersistenceBroker] = {
+    try {
+      playMode.peek.get
+      None
+    } catch {
+      case e: Throwable => {
+        println("@@@@ Giving away the root PB; was this the test runner?")
+        Some(rootPB)
+      }
+    }
+  }
 
   def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
     val allowedIPs = Set(
@@ -52,7 +69,7 @@ object PermissionsAuthority {
       allowableUserTypes.get.contains(userType) &&  // requested user type is enabled in this server instance
       requestIsFromLocalHost(request) &&               // request came from localhost, i.e. the bouncer
       requestIsVIP(request)
-    ) userType.getPwHashForUser(userName, rootPB)
+    ) userType.getPwHashForUser(userName, bouncerPB)
     else None
   }
 

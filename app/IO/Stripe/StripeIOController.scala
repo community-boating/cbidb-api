@@ -4,24 +4,24 @@ import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 import CbiUtil.{GenerateSetDelta, SetDelta}
+import Entities.JsFacades.Stripe.Charge
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
-import Stripe.JsFacades.Charge
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism) {
-  def updateLocalChargesFromAPIForClose(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: ZonedDateTime): Unit = {
+  def updateLocalChargesFromAPIForClose(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: Option[ZonedDateTime]): Unit = {
     val delta = getAPItoDBChargeDelta(closeId, closeOpenDateTime, closeFinalizedDateTime)
     commitChargeDeltaToDatabase(delta)
   }
 
-  def getAPItoDBChargeDelta(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: ZonedDateTime): SetDelta[Charge] = {
+  def getAPItoDBChargeDelta(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: Option[ZonedDateTime]): SetDelta[Charge] = {
     val filterChargesToClose: Charge => Boolean =
-      c => c.metadata.closeId.get == closeId.toString
+      c => c.metadata.closeId.getOrElse("") == closeId.toString
     val getChargeID: Charge => String = c => c.id
-    val currentLocalCharges: Set[Charge] = dbIO.getLocalCharges.toSet
+    val currentLocalCharges: Set[Charge] = dbIO.getLocalChargesForClose(closeId).toSet
 
     // Unfortunately we can't ask stripe to just give us all charges with a given close ID.
     // So, first try getting all charges created up to 24 hours before the close was opened.
@@ -47,6 +47,6 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
   private def commitChargeDeltaToDatabase(delta: SetDelta[Charge]): Unit = {
     delta.toCreate.foreach(dbIO.createCharge)
     delta.toUpdate.foreach(dbIO.updateCharge)
-    delta.toDestroy.map(c => c.id).foreach(dbIO.deleteCharge)
+    delta.toDestroy.foreach(dbIO.deleteCharge)
   }
 }

@@ -2,12 +2,11 @@ package IO.PreparedQueries.Staff
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQueryCastableToJSObject
-import Services.Authentication.{StaffUserType, UserType}
+import IO.PreparedQueries.PreparedQueryForSelectCastableToJSObject
+import Services.Authentication.StaffUserType
 import play.api.libs.json.{JsArray, JsString}
 
-class GetUsers extends PreparedQueryCastableToJSObject[GetUsersResult]{
-  override val allowedUserTypes: Set[UserType] = Set(StaffUserType)
+class GetUsers extends PreparedQueryForSelectCastableToJSObject[GetUsersResult](Set(StaffUserType)) {
   val getQuery: String =
     """
       |select user_id, user_name from users

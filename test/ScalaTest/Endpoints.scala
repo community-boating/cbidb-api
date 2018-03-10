@@ -1,4 +1,4 @@
-package main
+package ScalaTest
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

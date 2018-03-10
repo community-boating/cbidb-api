@@ -8,6 +8,11 @@ class Initializable[T] {
     case None => throw new Exception("Attempted to get() an uninitialized value")
   }
 
+  def getOrElse(fallback: T): T = value match {
+    case Some(t: T) => t
+    case None => fallback
+  }
+
   def set(t: T): T = synchronized {
     value match {
       case None => {

@@ -1,16 +1,16 @@
-package Stripe.JsFacades
+package Entities.JsFacades.Stripe
 
 import play.api.libs.json.{JsString, JsValue}
 
-case class Error(
+case class StripeError(
   `type`: String,
   message: String
 )
 
-object Error {
-  def apply(v: JsValue): Error = {
+object StripeError {
+  def apply(v: JsValue): StripeError = {
     val error = v("error")
-    Error(
+    StripeError(
       error("type").as[JsString].value,
       error("message").as[JsString].value
     )
