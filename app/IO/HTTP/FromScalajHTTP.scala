@@ -34,9 +34,3 @@ class FromScalajHTTP(implicit exec: ExecutionContext) extends HTTPMechanism {
     basicAuthPassword: Option[String]
   ): Future[JsValue] = getString(url, method, body, basicAuthUsername, basicAuthPassword).map(s => Json.parse(s))
 }
-
-/*
-
-
-
- */

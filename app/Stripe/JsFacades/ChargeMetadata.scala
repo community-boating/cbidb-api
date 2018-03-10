@@ -3,10 +3,10 @@ package Stripe.JsFacades
 import play.api.libs.json.{JsValue, Json}
 
 case class ChargeMetadata(
-  closeId: String,
-  orderId: String,
-  token: String,
-  cbiInstance: String
+  closeId: Option[String],
+  orderId: Option[String],
+  token: Option[String],
+  cbiInstance: Option[String]
 )
 
 object ChargeMetadata {
