@@ -1,10 +1,9 @@
-package Logic.PreparedQueries.Apex
+package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 import java.time.LocalDateTime
 
-import Api.ApiDataObject
-import Logic.PreparedQueries.PreparedQuery
+import IO.PreparedQueries.PreparedQuery
 import Services.Authentication.{ApexUserType, UserType}
 
 class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQuery[ValidateTokenInOrderResult]{
@@ -30,4 +29,4 @@ case class ValidateTokenInOrderResult (
   orderId: Int,
   token: String,
   created: LocalDateTime
-) extends ApiDataObject
+)

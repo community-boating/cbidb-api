@@ -1,7 +1,6 @@
 package Services
 
-import Api.ApiDataObject
-import Logic.PreparedQueries.PreparedQuery
+import IO.PreparedQueries.PreparedQuery
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Storable._
 
@@ -34,7 +33,7 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
     else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
   }
 
-  final def executePreparedQuery[T <: ApiDataObject](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
+  final def executePreparedQuery[T](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
     if (pq.allowedUserTypes.contains(rc.auth.userType)) executePreparedQueryImplementation(pq, fetchSize)
     else throw new UnauthorizedAccessException("executePreparedQuery denied to userType " + rc.auth.userType)
   }
@@ -45,7 +44,7 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
   protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T]
   protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T]
   protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
-  protected def executePreparedQueryImplementation[T <: ApiDataObject](pq: PreparedQuery[T], fetchSize: Int = 50): List[T]
+  protected def executePreparedQueryImplementation[T](pq: PreparedQuery[T], fetchSize: Int = 50): List[T]
 
 
   // TODO: implement some IDs

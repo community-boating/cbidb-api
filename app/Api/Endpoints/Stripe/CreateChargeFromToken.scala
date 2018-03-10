@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import Api.AuthenticatedRequest
 import CbiUtil.ParsedRequest
-import Logic.PreparedQueries.Apex._
+import IO.PreparedQueries.Apex._
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}

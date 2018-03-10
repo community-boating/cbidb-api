@@ -1,11 +1,10 @@
-package Logic.PreparedQueries
+package IO.PreparedQueries
 
 import java.sql.ResultSet
 
-import Api.ApiDataObject
 import Services.Authentication.UserType
 
-abstract class PreparedQuery[T <: ApiDataObject] {
+abstract class PreparedQuery[T] {
   // TODO: implement user type downgrading on these
   val allowedUserTypes: Set[UserType]
   def getQuery: String

@@ -7,7 +7,7 @@ import javax.inject.Inject
 import Api.Endpoints.Public.JpClassInstances.JpClassInstancesParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import CbiUtil.DateUtil
-import Logic.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
+import IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
 import Services.Authentication.PublicUserType
 import play.api.mvc.{Action, AnyContent}
 

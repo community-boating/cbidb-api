@@ -1,4 +1,4 @@
-package Logic.PreparedQueries
+package IO.PreparedQueries
 
 import play.api.libs.json.JsArray
 

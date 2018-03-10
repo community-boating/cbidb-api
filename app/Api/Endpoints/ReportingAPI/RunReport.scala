@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
-import Api.{ApiDataObject, AuthenticatedRequest, CacheableResult, ParamsObject}
+import Api.{AuthenticatedRequest, CacheableResult, ParamsObject}
 import CbiUtil.ParsedRequest
 import Reporting.Report
 import Services.Authentication.StaffUserType
@@ -117,5 +117,5 @@ object RunReport {
     outputType: String
   ) extends ParamsObject
 
-  class RunReportsResult extends ApiDataObject
+  class RunReportsResult
 }

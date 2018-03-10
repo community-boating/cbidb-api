@@ -1,9 +1,8 @@
-package Logic.PreparedQueries.Staff
+package IO.PreparedQueries.Staff
 
 import java.sql.ResultSet
 
-import Api.ApiDataObject
-import Logic.PreparedQueries.PreparedQueryCastableToJSObject
+import IO.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.{StaffUserType, UserType}
 import play.api.libs.json.{JsArray, JsString}
 
@@ -33,4 +32,4 @@ class GetUsers extends PreparedQueryCastableToJSObject[GetUsersResult]{
 case class GetUsersResult(
   userId: Int,
   userName: String,
-) extends ApiDataObject
+)

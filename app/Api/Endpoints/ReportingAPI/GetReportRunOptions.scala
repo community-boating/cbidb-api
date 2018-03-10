@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 import Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
-import Api.{ApiDataObject, AuthenticatedRequest, CacheableResult, ParamsObject}
+import Api.{AuthenticatedRequest, CacheableResult, ParamsObject}
 import CbiUtil.ParsedRequest
 import Reporting.ReportingFilters._
 import Reporting.{Report, ReportFactory}
@@ -115,5 +115,5 @@ extends AuthenticatedRequest with CacheableResult[GetReportRunOptionsParamsObjec
 
 object GetReportRunOptions {
   class GetReportRunOptionsParamsObject extends ParamsObject
-  class GetReportRunOptionsResult extends ApiDataObject
+  class GetReportRunOptionsResult
 }

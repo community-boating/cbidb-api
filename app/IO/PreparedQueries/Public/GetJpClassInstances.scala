@@ -1,11 +1,10 @@
-package Logic.PreparedQueries.Public
+package IO.PreparedQueries.Public
 
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import Api.ApiDataObject
-import Logic.PreparedQueries.PreparedQueryCastableToJSObject
+import IO.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.{PublicUserType, UserType}
 import play.api.libs.json.{JsArray, JsString}
 
@@ -74,4 +73,4 @@ case class GetJpClassInstancesResult(
   instructorFirstName: String,
   instructorLastName: String,
   enrollees: Int
-) extends ApiDataObject
+)

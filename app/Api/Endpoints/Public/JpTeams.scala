@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
-import Logic.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
+import IO.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
 import Services.Authentication.PublicUserType
 import play.api.mvc.{Action, AnyContent}
 

@@ -1,6 +1,6 @@
 package main
 import IO.HTTP.{FromScalajHTTP, GET}
-import IO.StripeIO
+import IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -12,7 +12,7 @@ import scala.concurrent.{Await, Future}
 
 @RunWith(classOf[JUnitRunner])
 class GetCharges extends FunSuite {
-  val sio = new StripeIO(
+  val sio = new StripeAPIIOLiveService(
     "https://api.stripe.com/v1/",
     "",
     new FromScalajHTTP()

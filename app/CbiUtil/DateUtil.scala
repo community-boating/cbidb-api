@@ -1,7 +1,7 @@
 package CbiUtil
 
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 
 object DateUtil {
   def parse(dateLiteral: String, formatString: String = "MM/dd/yyyy"): LocalDate =

@@ -1,7 +1,7 @@
 package Api
 
 import CbiUtil.ParsedRequest
-import Logic.PreparedQueries.PreparedQueryCastableToJSObject
+import IO.PreparedQueries.PreparedQueryCastableToJSObject
 import Services.Authentication.UserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PersistenceBroker}
@@ -10,7 +10,7 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.Future
 
-trait CacheableResultFromPreparedQuery[T <: ParamsObject, U <: ApiDataObject] extends CacheableResult[T, U] with AuthenticatedRequest {
+trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableResult[T, U] with AuthenticatedRequest {
   type PQ = PreparedQueryCastableToJSObject[U]
   private def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
     val calculateValue: (() => Future[JsObject]) = () => Future {
