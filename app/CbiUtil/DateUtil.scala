@@ -30,5 +30,7 @@ object DateUtil {
   }
 
   def toBostonTime(ldt: LocalDateTime): ZonedDateTime = ldt.atZone(ZoneId.of("America/New_York"))
+  def toBostonTime(ld: LocalDate): ZonedDateTime = ld.atStartOfDay(ZoneId.of("America/New_York"))
+
   def getTimestamp(ldt: LocalDateTime): Long = toBostonTime(ldt).toEpochSecond
 }

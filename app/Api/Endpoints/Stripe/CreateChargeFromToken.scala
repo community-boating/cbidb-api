@@ -3,9 +3,13 @@ package Api.Endpoints.Stripe
 import javax.inject.Inject
 
 import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
+import CbiUtil.{DateUtil, ParsedRequest}
 import Entities.JsFacades.Stripe.{Charge, StripeError}
+import IO.HTTP.FromWSClient
 import IO.PreparedQueries.Apex._
+import IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
+import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import IO.Stripe.StripeIOController
 import Services.Authentication.ApexUserType
 import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
@@ -27,7 +31,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
 
       val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
       val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
-      val closeID: Int = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
+      val close: GetCurrentOnlineCloseResult = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head
 
       val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "charges")
         .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
@@ -36,7 +40,7 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
         "currency" -> "usd",
         "source" -> token,
         "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
-        "metadata[closeId]" -> closeID.toString,
+        "metadata[closeId]" -> close.closeId.toString,
         "metadata[orderId]" -> orderId.toString,
         "metadata[token]" -> token,
         "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
@@ -46,6 +50,20 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
         try {
           val chargeObject = Charge(r.json)
           val msg = List("success", chargeObject.id, chargeObject.amount).mkString("$$")
+          try {
+            val apiService = new StripeAPIIOLiveService(
+              PermissionsAuthority.stripeURL,
+              PermissionsAuthority.secrets.stripeAPIKey.get(rc),
+              new FromWSClient(ws)
+            )
+            val dbService = new StripeDatabaseIOMechanism(pb)
+            val stripeIOController = new StripeIOController(apiService, dbService)
+            stripeIOController.updateLocalChargesFromAPIForClose(close.closeId, DateUtil.toBostonTime(close.createdOn), close.finalized.map(DateUtil.toBostonTime))
+          } catch {
+            case t: Throwable => {
+              println("Failed to update charges in db")
+            }
+          }
           Ok(msg)
         }catch {
           case e: Throwable => {
