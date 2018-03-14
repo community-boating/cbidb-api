@@ -1,27 +1,34 @@
 package Services
 
 import CbiUtil.{Initializable, ParsedRequest}
-import Services.Authentication.{AuthenticationInstance, UserType}
-import Services.Secrets.SecretsObject
+import IO.HTTP.FromWSClient
+import IO.Stripe.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
 import play.api.Mode
+import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object PermissionsAuthority {
+  val stripeURL: String = "https://api.stripe.com/v1/"
+  val SEC_COOKIE_NAME = "CBIDB-SEC"
+
   val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
+  def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
   val playMode = new Initializable[Mode]
   val preparedQueriesOnly = new Initializable[Boolean]
   val instanceName = new Initializable[String]
 
-  val stripeURL: String = "https://api.stripe.com/v1/"
-
   private val apexToken = new Initializable[String]
-  def setApexToken(s: String) = apexToken.set(s)
-  val secrets = new SecretsObject
+  def setApexToken(s: String): String = apexToken.set(s)
+  private val stripeAPIKey = new Initializable[String]
+  def setStripeAPIKey(s: String): String = apexToken.set(s)
 
-  def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
+  val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret[WSClient => StripeAPIIOMechanism](rc => rc.auth.userType == ApexUserType)
+    .setImmediate(ws => new StripeAPIIOLiveService(stripeURL, stripeAPIKey.get, new FromWSClient(ws)))
 
-  val SEC_COOKIE_NAME = "CBIDB-SEC"
   private val rootPB = RequestCache.getRootRC.pb
   private val rootCB = new RedisBroker
   private val bouncerPB = RequestCache.getBouncerRC.pb

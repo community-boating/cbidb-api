@@ -8,7 +8,7 @@ abstract class HTTPMechanism {
   def getString(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[String]
@@ -16,7 +16,7 @@ abstract class HTTPMechanism {
   def getJSON(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[JsValue]

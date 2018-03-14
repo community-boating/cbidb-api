@@ -9,7 +9,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
   def getString(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[String] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.body)
@@ -17,7 +17,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
   def getJSON(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[JsValue] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.json)
@@ -25,7 +25,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
   private def getResponse(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[WSResponse] = {

@@ -9,7 +9,7 @@ class FromScalajHTTP(implicit exec: ExecutionContext) extends HTTPMechanism {
   def getString(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[String] = Future{
@@ -22,14 +22,14 @@ class FromScalajHTTP(implicit exec: ExecutionContext) extends HTTPMechanism {
     }
     method match {
       case GET => req.asString.body
-      case POST => req.postData(body.get).asString.body
+      case POST => req.postForm(body.get.toSeq).asString.body
     }
   }
 
   def getJSON(
     url: String,
     method: HTTPMethod,
-    body: Option[String],
+    body: Option[Map[String, String]],
     basicAuthUsername: Option[String],
     basicAuthPassword: Option[String]
   ): Future[JsValue] = getString(url, method, body, basicAuthUsername, basicAuthPassword).map(s => Json.parse(s))

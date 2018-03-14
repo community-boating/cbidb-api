@@ -2,7 +2,6 @@ package Api.Endpoints
 
 import javax.inject.Inject
 
-import Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext

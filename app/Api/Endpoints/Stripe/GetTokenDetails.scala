@@ -3,18 +3,14 @@ package Api.Endpoints.Stripe
 import javax.inject.Inject
 
 import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
-import Entities.JsFacades.Stripe.{StripeError, Token}
-import Services.Authentication.ApexUserType
-import Services.PermissionsAuthority
-import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def get(token: String): Action[AnyContent] = Action.async {req => {
+    /*
     val rc = getRC(ApexUserType, ParsedRequest(req))
     val pb = rc.pb
 
@@ -48,6 +44,7 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
       val msg: String = msgTry.getOrElse(List("failure", "Unknown error").mkString("$$"))
 
       Ok(msg)
-    })
+    })*/
+    Future{Ok("dfg")}
   }}
 }

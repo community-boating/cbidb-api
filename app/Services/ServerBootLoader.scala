@@ -47,7 +47,7 @@ class ServerBootLoader @Inject()(
       // Init PA with APEX access token
       PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
 
-      PermissionsAuthority.secrets.stripeAPIKey.set(serverProps.getProperty("StripeAPIKey"))
+      PermissionsAuthority.setStripeAPIKey(serverProps.getProperty("StripeAPIKey"))
 
       PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
 
