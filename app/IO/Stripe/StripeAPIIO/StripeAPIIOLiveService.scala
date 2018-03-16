@@ -59,10 +59,14 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
     val f1: Failover[Future[JsValue], Future[ServiceRequestResult]] = Failover(makeRequest())
     val f2 = f1.andCatch(_ => Future { new CriticalError(None, None)})
-      .andThen(jsValFut => jsValFut.map(jsVal => Charge(jsVal)), jsValFut => jsValFut.map(jsVal => {
-        val stripeError = StripeError(jsVal)
-        ValidationError(Some(stripeError.message))
-      }))
+      .andThen(
+        jsValFut => jsValFut.map(jsVal => Charge(jsVal)),
+        jsValFut => jsValFut.map(jsVal => {
+          val stripeError = StripeError(jsVal)
+          ValidationError(Some(stripeError.message))
+        })
+      )
+
     f2 match {
       case Resolved(_) => Future{Succeeded(Unit)}
       case Rejected(x) => x

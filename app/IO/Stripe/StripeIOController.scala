@@ -3,13 +3,14 @@ package IO.Stripe
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
-import CbiUtil.{GenerateSetDelta, SetDelta}
+import CbiUtil.{GenerateSetDelta, ServiceRequestResult, SetDelta, Succeeded}
 import Entities.JsFacades.Stripe.Charge
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.util.Success
 
 class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism) {
   def updateLocalChargesFromAPIForClose(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: Option[ZonedDateTime]): Unit = {
@@ -42,6 +43,13 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
       ).filter(filterChargesToClose).toSet
       GenerateSetDelta(twoMonthGracePeriod, currentLocalCharges, getChargeID)
     }
+  }
+
+  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult] = {
+    apiIO.createCharge(amountInCents, token, orderId, closeId).map({
+      case Succeeded(_) =>
+    })
+
   }
 
   private def commitChargeDeltaToDatabase(delta: SetDelta[Charge]): Unit = {
