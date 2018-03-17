@@ -3,6 +3,7 @@ package Services
 import CbiUtil.{Initializable, ParsedRequest}
 import IO.HTTP.FromWSClient
 import IO.Stripe.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
 import play.api.Mode
 import play.api.libs.ws.WSClient
@@ -26,8 +27,9 @@ object PermissionsAuthority {
   private val stripeAPIKey = new Initializable[String]
   def setStripeAPIKey(s: String): String = apexToken.set(s)
 
-  val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret[WSClient => StripeAPIIOMechanism](rc => rc.auth.userType == ApexUserType)
-    .setImmediate(ws => new StripeAPIIOLiveService(stripeURL, stripeAPIKey.get, new FromWSClient(ws)))
+  val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+  val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+    .setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
   private val rootPB = RequestCache.getRootRC.pb
   private val rootCB = new RedisBroker

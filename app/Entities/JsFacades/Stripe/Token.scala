@@ -11,6 +11,7 @@ case class Token(
 
 object Token {
   implicit val tokenReads = Json.format[Token]
+  def apply(v: JsValue): Token = v.as[Token]
 }
 
 /*

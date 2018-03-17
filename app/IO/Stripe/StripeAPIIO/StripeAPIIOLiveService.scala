@@ -3,7 +3,7 @@ package IO.Stripe.StripeAPIIO
 import java.time.ZonedDateTime
 
 import CbiUtil._
-import Entities.JsFacades.Stripe.{Charge, StripeError}
+import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
 import IO.HTTP.{GET, HTTPMechanism, POST}
 import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
@@ -37,7 +37,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     makeRequest(baseURL + "charges", params, None, List.empty)
   }
 
-  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult] = {
+  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
     def makeRequest(): Future[JsValue] = {
       http.getJSON(
         baseURL + "charges",
@@ -57,20 +57,46 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       )
     }
 
-    val f1: Failover[Future[JsValue], Future[ServiceRequestResult]] = Failover(makeRequest())
-    val f2 = f1.andCatch(_ => Future { new CriticalError(None, None)})
+    val f1: Failover[Future[JsValue], Future[ServiceRequestResult[Charge, StripeError]]] = Failover(makeRequest())
+      .andCatch(e => Future { new CriticalError(e)})
+
+    val f2 = f1
       .andThen(
         jsValFut => jsValFut.map(jsVal => Charge(jsVal)),
-        jsValFut => jsValFut.map(jsVal => {
-          val stripeError = StripeError(jsVal)
-          ValidationError(Some(stripeError.message))
-        })
+        jsValFut => jsValFut.map(jsVal => new ValidationError(StripeError(jsVal)))
       )
 
     f2 match {
-      case Resolved(_) => Future{Succeeded(Unit)}
-      case Rejected(x) => x
-      case Failed(_) => Future { new CriticalError(None, None)}
+      case Resolved(c: Charge) => Future{new Succeeded(c)}
+      case Rejected(se: StripeError) => Future{ new ValidationError(se)}
+      case Failed(e: Throwable) => Future { new CriticalError(e)}
+    }
+  }
+
+  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
+    def makeRequest(): Future[JsValue] = {
+      http.getJSON(
+        baseURL + "tokens/" + token,
+        GET,
+        None,
+        Some(secretKey),
+        Some("")
+      )
+    }
+
+    val f1: Failover[Future[JsValue], Future[ServiceRequestResult[Token, StripeError]]] = Failover(makeRequest())
+      .andCatch(e => Future { new CriticalError(e)})
+
+    val f2 = f1
+      .andThen(
+        jsValFut => jsValFut.map(jsVal => Token(jsVal)),
+        jsValFut => jsValFut.map(jsVal => new ValidationError(StripeError(jsVal)))
+      )
+
+    f2 match {
+      case Resolved(t: Token) => Future{new Succeeded(t)}
+      case Rejected(se: StripeError) => Future{ new ValidationError(se)}
+      case Failed(e: Throwable) => Future { new CriticalError(e)}
     }
   }
 }

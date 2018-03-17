@@ -3,6 +3,10 @@ package Api.Endpoints.Stripe
 import javax.inject.Inject
 
 import Api.AuthenticatedRequest
+import CbiUtil.ParsedRequest
+import IO.Stripe.StripeIOController
+import Services.Authentication.ApexUserType
+import Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
@@ -10,9 +14,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def get(token: String): Action[AnyContent] = Action.async {req => {
-    /*
     val rc = getRC(ApexUserType, ParsedRequest(req))
     val pb = rc.pb
+    val stripeIOController = new StripeIOController(
+      PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
+      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
+    )
+    /*
+
 
     val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "tokens/" + token)
       .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)

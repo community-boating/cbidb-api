@@ -3,12 +3,14 @@ package Services
 import javax.inject.Inject
 
 import CbiUtil.Initializable
+import IO.HTTP.FromWSClient
+import IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE
 import play.api.inject.ApplicationLifecycle
 import play.api.{Application, Mode}
 
 import scala.concurrent.Future
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ServerBootLoader @Inject()(
   lifecycle: ApplicationLifecycle,
@@ -47,7 +49,6 @@ class ServerBootLoader @Inject()(
       // Init PA with APEX access token
       PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
 
-      PermissionsAuthority.setStripeAPIKey(serverProps.getProperty("StripeAPIKey"))
 
       PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
 
@@ -67,6 +68,10 @@ class ServerBootLoader @Inject()(
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)
+
+      PermissionsAuthority.stripeAPIIOMechanism.set(
+        ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, serverProps.getProperty("StripeAPIKey"), new FromWSClient(ws))
+      )
     }
     case Some(_) => // The server is already booted up; do nothing
   }

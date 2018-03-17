@@ -4,12 +4,13 @@ import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 import CbiUtil.{GenerateSetDelta, ServiceRequestResult, SetDelta, Succeeded}
-import Entities.JsFacades.Stripe.Charge
+import Entities.JsFacades.Stripe.{Charge, StripeError}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 
 class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism) {
@@ -45,11 +46,8 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     }
   }
 
-  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult] = {
-    apiIO.createCharge(amountInCents, token, orderId, closeId).map({
-      case Succeeded(_) =>
-    })
-
+  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
+    apiIO.createCharge(amountInCents, token, orderId, closeId)
   }
 
   private def commitChargeDeltaToDatabase(delta: SetDelta[Charge]): Unit = {
