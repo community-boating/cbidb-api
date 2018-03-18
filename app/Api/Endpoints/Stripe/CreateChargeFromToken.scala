@@ -35,6 +35,9 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
     stripeIOController.createCharge(orderDetails.priceInCents, token, orderId, close.closeId).map({
       case s: NetSuccess[Charge, StripeError] => {
         println("Create charge net success: " + s.successObject)
+        if (s.isInstanceOf[Warning[Charge, StripeError]]) {
+          println("Warning: " + s.asInstanceOf[Warning[Charge, StripeError]].e)
+        }
         Ok(List("success", s.successObject.id, s.successObject.amount).mkString("$$"))
       }
       case v: ValidationError[Charge, StripeError] => {
