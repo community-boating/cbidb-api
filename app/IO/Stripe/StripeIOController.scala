@@ -47,7 +47,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
   }
 
   def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
-    apiIO.createCharge(amountInCents, token, orderId, closeId)
+    apiIO.createCharge(dbIO, amountInCents, token, orderId, closeId)
   }
 
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
