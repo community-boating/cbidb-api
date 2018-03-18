@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 import CbiUtil.{GenerateSetDelta, ServiceRequestResult, SetDelta, Succeeded}
-import Entities.JsFacades.Stripe.{Charge, StripeError}
+import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 
@@ -49,6 +49,9 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
   def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
     apiIO.createCharge(amountInCents, token, orderId, closeId)
   }
+
+  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
+    apiIO.getTokenDetails(token)
 
   private def commitChargeDeltaToDatabase(delta: SetDelta[Charge]): Unit = {
     delta.toCreate.foreach(dbIO.createCharge)

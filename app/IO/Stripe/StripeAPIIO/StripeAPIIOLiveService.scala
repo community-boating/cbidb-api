@@ -9,6 +9,7 @@ import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
   def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] = {
@@ -84,19 +85,23 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       )
     }
 
-    val f1: Failover[Future[JsValue], Future[ServiceRequestResult[Token, StripeError]]] = Failover(makeRequest())
-      .andCatch(e => Future { new CriticalError(e)})
-
-    val f2 = f1
-      .andThen(
-        jsValFut => jsValFut.map(jsVal => Token(jsVal)),
-        jsValFut => jsValFut.map(jsVal => new ValidationError(StripeError(jsVal)))
-      )
-
-    f2 match {
-      case Resolved(t: Token) => Future{new Succeeded(t)}
-      case Rejected(se: StripeError) => Future{ new ValidationError(se)}
-      case Failed(e: Throwable) => Future { new CriticalError(e)}
+    val f1: Future[Failover[JsValue, ServiceRequestResult[Token, StripeError]]] = {
+      makeRequest().transform({
+        case Success(jsv: JsValue) => Success(Resolved(jsv))
+        case Failure(e: Throwable) => Success(Failed(e))
+      })
     }
+
+    val f2: Future[Failover[Token, ServiceRequestResult[Token, StripeError]]] = f1.map(_.andThen(
+      jsVal => Token(jsVal),
+      jsVal => ValidationError(StripeError(jsVal))
+    ))
+
+
+    f2.map({
+      case Resolved(t: Token) => Succeeded(t)
+      case Rejected(se: ServiceRequestResult[Token, StripeError]) => se
+      case Failed(e: Throwable) => CriticalError(e)
+    })
   }
 }

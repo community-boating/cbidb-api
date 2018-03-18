@@ -5,6 +5,9 @@ package CbiUtil
 // (i.e. any `andThen`'s after an exception will never run
 // Seems like the only way to do it in a static typing environment
 sealed abstract class Failover[A, B] {
+  def isResolved: Boolean
+  def isFailed: Boolean
+  def isRejected: Boolean
   // If called on a Resolved, pipe that success value into the new block and return a Resolved out of that
   // If called on a Rejection or an uncaught Failure, pass it on through
   def andThen[C](block: (A => C)): Failover[C, B] = this match {
@@ -57,9 +60,21 @@ sealed abstract class Failover[A, B] {
     this
   }
 }
-case class Resolved[A, B](a: A) extends Failover[A, B]
-case class Failed[A, B](e: Throwable) extends Failover[A, B]
-case class Rejected[A, B](b: B) extends Failover[A, B]
+case class Resolved[A, B](a: A) extends Failover[A, B] {
+  def isResolved: Boolean = true
+  def isFailed: Boolean = false
+  def isRejected: Boolean = false
+}
+case class Failed[A, B](e: Throwable) extends Failover[A, B] {
+  def isResolved: Boolean = false
+  def isFailed: Boolean = true
+  def isRejected: Boolean = false
+}
+case class Rejected[A, B](b: B) extends Failover[A, B] {
+  def isResolved: Boolean = false
+  def isFailed: Boolean = false
+  def isRejected: Boolean = true
+}
 
 object Failover {
   def apply[A, B](block: => A): Failover[A, B] = {

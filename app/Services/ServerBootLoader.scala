@@ -51,6 +51,7 @@ class ServerBootLoader @Inject()(
 
 
       PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
+      println("Using CBI DB instance: " + poolConstructor.getMainSchemaName)
 
       val preparedQueriesOnly = {
         try {

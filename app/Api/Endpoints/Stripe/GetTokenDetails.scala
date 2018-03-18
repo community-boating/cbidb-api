@@ -3,7 +3,8 @@ package Api.Endpoints.Stripe
 import javax.inject.Inject
 
 import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
+import CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
+import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
 import IO.Stripe.StripeIOController
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
@@ -20,40 +21,19 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
       PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
       PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
     )
-    /*
 
-
-    val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "tokens/" + token)
-      .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
-    val futureResponse: Future[WSResponse] = stripeRequest.get
-    futureResponse.map(r => {
-      println(r.json.toString())
-      val tokenObject = r.json.as[Token]
-
-      def parseAsSuccess: Try[String] = Try {
-        val tokenObject = r.json.as[Token]
-        List(
-          "success",
-          tokenObject.id,
-          tokenObject.used,
-          tokenObject.card.last4,
-          tokenObject.card.exp_month,
-          tokenObject.card.exp_year,
-          tokenObject.card.address_zip
-        ).mkString("$$")
-      }
-
-      def parseAsFailure: Try[String] = Try {
-        val errorObject = StripeError(r.json)
-        List("failure", errorObject.`type`, errorObject.message).mkString("$$")
-      }
-
-      def msgTry: Try[String] = parseAsSuccess orElse parseAsFailure
-
-      val msg: String = msgTry.getOrElse(List("failure", "Unknown error").mkString("$$"))
-
-      Ok(msg)
-    })*/
-    Future{Ok("dfg")}
+    stripeIOController.getTokenDetails(token).map({
+      case s: NetSuccess[Token, StripeError] => Ok(List(
+        "success",
+        s.successObject.id,
+        s.successObject.used,
+        s.successObject.card.last4,
+        s.successObject.card.exp_month,
+        s.successObject.card.exp_year,
+        s.successObject.card.address_zip
+      ).mkString("$$"))
+      case v: ValidationError[Token, StripeError] => Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
+      case e: CriticalError[Token, StripeError] => Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
+    })
   }}
 }

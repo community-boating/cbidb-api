@@ -9,16 +9,16 @@ sealed abstract class NetSuccess[T, U](val successObject: T) extends ServiceRequ
 sealed abstract class NetFailure[T, U] extends ServiceRequestResult[T, U]
 
 // Everything working fine; nothing to say, nothing to do.  Maybe return some result
-class Succeeded[T, U](override val successObject: T) extends NetSuccess[T, U](successObject)
+case class Succeeded[T, U](override val successObject: T) extends NetSuccess[T, U](successObject)
 
 // Something went wrong that we should sound an internal alarm about, but we can still complete the user's request normally.
 // E.g. a cc charge was successful but the charge record failed to write to the database
-class Warning[T, U](override val successObject: T) extends NetSuccess[T, U](successObject)
+case class Warning[T, U](override val successObject: T) extends NetSuccess[T, U](successObject)
 
 // Something went wrong that's preventing the request from finishing.  The end user needs to change their request; no alarm needs to be sounded.
 // E.g. a credit card was declined
-class ValidationError[T, U](val errorObject: U) extends NetFailure[T, U]
+case class ValidationError[T, U](errorObject: U) extends NetFailure[T, U]
 
 // Something went wrong that is preventing the request from completing, and is an alarm
 // e.g. a 3rd party service is not responding to our requests, or the database disappeared or something
-class CriticalError[T, U](val e: Throwable) extends NetFailure[T, U]
+case class CriticalError[T, U](e: Throwable) extends NetFailure[T, U]
