@@ -23,17 +23,26 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
     )
 
     stripeIOController.getTokenDetails(token).map({
-      case s: NetSuccess[Token, StripeError] => Ok(List(
-        "success",
-        s.successObject.id,
-        s.successObject.used,
-        s.successObject.card.last4,
-        s.successObject.card.exp_month,
-        s.successObject.card.exp_year,
-        s.successObject.card.address_zip
-      ).mkString("$$"))
-      case v: ValidationError[Token, StripeError] => Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
-      case e: CriticalError[Token, StripeError] => Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
+      case s: NetSuccess[Token, StripeError] => {
+        println("Get token details success " + s.successObject)
+        Ok(List(
+          "success",
+          s.successObject.id,
+          s.successObject.used,
+          s.successObject.card.last4,
+          s.successObject.card.exp_month,
+          s.successObject.card.exp_year,
+          s.successObject.card.address_zip
+        ).mkString("$$"))
+      }
+      case v: ValidationError[Token, StripeError] => {
+        println("Get token details validation error " + v.errorObject)
+        Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
+      }
+      case e: CriticalError[Token, StripeError] => {
+        println("Get token details critical error")
+        Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
+      }
     })
   }}
 }

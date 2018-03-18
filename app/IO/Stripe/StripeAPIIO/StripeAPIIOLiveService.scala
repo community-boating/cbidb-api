@@ -73,8 +73,12 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
     f2.map({
       case Resolved(c: Charge) => {
-        dbIO.createCharge(c)
-        Succeeded(c)
+        try {
+          dbIO.createCharge(c)
+          Succeeded(c)
+        } catch {
+          case e: Throwable => Warning(c, e)
+        }
       }
       case Rejected(se: ServiceRequestResult[Charge, StripeError]) => se
       case Failed(e: Throwable) => CriticalError(e)

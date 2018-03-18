@@ -33,9 +33,18 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
     val close: GetCurrentOnlineCloseResult = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head
 
     stripeIOController.createCharge(orderDetails.priceInCents, token, orderId, close.closeId).map({
-      case s: NetSuccess[Charge, StripeError] => Ok(List("success", s.successObject.id, s.successObject.amount).mkString("$$"))
-      case v: ValidationError[Charge, StripeError] => Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
-      case e: CriticalError[Charge, StripeError] => Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
+      case s: NetSuccess[Charge, StripeError] => {
+        println("Create charge net success: " + s.successObject)
+        Ok(List("success", s.successObject.id, s.successObject.amount).mkString("$$"))
+      }
+      case v: ValidationError[Charge, StripeError] => {
+        println("Create charge validation error: " + v.errorObject)
+        Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
+      }
+      case e: CriticalError[Charge, StripeError] => {
+        println("Create charge critical error: " + e.e)
+        Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
+      }
     })
   }
 }

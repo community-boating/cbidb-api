@@ -13,7 +13,7 @@ case class Succeeded[T, U](override val successObject: T) extends NetSuccess[T, 
 
 // Something went wrong that we should sound an internal alarm about, but we can still complete the user's request normally.
 // E.g. a cc charge was successful but the charge record failed to write to the database
-case class Warning[T, U](override val successObject: T) extends NetSuccess[T, U](successObject)
+case class Warning[T, U](override val successObject: T, e: Throwable) extends NetSuccess[T, U](successObject)
 
 // Something went wrong that's preventing the request from finishing.  The end user needs to change their request; no alarm needs to be sounded.
 // E.g. a credit card was declined
