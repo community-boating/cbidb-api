@@ -1,5 +1,8 @@
 package Services.Emailer
 
+import Services.PermissionsAuthority
+import Services.Shell.ShellManager
+
 import sys.process._
 
 class SSMTPEmailer(alwaysSendTo: Option[String]) extends Emailer {
@@ -9,18 +12,10 @@ class SSMTPEmailer(alwaysSendTo: Option[String]) extends Emailer {
       case Some(s) => s
       case None => to
     }
-    val commandInput = List(
-      "{",
-      "echo \"Subject:\"" + sanitize(subject) + ";"
-    ) ++
-      body.split("\n").toList.map(l => "echo \"" + sanitize(l) + "\";") ++
-      List("}")
 
-    val command = "'" + commandInput.mkString("") + "#| ssmtp " + sendTo + " -F CBI-API'"
+    val command = "ssmtp " + sendTo + " -F CBI-API"
+    val stdin = "Subject: " + subject + "\n\n" + body
     println(command)
-    val result = command!
-
-
-    println(result)
+    ShellManager.execute(command, None, Some(20000), None, Some(stdin))
   }
 }
