@@ -21,10 +21,23 @@ sealed abstract class Failover[A, B] {
     case Failed(e) => Failed(e)
     case Rejected(b) => Rejected(b)
   }
+  // If called on a Resolved, pipe that success value into the new block and return a Resolved out of that
+  // If called on a Rejection or an uncaught Failure, pass it on through
+  def andThenWithCatch[C](block: (A => C), onFailure: (Throwable => B)): Failover[C, B] = this match {
+    case Resolved(a) => {
+      try {
+        Resolved(block(a))
+      } catch {
+        case e: Throwable => Rejected(onFailure(e))
+      }
+    }
+    case Failed(e) => Failed(e)
+    case Rejected(b) => Rejected(b)
+  }
   // If called on a Resolved, pipe that success value into the new block and return a new Resolved out of that
   // If that block fails, pipe the last thing into the failover block and return a Rejected out of that
   // If called on a Rejection or an uncaught Failure, pass it on through
-  def andThen[C](block: (A => C), failover: (A => B)): Failover[C, B] = this match {
+  def andThenWithFailover[C](block: (A => C), failover: (A => B)): Failover[C, B] = this match {
     case Resolved(a) => {
       try {
         Resolved(block(a))
@@ -82,6 +95,13 @@ object Failover {
       Resolved(block)
     } catch {
       case e: Throwable => Failed(e)
+    }
+  }
+  def apply[A, B](block: => A, onFailure: (Throwable => B)): Failover[A, B] = {
+    try {
+      Resolved(block)
+    } catch {
+      case e: Throwable => Rejected(onFailure(e))
     }
   }
 }

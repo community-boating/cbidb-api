@@ -5,9 +5,9 @@ import Services.Shell.ShellManager
 
 import sys.process._
 
-class SSMTPEmailer(alwaysSendTo: Option[String]) extends Emailer {
+class SSMTPEmailer private[Services] (alwaysSendTo: Option[String]) extends Emailer {
   private def sanitize(s: String): String = s.replace("\"", "\\\"").replace("'", "\\'")
-  def send(to: String, subject: String, body: String): Unit = {
+  def send(subject: String, body: String, to: String = "jon@community-boating.org"): Unit = {
     val sendTo = alwaysSendTo match {
       case Some(s) => s
       case None => to

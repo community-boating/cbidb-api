@@ -5,6 +5,8 @@ import IO.HTTP.FromWSClient
 import IO.Stripe.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
+import Services.Emailer.SSMTPEmailer
+import Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import play.api.Mode
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
@@ -35,21 +37,27 @@ object PermissionsAuthority {
   private val rootCB = new RedisBroker
   private val bouncerPB = RequestCache.getBouncerRC.pb
 
+  lazy val isProd: Boolean = {
+    try {
+      playMode.peek.get
+      true
+    } catch {
+      case _: Throwable => false
+    }
+  }
+
   // This should only be called by the unit tester.
   // If it's ever called when the application is runnning, it shoudl return None.
   // If the unit tester is running then the initializables aren't set,
   // so try to get their value, catch the exception, and return the PB
   def getRootPB: Option[PersistenceBroker] = {
-    try {
-      playMode.peek.get
-      None
-    } catch {
-      case e: Throwable => {
-        println("@@@@ Giving away the root PB; was this the test runner?")
-        Some(rootPB)
-      }
+    if (isProd) None else {
+      println("@@@@ Giving away the root PB; was this the test runner?")
+      Some(rootPB)
     }
   }
+
+  def logger: Logger = if (isProd) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
   def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
     val allowedIPs = Set(

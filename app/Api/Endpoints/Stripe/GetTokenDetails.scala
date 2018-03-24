@@ -15,6 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def get(token: String): Action[AnyContent] = Action.async {req => {
+    val logger = PermissionsAuthority.logger
     val rc = getRC(ApexUserType, ParsedRequest(req))
     val pb = rc.pb
     val stripeIOController = new StripeIOController(
@@ -36,11 +37,11 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
         ).mkString("$$"))
       }
       case v: ValidationError[Token, StripeError] => {
-        println("Get token details validation error " + v.errorObject)
+        logger.warning("Get token details validation error " + v.errorObject)
         Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
       }
       case e: CriticalError[Token, StripeError] => {
-        println("Get token details critical error")
+        logger.error("Get token details critical error: ", e.e)
         Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
       }
     })

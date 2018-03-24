@@ -1,5 +1,5 @@
 package Services.Emailer
 
 abstract class Emailer {
-  def send(to: String, subject: String, body: String): Unit
+  def send(subject: String, body: String, to: String = "jon@community-boating.org"): Unit
 }

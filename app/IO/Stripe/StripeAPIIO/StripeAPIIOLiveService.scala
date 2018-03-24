@@ -66,7 +66,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       })
     }
 
-    val f2: Future[Failover[Charge, ServiceRequestResult[Charge, StripeError]]] = f1.map(_.andThen(
+    val f2: Future[Failover[Charge, ServiceRequestResult[Charge, StripeError]]] = f1.map(_.andThenWithFailover(
       jsVal => Charge(jsVal),
       jsVal => ValidationError(StripeError(jsVal))
     ))
@@ -103,7 +103,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       })
     }
 
-    val f2: Future[Failover[Token, ServiceRequestResult[Token, StripeError]]] = f1.map(_.andThen(
+    val f2: Future[Failover[Token, ServiceRequestResult[Token, StripeError]]] = f1.map(_.andThenWithFailover(
       jsVal => Token(jsVal),
       jsVal => ValidationError(StripeError(jsVal))
     ))
