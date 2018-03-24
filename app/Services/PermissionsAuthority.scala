@@ -1,29 +1,63 @@
 package Services
 
 import CbiUtil.{Initializable, ParsedRequest}
-import Services.Authentication.{AuthenticationInstance, UserType}
-import Services.Secrets.SecretsObject
+import IO.HTTP.FromWSClient
+import IO.Stripe.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
+import Services.Emailer.SSMTPEmailer
+import Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import play.api.Mode
+import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object PermissionsAuthority {
+  val stripeURL: String = "https://api.stripe.com/v1/"
+  val SEC_COOKIE_NAME = "CBIDB-SEC"
+
   val allowableUserTypes = new Initializable[Set[UserType]]
   val persistenceSystem = new Initializable[PersistenceSystem]
+  def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
   val playMode = new Initializable[Mode]
   val preparedQueriesOnly = new Initializable[Boolean]
   val instanceName = new Initializable[String]
 
-  val stripeURL: String = "https://api.stripe.com/v1/"
-
   private val apexToken = new Initializable[String]
-  def setApexToken(s: String) = apexToken.set(s)
-  val secrets = new SecretsObject
+  def setApexToken(s: String): String = apexToken.set(s)
+  private val stripeAPIKey = new Initializable[String]
+  def setStripeAPIKey(s: String): String = apexToken.set(s)
 
-  def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
+  val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+  val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+    .setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
-  val SEC_COOKIE_NAME = "CBIDB-SEC"
   private val rootPB = RequestCache.getRootRC.pb
   private val rootCB = new RedisBroker
+  private val bouncerPB = RequestCache.getBouncerRC.pb
+
+  lazy val isProd: Boolean = {
+    try {
+      playMode.peek.get
+      true
+    } catch {
+      case _: Throwable => false
+    }
+  }
+
+  // This should only be called by the unit tester.
+  // If it's ever called when the application is runnning, it shoudl return None.
+  // If the unit tester is running then the initializables aren't set,
+  // so try to get their value, catch the exception, and return the PB
+  def getRootPB: Option[PersistenceBroker] = {
+    if (isProd) None else {
+      println("@@@@ Giving away the root PB; was this the test runner?")
+      Some(rootPB)
+    }
+  }
+
+  def logger: Logger = if (isProd) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
   def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
     val allowedIPs = Set(
@@ -52,7 +86,7 @@ object PermissionsAuthority {
       allowableUserTypes.get.contains(userType) &&  // requested user type is enabled in this server instance
       requestIsFromLocalHost(request) &&               // request came from localhost, i.e. the bouncer
       requestIsVIP(request)
-    ) userType.getPwHashForUser(userName, rootPB)
+    ) userType.getPwHashForUser(userName, bouncerPB)
     else None
   }
 

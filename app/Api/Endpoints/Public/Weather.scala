@@ -6,7 +6,7 @@ import javax.inject.Inject
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromRemoteRequest}
 import CbiUtil.PropertiesWrapper
-import Logic.PreparedQueries.Public.GetJpTeamsResult
+import IO.PreparedQueries.Public.GetJpTeamsResult
 import Services.Authentication.PublicUserType
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}

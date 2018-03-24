@@ -3,11 +3,13 @@ package Api.Endpoints.Stripe
 import javax.inject.Inject
 
 import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
-import Logic.PreparedQueries.Apex._
+import CbiUtil._
+import Entities.JsFacades.Stripe.{Charge, StripeError}
+import IO.PreparedQueries.Apex._
+import IO.Stripe.StripeIOController
 import Services.Authentication.ApexUserType
-import Services.{PermissionsAuthority, ServerStateContainer}
-import play.api.libs.ws.{WSAuthScheme, WSClient, WSRequest, WSResponse}
+import Services.PermissionsAuthority
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,59 +18,57 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
   def post(): Action[AnyContent] = Action.async {r => doPost(ParsedRequest(r))}
 
   def doPost(req: ParsedRequest): Future[Result] = {
-    val ultimateErrMsg = "An internal error occurred.  Tech support has been notified and this issue will be resolved within 24 hours.  Please do not attempt to resubmit payment."
-    try {
-      val rc = getRC(ApexUserType, req)
-      val pb = rc.pb
-      val params = req.postParams
-      val token: String = params("token")
-      val orderId: Int = params("orderId").toInt
+    val logger = PermissionsAuthority.logger
+    val rc = getRC(ApexUserType, req)
+    val pb = rc.pb
+    val stripeIOController = new StripeIOController(
+      PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
+      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
+    )
+    val params = req.postParams
+    val token: String = params("token")
+    val orderId: Int = params("orderId").toInt
 
-      val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQuery(new GetCartDetailsForOrderId(orderId)).head
-      val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQuery(new ValidateTokenInOrder(orderId, token)).head
-      val closeID: Int = pb.executePreparedQuery(new GetCurrentOnlineClose).head.closeId
-
-      val stripeRequest: WSRequest = ws.url(PermissionsAuthority.stripeURL + "charges")
-        .withAuth(PermissionsAuthority.secrets.stripeAPIKey.get(rc), "", WSAuthScheme.BASIC)
-      val futureResponse: Future[WSResponse] = stripeRequest.post(Map(
-        "amount" -> orderDetails.priceInCents.toString,
-        "currency" -> "usd",
-        "source" -> token,
-        "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
-        "metadata[closeId]" -> closeID.toString,
-        "metadata[orderId]" -> orderId.toString,
-        "metadata[token]" -> token,
-        "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
-      ))
-      futureResponse.map(r => {
-        println(r.json.toString())
-        try {
-          val chargeObject = Stripe.JsFacades.Charge(r.json)
-          val msg = List("success", chargeObject.id, chargeObject.amount).mkString("$$")
-          Ok(msg)
-        }catch {
-          case e: Throwable => {
-            println(e)
-            try {
-              val errorObject = Stripe.JsFacades.Error(r.json)
-              val msg = List("failure", errorObject.`type`, errorObject.message).mkString("$$")
-              Ok(msg)
-            } catch {
-              case f: Throwable => {
-                println(f)
-                Ok(List("failure", "cbi-api-error", f.getMessage).mkString("$$"))
-              }
-            }
+    Failover({
+      val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
+      orderDetails
+    }, (e: Throwable) => logger.error("Unknown order id " + orderId, e))
+    .andThenWithCatch(orderDetails => {
+      val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
+      val nextPacket = (orderDetails, tokenRecord)
+      nextPacket
+    }, (e: Throwable) => logger.error("Mismatched token " + token + " and orderID " + orderId, e))
+    .andThenWithCatch(packet => {
+      val close: GetCurrentOnlineCloseResult = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head
+      val nextPacket = (packet._1, packet._2, close)
+      nextPacket
+    }, (e: Throwable) => logger.error("Unable to get current online close", e))
+    .andThenWithCatch(packet => {
+      stripeIOController.createCharge(packet._1.priceInCents, token, orderId, packet._3.closeId)
+    }, (e: Throwable) => logger.error("Unknown order id + orderID", e)) match {
+      case Resolved(f) => f.map({
+        case s: NetSuccess[Charge, StripeError] => {
+          println("Create charge net success: " + s.successObject)
+          if (s.isInstanceOf[Warning[Charge, StripeError]]) {
+            println("Warning: " + s.asInstanceOf[Warning[Charge, StripeError]].e)
+            logger.warning("Nonblocking warning creating stripe charge", s.asInstanceOf[Warning[Charge, StripeError]].e)
           }
+          Ok(List("success", s.successObject.id, s.successObject.amount).mkString("$$"))
+        }
+        case v: ValidationError[Charge, StripeError] => {
+          println("Create charge validation error: " + v.errorObject)
+          Ok(List("failure", v.errorObject.`type`, v.errorObject.message).mkString("$$"))
+        }
+        case e: CriticalError[Charge, StripeError] => {
+          logger.error("Create charge critical error: ", e.e)
+          Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
         }
       })
-    } catch {
-      case e: Throwable => {
-        println(e)
-        Future {Ok(List("failure", "cbi-api-error", e.getMessage).mkString("$$"))}
+      case Failed(e) => {
+        logger.error("Error creating charge", e)
+        Future { Ok(List("failure", "cbi-api-error", e.getMessage).mkString("$$")) }
       }
     }
-
   }
 }
 

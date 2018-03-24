@@ -10,7 +10,7 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.Future
 
-trait CacheableResultFromRemoteRequest[T <: ParamsObject, U <: ApiDataObject] extends CacheableResult[T, U] with AuthenticatedRequest {
+trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableResult[T, U] with AuthenticatedRequest {
   private def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, ws: WSClient, url: String): Future[String] = {
     val calculateValue: (() => Future[JsObject]) = () => {
       val request: WSRequest = ws.url(url)

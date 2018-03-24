@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import Api.Endpoints.Users.UsersParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
-import Logic.PreparedQueries.Staff.{GetUsers, GetUsersResult}
+import IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
 import Services.Authentication.StaffUserType
 import play.api.mvc.{Action, AnyContent}
 

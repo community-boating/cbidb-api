@@ -4,9 +4,8 @@ import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-import Api.ApiDataObject
 import CbiUtil.{Initializable, Profiler}
-import Logic.PreparedQueries.PreparedQuery
+import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -20,10 +19,10 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
   private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
 
-  def executePreparedQueryImplementation[T <: ApiDataObject](pq: PreparedQuery[T], fetchSize: Int = 50): List[T] = {
+  protected def executePreparedQueryForSelectImplementation[T](pq: PreparedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
     println(pq.getQuery)
     val profiler = new Profiler
-    val c: Connection = mainPool.getConnection
+    val c: Connection = if (pq.useTempSchema) tempTablePool.getConnection else mainPool.getConnection
     profiler.lap("got connection")
     try {
       val st: Statement = c.createStatement()
@@ -48,7 +47,15 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
+  protected def executePreparedQueryForInsertImplementation(pq: PreparedQueryForInsert): Option[String] = {
+    executeSQLForInsert(pq.getQuery, pq.pkName, pq.useTempSchema)
+  }
+
+  protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: PreparedQueryForUpdateOrDelete): Int = {
+    executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
+  }
+
+  protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
@@ -57,7 +64,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     rows.map(r => obj.construct(r, rc, isClean = true))
   }
 
-  def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+  protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
     val sb: StringBuilder = new StringBuilder
     sb.append("SELECT ")
     sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
@@ -68,7 +75,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     else None
   }
 
-  def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+  protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
     println("#################################################")
     println("About to get " + ids.length + " instances of " + obj.entityName)
     println("#################################################")
@@ -89,7 +96,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
+  protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
     // Filter("") means a filter that can't possibly match anything.
     // E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
     // If there are any short circuit filters, don't bother talking to the database
@@ -167,23 +174,30 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  private def executeSQLForInsert(sql: String, pkPersistenceName: String): Int = {
-    val c: Connection = mainPool.getConnection
+  private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false): Option[String] = {
+    val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
     try {
-      val arr: scala.Array[String] = scala.Array(pkPersistenceName)
+      val arr: scala.Array[String] = pkPersistenceName match {
+        case Some(s) => scala.Array(s)
+        case None => scala.Array.empty
+      }
       val ps: PreparedStatement = c.prepareStatement(sql, arr)
       ps.executeUpdate()
       val rs = ps.getGeneratedKeys
-      if (rs.next) {
-        rs.getLong(1).toInt
-      } else throw new Exception("No pk value came back from insert statement")
+      if (pkPersistenceName.isDefined) {
+        if (rs.next) {
+          Some(rs.getString(1))
+        } else throw new Exception("No pk value came back from insert statement")
+      } else None
+
     } finally {
       c.close()
     }
   }
 
-  private def executeSQLForUpdate(sql: String): Int = {
-    val c: Connection = mainPool.getConnection
+  private def executeSQLForUpdateOrDelete(sql: String, useTempConnection: Boolean = false): Int = {
+    println(sql)
+    val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
     try {
       val st: Statement = c.createStatement()
       st.executeUpdate(sql) // returns # of rows updated
@@ -265,7 +279,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
+  protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
     if (i.hasID) updateObject(i) else insertObject(i)
   }
 
@@ -294,7 +308,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     sb.append(fieldValues.map(fv => fv.getPersistenceLiteral).mkString(", "))
     sb.append(")")
     println(sb.toString())
-    executeSQLForInsert(sb.toString(), i.getCompanion.primaryKey.getPersistenceFieldName)
+    executeSQLForInsert(sb.toString(), Some(i.getCompanion.primaryKey.getPersistenceFieldName))
   }
 
   private def updateObject(i: StorableClass): Unit = {
@@ -318,7 +332,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
     sb.append(updateExpressions.mkString(", "))
     sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)
-    executeSQLForUpdate(sb.toString())
+    executeSQLForUpdateOrDelete(sb.toString())
   }
 
   private def dateToLocalDate(d: Date): LocalDate =

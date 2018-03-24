@@ -23,6 +23,8 @@ libraryDependencies += guice
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
+
 libraryDependencies ++= Seq(
 	"net.debasishg" %% "redisclient" % "3.4"
 )

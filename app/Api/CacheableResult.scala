@@ -11,7 +11,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 
-trait CacheableResult[T <: ParamsObject, U <: ApiDataObject] {
+trait CacheableResult[T <: ParamsObject, U] {
   implicit val exec: ExecutionContext
   type CacheKey = String
   val cacheExpirationDatePattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ")
