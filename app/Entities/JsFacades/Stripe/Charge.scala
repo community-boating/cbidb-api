@@ -17,7 +17,7 @@ case class Charge(
   val apexTableName = "STRIPE_CHARGES"
   val persistenceFields: Map[String, String] = Map(
     "CHARGE_ID" -> GetSQLLiteral(id),
-    "AMOUNT" -> GetSQLLiteral(amount),
+    "AMOUNT_IN_CENTS" -> GetSQLLiteral(amount),
     "CREATED_EPOCH" -> GetSQLLiteral(created),
     "PAID" -> GetSQLLiteral(paid),
     "STATUS" -> GetSQLLiteral(status),
