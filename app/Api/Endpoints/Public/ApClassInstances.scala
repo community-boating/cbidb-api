@@ -2,13 +2,13 @@ package Api.Endpoints.Public
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
-import javax.inject.Inject
 
 import Api.Endpoints.Public.ApClassInstances.ApClassInstancesParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import CbiUtil.DateUtil
 import IO.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult}
 import Services.Authentication.PublicUserType
+import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext

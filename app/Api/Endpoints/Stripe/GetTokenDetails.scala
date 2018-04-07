@@ -5,14 +5,15 @@ import java.time.ZonedDateTime
 import javax.inject.Inject
 import Api.AuthenticatedRequest
 import CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
-import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
+import Entities.JsFacades.Stripe.{StripeError, Token}
 import IO.Stripe.StripeIOController
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
+import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext) extends AuthenticatedRequest {
   def get(token: String): Action[AnyContent] = Action.async {req => {

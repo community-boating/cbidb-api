@@ -8,7 +8,15 @@ case class ParsedRequest(
   path: String,
   method: String,
   postParams: Map[String, String]
-)
+) {
+  def addHeader(h: (String, String)): ParsedRequest = ParsedRequest(
+    headers.add(h),
+    cookies,
+    path,
+    method,
+    postParams
+  )
+}
 
 object ParsedRequest {
   object methods {

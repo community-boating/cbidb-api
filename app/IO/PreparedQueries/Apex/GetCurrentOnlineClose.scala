@@ -3,10 +3,10 @@ package IO.PreparedQueries.Apex
 import java.sql.ResultSet
 import java.time.LocalDate
 
-import IO.PreparedQueries.PreparedQueryForSelect
+import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.Authentication.ApexUserType
 
-class GetCurrentOnlineClose extends PreparedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType)) {
+class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
        |select close_id, created_on, closed_datetime from fo_closes c, current_closes cur where close_id = online_close

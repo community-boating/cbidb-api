@@ -2,9 +2,9 @@ package IO.PreparedQueries
 
 import Services.Authentication.UserType
 
-abstract class PreparedQueryForInsert(
+abstract class HardcodedQueryForInsert(
   override val allowedUserTypes: Set[UserType],
   override val useTempSchema: Boolean = false
-) extends PreparedQuery(allowedUserTypes, useTempSchema) {
+) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
   val pkName: Option[String]
 }

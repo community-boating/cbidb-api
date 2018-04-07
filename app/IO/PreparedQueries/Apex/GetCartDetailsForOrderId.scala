@@ -2,10 +2,10 @@ package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQueryForSelect
+import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.Authentication.ApexUserType
 
-class GetCartDetailsForOrderId(orderId: Int) extends PreparedQueryForSelect[GetCartDetailsForOrderIdResult](Set(ApexUserType)) {
+class GetCartDetailsForOrderId(orderId: Int) extends HardcodedQueryForSelect[GetCartDetailsForOrderIdResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
       |select order_id, round(sum(price)*100)

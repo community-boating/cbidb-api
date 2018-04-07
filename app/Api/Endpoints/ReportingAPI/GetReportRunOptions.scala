@@ -1,7 +1,6 @@
 package Api.Endpoints.ReportingAPI
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 import Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
 import Api.{AuthenticatedRequest, CacheableResult, ParamsObject}
@@ -12,6 +11,7 @@ import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.PersistenceBroker
 import Storable.StorableClass
+import javax.inject.Inject
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
 

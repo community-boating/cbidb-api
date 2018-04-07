@@ -1,16 +1,15 @@
 package Services
 
-import javax.inject.Inject
-
 import CbiUtil.Initializable
 import IO.HTTP.FromWSClient
 import IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE
+import javax.inject.Inject
 import play.api.inject.ApplicationLifecycle
 import play.api.{Application, Mode}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ServerBootLoader @Inject()(
   lifecycle: ApplicationLifecycle,
@@ -48,7 +47,20 @@ class ServerBootLoader @Inject()(
 
       // Init PA with APEX access token
       PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
+      val debugSignet: Option[String] = {
+        try {
+          serverProps.getProperty("ApexDebugSignet") match {
+            case null => None
+            case "" => None
+            case s: String => Some(s)
+          }
+        } catch {
+          case _: Throwable => None
+        }
+      }
+      PermissionsAuthority.setApexDebugSignet(debugSignet)
 
+      println("set apex debug signet to " + debugSignet)
 
       PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
       println("Using CBI DB instance: " + poolConstructor.getMainSchemaName)

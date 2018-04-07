@@ -1,9 +1,9 @@
 package IO.HTTP
 
 import play.api.libs.json.{JsValue, Json}
+import scalaj.http.Http
 
 import scala.concurrent.{ExecutionContext, Future}
-import scalaj.http.Http
 
 class FromScalajHTTP(implicit exec: ExecutionContext) extends HTTPMechanism {
   def getString(

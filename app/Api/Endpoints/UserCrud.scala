@@ -1,13 +1,12 @@
 package Api.Endpoints
 
-import javax.inject.Inject
-
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
+import javax.inject.Inject
 import play.api.mvc.{Action, Controller}
 
 import scala.collection.mutable.ArrayBuffer

@@ -1,8 +1,7 @@
 package Services
 
 import CbiUtil.{Initializable, ParsedRequest}
-import IO.HTTP.FromWSClient
-import IO.Stripe.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
 import Services.Emailer.SSMTPEmailer
@@ -10,8 +9,6 @@ import Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import play.api.Mode
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object PermissionsAuthority {
   val stripeURL: String = "https://api.stripe.com/v1/"
@@ -23,6 +20,9 @@ object PermissionsAuthority {
   val playMode = new Initializable[Mode]
   val preparedQueriesOnly = new Initializable[Boolean]
   val instanceName = new Initializable[String]
+
+  val apexDebugSignet = new Initializable[Option[String]]
+  def setApexDebugSignet(os: Option[String]): Option[String] = apexDebugSignet.set(os)
 
   private val apexToken = new Initializable[String]
   def setApexToken(s: String): String = apexToken.set(s)

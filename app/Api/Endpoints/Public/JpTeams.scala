@@ -1,12 +1,12 @@
 package Api.Endpoints.Public
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import IO.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
 import Services.Authentication.PublicUserType
+import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext

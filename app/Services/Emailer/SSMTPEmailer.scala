@@ -1,9 +1,6 @@
 package Services.Emailer
 
-import Services.PermissionsAuthority
 import Services.Shell.ShellManager
-
-import sys.process._
 
 class SSMTPEmailer private[Services] (alwaysSendTo: Option[String]) extends Emailer {
   private def sanitize(s: String): String = s.replace("\"", "\\\"").replace("'", "\\'")

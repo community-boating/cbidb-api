@@ -1,6 +1,6 @@
 package Services.Authentication
 
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
@@ -10,7 +10,16 @@ object ApexUserType extends UserType {
     val headers = requestHeaders.toMap
     val headerKey = "apex-token"
     if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
-    else None
+    else {
+      // signet?
+      val signetKey = "apex-signet"
+      if (
+        PermissionsAuthority.apexDebugSignet.getOrElse(None).isDefined
+          && headers.contains(signetKey)
+          && Some(headers(signetKey).mkString("")) == PermissionsAuthority.apexDebugSignet.getOrElse(None)
+      ) Some(uniqueUserName)
+      else None
+    }
   }
 
   def getAuthenticatedUsernameFromSuperiorAuth(

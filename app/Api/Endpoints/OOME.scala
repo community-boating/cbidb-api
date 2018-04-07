@@ -1,7 +1,6 @@
 package Api.Endpoints
 
 import javax.inject.Inject
-
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext

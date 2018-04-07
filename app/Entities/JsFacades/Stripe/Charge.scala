@@ -2,6 +2,8 @@ package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
 import Entities.StorableJSObject
+import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForUpdateOrDelete}
+import Services.Authentication.ApexUserType
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -38,6 +40,33 @@ case class Charge(
         .map(_.split(innerSeparator))
         .map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
     }
+  def getInsertPreparedQuery: HardcodedQueryForInsert = new HardcodedQueryForInsert(Set(ApexUserType)) {
+    override val pkName: Option[String] = Some(pkColumnName)
+    val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
+    val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
+    val values: String = columnNamesAndValues.map(_._2).mkString(", ")
+    override def getQuery: String =
+      s"""
+         |insert into $apexTableName ($columnNames) values ($values)
+         |
+      """.stripMargin
+  }
+
+  def getUpdatePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
+    val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
+    override def getQuery: String =
+      s"""
+         |update $apexTableName set $setStatements where $pkColumnName = ${GetSQLLiteral(self.id)}
+         |
+      """.stripMargin
+  }
+
+  def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
+    override def getQuery: String =
+      s"""
+         |delete from $apexTableName where $pkColumnName = ${GetSQLLiteral(self.id)}
+         |
+      """.stripMargin
   }
 }
 

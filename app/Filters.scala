@@ -1,5 +1,4 @@
 import javax.inject._
-
 import play.api._
 import play.api.http.HttpFilters
 import play.filters.cors.CORSFilter

@@ -2,9 +2,9 @@ package IO.PreparedQueries
 
 import Services.Authentication.UserType
 
-abstract class PreparedQueryForUpdateOrDelete(
+abstract class HardcodedQueryForUpdateOrDelete(
   override val allowedUserTypes: Set[UserType],
   override val useTempSchema: Boolean = false
-) extends PreparedQuery(allowedUserTypes, useTempSchema) {
+) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
 
 }

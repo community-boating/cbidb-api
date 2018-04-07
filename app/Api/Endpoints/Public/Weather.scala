@@ -1,13 +1,13 @@
 package Api.Endpoints.Public
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import Api.{AuthenticatedRequest, CacheableResultFromRemoteRequest}
 import CbiUtil.PropertiesWrapper
 import IO.PreparedQueries.Public.GetJpTeamsResult
 import Services.Authentication.PublicUserType
+import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 

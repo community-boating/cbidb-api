@@ -1,7 +1,7 @@
 package Services
 
 import CbiUtil.TestUserType
-import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Storable._
 
@@ -34,17 +34,17 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
     else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
   }
 
-  final def executePreparedQueryForSelect[T](pq: PreparedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+  final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
     if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForSelectImplementation(pq, fetchSize)
     else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.userType)
   }
 
-  final def executePreparedQueryForInsert(pq: PreparedQueryForInsert): Option[String] = {
+  final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
     if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForInsertImplementation(pq)
     else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
   }
 
-  final def executePreparedQueryForUpdateOrDelete(pq: PreparedQueryForUpdateOrDelete): Int = {
+  final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
     if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
     else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
   }
@@ -55,9 +55,9 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
   protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T]
   protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T]
   protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
-  protected def executePreparedQueryForSelectImplementation[T](pq: PreparedQueryForSelect[T], fetchSize: Int = 50): List[T]
-  protected def executePreparedQueryForInsertImplementation(pq: PreparedQueryForInsert): Option[String]
-  protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: PreparedQueryForUpdateOrDelete): Int
+  protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T]
+  protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String]
+  protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int
 
   // TODO: implement some IDs
   private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible

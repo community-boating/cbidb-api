@@ -1,7 +1,5 @@
 package Api.Endpoints.Stripe
 
-import javax.inject.Inject
-
 import Api.AuthenticatedRequest
 import CbiUtil._
 import Entities.JsFacades.Stripe.{Charge, StripeError}
@@ -9,6 +7,7 @@ import IO.PreparedQueries.Apex._
 import IO.Stripe.StripeIOController
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
+import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Result}
 

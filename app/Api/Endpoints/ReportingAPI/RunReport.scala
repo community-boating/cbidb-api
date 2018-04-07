@@ -1,7 +1,6 @@
 package Api.Endpoints.ReportingAPI
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 import Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
@@ -13,6 +12,7 @@ import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import javax.inject.Inject
 import play.api.http.{HeaderNames, HttpEntity}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._

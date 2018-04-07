@@ -5,7 +5,7 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.{Initializable, Profiler}
-import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForSelect}
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -19,8 +19,8 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
   private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
   private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
 
-  protected def executePreparedQueryForSelectImplementation[T](pq: PreparedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
-    println(pq.getQuery)
+  protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+
     val profiler = new Profiler
     val c: Connection = if (pq.useTempSchema) {
       println("using temp schema")
@@ -31,8 +31,25 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
     profiler.lap("got connection")
     try {
-      val st: Statement = c.createStatement()
-      val rs: ResultSet = st.executeQuery(pq.getQuery)
+      val rs: ResultSet = pq match {
+        case p: PreparedQueryForSelect[T] => {
+          println("executing prepared select:")
+          val preparedStatement = c.prepareStatement(pq.getQuery)
+          (p.params.indices zip p.params).foreach(t => {
+            preparedStatement.setString(t._1 + 1, t._2)
+          })
+          println(pq.getQuery)
+          println("Parameterized with " + p.params)
+          preparedStatement.executeQuery
+        }
+        case _ => {
+          println("executing non-prepared select:")
+          println(pq.getQuery)
+          val st: Statement = c.createStatement()
+          st.executeQuery(pq.getQuery)
+        }
+      }
+
       rs.setFetchSize(fetchSize)
 
       val resultObjects: ListBuffer[T] = ListBuffer()
@@ -53,11 +70,11 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  protected def executePreparedQueryForInsertImplementation(pq: PreparedQueryForInsert): Option[String] = {
+  protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = {
     executeSQLForInsert(pq.getQuery, pq.pkName, pq.useTempSchema)
   }
 
-  protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: PreparedQueryForUpdateOrDelete): Int = {
+  protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
     executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
   }
 

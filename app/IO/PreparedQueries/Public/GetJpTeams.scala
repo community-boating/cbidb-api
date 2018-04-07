@@ -2,11 +2,11 @@ package IO.PreparedQueries.Public
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQueryForSelectCastableToJSObject
+import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import Services.Authentication.PublicUserType
 import play.api.libs.json.{JsArray, JsString}
 
-class GetJpTeams extends PreparedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
+class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
   val getQuery: String =
     """
       |select t.team_id, t.team_name, sum(points)

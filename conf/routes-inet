@@ -22,6 +22,12 @@ POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFro
 GET     /stripe/token-details               Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
 POST    /stripe/sync-db                     Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
 
+GET     /pdf/daily-close                     Api.Endpoints.PDFReports.RunDailyCloseReport.get(closeId: Int, signet: Option[String])
+GET     /pdf/ap-roster                     Api.Endpoints.PDFReports.RunApClassRoster.get(instanceId: Int, signet: Option[String])
+GET     /pdf/jp-roster                     Api.Endpoints.PDFReports.RunJpClassRoster.get(instanceIds: String, signet: Option[String])
+GET     /pdf/jp-spec-needs                     Api.Endpoints.PDFReports.RunJpSpecialNeedsReport.get(from: String, to: String, signet: Option[String])
+
+
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
 

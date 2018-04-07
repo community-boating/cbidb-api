@@ -11,11 +11,13 @@ class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryFor
     s"""
        |select order_id, token, created_datetime
        |from stripe_tokens
-       |where order_id = $orderId
-       |and token = '$token'
+       |where order_id = ?
+       |and token = ?
        |order by created_datetime
        |
     """.stripMargin
+
+  val params = List(orderId.toString, token)
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): ValidateTokenInOrderResult = ValidateTokenInOrderResult(
     rs.getInt(1),

@@ -1,11 +1,10 @@
 package Api.Endpoints
 
-import javax.inject.Inject
-
 import CbiUtil.ParsedRequest
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.UnauthorizedAccessException
+import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}

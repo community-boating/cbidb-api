@@ -3,11 +3,11 @@ package IO.PreparedQueries.Apex
 import java.sql.ResultSet
 
 import Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
-import IO.PreparedQueries.PreparedQueryForSelect
+import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
 
-class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect[Charge](Set(ApexUserType), true) {
+class GetLocalStripeChargesForClose(closeId: Int) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
   val getQuery: String =
     s"""
        |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds
