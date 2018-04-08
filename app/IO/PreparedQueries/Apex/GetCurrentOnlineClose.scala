@@ -9,7 +9,7 @@ import Services.Authentication.ApexUserType
 class GetCurrentOnlineClose extends PreparedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType)) {
   val getQuery: String =
     s"""
-       |select close_id, created_on, closed_datetime from fo_closes where close_id = cc_pkg.get_current_online_close
+       |select close_id, created_on, closed_datetime from fo_closes c, current_closes cur where close_id = online_close
        |
     """.stripMargin
 

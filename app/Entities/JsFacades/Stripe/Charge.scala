@@ -26,7 +26,7 @@ case class Charge(
     "TOKEN" -> GetSQLLiteral(metadata.token)
   )
   val pkColumnName = "CHARGE_ID"
-  def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType)) {
+  def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType), true) {
     override val pkName: Option[String] = Some(pkColumnName)
     val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
     val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
@@ -38,7 +38,7 @@ case class Charge(
       """.stripMargin
   }
 
-  def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType)) {
+  def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
     val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
     override def getQuery: String =
       s"""
@@ -47,7 +47,7 @@ case class Charge(
       """.stripMargin
   }
 
-  def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType)) {
+  def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
     override def getQuery: String =
       s"""
          |delete from $apexTableName where $pkColumnName = ${GetSQLLiteral(self.id)}

@@ -22,7 +22,13 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
   protected def executePreparedQueryForSelectImplementation[T](pq: PreparedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
     println(pq.getQuery)
     val profiler = new Profiler
-    val c: Connection = if (pq.useTempSchema) tempTablePool.getConnection else mainPool.getConnection
+    val c: Connection = if (pq.useTempSchema) {
+      println("using temp schema")
+      tempTablePool.getConnection
+    } else {
+      println("using main schema")
+      mainPool.getConnection
+    }
     profiler.lap("got connection")
     try {
       val st: Statement = c.createStatement()
