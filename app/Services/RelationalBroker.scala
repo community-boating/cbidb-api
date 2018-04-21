@@ -181,6 +181,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
   }
 
   private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false): Option[String] = {
+    println(sql)
     val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
     try {
       val arr: scala.Array[String] = pkPersistenceName match {

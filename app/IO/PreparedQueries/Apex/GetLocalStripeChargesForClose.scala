@@ -10,7 +10,7 @@ import Services.PermissionsAuthority
 class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect[Charge](Set(ApexUserType)) {
   val getQuery: String =
     s"""
-       |select CHARGE_ID, AMOUNT, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status
+       |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds
        |from STRIPE_CHARGES
        |where CLOSE_ID = $closeId
        |order by created_datetime
@@ -18,11 +18,18 @@ class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): Charge = {
+    // TODO: put this in a library somewhere
+    val refunds = rs.getString(9) match {
+      case "null" | null => None
+      case s: String => Some(s)
+    }
+
     val cmd = ChargeMetadata(
       closeId = Some(rs.getInt(3).toString),
       orderId = Some(rs.getInt(4).toString),
       token = Some(rs.getString(5)),
-      cbiInstance = PermissionsAuthority.instanceName.peek
+      cbiInstance = PermissionsAuthority.instanceName.peek,
+      refunds = refunds
     )
 
     Charge(

@@ -6,7 +6,8 @@ case class ChargeMetadata(
   closeId: Option[String],
   orderId: Option[String],
   token: Option[String],
-  cbiInstance: Option[String]
+  cbiInstance: Option[String],
+  refunds: Option[String]
 )
 
 object ChargeMetadata {

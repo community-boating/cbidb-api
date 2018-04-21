@@ -1,8 +1,7 @@
 package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
-import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
-import Services.Authentication.ApexUserType
+import Entities.StorableJSObject
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -12,8 +11,7 @@ case class Charge(
   created: Int,
   paid: Boolean,
   status: String
-) {
-  private val self = this
+) extends StorableJSObject {
   val apexTableName = "STRIPE_CHARGES"
   val persistenceFields: Map[String, String] = Map(
     "CHARGE_ID" -> GetSQLLiteral(id),
@@ -23,36 +21,23 @@ case class Charge(
     "STATUS" -> GetSQLLiteral(status),
     "CLOSE_ID" -> GetSQLLiteral(metadata.closeId),
     "ORDER_ID" -> GetSQLLiteral(metadata.orderId),
-    "TOKEN" -> GetSQLLiteral(metadata.token)
+    "TOKEN" -> GetSQLLiteral(metadata.token),
+    "REFUNDS" -> GetSQLLiteral(metadata.refunds),
   )
   val pkColumnName = "CHARGE_ID"
-  def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType), true) {
-    override val pkName: Option[String] = Some(pkColumnName)
-    val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
-    val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
-    val values: String = columnNamesAndValues.map(_._2).mkString(", ")
-    override def getQuery: String =
-      s"""
-         |insert into $apexTableName ($columnNames) values ($values)
-         |
-      """.stripMargin
-  }
+  val pkSqlLiteral: String = GetSQLLiteral(id)
 
-  def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
-    val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
-    override def getQuery: String =
-      s"""
-         |update $apexTableName set $setStatements where $pkColumnName = ${GetSQLLiteral(self.id)}
-         |
-      """.stripMargin
-  }
-
-  def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
-    override def getQuery: String =
-      s"""
-         |delete from $apexTableName where $pkColumnName = ${GetSQLLiteral(self.id)}
-         |
-      """.stripMargin
+  // e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
+  def refunds: List[ChargeRefund] = {
+    val outerSeparator = "&"
+    val innerSeparator = "%"
+    metadata.refunds match {
+      case None => List.empty
+      case Some(s) => s.split(outerSeparator)
+        .toList
+        .map(_.split(innerSeparator))
+        .map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
+    }
   }
 }
 
