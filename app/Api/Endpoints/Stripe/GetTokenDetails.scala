@@ -24,8 +24,6 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
       PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
     )
 
-    stripeIOController.updateLocalChargesFromAPIForClose(2184, ZonedDateTime.now(), None)
-
     stripeIOController.getTokenDetails(token).map({
       case s: NetSuccess[Token, StripeError] => {
         println("Get token details success " + s.successObject)

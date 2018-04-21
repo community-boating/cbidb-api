@@ -19,6 +19,7 @@ GET     /ping                               Api.Endpoints.Ping.get()
 
 POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
 GET     /stripe/token-details               Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
+POST    /stripe/sync-db                     Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
