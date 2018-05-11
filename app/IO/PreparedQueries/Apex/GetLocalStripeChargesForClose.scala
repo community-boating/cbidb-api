@@ -7,7 +7,7 @@ import IO.PreparedQueries.PreparedQueryForSelect
 import Services.Authentication.ApexUserType
 import Services.PermissionsAuthority
 
-class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect[Charge](Set(ApexUserType)) {
+class GetLocalStripeChargesForClose(closeId: Int) extends PreparedQueryForSelect[Charge](Set(ApexUserType), true) {
   val getQuery: String =
     s"""
        |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds
