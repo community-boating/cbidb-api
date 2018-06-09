@@ -3,7 +3,6 @@ package Services.Authentication
 import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{Cookies, Headers}
 
 object BouncerUserType extends UserType {
   val uniqueUserName = ""

@@ -1,9 +1,8 @@
 package Services.Authentication
 
-import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import CbiUtil.ParsedRequest
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{Cookies, Headers}
 
 object ApexUserType extends UserType {
   val uniqueUserName = "APEX"

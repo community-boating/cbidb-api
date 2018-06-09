@@ -3,7 +3,6 @@ package Services.Authentication
 import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{Cookies, Headers}
 
 abstract class UserType {
   // Given a request (and an unrestricted CacheBroker), determine if the request is authenticated against this mechanism.

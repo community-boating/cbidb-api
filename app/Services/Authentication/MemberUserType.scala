@@ -3,7 +3,6 @@ package Services.Authentication
 import CbiUtil.ParsedRequest
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{Cookies, Headers}
 
 object MemberUserType extends UserType {
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = None

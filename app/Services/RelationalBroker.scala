@@ -5,7 +5,7 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.{Initializable, Profiler}
-import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForSelect}
+import IO.PreparedQueries._
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import Storable._
@@ -70,8 +70,9 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = {
-    executeSQLForInsert(pq.getQuery, pq.pkName, pq.useTempSchema)
+  protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
+    case p: PreparedQueryForInsert => executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.asInstanceOf[PreparedQueryForInsert].params))
+    case hq: HardcodedQueryForInsert => executeSQLForInsert(hq.getQuery, hq.pkName, hq.useTempSchema)
   }
 
   protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
@@ -197,7 +198,7 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     }
   }
 
-  private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false): Option[String] = {
+  private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[String]] = None): Option[String] = {
     println(sql)
     val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
     try {
@@ -206,6 +207,11 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
         case None => scala.Array.empty
       }
       val ps: PreparedStatement = c.prepareStatement(sql, arr)
+      if (params.isDefined) {
+        (params.get.indices zip params.get).foreach(t => {
+          ps.setString(t._1 + 1, t._2)
+        })
+      }
       ps.executeUpdate()
       val rs = ps.getGeneratedKeys
       if (pkPersistenceName.isDefined) {
