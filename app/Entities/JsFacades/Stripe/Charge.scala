@@ -14,6 +14,7 @@ case class Charge(
   paid: Boolean,
   status: String
 ) extends StorableJSObject {
+  val self = this
   val apexTableName = "STRIPE_CHARGES"
   val persistenceFields: Map[String, String] = Map(
     "CHARGE_ID" -> GetSQLLiteral(id),
@@ -40,7 +41,9 @@ case class Charge(
         .map(_.split(innerSeparator))
         .map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
     }
-  def getInsertPreparedQuery: HardcodedQueryForInsert = new HardcodedQueryForInsert(Set(ApexUserType)) {
+  }
+
+  override def getInsertPreparedQuery: HardcodedQueryForInsert = new HardcodedQueryForInsert(Set(ApexUserType)) {
     override val pkName: Option[String] = Some(pkColumnName)
     val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
     val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
@@ -52,7 +55,7 @@ case class Charge(
       """.stripMargin
   }
 
-  def getUpdatePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
+  override def getUpdatePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
     val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
     override def getQuery: String =
       s"""
@@ -61,7 +64,7 @@ case class Charge(
       """.stripMargin
   }
 
-  def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
+  override def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType)) {
     override def getQuery: String =
       s"""
          |delete from $apexTableName where $pkColumnName = ${GetSQLLiteral(self.id)}

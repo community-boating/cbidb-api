@@ -2,11 +2,11 @@ package IO.PreparedQueries.Public
 
 import java.sql.ResultSet
 
-import IO.PreparedQueries.PreparedQueryForSelectCastableToJSObject
+import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import Services.Authentication.PublicUserType
 import play.api.libs.json.{JsArray, JsString}
 
-class GetFlagColor extends PreparedQueryForSelectCastableToJSObject[GetFlagColorResult](Set(PublicUserType)) {
+class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColorResult](Set(PublicUserType)) {
   val getQuery: String =
     """
       |select flag from flag_changes where change_datetime = (select max(change_datetime) from flag_changes)

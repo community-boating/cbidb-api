@@ -1,6 +1,6 @@
 package Entities
 
-import IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
+import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForUpdateOrDelete}
 import Services.Authentication.ApexUserType
 
 abstract class StorableJSObject {
@@ -9,7 +9,7 @@ abstract class StorableJSObject {
   val pkColumnName: String
   val pkSqlLiteral: String
 
-  def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType), true) {
+  def getInsertPreparedQuery: HardcodedQueryForInsert = new HardcodedQueryForInsert(Set(ApexUserType), true) {
     override val pkName: Option[String] = Some(pkColumnName)
     val columnNamesAndValues: List[(String, String)] = persistenceFields.toList
     val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
@@ -21,7 +21,7 @@ abstract class StorableJSObject {
       """.stripMargin
   }
 
-  def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
+  def getUpdatePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType), true) {
     val setStatements: String = persistenceFields.toList.map(t => t._1 + " = " + t._2).mkString(", ")
     override def getQuery: String =
       s"""
@@ -30,7 +30,7 @@ abstract class StorableJSObject {
       """.stripMargin
   }
 
-  def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
+  def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType), true) {
     override def getQuery: String =
       s"""
          |delete from $apexTableName where $pkColumnName = $pkSqlLiteral
