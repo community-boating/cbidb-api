@@ -16,19 +16,23 @@ class PostSymonRun@Inject() (ws: WSClient) (implicit exec: ExecutionContext) ext
 
   def doPost(req: ParsedRequest): Future[Result] = {
     val logger = PermissionsAuthority.logger
-    val rc = getRC(SymonUserType, req)
-    val pb = rc.pb
 
-    pb.executePreparedQueryForInsert(new StoreSymonRun(
-      req.postParams("symon-host"),
-      req.postParams("symon-program"),
-      req.postParams("symon-argString"),
-      req.postParams("symon-status").toInt,
-      req.postParams("symon-mac")
-    ))
+    try{
+      val rc = getRC(SymonUserType, req)
+      val pb = rc.pb
 
-    Future{ Ok("inserted.")}
+      pb.executePreparedQueryForInsert(new StoreSymonRun(
+        req.postParams("symon-host"),
+        req.postParams("symon-program"),
+        req.postParams("symon-argString"),
+        req.postParams("symon-status").toInt,
+        req.postParams("symon-mac")
+      ))
+
+      Future{ Ok("inserted.")}
+    } catch {
+      case _:  Throwable => Future{ Ok("Unable to log symon run")}
+    }
+
   }
 }
-
-
