@@ -1,5 +1,6 @@
 package Services
 
+import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -32,8 +33,8 @@ object PermissionsAuthority {
   def setApexToken(s: String): String = apexToken.set(s)
   private val stripeAPIKey = new Initializable[String]
   def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
-  private val symonSalt = new Initializable[String]
-  def setSymonSalt(s: String): String = symonSalt.set(s)
+  private val symonSalt = new Initializable[Option[String]]
+  def setSymonSalt(s: Option[String]): Option[String] = symonSalt.set(s)
 
   val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
   val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
@@ -104,10 +105,15 @@ object PermissionsAuthority {
     mac: String,
     candidateHash: String
   ): Boolean = {
-    val now: String = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH24"))
-    val input = symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get
-    val trueHash: String = MessageDigest.getInstance("MD5").digest(input.getBytes).mkString("")
-    trueHash == candidateHash
+    println("here we go")
+    val now: String = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH"))
+    val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get
+    println(input)
+    val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
+    val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
+    println("expectedHash: " + expectedHash)
+    println("candidateHash: " + candidateHash)
+    expectedHash == candidateHash
   }
 
   trait PersistenceSystem {

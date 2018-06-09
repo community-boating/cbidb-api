@@ -9,12 +9,15 @@ object SymonUserType extends UserType {
 
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
     try {
+      println("here we go")
       val host: String = request.postParams("symon-host")
+      println("symon host is " + host)
       val program = request.postParams("symon-program")
       val argString = request.postParams("symon-argString")
       val status = request.postParams("symon-status").toInt
       val mac = request.postParams("symon-mac")
       val candidateHash = request.postParams("symon-hash")
+      println("All args were present")
       val isValid = PermissionsAuthority.validateSymonHash(
         host = host,
         program = program,
@@ -26,7 +29,10 @@ object SymonUserType extends UserType {
       if (isValid) Some(uniqueUserName)
       else None
     } catch {
-      case _: Throwable => None
+      case e: Throwable => {
+        println(e)
+        None
+      }
     }
   }
 

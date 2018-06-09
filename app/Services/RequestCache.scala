@@ -93,7 +93,7 @@ object RequestCache {
         println("@@@  Nuking RC due to potential CSRF")
         Some((authentication, None))
       }
-      if (requiredUserType != PublicUserType && requiredUserType != ApexUserType) {
+      if (requiredUserType != PublicUserType && requiredUserType != ApexUserType && requiredUserType != SymonUserType) {
         CORS.getCORSStatus(parsedRequest.headers) match {
           case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
           case Some(CROSS_SITE) | None => nuke()

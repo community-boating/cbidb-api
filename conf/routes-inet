@@ -27,6 +27,7 @@ GET     /pdf/ap-roster                     Api.Endpoints.PDFReports.RunApClassRo
 GET     /pdf/jp-roster                     Api.Endpoints.PDFReports.RunJpClassRoster.get(instanceIds: String, signet: Option[String])
 GET     /pdf/jp-spec-needs                     Api.Endpoints.PDFReports.RunJpSpecialNeedsReport.get(from: String, to: String, signet: Option[String])
 
+POST 	/symon				Api.Endpoints.Symon.PostSymonRun.post()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()

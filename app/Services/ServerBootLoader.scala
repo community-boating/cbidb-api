@@ -47,20 +47,15 @@ class ServerBootLoader @Inject()(
 
       // Init PA with APEX access token
       PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
-      val debugSignet: Option[String] = {
-        try {
-          serverProps.getProperty("ApexDebugSignet") match {
-            case null => None
-            case "" => None
-            case s: String => Some(s)
-          }
-        } catch {
-          case _: Throwable => None
-        }
-      }
+
+      val debugSignet: Option[String] = getOptionalProperty(serverProps, "ApexDebugSignet")
+
       PermissionsAuthority.setApexDebugSignet(debugSignet)
 
       println("set apex debug signet to " + debugSignet)
+
+      val symonSalt: Option[String] = getOptionalProperty(serverProps, "SymonSalt")
+      PermissionsAuthority.setSymonSalt(symonSalt)
 
       PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
       println("Using CBI DB instance: " + poolConstructor.getMainSchemaName)
@@ -87,6 +82,18 @@ class ServerBootLoader @Inject()(
       )
     }
     case Some(_) => // The server is already booted up; do nothing
+  }
+
+  def getOptionalProperty(serverProps: ServerInstanceProperties, propname: String): Option[String] = {
+    try {
+      serverProps.getProperty(propname) match {
+        case null => None
+        case "" => None
+        case s: String => Some(s)
+      }
+    } catch {
+      case _: Throwable => None
+    }
   }
 }
 
