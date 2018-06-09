@@ -1,5 +1,9 @@
 package Services
 
+import java.security.MessageDigest
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import CbiUtil.{Initializable, ParsedRequest}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
@@ -27,7 +31,9 @@ object PermissionsAuthority {
   private val apexToken = new Initializable[String]
   def setApexToken(s: String): String = apexToken.set(s)
   private val stripeAPIKey = new Initializable[String]
-  def setStripeAPIKey(s: String): String = apexToken.set(s)
+  def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
+  private val symonSalt = new Initializable[String]
+  def setSymonSalt(s: String): String = symonSalt.set(s)
 
   val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
   val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
@@ -88,6 +94,20 @@ object PermissionsAuthority {
       requestIsVIP(request)
     ) userType.getPwHashForUser(userName, bouncerPB)
     else None
+  }
+
+  def validateSymonHash(
+    host: String,
+    program: String,
+    argString: String,
+    status: Int,
+    mac: String,
+    candidateHash: String
+  ): Boolean = {
+    val now: String = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH24"))
+    val input = symonSalt.get + List(host, program, argString, status.toString, mac, now.mkString("-") + symonSalt.get
+    val trueHash = MessageDigest.getInstance("MD5").digest(input.getBytes)
+    trueHash == candidateHash
   }
 
   trait PersistenceSystem {
