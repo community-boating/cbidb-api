@@ -2,10 +2,10 @@ package Services
 
 import java.math.BigInteger
 import java.security.MessageDigest
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
-import CbiUtil.{Initializable, ParsedRequest}
+import CbiUtil.{DateUtil, Initializable, ParsedRequest}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.Authentication.{ApexUserType, AuthenticationInstance, UserType}
@@ -106,7 +106,7 @@ object PermissionsAuthority {
     candidateHash: String
   ): Boolean = {
     println("here we go")
-    val now: String = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH"))
+    val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
     val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get
     println(input)
     val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
