@@ -1,12 +1,13 @@
 package Services.Authentication
 
+import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
 object RootUserType extends UserType {
   val uniqueUserName = ""
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] =
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
     None
 
   def getAuthenticatedUsernameFromSuperiorAuth(

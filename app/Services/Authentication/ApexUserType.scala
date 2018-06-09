@@ -1,13 +1,14 @@
 package Services.Authentication
 
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
+import CbiUtil.ParsedRequest
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
 object ApexUserType extends UserType {
   val uniqueUserName = "APEX"
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val headers = requestHeaders.toMap
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    val headers = request.headers.toMap
     val headerKey = "apex-token"
     if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
     else {

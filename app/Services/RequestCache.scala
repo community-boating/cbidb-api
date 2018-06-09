@@ -65,7 +65,7 @@ object RequestCache {
         .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
           // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
           case Some(x) => Some(x)
-          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest.headers, parsedRequest.cookies, rootCB, apexToken) match {
+          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken) match {
             case None => None
             case Some(x: String) => {
               println("AUTHENTICATION:  Request is authenticated as " + ut)

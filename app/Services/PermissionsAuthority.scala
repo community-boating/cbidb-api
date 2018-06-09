@@ -105,8 +105,8 @@ object PermissionsAuthority {
     candidateHash: String
   ): Boolean = {
     val now: String = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH24"))
-    val input = symonSalt.get + List(host, program, argString, status.toString, mac, now.mkString("-") + symonSalt.get
-    val trueHash = MessageDigest.getInstance("MD5").digest(input.getBytes)
+    val input = symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get
+    val trueHash: String = MessageDigest.getInstance("MD5").digest(input.getBytes).mkString("")
     trueHash == candidateHash
   }
 

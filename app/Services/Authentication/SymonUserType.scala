@@ -1,21 +1,20 @@
 package Services.Authentication
 
+import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
-import play.api.mvc.{Cookies, Headers}
 
 object SymonUserType extends UserType {
   val uniqueUserName = "SYMON"
 
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val headers = requestHeaders.toMap
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
     try {
-      val host: String = headers("symon-host").mkString("")
-      val program = headers("symon-program").mkString("")
-      val argString = headers("symon-argString").mkString("")
-      val status = headers("symon-status").mkString("").toInt
-      val mac = headers("symon-mac").mkString("")
-      val candidateHash = headers("symon-hash").mkString("")
+      val host: String = request.postParams("symon-host")
+      val program = request.postParams("symon-program")
+      val argString = request.postParams("symon-argString")
+      val status = request.postParams("symon-status").toInt
+      val mac = request.postParams("symon-mac")
+      val candidateHash = request.postParams("symon-hash")
       val isValid = PermissionsAuthority.validateSymonHash(
         host = host,
         program = program,

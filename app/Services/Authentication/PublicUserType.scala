@@ -1,12 +1,13 @@
 package Services.Authentication
 
+import CbiUtil.ParsedRequest
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
 object PublicUserType extends UserType {
   val uniqueUserName = "PUBLIC"
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] =
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
     Some(uniqueUserName)
 
   // Anyone can downgrade from anything to public

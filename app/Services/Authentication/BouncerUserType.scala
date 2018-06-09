@@ -1,5 +1,6 @@
 package Services.Authentication
 
+import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
@@ -7,8 +8,7 @@ import play.api.mvc.{Cookies, Headers}
 object BouncerUserType extends UserType {
   val uniqueUserName = ""
   def getAuthenticatedUsernameInRequest(
-    requestHeaders: Headers,
-    requestCookies: Cookies,
+    request: ParsedRequest,
     rootCB: CacheBroker,
     apexToken: String
   ): Option[String] = None

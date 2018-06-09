@@ -1,13 +1,14 @@
 package Services.Authentication
 
+import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 import play.api.mvc.{Cookies, Headers}
 
 object StaffUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(requestHeaders: Headers, requestCookies: Cookies, rootCB: CacheBroker, apexToken: String): Option[String] = {
-    val secCookies = requestCookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None
     else if (secCookies.size > 1) None
     else {
