@@ -56,9 +56,9 @@ class JpClassSignupsQuery(closeId: Int) extends HardcodedQueryForSelect[JPClassD
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): JPClassData = new JPClassData(
-    lastName = rs.getString(3),
-    firstName = rs.getString(2),
-    className = rs.getString(4),
+    lastName = rs.getStringOrEmptyString(3),
+    firstName = rs.getStringOrEmptyString(2),
+    className = rs.getStringOrEmptyString(4),
     firstSession = DateUtil.toBostonTime(rs.getTimestamp(7).toLocalDateTime),
     discountName = {
       val ret = rs.getString(6)

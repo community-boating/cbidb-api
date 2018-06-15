@@ -23,8 +23,8 @@ class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult]
     rs.getInt(1),
     rs.getString(2) == "C",
     rs.getInt(3),
-    rs.getString(4),
-    rs.getString(5)
+    rs.getStringOrEmptyString(4),
+    rs.getStringOrEmptyString(5)
   )
 }
 

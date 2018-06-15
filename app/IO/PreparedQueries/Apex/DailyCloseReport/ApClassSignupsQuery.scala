@@ -54,11 +54,11 @@ class ApClassSignupsQuery(closeId: Int) extends HardcodedQueryForSelect[APClassD
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): APClassData = new APClassData(
-    lastName = rs.getString(3),
-    firstName = rs.getString(2),
-    className = rs.getString(4),
+    lastName = rs.getStringOrEmptyString(3),
+    firstName = rs.getStringOrEmptyString(2),
+    className = rs.getStringOrEmptyString(4),
     firstSession = DateUtil.toBostonTime(rs.getTimestamp(6).toLocalDateTime),
     price = Currency.cents(rs.getInt(5)),
-    payment = rs.getString(7)
+    payment = rs.getStringOrEmptyString(7)
   )
 }

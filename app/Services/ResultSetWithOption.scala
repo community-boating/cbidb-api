@@ -8,6 +8,12 @@ class ResultSetWithOption(rs: ResultSet) {
     if (rs.wasNull()) None
     else Some(ret)
   }
+  def getStringOrEmptyString(c: Int): String = {
+    getOptionString(c) match {
+      case Some(s) => s
+      case None => ""
+    }
+  }
 }
 
 object ResultSetWithOption {

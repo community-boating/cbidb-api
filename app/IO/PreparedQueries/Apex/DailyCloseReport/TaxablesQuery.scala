@@ -38,7 +38,7 @@ class TaxablesQuery(closeId: Int) extends HardcodedQueryForSelect[TaxablesItem](
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): TaxablesItem = new TaxablesItem(
     closeId,
-    rs.getString(1),
+    rs.getStringOrEmptyString(1),
     {
       val ret = rs.getString(2)
       if (rs.wasNull()) None

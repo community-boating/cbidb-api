@@ -44,9 +44,9 @@ class GCSalesQuery(closeId: Int) extends HardcodedQueryForSelect[GCSalesData](Se
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): GCSalesData = new GCSalesData(
-    purchaser = rs.getString(1),
-    recipient = rs.getString(2),
-    certNumber = rs.getString(3),
+    purchaser = rs.getStringOrEmptyString(1),
+    recipient = rs.getStringOrEmptyString(2),
+    certNumber = rs.getStringOrEmptyString(3),
     paid = Currency.cents(rs.getInt(5)),
     value = {
       val discount = rs.getInt(7)

@@ -26,7 +26,7 @@ class CloseCash(closeId: Int) extends HardcodedQueryForSelect[CloseCashResult](S
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): CloseCashResult = new CloseCashResult(
     rs.getInt(1),
-    rs.getString(2),
+    rs.getStringOrEmptyString(2),
     rs.getString(3) == "O",
     rs.getInt(4),
     Currency.cents(rs.getInt(5)),

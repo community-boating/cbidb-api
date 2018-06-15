@@ -69,7 +69,7 @@ class SummaryQuery(closeId: Int) extends HardcodedQueryForSelect[SummaryItem](Se
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): SummaryItem = new SummaryItem(
-    itemName = rs.getString(1),
+    itemName = rs.getStringOrEmptyString(1),
     discountName = {
       val ret = rs.getString(2)
       if (rs.wasNull()) None

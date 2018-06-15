@@ -22,7 +22,7 @@ class ReplacementCardsQuery(closeId: Int) extends HardcodedQueryForSelect[Replac
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): ReplacementCardData = new ReplacementCardData(
-    fullName = rs.getString(2) + ", " + rs.getString(1),
+    fullName = rs.getStringOrEmptyString(2) + ", " + rs.getStringOrEmptyString(1),
     price = Currency.cents(rs.getInt(3))
   )
 }

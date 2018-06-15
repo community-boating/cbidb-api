@@ -26,8 +26,8 @@ class GCCompsQuery(closeId: Int) extends HardcodedQueryForSelect[GCCompsData](Se
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): GCCompsData = new GCCompsData(
-    recipient = rs.getString(1),
-    certNumber = rs.getString(2),
+    recipient = rs.getStringOrEmptyString(1),
+    certNumber = rs.getStringOrEmptyString(2),
     value = Currency.cents(rs.getInt(5))
   )
 }

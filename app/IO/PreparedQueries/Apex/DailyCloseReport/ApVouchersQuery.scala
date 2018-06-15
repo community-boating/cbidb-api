@@ -32,8 +32,8 @@ class ApVouchersQuery(closeId: Int) extends HardcodedQueryForSelect[APVoucherDat
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): APVoucherData = new APVoucherData(
-    lastName = rs.getString(2),
-    firstName = rs.getString(1),
+    lastName = rs.getStringOrEmptyString(2),
+    firstName = rs.getStringOrEmptyString(1),
     price = Currency.cents(rs.getInt(3)),
     isVoid = rs.getString(4) == "(VOID)"
   )

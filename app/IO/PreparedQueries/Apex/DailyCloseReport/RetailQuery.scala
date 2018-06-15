@@ -83,7 +83,7 @@ class RetailQuery(closeId: Int) extends HardcodedQueryForSelect[RetailData](Set(
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): RetailData = new RetailData(
-    itemName = rs.getString(1),
+    itemName = rs.getStringOrEmptyString(1),
     numberSold = rs.getInt(2),
     discounts = Currency.cents(rs.getInt(4)),
     pretax = Currency.cents(rs.getInt(3)),

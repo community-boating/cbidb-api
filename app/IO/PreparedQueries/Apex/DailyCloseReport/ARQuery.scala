@@ -20,7 +20,7 @@ class ARQuery(closeId: Int) extends HardcodedQueryForSelect[AR](Set(ApexUserType
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): AR = new AR(
-    rs.getString(1),
+    rs.getStringOrEmptyString(1),
     Currency.cents(rs.getInt(2))
   )
 }

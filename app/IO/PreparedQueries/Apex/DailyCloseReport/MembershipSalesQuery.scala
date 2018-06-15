@@ -70,12 +70,12 @@ class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[Members
   override def mapResultSetRowToCaseObject(rs: ResultSet): MembershipSale = new MembershipSale(
     closeId,
     fullName = {
-      val lastname = rs.getString(3)
-      val firstName = rs.getString(2)
+      val lastname = rs.getStringOrEmptyString(3)
+      val firstName = rs.getStringOrEmptyString(2)
       if (rs.wasNull()) lastname
       else lastname + ", " + firstName
     },
-    membershipType = rs.getString(4),
+    membershipType = rs.getStringOrEmptyString(4),
     discountAmount = {
       val ret = rs.getInt(7)
       if (rs.wasNull()) None

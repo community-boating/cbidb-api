@@ -56,10 +56,10 @@ class GCRedemptionsQuery(closeId: Int) extends HardcodedQueryForSelect[GCRedempt
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): GCRedemptionData = new GCRedemptionData(
-    lastName = rs.getString(1),
-    firstName = rs.getString(2),
-    certNumber = rs.getString(5),
-    usedFor = rs.getString(3),
+    lastName = rs.getStringOrEmptyString(1),
+    firstName = rs.getStringOrEmptyString(2),
+    certNumber = rs.getStringOrEmptyString(5),
+    usedFor = rs.getStringOrEmptyString(3),
     amount = Currency.cents(rs.getInt(4))
   )
 }

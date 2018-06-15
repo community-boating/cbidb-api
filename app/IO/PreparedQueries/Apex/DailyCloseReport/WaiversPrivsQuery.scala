@@ -57,13 +57,13 @@ class WaiversPrivsQuery(closeId: Int) extends HardcodedQueryForSelect[WaiverPriv
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): WaiverPrivData = new WaiverPrivData(
-    identifier = rs.getString(1),
+    identifier = rs.getStringOrEmptyString(1),
     location = {
       val ret = rs.getString(4)
       if (rs.wasNull()) ""
       else ret
     },
-    fullName = rs.getString(2),
+    fullName = rs.getStringOrEmptyString(2),
     price = Currency.cents(rs.getInt(3))
   )
 }

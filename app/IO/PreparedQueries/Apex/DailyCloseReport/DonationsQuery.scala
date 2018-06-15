@@ -41,10 +41,10 @@ class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): Donation = new Donation(
-    name = rs.getString(2),
-    fundName = rs.getString(4),
+    name = rs.getStringOrEmptyString(2),
+    fundName = rs.getStringOrEmptyString(4),
     donationDate = DateUtil.toBostonTime(rs.getTimestamp(5).toLocalDateTime),
-    location = rs.getString(1),
+    location = rs.getStringOrEmptyString(1),
     amount = Currency.cents(rs.getInt(3))
   )
 }
