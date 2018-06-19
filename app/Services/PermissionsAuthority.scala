@@ -40,9 +40,9 @@ object PermissionsAuthority {
   val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
     .setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
-  private val rootPB = RequestCache.getRootRC.pb
-  private val rootCB = new RedisBroker
-  private val bouncerPB = RequestCache.getBouncerRC.pb
+  private lazy val rootPB = RequestCache.getRootRC.pb
+  private lazy val rootCB = new RedisBroker
+  private lazy val bouncerPB = RequestCache.getBouncerRC.pb
 
   lazy val isProd: Boolean = {
     try {

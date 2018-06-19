@@ -1,6 +1,7 @@
 package Services.Authentication
 
 import CbiUtil.ParsedRequest
+import Entities.EntityDefinitions.User
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
@@ -19,5 +20,11 @@ object BouncerUserType extends UserType {
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 
-  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
+    case User => EntityVisibility(true, None, Some(Set(
+      User.fields.userId,
+      User.fields.pwHash
+    )))
+    case _ => EntityVisibility.ZERO_VISIBILITY
+  }
 }

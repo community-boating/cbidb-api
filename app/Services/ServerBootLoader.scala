@@ -73,6 +73,7 @@ class ServerBootLoader @Inject()(
         }
       }
       PermissionsAuthority.preparedQueriesOnly.set(preparedQueriesOnly)
+      println("Prepared queries only: " + PermissionsAuthority.preparedQueriesOnly.get)
 
       // Init PA with persistence system
       PermissionsAuthority.persistenceSystem.set(PERSISTENCE_SYSTEM_ORACLE)
