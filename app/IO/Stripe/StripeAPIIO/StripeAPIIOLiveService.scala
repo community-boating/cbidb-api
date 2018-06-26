@@ -105,7 +105,13 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
     val f2: Future[Failover[Token, ServiceRequestResult[Token, StripeError]]] = f1.map(_.andThenWithFailover(
       jsVal => Token(jsVal),
-      jsVal => ValidationError(StripeError(jsVal))
+      jsVal => {
+        try {
+          ValidationError(StripeError(jsVal))
+        } catch {
+          case e: Throwable => throw new Exception("Could not parse stripe response as success or error obj:\n" + jsVal.toString() + "\noriginal exception: " + e.getMessage)
+        }
+      }
     ))
 
 
