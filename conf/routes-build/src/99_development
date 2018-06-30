@@ -1,0 +1,8 @@
+#GET     /jp-class-instances                 Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
+#GET     /ap-class-instances                 Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
+#GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
+#GET     /weather                            Api.Endpoints.Public.Weather.get()
+#GET     /users                              Api.Endpoints.Users.get()
+
+# POST    /user                               Api.Endpoints.UserCrud.post()
+# POST    /oome                               Api.Endpoints.OOME.post()

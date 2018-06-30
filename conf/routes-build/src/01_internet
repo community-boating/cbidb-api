@@ -1,0 +1,9 @@
+GET     /ping                               Api.Endpoints.Ping.get()
+GET     /flag                           Api.Endpoints.Public.FlagColor.get()
+POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
+GET     /stripe/token-details               Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
+POST    /stripe/sync-db                     Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
+POST 	/symon				Api.Endpoints.Symon.PostSymonRun.post()
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
