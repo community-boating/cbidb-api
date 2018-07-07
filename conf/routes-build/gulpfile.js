@@ -27,7 +27,7 @@ function build(routeFiles) {
 }
 
 gulp.task('build', function() {
-    var secLevel = ini.parse(fs.readFileSync('../private/server-properties', 'utf-8')).routesSecurityLevel;
+    var secLevel = ini.parse(fs.readFileSync('../private/server-properties', 'utf-8')).RoutesSecurityLevel;
 	var routeFiles = getRouteFiles(secLevel);
 	build(routeFiles);
 })
