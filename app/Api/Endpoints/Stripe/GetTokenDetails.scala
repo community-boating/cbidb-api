@@ -32,7 +32,7 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
           s.successObject.card.last4,
           s.successObject.card.exp_month,
           s.successObject.card.exp_year,
-          s.successObject.card.address_zip
+          s.successObject.card.address_zip.getOrElse("null")
         ).mkString("$$"))
       }
       case v: ValidationError[Token, StripeError] => {
