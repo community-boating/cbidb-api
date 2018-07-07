@@ -4,7 +4,7 @@ import play.api.libs.json.Json
 
 case class Card (
   id: String,
-  address_zip: String,
+  address_zip: Option[String],
   exp_month: Int,
   exp_year: Int,
   last4: String
