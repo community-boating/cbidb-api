@@ -1,5 +1,7 @@
 package IO.Stripe.StripeAPIIO
 
+import java.time.ZonedDateTime
+
 import CbiUtil.{Currency, CurrencyFormat}
 import IO.HTTP.FromScalajHTTP
 import Services.{PermissionsAuthority, ServerInstanceProperties}
@@ -22,14 +24,15 @@ class StripeAPIIOLiveServiceTest extends FunSuite {
   // Test that getting a list of stripe objects yields the same final list size regardless of fetch size
   // i.e. test that pagination works
   test("Get Charges Pagination") {
+    println("here we go")
     val apiService = new StripeAPIIOLiveService(stripeURL, secretKey, new FromScalajHTTP)
-    val firstFuture = apiService.getCharges(None, 50)
-    val secondFuture = apiService.getCharges(None, 10)
+    val firstFuture = apiService.getCharges(Some(ZonedDateTime.now.minusWeeks(3)), 50)
+    val secondFuture = apiService.getCharges(Some(ZonedDateTime.now.minusWeeks(3)), 10)
     firstFuture.onComplete(first => {
       secondFuture.onComplete(second => {
         val firstList = first.getOrElse(List.empty)
         val secondList = second.getOrElse(List.empty)
-        assert(firstList.length == secondList.length)
+        assert(firstList == secondList)
       })
     })
     Await.result(firstFuture, Duration(40, "seconds"))

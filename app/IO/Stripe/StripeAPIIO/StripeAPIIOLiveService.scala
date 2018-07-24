@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 
 import CbiUtil._
 import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
-import IO.HTTP.{GET, HTTPMechanism, POST}
+import IO.HTTP.{GET, HTTPMechanism, HTTPMethod, POST}
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.{PermissionsAuthority, ServerStateContainer}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
@@ -13,82 +13,53 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
-  def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] = {
-    def makeRequest(url: String, params: List[String], lastID: Option[String], results: List[Charge]): Future[List[Charge]] = {
-      val finalParams: String = (lastID match {
-        case None => params
-        case Some(id) => ("starting_after=" + id) :: params
-      }).mkString("&")
-
-      val finalURL = if(finalParams.length == 0) url else url + "?" + finalParams
-
-      http.getJSON(finalURL, GET, None, Some(secretKey), Some("")).flatMap(res => {
-        println(res)
-        val json = res.as[JsObject].value("data").as[JsArray].value
-        json.map(e => Charge(e)).toList match {
-          case Nil => Future {results}
-          case l => makeRequest(url, params, Some(l.last.id), results ++ l)
-        }
-      })
-    }
-
-    val params = ("limit=" + chargesPerRequest) :: (since match {
-      case None => List.empty
-      case Some(d) => List("created[gte]=" + d.toEpochSecond)
+  def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
+    getStripeList[Charge](
+      baseURL + "charges",
+      Charge.apply,
+      (c: Charge) => c.id,
+      since match {
+        case None => List.empty
+        case Some(d) => List("created[gte]=" + d.toEpochSecond)
+      },
+      chargesPerRequest
+    ).map({
+      case Succeeded(t) => t
+      case Warning(t, _) => t
+      case _ => throw new Exception("failed to get charges")
     })
-    makeRequest(baseURL + "charges", params, None, List.empty)
-  }
 
-  def createCharge(dbIO: StripeDatabaseIOMechanism, amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
+  def createCharge(dbIO: StripeDatabaseIOMechanism, amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] =
+    getStripeSingleton(
+      baseURL + "charges",
+      Charge.apply,
+      POST,
+      Some(Map(
+        "amount" -> amountInCents.toString,
+        "currency" -> "usd",
+        "source" -> token,
+        "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
+        "metadata[closeId]" -> closeId.toString,
+        "metadata[orderId]" -> orderId.toString,
+        "metadata[token]" -> token,
+        "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
+      )),
+      Some(dbIO.createCharge)
+    )
+
+  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
+    getStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
+
+  private def getStripeSingleton[T](
+    url: String,
+    constructor: JsValue => T,
+    httpMethod: HTTPMethod = GET,
+    body: Option[Map[String, String]] = None,
+    postSuccessAction: Option[T => _] = None
+  ): Future[ServiceRequestResult[T, StripeError]] = {
     def makeRequest(): Future[JsValue] = {
       http.getJSON(
-        baseURL + "charges",
-        POST,
-        Some(Map(
-          "amount" -> amountInCents.toString,
-          "currency" -> "usd",
-          "source" -> token,
-          "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
-          "metadata[closeId]" -> closeId.toString,
-          "metadata[orderId]" -> orderId.toString,
-          "metadata[token]" -> token,
-          "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
-        )),
-        Some(secretKey),
-        Some("")
-      )
-    }
-
-    val f1: Future[Failover[JsValue, ServiceRequestResult[Charge, StripeError]]] = {
-      makeRequest().transform({
-        case Success(jsv: JsValue) => Success(Resolved(jsv))
-        case Failure(e: Throwable) => Success(Failed(e))
-      })
-    }
-
-    val f2: Future[Failover[Charge, ServiceRequestResult[Charge, StripeError]]] = f1.map(_.andThenWithFailover(
-      jsVal => Charge(jsVal),
-      jsVal => ValidationError(StripeError(jsVal))
-    ))
-
-    f2.map({
-      case Resolved(c: Charge) => {
-        try {
-          dbIO.createCharge(c)
-          Succeeded(c)
-        } catch {
-          case e: Throwable => Warning(c, e)
-        }
-      }
-      case Rejected(se: ServiceRequestResult[Charge, StripeError]) => se
-      case Failed(e: Throwable) => CriticalError(e)
-    })
-  }
-
-  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
-    def makeRequest(): Future[JsValue] = {
-      http.getJSON(
-        baseURL + "tokens/" + token,
+        url,
         GET,
         None,
         Some(secretKey),
@@ -96,15 +67,15 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       )
     }
 
-    val f1: Future[Failover[JsValue, ServiceRequestResult[Token, StripeError]]] = {
+    val f1: Future[Failover[JsValue, ServiceRequestResult[T, StripeError]]] = {
       makeRequest().transform({
         case Success(jsv: JsValue) => Success(Resolved(jsv))
         case Failure(e: Throwable) => Success(Failed(e))
       })
     }
 
-    val f2: Future[Failover[Token, ServiceRequestResult[Token, StripeError]]] = f1.map(_.andThenWithFailover(
-      jsVal => Token(jsVal),
+    val f2: Future[Failover[T, ServiceRequestResult[T, StripeError]]] = f1.map(_.andThenWithFailover(
+      jsVal => constructor(jsVal),
       jsVal => {
         try {
           ValidationError(StripeError(jsVal))
@@ -114,11 +85,67 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       }
     ))
 
+    type DoThing = T => _
 
     f2.map({
-      case Resolved(t: Token) => Succeeded(t)
-      case Rejected(se: ServiceRequestResult[Token, StripeError]) => se
+      case Resolved(t: T) => postSuccessAction match {
+        case None => Succeeded(t)
+        case Some(a: DoThing) => try {
+          a(t)
+          Succeeded(t)
+        } catch {
+          case e: Throwable => Warning(t, e)
+        }
+      }
+      case Rejected(se: ServiceRequestResult[T, StripeError]) => se
       case Failed(e: Throwable) => CriticalError(e)
     })
+  }
+
+  private def getStripeList[T](
+    url: String,
+    constructor: JsValue => T,
+    getID: T => String,
+    params: List[String],
+    fetchSize: Int
+  ): Future[ServiceRequestResult[List[T], StripeError]] = {
+    def makeRequest(eachUrl: String, params: List[String], lastID: Option[String], results: List[T]): Future[ServiceRequestResult[List[T], StripeError]] = {
+      val finalParams: String = (lastID match {
+        case None => params
+        case Some(id) => ("starting_after=" + id) :: params
+      }).mkString("&")
+
+      val finalURL = if(finalParams.length == 0) eachUrl else eachUrl + "?" + finalParams
+
+      val f1: Future[Failover[JsValue, ServiceRequestResult[List[T], StripeError]]] =
+        http.getJSON(finalURL, GET, None, Some(secretKey), Some("")).transform({
+          case Success(jsv: JsValue) => Success(Resolved(jsv))
+          case Failure(e: Throwable) => Success(Failed(e))
+        })
+
+      val f2: Future[Failover[List[JsValue], ServiceRequestResult[List[T], StripeError]]] =  f1.map(_.andThenWithFailover(
+        jsVal => jsVal.as[JsObject].value("data").as[JsArray].value.toList,
+        jsVal => try {
+          ValidationError(StripeError(jsVal))
+        } catch {
+          case e: Throwable => throw new Exception("Could not parse stripe response as success or error obj:\n" + jsVal.toString() + "\noriginal exception: " + e.getMessage)
+        }
+      ))
+
+      val f3: Future[Failover[List[T], ServiceRequestResult[List[T], StripeError]]] = f2.map(_.andThen(
+        (jsvs: List[JsValue]) => jsvs.map(constructor)
+      ))
+
+      f3.flatMap({
+        case Resolved(l: List[T]) => l match {
+          case Nil => Future { Succeeded(results) }
+          case more => makeRequest(eachUrl, params, Some(getID(more.last)), results ++ more)
+        }
+        case Rejected(se: ServiceRequestResult[T, StripeError]) => Future { se }
+        case Failed(e) => Future { CriticalError(e) }
+      })
+    }
+
+    makeRequest(url, ("limit=" + fetchSize) :: params, None, List.empty)
   }
 }
