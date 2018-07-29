@@ -16,7 +16,7 @@ trait CastableToStorableClass {
     val values: String = columnNamesAndValues.map(_._2).mkString(", ")
     override def getQuery: String =
       s"""
-         |insert into $storableObject.apexTableName ($columnNames) values ($values)
+         |insert into ${storableObject.apexTableName} ($columnNames) values ($values)
          |
       """.stripMargin
   }
@@ -25,7 +25,7 @@ trait CastableToStorableClass {
     val setStatements: String = persistenceValues.toList.map(t => t._1 + " = " + t._2).mkString(", ")
     override def getQuery: String =
       s"""
-         |update $storableObject.apexTableName set $setStatements where $storableObject.pkColumnName = $pkSqlLiteral
+         |update ${storableObject.apexTableName} set $setStatements where ${storableObject.pkColumnName} = $pkSqlLiteral
          |
       """.stripMargin
   }
@@ -33,7 +33,7 @@ trait CastableToStorableClass {
   def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType), true) {
     override def getQuery: String =
       s"""
-         |delete from $storableObject.apexTableName where $storableObject.pkColumnName = $pkSqlLiteral
+         |delete from ${storableObject.apexTableName} where ${storableObject.pkColumnName} = $pkSqlLiteral
          |
       """.stripMargin
   }
