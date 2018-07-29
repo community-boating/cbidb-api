@@ -2,7 +2,8 @@ package IO.Stripe.StripeAPIIO
 
 import java.time.ZonedDateTime
 
-import CbiUtil.{Currency, CurrencyFormat}
+import CbiUtil._
+import Entities.JsFacades.Stripe._
 import IO.HTTP.FromScalajHTTP
 import Services.{PermissionsAuthority, ServerInstanceProperties}
 import org.junit.runner.RunWith
@@ -20,7 +21,7 @@ class StripeAPIIOLiveServiceTest extends FunSuite {
     val serverProps = new ServerInstanceProperties("conf/private/server-properties")
     serverProps.getProperty("StripeAPIKey")
   }
-
+/*
   // Test that getting a list of stripe objects yields the same final list size regardless of fetch size
   // i.e. test that pagination works
   test("Get Charges Pagination") {
@@ -37,5 +38,27 @@ class StripeAPIIOLiveServiceTest extends FunSuite {
     })
     Await.result(firstFuture, Duration(40, "seconds"))
     Await.result(secondFuture, Duration(40, "seconds"))
+  }
+*/
+  test("Get Balance Transactions") {
+    val apiService = new StripeAPIIOLiveService(stripeURL, secretKey, new FromScalajHTTP)
+    val firstFuture = apiService.getBalanceTransactions
+    firstFuture.onComplete(f => {
+      val r: ServiceRequestResult[scala.List[BalanceTransaction], StripeError] = f.get
+      r match {
+        case Succeeded(l: List[BalanceTransaction]) => {
+          val reversed = l.reverse
+          reversed.foreach({
+            case c: BalanceTransactionCharge => println("Charge\tAmount\t" + c.amount + "\tFee\t" + c.fee + "\tnet\t" + c.net)
+            case r: BalanceTransactionRefund => println("Refund\tAmount\t" + r.amount + "\tFee\t" + r.fee + "\tnet\t" + r.net)
+            case p: BalanceTransactionPayout => println("Payout\tAmount\t" + p.amount + "\tFee\t" + p.fee + "\tnet\t" + p.net)
+          })
+        }
+        case Warning(s, e) => throw e
+        case CriticalError(e) => throw e
+      }
+      assert(true)
+    })
+    Await.result(firstFuture, Duration(40, "seconds"))
   }
 }

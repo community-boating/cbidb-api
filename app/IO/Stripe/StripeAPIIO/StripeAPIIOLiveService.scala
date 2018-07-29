@@ -3,7 +3,7 @@ package IO.Stripe.StripeAPIIO
 import java.time.ZonedDateTime
 
 import CbiUtil._
-import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
+import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, StripeError, Token}
 import IO.HTTP.{GET, HTTPMechanism, HTTPMethod, POST}
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.{PermissionsAuthority, ServerStateContainer}
@@ -49,6 +49,15 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
     getStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
+
+  def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
+    getStripeList(
+      baseURL + "balance/history",
+      BalanceTransaction.apply,
+      (bt: BalanceTransaction) => bt.getId,
+      List.empty,
+      100
+    )
 
   private def getStripeSingleton[T](
     url: String,

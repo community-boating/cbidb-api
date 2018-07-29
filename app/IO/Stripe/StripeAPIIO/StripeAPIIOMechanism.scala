@@ -3,7 +3,7 @@ package IO.Stripe.StripeAPIIO
 import java.time.ZonedDateTime
 
 import CbiUtil.ServiceRequestResult
-import Entities.JsFacades.Stripe.{Charge, StripeError, Token}
+import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, StripeError, Token}
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 
 import scala.concurrent.Future
@@ -14,4 +14,6 @@ abstract class StripeAPIIOMechanism {
   def createCharge(dbIO: StripeDatabaseIOMechanism, amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]]
 
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]]
+
+  def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]]
 }
