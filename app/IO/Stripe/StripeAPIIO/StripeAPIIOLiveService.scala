@@ -12,6 +12,9 @@ import play.api.libs.json.{JsArray, JsObject, JsValue}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
+// TODO: separate the core methods from the things like getCharges, getTokenDetails that are just concrete implementations of the core methods
+// Maybe the instance things should go in a companion, which is parameterized with a API Mechanism object?
+// The only things in this class should be core talking-to-stripe functionality
 class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
   def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
     getStripeList[Charge](
@@ -47,9 +50,11 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       Some((c: Charge) => dbIO.createObject(c))
     )
 
+  // TODO: adds no value
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
     getOrPostStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
 
+  // TODO: replace with call to method parameterized by BalanceTransaction
   def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
     getStripeList(
       "balance/history",

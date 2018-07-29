@@ -45,6 +45,8 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     })
   }
 
+  // TODO: This seems to add no value.  Best case move it to the API Mech, worst case trash it
+  // I'm thinking trash it.
   def getRemoteObjects[T <: CastableToStorableClass](
     castableObj: StripeCastableToStorableObject[T],
     getReqParameters: List[String],
