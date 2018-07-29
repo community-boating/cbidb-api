@@ -44,7 +44,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
         "metadata[token]" -> token,
         "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
       )),
-      Some(dbIO.createCharge)
+      Some((c: Charge) => dbIO.createObject(c))
     )
 
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
@@ -111,7 +111,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     })
   }
 
-  private def getStripeList[T](
+  def getStripeList[T](
     url: String,
     constructor: JsValue => T,
     getID: T => String,

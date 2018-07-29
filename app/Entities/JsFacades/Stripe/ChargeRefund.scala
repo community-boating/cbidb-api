@@ -2,6 +2,7 @@ package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
 import Entities.{CastableToStorableClass, CastableToStorableObject}
+import play.api.libs.json.{JsValue, Json}
 
 case class ChargeRefund(
   refundId: String,
@@ -15,6 +16,9 @@ case class ChargeRefund(
 }
 
 object ChargeRefund extends StripeCastableToStorableObject[ChargeRefund] {
+  implicit val chargeRefundJSONFormat = Json.format[ChargeRefund]
+  def apply(v: JsValue): ChargeRefund = v.as[ChargeRefund]
+
   val apexTableName = "STRIPE_REFUNDS"
   val persistenceFieldsMap: Map[String, ChargeRefund => String] = Map(
     "REFUND_ID" -> ((r: ChargeRefund) => GetSQLLiteral(r.refundId)),

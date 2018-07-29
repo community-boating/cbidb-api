@@ -2,6 +2,7 @@ package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
 import Entities.{CastableToStorableClass, CastableToStorableObject}
+import Services.PersistenceBroker
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -29,7 +30,10 @@ case class Charge(
     }
   }
 
-
+  override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
+    pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+    this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
+  }
 }
 
 object Charge extends StripeCastableToStorableObject[Charge] {

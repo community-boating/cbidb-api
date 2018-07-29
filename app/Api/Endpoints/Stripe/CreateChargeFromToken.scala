@@ -22,7 +22,8 @@ class CreateChargeFromToken @Inject() (ws: WSClient) (implicit exec: ExecutionCo
     val pb = rc.pb
     val stripeIOController = new StripeIOController(
       PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
-      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
+      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb),
+      logger
     )
     val params = req.postParams
     val token: String = params("token")

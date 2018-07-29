@@ -19,7 +19,8 @@ class GetTokenDetails @Inject() (ws: WSClient) (implicit exec: ExecutionContext)
     val pb = rc.pb
     val stripeIOController = new StripeIOController(
       PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
-      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb)
+      PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb),
+      logger
     )
 
     stripeIOController.getTokenDetails(token).map({

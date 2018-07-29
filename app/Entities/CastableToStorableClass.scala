@@ -2,6 +2,7 @@ package Entities
 
 import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForUpdateOrDelete}
 import Services.Authentication.ApexUserType
+import Services.PersistenceBroker
 
 trait CastableToStorableClass {
   val storableObject: CastableToStorableObject[_]
@@ -36,4 +37,8 @@ trait CastableToStorableClass {
          |
       """.stripMargin
   }
+
+  def insertIntoLocalDB(pb: PersistenceBroker): Unit =
+    pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+
 }

@@ -7,4 +7,5 @@ trait CastableToStorableObject[T <: CastableToStorableClass] {
 
   val persistenceFields: List[String] = persistenceFieldsMap.toList.map(t => t._1)
   def persistenceValues(t: T): Map[String, String] = persistenceFieldsMap.map(tup => (tup._1, tup._2(t)))
+  val getId: T => String = (t: T) => t.pkSqlLiteral
 }

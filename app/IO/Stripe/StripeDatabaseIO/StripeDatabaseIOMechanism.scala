@@ -1,14 +1,36 @@
 package IO.Stripe.StripeDatabaseIO
 
-import Entities.JsFacades.Stripe.{BalanceTransaction, Charge}
-import IO.PreparedQueries.Apex.GetLocalStripeChargesForClose
+import Entities.{CastableToStorableClass, CastableToStorableObject}
+import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund}
 import Services.PersistenceBroker
 
 class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
-  def createCharge(c: Charge): Unit = {
-    pb.executePreparedQueryForInsert(c.getInsertPreparedQuery)
-    c.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
+  val whitelistedClasses: Set[CastableToStorableObject[_]] = Set(
+    Charge,
+    ChargeRefund,
+    BalanceTransaction
+  )
+
+  def createObject[T <: CastableToStorableClass](t: T): Unit = {
+    if (whitelistedClasses contains t.storableObject) {
+      pb.executePreparedQueryForInsert(t.getInsertPreparedQuery)
+    }
   }
+
+  def updateObject[T <: CastableToStorableClass](t: T): Unit = {
+    if (whitelistedClasses contains t.storableObject) {
+      pb.executePreparedQueryForUpdateOrDelete(t.getUpdatePreparedQuery)
+    }
+  }
+
+  def deleteObject[T <: CastableToStorableClass](t: T): Unit = {
+    if (whitelistedClasses contains t.storableObject) {
+      pb.executePreparedQueryForUpdateOrDelete(t.getDeletePreparedQuery)
+    }
+  }
+
+  /*
+
   def updateCharge(c: Charge): Unit = {
     pb.executePreparedQueryForUpdateOrDelete(c.getUpdatePreparedQuery)
     c.refunds.foreach(r => {
@@ -20,7 +42,8 @@ class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
     c.refunds.foreach(r => pb.executePreparedQueryForUpdateOrDelete(r.getDeletePreparedQuery))
     pb.executePreparedQueryForUpdateOrDelete(c.getDeletePreparedQuery)
   }
-  def getLocalChargesForClose(closeId: Int): List[Charge] = pb.executePreparedQueryForSelect(new GetLocalStripeChargesForClose(closeId))
+
   def createBalanceTransaction(bt: BalanceTransaction): Unit =
     pb.executePreparedQueryForInsert(bt.getInsertPreparedQuery)
+    */
 }
