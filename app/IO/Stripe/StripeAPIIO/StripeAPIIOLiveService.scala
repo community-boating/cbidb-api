@@ -30,7 +30,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     })
 
   def createCharge(dbIO: StripeDatabaseIOMechanism, amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] =
-    getStripeSingleton(
+    getOrPostStripeSingleton(
       baseURL + "charges",
       Charge.apply,
       POST,
