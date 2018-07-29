@@ -48,7 +48,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     )
 
   def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
-    getStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
+    getOrPostStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
 
   def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
     getStripeList(
@@ -59,7 +59,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       100
     )
 
-  private def getStripeSingleton[T](
+  private def getOrPostStripeSingleton[T](
     url: String,
     constructor: JsValue => T,
     httpMethod: HTTPMethod = GET,
@@ -69,8 +69,8 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     def makeRequest(): Future[JsValue] = {
       http.getJSON(
         url,
-        GET,
-        None,
+        httpMethod,
+        body,
         Some(secretKey),
         Some("")
       )
