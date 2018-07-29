@@ -22,8 +22,8 @@ class UpdateLocalStripeCharges extends FunSuite {
       new FromScalajHTTP()
     )
     val dbMech = new StripeDatabaseIOMechanism(pb)
-    val controller = new StripeIOController(ioMech, dbMech)
-    controller.updateLocalChargesFromAPIForClose(2104, ZonedDateTime.now.minusDays(4), None)
+    val controller = new StripeIOController(ioMech, dbMech, PermissionsAuthority.logger)
+   // controller.updateLocalChargesFromAPIForClose(2104, ZonedDateTime.now.minusDays(4), None)
     assert(1 ==1)
   }
 }
