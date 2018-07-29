@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 
 object DateUtil {
+  val HOME_TIME_ZONE: ZoneId = ZoneId.of("America/New_York")
   def parse(dateLiteral: String, formatString: String = "MM/dd/yyyy"): LocalDate =
     LocalDate.parse(dateLiteral, DateTimeFormatter.ofPattern(formatString))
 

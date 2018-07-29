@@ -2,6 +2,7 @@ package IO.Stripe.StripeDatabaseIO
 
 import Entities.{CastableToStorableClass, CastableToStorableObject}
 import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund}
+import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.PersistenceBroker
 
 class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
@@ -27,6 +28,12 @@ class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
     if (whitelistedClasses contains t.storableObject) {
       pb.executePreparedQueryForUpdateOrDelete(t.getDeletePreparedQuery)
     }
+  }
+
+  def getObjects[T <: CastableToStorableClass](obj: CastableToStorableObject[T], pq: HardcodedQueryForSelect[T]): List[T] = {
+    if (whitelistedClasses contains obj) {
+      pb.executePreparedQueryForSelect(pq)
+    } else List.empty
   }
 
   /*

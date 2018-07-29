@@ -32,9 +32,10 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     insertCommitType: CommitType,
     updateCommitType: CommitType,
     deleteCommitType: CommitType
-  ): Unit = {
+  ): Future[ServiceRequestResult[Unit, Unit]] = {
     val localObjects: List[T] = getLocalObjectsQuery(dbIO)
     getRemoteObjects(castableObj, getReqParameters, filterGetReqResults).map(remotes => {
+      println("Found " + remotes.length + " remote payouts")
       commitDeltaToDatabase(
         GenerateSetDelta(remotes.toSet, localObjects.toSet, castableObj.getId),
         insertCommitType,
@@ -42,7 +43,6 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
         deleteCommitType
       )
     })
-
   }
 
   def getRemoteObjects[T <: CastableToStorableClass](
@@ -51,6 +51,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     filterGetReqResults: Option[T => Boolean],
   ): Future[List[T]] = apiIO.getStripeList(castableObj.getURL, castableObj.apply, castableObj.getId, getReqParameters, 100).map({
     case s: NetSuccess[List[T], _] => s.successObject
+    case CriticalError(e) => throw e
     case _ => List.empty
   })
 
@@ -59,21 +60,26 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     insertCommitType: CommitType,
     updateCommitType: CommitType,
     deleteCommitType: CommitType
-  ): Unit = {
-    insertCommitType match {
-      case COMMIT_TYPE_DO => delta.toCreate.foreach(dbIO.createObject(_))
-      case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toCreate.nonEmpty) logger.warning("Found unexpected inserts " + delta.toCreate.map(_.pkSqlLiteral).mkString(","))
-      case COMMIT_TYPE_SKIP =>
-    }
-    updateCommitType match {
-      case COMMIT_TYPE_DO => delta.toUpdate.foreach(dbIO.updateObject(_))
-      case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toUpdate.nonEmpty) logger.warning("Found unexpected updates " + delta.toUpdate.map(_.pkSqlLiteral).mkString(","))
-      case COMMIT_TYPE_SKIP =>
-    }
-    deleteCommitType match {
-      case COMMIT_TYPE_DO => delta.toDestroy.foreach(dbIO.deleteObject(_))
-      case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toDestroy.nonEmpty) logger.warning("Found unexpected deletes " + delta.toDestroy.map(_.pkSqlLiteral).mkString(","))
-      case COMMIT_TYPE_SKIP =>
+  ): ServiceRequestResult[Unit, Unit] = {
+    try {
+      insertCommitType match {
+        case COMMIT_TYPE_DO => delta.toCreate.foreach(dbIO.createObject(_))
+        case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toCreate.nonEmpty) logger.warning("Found unexpected inserts " + delta.toCreate.map(_.pkSqlLiteral).mkString(","))
+        case COMMIT_TYPE_SKIP =>
+      }
+      updateCommitType match {
+        case COMMIT_TYPE_DO => delta.toUpdate.foreach(dbIO.updateObject(_))
+        case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toUpdate.nonEmpty) logger.warning("Found unexpected updates " + delta.toUpdate.map(_.pkSqlLiteral).mkString(","))
+        case COMMIT_TYPE_SKIP =>
+      }
+      deleteCommitType match {
+        case COMMIT_TYPE_DO => delta.toDestroy.foreach(dbIO.deleteObject(_))
+        case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toDestroy.nonEmpty) logger.warning("Found unexpected deletes " + delta.toDestroy.map(_.pkSqlLiteral).mkString(","))
+        case COMMIT_TYPE_SKIP =>
+      }
+      Succeeded(Unit)
+    } catch {
+      case e: Throwable => CriticalError(e)
     }
   }
 

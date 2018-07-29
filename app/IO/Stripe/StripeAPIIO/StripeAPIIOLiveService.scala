@@ -125,6 +125,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       }).mkString("&")
 
       val finalURL = if(finalParams.length == 0) eachUrl else eachUrl + "?" + finalParams
+      println("making request to " + finalURL)
 
       val f1: Future[Failover[JsValue, ServiceRequestResult[List[T], StripeError]]] =
         http.getJSON(finalURL, GET, None, Some(secretKey), Some("")).transform({
@@ -155,6 +156,6 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       })
     }
 
-    makeRequest(url, ("limit=" + fetchSize) :: params, None, List.empty)
+    makeRequest(baseURL + url, ("limit=" + fetchSize) :: params, None, List.empty)
   }
 }
