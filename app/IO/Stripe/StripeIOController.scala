@@ -62,6 +62,8 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     deleteCommitType: CommitType
   ): ServiceRequestResult[Unit, Unit] = {
     try {
+      println("About to commit delta")
+      println(delta.toCreate.size + " inserts to do")
       insertCommitType match {
         case COMMIT_TYPE_DO => delta.toCreate.foreach(dbIO.createObject(_))
         case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toCreate.nonEmpty) logger.warning("Found unexpected inserts " + delta.toCreate.map(_.pkSqlLiteral).mkString(","))

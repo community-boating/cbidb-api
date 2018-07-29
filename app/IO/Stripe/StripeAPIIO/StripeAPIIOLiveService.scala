@@ -52,7 +52,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
   def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
     getStripeList(
-      baseURL + "balance/history",
+      "balance/history",
       BalanceTransaction.apply,
       (bt: BalanceTransaction) => bt.id,
       List.empty,
@@ -119,6 +119,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     fetchSize: Int
   ): Future[ServiceRequestResult[List[T], StripeError]] = {
     def makeRequest(eachUrl: String, params: List[String], lastID: Option[String], results: List[T]): Future[ServiceRequestResult[List[T], StripeError]] = {
+      println("entered makeRequest with " + results.length)
       val finalParams: String = (lastID match {
         case None => params
         case Some(id) => ("starting_after=" + id) :: params
@@ -129,7 +130,10 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
       val f1: Future[Failover[JsValue, ServiceRequestResult[List[T], StripeError]]] =
         http.getJSON(finalURL, GET, None, Some(secretKey), Some("")).transform({
-          case Success(jsv: JsValue) => Success(Resolved(jsv))
+          case Success(jsv: JsValue) => {
+            println(jsv.toString())
+            Success(Resolved(jsv))
+          }
           case Failure(e: Throwable) => Success(Failed(e))
         })
 
@@ -148,8 +152,18 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
       f3.flatMap({
         case Resolved(l: List[T]) => l match {
-          case Nil => Future { Succeeded(results) }
-          case more => makeRequest(eachUrl, params, Some(getID(more.last)), results ++ more)
+          case Nil => {
+            println("actually its " + l.length)
+            Future { Succeeded(results) }
+          }
+          case more => {
+            println("started with " + results.length + ", adding " + more.length)
+            makeRequest(eachUrl, params, Some(getID(more.last)), results ++ more)
+          }
+          case _ => {
+            println("shoudlnt be here")
+            Future { Succeeded(results) }
+          }
         }
         case Rejected(se: ServiceRequestResult[T, StripeError]) => Future { se }
         case Failed(e) => Future { CriticalError(e) }

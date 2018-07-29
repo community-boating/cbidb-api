@@ -2,6 +2,7 @@ package IO.PreparedQueries.Apex
 
 import java.sql.ResultSet
 
+import CbiUtil.DateUtil
 import Entities.JsFacades.Stripe.{Charge, ChargeMetadata, Payout}
 import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.Authentication.ApexUserType
@@ -19,8 +20,8 @@ class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexUser
   override def mapResultSetRowToCaseObject(rs: ResultSet): Payout = Payout(
     id = rs.getString(1),
     amount = rs.getInt(2),
-    arrivalDate = rs.getDate(3).toInstant.getEpochSecond,
-    balanceTransactionId = rs.getString(4),
+    arrival_date = rs.getTimestamp(3).toLocalDateTime.atZone(DateUtil.HOME_TIME_ZONE).toEpochSecond,
+    balance_transaction = rs.getString(4),
     status = rs.getString(5)
   )
 }

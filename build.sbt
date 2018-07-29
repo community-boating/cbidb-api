@@ -28,3 +28,10 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 libraryDependencies ++= Seq(
 	"net.debasishg" %% "redisclient" % "3.4"
 )
+
+/*
+scalacOptions ++= Seq(
+  "-Xcheckinit"
+//  , "-feature"
+)
+*/

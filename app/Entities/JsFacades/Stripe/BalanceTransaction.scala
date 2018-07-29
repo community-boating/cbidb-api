@@ -36,4 +36,5 @@ object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransact
   )
   val pkColumnName = "TRANSACTION_ID"
   val getURL: String = "balance/history"
+  val getId: BalanceTransaction => String = _.id
 }

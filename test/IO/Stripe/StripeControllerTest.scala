@@ -22,13 +22,15 @@ class StripeControllerTest  extends FunSuite {
     serverProps.getProperty("StripeAPIKey")
   }
 
-  GetPersistenceBroker { pb =>
-
-    test("Write Payouts to DB") {
+  test("Write Payouts to DB") {
+    GetPersistenceBroker(pb => {
+      println(s"startnig test 0: ${Thread.currentThread.getName}")
       val apiService = new StripeAPIIOLiveService(stripeURL, secretKey, new FromScalajHTTP)
       val dbService = new StripeDatabaseIOMechanism(pb)
       val logger = PermissionsAuthority.logger
       val controller = new StripeIOController(apiService, dbService, logger)
+      println(s"second: ${Thread.currentThread.getName}")
+      println("1")
       val firstFuture = controller.updateLocalDBFromStripeForStorable(
         Payout,
         List.empty,
@@ -39,11 +41,14 @@ class StripeControllerTest  extends FunSuite {
         updateCommitType = COMMIT_TYPE_ASSERT_NO_ACTION,
         deleteCommitType = COMMIT_TYPE_ASSERT_NO_ACTION
       )
-      firstFuture.onComplete(f => {
-
-        assert(true)
-      })
+      println("2")
+      firstFuture.onComplete(_.map({
+        case CriticalError(e) => throw e
+        case _ =>assert(true)
+      }))
+      println("3")
       Await.result(firstFuture, Duration(40, "seconds"))
-    }
+      println("4")
+    })
   }
 }

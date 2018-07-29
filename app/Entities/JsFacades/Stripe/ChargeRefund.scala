@@ -28,4 +28,5 @@ object ChargeRefund extends StripeCastableToStorableObject[ChargeRefund] {
   )
   val pkColumnName = "REFUND_ID"
   val getURL: String = "refunds"
+  val getId: ChargeRefund => String = _.refundId
 }

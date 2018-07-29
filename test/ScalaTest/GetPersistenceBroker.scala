@@ -10,6 +10,8 @@ object GetPersistenceBroker {
     PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
     try {
       block(PermissionsAuthority.getRootPB.get)
+      println(s"first thread is: ${Thread.currentThread.getName}")
+      println("its done")
     } finally {
       println("************  SHUTTING DOWN  ************")
       RelationalBroker.shutdown()
