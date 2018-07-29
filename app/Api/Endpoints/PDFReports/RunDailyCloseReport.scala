@@ -16,8 +16,6 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import play.api.http.HttpEntity
 import play.api.mvc._
 
-import scala.concurrent.Future
-
 
 class RunDailyCloseReport @Inject() extends AuthenticatedRequest {
   def get(closeId: Int, signet: Option[String]): Action[AnyContent] = Action {req => {

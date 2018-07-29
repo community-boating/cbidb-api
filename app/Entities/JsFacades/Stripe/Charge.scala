@@ -2,8 +2,6 @@ package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
 import Entities.StorableJSObject
-import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForUpdateOrDelete}
-import Services.Authentication.ApexUserType
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(

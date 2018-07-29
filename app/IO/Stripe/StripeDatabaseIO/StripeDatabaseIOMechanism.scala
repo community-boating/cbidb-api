@@ -1,6 +1,6 @@
 package IO.Stripe.StripeDatabaseIO
 
-import Entities.JsFacades.Stripe.Charge
+import Entities.JsFacades.Stripe.{BalanceTransaction, Charge}
 import IO.PreparedQueries.Apex.GetLocalStripeChargesForClose
 import Services.PersistenceBroker
 
@@ -21,4 +21,6 @@ class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
     pb.executePreparedQueryForUpdateOrDelete(c.getDeletePreparedQuery)
   }
   def getLocalChargesForClose(closeId: Int): List[Charge] = pb.executePreparedQueryForSelect(new GetLocalStripeChargesForClose(closeId))
+  def createBalanceTransaction(bt: BalanceTransaction): Unit =
+    pb.executePreparedQueryForInsert(bt.getInsertPreparedQuery)
 }

@@ -3,8 +3,7 @@ package Services.Authentication
 import java.sql.ResultSet
 
 import CbiUtil.ParsedRequest
-import Entities.EntityDefinitions.User
-import IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
+import IO.PreparedQueries.PreparedQueryForSelect
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 

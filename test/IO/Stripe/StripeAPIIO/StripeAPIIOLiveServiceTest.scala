@@ -48,11 +48,7 @@ class StripeAPIIOLiveServiceTest extends FunSuite {
       r match {
         case Succeeded(l: List[BalanceTransaction]) => {
           val reversed = l.reverse
-          reversed.foreach({
-            case c: BalanceTransactionCharge => println("Charge\tAmount\t" + c.amount + "\tFee\t" + c.fee + "\tnet\t" + c.net)
-            case r: BalanceTransactionRefund => println("Refund\tAmount\t" + r.amount + "\tFee\t" + r.fee + "\tnet\t" + r.net)
-            case p: BalanceTransactionPayout => println("Payout\tAmount\t" + p.amount + "\tFee\t" + p.fee + "\tnet\t" + p.net)
-          })
+          reversed.foreach(c => println(c.`type` + "\tAmount\t" + c.amount + "\tFee\t" + c.fee + "\tnet\t" + c.net + "\t" + c.description))
         }
         case Warning(s, e) => throw e
         case CriticalError(e) => throw e

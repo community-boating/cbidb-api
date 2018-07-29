@@ -54,7 +54,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
     getStripeList(
       baseURL + "balance/history",
       BalanceTransaction.apply,
-      (bt: BalanceTransaction) => bt.getId,
+      (bt: BalanceTransaction) => bt.id,
       List.empty,
       100
     )
