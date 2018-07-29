@@ -24,24 +24,12 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     val currentLocalCharges: Set[Charge] = dbIO.getLocalChargesForClose(closeId).toSet
 
     // Unfortunately we can't ask stripe to just give us all charges with a given close ID.
-    // So, first try getting all charges created up to 24 hours before the close was opened.
-    // If for some reason the database has charges that aren't in that result set from Stripe,
-    // try one more time, going back two months before the close opened, just to be super sure
-    val oneDayGracePeriod: Set[Charge] = Await.result(
-      apiIO.getCharges(Some(closeOpenDateTime.minusDays(1))),
-      Duration.create(10, TimeUnit.SECONDS)
+    // So, go back two months before the close opened, just to be super sure
+    val twoMonthGracePeriod: Set[Charge] = Await.result(
+      apiIO.getCharges(Some(closeOpenDateTime.minusMonths(2))),
+      Duration.create(50, TimeUnit.SECONDS)
     ).filter(filterChargesToClose).toSet
-
-    val oneDayDelta = GenerateSetDelta(oneDayGracePeriod, currentLocalCharges, getChargeID)
-    if (oneDayDelta.toDestroy.isEmpty) {
-      oneDayDelta
-    } else {
-      val twoMonthGracePeriod: Set[Charge] = Await.result(
-        apiIO.getCharges(Some(closeOpenDateTime.minusMonths(2))),
-        Duration.create(50, TimeUnit.SECONDS)
-      ).filter(filterChargesToClose).toSet
-      GenerateSetDelta(twoMonthGracePeriod, currentLocalCharges, getChargeID)
-    }
+    GenerateSetDelta(twoMonthGracePeriod, currentLocalCharges, getChargeID)
   }
 
   def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {

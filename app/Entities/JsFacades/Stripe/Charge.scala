@@ -1,7 +1,7 @@
 package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
-import Entities.StorableJSObject
+import Entities.{CastableToStorableClass, CastableToStorableObject}
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -11,21 +11,9 @@ case class Charge(
   created: Int,
   paid: Boolean,
   status: String
-) extends StorableJSObject {
-  val self = this
-  val apexTableName = "STRIPE_CHARGES"
-  val persistenceFields: Map[String, String] = Map(
-    "CHARGE_ID" -> GetSQLLiteral(id),
-    "AMOUNT_IN_CENTS" -> GetSQLLiteral(amount),
-    "CREATED_EPOCH" -> GetSQLLiteral(created),
-    "PAID" -> GetSQLLiteral(paid),
-    "STATUS" -> GetSQLLiteral(status),
-    "CLOSE_ID" -> GetSQLLiteral(metadata.closeId),
-    "ORDER_ID" -> GetSQLLiteral(metadata.orderId),
-    "TOKEN" -> GetSQLLiteral(metadata.token),
-    "REFUNDS" -> GetSQLLiteral(metadata.refunds),
-  )
-  val pkColumnName = "CHARGE_ID"
+) extends CastableToStorableClass {
+  val storableObject: CastableToStorableObject[_] = Charge
+  val persistenceValues: Map[String, String] = Charge.persistenceValues(this)
   val pkSqlLiteral: String = GetSQLLiteral(id)
 
   // e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
@@ -40,11 +28,28 @@ case class Charge(
         .map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
     }
   }
+
+
 }
 
-object Charge {
+object Charge extends StripeCastableToStorableObject[Charge] {
   implicit val chargeJSONFormat = Json.format[Charge]
   def apply(v: JsValue): Charge = v.as[Charge]
+
+  val apexTableName = "STRIPE_CHARGES"
+  val persistenceFieldsMap: Map[String, Charge => String] = Map(
+    "CHARGE_ID" -> ((c: Charge) => GetSQLLiteral(c.id)),
+    "AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteral(c.amount)),
+    "CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteral(c.created)),
+    "PAID" -> ((c: Charge) => GetSQLLiteral(c.paid)),
+    "STATUS" -> ((c: Charge) => GetSQLLiteral(c.status)),
+    "CLOSE_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.closeId)),
+    "ORDER_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.orderId)),
+    "TOKEN" -> ((c: Charge) => GetSQLLiteral(c.metadata.token)),
+    "REFUNDS" -> ((c: Charge) => GetSQLLiteral(c.metadata.refunds)),
+  )
+  val pkColumnName = "CHARGE_ID"
+  val getURL: String = "charges"
 }
 
 /*
