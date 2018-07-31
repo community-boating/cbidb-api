@@ -2,7 +2,7 @@ package Entities.JsFacades.Stripe
 
 import CbiUtil.GetSQLLiteral
 import Entities.{CastableToStorableClass, CastableToStorableObject}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 case class BalanceTransaction(
   id: String,
@@ -12,7 +12,8 @@ case class BalanceTransaction(
   net: Int,
   source: String,
   status: String,
-  `type`: String
+  `type`: String,
+  payout: String
 ) extends CastableToStorableClass {
   val pkSqlLiteral: String = GetSQLLiteral(id)
   val storableObject: CastableToStorableObject[_] = BalanceTransaction
@@ -21,6 +22,11 @@ case class BalanceTransaction(
 
 object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransaction] {
   implicit val balanceTransactionJSONFormat = Json.format[BalanceTransaction]
+  def apply(v: JsValue, po: Payout): BalanceTransaction = {
+    val newThing: JsObject = v.as[JsObject] ++ JsObject(Map("payout" -> JsString(po.id)))
+    newThing.as[BalanceTransaction]
+  }
+
   def apply(v: JsValue): BalanceTransaction = v.as[BalanceTransaction]
 
   val apexTableName = "STRIPE_BALANCE_TRANSACTIONS"
@@ -33,6 +39,7 @@ object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransact
     "SOURCE" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.source)),
     "STATUS" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.status)),
     "TYPE" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.`type`)),
+    "PAYOUT" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.payout))
   )
   val pkColumnName = "TRANSACTION_ID"
   val getURL: String = "balance/history"

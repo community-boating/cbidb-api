@@ -1,27 +1,99 @@
 package IO.Stripe
 
 import java.time.ZonedDateTime
-import java.util.concurrent.TimeUnit
 
 import CbiUtil._
-import Entities.{CastableToStorableClass, CastableToStorableObject}
-import Entities.JsFacades.Stripe.{Charge, StripeCastableToStorableObject, StripeError, Token}
-import IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
-import IO.PreparedQueries.HardcodedQueryForSelect
+import Entities.CastableToStorableClass
+import Entities.JsFacades.Stripe.{Charge, StripeError, _}
+import IO.HTTP.{GET, POST}
+import IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripePayouts}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
 import Services.Logger.Logger
-import scala.concurrent.ExecutionContext.Implicits.global
+import Services.{PermissionsAuthority, ServerStateContainer}
+import play.api.libs.json.JsValue
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger) {
-  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
-    apiIO.getTokenDetails(token)
+  def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
+    apiIO.getStripeList[Charge](
+      "charges",
+      Charge.apply,
+      (c: Charge) => c.id,
+      since match {
+        case None => List.empty
+        case Some(d) => List("created[gte]=" + d.toEpochSecond)
+      },
+      chargesPerRequest
+    ).map({
+      case Succeeded(t) => t
+      case Warning(t, _) => t
+      case _ => throw new Exception("failed to get charges")
+    })
 
-  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
-    apiIO.createCharge(dbIO, amountInCents, token, orderId, closeId)
+  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
+    apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
+
+  def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
+    apiIO.getStripeList(
+      "balance/history",
+      BalanceTransaction.apply,
+      (bt: BalanceTransaction) => bt.id,
+      List.empty,
+      100
+    )
+
+  def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] =
+    apiIO.getOrPostStripeSingleton(
+      "charges",
+      Charge.apply,
+      POST,
+      Some(Map(
+        "amount" -> amountInCents.toString,
+        "currency" -> "usd",
+        "source" -> token,
+        "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
+        "metadata[closeId]" -> closeId.toString,
+        "metadata[orderId]" -> orderId.toString,
+        "metadata[token]" -> token,
+        "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
+      )),
+      Some((c: Charge) => dbIO.createObject(c))
+    )
+
+  def syncBalanceTransactions: Future[ServiceRequestResult[Unit, Unit]] = {
+    // Update DB with all payouts
+    updateLocalDBFromStripeForStorable(
+      Payout,
+      List.empty,
+      None,
+      (dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
+      COMMIT_TYPE_DO,
+      COMMIT_TYPE_ASSERT_NO_ACTION,
+      COMMIT_TYPE_ASSERT_NO_ACTION
+    ).flatMap(_ => {
+      val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
+      // For each payout, update DB with all associated BTs
+      Future.sequence(payouts.map(po => {
+        val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
+        updateLocalDBFromStripeForStorable(
+          BalanceTransaction,
+          List("payout=" + po.id),
+          Some((bt: BalanceTransaction) => bt.`type` != "payout"),
+          (dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
+          COMMIT_TYPE_DO,
+          COMMIT_TYPE_ASSERT_NO_ACTION,
+          COMMIT_TYPE_ASSERT_NO_ACTION,
+          Some(constructor)
+        )
+      })).map(serviceResultList => serviceResultList.foldLeft(Succeeded(Unit): ServiceRequestResult[Unit, Unit])((result, e) => result match {
+        case Succeeded(_) => e
+        case x => x
+      }))
+    })
   }
 
   def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
@@ -31,11 +103,11 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     getLocalObjectsQuery: StripeDatabaseIOMechanism => List[T],
     insertCommitType: CommitType,
     updateCommitType: CommitType,
-    deleteCommitType: CommitType
+    deleteCommitType: CommitType,
+    constructor: Option[JsValue => T] = None
   ): Future[ServiceRequestResult[Unit, Unit]] = {
     val localObjects: List[T] = getLocalObjectsQuery(dbIO)
-    getRemoteObjects(castableObj, getReqParameters, filterGetReqResults).map(remotes => {
-      println("Found " + remotes.length + " remote payouts")
+    getRemoteObjects(castableObj, getReqParameters, filterGetReqResults, constructor).map(remotes => {
       commitDeltaToDatabase(
         GenerateSetDelta(remotes.toSet, localObjects.toSet, castableObj.getId),
         insertCommitType,
@@ -45,17 +117,22 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
     })
   }
 
-  // TODO: This seems to add no value.  Best case move it to the API Mech, worst case trash it
-  // I'm thinking trash it.
   def getRemoteObjects[T <: CastableToStorableClass](
     castableObj: StripeCastableToStorableObject[T],
     getReqParameters: List[String],
     filterGetReqResults: Option[T => Boolean],
-  ): Future[List[T]] = apiIO.getStripeList(castableObj.getURL, castableObj.apply, castableObj.getId, getReqParameters, 100).map({
-    case s: NetSuccess[List[T], _] => s.successObject
-    case CriticalError(e) => throw e
-    case _ => List.empty
-  })
+    constructor: Option[(JsValue => T)] = None
+  ): Future[List[T]] = {
+    val defaultConstructor: (JsValue => T) = castableObj.apply
+    apiIO.getStripeList(castableObj.getURL, constructor.getOrElse(defaultConstructor), castableObj.getId, getReqParameters, 100).map({
+      case s: NetSuccess[List[T], _] => filterGetReqResults match {
+        case None => s.successObject
+        case Some(f) => s.successObject.filter(f)
+      }
+      case CriticalError(e) => throw e
+      case _ => List.empty
+    })
+  }
 
   private def commitDeltaToDatabase[T <: CastableToStorableClass](
     delta: SetDelta[T],
@@ -86,33 +163,4 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
       case e: Throwable => CriticalError(e)
     }
   }
-
-  /*
-  def updateLocalChargesFromAPIForClose(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: Option[ZonedDateTime]): Unit = {
-    val delta = getAPItoDBChargeDelta(closeId, closeOpenDateTime, closeFinalizedDateTime)
-    commitChargeDeltaToDatabase(delta)
-  }
-
-  def getAPItoDBChargeDelta(closeId: Int, closeOpenDateTime: ZonedDateTime, closeFinalizedDateTime: Option[ZonedDateTime]): SetDelta[Charge] = {
-    val filterChargesToClose: Charge => Boolean =
-      c => c.metadata.closeId.getOrElse("") == closeId.toString
-    val getChargeID: Charge => String = c => c.id
-    val currentLocalCharges: Set[Charge] = dbIO.getLocalChargesForClose(closeId).toSet
-
-    // Unfortunately we can't ask stripe to just give us all charges with a given close ID.
-    // So, go back two months before the close opened, just to be super sure
-    val twoMonthGracePeriod: Set[Charge] = Await.result(
-      apiIO.getCharges(Some(closeOpenDateTime.minusMonths(2))),
-      Duration.create(50, TimeUnit.SECONDS)
-    ).filter(filterChargesToClose).toSet
-    GenerateSetDelta(twoMonthGracePeriod, currentLocalCharges, getChargeID)
-  }
-
-
-
-  private def commitChargeDeltaToDatabase(delta: SetDelta[Charge]): Unit = {
-    delta.toCreate.foreach(dbIO.createCharge)
-    delta.toUpdate.foreach(dbIO.updateCharge)
-    delta.toDestroy.foreach(dbIO.deleteCharge)
-  }*/
 }

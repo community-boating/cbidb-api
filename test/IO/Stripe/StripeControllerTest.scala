@@ -21,7 +21,7 @@ class StripeControllerTest  extends FunSuite {
     val serverProps = new ServerInstanceProperties("conf/private/server-properties")
     serverProps.getProperty("StripeAPIKey")
   }
-
+/*
   test("Write Payouts to DB") {
     GetPersistenceBroker(pb => {
       println(s"startnig test 0: ${Thread.currentThread.getName}")
@@ -45,6 +45,26 @@ class StripeControllerTest  extends FunSuite {
       firstFuture.onComplete(_.map({
         case CriticalError(e) => throw e
         case _ =>assert(true)
+      }))
+      println("3")
+      Await.result(firstFuture, Duration(40, "seconds"))
+      println("4")
+    })
+  }*/
+  test("Write BalanceTransactions to DB") {
+    GetPersistenceBroker(pb => {
+      println(s"startnig test 0: ${Thread.currentThread.getName}")
+      val apiService = new StripeAPIIOLiveService(stripeURL, secretKey, new FromScalajHTTP)
+      val dbService = new StripeDatabaseIOMechanism(pb)
+      val logger = PermissionsAuthority.logger
+      val controller = new StripeIOController(apiService, dbService, logger)
+      println(s"second: ${Thread.currentThread.getName}")
+      println("1")
+      val firstFuture = controller.syncBalanceTransactions
+      println("2")
+      firstFuture.onComplete(_.map({
+        case CriticalError(e) => throw e
+        case _ => assert(true)
       }))
       println("3")
       Await.result(firstFuture, Duration(40, "seconds"))

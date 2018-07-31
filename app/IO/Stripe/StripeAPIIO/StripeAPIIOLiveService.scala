@@ -1,12 +1,8 @@
 package IO.Stripe.StripeAPIIO
 
-import java.time.ZonedDateTime
-
 import CbiUtil._
-import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, StripeError, Token}
-import IO.HTTP.{GET, HTTPMechanism, HTTPMethod, POST}
-import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
-import Services.{PermissionsAuthority, ServerStateContainer}
+import Entities.JsFacades.Stripe.StripeError
+import IO.HTTP.{GET, HTTPMechanism, HTTPMethod}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,55 +12,7 @@ import scala.util.{Failure, Success}
 // Maybe the instance things should go in a companion, which is parameterized with a API Mechanism object?
 // The only things in this class should be core talking-to-stripe functionality
 class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
-  def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
-    getStripeList[Charge](
-      baseURL + "charges",
-      Charge.apply,
-      (c: Charge) => c.id,
-      since match {
-        case None => List.empty
-        case Some(d) => List("created[gte]=" + d.toEpochSecond)
-      },
-      chargesPerRequest
-    ).map({
-      case Succeeded(t) => t
-      case Warning(t, _) => t
-      case _ => throw new Exception("failed to get charges")
-    })
-
-  def createCharge(dbIO: StripeDatabaseIOMechanism, amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] =
-    getOrPostStripeSingleton(
-      baseURL + "charges",
-      Charge.apply,
-      POST,
-      Some(Map(
-        "amount" -> amountInCents.toString,
-        "currency" -> "usd",
-        "source" -> token,
-        "description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
-        "metadata[closeId]" -> closeId.toString,
-        "metadata[orderId]" -> orderId.toString,
-        "metadata[token]" -> token,
-        "metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
-      )),
-      Some((c: Charge) => dbIO.createObject(c))
-    )
-
-  // TODO: adds no value
-  def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
-    getOrPostStripeSingleton(baseURL + "tokens/" + token, Token.apply, GET, None, None)
-
-  // TODO: replace with call to method parameterized by BalanceTransaction
-  def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
-    getStripeList(
-      "balance/history",
-      BalanceTransaction.apply,
-      (bt: BalanceTransaction) => bt.id,
-      List.empty,
-      100
-    )
-
-  private def getOrPostStripeSingleton[T](
+  def getOrPostStripeSingleton[T](
     url: String,
     constructor: JsValue => T,
     httpMethod: HTTPMethod = GET,
@@ -73,7 +21,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
   ): Future[ServiceRequestResult[T, StripeError]] = {
     def makeRequest(): Future[JsValue] = {
       http.getJSON(
-        url,
+        baseURL + url,
         httpMethod,
         body,
         Some(secretKey),

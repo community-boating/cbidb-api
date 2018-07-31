@@ -3,10 +3,9 @@ package IO.PreparedQueries.Apex
 import java.sql.ResultSet
 
 import CbiUtil.DateUtil
-import Entities.JsFacades.Stripe.{Charge, ChargeMetadata, Payout}
+import Entities.JsFacades.Stripe.Payout
 import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.Authentication.ApexUserType
-import Services.PermissionsAuthority
 
 class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexUserType), true) {
   val getQuery: String =

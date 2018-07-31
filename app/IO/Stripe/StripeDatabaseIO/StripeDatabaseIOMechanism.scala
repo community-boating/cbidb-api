@@ -1,11 +1,12 @@
 package IO.Stripe.StripeDatabaseIO
 
-import Entities.{CastableToStorableClass, CastableToStorableObject}
 import Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund, Payout}
+import Entities.{CastableToStorableClass, CastableToStorableObject}
 import IO.PreparedQueries.HardcodedQueryForSelect
 import Services.PersistenceBroker
 
 class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
+  val self = this
   val whitelistedClasses: Set[CastableToStorableObject[_]] = Set(
     Charge,
     ChargeRefund,
@@ -38,21 +39,5 @@ class StripeDatabaseIOMechanism(pb: PersistenceBroker) {
     } else List.empty
   }
 
-  /*
 
-  def updateCharge(c: Charge): Unit = {
-    pb.executePreparedQueryForUpdateOrDelete(c.getUpdatePreparedQuery)
-    c.refunds.foreach(r => {
-      pb.executePreparedQueryForUpdateOrDelete(r.getDeletePreparedQuery)
-      pb.executePreparedQueryForInsert(r.getInsertPreparedQuery)
-    })
-  }
-  def deleteCharge(c: Charge): Unit = {
-    c.refunds.foreach(r => pb.executePreparedQueryForUpdateOrDelete(r.getDeletePreparedQuery))
-    pb.executePreparedQueryForUpdateOrDelete(c.getDeletePreparedQuery)
-  }
-
-  def createBalanceTransaction(bt: BalanceTransaction): Unit =
-    pb.executePreparedQueryForInsert(bt.getInsertPreparedQuery)
-    */
 }

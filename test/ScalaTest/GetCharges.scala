@@ -17,12 +17,12 @@ class GetCharges extends FunSuite {
     "",
     new FromScalajHTTP()
   )
-
+/*
   test("Charges") {
     val charges = sio.getCharges(None, 100)
     val result = charges.map(r => {
       assert(r.length == 35)
     })
     Await.result(result, Duration(50, "seconds"))
-  }
+  }*/
 }

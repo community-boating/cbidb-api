@@ -5,6 +5,7 @@ import java.time.ZonedDateTime
 import CbiUtil._
 import Entities.JsFacades.Stripe._
 import IO.HTTP.FromScalajHTTP
+import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.{PermissionsAuthority, ServerInstanceProperties}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -40,21 +41,4 @@ class StripeAPIIOLiveServiceTest extends FunSuite {
     Await.result(secondFuture, Duration(40, "seconds"))
   }
 */
-  test("Get Balance Transactions") {
-    val apiService = new StripeAPIIOLiveService(stripeURL, secretKey, new FromScalajHTTP)
-    val firstFuture = apiService.getBalanceTransactions
-    firstFuture.onComplete(f => {
-      val r: ServiceRequestResult[scala.List[BalanceTransaction], StripeError] = f.get
-      r match {
-        case Succeeded(l: List[BalanceTransaction]) => {
-          val reversed = l.reverse
-          reversed.foreach(c => println(c.`type` + "\tAmount\t" + c.amount + "\tFee\t" + c.fee + "\tnet\t" + c.net + "\t" + c.description))
-        }
-        case Warning(s, e) => throw e
-        case CriticalError(e) => throw e
-      }
-      assert(true)
-    })
-    Await.result(firstFuture, Duration(40, "seconds"))
-  }
 }

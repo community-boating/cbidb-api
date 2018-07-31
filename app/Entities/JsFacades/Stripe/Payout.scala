@@ -1,6 +1,5 @@
 package Entities.JsFacades.Stripe
 
-import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZonedDateTime}
 
 import CbiUtil.{DateUtil, GetSQLLiteral}
