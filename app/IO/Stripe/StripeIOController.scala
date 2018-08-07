@@ -72,7 +72,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
       None,
       (dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
       COMMIT_TYPE_DO,
-      COMMIT_TYPE_ASSERT_NO_ACTION,
+      COMMIT_TYPE_DO,
       COMMIT_TYPE_ASSERT_NO_ACTION
     ).flatMap(_ => {
       val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
@@ -85,7 +85,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
           Some((bt: BalanceTransaction) => bt.`type` != "payout"),
           (dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
           COMMIT_TYPE_DO,
-          COMMIT_TYPE_ASSERT_NO_ACTION,
+          COMMIT_TYPE_DO,
           COMMIT_TYPE_ASSERT_NO_ACTION,
           Some(constructor)
         )
