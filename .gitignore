@@ -9,5 +9,6 @@ target
 /conf/private
 conf/routes-build/node_modules
 conf/routes-build/dist
+npm-debug.log
 
 start.sh
