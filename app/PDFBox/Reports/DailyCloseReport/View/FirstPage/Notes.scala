@@ -10,7 +10,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 class Notes(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable{
   val notes = data.closeProps.notes.getOrElse("")
   val notesBoxWidth = 500
-  val notesMaxLines = 21
+  val notesMaxLines = 20
   val wrappedNotes = ContentStreamDecorator.wrapText(notes, defaultFont, defaultFontSize, notesBoxWidth)
   val trimmedNotes = {
     if (wrappedNotes.length <= notesMaxLines) wrappedNotes
@@ -40,7 +40,7 @@ class Notes(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, d
       trimmedNotes,
       notesBoxWidth,
       ALIGN_LEFT,
-      300,
+      280,
       1,
       1,
       Color.BLACK,

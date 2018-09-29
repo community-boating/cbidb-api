@@ -23,8 +23,8 @@ class FirstPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFon
     new OnlineDetailTable(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top)
       .draw(contentStreamDecorator, left+270, top-100)
     new StaffTables(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top)
-      .draw(contentStreamDecorator, left, top-310)
+      .draw(contentStreamDecorator, left, top-330)
     new Notes(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top)
-      .draw(contentStreamDecorator, left, top-410)
+      .draw(contentStreamDecorator, left, top-430)
   }
 }

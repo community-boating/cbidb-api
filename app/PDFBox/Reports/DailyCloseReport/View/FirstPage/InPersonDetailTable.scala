@@ -32,7 +32,8 @@ class InPersonDetailTable(data: DailyCloseReportModel, maxWidth: Float, defaultF
         data.inPersonAPVouchersRedeemed,
         data.inPersonOtherARTotal
       ).sum.format()),
-      List("Total Sales (Tally):", data.closeProps.inPersonTally.format()),
+      List("Total Sales (DB):", data.closeProps.inPersonTally.format()),
+      List("Total POS (Tape):", data.closeProps.tapeValue.format()),
       List("Total Tax Amount:", data.taxRevenue.format())
     ),
     List(widthLeft, widthRight),
