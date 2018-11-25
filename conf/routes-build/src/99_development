@@ -3,6 +3,7 @@
 #GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
 #GET     /weather                            Api.Endpoints.Public.Weather.get()
 GET     /users                              Api.Endpoints.Users.get()
+GET     /member-welcome                     Api.Endpoints.Member.WelcomePackage.get()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()

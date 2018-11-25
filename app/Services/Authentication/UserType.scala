@@ -1,7 +1,7 @@
 package Services.Authentication
 
 import CbiUtil.ParsedRequest
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 abstract class UserType {
@@ -32,4 +32,32 @@ abstract class UserType {
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)]
 
   def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility
+
+  def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
+    if (secCookies.isEmpty) None
+    else if (secCookies.size > 1) None
+    else {
+      val cookie = secCookies.toList.head
+      val token = cookie.value
+      println("Found cookie on request: " + token)
+      val cacheResult = rootCB.get(PermissionsAuthority.SEC_COOKIE_NAME + "_" + token)
+      println(cacheResult)
+      cacheResult match {
+        case None => None
+        case Some(s: String) => {
+          val split = s.split(",")
+          if (split.length != 2) None
+          val userName = split(0)
+          val expires = split(1)
+          println("expires ")
+          println(expires)
+          println("and its currently ")
+          println(System.currentTimeMillis())
+          if (expires.toLong < System.currentTimeMillis()) None
+          else Some(userName)
+        }
+      }
+    }
+  }
 }

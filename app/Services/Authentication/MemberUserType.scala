@@ -8,7 +8,8 @@ import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object MemberUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = None
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
+    getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken)
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,
