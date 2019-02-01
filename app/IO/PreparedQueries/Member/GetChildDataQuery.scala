@@ -14,7 +14,8 @@ class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDa
       rs.getString(2),
       rs.getString(3),
       rs.getString(4),
-      rs.getString(5)
+      rs.getString(5),
+      rs.getString(6)
     )
 
   override def getQuery: String =
@@ -23,8 +24,9 @@ class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDa
       |p.person_id,
       |p.name_first,
       |p.name_last,
-      |jp_state_pkg.jp_status(p.person_id,?) as status,
-      |jp_state_pkg.jp_actions(p.person_id,?) as actions
+      |jp_state_pkg.jp_status(p.person_id,cc_pkg.get_order_id(?)) as status,
+      |jp_state_pkg.jp_actions(p.person_id,cc_pkg.get_order_id(?), 'Y') as actions,
+      |ratings_pkg.jp_ratings(p.person_id)
       |from persons p
       |left outer join jp_teams t on p.jp_team_id = t.team_id
       |left outer join active_jp_members v on p.person_id = v.person_id
@@ -41,7 +43,8 @@ case class GetChildDataQueryResult(
   nameFirst: String,
   nameLast: String,
   status: String,
-  actions: String
+  actions: String,
+  ratings: String
 )
 
 object GetChildDataQueryResult {
