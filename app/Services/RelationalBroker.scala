@@ -16,8 +16,24 @@ import scala.collection.mutable.ListBuffer
 abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQueriesOnly: Boolean) extends PersistenceBroker(rc, preparedQueriesOnly) {
   implicit val pb: PersistenceBroker = this
 
-  private val mainPool: HikariDataSource = RelationalBroker.mainPool.get
-  private val tempTablePool: HikariDataSource = RelationalBroker.tempTablePool.get
+  private val mainPoolOption: Initializable[HikariDataSource] = RelationalBroker.mainPool
+  private val tempTablePoolOption: Initializable[HikariDataSource] = RelationalBroker.tempTablePool
+
+  private def mainPool: HikariDataSource = {
+    if (!mainPoolOption.isInitialized) {
+      println("Whoops, tried to get the pools but they aint there.")
+      RelationalBroker.setPools()
+    }
+    mainPoolOption.get
+  }
+
+  private def tempTablePool: HikariDataSource = {
+    if (!tempTablePoolOption.isInitialized) {
+      println("Whoops, tried to get the pools but they aint there.")
+      RelationalBroker.setPools()
+    }
+    tempTablePoolOption.get
+  }
 
   protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 
@@ -370,6 +386,20 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
 
   private def dateToLocalDateTime(d: Date): LocalDateTime =
     d.toInstant.atZone(ZoneId.systemDefault).toLocalDateTime
+
+  // test query
+  def testDB {
+    val c: Connection = mainPool.getConnection
+    try {
+      val st: Statement = c.createStatement()
+      st.execute("select count(*) from users")
+      println("test query executed successfully")
+    } catch {
+      case e: Exception => println("Error on bootup query: " + e)
+    } finally {
+      c.close()
+    }
+  }
 }
 
 object RelationalBroker {
@@ -387,12 +417,37 @@ object RelationalBroker {
       case Some(_) => println("...NOOPing that shit")
       case None => {
         println("...going for it!")
+        cp.set(_cp)
         registerShutdownCallback()
         println("! Shutdown callback registered.")
-        cp.set(_cp)
-        mainPool.set(_cp.getMainDataSource)
-        tempTablePool.set(_cp.getTempTableDataSource)
-        println("Pool set")
+        setPools()
+      }
+    }
+  }
+
+  def setPools(attempts: Int = 0): Unit = {
+    try {
+      if (this.cp.isInitialized) {
+        if (!mainPool.isInitialized) {
+          val mainDS = this.cp.get.getMainDataSource
+          mainPool.set(mainDS)
+          println("set main pool!")
+        }
+        if (!tempTablePool.isInitialized) {
+          val tempDS = this.cp.get.getTempTableDataSource
+          tempTablePool.set(tempDS)
+          println("set temp pool!")
+        }
+      }
+    } catch {
+      case e: Exception => {
+        if (attempts < 10) {
+          println("failed to get pools, sleeping and trying again....")
+          Thread.sleep(1000)
+          setPools(attempts+1)
+        } else {
+          println("Failed to get pools, giving up.")
+        }
       }
     }
   }

@@ -61,4 +61,6 @@ abstract class PersistenceBroker private[Services] (rc: RequestCache, preparedQu
 
   // TODO: implement some IDs
   private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible
+
+  def testDB
 }

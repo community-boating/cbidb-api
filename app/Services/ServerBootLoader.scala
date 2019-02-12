@@ -81,6 +81,12 @@ class ServerBootLoader @Inject()(
       PermissionsAuthority.stripeAPIIOMechanism.set(
         ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, serverProps.getProperty("StripeAPIKey"), new FromWSClient(ws))
       )
+
+      try {
+        PermissionsAuthority.testDB
+      } catch {
+        case e: Throwable =>
+      }
     }
     case Some(_) => // The server is already booted up; do nothing
   }

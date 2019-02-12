@@ -44,6 +44,8 @@ object PermissionsAuthority {
   private lazy val rootCB = new RedisBroker
   private lazy val bouncerPB = RequestCache.getBouncerRC.pb
 
+  def testDB = rootPB.testDB
+
   lazy val isProd: Boolean = {
     try {
       playMode.peek.get
