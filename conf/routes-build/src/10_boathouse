@@ -1,5 +1,6 @@
 GET     /reporting/get-report-run-options   Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
 GET     /auth/getPwHash                     Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String = "staff")
+GET     /auth/getUserHasRole                   Api.Endpoints.Security.GetUserHasRole.get(userName: String, role: String)
 GET     /is-logged-in-as-staff              Api.Endpoints.IsLoggedInAsStaff.get()
 POST    /report                             Api.Endpoints.ReportingAPI.RunReport.post()
 GET     /pdf/daily-close                     Api.Endpoints.PDFReports.RunDailyCloseReport.get(closeId: Int, signet: Option[String])
