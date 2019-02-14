@@ -1,7 +1,7 @@
 package Services.Authentication
 
 import CbiUtil.ParsedRequest
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 abstract class UserType {

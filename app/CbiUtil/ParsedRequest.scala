@@ -7,6 +7,7 @@ case class ParsedRequest(
   cookies: Cookies,
   path: String,
   method: String,
+  remoteAddress: String,
   postParams: Map[String, String]
 ) {
   def addHeader(h: (String, String)): ParsedRequest = ParsedRequest(
@@ -14,6 +15,7 @@ case class ParsedRequest(
     cookies,
     path,
     method,
+    remoteAddress,
     postParams
   )
 }
@@ -28,6 +30,7 @@ object ParsedRequest {
     cookies = request.cookies,
     path = request.path,
     method = request.method,
+    remoteAddress = request.remoteAddress,
     postParams = getPostParams(request)
   )
 

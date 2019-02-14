@@ -14,9 +14,7 @@ object ApexUserType extends UserType {
       // signet?
       val signetKey = "apex-signet"
       if (
-        PermissionsAuthority.apexDebugSignet.getOrElse(None).isDefined
-          && headers.contains(signetKey)
-          && Some(headers(signetKey).mkString("")) == PermissionsAuthority.apexDebugSignet.getOrElse(None)
+        headers.contains(signetKey) && PermissionsAuthority.validateApexSignet(Some(headers(signetKey).mkString("")))
       ) Some(uniqueUserName)
       else None
     }

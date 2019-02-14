@@ -8,7 +8,9 @@ class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(f
     (MemberUserType, "MemberAuthEnabled"),
     (StaffUserType, "StaffAuthEnabled"),
     (ApexUserType, "ApexAuthEnabled"),
-    (SymonUserType, "SymonAuthEnabled")
+    (SymonUserType, "SymonAuthEnabled"),
+    (BouncerUserType, "BouncerAuthEnabled"),
+    (RootUserType, "RootAuthEnabled")
   )
 
   val enabledAuthMechanisms:Set[UserType] =

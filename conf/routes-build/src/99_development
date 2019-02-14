@@ -1,6 +1,8 @@
 
 #GET     /weather                            Api.Endpoints.Public.Weather.get()
 GET     /users                              Api.Endpoints.Users.get()
+GET     /auth-test/root                     Api.Endpoints.Security.TestAuth.getRoot()
+GET     /auth-test/bouncer                  Api.Endpoints.Security.TestAuth.getBouncer()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
