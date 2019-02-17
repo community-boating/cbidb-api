@@ -1,8 +1,8 @@
-#GET     /jp-class-instances                 Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
-#GET     /ap-class-instances                 Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
-#GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
+
 #GET     /weather                            Api.Endpoints.Public.Weather.get()
 GET     /users                              Api.Endpoints.Users.get()
+GET     /auth-test/root                     Api.Endpoints.Security.TestAuth.getRoot()
+GET     /auth-test/bouncer                  Api.Endpoints.Security.TestAuth.getBouncer()
 GET     /member-welcome                     Api.Endpoints.Member.WelcomePackage.get()
 
 # POST    /user                               Api.Endpoints.UserCrud.post()

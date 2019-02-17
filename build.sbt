@@ -13,8 +13,8 @@ packageSummary in Linux := "API Provider for Community Boating, Inc"
 packageDescription := "API Provider for Community Boating, Inc"
 
 
-libraryDependencies += jdbc
-libraryDependencies += cache
+//libraryDependencies += jdbc
+//libraryDependencies += cache
 libraryDependencies += ws
 libraryDependencies += filters
 libraryDependencies += guice
@@ -25,9 +25,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 
-libraryDependencies ++= Seq(
-	"net.debasishg" %% "redisclient" % "3.4"
-)
+libraryDependencies +="net.debasishg" %% "redisclient" % "3.4"
 
 /*
 scalacOptions ++= Seq(

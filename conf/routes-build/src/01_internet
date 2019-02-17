@@ -6,6 +6,10 @@ POST    /stripe/sync-db                     Api.Endpoints.Stripe.SyncLocalDBWith
 POST 	/symon				Api.Endpoints.Symon.PostSymonRun.post()
 GET     /ip                                     Api.Endpoints.GetIP.get()
 
+GET     /jp-class-instances                 Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
+GET     /ap-class-instances                 Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
+GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

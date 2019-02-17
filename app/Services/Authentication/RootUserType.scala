@@ -1,13 +1,18 @@
 package Services.Authentication
 
 import CbiUtil.ParsedRequest
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object RootUserType extends UserType {
-  val uniqueUserName = ""
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
-    None
+  val uniqueUserName = "ROOT"
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+    if (
+      request.headers.get(PermissionsAuthority.ROOT_AUTH_HEADER).contains("true") &&
+      PermissionsAuthority.requestIsFromLocalHost(request)
+    ) Some(uniqueUserName)
+    else None
+  }
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,

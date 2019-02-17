@@ -4,14 +4,18 @@ import java.sql.ResultSet
 
 import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import Services.Authentication.PublicUserType
-import play.api.libs.json.{JsArray, JsString}
+import play.api.libs.json.{JsArray, JsString, Json}
 
 class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
   val getQuery: String =
     """
-      |select t.team_id, t.team_name, sum(points)
-      |from jp_teams t, jp_team_event_points tep
-      |where t.team_id = tep.team_id
+      |select t.team_id, t.team_name, nvl(sum(points),0)
+      |from jp_team_event_points tep
+      |inner join jp_team_events e
+      |on tep.event_id = e.event_id
+      |and to_char(e.awarded_date,'YYYY') = to_char(sysdate,'YYYY')
+      |right outer join jp_teams t
+      |on t.team_id = tep.team_id
       |group by t.team_id, t.team_name
     """.stripMargin
 
@@ -28,8 +32,8 @@ class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsRes
   )
 
   def mapCaseObjectToJsArray(caseObject: GetJpTeamsResult): JsArray = JsArray(IndexedSeq(
-    JsString(caseObject.teamName),
-    JsString(caseObject.points.toString)
+    Json.toJson(caseObject.teamName),
+    Json.toJson(caseObject.points)
   ))
 }
 

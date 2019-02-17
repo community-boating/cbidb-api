@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import Services.Authentication.PublicUserType
-import play.api.libs.json.{JsArray, JsString}
+import play.api.libs.json.{JsArray, JsString, Json}
 
 class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassInstancesResult](Set(PublicUserType))  {
   val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
@@ -27,6 +27,7 @@ class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectC
        |and i.instructor_id = ins.instructor_id (+)
        |and trunc(s.session_datetime) = to_date('$startDateString', 'MM/DD/YYYY')
        |order by s.session_datetime, t.display_order, i.instance_id
+       |
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): GetJpClassInstancesResult = GetJpClassInstancesResult(
@@ -52,15 +53,16 @@ class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectC
   )
 
   def mapCaseObjectToJsArray(caseObject: GetJpClassInstancesResult): JsArray = JsArray(IndexedSeq(
-    JsString(caseObject.instanceId.toString),
-    JsString(caseObject.typeName),
-    JsString(caseObject.sessionDate),
-    JsString(caseObject.sessionTime),
-    JsString(caseObject.location),
-    JsString(caseObject.instructorFirstName),
-    JsString(caseObject.instructorLastName),
-    JsString(caseObject.enrollees.toString)
+    Json.toJson(caseObject.instanceId),
+    Json.toJson(caseObject.typeName),
+    Json.toJson(caseObject.sessionDate),
+    Json.toJson(caseObject.sessionTime),
+    Json.toJson(caseObject.location),
+    Json.toJson(caseObject.instructorFirstName),
+    Json.toJson(caseObject.instructorLastName),
+    Json.toJson(caseObject.enrollees)
   ))
+
 }
 
 case class GetJpClassInstancesResult(
@@ -73,3 +75,7 @@ case class GetJpClassInstancesResult(
   instructorLastName: String,
   enrollees: Int
 )
+
+object GetJpClassInstancesResult {
+  implicit val format = Json.format[GetJpClassInstancesResult]
+}

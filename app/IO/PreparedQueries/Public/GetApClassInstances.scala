@@ -6,23 +6,22 @@ import java.time.format.DateTimeFormatter
 
 import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import Services.Authentication.PublicUserType
-import play.api.libs.json.{JsArray, JsString}
+import play.api.libs.json.{JsArray, JsString, Json}
 
 class GetApClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetApClassInstancesResult](Set(PublicUserType)) {
   val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
   val getQuery: String =
     s"""
-       |select i.instance_id, t.type_name, to_char(se.session_datetime, 'MM/DD/YYYY') as start_date,
-       |to_char(se.session_datetime, 'HH:MIPM') as start_time, i.location_string,
+       |select i.instance_id, t.type_name, to_char(fs.session_datetime, 'MM/DD/YYYY') as start_date, to_char(fs.session_datetime, 'HH:MIPM') as start_time, i.location_string,
        |(select count(*) from ap_class_signups where instance_id = i.instance_id and signup_type = 'E') as enrollees
-       |from ap_class_types t, ap_class_formats f, ap_class_instances i, ap_class_sessions se
-       |where se.instance_id = i.instance_id
-       |and i.format_id = f.format_id
-       |and f.type_id = t.type_id
-       |and trunc(se.session_datetime) = to_date('$startDateString','MM/DD/YYYY')
+       |from ap_class_types t, ap_class_formats f, ap_class_instances i, ap_class_bookends bk, ap_class_sessions fs
+       |where i.instance_id = bk.instance_id and bk.first_session = fs.session_id
+       |and i.format_id = f.format_id and f.type_id = t.type_id
+       |and trunc(fs.session_datetime) = to_date('$startDateString','MM/DD/YYYY')
        |and i.cancelled_datetime is null
        |and nvl(i.hide_online,'N') <> 'Y'
-       |order by se.session_datetime
+       |order by fs.session_datetime
+       |
     """.stripMargin
 
   override def mapResultSetRowToCaseObject(rs: ResultSet): GetApClassInstancesResult = GetApClassInstancesResult(
@@ -44,12 +43,12 @@ class GetApClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectC
   )
 
   def mapCaseObjectToJsArray(caseObject: GetApClassInstancesResult): JsArray = JsArray(IndexedSeq(
-    JsString(caseObject.instanceId.toString),
-    JsString(caseObject.typeName),
-    JsString(caseObject.sessionDate),
-    JsString(caseObject.sessionTime),
-    JsString(caseObject.location),
-    JsString(caseObject.enrollees.toString)
+    Json.toJson(caseObject.instanceId),
+    Json.toJson(caseObject.typeName),
+    Json.toJson(caseObject.sessionDate),
+    Json.toJson(caseObject.sessionTime),
+    Json.toJson(caseObject.location),
+    Json.toJson(caseObject.enrollees)
   ))
 }
 

@@ -59,30 +59,7 @@ object RequestCache {
     println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
     println("Headers: " + parsedRequest.headers)
     // For all the enabled user types (besides public), see if the request is authenticated against any of them.
-    val authentication: AuthenticationInstance = {
-      val ret: Option[AuthenticationInstance] = PermissionsAuthority.allowableUserTypes.get
-        .filter(_ != PublicUserType)
-        .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
-          // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
-          case Some(x) => Some(x)
-          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken) match {
-            case None => None
-            case Some(x: String) => {
-              println("AUTHENTICATION:  Request is authenticated as " + ut)
-              Some(AuthenticationInstance(ut, x))
-            }
-          }
-        })
-
-      // If after looping through all auth mechs we still didnt find a match, this request is Public
-      ret match {
-        case Some(x) => x
-        case None => {
-          println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
-          AuthenticationInstance(PublicUserType, PublicUserType.uniqueUserName)
-        }
-      }
-    }
+    val authentication: AuthenticationInstance = PermissionsAuthority.authenticate(parsedRequest)
 
     // Cross-site request?
     // Someday I'll flesh this out more
@@ -93,7 +70,7 @@ object RequestCache {
         println("@@@  Nuking RC due to potential CSRF")
         Some((authentication, None))
       }
-      if (requiredUserType != PublicUserType && requiredUserType != ApexUserType && requiredUserType != SymonUserType) {
+      if (requiredUserType == StaffUserType || requiredUserType == MemberUserType) {
         CORS.getCORSStatus(parsedRequest.headers) match {
           case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
           case Some(CROSS_SITE) | None => nuke()
@@ -106,6 +83,7 @@ object RequestCache {
       case Some(r) => r
       case None => {
         println("@@@  CSRF check passed")
+        println("Authenticated as " + authentication.userType)
 
         // requiredUserType says what this request endpoint requires
         // If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),

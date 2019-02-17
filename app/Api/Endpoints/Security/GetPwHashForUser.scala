@@ -1,5 +1,6 @@
 package Api.Endpoints.Security
 
+import CbiUtil.ParsedRequest
 import Services.Authentication.{MemberUserType, StaffUserType, UserType}
 import Services.PermissionsAuthority
 import javax.inject.Inject
@@ -26,7 +27,7 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Contro
     if (userTypeObj.isEmpty) Ok("BAD USER TYPE")
     else {
       try {
-        PermissionsAuthority.getPwHashForUser(request, userName, userTypeObj.get) match {
+        PermissionsAuthority.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
           case None => Ok("NO DATA")
           // Int is the hashing scheme ID, string is the hash itself
           case Some(t: (Int, String)) => Ok(t._1 + "," + t._2)

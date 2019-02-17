@@ -2,16 +2,21 @@ package Services.Authentication
 
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
-import Services.{CacheBroker, PersistenceBroker}
+import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object BouncerUserType extends UserType {
-  val uniqueUserName = ""
+  val uniqueUserName = "BOUNCER"
   def getAuthenticatedUsernameInRequest(
     request: ParsedRequest,
     rootCB: CacheBroker,
     apexToken: String
-  ): Option[String] = None
+  ): Option[String] =
+    if (
+      request.headers.get(PermissionsAuthority.BOUNCER_AUTH_HEADER).contains("true") &&
+      PermissionsAuthority.requestIsFromLocalHost(request)
+    ) Some(uniqueUserName)
+    else None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,
