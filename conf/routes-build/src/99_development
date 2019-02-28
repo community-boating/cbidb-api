@@ -5,6 +5,9 @@ GET     /auth-test/root                     Api.Endpoints.Security.TestAuth.getR
 GET     /auth-test/bouncer                  Api.Endpoints.Security.TestAuth.getBouncer()
 GET     /member-welcome                     Api.Endpoints.Member.WelcomePackage.get()
 
+POST    /junior/required                               Api.Endpoints.Member.RequiredInfo.post()
+GET    /junior/required                               Api.Endpoints.Member.RequiredInfo.get()
+
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
 
