@@ -33,6 +33,7 @@ abstract class UserType {
 
   def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility
 
+  // TODO: this is not a good way to separate members from staff
   def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
     val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None

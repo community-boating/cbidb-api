@@ -9,7 +9,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object StaffUserType extends UserType {
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
-    getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken)
+    getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,

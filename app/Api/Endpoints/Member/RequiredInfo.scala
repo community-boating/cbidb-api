@@ -1,10 +1,12 @@
 package Api.Endpoints.Member
 
+import java.sql.ResultSet
 import java.time.LocalDateTime
 
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
+import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete}
 import IO.PreparedQueries.Public.GetJpTeams
 import Services.Authentication.{PublicUserType, StaffUserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
@@ -17,12 +19,27 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
 class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controller {
+  val testJuniorID = 188911
+
   def get: Action[AnyContent] =  Action { request =>
     val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    Ok("boom")
+    case class Result(nameFirst: String, nameLast: String, nameMiddleInitial: String)
+    val select = new HardcodedQueryForSelect[Result](Set(PublicUserType)) {
+      override def mapResultSetRowToCaseObject(rs: ResultSet): Result =
+        Result(rs.getString(1), rs.getString(2), rs.getString(3))
+
+      override def getQuery: String =
+        s"""
+          |select name_first, name_last, name_middle_initial from persons where person_id = $testJuniorID
+        """.stripMargin
+    }
+
+    val result = pb.executePreparedQueryForSelect(select).head
+    Ok("{\"nameFirst\": \"" + result.nameFirst + "\", \"nameLast\": \"" + result.nameLast + "\", \"nameMiddleInitial\": \"" + result.nameMiddleInitial + "\"}")
   }
+
   def post() = Action { request =>
     try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
@@ -35,20 +52,39 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
           new Status(400)("no body")
         }
         case Some(v) => {
-          v.foreach(Function.tupled((s: String, ss: Seq[String]) => {
-            println("key: "+  s)
-            println("value: " + ss.mkString(""))
-          }))
+
 
           val postParams: Map[String, String] = v.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
           println(postParams)
+
+          object values {
+            val nameFirst = postParams.getOrElse("nameFirst", null)
+            val nameLast = postParams.getOrElse("nameLast", null)
+            val nameMiddleInitial = postParams.getOrElse("nameMiddleInitial", null)
+          }
+
+          val updateQuery = new HardcodedQueryForUpdateOrDelete(Set(PublicUserType)) {
+            override def getQuery: String =
+              s"""
+                |update persons set
+                |name_First='${values.nameFirst}',
+                |name_Last='${values.nameLast}',
+                |name_middle_initial='${values.nameMiddleInitial}'
+                |where person_id = $testJuniorID
+              """.stripMargin
+          }
+
+          pb.executePreparedQueryForUpdateOrDelete(updateQuery)
 
           Ok("done")
         }
       }
     } catch {
       case _: UnauthorizedAccessException =>  Ok("Access Denied")
-      case _: Throwable =>  Ok("Internal Error")
+      case e: Throwable =>  {
+        println(e)
+        Ok("Internal Error")
+      }
     }
   }
 }
