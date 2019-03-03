@@ -6,3 +6,5 @@ GET     /pdf/daily-close                     Api.Endpoints.PDFReports.RunDailyCl
 GET     /pdf/ap-roster                     Api.Endpoints.PDFReports.RunApClassRoster.get(instanceId: Int, signet: Option[String])
 GET     /pdf/jp-roster                     Api.Endpoints.PDFReports.RunJpClassRoster.get(instanceIds: String, signet: Option[String])
 GET     /pdf/jp-spec-needs                     Api.Endpoints.PDFReports.RunJpSpecialNeedsReport.get(from: String, to: String, signet: Option[String])
+
+POST    /fo-kiosk/create-person             Api.Endpoints.Kiosk.CreatePerson.post()
