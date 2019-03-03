@@ -26,6 +26,10 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
       "code" -> JsString("bad_date_format"),
       "message" -> JsString("DOB was not parsable as MM/DD/YYYY")
     ))
+    val ACCESS_DENIED = JsObject(Map(
+      "code" -> JsString("access_denied"),
+      "message" -> JsString("Authentication failure.")
+    ))
     val UNKNOWN = JsObject(Map(
       "code" -> JsString("unknown"),
       "message" -> JsString("An unknwon error occurred.")
@@ -82,10 +86,10 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
 
       }
     } catch {
-      case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
+      case _: UnauthorizedAccessException => Future { Status(400)(JsObject(Map("error" -> errors.ACCESS_DENIED))) }
       case e: Throwable => {
         println(e)
-        Future{ Ok("Internal Error") }
+        Future { Status(400)(JsObject(Map("error" -> errors.UNKNOWN))) }
       }
     }
   }

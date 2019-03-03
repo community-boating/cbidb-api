@@ -8,3 +8,4 @@ GET     /pdf/jp-roster                     Api.Endpoints.PDFReports.RunJpClassRo
 GET     /pdf/jp-spec-needs                     Api.Endpoints.PDFReports.RunJpSpecialNeedsReport.get(from: String, to: String, signet: Option[String])
 
 POST    /fo-kiosk/create-person             Api.Endpoints.Kiosk.CreatePerson.post()
+POST    /fo-kiosk/create-card             Api.Endpoints.Kiosk.CreateCard.post()

@@ -10,6 +10,6 @@ case class CreatePersonParams (
 )
 
 object CreatePersonParams {
-  implicit val paramsFormat = Json.format[CreatePersonParams]
+  implicit val createPersonParams = Json.format[CreatePersonParams]
   def apply(v: JsValue): CreatePersonParams = v.as[CreatePersonParams]
 }
