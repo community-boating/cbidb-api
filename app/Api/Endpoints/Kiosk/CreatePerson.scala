@@ -1,11 +1,9 @@
 package Api.Endpoints.Kiosk
 
 import Api.AuthenticatedRequest
-import Api.Endpoints.Public.FlagColor.FlagColorParamsObject
 import CbiUtil.ParsedRequest
 import IO.PreparedQueries.PreparedQueryForInsert
-import IO.PreparedQueries.Public.GetFlagColor
-import Services.Authentication.PublicUserType
+import Services.Authentication.KioskUserType
 import Services.CacheBroker
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import javax.inject.Inject
@@ -35,7 +33,7 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
   }
   def post: Action[AnyContent] = Action.async{request =>
     try {
-      val rc = getRC(PublicUserType, ParsedRequest(request))
+      val rc = getRC(KioskUserType, ParsedRequest(request))
       val cb: CacheBroker = rc.cb
       val pb = rc.pb
 
@@ -49,7 +47,7 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
           val parsed = CreatePersonParams.apply(params.get)
           val parsedDOB = CbiUtil.DateUtil.parse(parsed.dob)
           println(parsed)
-          val q = new PreparedQueryForInsert(Set(PublicUserType)) {
+          val q = new PreparedQueryForInsert(Set(KioskUserType)) {
             override def getQuery: String =
               """
                 |insert into persons
@@ -57,10 +55,10 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
                 | ('N',?,?,to_date(?,'MM/DD/YYYY'),?)
               """.stripMargin
             override val params: List[String] = List(
-              parsed.nameFirst,
-              parsed.nameLast,
+              parsed.firstName,
+              parsed.lastName,
               parsed.dob,
-              parsed.email
+              parsed.emailAddress
             )
             override val pkName: Option[String] = Some("person_id")
           }
@@ -85,7 +83,10 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
       }
     } catch {
       case _: UnauthorizedAccessException => Future{ Ok("Access Denied") }
-      case _: Throwable => Future{ Ok("Internal Error") }
+      case e: Throwable => {
+        println(e)
+        Future{ Ok("Internal Error") }
+      }
     }
   }
 }

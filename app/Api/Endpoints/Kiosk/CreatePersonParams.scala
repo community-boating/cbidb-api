@@ -3,9 +3,9 @@ package Api.Endpoints.Kiosk
 import play.api.libs.json.{JsValue, Json}
 
 case class CreatePersonParams (
-  nameFirst: String,
-  nameLast: String,
-  email: String,
+  firstName: String,
+  lastName: String,
+  emailAddress: String,
   dob: String
 )
 

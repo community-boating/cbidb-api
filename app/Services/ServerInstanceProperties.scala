@@ -9,6 +9,7 @@ class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(f
     (MemberUserType, "MemberAuthEnabled", () => true),
     (StaffUserType, "StaffAuthEnabled", () => true),
     (ApexUserType, "ApexAuthEnabled", () => true),
+    (KioskUserType, "KioskAuthEnabled", () => true),
     (SymonUserType, "SymonAuthEnabled", () => getPropAsOption("SymonSalt").isDefined)
   )
 

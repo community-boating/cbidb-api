@@ -2,6 +2,7 @@ package Api
 
 import CbiUtil.ParsedRequest
 import Services.Authentication.UserType
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
@@ -14,7 +15,7 @@ trait AuthenticatedRequest {
     val authResult = PermissionsAuthority.getRequestCache(ut, None, parsedRequest)
     authResult._2 match {
       case Some(rc) => rc
-      case None => throw new Exception("Unable to generate RC of type " + ut + " for request authenticated as " + authResult._1)
+      case None => throw new UnauthorizedAccessException("Unable to generate RC of type " + ut + " for request authenticated as " + authResult._1)
     }
     /*if (ret.authenticatedUserType == ut) ret
     else {
