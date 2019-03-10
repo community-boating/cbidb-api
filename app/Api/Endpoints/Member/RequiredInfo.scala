@@ -13,6 +13,7 @@ import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
 import javax.inject.Inject
+import play.api.libs.json.{JsObject, JsString, JsValue}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.collection.mutable.ArrayBuffer
@@ -22,22 +23,30 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
   val testJuniorID = 188911
 
   def get: Action[AnyContent] =  Action { request =>
+    Thread.sleep(4000)
     val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
-    case class Result(nameFirst: String, nameLast: String, nameMiddleInitial: String)
+
+    case class Result(nameFirst: Option[String], nameLast: Option[String], nameMiddleInitial: Option[String])
+
     val select = new HardcodedQueryForSelect[Result](Set(PublicUserType)) {
       override def mapResultSetRowToCaseObject(rs: ResultSet): Result =
-        Result(rs.getString(1), rs.getString(2), rs.getString(3))
+        Result(rs.getOptionString(1), rs.getOptionString(2), rs.getOptionString(3))
 
       override def getQuery: String =
         s"""
           |select name_first, name_last, name_middle_initial from persons where person_id = $testJuniorID
         """.stripMargin
     }
-
-    val result = pb.executePreparedQueryForSelect(select).head
-    Ok("{\"nameFirst\": \"" + result.nameFirst + "\", \"nameLast\": \"" + result.nameLast + "\", \"nameMiddleInitial\": \"" + result.nameMiddleInitial + "\"}")
+    
+    val resultObj = pb.executePreparedQueryForSelect(select).head
+    val resultJson = JsObject(Map(
+      "firstName" -> JsString(resultObj.nameFirst.orNull),
+      "lastName" -> JsString(resultObj.nameLast.orNull),
+      "middleInitial" -> JsString(resultObj.nameMiddleInitial.orNull)
+    ))
+    Ok(resultJson)
   }
 
   def post() = Action { request =>
