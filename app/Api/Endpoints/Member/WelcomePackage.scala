@@ -31,7 +31,7 @@ class WelcomePackage @Inject() (implicit val exec: ExecutionContext) extends Aut
       val result = WelcomePackageResult(personId, rc.auth.userName, childData)
       implicit val format = WelcomePackageResult.format
       profiler.lap("finishing welcome pkg")
-      Future{Ok("{\"data\": " + Json.toJson(result) + "}")}
+      Future{Ok(Json.toJson(result))}
     }
   }}
 

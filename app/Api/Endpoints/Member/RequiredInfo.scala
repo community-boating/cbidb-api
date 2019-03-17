@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
-import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForUpdateOrDelete}
+import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import IO.PreparedQueries.Public.GetJpTeams
 import Services.Authentication.{PublicUserType, StaffUserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
@@ -22,20 +22,22 @@ import scala.concurrent.ExecutionContext
 class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controller {
   val testJuniorID = 188911
 
-  def get: Action[AnyContent] =  Action { request =>
-    Thread.sleep(4000)
+  def get: Action[AnyContent] = Action { request =>
+    Thread.sleep(1500)
     val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
 
-    val select = new HardcodedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
+    val select = new PreparedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
       override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
         RequiredInfoShape(rs.getOptionString(1), rs.getOptionString(2), rs.getOptionString(3))
 
       override def getQuery: String =
         s"""
-          |select name_first, name_last, name_middle_initial from persons where person_id = $testJuniorID
+          |select name_first, name_last, name_middle_initial from persons where person_id = ?
         """.stripMargin
+
+      override val params: List[String] = List(testJuniorID.toString)
     }
     
     val resultObj = pb.executePreparedQueryForSelect(select).head
