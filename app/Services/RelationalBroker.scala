@@ -92,7 +92,24 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
   }
 
   protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
-    executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
+    pq match {
+      case p: PreparedQueryForUpdateOrDelete => {
+        val c: Connection = if (pq.useTempSchema) tempTablePool.getConnection else mainPool.getConnection
+        println("executing prepared update/delete:")
+        val preparedStatement = c.prepareStatement(p.getQuery)
+        (p.params.indices zip p.params).foreach(t => {
+          preparedStatement.setString(t._1 + 1, t._2)
+        })
+        println(p.getQuery)
+        println("Parameterized with " + p.params)
+        preparedStatement.executeUpdate()
+      }
+      case _ => {
+        println("executing non-prepared update/delete:")
+        println(pq.getQuery)
+        executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
+      }
+    }
   }
 
   protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {

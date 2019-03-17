@@ -6,14 +6,14 @@ import java.time.LocalDateTime
 import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import CbiUtil.ParsedRequest
 import Entities.EntityDefinitions.User
-import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete}
+import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForUpdateOrDelete}
 import IO.PreparedQueries.Public.GetJpTeams
 import Services.Authentication.{PublicUserType, StaffUserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import Storable.ProtoStorable
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsString, JsValue}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,11 +28,9 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
 
-    case class Result(nameFirst: Option[String], nameLast: Option[String], nameMiddleInitial: Option[String])
-
-    val select = new HardcodedQueryForSelect[Result](Set(PublicUserType)) {
-      override def mapResultSetRowToCaseObject(rs: ResultSet): Result =
-        Result(rs.getOptionString(1), rs.getOptionString(2), rs.getOptionString(3))
+    val select = new HardcodedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
+      override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
+        RequiredInfoShape(rs.getOptionString(1), rs.getOptionString(2), rs.getOptionString(3))
 
       override def getQuery: String =
         s"""
@@ -41,11 +39,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
     }
     
     val resultObj = pb.executePreparedQueryForSelect(select).head
-    val resultJson = JsObject(Map(
-      "firstName" -> JsString(resultObj.nameFirst.orNull),
-      "lastName" -> JsString(resultObj.nameLast.orNull),
-      "middleInitial" -> JsString(resultObj.nameMiddleInitial.orNull)
-    ))
+    val resultJson: JsValue = Json.toJson(resultObj)
     Ok(resultJson)
   }
 
@@ -54,38 +48,42 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
       val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
-      val data = request.body.asFormUrlEncoded
+      val data = request.body.asJson
       data match {
         case None => {
           println("no body")
           new Status(400)("no body")
         }
-        case Some(v) => {
+        case Some(v: JsValue) => {
+          val parsed = RequiredInfoShape.apply(v)
+          println(parsed)
 
-
-          val postParams: Map[String, String] = v.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
-          println(postParams)
-
-          object values {
-            val nameFirst = postParams.getOrElse("nameFirst", null)
-            val nameLast = postParams.getOrElse("nameLast", null)
-            val nameMiddleInitial = postParams.getOrElse("nameMiddleInitial", null)
-          }
-
-          val updateQuery = new HardcodedQueryForUpdateOrDelete(Set(PublicUserType)) {
+          // TODO: make prepared
+          val updateQuery = new PreparedQueryForUpdateOrDelete(Set(PublicUserType)) {
             override def getQuery: String =
               s"""
                 |update persons set
-                |name_First='${values.nameFirst}',
-                |name_Last='${values.nameLast}',
-                |name_middle_initial='${values.nameMiddleInitial}'
-                |where person_id = $testJuniorID
+                |name_First=?,
+                |name_Last=?,
+                |name_middle_initial=?
+                |where person_id = ?
               """.stripMargin
+
+            override val params: List[String] = List(
+              parsed.firstName.orNull,
+              parsed.lastName.orNull,
+              parsed.middleInitial.orNull,
+              testJuniorID.toString
+            )
           }
 
           pb.executePreparedQueryForUpdateOrDelete(updateQuery)
 
           Ok("done")
+        }
+        case Some(v) => {
+          println("wut dis " + v)
+          Ok("wat")
         }
       }
     } catch {
