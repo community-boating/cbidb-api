@@ -6,7 +6,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object RootUserType extends UserType {
   val uniqueUserName = ""
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
     None
 
   def getAuthenticatedUsernameFromSuperiorAuth(

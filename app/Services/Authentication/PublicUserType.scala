@@ -6,7 +6,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object PublicUserType extends UserType {
   val uniqueUserName = "PUBLIC"
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
     Some(uniqueUserName)
 
   // Anyone can downgrade from anything to public

@@ -8,7 +8,7 @@ import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object StaffUserType extends UserType {
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
     val secCookies = request.cookies.filter(_.name == PermissionsAuthority.SEC_COOKIE_NAME)
     if (secCookies.isEmpty) None
     else if (secCookies.size > 1) None

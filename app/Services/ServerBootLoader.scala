@@ -48,6 +48,8 @@ class ServerBootLoader @Inject()(
       // Init PA with APEX access token
       PermissionsAuthority.setApexToken(serverProps.getProperty("ApexToken"))
 
+      PermissionsAuthority.setKioskToken(serverProps.getProperty("KioskToken"))
+
       val debugSignet: Option[String] = getOptionalProperty(serverProps, "ApexDebugSignet")
 
       PermissionsAuthority.setApexDebugSignet(debugSignet)

@@ -6,8 +6,8 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object KioskUserType extends UserType {
   val uniqueUserName = "KIOSK"
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
-    if (request.headers.get("Am-CBI-Kiosk").contains("true")) Some(uniqueUserName)
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
+    if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
     else None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
