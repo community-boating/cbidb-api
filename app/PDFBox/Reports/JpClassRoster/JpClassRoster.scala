@@ -13,10 +13,10 @@ import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 class JpClassRoster(data: JpClassRosterModel) extends PDFReport(data) {
   val defaultFont: PDFont = PDType1Font.HELVETICA
   val defaultBoldFont: PDFont = PDType1Font.HELVETICA_BOLD
-  val defaultFontSize: Float = 13f
+  val defaultFontSize: Float = 12f
   val defaultColor: Color = Color.BLACK
 
-  val sideMargin: Float = 50
+  val sideMargin: Float = 30
   val topMargin: Float = 40
 
   val marginBetweenReports: Float = 10f

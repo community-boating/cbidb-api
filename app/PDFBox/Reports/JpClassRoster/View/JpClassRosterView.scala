@@ -41,7 +41,7 @@ class JpClassRosterView(
 
 object JpClassRosterView {
   def getHeaderTexts(data: JpClassRosterModel): List[String] = "Name" :: ((1 to data.instanceData.numberSessions).map("Day " + _) :+ "Pass" ).toList
-  def getWidths(data: JpClassRosterModel): List[Float] = 270f :: (1 to data.instanceData.numberSessions+1).map(_ => 40f).toList
+  def getWidths(data: JpClassRosterModel): List[Float] = 160f :: (1 to data.instanceData.numberSessions+1).map(_ => 36f).toList
   def getHeaderAligns(data: JpClassRosterModel): List[Alignment] = (1 to data.instanceData.numberSessions+2).map(_ => ALIGN_CENTER).toList
   def getBodyAligns(data: JpClassRosterModel): List[Alignment] = (1 to data.instanceData.numberSessions+2).map(_ => ALIGN_LEFT).toList
 }
