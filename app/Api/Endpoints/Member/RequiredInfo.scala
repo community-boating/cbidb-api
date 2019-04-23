@@ -30,11 +30,51 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
 
     val select = new PreparedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
       override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
-        RequiredInfoShape(rs.getOptionString(1), rs.getOptionString(2), rs.getOptionString(3))
+        RequiredInfoShape(
+          rs.getString(1),
+          rs.getString(2),
+          rs.getString(3),
+          rs.getString(4),
+          rs.getString(5),
+          rs.getString(6),
+          rs.getString(7),
+          rs.getString(8),
+          rs.getString(9),
+          rs.getString(10),
+          rs.getString(11),
+          rs.getString(12),
+          rs.getString(13),
+          rs.getString(14),
+          rs.getString(15),
+          rs.getString(16),
+          rs.getString(17),
+          rs.getString(18),
+          rs.getString(19)
+        )
 
       override def getQuery: String =
         s"""
-          |select name_first, name_last, name_middle_initial from persons where person_id = ?
+          |select
+          |name_first,
+          |name_last,
+          |name_middle_initial,
+          |to_char(dob, 'MM/DD/YYYY'),
+          |email,
+          |addr_1,
+          |addr_2,
+          |addr_3,
+          |city,
+          |state,
+          |zip,
+          |country,
+          |phone_primary,
+          |phone_primary_type,
+          |phone_alternate,
+          |phone_alternate_type,
+          |allergies,
+          |medications,
+          |special_needs
+          |from persons where person_id = ?
         """.stripMargin
 
       override val params: List[String] = List(testJuniorID.toString)
@@ -72,9 +112,9 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
               """.stripMargin
 
             override val params: List[String] = List(
-              parsed.firstName.orNull,
-              parsed.lastName.orNull,
-              parsed.middleInitial.orNull,
+              parsed.firstName,
+              parsed.lastName,
+              parsed.middleInitial,
               testJuniorID.toString
             )
           }
