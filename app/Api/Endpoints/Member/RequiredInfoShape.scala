@@ -3,25 +3,25 @@ package Api.Endpoints.Member
 import play.api.libs.json.{JsValue, Json}
 
 case class RequiredInfoShape(
-  firstName: String,
-  lastName: String,
-  middleInitial: String,
-  dob: String,
-  childEmail: String,
-  addr1: String,
-  addr2: String,
-  addr3: String,
-  city: String,
-  state: String,
-  zip: String,
-  country: String,
-  primaryPhone: String,
-  primaryPhoneType: String,
-  alternatePhone: String,
-  alternatePhoneType: String,
-  allergies: String,
-  medications: String,
-  specialNeeds: String
+  firstName: Option[String],
+  lastName: Option[String],
+  middleInitial: Option[String],
+  dob: Option[String],
+  childEmail: Option[String],
+  addr1: Option[String],
+  addr2: Option[String],
+  addr3: Option[String],
+  city: Option[String],
+  state: Option[String],
+  zip: Option[String],
+  country: Option[String],
+  primaryPhone: Option[String],
+  primaryPhoneType: Option[String],
+  alternatePhone: Option[String],
+  alternatePhoneType: Option[String],
+  allergies: Option[String],
+  medications: Option[String],
+  specialNeeds: Option[String]
 )
 
 object RequiredInfoShape {

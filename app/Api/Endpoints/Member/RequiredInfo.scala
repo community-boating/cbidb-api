@@ -23,7 +23,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
   val testJuniorID = 188911
 
   def get: Action[AnyContent] = Action { request =>
-    Thread.sleep(1500)
+   // Thread.sleep(1500)
     val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
@@ -31,25 +31,25 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
     val select = new PreparedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
       override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
         RequiredInfoShape(
-          rs.getString(1),
-          rs.getString(2),
-          rs.getString(3),
-          rs.getString(4),
-          rs.getString(5),
-          rs.getString(6),
-          rs.getString(7),
-          rs.getString(8),
-          rs.getString(9),
-          rs.getString(10),
-          rs.getString(11),
-          rs.getString(12),
-          rs.getString(13),
-          rs.getString(14),
-          rs.getString(15),
-          rs.getString(16),
-          rs.getString(17),
-          rs.getString(18),
-          rs.getString(19)
+          rs.getOptionString(1),
+          rs.getOptionString(2),
+          rs.getOptionString(3),
+          rs.getOptionString(4),
+          rs.getOptionString(5),
+          rs.getOptionString(6),
+          rs.getOptionString(7),
+          rs.getOptionString(8),
+          rs.getOptionString(9),
+          rs.getOptionString(10),
+          rs.getOptionString(11),
+          rs.getOptionString(12),
+          rs.getOptionString(13),
+          rs.getOptionString(14),
+          rs.getOptionString(15),
+          rs.getOptionString(16),
+          rs.getOptionString(17),
+          rs.getOptionString(18),
+          rs.getOptionString(19)
         )
 
       override def getQuery: String =
@@ -100,21 +100,53 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
           val parsed = RequiredInfoShape.apply(v)
           println(parsed)
 
-          // TODO: make prepared
+
           val updateQuery = new PreparedQueryForUpdateOrDelete(Set(PublicUserType)) {
             override def getQuery: String =
               s"""
                 |update persons set
-                |name_First=?,
-                |name_Last=?,
-                |name_middle_initial=?
+                |name_first=?,
+                |name_last=?,
+                |name_middle_initial=?,
+                |dob=to_date(?,'MM/DD/YYYY'),
+                |email=?,
+                |addr_1=?,
+                |addr_2=?,
+                |addr_3=?,
+                |city=?,
+                |state=?,
+                |zip=?,
+                |country=?,
+                |phone_primary=?,
+                |phone_primary_type=?,
+                |phone_alternate=?,
+                |phone_alternate_type=?,
+                |allergies=?,
+                |medications=?,
+                |special_needs=?
                 |where person_id = ?
               """.stripMargin
 
             override val params: List[String] = List(
-              parsed.firstName,
-              parsed.lastName,
-              parsed.middleInitial,
+              parsed.firstName.orNull,
+              parsed.lastName.orNull,
+              parsed.middleInitial.orNull,
+              parsed.dob.orNull,
+              parsed.childEmail.orNull,
+              parsed.addr1.orNull,
+              parsed.addr2.orNull,
+              parsed.addr3.orNull,
+              parsed.city.orNull,
+              parsed.state.orNull,
+              parsed.zip.orNull,
+              parsed.country.orNull,
+              parsed.primaryPhone.orNull,
+              parsed.primaryPhoneType.orNull,
+              parsed.alternatePhone.orNull,
+              parsed.alternatePhoneType.orNull,
+              parsed.allergies.orNull,
+              parsed.medications.orNull,
+              parsed.specialNeeds.orNull,
               testJuniorID.toString
             )
           }
