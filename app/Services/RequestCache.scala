@@ -50,7 +50,8 @@ object RequestCache {
     requiredUserName: Option[String],
     parsedRequest: ParsedRequest,
     rootCB: CacheBroker,
-    apexToken: String
+    apexToken: String,
+    kioskToken: String
   ): (AuthenticationInstance, Option[RequestCache]) = {
     println("\n\n====================================================")
     println("====================================================")
@@ -65,7 +66,7 @@ object RequestCache {
         .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
           // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
           case Some(x) => Some(x)
-          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken) match {
+          case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken, kioskToken) match {
             case None => None
             case Some(x: String) => {
               println("AUTHENTICATION:  Request is authenticated as " + ut)
@@ -93,7 +94,7 @@ object RequestCache {
         println("@@@  Nuking RC due to potential CSRF")
         Some((authentication, None))
       }
-      if (requiredUserType != PublicUserType && requiredUserType != ApexUserType && requiredUserType != SymonUserType) {
+      if (requiredUserType == MemberUserType || requiredUserType == StaffUserType) {
         CORS.getCORSStatus(parsedRequest.headers) match {
           case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
           case Some(CROSS_SITE) | None => nuke()

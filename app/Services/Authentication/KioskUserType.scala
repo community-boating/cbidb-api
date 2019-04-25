@@ -4,10 +4,11 @@ import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object RootUserType extends UserType {
-  val uniqueUserName = ""
+object KioskUserType extends UserType {
+  val uniqueUserName = "KIOSK"
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
-    None
+    if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
+    else None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
     currentAuthentication: AuthenticationInstance,
@@ -16,5 +17,5 @@ object RootUserType extends UserType {
 
   def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 
-  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.FULL_VISIBILITY
+  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 }

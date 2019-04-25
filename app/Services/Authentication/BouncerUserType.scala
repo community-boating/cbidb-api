@@ -10,7 +10,8 @@ object BouncerUserType extends UserType {
   def getAuthenticatedUsernameInRequest(
     request: ParsedRequest,
     rootCB: CacheBroker,
-    apexToken: String
+    apexToken: String,
+    kioskToken: String
   ): Option[String] = None
 
   def getAuthenticatedUsernameFromSuperiorAuth(
