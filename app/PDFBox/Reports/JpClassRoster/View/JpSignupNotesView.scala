@@ -13,7 +13,7 @@ class JpSignupNotesView(
 ) extends AbstractTable[JpSignupNotesData](
   data,
   new MultiDrawableTable(List(DrawableTable(
-    List(List("SIGNUP NOTES")),
+    List(List("DIRECTOR SIGNUP NOTES")),
     List(500f),
     List(ALIGN_CENTER),
     headerFont,
@@ -21,7 +21,7 @@ class JpSignupNotesView(
     1,
     3
   ), DrawableTable(
-    List(List("Name", "Signup Note")),
+    List(List("Name", "Director Signup Note")),
     List(150f, 350f),
     List(ALIGN_CENTER, ALIGN_CENTER),
     headerFont,
