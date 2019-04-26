@@ -6,7 +6,12 @@ case class CreatePersonParams (
   firstName: String,
   lastName: String,
   emailAddress: String,
-  dob: String
+  dob: String,
+  phonePrimary: String,
+  emerg1Name: String,
+  emerg1Relation: String,
+  emerg1PhonePrimary: String,
+  previousMember: Boolean
 )
 
 object CreatePersonParams {
