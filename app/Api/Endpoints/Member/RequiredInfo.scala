@@ -1,36 +1,28 @@
 package Api.Endpoints.Member
 
 import java.sql.ResultSet
-import java.time.LocalDateTime
 
-import Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import CbiUtil.ParsedRequest
-import Entities.EntityDefinitions.User
-import IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import IO.PreparedQueries.Public.GetJpTeams
-import Services.Authentication.{PublicUserType, StaffUserType}
+import IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import Services.Authentication.MemberUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import Storable.ProtoStorable
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
 class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controller {
-  val testJuniorID = 188911
-
-  def get: Action[AnyContent] = Action { request =>
-   // Thread.sleep(1500)
-    val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
+  def get(personId: Int): Action[AnyContent] = Action { request =>
+    val rc: RequestCache = PermissionsAuthority.getRequestCache(MemberUserType, None, ParsedRequest(request))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
 
-    val select = new PreparedQueryForSelect[RequiredInfoShape](Set(PublicUserType)) {
+    val select = new PreparedQueryForSelect[RequiredInfoShape](Set(MemberUserType)) {
       override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
         RequiredInfoShape(
+          personId,
           rs.getOptionString(1),
           rs.getOptionString(2),
           rs.getOptionString(3),
@@ -77,7 +69,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
           |from persons where person_id = ?
         """.stripMargin
 
-      override val params: List[String] = List(testJuniorID.toString)
+      override val params: List[String] = List(personId.toString)
     }
     
     val resultObj = pb.executePreparedQueryForSelect(select).head
@@ -87,7 +79,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
 
   def post() = Action { request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(PublicUserType, None, ParsedRequest(request))._2.get
+      val rc: RequestCache = PermissionsAuthority.getRequestCache(MemberUserType, None, ParsedRequest(request))._2.get
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val data = request.body.asJson
@@ -101,7 +93,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
           println(parsed)
 
 
-          val updateQuery = new PreparedQueryForUpdateOrDelete(Set(PublicUserType)) {
+          val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
             override def getQuery: String =
               s"""
                 |update persons set
@@ -147,7 +139,7 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
               parsed.allergies.orNull,
               parsed.medications.orNull,
               parsed.specialNeeds.orNull,
-              testJuniorID.toString
+              parsed.personId.toString
             )
           }
 

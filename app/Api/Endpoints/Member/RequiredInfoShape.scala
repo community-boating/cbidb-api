@@ -3,6 +3,7 @@ package Api.Endpoints.Member
 import play.api.libs.json.{JsValue, Json}
 
 case class RequiredInfoShape(
+  personId: Int,
   firstName: Option[String],
   lastName: Option[String],
   middleInitial: Option[String],
