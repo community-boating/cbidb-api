@@ -1,7 +1,7 @@
 package Api
 
 import CbiUtil.ParsedRequest
-import Services.Authentication.UserType
+import Services.Authentication.{NonMemberUserType, UserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json.{JsObject, JsValue}
@@ -26,7 +26,7 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableRe
     getFuture(cb, pb, params, calculateValue)
   }
 
-  protected def evaluate(ut: UserType, params: T, ws: WSClient, url: String): Action[AnyContent] = Action.async {request =>
+  protected def evaluate(ut: NonMemberUserType, params: T, ws: WSClient, url: String): Action[AnyContent] = Action.async {request =>
     try {
       val rc = getRC(ut, ParsedRequest(request))
       val cb: CacheBroker = rc.cb

@@ -15,7 +15,8 @@ import scala.concurrent.ExecutionContext
 
 class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controller {
   def get(personId: Int): Action[AnyContent] = Action { request =>
-    val rc: RequestCache = PermissionsAuthority.getRequestCache(MemberUserType, None, ParsedRequest(request))._2.get
+    val parsedRequest = ParsedRequest(request)
+    val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, Some(personId))._2.get
     val pb: PersistenceBroker = rc.pb
     val cb: CacheBroker = rc.cb
 
@@ -79,7 +80,10 @@ class RequiredInfo @Inject() (implicit exec: ExecutionContext) extends Controlle
 
   def post() = Action { request =>
     try {
-      val rc: RequestCache = PermissionsAuthority.getRequestCache(MemberUserType, None, ParsedRequest(request))._2.get
+      val parsedRequest = ParsedRequest(request)
+      val juniorId: Option[Int] = request.body.asJson.map(json => json("personId").toString().toInt)
+      println("required info post: juniorId is " + juniorId)
+      val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, juniorId)._2.get
       val pb: PersistenceBroker = rc.pb
       val cb: CacheBroker = rc.cb
       val data = request.body.asJson

@@ -79,11 +79,21 @@ object PermissionsAuthority {
   }
 
   def getRequestCache(
-    requiredUserType: UserType,
+    requiredUserType: NonMemberUserType,
     requiredUserName: Option[String],
     parsedRequest: ParsedRequest
   ): (AuthenticationInstance, Option[RequestCache]) =
     RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get)
+
+  def getRequestCacheMember(
+    requiredUserName: Option[String],
+    parsedRequest: ParsedRequest,
+    juniorId: Option[Int]
+  ): (AuthenticationInstance, Option[RequestCache]) = {
+    // TODO: bail if junior is is set and is not a valid junior for this member
+    RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get)
+  }
+
 
   def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
     if (

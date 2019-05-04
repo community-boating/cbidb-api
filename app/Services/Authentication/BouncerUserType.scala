@@ -5,7 +5,7 @@ import Entities.EntityDefinitions.User
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object BouncerUserType extends UserType {
+object BouncerUserType extends NonMemberUserType {
   val uniqueUserName = "BOUNCER"
   def getAuthenticatedUsernameInRequest(
     request: ParsedRequest,

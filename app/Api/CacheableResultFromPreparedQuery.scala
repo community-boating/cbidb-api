@@ -2,7 +2,7 @@ package Api
 
 import CbiUtil.ParsedRequest
 import IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import Services.Authentication.UserType
+import Services.Authentication.{NonMemberUserType, UserType}
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json.{JsArray, JsObject}
@@ -24,7 +24,7 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableRe
     getFuture(cb, pb, params, calculateValue)
   }
 
-  protected def evaluate(ut: UserType, params: T, pq: PQ): Action[AnyContent] = Action.async {request =>
+  protected def evaluate(ut: NonMemberUserType, params: T, pq: PQ): Action[AnyContent] = Action.async {request =>
     try {
       val rc = getRC(ut, ParsedRequest(request))
       val cb: CacheBroker = rc.cb

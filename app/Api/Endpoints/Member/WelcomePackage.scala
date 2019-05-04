@@ -15,7 +15,7 @@ class WelcomePackage @Inject() (implicit val exec: ExecutionContext) extends Aut
   def get(): Action[AnyContent] = Action.async {req => {
     val profiler = new Profiler
     val logger = PermissionsAuthority.logger
-    val maybeRC = getRCOption(MemberUserType, ParsedRequest(req))
+    val maybeRC = getRCOptionMember(ParsedRequest(req), None)
     if (maybeRC.isEmpty) Future {Ok("{\"error\": \"Unauthorized\"}") }
     else {
       val rc = maybeRC.get

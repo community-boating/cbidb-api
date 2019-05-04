@@ -7,7 +7,7 @@ import IO.PreparedQueries.PreparedQueryForSelect
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object StaffUserType extends UserType {
+object StaffUserType extends NonMemberUserType {
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
     getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
 

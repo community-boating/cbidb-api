@@ -4,7 +4,7 @@ import CbiUtil.ParsedRequest
 import Services._
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object PublicUserType extends UserType {
+object PublicUserType extends NonMemberUserType {
   val uniqueUserName = "PUBLIC"
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] =
     Some(uniqueUserName)

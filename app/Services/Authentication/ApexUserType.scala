@@ -4,7 +4,7 @@ import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object ApexUserType extends UserType {
+object ApexUserType extends NonMemberUserType {
   val uniqueUserName = "APEX"
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
     val headers = request.headers.toMap

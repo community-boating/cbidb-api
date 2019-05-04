@@ -4,7 +4,7 @@ import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object RootUserType extends UserType {
+object RootUserType extends NonMemberUserType {
   val uniqueUserName = "ROOT"
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
     if (
