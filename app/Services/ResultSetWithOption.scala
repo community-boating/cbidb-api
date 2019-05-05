@@ -14,6 +14,11 @@ class ResultSetWithOption(rs: ResultSet) {
       case None => ""
     }
   }
+  def getOptionInt(c: Int): Option[Int] = {
+    val ret = rs.getInt(c)
+    if (rs.wasNull()) None
+    else Some(ret)
+  }
 }
 
 object ResultSetWithOption {

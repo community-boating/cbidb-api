@@ -25,7 +25,6 @@ class WelcomePackage @Inject() (implicit val exec: ExecutionContext) extends Aut
       val personId: Int = identifyMemberResult.personId
       profiler.lap("got person id")
       val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
-      println(Json.toJson(childData))
       profiler.lap("got child data")
 
       val result = WelcomePackageResult(personId, rc.auth.userName, childData)

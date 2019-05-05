@@ -3,13 +3,6 @@
 GET     /users                              Api.Endpoints.Users.get()
 GET     /auth-test/root                     Api.Endpoints.Security.TestAuth.getRoot()
 GET     /auth-test/bouncer                  Api.Endpoints.Security.TestAuth.getBouncer()
-GET     /member-welcome                     Api.Endpoints.Member.WelcomePackage.get()
-
-POST    /junior/required                               Api.Endpoints.Member.RequiredInfo.post()
-GET    /junior/required                               Api.Endpoints.Member.RequiredInfo.get(personId: Int)
-
-POST    /junior/emerg                               Api.Endpoints.Member.EmergencyContact.post()
-GET    /junior/emerg                               Api.Endpoints.Member.EmergencyContact.get(personId: Int)
 
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
