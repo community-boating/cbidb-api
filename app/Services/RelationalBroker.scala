@@ -95,14 +95,18 @@ abstract class RelationalBroker private[Services] (rc: RequestCache, preparedQue
     pq match {
       case p: PreparedQueryForUpdateOrDelete => {
         val c: Connection = if (pq.useTempSchema) tempTablePool.getConnection else mainPool.getConnection
-        println("executing prepared update/delete:")
-        val preparedStatement = c.prepareStatement(p.getQuery)
-        (p.params.indices zip p.params).foreach(t => {
-          preparedStatement.setString(t._1 + 1, t._2)
-        })
-        println(p.getQuery)
-        println("Parameterized with " + p.params)
-        preparedStatement.executeUpdate()
+        try {
+          println("executing prepared update/delete:")
+          val preparedStatement = c.prepareStatement(p.getQuery)
+          (p.params.indices zip p.params).foreach(t => {
+            preparedStatement.setString(t._1 + 1, t._2)
+          })
+          println(p.getQuery)
+          println("Parameterized with " + p.params)
+          preparedStatement.executeUpdate()
+        } finally {
+          c.close()
+        }
       }
       case _ => {
         println("executing non-prepared update/delete:")
