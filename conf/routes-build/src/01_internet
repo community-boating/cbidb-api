@@ -21,6 +21,9 @@ GET    /junior/emerg                               Api.Endpoints.Member.Emergenc
 POST    /junior/swim-proof                               Api.Endpoints.Member.SwimProof.post()
 GET    /junior/swim-proof                               Api.Endpoints.Member.SwimProof.get(personId: Int)
 
+POST    /junior/survey                               Api.Endpoints.Member.SurveyInfo.post()
+GET    /junior/survey                               Api.Endpoints.Member.SurveyInfo.get(personId: Int)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
