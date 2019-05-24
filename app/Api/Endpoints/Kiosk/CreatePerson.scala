@@ -1,7 +1,7 @@
 package Api.Endpoints.Kiosk
 
 import Api.AuthenticatedRequest
-import CbiUtil.ParsedRequest
+import CbiUtil.{GetSQLLiteral, ParsedRequest}
 import IO.PreparedQueries.PreparedQueryForInsert
 import Services.Authentication.KioskUserType
 import Services.CacheBroker
@@ -53,16 +53,30 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
           println(parsed)
           val q = new PreparedQueryForInsert(Set(KioskUserType)) {
             override def getQuery: String =
-              """
-                |insert into persons
-                |(temp, name_first, name_last, dob, email) values
-                | ('N',?,?,to_date(?,'MM/DD/YYYY'),?)
+              s"""
+                |insert into persons (
+                |temp,
+                |name_first,
+                |name_last,
+                |dob,
+                |email,
+                |phone_primary,
+                |emerg1_name,
+                |emerg1_relation,
+                |emerg1_phone_primary,
+                |previous_member
+                |) values
+                | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,?,${GetSQLLiteral(parsed.previousMember)})
               """.stripMargin
             override val params: List[String] = List(
               parsed.firstName,
               parsed.lastName,
               parsed.dob,
-              parsed.emailAddress
+              parsed.emailAddress,
+              parsed.phonePrimary,
+              parsed.emerg1Name,
+              parsed.emerg1Relation,
+              parsed.emerg1PhonePrimary
             )
             override val pkName: Option[String] = Some("person_id")
           }
@@ -79,7 +93,8 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
             Future { Status(400)(JsObject(Map("error" -> errors.BAD_DATE))) }
           }
           case e: Throwable => {
-            println(e)
+            e.printStackTrace()
+            println("this is the err")
             Future { Status(400)(JsObject(Map("error" -> errors.UNKNOWN))) }
           }
         }
@@ -88,7 +103,8 @@ class CreatePerson @Inject() (implicit exec: ExecutionContext) extends Authentic
     } catch {
       case _: UnauthorizedAccessException => Future { Status(400)(JsObject(Map("error" -> errors.ACCESS_DENIED))) }
       case e: Throwable => {
-        println(e)
+        e.printStackTrace()
+        println("this is the err2")
         Future { Status(400)(JsObject(Map("error" -> errors.UNKNOWN))) }
       }
     }
