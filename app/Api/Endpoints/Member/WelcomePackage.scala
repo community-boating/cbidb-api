@@ -1,8 +1,11 @@
 package Api.Endpoints.Member
 
+import java.sql.ResultSet
+
 import Api.AuthenticatedRequest
 import CbiUtil.{ParsedRequest, Profiler}
 import IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult, IdentifyMemberQuery}
+import IO.PreparedQueries.PreparedQueryForSelect
 import Services.Authentication.MemberUserType
 import Services.PermissionsAuthority
 import javax.inject.Inject
@@ -24,10 +27,16 @@ class WelcomePackage @Inject() (implicit val exec: ExecutionContext) extends Aut
       val identifyMemberResult = pb.executePreparedQueryForSelect(new IdentifyMemberQuery(rc.auth.userName)).head
       val personId: Int = identifyMemberResult.personId
       profiler.lap("got person id")
+      val hasEIIResponse = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+        override def getQuery: String = "select 1 from eii_responses where person_id = ? and season = util_pkg.get_current_season"
+        override val params: List[String] = List(personId.toString)
+
+        override def mapResultSetRowToCaseObject(rs: ResultSet): Int = 1
+      }).nonEmpty
       val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
       profiler.lap("got child data")
 
-      val result = WelcomePackageResult(personId, rc.auth.userName, childData)
+      val result = WelcomePackageResult(personId, rc.auth.userName, hasEIIResponse, childData)
       implicit val format = WelcomePackageResult.format
       profiler.lap("finishing welcome pkg")
       Future{Ok(Json.toJson(result))}
@@ -37,6 +46,7 @@ class WelcomePackage @Inject() (implicit val exec: ExecutionContext) extends Aut
   case class WelcomePackageResult (
     parentPersonId: Int,
     userName: String,
+    hasEIIResponse: Boolean,
     children: List[GetChildDataQueryResult]
   )
 
