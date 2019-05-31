@@ -8,18 +8,19 @@ class StoreSymonRun(
   program: String,
   argString: String,
   status: Int,
-  mac: String
+  mac: String,
+  symonVersion: Option[String]
 ) extends PreparedQueryForInsert(Set(SymonUserType), true) {
 
   val getQuery: String =
     s"""
-       |insert into symon_runs(HOST_NAME, PROGRAM_NAME, STATUS, MAC_ADDRESS, RUN_DATETIME, ARG_STRING)
-       | values (?, ?, ?, ?, sysdate, ?)
+       |insert into symon_runs(HOST_NAME, PROGRAM_NAME, STATUS, MAC_ADDRESS, RUN_DATETIME, ARG_STRING, symon_version)
+       | values (?, ?, ?, ?, sysdate, ?, ?)
        |
     """.stripMargin
 
   override val params: List[String] = List(
-    host, program, status.toString, mac, argString
+    host, program, status.toString, mac, argString, symonVersion.getOrElse(null)
   )
   override val pkName: Option[String] = Some("RUN_ID")
 }

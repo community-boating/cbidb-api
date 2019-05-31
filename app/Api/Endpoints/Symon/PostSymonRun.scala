@@ -33,7 +33,8 @@ class PostSymonRun@Inject() (ws: WSClient) (implicit exec: ExecutionContext) ext
           req.postParams("symon-program"),
           req.postParams("symon-argString"),
           req.postParams("symon-status").toInt,
-          req.postParams("symon-mac")
+          req.postParams("symon-mac"),
+          req.postParams.get("symon-version")
         ))
 
         Future {Ok("inserted.") }
