@@ -96,7 +96,7 @@ object PermissionsAuthority {
     juniorId: Option[Int]
   ): (AuthenticationInstance, Option[RequestCache]) = {
     // TODO: bail if junior is is set and is not a valid junior for this member
-    RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get)
+    RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
   }
 
 
@@ -135,7 +135,7 @@ object PermissionsAuthority {
       .foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
         // If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
         case Some(x) => Some(x)
-        case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken.get) match {
+        case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken.get, kioskToken.get) match {
           case None => None
           case Some(x: String) => {
             println("AUTHENTICATION:  Request is authenticated as " + ut)

@@ -4,7 +4,7 @@ import CbiUtil.ParsedRequest
 import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object KioskUserType extends UserType {
+object KioskUserType extends NonMemberUserType {
   val uniqueUserName = "KIOSK"
   def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
     if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
