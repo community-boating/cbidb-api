@@ -11,24 +11,26 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 
-class Users @Inject() (implicit val exec: ExecutionContext)
-extends AuthenticatedRequest with CacheableResultFromPreparedQuery[UsersParamsObject, GetUsersResult] {
-  def get(): Action[AnyContent] = {
-    val params = new UsersParamsObject()
-    val pq = new GetUsers
-    evaluate(StaffUserType, params, pq)
-  }
+class Users @Inject()(implicit val exec: ExecutionContext)
+		extends AuthenticatedRequest with CacheableResultFromPreparedQuery[UsersParamsObject, GetUsersResult] {
+	def get(): Action[AnyContent] = {
+		val params = new UsersParamsObject()
+		val pq = new GetUsers
+		evaluate(StaffUserType, params, pq)
+	}
 
-  def getCacheBrokerKey(params: UsersParamsObject): CacheKey =
-    "users"
+	def getCacheBrokerKey(params: UsersParamsObject): CacheKey =
+		"users"
 
-  def getExpirationTime: LocalDateTime = {
-    LocalDateTime.now.plusSeconds(5)
-  }
+	def getExpirationTime: LocalDateTime = {
+		LocalDateTime.now.plusSeconds(5)
+	}
 }
 
 object Users {
-  class UsersParamsObject extends ParamsObject
+
+	class UsersParamsObject extends ParamsObject
+
 }
 
 /*

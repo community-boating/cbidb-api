@@ -3,15 +3,16 @@ package Entities.JsFacades.Stripe
 import play.api.libs.json._
 
 case class Token(
-  id: String,
-  card: Card,
-  created: Int,
-  used: Boolean
-)
+						id: String,
+						card: Card,
+						created: Int,
+						used: Boolean
+				)
 
 object Token {
-  implicit val tokenReads = Json.format[Token]
-  def apply(v: JsValue): Token = v.as[Token]
+	implicit val tokenReads = Json.format[Token]
+
+	def apply(v: JsValue): Token = v.as[Token]
 }
 
 /*

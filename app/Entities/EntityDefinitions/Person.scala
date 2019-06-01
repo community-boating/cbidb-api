@@ -8,66 +8,68 @@ import Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import Storable._
 
 class Person extends StorableClass {
-  val instance: Person = this
-  this.setCompanion(Person)
-  object references extends ReferencesObject {
-    val personRatings = new Initializable[Set[PersonRating]]
-  }
-  object values extends ValuesObject {
-    val personId = new IntFieldValue(self, Person.fields.personId)
-    val nameFirst = new NullableStringFieldValue(self, Person.fields.nameFirst)
-    val nameLast = new NullableStringFieldValue(self, Person.fields.nameLast)
-    val email = new NullableStringFieldValue(self, Person.fields.email)
-    val pwHash = new NullableStringFieldValue(self, Person.fields.pwHash)
-    val addr1 = new NullableStringFieldValue(self, Person.fields.addr1)
-    val addr2 = new NullableStringFieldValue(self, Person.fields.addr2)
-    val addr3 = new NullableStringFieldValue(self, Person.fields.addr3)
-    val city = new NullableStringFieldValue(self, Person.fields.city)
-    val state = new NullableStringFieldValue(self, Person.fields.state)
-    val zip = new NullableStringFieldValue(self, Person.fields.zip)
-  }
+	val instance: Person = this
+	this.setCompanion(Person)
 
-  def setPersonRatings(pb: PersistenceBroker): Unit = {
-    references.personRatings set pb.getObjectsByFilters(
-      PersonRating,
-      List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
-    ).toSet
-  }
+	object references extends ReferencesObject {
+		val personRatings = new Initializable[Set[PersonRating]]
+	}
 
-  lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
+	object values extends ValuesObject {
+		val personId = new IntFieldValue(self, Person.fields.personId)
+		val nameFirst = new NullableStringFieldValue(self, Person.fields.nameFirst)
+		val nameLast = new NullableStringFieldValue(self, Person.fields.nameLast)
+		val email = new NullableStringFieldValue(self, Person.fields.email)
+		val pwHash = new NullableStringFieldValue(self, Person.fields.pwHash)
+		val addr1 = new NullableStringFieldValue(self, Person.fields.addr1)
+		val addr2 = new NullableStringFieldValue(self, Person.fields.addr2)
+		val addr3 = new NullableStringFieldValue(self, Person.fields.addr3)
+		val city = new NullableStringFieldValue(self, Person.fields.city)
+		val state = new NullableStringFieldValue(self, Person.fields.state)
+		val zip = new NullableStringFieldValue(self, Person.fields.zip)
+	}
 
-  // TODO: move to logic
-  def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
-    this.values.personId.get,
-    ratingId,
-    programId
-  ))
+	def setPersonRatings(pb: PersistenceBroker): Unit = {
+		references.personRatings set pb.getObjectsByFilters(
+			PersonRating,
+			List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
+		).toSet
+	}
 
-  def hasRatingSomehow(ratings: Set[Rating], ratingId: Int, programId: Int): Boolean = {
-    if (hasRatingDirect(ratingId, programId)) true
-    else {
-      val subRatings: Set[Rating] = ratings.filter(_.values.overriddenBy.get == Some(ratingId))
-      subRatings.map(_.values.ratingId.get).foldLeft(false)((agg, r) => agg || hasRatingSomehow(ratings, r, programId))
-    }
-  }
+	lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
+
+	// TODO: move to logic
+	def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
+		this.values.personId.get,
+		ratingId,
+		programId
+	))
+
+	def hasRatingSomehow(ratings: Set[Rating], ratingId: Int, programId: Int): Boolean = {
+		if (hasRatingDirect(ratingId, programId)) true
+		else {
+			val subRatings: Set[Rating] = ratings.filter(_.values.overriddenBy.get == Some(ratingId))
+			subRatings.map(_.values.ratingId.get).foldLeft(false)((agg, r) => agg || hasRatingSomehow(ratings, r, programId))
+		}
+	}
 }
 
 object Person extends StorableObject[Person] {
-  val entityName: String = "PERSONS"
+	val entityName: String = "PERSONS"
 
-  object fields extends FieldsObject {
-    val personId = new IntDatabaseField(self, "PERSON_ID")
-    val nameFirst = new NullableStringDatabaseField(self, "NAME_FIRST", 100)
-    val nameLast = new NullableStringDatabaseField(self, "NAME_LAST", 100)
-    val email = new NullableStringDatabaseField(self, "EMAIL", 100)
-    val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
-    val addr1 = new NullableStringDatabaseField(self, "ADDR_1", 100)
-    val addr2 = new NullableStringDatabaseField(self, "ADDR_2", 100)
-    val addr3 = new NullableStringDatabaseField(self, "ADDR_3", 100)
-    val city = new NullableStringDatabaseField(self, "CITY", 100)
-    val state = new NullableStringDatabaseField(self, "STATE", 50)
-    val zip = new NullableStringDatabaseField(self, "ZIP", 15)
-  }
+	object fields extends FieldsObject {
+		val personId = new IntDatabaseField(self, "PERSON_ID")
+		val nameFirst = new NullableStringDatabaseField(self, "NAME_FIRST", 100)
+		val nameLast = new NullableStringDatabaseField(self, "NAME_LAST", 100)
+		val email = new NullableStringDatabaseField(self, "EMAIL", 100)
+		val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
+		val addr1 = new NullableStringDatabaseField(self, "ADDR_1", 100)
+		val addr2 = new NullableStringDatabaseField(self, "ADDR_2", 100)
+		val addr3 = new NullableStringDatabaseField(self, "ADDR_3", 100)
+		val city = new NullableStringDatabaseField(self, "CITY", 100)
+		val state = new NullableStringDatabaseField(self, "STATE", 50)
+		val zip = new NullableStringDatabaseField(self, "ZIP", 15)
+	}
 
-  def primaryKey: IntDatabaseField = fields.personId
+	def primaryKey: IntDatabaseField = fields.personId
 }

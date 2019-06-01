@@ -6,55 +6,56 @@ import Services.PersistenceBroker
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
-  id: String,
-  amount: Int,
-  metadata: ChargeMetadata,
-  created: Int,
-  paid: Boolean,
-  status: String
-) extends CastableToStorableClass {
-  val storableObject: CastableToStorableObject[_] = Charge
-  val persistenceValues: Map[String, String] = Charge.persistenceValues(this)
-  val pkSqlLiteral: String = GetSQLLiteral(id)
+						 id: String,
+						 amount: Int,
+						 metadata: ChargeMetadata,
+						 created: Int,
+						 paid: Boolean,
+						 status: String
+				 ) extends CastableToStorableClass {
+	val storableObject: CastableToStorableObject[_] = Charge
+	val persistenceValues: Map[String, String] = Charge.persistenceValues(this)
+	val pkSqlLiteral: String = GetSQLLiteral(id)
 
-  // e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
-  def refunds: List[ChargeRefund] = {
-    val outerSeparator = "&"
-    val innerSeparator = "%"
-    metadata.refunds match {
-      case None => List.empty
-      case Some(s) => s.split(outerSeparator)
-        .toList
-        .map(_.split(innerSeparator))
-        .map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
-    }
-  }
+	// e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
+	def refunds: List[ChargeRefund] = {
+		val outerSeparator = "&"
+		val innerSeparator = "%"
+		metadata.refunds match {
+			case None => List.empty
+			case Some(s) => s.split(outerSeparator)
+					.toList
+					.map(_.split(innerSeparator))
+					.map(p => ChargeRefund(p(0), id, p(1).toInt, p(2).toInt))
+		}
+	}
 
-  override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
-    pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
-    this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
-  }
+	override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
+		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+		this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
+	}
 }
 
 object Charge extends StripeCastableToStorableObject[Charge] {
-  implicit val chargeJSONFormat = Json.format[Charge]
-  def apply(v: JsValue): Charge = v.as[Charge]
+	implicit val chargeJSONFormat = Json.format[Charge]
 
-  val apexTableName = "STRIPE_CHARGES"
-  val persistenceFieldsMap: Map[String, Charge => String] = Map(
-    "CHARGE_ID" -> ((c: Charge) => GetSQLLiteral(c.id)),
-    "AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteral(c.amount)),
-    "CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteral(c.created)),
-    "PAID" -> ((c: Charge) => GetSQLLiteral(c.paid)),
-    "STATUS" -> ((c: Charge) => GetSQLLiteral(c.status)),
-    "CLOSE_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.closeId)),
-    "ORDER_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.orderId)),
-    "TOKEN" -> ((c: Charge) => GetSQLLiteral(c.metadata.token)),
-    "REFUNDS" -> ((c: Charge) => GetSQLLiteral(c.metadata.refunds)),
-  )
-  val pkColumnName = "CHARGE_ID"
-  val getURL: String = "charges"
-  val getId: Charge => String = _.id
+	def apply(v: JsValue): Charge = v.as[Charge]
+
+	val apexTableName = "STRIPE_CHARGES"
+	val persistenceFieldsMap: Map[String, Charge => String] = Map(
+		"CHARGE_ID" -> ((c: Charge) => GetSQLLiteral(c.id)),
+		"AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteral(c.amount)),
+		"CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteral(c.created)),
+		"PAID" -> ((c: Charge) => GetSQLLiteral(c.paid)),
+		"STATUS" -> ((c: Charge) => GetSQLLiteral(c.status)),
+		"CLOSE_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.closeId)),
+		"ORDER_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.orderId)),
+		"TOKEN" -> ((c: Charge) => GetSQLLiteral(c.metadata.token)),
+		"REFUNDS" -> ((c: Charge) => GetSQLLiteral(c.metadata.refunds)),
+	)
+	val pkColumnName = "CHARGE_ID"
+	val getURL: String = "charges"
+	val getId: Charge => String = _.id
 }
 
 /*

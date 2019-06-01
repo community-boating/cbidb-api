@@ -8,79 +8,83 @@ import Services.{PersistenceBroker, RequestCache}
 import Storable.{StorableClass, StorableObject}
 
 abstract class ReportFactory[T <: StorableClass] {
-  private val rcWrapper = new Initializable[RequestCache]
-  private val pbWrapper = new Initializable[PersistenceBroker]
-  private val filterSpecWrapper = new Initializable[String]
-  private val fieldSpecWrapper = new Initializable[String]
+	private val rcWrapper = new Initializable[RequestCache]
+	private val pbWrapper = new Initializable[PersistenceBroker]
+	private val filterSpecWrapper = new Initializable[String]
+	private val fieldSpecWrapper = new Initializable[String]
 
-  def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
-    rcWrapper.set(rc)
-    pbWrapper.set(rc.pb)
-    filterSpecWrapper.set(filterSpec)
-    fieldSpecWrapper.set(fieldSpec)
-  }
+	def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
+		rcWrapper.set(rc)
+		pbWrapper.set(rc.pb)
+		filterSpecWrapper.set(filterSpec)
+		fieldSpecWrapper.set(fieldSpec)
+	}
 
-  def rc: RequestCache = rcWrapper.get
-  def pb: PersistenceBroker = pbWrapper.get
-  def filterSpec: String = filterSpecWrapper.get
-  def fieldSpec: String = fieldSpecWrapper.get
+	def rc: RequestCache = rcWrapper.get
 
-  type ValueFunction = (T => String)
-  implicit val localDateTimeOrdering: Ordering[LocalDateTime] = Ordering.by(
-    (d: LocalDateTime) => d.atZone(ZoneId.systemDefault).toInstant.toEpochMilli
-  )
+	def pb: PersistenceBroker = pbWrapper.get
 
-  val entityCompanion: StorableObject[T]
-  // TODO: some sanity check that this can't be more than like 100 things or something
-  val getAllFilter: (PersistenceBroker => ReportingFilter[T]) = pb =>
-    new ReportingFilterFunction[T](pb, pb => {
-      pb.getAllObjectsOfClass(
-        entityCompanion
-      ).toSet
-    })
+	def filterSpec: String = filterSpecWrapper.get
 
-  val filterList: List[(String, ReportingFilterFactory[T])]
-  val fieldList: List[(String, ReportingField[T])]
+	def fieldSpec: String = fieldSpecWrapper.get
 
-  lazy val filterMap: Map[String, ReportingFilterFactory[T]] = filterList.toMap
-  lazy val fieldMap: Map[String, ReportingField[T]] = fieldList.toMap
+	type ValueFunction = (T => String)
+	implicit val localDateTimeOrdering: Ordering[LocalDateTime] = Ordering.by(
+		(d: LocalDateTime) => d.atZone(ZoneId.systemDefault).toInstant.toEpochMilli
+	)
 
-  lazy private val getCombinedFilter: ReportingFilter[T] = {
-    val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, filterMap, getAllFilter)
-    parser.parse(filterSpec)
-  }
+	val entityCompanion: StorableObject[T]
+	// TODO: some sanity check that this can't be more than like 100 things or something
+	val getAllFilter: (PersistenceBroker => ReportingFilter[T]) = pb =>
+		new ReportingFilterFunction[T](pb, pb => {
+			pb.getAllObjectsOfClass(
+				entityCompanion
+			).toSet
+		})
 
-  private var instances: Option[List[T]] = None
+	val filterList: List[(String, ReportingFilterFactory[T])]
+	val fieldList: List[(String, ReportingField[T])]
 
-  private def setInstances(): Unit = instances match {
-    case None =>
-      instances = Some(getCombinedFilter.instances.asInstanceOf[Set[T]].toList)
-      decorateInstancesWithParentReferences(instances.get)
-    case Some(_) =>
-  }
+	lazy val filterMap: Map[String, ReportingFilterFactory[T]] = filterList.toMap
+	lazy val fieldMap: Map[String, ReportingField[T]] = fieldList.toMap
 
-  def getInstances: List[T] = instances match {
-    case Some(is: List[T]) => is
-    case None => throw new Exception("Tried to get instances before they were set")
-  }
+	lazy private val getCombinedFilter: ReportingFilter[T] = {
+		val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, filterMap, getAllFilter)
+		parser.parse(filterSpec)
+	}
 
-  lazy val getFieldsToUse: List[ReportingField[T]] = {
-    fieldSpecWrapper.get.split(",").map(name => fieldMap.get(name) match {
-      case Some(rf: ReportingField[T]) => rf
-      case None => throw new Exception("Couldn't find reporting field " + name)
-    }).toList
-  }
+	private var instances: Option[List[T]] = None
 
-  def getHeaders: List[String] = getFieldsToUse.map(_.fieldDisplayName)
-  def getRows: List[List[String]] = {
-    setInstances()
-    val valueFunctions: List[ValueFunction] = getFieldsToUse.map(_.valueFunction)
-    instances.get.map(i => {
-      valueFunctions.map(fn => {
-        fn(i)
-      })
-    })
-  }
+	private def setInstances(): Unit = instances match {
+		case None =>
+			instances = Some(getCombinedFilter.instances.asInstanceOf[Set[T]].toList)
+			decorateInstancesWithParentReferences(instances.get)
+		case Some(_) =>
+	}
 
-  protected def decorateInstancesWithParentReferences(instances: List[T]): Unit
+	def getInstances: List[T] = instances match {
+		case Some(is: List[T]) => is
+		case None => throw new Exception("Tried to get instances before they were set")
+	}
+
+	lazy val getFieldsToUse: List[ReportingField[T]] = {
+		fieldSpecWrapper.get.split(",").map(name => fieldMap.get(name) match {
+			case Some(rf: ReportingField[T]) => rf
+			case None => throw new Exception("Couldn't find reporting field " + name)
+		}).toList
+	}
+
+	def getHeaders: List[String] = getFieldsToUse.map(_.fieldDisplayName)
+
+	def getRows: List[List[String]] = {
+		setInstances()
+		val valueFunctions: List[ValueFunction] = getFieldsToUse.map(_.valueFunction)
+		instances.get.map(i => {
+			valueFunctions.map(fn => {
+				fn(i)
+			})
+		})
+	}
+
+	protected def decorateInstancesWithParentReferences(instances: List[T]): Unit
 }
