@@ -84,7 +84,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       val f1: Future[Failover[JsValue, ServiceRequestResult[List[T], StripeError]]] =
         http.getJSON(finalURL, GET, None, Some(secretKey), Some("")).transform({
           case Success(jsv: JsValue) => {
-            println(jsv.toString())
+          //  println(jsv.toString())
             Success(Resolved(jsv))
           }
           case Failure(e: Throwable) => Success(Failed(e))
@@ -100,7 +100,10 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
       ))
 
       val f3: Future[Failover[List[T], ServiceRequestResult[List[T], StripeError]]] = f2.map(_.andThen(
-        (jsvs: List[JsValue]) => jsvs.map(constructor)
+        (jsvs: List[JsValue]) => jsvs.map(jsv => {
+          println("about to construct " + jsv)
+          constructor(jsv)
+        })
       ))
 
       f3.flatMap({

@@ -7,7 +7,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 object SymonUserType extends NonMemberUserType {
   val uniqueUserName = "SYMON"
 
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
     try {
       println("here we go")
       val host: String = request.postParams("symon-host")

@@ -24,10 +24,12 @@ class CloseProps(closeId: Int) extends HardcodedQueryForSelect[ClosePropsResult]
        |c.notes,
        |u.user_id,
        |u.name_first,
-       |u.name_last
-       |from close_pkg_view v, fo_closes c, users u
+       |u.name_last,
+       |nvl(cap.amount,0)
+       |from close_pkg_view v, fo_closes c, users u, close_ar_payments cap
        |where v.close_id = c.close_id
        |and c.finalized_by = u.user_id (+)
+       |and c.close_id = cap.close_id (+)
        |and c.close_id = $closeId
        |
     """.stripMargin
@@ -54,7 +56,8 @@ class CloseProps(closeId: Int) extends HardcodedQueryForSelect[ClosePropsResult]
       val lastName = rs.getString(14)
       if (rs.wasNull() || firstNameWasNull) None
       else Some(firstName + " " + lastName)
-    }
+    },
+    Currency.dollars(rs.getDouble(15))
   )
 }
 
@@ -70,7 +73,8 @@ class ClosePropsResult (
   val closedDatetime: Option[ZonedDateTime],
   val tapeValue: Currency,
   val notes: Option[String],
-  val finalizedBy: Option[String]
+  val finalizedBy: Option[String],
+  val arPaymentsTotal: Currency
 ) {
   val inPersonRevenueTotal: Currency = cashTotal + inPersonARTotal + checkTotal
 }

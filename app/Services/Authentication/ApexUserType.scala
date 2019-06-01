@@ -6,7 +6,7 @@ import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object ApexUserType extends NonMemberUserType {
   val uniqueUserName = "APEX"
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {
+  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
     val headers = request.headers.toMap
     val headerKey = "apex-token"
     if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)

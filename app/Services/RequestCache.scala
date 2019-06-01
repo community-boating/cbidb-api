@@ -50,7 +50,8 @@ object RequestCache {
     requiredUserName: Option[String],
     parsedRequest: ParsedRequest,
     rootCB: CacheBroker,
-    apexToken: String
+    apexToken: String,
+    kioskToken: String
   ): (AuthenticationInstance, Option[RequestCache]) = {
     println("\n\n====================================================")
     println("====================================================")

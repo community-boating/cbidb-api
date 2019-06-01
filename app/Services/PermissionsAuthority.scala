@@ -32,8 +32,13 @@ object PermissionsAuthority {
   def setApexDebugSignet(os: Option[String]): Option[String] = apexDebugSignet.set(os)
   private val apexToken = new Initializable[String]
   def setApexToken(s: String): String = apexToken.set(s)
+
+  private val kioskToken = new Initializable[String]
+  def setKioskToken(s: String): String = kioskToken.set(s)
+
   private val stripeAPIKey = new Initializable[String]
   def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
+
   private val symonSalt = new Initializable[Option[String]]
   def setSymonSalt(s: Option[String]): Option[String] = symonSalt.set(s)
 
@@ -83,7 +88,7 @@ object PermissionsAuthority {
     requiredUserName: Option[String],
     parsedRequest: ParsedRequest
   ): (AuthenticationInstance, Option[RequestCache]) =
-    RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get)
+    RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
 
   def getRequestCacheMember(
     requiredUserName: Option[String],

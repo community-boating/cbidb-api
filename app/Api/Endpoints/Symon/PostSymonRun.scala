@@ -21,15 +21,24 @@ class PostSymonRun@Inject() (ws: WSClient) (implicit exec: ExecutionContext) ext
       val rc = getRC(SymonUserType, req)
       val pb = rc.pb
 
-      pb.executePreparedQueryForInsert(new StoreSymonRun(
-        req.postParams("symon-host"),
-        req.postParams("symon-program"),
-        req.postParams("symon-argString"),
-        req.postParams("symon-status").toInt,
-        req.postParams("symon-mac")
-      ))
+      if (
+        req.postParams("symon-program") == "can-email" &&
+        req.postParams("symon-status") != "1"
+      ) {
+        logger.error("Symon client " + req.postParams("symon-host") + " reported failure to send emails")
+        Future {Ok("alarm raised.") }
+      } else {
+        pb.executePreparedQueryForInsert(new StoreSymonRun(
+          req.postParams("symon-host"),
+          req.postParams("symon-program"),
+          req.postParams("symon-argString"),
+          req.postParams("symon-status").toInt,
+          req.postParams("symon-mac"),
+          req.postParams.get("symon-version")
+        ))
 
-      Future{ Ok("inserted.")}
+        Future {Ok("inserted.") }
+      }
     } catch {
       case _:  Throwable => Future{ Ok("Unable to log symon run")}
     }

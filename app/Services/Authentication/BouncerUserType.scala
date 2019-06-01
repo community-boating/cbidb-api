@@ -10,7 +10,8 @@ object BouncerUserType extends NonMemberUserType {
   def getAuthenticatedUsernameInRequest(
     request: ParsedRequest,
     rootCB: CacheBroker,
-    apexToken: String
+    apexToken: String,
+    kioskToken: String
   ): Option[String] =
     if (
       request.headers.get(PermissionsAuthority.BOUNCER_AUTH_HEADER).contains("true") &&

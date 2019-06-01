@@ -7,7 +7,7 @@ import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 case class BalanceTransaction(
   id: String,
   amount: Int,
-  description: String,
+  description: Option[String],
   fee: Int,
   net: Int,
   source: String,

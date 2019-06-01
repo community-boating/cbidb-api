@@ -18,7 +18,7 @@ class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryFor
   override def mapResultSetRowToCaseObject(rs: ResultSet): BalanceTransaction = BalanceTransaction(
     id = rs.getString(1),
     amount = rs.getInt(2),
-    description = rs.getString(3),
+    description = rs.getOptionString(3),
     fee = rs.getInt(4),
     net = rs.getInt(5),
     source = rs.getString(6),

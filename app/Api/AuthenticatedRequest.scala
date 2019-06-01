@@ -2,6 +2,7 @@ package Api
 
 import CbiUtil.ParsedRequest
 import Services.Authentication.{NonMemberUserType, UserType}
+import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
@@ -20,7 +21,7 @@ trait AuthenticatedRequest {
   protected def getRC(ut: NonMemberUserType, parsedRequest: ParsedRequest): RequestCache = {
     getRCOption(ut, parsedRequest) match {
       case Some(rc) => rc
-      case None => throw new Exception("Unable to generate RC of type " + ut)
+      case None => throw new UnauthorizedAccessException("Unable to generate RC of type " + ut)
     }
   }
 }
