@@ -5,17 +5,18 @@ import Services.{CacheBroker, PersistenceBroker}
 import Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object KioskUserType extends UserType {
-  val uniqueUserName = "KIOSK"
-  def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
-    if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
-    else None
+	val uniqueUserName = "KIOSK"
 
-  def getAuthenticatedUsernameFromSuperiorAuth(
-    currentAuthentication: AuthenticationInstance,
-    requiredUserName: Option[String]
-  ): Option[String] = None
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
+		if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
+		else None
 
-  def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
+	def getAuthenticatedUsernameFromSuperiorAuth(
+														currentAuthentication: AuthenticationInstance,
+														requiredUserName: Option[String]
+												): Option[String] = None
 
-  def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
+
+	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 }

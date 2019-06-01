@@ -7,65 +7,65 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 
 public class OracleConnectionPoolConstructor implements ConnectionPoolConstructor {
-    private PropertiesWrapper pw = null;
-    private HikariDataSource mainDataSource = null;
-    private HikariDataSource tempTableDataSource = null;
+	private PropertiesWrapper pw = null;
+	private HikariDataSource mainDataSource = null;
+	private HikariDataSource tempTableDataSource = null;
 
-    public String getMainSchemaName() {
-        return pw.getProperty("schema");
-    }
+	public String getMainSchemaName() {
+		return pw.getProperty("schema");
+	}
 
-    public String getTempTableSchemaName() {
-        return pw.getProperty("temptableschema");
-    }
+	public String getTempTableSchemaName() {
+		return pw.getProperty("temptableschema");
+	}
 
-    public String getMainUserName() {
-        return pw.getProperty("username");
-    }
+	public String getMainUserName() {
+		return pw.getProperty("username");
+	}
 
-    public HikariDataSource getMainDataSource() {
-        if (null == mainDataSource) init();
-        return mainDataSource;
-    }
+	public HikariDataSource getMainDataSource() {
+		if (null == mainDataSource) init();
+		return mainDataSource;
+	}
 
-    public HikariDataSource getTempTableDataSource() {
-        if (null == tempTableDataSource) init();
-        return tempTableDataSource;
-    }
+	public HikariDataSource getTempTableDataSource() {
+		if (null == tempTableDataSource) init();
+		return tempTableDataSource;
+	}
 
-    public void closePools() {
-        mainDataSource.close();
-        System.out.println("  ************    Shutting down!  Closing pool!!  *************  ");
-        if (tempTableDataSource != mainDataSource) {
-            tempTableDataSource.close();
-            System.out.println(" *$*$*$*$*$*$*$*$*$*$    CLOSING TEMP TABLE CONNECTION POOL   *$*$*$*$*$*$*$*$*$*$");
-        }
-    }
+	public void closePools() {
+		mainDataSource.close();
+		System.out.println("  ************    Shutting down!  Closing pool!!  *************  ");
+		if (tempTableDataSource != mainDataSource) {
+			tempTableDataSource.close();
+			System.out.println(" *$*$*$*$*$*$*$*$*$*$    CLOSING TEMP TABLE CONNECTION POOL   *$*$*$*$*$*$*$*$*$*$");
+		}
+	}
 
-    private void init() {
-        String devLocation = "conf/private/oracle-credentials";
-        String prodLocation = "../conf/private/oracle-credentials";
-        File devFile = new File(devLocation);
-        File prodFile = new File(prodLocation);
-        String locationToUse = null;
+	private void init() {
+		String devLocation = "conf/private/oracle-credentials";
+		String prodLocation = "../conf/private/oracle-credentials";
+		File devFile = new File(devLocation);
+		File prodFile = new File(prodLocation);
+		String locationToUse = null;
 
-        try {
-            if (devFile.exists()) {
-                locationToUse = devLocation;
-            } else if (prodFile.exists()) {
-                locationToUse = prodLocation;
-            } else throw new Exception("Unable to location Oracle conf file");
-            this.pw = new PropertiesWrapper(
-                    locationToUse,
-                    new String[] {"username", "password", "host", "port", "sid", "schema", "temptableschema"}
-            );
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-            this.mainDataSource = getPool(getMainDataSourceConfig());
-            this.tempTableDataSource = getPool(getTempTableDataSourceConfig());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try {
+			if (devFile.exists()) {
+				locationToUse = devLocation;
+			} else if (prodFile.exists()) {
+				locationToUse = prodLocation;
+			} else throw new Exception("Unable to location Oracle conf file");
+			this.pw = new PropertiesWrapper(
+					locationToUse,
+					new String[]{"username", "password", "host", "port", "sid", "schema", "temptableschema"}
+			);
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			this.mainDataSource = getPool(getMainDataSourceConfig());
+			this.tempTableDataSource = getPool(getTempTableDataSourceConfig());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 /*
     private String mainDataSourceConnectionString() {
         return "jdbc:oracle:thin:" + pw.getProperty("username") + "/" +
@@ -88,23 +88,23 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
     }
 */
 
-    private HikariConfig getMainDataSourceConfig() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
-        config.setUsername(pw.getProperty("username"));
-        config.setPassword(pw.getProperty("password"));
-        return config;
-    }
+	private HikariConfig getMainDataSourceConfig() {
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
+		config.setUsername(pw.getProperty("username"));
+		config.setPassword(pw.getProperty("password"));
+		return config;
+	}
 
-    private HikariConfig getTempTableDataSourceConfig() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
-        config.setUsername(pw.getProperty("temptableusername"));
-        config.setPassword(pw.getProperty("temptablepassword"));
-        return config;
-    }
+	private HikariConfig getTempTableDataSourceConfig() {
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
+		config.setUsername(pw.getProperty("temptableusername"));
+		config.setPassword(pw.getProperty("temptablepassword"));
+		return config;
+	}
 
-    private HikariDataSource getPool(HikariConfig config) {
-        return new HikariDataSource(config);
-    }
+	private HikariDataSource getPool(HikariConfig config) {
+		return new HikariDataSource(config);
+	}
 }

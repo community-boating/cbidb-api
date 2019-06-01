@@ -4,37 +4,37 @@ import CbiUtil.PropertiesWrapper;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor {
-    private PropertiesWrapper pw = null;
-    private HikariDataSource pool = null;
+	private PropertiesWrapper pw = null;
+	private HikariDataSource pool = null;
 
-    public String getMainSchemaName() {
-        return pw.getProperty("schema");
-    }
+	public String getMainSchemaName() {
+		return pw.getProperty("schema");
+	}
 
-    public String getTempTableSchemaName() {
-        return pw.getProperty("schema");
-    }
+	public String getTempTableSchemaName() {
+		return pw.getProperty("schema");
+	}
 
-    public String getMainUserName() {
-        return pw.getProperty("username");
-    }
+	public String getMainUserName() {
+		return pw.getProperty("username");
+	}
 
-    public HikariDataSource getMainDataSource() {
-        if (null == this.pool) init();
-        return this.pool;
-    }
+	public HikariDataSource getMainDataSource() {
+		if (null == this.pool) init();
+		return this.pool;
+	}
 
-    public HikariDataSource getTempTableDataSource() {
-        return getMainDataSource();
-    }
+	public HikariDataSource getTempTableDataSource() {
+		return getMainDataSource();
+	}
 
-    public void closePools() {
-        pool.close();
-        System.out.println("  ************    Shutting down!  Closing mysql pool!!  *************  ");
-    }
+	public void closePools() {
+		pool.close();
+		System.out.println("  ************    Shutting down!  Closing mysql pool!!  *************  ");
+	}
 
-    private HikariDataSource init() {
-        HikariDataSource ds = new HikariDataSource();
+	private HikariDataSource init() {
+		HikariDataSource ds = new HikariDataSource();
         /*try {
             //mysql -u root -p -e "GRANT ALL PRIVILEGES ON $schema.* TO $user@localhost IDENTIFIED BY '$db_pass'"
             this.pw = new PropertiesWrapper(
@@ -60,6 +60,6 @@ public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-        return ds;
-    }
+		return ds;
+	}
 }

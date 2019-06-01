@@ -14,21 +14,21 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 
-class Weather @Inject() (ws: WSClient) (implicit val exec: ExecutionContext)
-extends AuthenticatedRequest with CacheableResultFromRemoteRequest[JpTeamsParamsObject, GetJpTeamsResult] {
-  def get: Action[AnyContent] = {
-    evaluate(PublicUserType, new JpTeamsParamsObject, ws, Weather.url)
-  }
+class Weather @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
+		extends AuthenticatedRequest with CacheableResultFromRemoteRequest[JpTeamsParamsObject, GetJpTeamsResult] {
+	def get: Action[AnyContent] = {
+		evaluate(PublicUserType, new JpTeamsParamsObject, ws, Weather.url)
+	}
 
-  def getCacheBrokerKey(params: JpTeamsParamsObject): CacheKey = "weather"
+	def getCacheBrokerKey(params: JpTeamsParamsObject): CacheKey = "weather"
 
-  def getExpirationTime: LocalDateTime = {
-    LocalDateTime.now.plusMinutes(10)
-  }
+	def getExpirationTime: LocalDateTime = {
+		LocalDateTime.now.plusMinutes(10)
+	}
 }
 
 object Weather {
-  val props = new PropertiesWrapper("conf/private/weather-credentials", Array[String]("host", "path"))
-  println("Making request to remote weather service")
-  val url = "https://" + props.getProperty("host") + props.getProperty("path")
+	val props = new PropertiesWrapper("conf/private/weather-credentials", Array[String]("host", "path"))
+	println("Making request to remote weather service")
+	val url = "https://" + props.getProperty("host") + props.getProperty("path")
 }

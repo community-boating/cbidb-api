@@ -9,41 +9,42 @@ import Reporting.ReportingFilters._
 import Services.PersistenceBroker
 
 class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
-  val displayName: String = "Donated at least $X since Y"
-  val argDefinitions = List(
-    (ARG_DOUBLE, "0"), // donated amount
-    (ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
-  )
-  def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
-    implicit val pb: PersistenceBroker = _pb
+	val displayName: String = "Donated at least $X since Y"
+	val argDefinitions = List(
+		(ARG_DOUBLE, "0"), // donated amount
+		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
+	)
 
-    type PersonID = Int
+	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+		implicit val pb: PersistenceBroker = _pb
 
-    val amount: Double = arg.split(",")(0).toDouble
-    val sinceDate: LocalDate = LocalDate.parse(arg.split(",")(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+		type PersonID = Int
 
-    val donationsSinceDate: List[Donation] = pb.getObjectsByFilters(
-      Donation,
-      List(
-        Donation.fields.donationDate.greaterEqualConstant(sinceDate)
-      )
-    )
+		val amount: Double = arg.split(",")(0).toDouble
+		val sinceDate: LocalDate = LocalDate.parse(arg.split(",")(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
-    println("found " + donationsSinceDate.length + " donations")
+		val donationsSinceDate: List[Donation] = pb.getObjectsByFilters(
+			Donation,
+			List(
+				Donation.fields.donationDate.greaterEqualConstant(sinceDate)
+			)
+		)
 
-    val byPersonId: Map[Int, List[Donation]] = donationsSinceDate.groupBy(_.values.personId.get)
+		println("found " + donationsSinceDate.length + " donations")
 
-    val personIDs = byPersonId.filter(m => {
-      m._2.foldLeft(0: Double)((sum, d) => {
-        val donationAmount = d.values.amount.get match {
-          case None => 0
-          case Some(d) => d
-        }
-        sum + donationAmount
-      }) >= amount
-    }).keys.toList
+		val byPersonId: Map[Int, List[Donation]] = donationsSinceDate.groupBy(_.values.personId.get)
 
-    pb.getObjectsByIds(Person, personIDs).toSet
-  })
+		val personIDs = byPersonId.filter(m => {
+			m._2.foldLeft(0: Double)((sum, d) => {
+				val donationAmount = d.values.amount.get match {
+					case None => 0
+					case Some(d) => d
+				}
+				sum + donationAmount
+			}) >= amount
+		}).keys.toList
+
+		pb.getObjectsByIds(Person, personIDs).toSet
+	})
 
 }

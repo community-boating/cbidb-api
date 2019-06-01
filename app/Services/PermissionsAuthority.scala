@@ -16,126 +16,137 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
 
 object PermissionsAuthority {
-  val stripeURL: String = "https://api.stripe.com/v1/"
-  val SEC_COOKIE_NAME = "CBIDB-SEC"
+	val stripeURL: String = "https://api.stripe.com/v1/"
+	val SEC_COOKIE_NAME = "CBIDB-SEC"
 
-  val allowableUserTypes = new Initializable[Set[UserType]]
-  val persistenceSystem = new Initializable[PersistenceSystem]
-  def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
-  val playMode = new Initializable[Mode]
-  val preparedQueriesOnly = new Initializable[Boolean]
-  val instanceName = new Initializable[String]
+	val allowableUserTypes = new Initializable[Set[UserType]]
+	val persistenceSystem = new Initializable[PersistenceSystem]
 
-  val apexDebugSignet = new Initializable[Option[String]]
-  def setApexDebugSignet(os: Option[String]): Option[String] = apexDebugSignet.set(os)
+	def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
-  private val apexToken = new Initializable[String]
-  def setApexToken(s: String): String = apexToken.set(s)
+	val playMode = new Initializable[Mode]
+	val preparedQueriesOnly = new Initializable[Boolean]
+	val instanceName = new Initializable[String]
 
-  private val kioskToken = new Initializable[String]
-  def setKioskToken(s: String): String = kioskToken.set(s)
+	val apexDebugSignet = new Initializable[Option[String]]
 
-  private val stripeAPIKey = new Initializable[String]
-  def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
+	def setApexDebugSignet(os: Option[String]): Option[String] = apexDebugSignet.set(os)
 
-  private val symonSalt = new Initializable[Option[String]]
-  def setSymonSalt(s: Option[String]): Option[String] = symonSalt.set(s)
+	private val apexToken = new Initializable[String]
 
-  val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
-  val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
-    .setImmediate(pb => new StripeDatabaseIOMechanism(pb))
+	def setApexToken(s: String): String = apexToken.set(s)
 
-  private lazy val rootPB = RequestCache.getRootRC.pb
-  private lazy val rootCB = new RedisBroker
-  private lazy val bouncerPB = RequestCache.getBouncerRC.pb
+	private val kioskToken = new Initializable[String]
 
-  lazy val isProd: Boolean = {
-    try {
-      playMode.peek.get
-      true
-    } catch {
-      case _: Throwable => false
-    }
-  }
+	def setKioskToken(s: String): String = kioskToken.set(s)
 
-  // This should only be called by the unit tester.
-  // If it's ever called when the application is runnning, it shoudl return None.
-  // If the unit tester is running then the initializables aren't set,
-  // so try to get their value, catch the exception, and return the PB
-  def getRootPB: Option[PersistenceBroker] = {
-    if (isProd) None else {
-      println("@@@@ Giving away the root PB; was this the test runner?")
-      Some(rootPB)
-    }
-  }
+	private val stripeAPIKey = new Initializable[String]
 
-  def logger: Logger = if (isProd) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
+	def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
 
-  def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
-    val allowedIPs = Set(
-      "127.0.0.1",
-      "0:0:0:0:0:0:0:1"
-    )
-    allowedIPs.contains(request.remoteAddress)
-  }
+	private val symonSalt = new Initializable[Option[String]]
 
-  def requestIsVIP(request: Request[AnyContent]): Boolean = {
-    request.headers.get("Is-VIP-Request") match {
-      case Some("true") => true
-      case _ => false
-    }
-  }
+	def setSymonSalt(s: Option[String]): Option[String] = symonSalt.set(s)
 
-  def getRequestCache(
-    requiredUserType: UserType,
-    requiredUserName: Option[String],
-    parsedRequest: ParsedRequest
-  ): (AuthenticationInstance, Option[RequestCache]) =
-    RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+	val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
+			.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
-  def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
-    if (
-      allowableUserTypes.get.contains(userType) &&  // requested user type is enabled in this server instance
-      requestIsFromLocalHost(request) &&               // request came from localhost, i.e. the bouncer
-      requestIsVIP(request)
-    ) userType.getPwHashForUser(userName, bouncerPB)
-    else None
-  }
+	private lazy val rootPB = RequestCache.getRootRC.pb
+	private lazy val rootCB = new RedisBroker
+	private lazy val bouncerPB = RequestCache.getBouncerRC.pb
 
-  def validateSymonHash(
-    host: String,
-    program: String,
-    argString: String,
-    status: Int,
-    mac: String,
-    candidateHash: String
-  ): Boolean = {
-    println("here we go")
-    val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
-    val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get
-    println(input)
-    val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
-    val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
-    println("expectedHash: " + expectedHash)
-    println("candidateHash: " + candidateHash)
-    expectedHash == candidateHash
-  }
+	lazy val isProd: Boolean = {
+		try {
+			playMode.peek.get
+			true
+		} catch {
+			case _: Throwable => false
+		}
+	}
 
-  trait PersistenceSystem {
-    val pbs: PersistenceBrokerStatic
-  }
-  trait PERSISTENCE_SYSTEM_RELATIONAL extends PersistenceSystem {
-    override val pbs: RelationalBrokerStatic
-  }
-  case object PERSISTENCE_SYSTEM_ORACLE extends PERSISTENCE_SYSTEM_RELATIONAL {
-    val pbs: RelationalBrokerStatic = OracleBrokerStatic
-  }
-  case object PERSISTENCE_SYSTEM_MYSQL extends PERSISTENCE_SYSTEM_RELATIONAL {
-    val pbs: RelationalBrokerStatic = MysqlBrokerStatic
-  }
+	// This should only be called by the unit tester.
+	// If it's ever called when the application is runnning, it shoudl return None.
+	// If the unit tester is running then the initializables aren't set,
+	// so try to get their value, catch the exception, and return the PB
+	def getRootPB: Option[PersistenceBroker] = {
+		if (isProd) None else {
+			println("@@@@ Giving away the root PB; was this the test runner?")
+			Some(rootPB)
+		}
+	}
 
-  class UnauthorizedAccessException(
-    private val message: String = "Unauthorized Access Denied",
-    private val cause: Throwable = None.orNull
-  ) extends Exception(message, cause)
+	def logger: Logger = if (isProd) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
+
+	def requestIsFromLocalHost(request: Request[AnyContent]): Boolean = {
+		val allowedIPs = Set(
+			"127.0.0.1",
+			"0:0:0:0:0:0:0:1"
+		)
+		allowedIPs.contains(request.remoteAddress)
+	}
+
+	def requestIsVIP(request: Request[AnyContent]): Boolean = {
+		request.headers.get("Is-VIP-Request") match {
+			case Some("true") => true
+			case _ => false
+		}
+	}
+
+	def getRequestCache(
+							   requiredUserType: UserType,
+							   requiredUserName: Option[String],
+							   parsedRequest: ParsedRequest
+					   ): (AuthenticationInstance, Option[RequestCache]) =
+		RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+
+	def getPwHashForUser(request: Request[AnyContent], userName: String, userType: UserType): Option[(Int, String)] = {
+		if (
+			allowableUserTypes.get.contains(userType) && // requested user type is enabled in this server instance
+					requestIsFromLocalHost(request) && // request came from localhost, i.e. the bouncer
+					requestIsVIP(request)
+		) userType.getPwHashForUser(userName, bouncerPB)
+		else None
+	}
+
+	def validateSymonHash(
+								 host: String,
+								 program: String,
+								 argString: String,
+								 status: Int,
+								 mac: String,
+								 candidateHash: String
+						 ): Boolean = {
+		println("here we go")
+		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
+		val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get
+		println(input)
+		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
+		val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
+		println("expectedHash: " + expectedHash)
+		println("candidateHash: " + candidateHash)
+		expectedHash == candidateHash
+	}
+
+	trait PersistenceSystem {
+		val pbs: PersistenceBrokerStatic
+	}
+
+	trait PERSISTENCE_SYSTEM_RELATIONAL extends PersistenceSystem {
+		override val pbs: RelationalBrokerStatic
+	}
+
+	case object PERSISTENCE_SYSTEM_ORACLE extends PERSISTENCE_SYSTEM_RELATIONAL {
+		val pbs: RelationalBrokerStatic = OracleBrokerStatic
+	}
+
+	case object PERSISTENCE_SYSTEM_MYSQL extends PERSISTENCE_SYSTEM_RELATIONAL {
+		val pbs: RelationalBrokerStatic = MysqlBrokerStatic
+	}
+
+	class UnauthorizedAccessException(
+											 private val message: String = "Unauthorized Access Denied",
+											 private val cause: Throwable = None.orNull
+									 ) extends Exception(message, cause)
+
 }
