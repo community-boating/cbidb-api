@@ -22,7 +22,7 @@ class JpClassInstances @Inject()(implicit val exec: ExecutionContext)
 	}
 
 	def getCacheBrokerKey(params: JpClassInstancesParamsObject): CacheKey =
-		"ap-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+		"jp-class-instances-" + params.startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
 	def getExpirationTime: LocalDateTime = {
 		LocalDateTime.now.plusSeconds(5)
