@@ -7,3 +7,4 @@ GET     /auth-test/bouncer                  Api.Endpoints.Security.TestAuth.getB
 # POST    /user                               Api.Endpoints.UserCrud.post()
 # POST    /oome                               Api.Endpoints.OOME.post()
 
+POST    /junior/scholarship                    Api.Endpoints.Member.Scholarship.post()

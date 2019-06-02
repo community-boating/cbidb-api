@@ -239,19 +239,19 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		println(sql)
 		val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
 		try {
-			val arr: scala.Array[String] = pkPersistenceName match {
-				case Some(s) => scala.Array(s)
-				case None => scala.Array.empty
+			val ps: PreparedStatement = pkPersistenceName match {
+				case Some(s) => c.prepareStatement(sql, scala.Array(s))
+				case None => c.prepareStatement(sql)
 			}
-			val ps: PreparedStatement = c.prepareStatement(sql, arr)
+
 			if (params.isDefined) {
 				(params.get.indices zip params.get).foreach(t => {
 					ps.setString(t._1 + 1, t._2)
 				})
 			}
 			ps.executeUpdate()
-			val rs = ps.getGeneratedKeys
 			if (pkPersistenceName.isDefined) {
+				val rs = ps.getGeneratedKeys
 				if (rs.next) {
 					Some(rs.getString(1))
 				} else throw new Exception("No pk value came back from insert statement")

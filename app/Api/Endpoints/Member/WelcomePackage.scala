@@ -15,14 +15,13 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.{ExecutionContext, Future}
 
 class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
-	def get(): Action[AnyContent] = Action.async { req => {
+	def get(): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PermissionsAuthority.logger
 		val maybeRC = getRCOptionMember(ParsedRequest(req), None)
 		if (maybeRC.isEmpty) Future {
 			Ok("{\"error\": \"Unauthorized\"}")
-		}
-		else {
+		} else {
 			val rc = maybeRC.get
 			val pb = rc.pb
 			profiler.lap("about to do first query")
@@ -42,22 +41,18 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val result = WelcomePackageResult(personId, rc.auth.userName, hasEIIResponse, childData)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
-			Future {
-				Ok(Json.toJson(result))
-			}
+			Future(Ok(Json.toJson(result)))
 		}
-	}
-	}
+	})
 
 	case class WelcomePackageResult(
-										   parentPersonId: Int,
-										   userName: String,
-										   hasEIIResponse: Boolean,
-										   children: List[GetChildDataQueryResult]
-								   )
+		parentPersonId: Int,
+		userName: String,
+		hasEIIResponse: Boolean,
+		children: List[GetChildDataQueryResult]
+	)
 
 	object WelcomePackageResult {
 		implicit val format = Json.format[WelcomePackageResult]
 	}
-
 }
