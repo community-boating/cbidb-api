@@ -66,11 +66,10 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends Authentica
 							   |email,
 							   |phone_primary,
 							   |emerg1_name,
-							   |emerg1_relation,
 							   |emerg1_phone_primary,
 							   |previous_member
 							   |) values
-							   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,?,${GetSQLLiteral(parsed.previousMember)})
+							   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)})
               """.stripMargin
 
 						override val params: List[String] = List(
@@ -80,7 +79,6 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends Authentica
 							parsed.emailAddress,
 							parsed.phonePrimary,
 							parsed.emerg1Name,
-							parsed.emerg1Relation,
 							parsed.emerg1PhonePrimary
 						)
 						override val pkName: Option[String] = Some("person_id")
