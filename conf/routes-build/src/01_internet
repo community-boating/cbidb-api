@@ -25,5 +25,9 @@ POST    /junior/survey                               Api.Endpoints.Member.Survey
 GET    /junior/survey                               Api.Endpoints.Member.SurveyInfo.get(personId: Int)
 
 
+POST    /junior/scholarship-no                    Api.Endpoints.Member.Scholarship.postNo()
+POST    /junior/scholarship-yes                    Api.Endpoints.Member.Scholarship.postYes()
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

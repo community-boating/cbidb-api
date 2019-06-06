@@ -110,7 +110,6 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			}
 			case _ => {
 				println("executing non-prepared update/delete:")
-				println(pq.getQuery)
 				executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
 			}
 		}
