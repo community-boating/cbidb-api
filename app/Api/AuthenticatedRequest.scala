@@ -18,8 +18,8 @@ trait AuthenticatedRequest {
 	protected def getRCOption(ut: NonMemberUserType, parsedRequest: ParsedRequest): Option[RequestCache] =
 		PermissionsAuthority.getRequestCache(ut, None, parsedRequest)._2
 
-	protected def getRCOptionMember(parsedRequest: ParsedRequest, juniorId: Option[Int]): Option[RequestCache] =
-		PermissionsAuthority.getRequestCacheMember(None, parsedRequest, juniorId)._2
+	protected def getRCOptionMember(parsedRequest: ParsedRequest): Option[RequestCache] =
+		PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2
 
 	@deprecated
 	protected def getRC(ut: NonMemberUserType, parsedRequest: ParsedRequest): RequestCache = {

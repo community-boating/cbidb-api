@@ -21,8 +21,8 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PermissionsAuthority.logger
 			val parsedRequest = ParsedRequest(request)
-			val juniorId: Option[Int] = request.body.asJson.map(json => json("personId").toString().toInt)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, juniorId)._2.get
+			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
+			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson
@@ -72,8 +72,8 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PermissionsAuthority.logger
 			val parsedRequest = ParsedRequest(request)
-			val juniorId: Option[Int] = request.body.asJson.map(json => json("personId").toString().toInt)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, juniorId)._2.get
+			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
+			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson

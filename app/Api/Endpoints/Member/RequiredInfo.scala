@@ -14,16 +14,16 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.ExecutionContext
 
 class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller {
-	def get(personId: Int): Action[AnyContent] = Action { request =>
+	def get(juniorId: Int): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, Some(personId))._2.get
+		val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 		val pb: PersistenceBroker = rc.pb
 		val cb: CacheBroker = rc.cb
 
 		val select = new PreparedQueryForSelect[RequiredInfoShape](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
 				RequiredInfoShape(
-					personId,
+					juniorId,
 					rs.getOptionString(1),
 					rs.getOptionString(2),
 					rs.getOptionString(3),
@@ -70,7 +70,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 				   |from persons where person_id = ?
         """.stripMargin
 
-			override val params: List[String] = List(personId.toString)
+			override val params: List[String] = List(juniorId.toString)
 		}
 
 		val resultObj = pb.executePreparedQueryForSelect(select).head
@@ -81,9 +81,9 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 	def post() = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)
-			val juniorId: Option[Int] = request.body.asJson.map(json => json("personId").toString().toInt)
+			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
 			println("required info post: juniorId is " + juniorId)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson

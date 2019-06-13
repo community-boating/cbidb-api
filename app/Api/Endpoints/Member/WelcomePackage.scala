@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import Api.AuthenticatedRequest
 import CbiUtil.{ParsedRequest, Profiler}
-import IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult, IdentifyMemberQuery}
+import IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import IO.PreparedQueries.PreparedQueryForSelect
 import Services.Authentication.MemberUserType
 import Services.PermissionsAuthority
@@ -18,15 +18,14 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 	def get(): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PermissionsAuthority.logger
-		val maybeRC = getRCOptionMember(ParsedRequest(req), None)
+		val maybeRC = getRCOptionMember(ParsedRequest(req))
 		if (maybeRC.isEmpty) Future {
 			Ok("{\"error\": \"Unauthorized\"}")
 		} else {
 			val rc = maybeRC.get
 			val pb = rc.pb
 			profiler.lap("about to do first query")
-			val identifyMemberResult = pb.executePreparedQueryForSelect(new IdentifyMemberQuery(rc.auth.userName)).head
-			val personId: Int = identifyMemberResult.personId
+			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
 			val hasEIIResponse = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 				override def getQuery: String = "select 1 from eii_responses where person_id = ? and season = util_pkg.get_current_season"

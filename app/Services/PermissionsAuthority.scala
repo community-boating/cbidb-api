@@ -2,10 +2,13 @@ package Services
 
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.sql.ResultSet
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
 import CbiUtil.{Initializable, ParsedRequest}
+import Entities.MagicIds
+import IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
 import IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import Services.Authentication._
@@ -92,19 +95,69 @@ object PermissionsAuthority {
 	}
 
 	def getRequestCache(
-							   requiredUserType: NonMemberUserType,
-							   requiredUserName: Option[String],
-							   parsedRequest: ParsedRequest
-					   ): (AuthenticationInstance, Option[RequestCache]) =
+		requiredUserType: NonMemberUserType,
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest
+	): (AuthenticationInstance, Option[RequestCache]) =
 		RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
 
 	def getRequestCacheMember(
-									 requiredUserName: Option[String],
-									 parsedRequest: ParsedRequest,
-									 juniorId: Option[Int]
-							 ): (AuthenticationInstance, Option[RequestCache]) = {
-		// TODO: bail if junior is is set and is not a valid junior for this member
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest
+	): (AuthenticationInstance, Option[RequestCache]) =
 		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+
+	def getRequestCacheMemberWithJuniorId(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		juniorId: Int
+	): (AuthenticationInstance, Option[RequestCache]) = {
+		println("about to validate junior id in request....")
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		if (ret._1.userType == MemberUserType) {
+			// auth was successful
+			//... but does the request juniorId match the auth'd parent id?
+			val authedPersonId = MemberUserType.getAuthedPersonId(ret._1.userName, rootPB)
+			val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
+				override def getQuery: String =
+					s"""
+					   |select b from person_relationships rl
+					   |where a = ${authedPersonId}
+					   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
+					""".stripMargin
+				override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+			}
+			val juniorIds = rootPB.executePreparedQueryForSelect(getAuthedJuniorIDs)
+			if (juniorIds.contains(juniorId)) {
+				ret
+			} else {
+				throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
+			}
+		} else {
+			// auth wasn't successful anyway
+			ret
+		}
+	}
+
+	def getRequestCacheMemberWithParentId(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		parentId: Int
+	): (AuthenticationInstance, Option[RequestCache]) = {
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		if (ret._1.userType == MemberUserType) {
+			// auth was successful
+			//... but does the request parentId match the auth'd parent id?
+			val authedPersonId = MemberUserType.getAuthedPersonId(ret._1.userName, rootPB)
+			if (authedPersonId == parentId) {
+				ret
+			} else {
+				throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
+			}
+		} else {
+			// auth wasn't successful anyway
+			ret
+		}
 	}
 
 
@@ -117,13 +170,13 @@ object PermissionsAuthority {
 	}
 
 	def validateSymonHash(
-								 host: String,
-								 program: String,
-								 argString: String,
-								 status: Int,
-								 mac: String,
-								 candidateHash: String
-						 ): Boolean = {
+		host: String,
+		program: String,
+		argString: String,
+		status: Int,
+		mac: String,
+		candidateHash: String
+	): Boolean = {
 		println("here we go")
 		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
 		val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get

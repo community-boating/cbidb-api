@@ -47,13 +47,13 @@ object RequestCache {
 	// TODO: better way to handle requests authenticated against multiple mechanisms?
 	// TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things
 	def construct(
-						 requiredUserType: UserType,
-						 requiredUserName: Option[String],
-						 parsedRequest: ParsedRequest,
-						 rootCB: CacheBroker,
-						 apexToken: String,
-						 kioskToken: String
-				 ): (AuthenticationInstance, Option[RequestCache]) = {
+		requiredUserType: UserType,
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		rootCB: CacheBroker,
+		apexToken: String,
+		kioskToken: String
+	 ): (AuthenticationInstance, Option[RequestCache]) = {
 		println("\n\n====================================================")
 		println("====================================================")
 		println("====================================================")
