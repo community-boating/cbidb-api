@@ -28,6 +28,8 @@ GET    /junior/survey                               Api.Endpoints.Member.SurveyI
 POST    /junior/scholarship-no                    Api.Endpoints.Member.Scholarship.postNo()
 POST    /junior/scholarship-yes                    Api.Endpoints.Member.Scholarship.postYes()
 
+GET    /junior/see-types                    Api.Endpoints.Member.JuniorSeeClassTypes.get(personId: Int)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
