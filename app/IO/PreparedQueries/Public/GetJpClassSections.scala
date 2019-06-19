@@ -16,13 +16,13 @@ class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCa
 		|sl.section_name,
 		|ilv.instance_id as instance_id,
 		|t.type_name,
-		|to_char(s1.session_datetime, 'MM/DD/YYYY') as start_date,
-		|to_char(s1.session_datetime, 'HH:MIPM') as start_time,
+		|to_char(s.session_datetime, 'MM/DD/YYYY') as start_date,
+		|to_char(s.session_datetime, 'HH:MIPM') as start_time,
 		|l.location_name,
 		|ins.name_first as instructor_name_first,
 		|ins.name_last as instructor_name_last,
 		|(select count(*) from jp_class_signups where instance_id = ilv.instance_id and signup_type = 'E') as enrollees
-		|from jp_class_types t, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w,
+		|from jp_class_types t, jp_class_sessions s,
 		|class_locations l, class_instructors ins, jp_class_section_lookup sl, (
 		|    select i.instance_id, i.type_id, loc1.location_id, ins1.instructor_id, nvl(se.section_id, -1 * i.instance_id) as section_id, se.lookup_id
 		|    from jp_class_instances i
@@ -37,12 +37,11 @@ class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCa
 		|    on loc1.location_id = nvl2(se.section_id, se.location_id, i.location_id)
 		|    group by i.instance_id, i.type_id, loc1.location_id, ins1.instructor_id, nvl(se.section_id, -1 * i.instance_id), se.lookup_id
 		|) ilv
-		|where ilv.type_id = t.type_id and bk.instance_id = ilv.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
+		|where ilv.type_id = t.type_id and s.instance_id = ilv.instance_id
 		|and ilv.location_id = l.location_id (+) and ilv.instructor_id = ins.instructor_id (+)
 		|and ilv.lookup_id = sl.section_id (+)
-		|and s1.session_datetime between w.monday and w.sunday
-		|and to_date('$startDateString', 'MM/DD/YYYY') between trunc(s1.session_datetime) and trunc(s2.session_datetime)
-		|order by s1.session_datetime, t.display_order, ilv.instance_id
+		|and to_date('$startDateString', 'MM/DD/YYYY') = trunc(s.session_datetime)
+		|order by s.session_datetime, t.display_order, ilv.instance_id
 		|
 	""".stripMargin
 
