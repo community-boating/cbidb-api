@@ -41,7 +41,7 @@ class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCa
 		|and ilv.location_id = l.location_id (+) and ilv.instructor_id = ins.instructor_id (+)
 		|and ilv.lookup_id = sl.section_id (+)
 		|and s1.session_datetime between w.monday and w.sunday
-		|and trunc(s1.session_datetime) = to_date('$startDateString', 'MM/DD/YYYY')
+		|and to_date('$startDateString', 'MM/DD/YYYY') between trunc(s1.session_datetime) and trunc(s2.session_datetime)
 		|order by s1.session_datetime, t.display_order, ilv.instance_id
 		|
 	""".stripMargin
