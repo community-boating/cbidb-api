@@ -105,6 +105,7 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
 	}
 
 	private HikariDataSource getPool(HikariConfig config) {
+		config.setLeakDetectionThreshold(30 * 1000);
 		return new HikariDataSource(config);
 	}
 }
