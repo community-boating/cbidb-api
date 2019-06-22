@@ -18,12 +18,18 @@ class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRoste
 		   |p.allergies,
 		   |p.medications,
 		   |p.special_needs,
-		   |si.signup_note
-		   |from persons p, jp_class_signups si
-		   | where p.person_id = si.person_id
-		   | and signup_type in ('E', 'W')
+		   |si.signup_note,
+		   |sl.section_name
+		   |from persons p
+		   |inner join jp_class_signups si
+		   |on p.person_id = si.person_id
+		   |left outer join jp_class_sections sec
+		   |on si.section_id = sec.section_id
+		   |left outer join jp_class_section_lookup sl
+		   |on sec.lookup_id = sl.section_id
+		   | where signup_type in ('E', 'W')
 		   | and si.instance_id = $instanceId
-		   | order by si.sequence
+		   | order by p.name_last, p.name_first
     """.stripMargin
 
 	override def mapResultSetRowToCaseObject(rs: ResultSet): JpRosterData = new JpRosterData(
@@ -35,6 +41,7 @@ class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRoste
 		medications = NAStrings.nullifyNAString(rs.getOptionString(6)),
 		specialNeeds = NAStrings.nullifyNAString(rs.getOptionString(7)),
 		signupNote = rs.getOptionString(8),
-		numberSessions = new Initializable[Int]
+		numberSessions = new Initializable[Int],
+		sectionName = rs.getOptionString(9)
 	)
 }

@@ -9,7 +9,6 @@ case class CreatePersonParams(
 									 dob: String,
 									 phonePrimary: String,
 									 emerg1Name: String,
-									 emerg1Relation: String,
 									 emerg1PhonePrimary: String,
 									 previousMember: Boolean
 							 )

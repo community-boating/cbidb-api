@@ -105,10 +105,9 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
 	}
 
 	private HikariDataSource getPool(HikariConfig config) {
-		HikariDataSource hikari = new HikariDataSource(config);
-		hikari.setMaximumPoolSize(10);
+		config.setMaximumPoolSize(10);
+		config.setLeakDetectionThreshold(30 * 1000);
 		//hikari.setIdleTimeout(30000);
-		//hikari.setLeakDetectionThreshold(60 * 1000);
-		return hikari;
+		return new HikariDataSource(config);
 	}
 }
