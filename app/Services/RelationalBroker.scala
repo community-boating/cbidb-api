@@ -1,7 +1,7 @@
 package Services
 
 import java.security.MessageDigest
-import java.sql._
+import java.sql.{Date, PreparedStatement, ResultSet, Statement}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import CbiUtil.{Initializable, Profiler}
@@ -19,34 +19,34 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 	private val mainPoolOption: Initializable[HikariDataSource] = RelationalBroker.mainPool
 	private val tempTablePoolOption: Initializable[HikariDataSource] = RelationalBroker.tempTablePool
 
-	private def mainPool: HikariDataSource = {
+	private def mainPool = {
 		if (!mainPoolOption.isInitialized) {
 			println("Whoops, tried to get the pools but they aint there.")
 			RelationalBroker.setPools()
 		}
-		mainPoolOption.get
+		new ConnectionPoolWrapper(mainPoolOption.get)
 	}
 
-	private def tempTablePool: HikariDataSource = {
+	private def tempTablePool = {
 		if (!tempTablePoolOption.isInitialized) {
 			println("Whoops, tried to get the pools but they aint there.")
 			RelationalBroker.setPools()
 		}
-		tempTablePoolOption.get
+		new ConnectionPoolWrapper(tempTablePoolOption.get)
 	}
 
 	protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 
-		val profiler = new Profiler
-		val c: Connection = if (pq.useTempSchema) {
+
+		val pool = if (pq.useTempSchema) {
 			println("using temp schema")
-			tempTablePool.getConnection
+			tempTablePool
 		} else {
 			println("using main schema")
-			mainPool.getConnection
+			mainPool
 		}
-		profiler.lap("got connection")
-		try {
+		pool.withConnection(c => {
+			val profiler = new Profiler
 			val rs: ResultSet = pq match {
 				case p: PreparedQueryForSelect[T] => {
 					println("executing prepared select:")
@@ -79,11 +79,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
 			if (fetchCount > 2) println(" ***********  QUERY EXECUTED " + fetchCount + " FETCHES!!  Rowcount was " + rowCounter + ":  " + pq.getQuery)
 			resultObjects.toList
-		} finally {
-			profiler.lap("about to close")
-			c.close()
-			profiler.lap("closed")
-		}
+		})
 	}
 
 	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
@@ -94,8 +90,8 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		pq match {
 			case p: PreparedQueryForUpdateOrDelete => {
-				val c: Connection = if (pq.useTempSchema) tempTablePool.getConnection else mainPool.getConnection
-				try {
+				val pool = if (pq.useTempSchema) tempTablePool else mainPool
+				pool.withConnection(c => {
 					println("executing prepared update/delete:")
 					val preparedStatement = c.prepareStatement(p.getQuery)
 					(p.params.indices zip p.params).foreach(t => {
@@ -104,9 +100,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 					println(p.getQuery)
 					println("Parameterized with " + p.params)
 					preparedStatement.executeUpdate()
-				} finally {
-					c.close()
-				}
+				})
 			}
 			case _ => {
 				println("executing non-prepared update/delete:")
@@ -185,8 +179,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		}
 		println(" ======   Creating filter table " + tableName + "    =======")
 		val p = new Profiler
-		val c: Connection = tempTablePool.getConnection
-		try {
+		tempTablePool.withConnection(c => {
 			val createTableSQL = "CREATE TABLE " + tableName + " (ID Number)"
 			c.createStatement().executeUpdate(createTableSQL)
 			p.lap("Created table")
@@ -228,16 +221,13 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			val ret = rows.map(r => obj.construct(r, rc, isClean = true))
 			p2.lap("finished construction")
 			ret
-		} finally {
-			c.close()
-			Nil
-		}
+		})
 	}
 
 	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[String]] = None): Option[String] = {
 		println(sql)
-		val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
-		try {
+		val pool = if (useTempConnection) tempTablePool else mainPool
+		pool.withConnection(c => {
 			val ps: PreparedStatement = pkPersistenceName match {
 				case Some(s) => c.prepareStatement(sql, scala.Array(s))
 				case None => c.prepareStatement(sql)
@@ -255,29 +245,22 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 					Some(rs.getString(1))
 				} else throw new Exception("No pk value came back from insert statement")
 			} else None
-
-		} finally {
-			c.close()
-		}
+		})
 	}
 
 	private def executeSQLForUpdateOrDelete(sql: String, useTempConnection: Boolean = false): Int = {
 		println(sql)
-		val c: Connection = if (useTempConnection) tempTablePool.getConnection else mainPool.getConnection
-		try {
+		val pool = if (useTempConnection) tempTablePool else mainPool
+		pool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.executeUpdate(sql) // returns # of rows updated
-		} finally {
-			c.close()
-		}
+		})
 	}
 
 	private def getProtoStorablesFromSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
 		println(sql)
 		val profiler = new Profiler
-		val c: Connection = mainPool.getConnection
-		profiler.lap("got connection")
-		try {
+		mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			val rs: ResultSet = st.executeQuery(sql)
 			rs.setFetchSize(fetchSize)
@@ -338,11 +321,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
 			if (fetchCount > 2) println(" ***********  QUERY EXECUTED " + fetchCount + " FETCHES!!  Rowcount was " + rowCounter + ":  " + sql)
 			rows.toList
-		} finally {
-			profiler.lap("about to close")
-			c.close()
-			profiler.lap("closed")
-		}
+		})
 	}
 
 	protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
@@ -410,16 +389,11 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 
 	// test query
 	def testDB {
-		val c: Connection = mainPool.getConnection
-		try {
+		mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.execute("select count(*) from users")
 			println("test query executed successfully")
-		} catch {
-			case e: Exception => println("Error on bootup query: " + e)
-		} finally {
-			c.close()
-		}
+		})
 	}
 }
 
