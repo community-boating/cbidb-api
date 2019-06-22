@@ -26,6 +26,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 
 libraryDependencies +="net.debasishg" %% "redisclient" % "3.4"
+libraryDependencies +="com.zaxxer" % "HikariCP" % "3.3.1"
 
 /*
 scalacOptions ++= Seq(
