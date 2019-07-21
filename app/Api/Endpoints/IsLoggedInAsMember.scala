@@ -1,5 +1,6 @@
 package Api.Endpoints
 
+import Api.ResultError
 import CbiUtil.ParsedRequest
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority
@@ -19,24 +20,15 @@ class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends Cont
 					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
 				}
 				case None => Future {
-					Ok(JsObject(Map("error" -> JsObject(Map(
-						"code" -> JsString("unauthorized"),
-						"message" -> JsString("Unauthorized")
-					)))))
+					Ok(ResultError.UNAUTHORIZED)
 				}
 			}
 		} catch {
 			case _: UnauthorizedAccessException => Future {
-				Ok(JsObject(Map("error" -> JsObject(Map(
-					"code" -> JsString("unauthorized"),
-					"message" -> JsString("Unauthorized")
-				)))))
+				Ok(ResultError.UNAUTHORIZED)
 			}
 			case _: Throwable => Future {
-				Ok(JsObject(Map("error" -> JsObject(Map(
-					"code" -> JsString("internal_error"),
-					"message" -> JsString("Internal Error")
-				)))))
+				Ok(ResultError.UNAUTHORIZED)
 			}
 		}
 	}

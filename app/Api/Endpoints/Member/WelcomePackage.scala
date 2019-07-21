@@ -2,7 +2,7 @@ package Api.Endpoints.Member
 
 import java.sql.ResultSet
 
-import Api.AuthenticatedRequest
+import Api.{AuthenticatedRequest, ResultError}
 import CbiUtil.{ParsedRequest, Profiler}
 import IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import IO.PreparedQueries.PreparedQueryForSelect
@@ -20,7 +20,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 		val logger = PermissionsAuthority.logger
 		val maybeRC = getRCOptionMember(ParsedRequest(req))
 		if (maybeRC.isEmpty) Future {
-			Ok("{\"error\": \"Unauthorized\"}")
+			Ok(ResultError.UNAUTHORIZED)
 		} else {
 			val rc = maybeRC.get
 			val pb = rc.pb
