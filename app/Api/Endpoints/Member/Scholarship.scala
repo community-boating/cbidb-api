@@ -21,44 +21,27 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PermissionsAuthority.logger
 			val parsedRequest = ParsedRequest(request)
-			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
+			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val data = request.body.asJson
-			data match {
-				case None => {
-					println("no body")
-					new Status(400)("no body")
-				}
-				case Some(v: JsValue) => {
-					val parsed = ScholarshipNoShape.apply(v)
-					Scholarship.setOthersNonCurrent(pb, parsed.personId)
-					val jpPrice = Scholarship.getBaseJpPrice(pb)
-					val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
-						val params: List[String] = List(parsed.personId.toString)
-						override val pkName: Option[String] = None
+			Scholarship.setOthersNonCurrent(pb, personId)
+			val jpPrice = Scholarship.getBaseJpPrice(pb)
+			val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
+				val params: List[String] = List(personId.toString)
+				override val pkName: Option[String] = None
 
-						override def getQuery: String =
-							s"""
-							   |insert into eii_responses
-							   |(person_id, season, is_current, is_applying, computed_eii, COMPUTED_PRICE) values
-							   | (?, 2019, 'Y', 'N', null, $jpPrice)
+				override def getQuery: String =
+					s"""
+					   |insert into eii_responses
+					   |(person_id, season, is_current, is_applying, computed_eii, COMPUTED_PRICE) values
+					   | (?, 2019, 'Y', 'N', null, $jpPrice)
 							 """.stripMargin
-					}
-
-					pb.executePreparedQueryForInsert(insertQuery)
-					Ok("done")
-				}
-				case Some(v) => {
-					println("wut dis " + v)
-					Ok("wat")
-				}
 			}
 
-
+			pb.executePreparedQueryForInsert(insertQuery)
 			Ok("done")
-
 		} catch {
 			case _: UnauthorizedAccessException => Ok("Access Denied")
 			case e: Throwable => {
@@ -72,10 +55,10 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PermissionsAuthority.logger
 			val parsedRequest = ParsedRequest(request)
-			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
+			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val data = request.body.asJson
 			data match {
 				case None => {
@@ -85,7 +68,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 				case Some(v: JsValue) => {
 					println(v)
 					val parsed = ScholarshipYesShape.apply(v)
-					Scholarship.setOthersNonCurrent(pb, parsed.personId)
+					Scholarship.setOthersNonCurrent(pb, personId)
 
 					val reducedKids = Scholarship.reduceKids(Kids(parsed.infantCount, parsed.preschoolerCount, parsed.schoolagerCount, parsed.teenagerCount))
 					val eiiQ = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
@@ -109,7 +92,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 						val totalKids = parsed.infantCount + parsed.preschoolerCount + parsed.schoolagerCount + parsed.teenagerCount
 						val myJpPrice = Scholarship.getMyJpPrice(pb, eiis.head, parsed.income, totalKids)
 						val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
-							val params: List[String] = List(parsed.personId.toString)
+							val params: List[String] = List(personId.toString)
 							override val pkName: Option[String] = None
 
 							override def getQuery: String =

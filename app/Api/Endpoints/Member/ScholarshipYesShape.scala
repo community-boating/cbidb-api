@@ -4,7 +4,6 @@ import play.api.libs.json.{JsValue, Json}
 
 
 case class ScholarshipYesShape(
-	personId: Int,
 	numberWorkers: Int,
 	hasBenefits: Boolean,
 	infantCount: Int,
@@ -18,14 +17,4 @@ object ScholarshipYesShape {
 	implicit val format = Json.format[ScholarshipYesShape]
 
 	def apply(v: JsValue): ScholarshipYesShape = v.as[ScholarshipYesShape]
-}
-
-case class ScholarshipNoShape(
-	personId: Int,
-)
-
-object ScholarshipNoShape {
-	implicit val format = Json.format[ScholarshipNoShape]
-
-	def apply(v: JsValue): ScholarshipNoShape = v.as[ScholarshipNoShape]
 }
