@@ -112,10 +112,10 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 					// TODO: add more validations, come up with some chained try/promise arch
 					if (!notTooOld) {
-						Ok(Json.toJson(ResultError(
+						Ok(ResultError(
 							code="too_old",
 							message="Prospective juniors must be 17 or younger and may not turn 18 before the program begins."
-						)))
+						).asJsObject)
 					} else {
 						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 							override def getQuery: String =
