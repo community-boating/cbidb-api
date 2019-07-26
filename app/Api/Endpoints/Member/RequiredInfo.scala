@@ -2,8 +2,9 @@ package Api.Endpoints.Member
 
 import java.sql.ResultSet
 
-import CbiUtil.ParsedRequest
-import IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import Api.ResultError
+import CbiUtil.{DateUtil, ParsedRequest}
+import IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import Services.Authentication.MemberUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
@@ -96,60 +97,80 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 					val parsed = RequiredInfoShape.apply(v)
 					println(parsed)
 
+					val dob = parsed.dob.getOrElse("")
 
-					val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+					val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+						override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
+
 						override def getQuery: String =
 							s"""
-							   |update persons set
-							   |name_first=?,
-							   |name_last=?,
-							   |name_middle_initial=?,
-							   |dob=to_date(?,'MM/DD/YYYY'),
-							   |email=?,
-							   |addr_1=?,
-							   |addr_2=?,
-							   |addr_3=?,
-							   |city=?,
-							   |state=?,
-							   |zip=?,
-							   |country=?,
-							   |phone_primary=?,
-							   |phone_primary_type=?,
-							   |phone_alternate=?,
-							   |phone_alternate_type=?,
-							   |allergies=?,
-							   |medications=?,
-							   |special_needs=?
-							   |where person_id = ?
+							  |select person_pkg.is_jp_max_age(to_date(?,'MM/DD/YYYY')) from dual
+							  |""".stripMargin
+
+						override val params: List[String] = List(dob)
+					}).head
+
+					// TODO: add more validations, come up with some chained try/promise arch
+					if (!notTooOld) {
+						Ok(Json.toJson(ResultError(
+							code="too_old",
+							message="Prospective juniors must be 17 or younger and may not turn 18 before the program begins."
+						)))
+					} else {
+						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+							override def getQuery: String =
+								s"""
+								   |update persons set
+								   |name_first=?,
+								   |name_last=?,
+								   |name_middle_initial=?,
+								   |dob=to_date(?,'MM/DD/YYYY'),
+								   |email=?,
+								   |addr_1=?,
+								   |addr_2=?,
+								   |addr_3=?,
+								   |city=?,
+								   |state=?,
+								   |zip=?,
+								   |country=?,
+								   |phone_primary=?,
+								   |phone_primary_type=?,
+								   |phone_alternate=?,
+								   |phone_alternate_type=?,
+								   |allergies=?,
+								   |medications=?,
+								   |special_needs=?
+								   |where person_id = ?
               """.stripMargin
 
-						override val params: List[String] = List(
-							parsed.firstName.orNull,
-							parsed.lastName.orNull,
-							parsed.middleInitial.orNull,
-							parsed.dob.orNull,
-							parsed.childEmail.orNull,
-							parsed.addr1.orNull,
-							parsed.addr2.orNull,
-							parsed.addr3.orNull,
-							parsed.city.orNull,
-							parsed.state.orNull,
-							parsed.zip.orNull,
-							parsed.country.orNull,
-							parsed.primaryPhone.orNull,
-							parsed.primaryPhoneType.orNull,
-							parsed.alternatePhone.orNull,
-							parsed.alternatePhoneType.orNull,
-							parsed.allergies.orNull,
-							parsed.medications.orNull,
-							parsed.specialNeeds.orNull,
-							parsed.personId.toString
-						)
+							override val params: List[String] = List(
+								parsed.firstName.orNull,
+								parsed.lastName.orNull,
+								parsed.middleInitial.orNull,
+								parsed.dob.orNull,
+								parsed.childEmail.orNull,
+								parsed.addr1.orNull,
+								parsed.addr2.orNull,
+								parsed.addr3.orNull,
+								parsed.city.orNull,
+								parsed.state.orNull,
+								parsed.zip.orNull,
+								parsed.country.orNull,
+								parsed.primaryPhone.orNull,
+								parsed.primaryPhoneType.orNull,
+								parsed.alternatePhone.orNull,
+								parsed.alternatePhoneType.orNull,
+								parsed.allergies.orNull,
+								parsed.medications.orNull,
+								parsed.specialNeeds.orNull,
+								parsed.personId.toString
+							)
+						}
+
+						pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+
+						Ok("done")
 					}
-
-					pb.executePreparedQueryForUpdateOrDelete(updateQuery)
-
-					Ok("done")
 				}
 				case Some(v) => {
 					println("wut dis " + v)
