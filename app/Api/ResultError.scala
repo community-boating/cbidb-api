@@ -16,4 +16,8 @@ object ResultError {
 		code="unauthorized",
 		message="Unauthorized"
 	).asJsObject()
+	val UNKNOWN: JsObject = ResultError(
+		code="unknown",
+		message="An internal error has occurred."
+	).asJsObject()
 }

@@ -2,14 +2,14 @@ package Api.Endpoints.Member
 
 import java.sql.ResultSet
 
-import Api.ResultError
+import Api.{ResultError, ValidationError}
 import CbiUtil.{DateUtil, ParsedRequest}
 import IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import Services.Authentication.MemberUserType
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext
@@ -88,10 +88,13 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson
+			val successResponse = new JsObject(Map(
+				"personId" -> JsNumber(juniorId)
+			))
 			data match {
 				case None => {
 					println("no body")
-					new Status(400)("no body")
+					Ok(ResultError.UNKNOWN)
 				}
 				case Some(v: JsValue) => {
 					val parsed = RequiredInfoShape.apply(v)
@@ -99,82 +102,24 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 					val dob = parsed.dob.getOrElse("")
 
-					val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-						override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
-
-						override def getQuery: String =
-							s"""
-							  |select person_pkg.is_jp_max_age(to_date(?,'MM/DD/YYYY')) from dual
-							  |""".stripMargin
-
-						override val params: List[String] = List(dob)
-					}).head
+					// Run all validations and combine into one
+					val validation = ValidationError.combine(List(
+						tooOld(pb, dob),
+						tooYoung(pb, dob, juniorId)
+					).filter(_.isDefined).map(_.orNull))
 
 					// TODO: add more validations, come up with some chained try/promise arch
-					if (!notTooOld) {
-						Ok(ResultError(
-							code="too_old",
-							message="Prospective juniors must be 17 or younger and may not turn 18 before the program begins."
-						).asJsObject)
-					} else {
-						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-							override def getQuery: String =
-								s"""
-								   |update persons set
-								   |name_first=?,
-								   |name_last=?,
-								   |name_middle_initial=?,
-								   |dob=to_date(?,'MM/DD/YYYY'),
-								   |email=?,
-								   |addr_1=?,
-								   |addr_2=?,
-								   |addr_3=?,
-								   |city=?,
-								   |state=?,
-								   |zip=?,
-								   |country=?,
-								   |phone_primary=?,
-								   |phone_primary_type=?,
-								   |phone_alternate=?,
-								   |phone_alternate_type=?,
-								   |allergies=?,
-								   |medications=?,
-								   |special_needs=?
-								   |where person_id = ?
-              """.stripMargin
-
-							override val params: List[String] = List(
-								parsed.firstName.orNull,
-								parsed.lastName.orNull,
-								parsed.middleInitial.orNull,
-								parsed.dob.orNull,
-								parsed.childEmail.orNull,
-								parsed.addr1.orNull,
-								parsed.addr2.orNull,
-								parsed.addr3.orNull,
-								parsed.city.orNull,
-								parsed.state.orNull,
-								parsed.zip.orNull,
-								parsed.country.orNull,
-								parsed.primaryPhone.orNull,
-								parsed.primaryPhoneType.orNull,
-								parsed.alternatePhone.orNull,
-								parsed.alternatePhoneType.orNull,
-								parsed.allergies.orNull,
-								parsed.medications.orNull,
-								parsed.specialNeeds.orNull,
-								parsed.personId.toString
-							)
-						}
-
-						pb.executePreparedQueryForUpdateOrDelete(updateQuery)
-
-						Ok("done")
+					validation match {
+						case Some(v) => Ok(v.toResultError().asJsObject())
+							case None => {
+								doUpdate(pb, parsed)
+								Ok(successResponse)
+							}
 					}
 				}
 				case Some(v) => {
 					println("wut dis " + v)
-					Ok("wat")
+					Ok(ResultError.UNKNOWN)
 				}
 			}
 		} catch {
@@ -185,33 +130,95 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 			}
 		}
 	}
+	def tooOld(pb: PersistenceBroker, dob: String): Option[ValidationError] = {
+		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
+
+			override def getQuery: String =
+				s"""
+				   |select person_pkg.is_jp_max_age(to_date(?,'MM/DD/YYYY')) from dual
+				   |""".stripMargin
+
+			override val params: List[String] = List(dob)
+		}).head
+		if (notTooOld) {
+			None
+		} else {
+			Some(ValidationError.from("Prospective juniors must be 17 or younger and may not turn 18 before the program begins."))
+		}
+	}
+
+	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Int): Option[ValidationError] = {
+		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
+
+			override def getQuery: String =
+				s"""
+				   |select 1 from dual
+				   |   where person_pkg.is_jp_min_age(to_date(?,'MM/DD/YYYY')) = 'Y'
+				   |   or exists (select 1 from persons where person_id = ? and ignore_jp_min_age = 'Y')
+				   |""".stripMargin
+
+			override val params: List[String] = List(dob, juniorId.toString)
+		}).nonEmpty
+		if (notTooYoung) {
+			None
+		} else {
+			Some(ValidationError.from("Prospective junior members must be at least 10 years old by August 31st to participate in the Junior Program."))
+		}
+	}
+
+	def doUpdate(pb: PersistenceBroker, data: RequiredInfoShape): Unit = {
+		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				   |update persons set
+				   |name_first=?,
+				   |name_last=?,
+				   |name_middle_initial=?,
+				   |dob=to_date(?,'MM/DD/YYYY'),
+				   |email=?,
+				   |addr_1=?,
+				   |addr_2=?,
+				   |addr_3=?,
+				   |city=?,
+				   |state=?,
+				   |zip=?,
+				   |country=?,
+				   |phone_primary=?,
+				   |phone_primary_type=?,
+				   |phone_alternate=?,
+				   |phone_alternate_type=?,
+				   |allergies=?,
+				   |medications=?,
+				   |special_needs=?
+				   |where person_id = ?
+              """.stripMargin
+
+			override val params: List[String] = List(
+				data.firstName.orNull,
+				data.lastName.orNull,
+				data.middleInitial.orNull,
+				data.dob.orNull,
+				data.childEmail.orNull,
+				data.addr1.orNull,
+				data.addr2.orNull,
+				data.addr3.orNull,
+				data.city.orNull,
+				data.state.orNull,
+				data.zip.orNull,
+				data.country.orNull,
+				data.primaryPhone.orNull,
+				data.primaryPhoneType.orNull,
+				data.alternatePhone.orNull,
+				data.alternatePhoneType.orNull,
+				data.allergies.orNull,
+				data.medications.orNull,
+				data.specialNeeds.orNull,
+				data.personId.toString
+			)
+		}
+
+		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+	}
 }
-
-
-//firstName: string
-//middleInitial: string
-//lastName: string,
-//dobMonth: string,
-//dobDate: string,
-//dobYear: string,
-//childEmail: string,
-//addr_1: string,
-//addr_2: string,
-//addr_3: string,
-//city: string,
-//state: string,
-//zip: string,
-//country: string,
-//primaryPhoneFirst: string,
-//primaryPhoneSecond: string,
-//primaryPhoneThird: string,
-//primaryPhoneExt: string,
-//primaryPhoneType: string,
-//alternatePhoneFirst: string,
-//alternatePhoneSecond: string,
-//alternatePhoneThird: string,
-//alternatePhoneExt: string,
-//alternatePhoneType: string,
-//allergies: string,
-//medications: string,
-//specialNeeds: string
