@@ -15,4 +15,24 @@ object ValidationError {
 		if (errors.isEmpty) None
 		else Some(errors.reduce(_.combine(_)))
 	}
+	def checkBlank(value: Option[_], name: String): Option[ValidationError] = {
+		value match {
+			case Some(_) => None
+			case None => Some(ValidationError.from(s"${name} may not be blank."))
+		}
+	}
+	def checkBlankCustom(value: Option[_], errorString: String): Option[ValidationError] = {
+		value match {
+			case Some(_) => None
+			case None => Some(ValidationError.from(errorString))
+		}
+	}
+	def inline[T](value: T)(f: T => Boolean, errorString: String): Option[ValidationError] = {
+		val ret = f(value)
+		if (ret) {
+			None
+		} else {
+			Some(ValidationError.from(errorString))
+		}
+	}
 }

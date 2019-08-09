@@ -102,11 +102,44 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 					val dob = parsed.dob.getOrElse("")
 
-					// Run all validations and combine into one
-					val validation = ValidationError.combine(List(
+					val phoneRegex = "^[0-9]{10}(x[0-9]+)?$".r
+
+					val unconditionalValidations = List(
 						tooOld(pb, dob),
-						tooYoung(pb, dob, juniorId)
-					).filter(_.isDefined).map(_.orNull))
+						tooYoung(pb, dob, juniorId),
+						ValidationError.checkBlank(parsed.firstName, "First Name"),
+						ValidationError.checkBlank(parsed.lastName, "Last Name"),
+						ValidationError.checkBlank(parsed.dob, "Date of Birth"),
+						ValidationError.checkBlank(parsed.addr1, "Address"),
+						ValidationError.checkBlank(parsed.city, "City"),
+						ValidationError.checkBlank(parsed.state, "State"),
+						ValidationError.checkBlank(parsed.zip, "Zip code"),
+						ValidationError.checkBlank(parsed.primaryPhone, "Primary phone number"),
+						ValidationError.checkBlank(parsed.primaryPhoneType, "Primary phone number type"),
+						ValidationError.inline(parsed.zip)(zip => "^[0-9]{5}(-[0-9]{4})?$".r.findFirstIn(zip.getOrElse("")).isDefined, "Zip code is an invalid format."),
+						ValidationError.inline(parsed.childEmail)(
+							childEmail => "^[A-Za-z0-9._%-]+@[A-Za-z0-9._%-]+\\.[A-Za-z]{2,4}$".r.findFirstIn(childEmail.getOrElse("")).isDefined,
+							"Child email is not valid."
+						),
+						ValidationError.inline(parsed.primaryPhone)(
+							phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+							"Primary Phone is not valid."
+						)
+					)
+
+					val conditionalValidations = List((
+						parsed.alternatePhone.isDefined,
+						ValidationError.inline(parsed.alternatePhone)(
+							phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+							"Alternate Phone is not valid."
+						)
+					), (
+						parsed.alternatePhone.isDefined,
+						ValidationError.checkBlankCustom(parsed.alternatePhoneType, "Alternate phone type must be specified if alternate phone number is provided."),
+					)).filter(_._1).map(_._2)
+
+					// Run all validations and combine into one
+					val validation = ValidationError.combine((unconditionalValidations ::: conditionalValidations).filter(_.isDefined).map(_.orNull))
 
 					// TODO: add more validations, come up with some chained try/promise arch
 					validation match {
