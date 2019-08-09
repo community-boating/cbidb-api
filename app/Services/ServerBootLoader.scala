@@ -12,14 +12,29 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ServerBootLoader @Inject()(
-										lifecycle: ApplicationLifecycle,
-										poolConstructor: OracleConnectionPoolConstructor,
-										application: Application
-								) {
+	lifecycle: ApplicationLifecycle,
+	oraclePoolConstructor: OracleConnectionPoolConstructor,
+	mysqlPoolConstructor: MysqlConnectionPoolConstructor,
+	application: Application
+) {
 	// Boot up the server
+
+	def writeToTempFile(msg: String): Unit = {
+		// For testing that DB connection pools are closed when the application is shut down
+
+//		import java.io.BufferedWriter
+//		import java.io.FileWriter
+//
+//		val writer = new BufferedWriter(new FileWriter("/home/jcole/tmp/out", true))
+//		writer.newLine() //Add new line
+//
+//		writer.write(msg)
+//		writer.close()
+	}
 	ServerBootLoader.serverStateContainer.peek match {
 		case None => {
 			println(" ***************     BOOTING UP SERVER   ***************  ")
+			writeToTempFile("going up!")
 			// Initialize server state container
 			ServerBootLoader.serverStateContainer.set(ServerStateContainer(
 				serverTimeOffsetSeconds = 0
@@ -29,9 +44,10 @@ class ServerBootLoader @Inject()(
 			val serverProps = new ServerInstanceProperties("conf/private/server-properties")
 
 			// Initialize database connections; provide shutdown callback
-			RelationalBroker.initialize(poolConstructor, () => {
+			RelationalBroker.initialize(oraclePoolConstructor, () => {
 				lifecycle.addStopHook(() => Future.successful({
 					println("****************************    Stop hook: closing pools  **********************")
+					writeToTempFile("coming down...")
 					RelationalBroker.shutdown()
 				}))
 			})
@@ -59,8 +75,8 @@ class ServerBootLoader @Inject()(
 			val symonSalt: Option[String] = getOptionalProperty(serverProps, "SymonSalt")
 			PermissionsAuthority.setSymonSalt(symonSalt)
 
-			PermissionsAuthority.instanceName.set(poolConstructor.getMainSchemaName)
-			println("Using CBI DB instance: " + poolConstructor.getMainSchemaName)
+			PermissionsAuthority.instanceName.set(oraclePoolConstructor.getMainSchemaName)
+			println("Using CBI DB instance: " + oraclePoolConstructor.getMainSchemaName)
 
 			val preparedQueriesOnly = {
 				try {
