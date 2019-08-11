@@ -1,10 +1,12 @@
 package Api.Endpoints
 
+import Api.ResultError
 import CbiUtil.ParsedRequest
 import Services.Authentication.StaffUserType
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.UnauthorizedAccessException
 import javax.inject.Inject
+import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,20 +17,19 @@ class IsLoggedInAsStaff @Inject()(implicit exec: ExecutionContext) extends Contr
 			val authResult = PermissionsAuthority.getRequestCache(StaffUserType, None, ParsedRequest(request))
 			authResult._2 match {
 				case Some(rc) => Future {
-					Ok(rc.auth.userName)
+					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
 				}
 				case None => Future {
-					Ok("false")
+					Ok(ResultError.UNAUTHORIZED)
 				}
 			}
 		} catch {
 			case _: UnauthorizedAccessException => Future {
-				Ok("false")
+				Ok(ResultError.UNAUTHORIZED)
 			}
 			case _: Throwable => Future {
-				Ok("Internal Error")
+				Ok(ResultError.UNAUTHORIZED)
 			}
 		}
 	}
-
 }
