@@ -7,28 +7,28 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMechanism {
 	def getString(
-						 url: String,
-						 method: HTTPMethod,
-						 body: Option[Map[String, String]],
-						 basicAuthUsername: Option[String],
-						 basicAuthPassword: Option[String]
-				 ): Future[String] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.body)
+		url: String,
+		method: HTTPMethod,
+		body: Option[Map[String, String]],
+		basicAuthUsername: Option[String],
+		basicAuthPassword: Option[String]
+	): Future[String] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.body)
 
 	def getJSON(
-					   url: String,
-					   method: HTTPMethod,
-					   body: Option[Map[String, String]],
-					   basicAuthUsername: Option[String],
-					   basicAuthPassword: Option[String]
-			   ): Future[JsValue] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.json)
+		url: String,
+		method: HTTPMethod,
+		body: Option[Map[String, String]],
+		basicAuthUsername: Option[String],
+		basicAuthPassword: Option[String]
+	): Future[JsValue] = getResponse(url, method, body, basicAuthUsername, basicAuthPassword).map(res => res.json)
 
 	private def getResponse(
-								   url: String,
-								   method: HTTPMethod,
-								   body: Option[Map[String, String]],
-								   basicAuthUsername: Option[String],
-								   basicAuthPassword: Option[String]
-						   ): Future[WSResponse] = {
+		url: String,
+		method: HTTPMethod,
+		body: Option[Map[String, String]],
+		basicAuthUsername: Option[String],
+		basicAuthPassword: Option[String]
+	): Future[WSResponse] = {
 		val request: WSRequest = basicAuthUsername match {
 			case None => ws.url(url)
 			case Some(username) => {

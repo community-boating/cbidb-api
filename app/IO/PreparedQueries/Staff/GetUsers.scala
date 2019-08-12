@@ -44,11 +44,11 @@ class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult]
 }
 
 case class GetUsersResult(
-								 userId: Int,
-								 userName: String,
-								 nameFirst: String,
-								 nameLast: String,
-								 email: String,
-								 active: Boolean,
-								 hideFromClose: Boolean
-						 )
+	userId: Int,
+	userName: String,
+	nameFirst: String,
+	nameLast: String,
+	email: String,
+	active: Boolean,
+	hideFromClose: Boolean
+)

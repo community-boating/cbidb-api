@@ -9,13 +9,13 @@ import PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class JpSpecialNeedsView(
-								from: ZonedDateTime,
-								to: ZonedDateTime,
-								data: List[JpSpecialNeedsData],
-								headerFont: PDFont,
-								bodyFont: PDFont,
-								fontSize: Float
-						) extends AbstractTable[JpSpecialNeedsData](
+	from: ZonedDateTime,
+	to: ZonedDateTime,
+	data: List[JpSpecialNeedsData],
+	headerFont: PDFont,
+	bodyFont: PDFont,
+	fontSize: Float
+) extends AbstractTable[JpSpecialNeedsData](
 	data,
 	new MultiDrawableTable(List(DrawableTable(
 		List(List("SPECIAL NEEDS: " + from.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + " - " + to.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))),

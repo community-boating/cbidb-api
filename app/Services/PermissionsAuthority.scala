@@ -232,8 +232,7 @@ object PermissionsAuthority {
 	}
 
 	class UnauthorizedAccessException(
-											 private val message: String = "Unauthorized Access Denied",
-											 private val cause: Throwable = None.orNull
-									 ) extends Exception(message, cause)
-
+		private val message: String = "Unauthorized Access Denied",
+		private val cause: Throwable = None.orNull
+	) extends Exception(message, cause)
 }

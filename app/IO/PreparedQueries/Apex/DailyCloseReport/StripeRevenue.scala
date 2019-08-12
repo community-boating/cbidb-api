@@ -28,6 +28,6 @@ class StripeRevenue(closeId: Int) extends HardcodedQueryForSelect[StripeRevenueR
 }
 
 class StripeRevenueResult(
-								 val closeId: Int,
-								 val total: Currency
-						 )
+	val closeId: Int,
+	val total: Currency
+)

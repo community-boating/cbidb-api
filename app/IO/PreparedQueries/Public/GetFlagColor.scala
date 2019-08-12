@@ -25,6 +25,4 @@ class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColo
 	))
 }
 
-case class GetFlagColorResult(
-									 color: String
-							 )
+case class GetFlagColorResult(color: String)

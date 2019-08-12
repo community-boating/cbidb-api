@@ -22,6 +22,6 @@ class GetCartDetailsForOrderId(orderId: Int) extends HardcodedQueryForSelect[Get
 }
 
 case class GetCartDetailsForOrderIdResult(
-												 orderId: Int,
-												 priceInCents: Int
-										 )
+	 orderId: Int,
+	 priceInCents: Int
+)

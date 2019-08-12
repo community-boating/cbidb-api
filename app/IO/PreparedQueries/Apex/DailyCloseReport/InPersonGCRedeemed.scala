@@ -26,6 +26,6 @@ class InPersonGCRedeemed(closeId: Int) extends HardcodedQueryForSelect[InPersonG
 }
 
 class InPersonGCRedeemedResult(
-									  val closeId: Int,
-									  val total: Currency
-							  )
+	val closeId: Int,
+	val total: Currency
+)

@@ -9,11 +9,11 @@ object BouncerUserType extends NonMemberUserType {
 	val uniqueUserName = "BOUNCER"
 
 	def getAuthenticatedUsernameInRequest(
-												 request: ParsedRequest,
-												 rootCB: CacheBroker,
-												 apexToken: String,
-												 kioskToken: String
-										 ): Option[String] =
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		apexToken: String,
+		kioskToken: String
+	): Option[String] =
 		if (
 			request.headers.get(PermissionsAuthority.BOUNCER_AUTH_HEADER).contains("true") &&
 					PermissionsAuthority.requestIsFromLocalHost(request)
@@ -21,9 +21,9 @@ object BouncerUserType extends NonMemberUserType {
 		else None
 
 	def getAuthenticatedUsernameFromSuperiorAuth(
-														currentAuthentication: AuthenticationInstance,
-														requiredUserName: Option[String]
-												): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
+		currentAuthentication: AuthenticationInstance,
+		requiredUserName: Option[String]
+	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
 
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

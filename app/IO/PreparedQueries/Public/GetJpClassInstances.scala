@@ -66,15 +66,15 @@ class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectC
 }
 
 case class GetJpClassInstancesResult(
-											instanceId: Int,
-											typeName: String,
-											sessionDate: String,
-											sessionTime: String,
-											location: String,
-											instructorFirstName: String,
-											instructorLastName: String,
-											enrollees: Int
-									)
+	instanceId: Int,
+	typeName: String,
+	sessionDate: String,
+	sessionTime: String,
+	location: String,
+	instructorFirstName: String,
+	instructorLastName: String,
+	enrollees: Int
+)
 
 object GetJpClassInstancesResult {
 	implicit val format = Json.format[GetJpClassInstancesResult]

@@ -38,7 +38,7 @@ class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsRes
 }
 
 case class GetJpTeamsResult(
-								   teamId: Int,
-								   teamName: String,
-								   points: Int
-						   )
+	teamId: Int,
+	teamName: String,
+	points: Int
+)

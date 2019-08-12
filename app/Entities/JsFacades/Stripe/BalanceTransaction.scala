@@ -5,16 +5,16 @@ import Entities.{CastableToStorableClass, CastableToStorableObject}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 case class BalanceTransaction(
-									 id: String,
-									 amount: Int,
-									 description: Option[String],
-									 fee: Int,
-									 net: Int,
-									 source: String,
-									 status: String,
-									 `type`: String,
-									 payout: String
-							 ) extends CastableToStorableClass {
+	id: String,
+	amount: Int,
+	description: Option[String],
+	fee: Int,
+	net: Int,
+	source: String,
+	status: String,
+	`type`: String,
+	payout: String
+) extends CastableToStorableClass {
 	val pkSqlLiteral: String = GetSQLLiteral(id)
 	val storableObject: CastableToStorableObject[_] = BalanceTransaction
 	val persistenceValues: Map[String, String] = BalanceTransaction.persistenceValues(this)

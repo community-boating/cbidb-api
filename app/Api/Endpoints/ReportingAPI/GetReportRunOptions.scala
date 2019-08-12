@@ -47,12 +47,12 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 
 	def getJSONResultFuture(pb: PersistenceBroker): (() => Future[JsObject]) = () => Future {
 		case class FilterDataForJSON(
-											filterName: String,
-											displayName: String,
-											filterType: String,
-											defaultValue: String,
-											dropdownValues: Option[List[List[(String, String)]]]
-									)
+			filterName: String,
+			displayName: String,
+			filterType: String,
+			defaultValue: String,
+			dropdownValues: Option[List[List[(String, String)]]]
+		)
 		val resultData: JsArray = Report.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
 			val entityName: String = e._1
 			val entityDisplayName: String = e._2._1

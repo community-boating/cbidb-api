@@ -5,8 +5,12 @@ import java.io.{BufferedReader, IOException, InputStreamReader, StringReader}
 import CbiUtil.Initializable
 
 class CommandWrapper private[Shell](
-										   command: String, cleanupCommand: Option[String], mainMaxWaitMillis: Option[Integer], cleanupMaxWaitMillis: Option[Integer], stdintext: Option[String]
-								   ) {
+	command: String,
+	cleanupCommand: Option[String],
+	mainMaxWaitMillis: Option[Integer],
+	cleanupMaxWaitMillis: Option[Integer],
+	stdintext: Option[String]
+) {
 	val main = new Initializable[ProcessWrapper]
 	val cleanup = new Initializable[ProcessWrapper]
 	val outputStream = new Initializable[StringBuilder]

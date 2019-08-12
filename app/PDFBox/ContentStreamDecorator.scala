@@ -7,11 +7,11 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ContentStreamDecorator(
-									contentStream: PDPageContentStream,
-									defaultFont: PDFont,
-									defaultFontSize: Float,
-									defaultColor: Color
-							) {
+	contentStream: PDPageContentStream,
+	defaultFont: PDFont,
+	defaultFontSize: Float,
+	defaultColor: Color
+) {
 
 	val SIDE_MARGIN: Float = 50
 	val TOP_MARGIN: Float = 40
@@ -19,13 +19,13 @@ class ContentStreamDecorator(
 	def close(): Unit = contentStream.close()
 
 	private def writeTextAtPosition(
-										   text: String,
-										   x: Float,
-										   y: Float,
-										   font: PDFont = defaultFont,
-										   fontSize: Float = defaultFontSize,
-										   color: Color = defaultColor
-								   ): Unit = {
+		text: String,
+		x: Float,
+		y: Float,
+		font: PDFont = defaultFont,
+		fontSize: Float = defaultFontSize,
+		color: Color = defaultColor
+	): Unit = {
 		contentStream.setNonStrokingColor(color)
 		contentStream.beginText()
 		contentStream.setFont(font, fontSize)
@@ -56,20 +56,20 @@ class ContentStreamDecorator(
 	}
 
 	def writeBoxedTextAtPosition(
-										font: PDFont,
-										fontSize: Float,
-										x: Float,
-										y: Float,
-										text: List[String],
-										width: Float,
-										align: Alignment,
-										height: Float,
-										thickness: Int,
-										padding: Int,
-										textColor: Color,
-										borderColor: Color,
-										fillColor: Option[Color] = None
-								): Unit = {
+		font: PDFont,
+		fontSize: Float,
+		x: Float,
+		y: Float,
+		text: List[String],
+		width: Float,
+		align: Alignment,
+		height: Float,
+		thickness: Int,
+		padding: Int,
+		textColor: Color,
+		borderColor: Color,
+		fillColor: Option[Color] = None
+	): Unit = {
 		contentStream.setFont(font, fontSize)
 		if (thickness >= 1) {
 			drawBox(

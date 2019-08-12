@@ -117,11 +117,11 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 object RunReport {
 
 	case class RunReportParamsObject(
-											baseEntityString: String,
-											filterSpec: String,
-											fieldSpec: String,
-											outputType: String
-									) extends ParamsObject
+		baseEntityString: String,
+		filterSpec: String,
+		fieldSpec: String,
+		outputType: String
+	) extends ParamsObject
 
 	class RunReportsResult
 

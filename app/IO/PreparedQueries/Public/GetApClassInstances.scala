@@ -53,10 +53,10 @@ class GetApClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectC
 }
 
 case class GetApClassInstancesResult(
-											instanceId: Int,
-											typeName: String,
-											sessionDate: String,
-											sessionTime: String,
-											location: String,
-											enrollees: Int
-									)
+	instanceId: Int,
+	typeName: String,
+	sessionDate: String,
+	sessionTime: String,
+	location: String,
+	enrollees: Int
+)

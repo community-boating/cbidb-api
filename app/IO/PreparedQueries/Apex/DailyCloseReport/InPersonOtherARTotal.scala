@@ -30,6 +30,6 @@ class InPersonOtherARTotal(closeId: Int) extends HardcodedQueryForSelect[InPerso
 }
 
 class InPersonOtherARTotalResult(
-										val closeId: Int,
-										val total: Currency
-								)
+	val closeId: Int,
+	val total: Currency
+)

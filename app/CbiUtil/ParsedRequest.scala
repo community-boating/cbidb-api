@@ -3,13 +3,13 @@ package CbiUtil
 import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
 case class ParsedRequest(
-								headers: Headers,
-								cookies: Cookies,
-								path: String,
-								method: String,
-								remoteAddress: String,
-								postParams: Map[String, String]
-						) {
+	headers: Headers,
+	cookies: Cookies,
+	path: String,
+	method: String,
+	remoteAddress: String,
+	postParams: Map[String, String]
+) {
 	def addHeader(h: (String, String)): ParsedRequest = ParsedRequest(
 		headers.add(h),
 		cookies,

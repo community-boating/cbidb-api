@@ -6,11 +6,11 @@ import PDFBox.Reports.DailyCloseReport.Model.ReplacementCardData
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ReplacementCardsTable(
-								   data: List[ReplacementCardData],
-								   headerFont: PDFont,
-								   bodyFont: PDFont,
-								   fontSize: Float
-						   ) extends AbstractTable[ReplacementCardData](
+	data: List[ReplacementCardData],
+	headerFont: PDFont,
+	bodyFont: PDFont,
+	fontSize: Float
+) extends AbstractTable[ReplacementCardData](
 	data,
 	new MultiDrawableTable(List(DrawableTable(
 		List(List("REPLACEMENT CARDS")),

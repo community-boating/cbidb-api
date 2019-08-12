@@ -12,9 +12,9 @@ object PublicUserType extends NonMemberUserType {
 
 	// Anyone can downgrade from anything to public
 	def getAuthenticatedUsernameFromSuperiorAuth(
-														currentAuthentication: AuthenticationInstance,
-														requiredUserName: Option[String]
-												): Option[String] = Some(uniqueUserName)
+		currentAuthentication: AuthenticationInstance,
+		requiredUserName: Option[String]
+	): Option[String] = Some(uniqueUserName)
 
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

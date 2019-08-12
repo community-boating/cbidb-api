@@ -25,7 +25,7 @@ class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineClos
 }
 
 case class GetCurrentOnlineCloseResult(
-											  closeId: Int,
-											  createdOn: LocalDate,
-											  finalized: Option[LocalDate]
-									  )
+	closeId: Int,
+	createdOn: LocalDate,
+	finalized: Option[LocalDate]
+)

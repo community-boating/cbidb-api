@@ -16,9 +16,9 @@ object ReportingFilterFactory {
 
 
 	class BadReportingFilterFactoryArgumentException(
-															private val message: String = "",
-															private val cause: Throwable = None.orNull
-													) extends Exception(message, cause)
+		private val message: String = "",
+		private val cause: Throwable = None.orNull
+	) extends Exception(message, cause)
 
 }
 

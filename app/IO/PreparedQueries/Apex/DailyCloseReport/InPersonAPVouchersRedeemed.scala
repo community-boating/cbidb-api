@@ -27,6 +27,6 @@ class InPersonAPVouchersRedeemed(closeId: Int) extends HardcodedQueryForSelect[I
 }
 
 class InPersonAPVouchersRedeemedResult(
-											  val closeId: Int,
-											  val total: Currency
-									  )
+	val closeId: Int,
+	val total: Currency
+)

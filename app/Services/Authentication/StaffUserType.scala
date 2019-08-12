@@ -12,9 +12,9 @@ object StaffUserType extends NonMemberUserType {
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
 
 	def getAuthenticatedUsernameFromSuperiorAuth(
-														currentAuthentication: AuthenticationInstance,
-														requiredUserName: Option[String]
-												): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
+		currentAuthentication: AuthenticationInstance,
+		requiredUserName: Option[String]
+	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
 
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)

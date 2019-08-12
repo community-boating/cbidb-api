@@ -4,11 +4,11 @@ import Services.RequestCache
 import Storable.Fields.DatabaseField
 
 case class EntityVisibility(
-								   entityVisible: Boolean, // false if the user can't do shit with this table
-								   instanceFilter: Option[(RequestCache => Set[Int])], // Function that specifies which IDs the user can pull.
-								   // If None, they can pull anything
-								   fieldList: Option[Set[DatabaseField[_]]] // Set of fields the user can get data from.  If None, no restriction
-						   )
+	entityVisible: Boolean, // false if the user can't do shit with this table
+	instanceFilter: Option[(RequestCache => Set[Int])], // Function that specifies which IDs the user can pull.
+	// If None, they can pull anything
+	fieldList: Option[Set[DatabaseField[_]]] // Set of fields the user can get data from.  If None, no restriction
+)
 
 object EntityVisibility {
 	// Entity is fully queryable

@@ -13,12 +13,12 @@ import scala.util.{Failure, Success}
 // The only things in this class should be core talking-to-stripe functionality
 class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
 	def getOrPostStripeSingleton[T](
-										   url: String,
-										   constructor: JsValue => T,
-										   httpMethod: HTTPMethod = GET,
-										   body: Option[Map[String, String]] = None,
-										   postSuccessAction: Option[T => _] = None
-								   ): Future[ServiceRequestResult[T, StripeError]] = {
+		url: String,
+		constructor: JsValue => T,
+		httpMethod: HTTPMethod = GET,
+		body: Option[Map[String, String]] = None,
+		postSuccessAction: Option[T => _] = None
+   ): Future[ServiceRequestResult[T, StripeError]] = {
 		def makeRequest(): Future[JsValue] = {
 			http.getJSON(
 				baseURL + url,
@@ -65,12 +65,12 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 	}
 
 	def getStripeList[T](
-								url: String,
-								constructor: JsValue => T,
-								getID: T => String,
-								params: List[String],
-								fetchSize: Int
-						): Future[ServiceRequestResult[List[T], StripeError]] = {
+		url: String,
+		constructor: JsValue => T,
+		getID: T => String,
+		params: List[String],
+		fetchSize: Int
+	): Future[ServiceRequestResult[List[T], StripeError]] = {
 		def makeRequest(eachUrl: String, params: List[String], lastID: Option[String], results: List[T]): Future[ServiceRequestResult[List[T], StripeError]] = {
 			println("entered makeRequest with " + results.length)
 			val finalParams: String = (lastID match {

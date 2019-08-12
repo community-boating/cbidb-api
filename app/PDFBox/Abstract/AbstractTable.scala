@@ -7,15 +7,15 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class AbstractTable[T <: RowData](
-										 data: List[T],
-										 header: MultiDrawableTable,
-										 footer: MultiDrawableTable,
-										 bodyAligns: List[Alignment],
-										 bodyFont: PDFont,
-										 fontSize: Float,
-										 thickness: Int,
-										 padding: Int
-								 ) {
+	data: List[T],
+	header: MultiDrawableTable,
+	footer: MultiDrawableTable,
+	bodyAligns: List[Alignment],
+	bodyFont: PDFont,
+	fontSize: Float,
+	thickness: Int,
+	padding: Int
+) {
 	// TODO: Assume the last header row has all the widths.  Not a safe assumption
 	val widths: List[Float] = header.tables.last.rows.head.cells.map(_.width)
 	lazy val rows: List[DrawableRow] = data.map(_.asRow(widths, bodyAligns, bodyFont, fontSize, thickness, padding))

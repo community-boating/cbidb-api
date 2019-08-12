@@ -39,13 +39,13 @@ class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDa
 }
 
 case class GetChildDataQueryResult(
-										  personId: Int,
-										  nameFirst: String,
-										  nameLast: String,
-										  status: String,
-										  actions: String,
-										  ratings: String
-								  )
+	personId: Int,
+	nameFirst: String,
+	nameLast: String,
+	status: String,
+	actions: String,
+	ratings: String
+)
 
 object GetChildDataQueryResult {
 	implicit val format = Json.format[GetChildDataQueryResult]

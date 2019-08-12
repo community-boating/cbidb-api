@@ -26,6 +26,6 @@ class OnlineGCRedeemed(closeId: Int) extends HardcodedQueryForSelect[OnlineGCRed
 }
 
 class OnlineGCRedeemedResult(
-									val closeId: Int,
-									val total: Currency
-							)
+	val closeId: Int,
+	val total: Currency
+)

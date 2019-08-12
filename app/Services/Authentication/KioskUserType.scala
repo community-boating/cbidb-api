@@ -12,9 +12,9 @@ object KioskUserType extends NonMemberUserType {
 		else None
 
 	def getAuthenticatedUsernameFromSuperiorAuth(
-														currentAuthentication: AuthenticationInstance,
-														requiredUserName: Option[String]
-												): Option[String] = None
+		currentAuthentication: AuthenticationInstance,
+		requiredUserName: Option[String]
+	): Option[String] = None
 
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
 

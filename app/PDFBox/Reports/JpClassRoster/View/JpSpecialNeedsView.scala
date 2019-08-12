@@ -6,11 +6,11 @@ import PDFBox.Reports.JpClassRoster.Model.JpSpecialNeedsData
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class JpSpecialNeedsView(
-								data: List[JpSpecialNeedsData],
-								headerFont: PDFont,
-								bodyFont: PDFont,
-								fontSize: Float
-						) extends AbstractTable[JpSpecialNeedsData](
+	data: List[JpSpecialNeedsData],
+	headerFont: PDFont,
+	bodyFont: PDFont,
+	fontSize: Float
+) extends AbstractTable[JpSpecialNeedsData](
 	data,
 	new MultiDrawableTable(List(DrawableTable(
 		List(List("SPECIAL NEEDS")),

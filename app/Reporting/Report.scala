@@ -38,13 +38,13 @@ object Report {
 	}
 
 	class BadReportingBaseEntityException(
-												 private val message: String = "",
-												 private val cause: Throwable = None.orNull
-										 ) extends Exception(message, cause)
+		private val message: String = "",
+		private val cause: Throwable = None.orNull
+	) extends Exception(message, cause)
 
 	class BadReportingFilterArgumentsException(
-													  private val message: String = "",
-													  private val cause: Throwable = None.orNull
-											  ) extends Exception(message, cause)
+		private val message: String = "",
+		private val cause: Throwable = None.orNull
+	) extends Exception(message, cause)
 
 }

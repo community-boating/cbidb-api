@@ -5,8 +5,8 @@ import java.time.format.DateTimeFormatter
 
 
 case class ServerStateContainer private[Services](
-														 serverTimeOffsetSeconds: Long
-												 ) {
+	serverTimeOffsetSeconds: Long
+) {
 	def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)
 
 	val dateTimeFormatDefault: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

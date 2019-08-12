@@ -9,13 +9,13 @@ import Storable.Fields._
 // whether the data came from the database or a POST request (to go to the database) etc
 // If it came from a POST or something, ignored is the post parameters that were not able to be matched to a single field (for debugging)
 case class ProtoStorable(
-								intFields: Map[String, Option[Int]],
-								doubleFields: Map[String, Option[Double]],
-								stringFields: Map[String, Option[String]],
-								dateFields: Map[String, Option[LocalDate]],
-								dateTimeFields: Map[String, Option[LocalDateTime]],
-								ignored: Map[String, String]
-						)
+	intFields: Map[String, Option[Int]],
+	doubleFields: Map[String, Option[Double]],
+	stringFields: Map[String, Option[String]],
+	dateFields: Map[String, Option[LocalDate]],
+	dateTimeFields: Map[String, Option[LocalDateTime]],
+	ignored: Map[String, String]
+)
 
 object ProtoStorable {
 	def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable = {

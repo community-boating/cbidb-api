@@ -27,7 +27,7 @@ class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryFor
 }
 
 case class ValidateTokenInOrderResult(
-											 orderId: Int,
-											 token: String,
-											 created: LocalDateTime
-									 )
+	orderId: Int,
+	token: String,
+	created: LocalDateTime
+)

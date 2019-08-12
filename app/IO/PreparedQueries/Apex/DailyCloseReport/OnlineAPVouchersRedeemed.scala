@@ -27,6 +27,6 @@ class OnlineAPVouchersRedeemed(closeId: Int) extends HardcodedQueryForSelect[Onl
 }
 
 class OnlineAPVouchersRedeemedResult(
-											val closeId: Int,
-											val total: Currency
-									)
+	val closeId: Int,
+	val total: Currency
+)

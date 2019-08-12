@@ -5,10 +5,10 @@ import Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
-														   pb: PersistenceBroker,
-														   filterMap: Map[String, ReportingFilterFactory[T]],
-														   getAllFilter: (PersistenceBroker => ReportingFilter[T])
-												   ) {
+	pb: PersistenceBroker,
+	filterMap: Map[String, ReportingFilterFactory[T]],
+	getAllFilter: (PersistenceBroker => ReportingFilter[T])
+) {
 
 	case class Token(c: Char) {
 		def char: Char = c
@@ -138,8 +138,8 @@ class ReportingFilterSpecParser[T <: StorableClass](
 	private def getFilter(filterName: String, filterArgs: String): ReportingFilter[T] = filterMap(filterName).getFilter(pb, filterArgs)
 
 	class BadReportingFilterSpecException(
-												 private val message: String = "",
-												 private val cause: Throwable = None.orNull
-										 ) extends Exception(message, cause)
+		private val message: String = "",
+		private val cause: Throwable = None.orNull
+	) extends Exception(message, cause)
 
 }

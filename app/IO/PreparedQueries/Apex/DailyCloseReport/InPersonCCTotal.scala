@@ -28,6 +28,6 @@ class InPersonCCTotal(closeId: Int) extends HardcodedQueryForSelect[InPersonCCTo
 }
 
 class InPersonCCTotalResult(
-								   val closeId: Int,
-								   val ccTotal: Currency
-						   )
+	val closeId: Int,
+	val ccTotal: Currency
+)

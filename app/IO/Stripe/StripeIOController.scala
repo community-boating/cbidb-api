@@ -97,15 +97,15 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 	}
 
 	def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
-																				castableObj: StripeCastableToStorableObject[T],
-																				getReqParameters: List[String],
-																				filterGetReqResults: Option[T => Boolean],
-																				getLocalObjectsQuery: StripeDatabaseIOMechanism => List[T],
-																				insertCommitType: CommitType,
-																				updateCommitType: CommitType,
-																				deleteCommitType: CommitType,
-																				constructor: Option[JsValue => T] = None
-																		): Future[ServiceRequestResult[Unit, Unit]] = {
+		castableObj: StripeCastableToStorableObject[T],
+		getReqParameters: List[String],
+		filterGetReqResults: Option[T => Boolean],
+		getLocalObjectsQuery: StripeDatabaseIOMechanism => List[T],
+		insertCommitType: CommitType,
+		updateCommitType: CommitType,
+		deleteCommitType: CommitType,
+		constructor: Option[JsValue => T] = None
+	): Future[ServiceRequestResult[Unit, Unit]] = {
 		val localObjects: List[T] = getLocalObjectsQuery(dbIO)
 		getRemoteObjects(castableObj, getReqParameters, filterGetReqResults, constructor).map(remotes => {
 			commitDeltaToDatabase(
@@ -118,11 +118,11 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 	}
 
 	def getRemoteObjects[T <: CastableToStorableClass](
-															  castableObj: StripeCastableToStorableObject[T],
-															  getReqParameters: List[String],
-															  filterGetReqResults: Option[T => Boolean],
-															  constructor: Option[(JsValue => T)] = None
-													  ): Future[List[T]] = {
+		castableObj: StripeCastableToStorableObject[T],
+		getReqParameters: List[String],
+		filterGetReqResults: Option[T => Boolean],
+		constructor: Option[(JsValue => T)] = None
+	): Future[List[T]] = {
 		val defaultConstructor: (JsValue => T) = castableObj.apply
 		apiIO.getStripeList(castableObj.getURL, constructor.getOrElse(defaultConstructor), castableObj.getId, getReqParameters, 100).map({
 			case s: NetSuccess[List[T], _] => filterGetReqResults match {
@@ -135,11 +135,11 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 	}
 
 	private def commitDeltaToDatabase[T <: CastableToStorableClass](
-																		   delta: SetDelta[T],
-																		   insertCommitType: CommitType,
-																		   updateCommitType: CommitType,
-																		   deleteCommitType: CommitType
-																   ): ServiceRequestResult[Unit, Unit] = {
+		delta: SetDelta[T],
+		insertCommitType: CommitType,
+		updateCommitType: CommitType,
+		deleteCommitType: CommitType
+	): ServiceRequestResult[Unit, Unit] = {
 		try {
 			println("About to commit delta")
 			println(delta.toCreate.size + " inserts to do")

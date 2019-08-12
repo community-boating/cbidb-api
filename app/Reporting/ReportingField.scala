@@ -8,24 +8,24 @@ import Storable.Fields._
 import Storable.StorableClass
 
 class ReportingField[T <: StorableClass](
-												val valueFunction: T => String,
-												val fieldDisplayName: String,
-												val isDefault: Boolean
-										)
+	val valueFunction: T => String,
+	val fieldDisplayName: String,
+	val isDefault: Boolean
+)
 
 object ReportingField {
 	def getReportingFieldFromDatabaseField[T <: StorableClass](
-																	  f: DatabaseField[_],
-																	  fieldDisplayName: String,
-																	  isDefault: Boolean
-															  ): ReportingField[T] = getReportingFieldFromDatabaseFieldParentObject[T, T](f, t => t, fieldDisplayName, isDefault)
+		f: DatabaseField[_],
+		fieldDisplayName: String,
+		isDefault: Boolean
+	): ReportingField[T] = getReportingFieldFromDatabaseFieldParentObject[T, T](f, t => t, fieldDisplayName, isDefault)
 
 	def getReportingFieldFromCalculatedValue[T <: StorableClass, U <: StorableClass](
-																							getValue: (U => String),
-																							getParent: (T => U),
-																							fieldDisplayName: String,
-																							isDefault: Boolean
-																					): ReportingField[T] = {
+		getValue: (U => String),
+		getParent: (T => U),
+		fieldDisplayName: String,
+		isDefault: Boolean
+	): ReportingField[T] = {
 		new ReportingField[T](
 			(t: T) => getValue(getParent(t)),
 			fieldDisplayName,
@@ -34,11 +34,11 @@ object ReportingField {
 	}
 
 	def getReportingFieldFromDatabaseFieldParentObject[T <: StorableClass, U <: StorableClass](
-																									  f: DatabaseField[_],
-																									  getParent: (T => U),
-																									  fieldDisplayName: String,
-																									  isDefault: Boolean
-																							  ): ReportingField[T] = f match {
+		f: DatabaseField[_],
+		getParent: (T => U),
+		fieldDisplayName: String,
+		isDefault: Boolean
+	): ReportingField[T] = f match {
 		case i: IntDatabaseField => new ReportingField[T]((t: T) => {
 			getParent(t).intValueMap.get(i.getRuntimeFieldName) match {
 				case Some(v: IntFieldValue) => v.get.toString

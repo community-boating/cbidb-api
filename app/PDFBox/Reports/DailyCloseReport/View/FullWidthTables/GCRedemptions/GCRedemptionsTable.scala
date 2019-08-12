@@ -6,11 +6,11 @@ import PDFBox.Reports.DailyCloseReport.Model.GCRedemptionData
 import org.apache.pdfbox.pdmodel.font.PDFont
 
 class GCRedemptionsTable(
-								signups: List[GCRedemptionData],
-								headerFont: PDFont,
-								bodyFont: PDFont,
-								fontSize: Float
-						) extends AbstractTable[GCRedemptionData](
+	signups: List[GCRedemptionData],
+	headerFont: PDFont,
+	bodyFont: PDFont,
+	fontSize: Float
+) extends AbstractTable[GCRedemptionData](
 	signups,
 	new MultiDrawableTable(List(DrawableTable(
 		List(List("GIFT CERTIFICATES - REDEMPTIONS")),
