@@ -115,7 +115,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 50)
-		rows.map(r => obj.construct(r, rc, isClean = true))
+		rows.map(r => obj.construct(r, rc))
 	}
 
 	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
@@ -125,7 +125,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
 		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 6)
-		if (rows.length == 1) Some(obj.construct(rows.head, rc, isClean = true))
+		if (rows.length == 1) Some(obj.construct(rows.head, rc))
 		else None
 	}
 
@@ -143,7 +143,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
-			rows.map(r => obj.construct(r, rc, isClean = true))
+			rows.map(r => obj.construct(r, rc))
 		} else {
 			// Too many IDs; make a filter table
 			getObjectsByIdsWithFilterTable(obj, ids, fetchSize)
@@ -165,7 +165,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			}
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
 			val p = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc, isClean = true))
+			val ret = rows.map(r => obj.construct(r, rc))
 			p.lap("finished construction")
 			ret
 		}
@@ -218,7 +218,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 
 			println(" =======   cleaned up filter table   =======")
 			val p2 = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc, isClean = true))
+			val ret = rows.map(r => obj.construct(r, rc))
 			p2.lap("finished construction")
 			ret
 		})

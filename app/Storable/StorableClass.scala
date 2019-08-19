@@ -53,19 +53,19 @@ abstract class StorableClass {
 		case None => false
 	}
 
-	// "clean" = internal state of this instance is consistent with the state of the database
-	// On construction, assume dirty; the codepath used by the DB adapter will set clean afterconstructing
-	private var clean: Boolean = false
+//	// "clean" = internal state of this instance is consistent with the state of the database
+//	// On construction, assume dirty; the codepath used by the DB adapter will set clean afterconstructing
+//	private var clean: Boolean = false
+//
+//	def isClean: Boolean = clean
+//
+//	def setClean(): Unit =
+//		clean = true
+//
+//	def setDirty(): Unit =
+//		clean = false
 
-	def isClean: Boolean = clean
-
-	def setClean(): Unit =
-		clean = true
-
-	def setDirty(): Unit =
-		clean = false
-
-	private val valueMaps = {
+	lazy private val valueMaps = {
 		val rm = scala.reflect.runtime.currentMirror
 		val accessors = rm.classSymbol(values.getClass).toType.members.collect {
 			case m: MethodSymbol if m.isGetter && m.isPublic => m
@@ -109,14 +109,14 @@ abstract class StorableClass {
 		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
 	}
 
-	val intValueMap: IntFieldValueMap = valueMaps._1
-	val nullableIntValueMap: NullableIntFieldValueMap = valueMaps._2
-	val doubleValueMap: DoubleFieldValueMap = valueMaps._3
-	val nullableDoubleValueMap: NullableDoubleFieldValueMap = valueMaps._4
-	val stringValueMap: StringFieldValueMap = valueMaps._5
-	val nullableStringValueMap: NullableStringFieldValueMap = valueMaps._6
-	val dateValueMap: DateFieldValueMap = valueMaps._7
-	val nullableDateValueMap: NullableDateFieldValueMap = valueMaps._8
-	val dateTimeValueMap: DateTimeFieldValueMap = valueMaps._9
-	val booleanValueMap: BooleanFieldValueMap = valueMaps._10
+	lazy val intValueMap: IntFieldValueMap = valueMaps._1
+	lazy val nullableIntValueMap: NullableIntFieldValueMap = valueMaps._2
+	lazy val doubleValueMap: DoubleFieldValueMap = valueMaps._3
+	lazy val nullableDoubleValueMap: NullableDoubleFieldValueMap = valueMaps._4
+	lazy val stringValueMap: StringFieldValueMap = valueMaps._5
+	lazy val nullableStringValueMap: NullableStringFieldValueMap = valueMaps._6
+	lazy val dateValueMap: DateFieldValueMap = valueMaps._7
+	lazy val nullableDateValueMap: NullableDateFieldValueMap = valueMaps._8
+	lazy val dateTimeValueMap: DateTimeFieldValueMap = valueMaps._9
+	lazy val booleanValueMap: BooleanFieldValueMap = valueMaps._10
 }

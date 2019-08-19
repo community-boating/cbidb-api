@@ -8,7 +8,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 
 	def set(v: T): Unit = {
 		value = Some(v)
-		instance.setDirty
+		//instance.setDirty
 	}
 
 	def peek: Option[T] = value

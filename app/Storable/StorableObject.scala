@@ -123,7 +123,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 				dateTimeFieldMap.values.toList ++
 				booleanFieldMap.values.toList
 
-	def construct(ps: ProtoStorable, rc: RequestCache, isClean: Boolean): T = {
+	def construct(ps: ProtoStorable, rc: RequestCache): T = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])
