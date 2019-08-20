@@ -2,7 +2,7 @@ package ScalaTest.Database
 
 import Entities.EntityDefinitions.{JpClassInstance, JpClassType}
 import ScalaTest.GetPersistenceBroker
-import Storable.Query
+import Storable.StorableQuery.{ColumnAlias, Query, TableAlias}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -18,8 +18,18 @@ class DBTest extends FunSuite{
 //	}
 
 	test("Test query") {
-		val q = Query(JpClassType)(f => List(f.typeName))
+		val typeId = ColumnAlias(TableAlias("types", JpClassType), JpClassType.fields.typeId)
+		val typeName = ColumnAlias(TableAlias("types", JpClassType), JpClassType.fields.typeName)
 
-		assert(q.doThing == List(JpClassType.fields.typeName))
+		val q = new Query(List(
+			typeId,
+			typeName
+		), List.empty)
+
+		val id = q.getValue(typeId)
+		val name = q.getValue(typeName)
+
+		assert(id == 4)
+		assert(name == "b")
 	}
 }
