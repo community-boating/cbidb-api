@@ -2,15 +2,15 @@ package Storable.Fields
 
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import Services._
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class IntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Int](entity, persistenceFieldName) {
+class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Int](entity, persistenceFieldName) {
 	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[Int] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Int] = {
 		row.intFields.get(this.getRuntimeFieldName) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null Int field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")

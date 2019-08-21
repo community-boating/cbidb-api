@@ -8,6 +8,7 @@ import CbiUtil.{Initializable, Profiler}
 import IO.PreparedQueries._
 import Storable.Fields.FieldValue.FieldValue
 import Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
+import Storable.StorableQuery.{ColumnAlias, QueryBuilder, QueryBuilderResultRow, TableAlias}
 import Storable._
 import com.zaxxer.hikari.HikariDataSource
 
@@ -114,7 +115,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append("SELECT ")
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 50)
+		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 50, _.field.getPersistenceFieldName)
 		rows.map(r => obj.construct(r, rc))
 	}
 
@@ -124,7 +125,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, 6)
+		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 6, _.field.getPersistenceFieldName)
 		if (rows.length == 1) Some(obj.construct(rows.head, rc))
 		else None
 	}
@@ -142,7 +143,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getPersistenceFieldName)
 			rows.map(r => obj.construct(r, rc))
 		} else {
 			// Too many IDs; make a filter table
@@ -163,7 +164,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			if (filters.nonEmpty) {
 				sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
 			}
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getPersistenceFieldName)
 			val p = new Profiler
 			val ret = rows.map(r => obj.construct(r, rc))
 			p.lap("finished construction")
@@ -211,7 +212,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
 			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList, fetchSize)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, ca => ca.field.getPersistenceFieldName)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
 			c.createStatement().executeUpdate(dropTableSQL)
@@ -257,7 +258,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		})
 	}
 
-	private def getProtoStorablesFromSelect(sql: String, properties: List[DatabaseField[_]], fetchSize: Int): List[ProtoStorable] = {
+	private def getProtoStorablesFromSelect[T](sql: String, properties: List[ColumnAlias[_]], fetchSize: Int, getKey: ColumnAlias[_] => T): List[ProtoStorable[T]] = {
 		println(sql)
 		val profiler = new Profiler
 		mainPool.withConnection(c => {
@@ -265,59 +266,59 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			val rs: ResultSet = st.executeQuery(sql)
 			rs.setFetchSize(fetchSize)
 
-			val rows: ListBuffer[ProtoStorable] = ListBuffer()
+			val rows: ListBuffer[ProtoStorable[T]] = ListBuffer()
 			var rowCounter = 0
 			profiler.lap("starting rows")
 			while (rs.next) {
 				rowCounter += 1
-				var intFields: Map[String, Option[Int]] = Map()
-				var doubleFields: Map[String, Option[Double]] = Map()
-				var stringFields: Map[String, Option[String]] = Map()
-				var dateFields: Map[String, Option[LocalDate]] = Map()
-				var dateTimeFields: Map[String, Option[LocalDateTime]] = Map()
+				var intFields: Map[T, Option[Int]] = Map()
+				var doubleFields: Map[T, Option[Double]] = Map()
+				var stringFields: Map[T, Option[String]] = Map()
+				var dateFields: Map[T, Option[LocalDate]] = Map()
+				var dateTimeFields: Map[T, Option[LocalDateTime]] = Map()
 
 
-				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((df: DatabaseField[_], i: Int) => {
-					df match {
+				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: ColumnAlias[_], i: Int) => {
+					ca.field match {
 						case _: IntDatabaseField | _: NullableIntDatabaseField => {
-							intFields += (df.getRuntimeFieldName -> Some(rs.getInt(i)))
-							if (rs.wasNull()) intFields += (df.getRuntimeFieldName -> None)
+							intFields += (getKey(ca) -> Some(rs.getInt(i)))
+							if (rs.wasNull()) intFields += (getKey(ca) -> None)
 						}
 						case _: DoubleDatabaseField | _: NullableDoubleDatabaseField => {
-							doubleFields += (df.getRuntimeFieldName -> Some(rs.getDouble(i)))
-							if (rs.wasNull()) doubleFields += (df.getRuntimeFieldName -> None)
+							doubleFields += (getKey(ca) -> Some(rs.getDouble(i)))
+							if (rs.wasNull()) doubleFields += (getKey(ca) -> None)
 						}
 						case _: StringDatabaseField | _: NullableStringDatabaseField => {
-							stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
+							stringFields += (getKey(ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += (getKey(ca) -> None)
 						}
 						case _: DateDatabaseField | _: NullableDateDatabaseField => {
-							dateFields += (df.getRuntimeFieldName -> {
+							dateFields += (getKey(ca) -> {
 								try {
 									Some(rs.getDate(i).toLocalDate)
 								} catch {
 									case _: Throwable => None
 								}
 							})
-							if (rs.wasNull()) dateFields += (df.getRuntimeFieldName -> None)
+							if (rs.wasNull()) dateFields += (getKey(ca) -> None)
 						}
 						case _: DateTimeDatabaseField => {
-							dateTimeFields += (df.getRuntimeFieldName -> Some(rs.getTimestamp(i).toLocalDateTime))
-							if (rs.wasNull()) dateTimeFields += (df.getRuntimeFieldName -> None)
+							dateTimeFields += (getKey(ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
+							if (rs.wasNull()) dateTimeFields += (getKey(ca) -> None)
 						}
 						case _: BooleanDatabaseField => {
-							stringFields += (df.getRuntimeFieldName -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += (df.getRuntimeFieldName -> None)
+							stringFields += (getKey(ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += (getKey(ca) -> None)
 						}
 						case _ => {
-							println(" *********** UNKNOWN COLUMN TYPE FOR COL " + df.getPersistenceFieldName)
+							println(" *********** UNKNOWN COLUMN TYPE FOR COL " + ca)
 						}
 					}
 				}))
 
 				rows += ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
 			}
-			profiler.lap("finsihed rows")
+			profiler.lap(s"finished rows (rowcount: ${rowCounter})")
 			val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
 			if (fetchCount > 2) println(" ***********  QUERY EXECUTED " + fetchCount + " FETCHES!!  Rowcount was " + rowCounter + ":  " + sql)
 			rows.toList
@@ -381,6 +382,34 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		executeSQLForUpdateOrDelete(sb.toString())
 	}
 
+	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+		val intValues: Map[ColumnAlias[Int], Option[Int]] = Map()
+		val stringValues: Map[ColumnAlias[String], Option[String]] = Map()
+
+		val tablesFromColumns = qb.fields.map(_.table)
+		val tablesFromJoinPoints = qb.joinPoints.map(_.a).map(_.table) ::: qb.joinPoints.map(_.b).map(_.table)
+
+		val distinctTables = (tablesFromColumns ::: tablesFromJoinPoints).distinct
+		distinctTables.map(_.obj).foreach(_.init())
+
+		val whereStatements = qb.joinPoints.map(jp => jp.a.table.name + "." + jp.a.field.getPersistenceFieldName + " = " + jp.b.table.name + "." + jp.b.field.getPersistenceFieldName)
+		val whereClause = if(whereStatements.nonEmpty) "WHERE " + whereStatements.mkString(" AND ") else ""
+		val sql =
+			s"""
+			  |select ${qb.fields.map(f => f.table.name + "." + f.field.getPersistenceFieldName).mkString(", ")}
+			  |from ${distinctTables.map(t => t.obj.entityName + " " + t.name).mkString(", ")}
+			  |${whereClause}
+			  |""".stripMargin
+
+		println("QueryBuilder SQL: " + sql)
+
+		val rows = getProtoStorablesFromSelect(sql, qb.fields, 500, ca => ca)
+		println(rows)
+
+		List(new QueryBuilderResultRow(intValues, stringValues))
+	}
+
+	// TODO: do these belong here or in util somewhere?
 	private def dateToLocalDate(d: Date): LocalDate =
 		d.toInstant.atZone(ZoneId.systemDefault).toLocalDate
 

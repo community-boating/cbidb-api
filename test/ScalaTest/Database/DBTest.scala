@@ -2,7 +2,7 @@ package ScalaTest.Database
 
 import Entities.EntityDefinitions.{JpClassInstance, JpClassType}
 import ScalaTest.GetPersistenceBroker
-import Storable.StorableQuery.{ColumnAlias, Query, TableAlias}
+import Storable.StorableQuery.{ColumnAlias, JoinPoint, QueryBuilder, TableAlias}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -18,18 +18,26 @@ class DBTest extends FunSuite{
 //	}
 
 	test("Test query") {
-		val typeId = ColumnAlias(TableAlias("types", JpClassType), JpClassType.fields.typeId)
-		val typeName = ColumnAlias(TableAlias("types", JpClassType), JpClassType.fields.typeName)
+		val types = TableAlias("types", JpClassType)
+		val instances = TableAlias("i", JpClassInstance)
 
-		val q = new Query(List(
-			typeId,
-			typeName
-		), List.empty)
+		val types_typeId = ColumnAlias(types, JpClassType.fields.typeId)
+		val typeName = ColumnAlias(types, JpClassType.fields.typeName)
 
-		val id = q.getValue(typeId)
-		val name = q.getValue(typeName)
+		val instances_typeId = ColumnAlias(instances, JpClassInstance.fields.typeId)
+		val instanceId = ColumnAlias(instances, JpClassInstance.fields.instanceId)
 
-		assert(id == 4)
-		assert(name == "b")
+		val q = new QueryBuilder(List(
+			types_typeId,
+			typeName,
+			instanceId
+		), List(
+			JoinPoint(types_typeId, instances_typeId)
+		))
+
+		GetPersistenceBroker { pb =>
+			pb.executeQueryBuilder(q)
+		}
+
 	}
 }

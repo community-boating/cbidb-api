@@ -1,8 +1,8 @@
 package Storable.Fields
 
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-abstract class DatabaseField[T](entity: StorableObject[_], persistenceFieldName: String) {
+abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
 	def getPersistenceFieldName: String = persistenceFieldName
 
 	def getFullyQualifiedName: String = entity.entityName + "." + persistenceFieldName
@@ -21,7 +21,7 @@ abstract class DatabaseField[T](entity: StorableObject[_], persistenceFieldName:
 		case None => runtimeFieldName = Some(s)
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[T]
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T]
 
 	def isNull: Filter = Filter(getFullyQualifiedName + " IS NULL")
 

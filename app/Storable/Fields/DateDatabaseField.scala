@@ -6,16 +6,16 @@ import java.time.format.DateTimeFormatter
 import CbiUtil._
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import Services._
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class DateDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
+class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[LocalDate] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[LocalDate] = {
 		row.dateFields.get(this.getRuntimeFieldName) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null Date field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")

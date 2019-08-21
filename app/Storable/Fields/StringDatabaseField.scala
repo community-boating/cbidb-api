@@ -2,9 +2,9 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
+class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
 	def getFieldLength: Int = fieldLength
 
 	def getFieldType: String = getFieldLength match {
@@ -15,7 +15,7 @@ class StringDatabaseField(entity: StorableObject[_], persistenceFieldName: Strin
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[String] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[String] = {
 		row.stringFields.get(this.getRuntimeFieldName) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null String field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")

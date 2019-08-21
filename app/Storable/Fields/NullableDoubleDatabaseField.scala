@@ -2,10 +2,10 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableDoubleDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
-	def findValueInProtoStorable(row: ProtoStorable): Option[Option[Double]] = row.doubleFields.get(this.getRuntimeFieldName)
+class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Double]] = row.doubleFields.get(this.getRuntimeFieldName)
 
 	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"

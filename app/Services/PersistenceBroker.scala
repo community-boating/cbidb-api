@@ -3,6 +3,7 @@ package Services
 import CbiUtil.TestUserType
 import IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete}
 import Services.PermissionsAuthority.UnauthorizedAccessException
+import Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
@@ -53,6 +54,11 @@ abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQue
 		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
 	}
 
+	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+		// TODO: security
+		executeQueryBuilderImplementation(qb)
+	}
+
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
 	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T]
 
@@ -69,6 +75,8 @@ abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQue
 	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String]
 
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int
+
+	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
 
 	// TODO: implement some IDs
 	private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible

@@ -2,9 +2,9 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
+class NullableStringDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
 	def getFieldLength: Int = fieldLength
 
 	def getFieldType: String = getFieldLength match {
@@ -15,7 +15,7 @@ class NullableStringDatabaseField(entity: StorableObject[_], persistenceFieldNam
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[Option[String]] = row.stringFields.get(this.getRuntimeFieldName)
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[String]] = row.stringFields.get(this.getRuntimeFieldName)
 
 	def equalsConstant(os: Option[String]): Filter = os match {
 		case Some(s: String) => Filter(getFullyQualifiedName + " = '" + s + "'")

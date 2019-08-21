@@ -2,9 +2,9 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
+class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def getFieldType: String = getFieldLength match {
@@ -13,7 +13,7 @@ class BooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: Stri
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[Boolean] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Boolean] = {
 		row.stringFields.get(this.getRuntimeFieldName) match {
 			case Some(Some("Y")) => Some(true)
 			case Some(Some("N")) => Some(false)

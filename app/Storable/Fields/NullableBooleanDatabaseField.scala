@@ -2,9 +2,9 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableBooleanDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
+class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def getFieldType: String = getFieldLength match {
@@ -15,7 +15,7 @@ class NullableBooleanDatabaseField(entity: StorableObject[_], persistenceFieldNa
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[Option[Boolean]] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Boolean]] = {
 		row.stringFields.get(this.getRuntimeFieldName) match {
 			case Some(Some("Y")) => Some(Some(true))
 			case Some(Some("N")) => Some(Some(false))

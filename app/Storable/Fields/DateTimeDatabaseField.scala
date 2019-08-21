@@ -5,9 +5,9 @@ import java.time.{LocalDate, LocalDateTime}
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class DateTimeDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
+class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
@@ -15,7 +15,7 @@ class DateTimeDatabaseField(entity: StorableObject[_], persistenceFieldName: Str
 		case PERSISTENCE_SYSTEM_ORACLE => "date"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable): Option[LocalDateTime] = {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[LocalDateTime] = {
 		row.dateTimeFields.get(this.getRuntimeFieldName) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null DateTime field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")

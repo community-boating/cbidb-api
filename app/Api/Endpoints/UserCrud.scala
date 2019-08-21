@@ -32,7 +32,7 @@ class UserCrud @Inject()(implicit exec: ExecutionContext) extends Controller {
 
 					val postParams: Map[String, String] = v.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
 
-					val ps: ProtoStorable = ProtoStorable.constructFromStrings(User, postParams)
+					val ps: ProtoStorable[String] = ProtoStorable.constructFromStrings(User, postParams)
 					println(ps)
 
 					val newUser: User = User.construct(ps, rc)

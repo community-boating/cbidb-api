@@ -2,10 +2,10 @@ package Storable.Fields
 
 import Services.PermissionsAuthority
 import Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import Storable.{Filter, ProtoStorable, StorableObject}
+import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableIntDatabaseField(entity: StorableObject[_], persistenceFieldName: String) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
-	def findValueInProtoStorable(row: ProtoStorable): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)
+class NullableIntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)
 
 	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"

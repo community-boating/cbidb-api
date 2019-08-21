@@ -8,17 +8,17 @@ import Storable.Fields._
 // Storables are almost always instantiated from one of these things as an intermediary,
 // whether the data came from the database or a POST request (to go to the database) etc
 // If it came from a POST or something, ignored is the post parameters that were not able to be matched to a single field (for debugging)
-case class ProtoStorable(
-	intFields: Map[String, Option[Int]],
-	doubleFields: Map[String, Option[Double]],
-	stringFields: Map[String, Option[String]],
-	dateFields: Map[String, Option[LocalDate]],
-	dateTimeFields: Map[String, Option[LocalDateTime]],
-	ignored: Map[String, String]
+case class ProtoStorable[T](
+	intFields: Map[T, Option[Int]],
+	doubleFields: Map[T, Option[Double]],
+	stringFields: Map[T, Option[String]],
+	dateFields: Map[T, Option[LocalDate]],
+	dateTimeFields: Map[T, Option[LocalDateTime]],
+	ignored: Map[T, String]
 )
 
 object ProtoStorable {
-	def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable = {
+	def constructFromStrings[T <: StorableClass](storable: StorableObject[T], formData: Map[String, String]): ProtoStorable[String] = {
 		var intFields: Map[String, Option[Int]] = Map()
 		var doubleFields: Map[String, Option[Double]] = Map()
 		var stringFields: Map[String, Option[String]] = Map()
