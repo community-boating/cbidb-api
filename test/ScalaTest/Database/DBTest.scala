@@ -33,6 +33,8 @@ class DBTest extends FunSuite{
 			instanceId
 		), List(
 			JoinPoint(types_typeId, instances_typeId)
+		), List(
+			types_typeId.filter(_.equalsConstant(1))
 		))
 
 		GetPersistenceBroker { pb =>

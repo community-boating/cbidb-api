@@ -13,7 +13,7 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 	}
 
 	def lessThanConstant(c: Double): Filter = {
-		Filter(getFullyQualifiedName + " < " + c)
+		Filter(t => s"$t.$getPersistenceFieldName < $c")
 	}
 
 	def inList(l: List[Double]): Filter = {
@@ -26,15 +26,15 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 			}
 		}
 
-		if (l.isEmpty) Filter("")
-		else Filter(groupIDs(l).map(group => {
-			getFullyQualifiedName + " in (" + group.mkString(", ") + ")"
+		if (l.isEmpty) Filter(t => "")
+		else Filter(t => groupIDs(l).map(group => {
+			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 		}).mkString(" OR "))
 	}
 
 	def equalsConstant(i: Option[Double]): Filter = i match {
-		case Some(x: Double) => Filter(getFullyQualifiedName + " = " + i)
-		case None => Filter(getFullyQualifiedName + " IS NULL")
+		case Some(x: Double) => Filter(t => s"$t.$getPersistenceFieldName = $i")
+		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
 	}
 
 	def getValueFromString(s: String): Option[Option[Double]] = {

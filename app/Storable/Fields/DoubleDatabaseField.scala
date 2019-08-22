@@ -19,7 +19,7 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 	}
 
 	def lessThanConstant(c: Double): Filter = {
-		Filter(getFullyQualifiedName + " < " + c)
+		Filter(t => s"$t.$getPersistenceFieldName < $c")
 	}
 
 	def inList(l: List[Double]): Filter = PermissionsAuthority.getPersistenceSystem match {
@@ -32,14 +32,14 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 				}
 			}
 
-			if (l.isEmpty) Filter("")
-			else Filter(groupIDs(l).map(group => {
-				getFullyQualifiedName + " in (" + group.mkString(", ") + ")"
+			if (l.isEmpty) Filter(t => "")
+			else Filter(t => groupIDs(l).map(group => {
+				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 			}).mkString(" OR "))
 		}
 	}
 
-	def equalsConstant(d: Double): Filter = Filter(getFullyQualifiedName + " = " + d)
+	def equalsConstant(d: Double): Filter = Filter(t => s"$t.$getPersistenceFieldName = $d")
 
 	def getValueFromString(s: String): Option[Double] = {
 		try {

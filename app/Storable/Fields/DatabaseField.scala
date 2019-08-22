@@ -5,8 +5,6 @@ import Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
 	def getPersistenceFieldName: String = persistenceFieldName
 
-	def getFullyQualifiedName: String = entity.entityName + "." + persistenceFieldName
-
 	def getFieldType: String
 
 	private var runtimeFieldName: Option[String] = None
@@ -23,9 +21,9 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T]
 
-	def isNull: Filter = Filter(getFullyQualifiedName + " IS NULL")
+	def isNull: Filter = Filter(t => s"$t.$getPersistenceFieldName IS NULL")
 
-	def isNotNull: Filter = Filter(getFullyQualifiedName + " IS NOT NULL")
+	def isNotNull: Filter = Filter(t => s"$t.$getPersistenceFieldName IS NOT NULL")
 
 	def getValueFromString(s: String): Option[T]
 }

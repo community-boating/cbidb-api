@@ -1,3 +1,5 @@
 package Storable.StorableQuery
 
-case class JoinPoint[T](a: ColumnAlias[T], b: ColumnAlias[T])
+import Storable.Fields.DatabaseField
+
+case class JoinPoint[T <: DatabaseField[_]](a: ColumnAlias[T], b: ColumnAlias[T])

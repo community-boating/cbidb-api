@@ -11,6 +11,9 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 	}
 
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Int] = {
+		println(row.intFields)
+		println(this.getRuntimeFieldName)
+		println(row.intFields.contains(this.getRuntimeFieldName))
 		row.intFields.get(this.getRuntimeFieldName) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null Int field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
@@ -19,7 +22,7 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 	}
 
 	def lessThanConstant(c: Int): Filter = {
-		Filter(getFullyQualifiedName + " < " + c)
+		Filter(t => s"$t.$getPersistenceFieldName < $c")
 	}
 
 	def inList(l: List[Int]): Filter = PermissionsAuthority.getPersistenceSystem match {
@@ -32,14 +35,14 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 				}
 			}
 
-			if (l.isEmpty) Filter("")
-			else Filter(groupIDs(l).map(group => {
-				getFullyQualifiedName + " in (" + group.mkString(", ") + ")"
+			if (l.isEmpty) Filter(t => "")
+			else Filter(t => groupIDs(l).map(group => {
+				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 			}).mkString(" OR "))
 		}
 	}
 
-	def equalsConstant(i: Int): Filter = Filter(getFullyQualifiedName + " = " + i)
+	def equalsConstant(i: Int): Filter = Filter(t => s"$t.$getPersistenceFieldName = $i")
 
 	def getValueFromString(s: String): Option[Int] = {
 		try {

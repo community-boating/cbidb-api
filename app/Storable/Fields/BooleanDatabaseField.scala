@@ -25,7 +25,7 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 	}
 
 	def equals(b: Boolean): Filter =
-		Filter(getFullyQualifiedName + " = '" + (if (b) "Y" else "N") + "'")
+		Filter(t => s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'")
 
 	def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
 		case "true" => Some(true)

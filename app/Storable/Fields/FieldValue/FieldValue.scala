@@ -7,6 +7,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 	private var value: Option[T] = None
 
 	def set(v: T): Unit = {
+		println("setting: " + instance.getCompanion.entityName + "." + field.getPersistenceFieldName)
 		value = Some(v)
 		//instance.setDirty
 	}

@@ -148,6 +148,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		intFieldMap.filter(t => {
 			t._2 == self.primaryKey || filterFunction(t)
 		}).foreach(tupled((fieldName: String, field: IntDatabaseField) => {
+			println("hi")
+			println(embryo.intValueMap.get(fieldName))
 			embryo.intValueMap.get(fieldName) match {
 				case Some(fv: IntFieldValue) => field.findValueInProtoStorable(ps) match {
 					case Some(i: Int) => fv.set(i)

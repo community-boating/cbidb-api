@@ -115,7 +115,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append("SELECT ")
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 50, _.field.getPersistenceFieldName)
+		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 50, _.field.getRuntimeFieldName)
 		rows.map(r => obj.construct(r, rc))
 	}
 
@@ -125,7 +125,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 6, _.field.getPersistenceFieldName)
+		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), 6, _.field.getRuntimeFieldName)
 		if (rows.length == 1) Some(obj.construct(rows.head, rc))
 		else None
 	}
@@ -143,7 +143,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getPersistenceFieldName)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getRuntimeFieldName)
 			rows.map(r => obj.construct(r, rc))
 		} else {
 			// Too many IDs; make a filter table
@@ -155,16 +155,16 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
-		if (filters.exists(f => f.sqlString == "")) List.empty
+		if (filters.exists(f => f.makeSQLString(RelationalBroker.SINGLE_TABLE_ALIAS) == "")) List.empty
 		else {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			if (filters.nonEmpty) {
-				sb.append(" WHERE " + filters.map(f => f.sqlString).mkString(" AND "))
+				sb.append(" WHERE " + filters.map(f => f.makeSQLString(RelationalBroker.SINGLE_TABLE_ALIAS)).mkString(" AND "))
 			}
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getPersistenceFieldName)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getRuntimeFieldName)
 			val p = new Profiler
 			val ret = rows.map(r => obj.construct(r, rc))
 			p.lap("finished construction")
@@ -212,7 +212,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
 			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, ca => ca.field.getPersistenceFieldName)
+			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(ColumnAlias.wrap), fetchSize, _.field.getRuntimeFieldName)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
 			c.createStatement().executeUpdate(dropTableSQL)
@@ -258,7 +258,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		})
 	}
 
-	private def getProtoStorablesFromSelect[T](sql: String, properties: List[ColumnAlias[_]], fetchSize: Int, getKey: ColumnAlias[_] => T): List[ProtoStorable[T]] = {
+	private def getProtoStorablesFromSelect[T](sql: String, properties: List[ColumnAlias[_ <: DatabaseField[_]]], fetchSize: Int, getKey: ColumnAlias[_ <: DatabaseField[_]] => T): List[ProtoStorable[T]] = {
 		println(sql)
 		val profiler = new Profiler
 		mainPool.withConnection(c => {
@@ -278,7 +278,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 				var dateTimeFields: Map[T, Option[LocalDateTime]] = Map()
 
 
-				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: ColumnAlias[_], i: Int) => {
+				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: ColumnAlias[_ <: DatabaseField[_]], i: Int) => {
 					ca.field match {
 						case _: IntDatabaseField | _: NullableIntDatabaseField => {
 							intFields += (getKey(ca) -> Some(rs.getInt(i)))
@@ -383,8 +383,8 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 	}
 
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		val intValues: Map[ColumnAlias[Int], Option[Int]] = Map()
-		val stringValues: Map[ColumnAlias[String], Option[String]] = Map()
+		val intValues: Map[ColumnAlias[_ <: DatabaseField[_]], Option[Int]] = Map()
+		val stringValues: Map[ColumnAlias[_ <: DatabaseField[_]], Option[String]] = Map()
 
 		val tablesFromColumns = qb.fields.map(_.table)
 		val tablesFromJoinPoints = qb.joinPoints.map(_.a).map(_.table) ::: qb.joinPoints.map(_.b).map(_.table)
@@ -392,8 +392,10 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		val distinctTables = (tablesFromColumns ::: tablesFromJoinPoints).distinct
 		distinctTables.map(_.obj).foreach(_.init())
 
-		val whereStatements = qb.joinPoints.map(jp => jp.a.table.name + "." + jp.a.field.getPersistenceFieldName + " = " + jp.b.table.name + "." + jp.b.field.getPersistenceFieldName)
-		val whereClause = if(whereStatements.nonEmpty) "WHERE " + whereStatements.mkString(" AND ") else ""
+		val joinStatements = qb.joinPoints.map(jp => jp.a.table.name + "." + jp.a.field.getPersistenceFieldName + " = " + jp.b.table.name + "." + jp.b.field.getPersistenceFieldName)
+		val whereStatements = qb.filters.map(af => af.filter.makeSQLString(af.name))
+		val allWhereStatements = joinStatements ::: whereStatements
+		val whereClause = if(allWhereStatements.nonEmpty) "WHERE " + allWhereStatements.mkString(" AND ") else ""
 		val sql =
 			s"""
 			  |select ${qb.fields.map(f => f.table.name + "." + f.field.getPersistenceFieldName).mkString(", ")}
@@ -427,8 +429,10 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 }
 
 object RelationalBroker {
-	val mainPool = new Initializable[HikariDataSource]
-	val tempTablePool = new Initializable[HikariDataSource]
+	private[Services] val mainPool = new Initializable[HikariDataSource]
+	private[Services] val tempTablePool = new Initializable[HikariDataSource]
+
+	val SINGLE_TABLE_ALIAS: String = "t"
 	private val cp = new Initializable[ConnectionPoolConstructor]
 
 	def getMainSchemaName: String = cp.get.getMainSchemaName
@@ -437,7 +441,7 @@ object RelationalBroker {
 
 	def getMainUserName: String = cp.get.getMainUserName
 
-	def initialize(_cp: ConnectionPoolConstructor, registerShutdownCallback: (() => Unit)): Unit = {
+	private[Services] def initialize(_cp: ConnectionPoolConstructor, registerShutdownCallback: (() => Unit)): Unit = {
 		println("RelationalBroker trying to initialize...")
 		cp.peek match {
 			case Some(_) => println("...NOOPing that shit")
@@ -451,7 +455,7 @@ object RelationalBroker {
 		}
 	}
 
-	def setPools(attempts: Int = 0): Unit = {
+	private[Services] def setPools(attempts: Int = 0): Unit = {
 		try {
 			if (this.cp.isInitialized) {
 				if (!mainPool.isInitialized) {
@@ -478,5 +482,5 @@ object RelationalBroker {
 		}
 	}
 
-	def shutdown(): Unit = cp.get.closePools()
+	private[Services] def shutdown(): Unit = cp.get.closePools()
 }

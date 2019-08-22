@@ -93,6 +93,7 @@ public class OracleConnectionPoolConstructor implements ConnectionPoolConstructo
 		config.setJdbcUrl("jdbc:oracle:thin:@" + pw.getProperty("host") + ":" + pw.getProperty("port") + ":" + pw.getProperty("sid"));
 		config.setUsername(pw.getProperty("username"));
 		config.setPassword(pw.getProperty("password"));
+
 		return config;
 	}
 

@@ -124,6 +124,6 @@ class ServerBootLoader @Inject()(
 
 object ServerBootLoader {
 	protected val serverStateContainer = new Initializable[ServerStateContainer]
-
+	def setSSC(ssc: ServerStateContainer): Unit = serverStateContainer.set(ssc)
 	def ssc: ServerStateContainer = serverStateContainer.get
 }

@@ -1,3 +1,4 @@
 package Storable
 
-case class Filter(sqlString: String)
+// table alias => whole sql string
+case class Filter(makeSQLString: String => String)
