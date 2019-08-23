@@ -160,7 +160,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
-			sb.append(" FROM " + obj.entityName)
+			sb.append(" FROM " + obj.entityName + " " + RelationalBroker.SINGLE_TABLE_ALIAS)
 			if (filters.nonEmpty) {
 				sb.append(" WHERE " + filters.map(f => f.makeSQLString(RelationalBroker.SINGLE_TABLE_ALIAS)).mkString(" AND "))
 			}
