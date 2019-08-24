@@ -5,9 +5,11 @@ import java.awt.Color
 import PDFBox.Drawable.Drawable
 import PDFBox.Reports.DailyCloseReport.Model.DailyCloseReportModel
 import PDFBox.{ContentStreamDecorator, PDFReport}
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 
-class FirstPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float) extends Drawable {
+class FirstPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float, document: PDDocument, newPage: (PDDocument, PDRectangle) => ContentStreamDecorator) extends Drawable {
 	def draw(contentStreamDecorator: ContentStreamDecorator): Unit =
 		draw(contentStreamDecorator: ContentStreamDecorator, left: Float, top: Float)
 
@@ -26,7 +28,7 @@ class FirstPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFon
 				.draw(contentStreamDecorator, left + 270, top - 235)
 		new StaffTables(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top)
 				.draw(contentStreamDecorator, left, top - 330)
-		new Notes(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top)
+		new Notes(data, PDFReport.MAX_WIDTH, defaultFont, defaultBoldFont, defaultFontSize, left, top, document, newPage)
 				.draw(contentStreamDecorator, left, top - 430)
 	}
 }
