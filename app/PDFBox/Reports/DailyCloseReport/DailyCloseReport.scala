@@ -24,9 +24,8 @@ class DailyCloseReport(data: DailyCloseReportModel) extends PDFReport(data) {
 
 	def appendToDocument(document: PDDocument): Unit = {
 		val firstPageStream: ContentStreamDecorator = newPage(document, PDRectangle.LETTER)
-		val firstPageSpec = new FirstPage(data, defaultFont, defaultBoldFont, defaultFontSize, defaultColor, firstPageStream.SIDE_MARGIN, PDFReport.MAX_HEIGHT - 40)
+		val firstPageSpec = new FirstPage(data, defaultFont, defaultBoldFont, defaultFontSize, defaultColor, firstPageStream.SIDE_MARGIN, PDFReport.MAX_HEIGHT - 40, document, newPage)
 		firstPageSpec.draw(firstPageStream)
-		firstPageStream.close()
 
 		val receiptsPageStream: ContentStreamDecorator = newPage(document, PDRectangle.LETTER)
 		val receiptsPageSpec = new ReceiptsPage(data, defaultFont, defaultBoldFont, defaultFontSize, defaultColor, receiptsPageStream.SIDE_MARGIN, PDFReport.MAX_HEIGHT - 40)
