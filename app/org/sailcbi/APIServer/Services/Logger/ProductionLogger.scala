@@ -36,5 +36,5 @@ class ProductionLogger private[Services](emailer: Emailer)(implicit PA: Permissi
 
 	private def getRandomString(numberLetters: Int = 5): String = scala.util.Random.alphanumeric.take(numberLetters).mkString
 
-	private def getSubjectSuffix: String = " (" + getRandomString() + ") (" + PA.instanceName.get + ")"
+	private def getSubjectSuffix: String = " (" + getRandomString() + ") (" + PA.instanceName + ")"
 }

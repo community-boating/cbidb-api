@@ -2,18 +2,15 @@ package org.sailcbi.APIServer.Services.Boot
 
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
-import org.sailcbi.APIServer.Services.{OracleConnectionPoolConstructor, PermissionsAuthority, RelationalBroker, ServerInstanceProperties, ServerParameters}
+import org.sailcbi.APIServer.Services.{DatabaseConnection, OracleDatabaseConnection, PermissionsAuthority, RelationalBroker, ServerInstanceProperties, ServerParameters}
 import play.api.Mode
 import play.api.inject.ApplicationLifecycle
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 abstract class ServerBootLoader {
-	def load(
-		oraclePoolConstructor: OracleConnectionPoolConstructor,
-		lifecycle: Option[ApplicationLifecycle],
-		playMode: play.api.Mode
-	): PermissionsAuthority = {
+	protected def load(lifecycle: Option[ApplicationLifecycle], isTestMode: Boolean): PermissionsAuthority = {
 		def getOptionalProperty(serverProps: ServerInstanceProperties, propname: String): Option[String] = {
 			try {
 				serverProps.getProperty(propname) match {
@@ -39,11 +36,42 @@ abstract class ServerBootLoader {
 			//		writer.close()
 		}
 
+		def getDBPools(attempts: Int = 0): DatabaseConnection = {
+			val MAX_ATTEMPTS = 3
+			try {
+				OracleDatabaseConnection("conf/private/oracle-credentials")
+			} catch {
+				case e: Exception => {
+					if (attempts < MAX_ATTEMPTS) {
+						println("failed to get pools, sleeping and trying again....")
+						Thread.sleep(1000)
+						getDBPools(attempts + 1)
+					} else {
+						throw e
+					}
+				}
+			}
+		}
+
 		if (PermissionsAuthority.isBooted) PermissionsAuthority.PA
 		else {
-			val PA = new PermissionsAuthority(true)
-
 			println(" ***************     BOOTING UP SERVER   ***************  ")
+
+			val dbConnection = getDBPools()
+			lifecycle match {
+				case Some(lc) => lc.addStopHook(() => Future.successful({
+					println("****************************    Stop hook: closing pools  **********************")
+					writeToTempFile("coming down...")
+					dbConnection.close()
+				}))
+				case None =>
+			}
+
+			val PA = new PermissionsAuthority(
+				isTestMode = isTestMode,
+				dbConnection = dbConnection
+			)
+
 			writeToTempFile("going up!")
 			// Initialize server params
 			PA.setServerParameters(ServerParameters(
@@ -53,21 +81,7 @@ abstract class ServerBootLoader {
 			// Get server instance properties
 			val serverProps = new ServerInstanceProperties("conf/private/server-properties")
 
-			// Initialize database connections; provide shutdown callback
-			RelationalBroker.initialize(oraclePoolConstructor, () => {
-				lifecycle match {
-					case Some(lc) => lc.addStopHook(() => Future.successful({
-						println("****************************    Stop hook: closing pools  **********************")
-						writeToTempFile("coming down...")
-						RelationalBroker.shutdown()
-					}))
-					case None =>
-				}
-			})
 
-			// Play runmode, i.e. Prod, Dev, or Test
-			PA.playMode.set(playMode)
-			println("Running in mode: " + playMode)
 
 			// Initialize PermissionsAuthority with activated AuthenticationMechanisms
 			PA.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
@@ -86,9 +100,6 @@ abstract class ServerBootLoader {
 
 			val symonSalt: Option[String] = getOptionalProperty(serverProps, "SymonSalt")
 			PA.setSymonSalt(symonSalt)
-
-			PA.instanceName.set(oraclePoolConstructor.getMainSchemaName)
-			println("Using CBI DB instance: " + oraclePoolConstructor.getMainSchemaName)
 
 			val preparedQueriesOnly = {
 				try {

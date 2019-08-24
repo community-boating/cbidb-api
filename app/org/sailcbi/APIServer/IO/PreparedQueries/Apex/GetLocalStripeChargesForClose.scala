@@ -28,7 +28,7 @@ class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAutho
 			closeId = Some(rs.getInt(3).toString),
 			orderId = Some(rs.getInt(4).toString),
 			token = Some(rs.getString(5)),
-			cbiInstance = PA.instanceName.peek,
+			cbiInstance = Some(PA.instanceName),
 			refunds = refunds
 		)
 

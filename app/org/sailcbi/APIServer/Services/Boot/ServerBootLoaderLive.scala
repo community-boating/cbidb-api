@@ -10,13 +10,8 @@ import play.api.{Application, Mode}
 
 import scala.concurrent.Future
 
-class ServerBootLoaderLive @Inject()(
-	lifecycle: ApplicationLifecycle,
-	oraclePoolConstructor: OracleConnectionPoolConstructor,
-	mysqlPoolConstructor: MysqlConnectionPoolConstructor,
-	application: Application
-) extends ServerBootLoader {
-	val PA = this.load(oraclePoolConstructor, Some(lifecycle), application.mode)
+class ServerBootLoaderLive @Inject()(lifecycle: ApplicationLifecycle) extends ServerBootLoader {
+	val PA = this.load(Some(lifecycle), false)
 	println("Live loader::::: setting PA!")
 	PermissionsAuthority.setPA(PA)
 }

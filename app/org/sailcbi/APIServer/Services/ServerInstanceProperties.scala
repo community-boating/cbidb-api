@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Services
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.Services.Authentication._
 
-class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation) {
+class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation, ServerInstanceProperties.requiredProperties) {
 	// 3rd member is a function that returns true if the user type is permitted, false if we need to force-disable it even if conf says enable
 	private val definedAuthMechanisms: Set[(UserType, String, () => Boolean)] = Set(
 		(MemberUserType, "MemberAuthEnabled", () => true),
@@ -36,4 +36,23 @@ class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(f
 			case _ => None
 		}
 	}
+}
+
+object ServerInstanceProperties {
+	val requiredProperties: Array[String] = Array(
+		"MemberAuthEnabled",
+		"KioskAuthEnabled",
+		"StaffAuthEnabled",
+		"ApexAuthEnabled",
+		"SymonAuthEnabled",
+		"BouncerAuthEnabled",
+		"RootAuthEnabled",
+		"ApexToken",
+		"ApexDebugSignet",
+		"StripeAPIKey",
+		"PreparedQueriesOnly",
+		"RoutesSecurityLevel",
+		"SymonSalt",
+		"KioskToken"
+	)
 }

@@ -59,7 +59,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 				"metadata[closeId]" -> closeId.toString,
 				"metadata[orderId]" -> orderId.toString,
 				"metadata[token]" -> token,
-				"metadata[cbiInstance]" -> PA.instanceName.get
+				"metadata[cbiInstance]" -> PA.instanceName
 			)),
 			Some((c: Charge) => dbIO.createObject(c))
 		)

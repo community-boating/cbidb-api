@@ -14,37 +14,18 @@ import com.zaxxer.hikari.HikariDataSource
 
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services](rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean) extends PersistenceBroker(rc, preparedQueriesOnly, readOnly) {
-	implicit val pb: PersistenceBroker = this
-
-	private val mainPoolOption: Initializable[HikariDataSource] = RelationalBroker.mainPool
-	private val tempTablePoolOption: Initializable[HikariDataSource] = RelationalBroker.tempTablePool
-
-	private def mainPool = {
-		if (!mainPoolOption.isInitialized) {
-			println("Whoops, tried to get the pools but they aint there.")
-			RelationalBroker.setPools()
-		}
-		new ConnectionPoolWrapper(mainPoolOption.get)
-	}
-
-	private def tempTablePool = {
-		if (!tempTablePoolOption.isInitialized) {
-			println("Whoops, tried to get the pools but they aint there.")
-			RelationalBroker.setPools()
-		}
-		new ConnectionPoolWrapper(tempTablePoolOption.get)
-	}
+abstract class RelationalBroker private[Services](dbConnection: DatabaseConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker(dbConnection, rc, preparedQueriesOnly, readOnly)
+{
+	//implicit val pb: PersistenceBroker = this
 
 	protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
-
-
 		val pool = if (pq.useTempSchema) {
 			println("using temp schema")
-			tempTablePool
+			dbConnection.tempPool
 		} else {
 			println("using main schema")
-			mainPool
+			dbConnection.mainPool
 		}
 		pool.withConnection(c => {
 			val profiler = new Profiler
@@ -91,7 +72,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		pq match {
 			case p: PreparedQueryForUpdateOrDelete => {
-				val pool = if (pq.useTempSchema) tempTablePool else mainPool
+				val pool = if (pq.useTempSchema) dbConnection.tempPool else dbConnection.mainPool
 				pool.withConnection(c => {
 					println("executing prepared update/delete:")
 					val preparedStatement = c.prepareStatement(p.getQuery)
@@ -180,7 +161,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 		}
 		println(" ======   Creating filter table " + tableName + "    =======")
 		val p = new Profiler
-		tempTablePool.withConnection(c => {
+		dbConnection.tempPool.withConnection(c => {
 			val createTableSQL = "CREATE TABLE " + tableName + " (ID Number)"
 			c.createStatement().executeUpdate(createTableSQL)
 			p.lap("Created table")
@@ -201,13 +182,13 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 			c.createStatement().executeUpdate(createIndexSQL)
 			p.lap("created index")
 
-			val grantSQL = "GRANT INDEX,SELECT ON \"" + tableName + "\" to " + RelationalBroker.getMainUserName
+			val grantSQL = "GRANT INDEX,SELECT ON \"" + tableName + "\" to " + dbConnection.mainUserName
 			c.createStatement().executeUpdate(grantSQL)
 			p.lap("created Grant")
 
 			val sb: StringBuilder = new StringBuilder
-			val ms = RelationalBroker.getMainSchemaName
-			val tts = RelationalBroker.getTempTableSchemaName
+			val ms = dbConnection.mainSchemaName
+			val tts = dbConnection.tempSchemaName
 			sb.append("SELECT ")
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
@@ -227,7 +208,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 
 	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[String]] = None): Option[String] = {
 		println(sql)
-		val pool = if (useTempConnection) tempTablePool else mainPool
+		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(c => {
 			val ps: PreparedStatement = pkPersistenceName match {
 				case Some(s) => c.prepareStatement(sql, scala.Array(s))
@@ -251,7 +232,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 
 	private def executeSQLForUpdateOrDelete(sql: String, useTempConnection: Boolean = false): Int = {
 		println(sql)
-		val pool = if (useTempConnection) tempTablePool else mainPool
+		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.executeUpdate(sql) // returns # of rows updated
@@ -261,7 +242,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 	private def getProtoStorablesFromSelect[T](sql: String, properties: List[ColumnAlias[_ <: DatabaseField[_]]], fetchSize: Int, getKey: ColumnAlias[_ <: DatabaseField[_]] => T): List[ProtoStorable[T]] = {
 		println(sql)
 		val profiler = new Profiler
-		mainPool.withConnection(c => {
+		dbConnection.mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			val rs: ResultSet = st.executeQuery(sql)
 			rs.setFetchSize(fetchSize)
@@ -420,7 +401,7 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 
 	// test query
 	def testDB {
-		mainPool.withConnection(c => {
+		dbConnection.mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.execute("select count(*) from users")
 			println("test query executed successfully")
@@ -429,58 +410,5 @@ abstract class RelationalBroker private[Services](rc: RequestCache, preparedQuer
 }
 
 object RelationalBroker {
-	private[Services] val mainPool = new Initializable[HikariDataSource]
-	private[Services] val tempTablePool = new Initializable[HikariDataSource]
-
 	val SINGLE_TABLE_ALIAS: String = "t"
-	private val cp = new Initializable[ConnectionPoolConstructor]
-
-	def getMainSchemaName: String = cp.get.getMainSchemaName
-
-	def getTempTableSchemaName: String = cp.get.getTempTableSchemaName
-
-	def getMainUserName: String = cp.get.getMainUserName
-
-	private[Services] def initialize(_cp: ConnectionPoolConstructor, registerShutdownCallback: (() => Unit)): Unit = {
-		println("RelationalBroker trying to initialize...")
-		cp.peek match {
-			case Some(_) => println("...NOOPing that shit")
-			case None => {
-				println("...going for it!")
-				cp.set(_cp)
-				registerShutdownCallback()
-				println("! Shutdown callback registered.")
-				setPools()
-			}
-		}
-	}
-
-	private[Services] def setPools(attempts: Int = 0): Unit = {
-		try {
-			if (this.cp.isInitialized) {
-				if (!mainPool.isInitialized) {
-					val mainDS = this.cp.get.getMainDataSource
-					mainPool.set(mainDS)
-					println("set main pool!")
-				}
-				if (!tempTablePool.isInitialized) {
-					val tempDS = this.cp.get.getTempTableDataSource
-					tempTablePool.set(tempDS)
-					println("set temp pool!")
-				}
-			}
-		} catch {
-			case e: Exception => {
-				if (attempts < 10) {
-					println("failed to get pools, sleeping and trying again....")
-					Thread.sleep(1000)
-					setPools(attempts + 1)
-				} else {
-					println("Failed to get pools, giving up.")
-				}
-			}
-		}
-	}
-
-	private[Services] def shutdown(): Unit = cp.get.closePools()
 }

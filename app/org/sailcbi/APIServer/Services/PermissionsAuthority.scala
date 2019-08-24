@@ -6,6 +6,7 @@ import java.sql.ResultSet
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
+import com.zaxxer.hikari.HikariDataSource
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
@@ -19,18 +20,20 @@ import play.api.Mode
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
 
-// the dontInjectMe parameter is there just to ensure that this constructor is never able to be called by a guice injector
-// it wont be caught at compile time but should prevent the server from booting
-class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
+
+class PermissionsAuthority private[Services] (
+	val isTestMode: Boolean,
+	private val dbConnection: DatabaseConnection
+)  {
 	println("inside PermissionsAuthority constructor")
+	def instanceName: String = dbConnection.mainSchemaName
+
 	val allowableUserTypes = new Initializable[Set[UserType]]
 	val persistenceSystem = new Initializable[PersistenceSystem]
 
 	def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
 
-	val playMode = new Initializable[Mode]
 	val preparedQueriesOnly = new Initializable[Boolean]
-	val instanceName = new Initializable[String]
 
 	private val apexDebugSignet = new Initializable[Option[String]]
 
@@ -59,34 +62,29 @@ class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
 	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
 			.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
-	private lazy val rootPB = RequestCache.getRootRC.pb
+	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
+	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
+
+	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
-	private lazy val bouncerPB = RequestCache.getBouncerRC.pb
+
+	private lazy val bouncerPB = bouncerRC.pb
 
 	def testDB = rootPB.testDB
 
-	// TODO: is this right?
-	lazy val isProd: Boolean = {
-		try {
-			playMode.peek.get
-			true
-		} catch {
-			case _: Throwable => false
-		}
-	}
 
 	// This should only be called by the unit tester.
 	// If it's ever called when the application is runnning, it shoudl return None.
 	// If the unit tester is running then the initializables aren't set,
 	// so try to get their value, catch the exception, and return the PB
 	def getRootPB: Option[PersistenceBroker] = {
-		if (isProd) None else {
+		if (isTestMode) {
 			println("@@@@ Giving away the root PB; was this the test runner?")
 			Some(rootPB)
-		}
+		} else None
 	}
 
-	def logger: Logger = if (isProd) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
+	def logger: Logger = if (!isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
 	def requestIsFromLocalHost(request: ParsedRequest): Boolean = {
 		val allowedIPs = Set(
@@ -107,14 +105,15 @@ class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
 			parsedRequest,
 			rootCB,
 			apexToken.get,
-			kioskToken.get
+			kioskToken.get,
+			dbConnection
 		)
 
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
 
 	def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
@@ -122,7 +121,7 @@ class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
 		juniorId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
 		println("about to validate junior id in request....")
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request juniorId match the auth'd parent id?
@@ -153,7 +152,7 @@ class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
 		parsedRequest: ParsedRequest,
 		parentId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request parentId match the auth'd parent id?

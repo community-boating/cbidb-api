@@ -12,6 +12,9 @@ public class PropertiesWrapper extends Properties {
 	public PropertiesWrapper(String fileLocation) throws IOException {
 		super();
 		File f = new File(fileLocation);
+		if (!f.exists()) {
+			throw new IOException("Unable to location Oracle conf file");
+		}
 		FileInputStream fileInput;
 		fileInput = new FileInputStream(f);
 		super.load(fileInput);

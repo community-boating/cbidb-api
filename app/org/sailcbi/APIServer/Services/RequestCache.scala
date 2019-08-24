@@ -10,12 +10,12 @@ import org.sailcbi.APIServer.Services.Authentication._
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-class RequestCache private[RequestCache](val auth: AuthenticationInstance)(implicit val PA: PermissionsAuthority) {
+class RequestCache private[Services](val auth: AuthenticationInstance, dbConnection: DatabaseConnection)(implicit val PA: PermissionsAuthority) {
 	private val self = this
 	val pb: PersistenceBroker = {
-		val pbReadOnly = PA.playMode.get == play.api.Mode.Test
-		if (auth.userType == RootUserType) new OracleBroker(this, false, false)
-		else new OracleBroker(this, PA.preparedQueriesOnly.getOrElse(true), pbReadOnly)
+		val pbReadOnly = PA.isTestMode
+		if (auth.userType == RootUserType) new OracleBroker(dbConnection, this, false, false)
+		else new OracleBroker(dbConnection, this, PA.preparedQueriesOnly.getOrElse(true), pbReadOnly)
 	}
 	val cb: CacheBroker = new RedisBroker
 
@@ -53,7 +53,8 @@ object RequestCache {
 		parsedRequest: ParsedRequest,
 		rootCB: CacheBroker,
 		apexToken: String,
-		kioskToken: String
+		kioskToken: String,
+		dbConnection: DatabaseConnection
 	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = {
 		println("\n\n====================================================")
 		println("====================================================")
@@ -95,12 +96,12 @@ object RequestCache {
 				// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
 				// so this architecture will make that request behave exactly as if the member requested it themselves
 				if (authentication.userType == requiredUserType) {
-					(authentication, Some(new RequestCache(authentication)))
+					(authentication, Some(new RequestCache(authentication, dbConnection)))
 				} else {
 					requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
 						case Some(lowerAuth: AuthenticationInstance) => {
 							println("@@@ Successfully downgraded to " + lowerAuth.userType)
-							(authentication, Some(new RequestCache(lowerAuth)))
+							(authentication, Some(new RequestCache(lowerAuth, dbConnection)))
 						}
 						case None => {
 							println("@@@ Unable to downgrade auth to " + requiredUserType)
@@ -111,7 +112,4 @@ object RequestCache {
 			}
 		}
 	}
-
-	lazy private[Services] val getRootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT)
-	lazy private[Services] val getBouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER)
 }

@@ -5,8 +5,8 @@ import java.sql.Connection
 import org.sailcbi.APIServer.CbiUtil.Profiler
 import com.zaxxer.hikari.HikariDataSource
 
-class ConnectionPoolWrapper(private val source: HikariDataSource) (implicit val PA: PermissionsAuthority) {
-	def withConnection[T](block: Connection => T): T = {
+class ConnectionPoolWrapper(private val source: HikariDataSource)  {
+	def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {
 		var c: Connection = null
 		try {
 			c = source.getConnection()
@@ -25,4 +25,6 @@ class ConnectionPoolWrapper(private val source: HikariDataSource) (implicit val 
 			println("closed connection")
 		}
 	}
+
+	def close(): Unit = source.close()
 }
