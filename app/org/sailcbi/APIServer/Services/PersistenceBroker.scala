@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderR
 import org.sailcbi.APIServer.Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQueriesOnly: Boolean) {
+abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -34,7 +34,8 @@ abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQue
 	}
 
 	final def commitObjectToDatabase(i: StorableClass): Unit = {
-		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
+		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
 		else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
 	}
@@ -45,12 +46,14 @@ abstract class PersistenceBroker private[Services](rc: RequestCache, preparedQue
 	}
 
 	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
-		if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForInsertImplementation(pq)
+		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
+		else if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForInsertImplementation(pq)
 		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
 	}
 
 	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
-		if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
+		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
+		else if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
 		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
 	}
 

@@ -13,8 +13,9 @@ import org.sailcbi.APIServer.Services.Authentication._
 class RequestCache private[RequestCache](val auth: AuthenticationInstance)(implicit val PA: PermissionsAuthority) {
 	private val self = this
 	val pb: PersistenceBroker = {
-		if (auth.userType == RootUserType) new OracleBroker(this, false)
-		else new OracleBroker(this, PA.preparedQueriesOnly.getOrElse(true))
+		val pbReadOnly = PA.playMode.get == play.api.Mode.Test
+		if (auth.userType == RootUserType) new OracleBroker(this, false, false)
+		else new OracleBroker(this, PA.preparedQueriesOnly.getOrElse(true), pbReadOnly)
 	}
 	val cb: CacheBroker = new RedisBroker
 
