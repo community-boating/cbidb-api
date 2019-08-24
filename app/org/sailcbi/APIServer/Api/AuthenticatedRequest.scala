@@ -7,7 +7,6 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
 trait AuthenticatedRequest {
-
 	class RequestClass extends Controller
 
 	protected val requestClass = new RequestClass
@@ -15,11 +14,11 @@ trait AuthenticatedRequest {
 
 	protected def Status(code: Int) = requestClass.Status(code)
 
-	protected def getRCOption(ut: NonMemberUserType, parsedRequest: ParsedRequest): Option[RequestCache] =
-		PermissionsAuthority.getRequestCache(ut, None, parsedRequest)._2
+	protected def getRCOption(ut: NonMemberUserType, parsedRequest: ParsedRequest)(implicit PA: PermissionsAuthority): Option[RequestCache] =
+		PA.getRequestCache(ut, None, parsedRequest)._2
 
-	protected def getRCOptionMember(parsedRequest: ParsedRequest): Option[RequestCache] =
-		PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2
+	protected def getRCOptionMember(parsedRequest: ParsedRequest)(implicit PA: PermissionsAuthority): Option[RequestCache] =
+		PA.getRequestCacheMember(None, parsedRequest)._2
 
 	@deprecated
 	protected def getRC(ut: NonMemberUserType, parsedRequest: ParsedRequest): RequestCache = {

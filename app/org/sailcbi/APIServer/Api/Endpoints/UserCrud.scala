@@ -12,10 +12,10 @@ import play.api.mvc.{Action, Controller}
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
-class UserCrud @Inject()(implicit exec: ExecutionContext) extends Controller {
+class UserCrud @Inject()(implicit exec: ExecutionContext, PA: PermissionsAuthority) extends Controller {
 	def post() = Action { request =>
 		try {
-			val rc: RequestCache = PermissionsAuthority.getRequestCache(StaffUserType, None, ParsedRequest(request))._2.get
+			val rc: RequestCache = PA.getRequestCache(StaffUserType, None, ParsedRequest(request))._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asFormUrlEncoded

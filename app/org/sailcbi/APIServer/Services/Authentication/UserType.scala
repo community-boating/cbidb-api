@@ -12,7 +12,7 @@ abstract class UserType {
 		rootCB: CacheBroker,
 		apexToken: String,
 		kioskToken: String
-	): Option[String]
+	)(implicit PA: PermissionsAuthority): Option[String]
 
 	// If the request actually came from e.g. a Staff request, but we want to access a Member or Public endpoint,
 	// use this to downgrade the request authentication

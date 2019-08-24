@@ -13,13 +13,13 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class SyncLocalDBWithStripe @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
-	def post(): Action[AnyContent] = Action.async { req => {
-		val logger = PermissionsAuthority.logger
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
+		val logger = PA.logger
 		val rc = getRC(ApexUserType, ParsedRequest(req))
 		val pb = rc.pb
 		val stripeIOController = new StripeIOController(
-			PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
-			PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb),
+			PA.stripeAPIIOMechanism.get(rc)(ws),
+			PA.stripeDatabaseIOMechanism.get(rc)(pb),
 			logger
 		)
 		stripeIOController.syncBalanceTransactions.map({

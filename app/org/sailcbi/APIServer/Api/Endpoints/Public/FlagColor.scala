@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPrepa
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import org.sailcbi.APIServer.Services.CacheBroker
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent}
@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FlagColor @Inject()(implicit val exec: ExecutionContext)
 		extends AuthenticatedRequest with CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
-	def get: Action[AnyContent] = Action.async { request =>
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
 			val rc = getRC(PublicUserType, ParsedRequest(request))
 			val cb: CacheBroker = rc.cb

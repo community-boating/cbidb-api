@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Services.Logger
 import org.sailcbi.APIServer.Services.Emailer.Emailer
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 
-class ProductionLogger private[Services](emailer: Emailer) extends Logger {
+class ProductionLogger private[Services](emailer: Emailer)(implicit PA: PermissionsAuthority) extends Logger {
 	def trace(s: String): Unit = println(s)
 
 	def trace(s: String, e: Throwable): Unit = println(s + "\n" + prettyPrintException(e))
@@ -36,5 +36,5 @@ class ProductionLogger private[Services](emailer: Emailer) extends Logger {
 
 	private def getRandomString(numberLetters: Int = 5): String = scala.util.Random.alphanumeric.take(numberLetters).mkString
 
-	private def getSubjectSuffix: String = " (" + getRandomString() + ") (" + PermissionsAuthority.instanceName.get + ")"
+	private def getSubjectSuffix: String = " (" + getRandomString() + ") (" + PA.instanceName.get + ")"
 }

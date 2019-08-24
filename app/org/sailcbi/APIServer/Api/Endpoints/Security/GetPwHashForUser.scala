@@ -9,7 +9,7 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Controller {
-	def get(userName: String, userType: String = "staff"): Action[AnyContent] = Action.async { request =>
+	def get(userName: String, userType: String = "staff")(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		Future {
 			println("userType is " + userType)
 			println("username is " + userName)
@@ -28,7 +28,7 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Contro
 			if (userTypeObj.isEmpty) Ok("BAD USER TYPE")
 			else {
 				try {
-					PermissionsAuthority.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
+					PA.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
 						case None => Ok("NO DATA")
 						// Int is the hashing scheme ID, string is the hash itself
 						case Some(t: (Int, String)) => Ok(t._1 + "," + t._2)

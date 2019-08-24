@@ -7,10 +7,10 @@ import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, Storable
 object RootUserType extends NonMemberUserType {
 	val uniqueUserName = "ROOT"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		if (
 			request.headers.get(PermissionsAuthority.ROOT_AUTH_HEADER).contains("true") &&
-					PermissionsAuthority.requestIsFromLocalHost(request)
+					PA.requestIsFromLocalHost(request)
 		) Some(uniqueUserName)
 		else None
 	}

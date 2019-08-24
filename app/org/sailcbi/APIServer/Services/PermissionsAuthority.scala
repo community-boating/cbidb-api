@@ -14,16 +14,15 @@ import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanis
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
+import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
 import play.api.Mode
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request}
 
-object PermissionsAuthority {
-	val stripeURL: String = "https://api.stripe.com/v1/"
-	val SEC_COOKIE_NAME = "CBIDB-SEC"
-	val ROOT_AUTH_HEADER = "origin-root"
-	val BOUNCER_AUTH_HEADER = "origin-bouncer"
-
+// the dontInjectMe parameter is there just to ensure that this constructor is never able to be called by a guice injector
+// it wont be caught at compile time but should prevent the server from booting
+class PermissionsAuthority private[Services] (dontInjectMe: Boolean)  {
+	println("inside PermissionsAuthority constructor")
 	val allowableUserTypes = new Initializable[Set[UserType]]
 	val persistenceSystem = new Initializable[PersistenceSystem]
 
@@ -40,6 +39,9 @@ object PermissionsAuthority {
 	private val apexToken = new Initializable[String]
 
 	def setApexToken(s: String): String = apexToken.set(s)
+
+	val serverParameters = new Initializable[ServerParameters]
+	def setServerParameters(sp: ServerParameters): ServerParameters = serverParameters.set(sp)
 
 	private val kioskToken = new Initializable[String]
 
@@ -99,7 +101,14 @@ object PermissionsAuthority {
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(requiredUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get)
+		RequestCache.construct(
+			requiredUserType,
+			requiredUserName,
+			parsedRequest,
+			rootCB,
+			apexToken.get,
+			kioskToken.get
+		)
 
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
@@ -191,7 +200,7 @@ object PermissionsAuthority {
 	def validateApexSignet(candidate: Option[String]): Boolean = apexDebugSignet.getOrElse(None) == candidate
 
 	def authenticate(parsedRequest: ParsedRequest): AuthenticationInstance = {
-		val ret: Option[AuthenticationInstance] = PermissionsAuthority.allowableUserTypes.get
+		val ret: Option[AuthenticationInstance] = allowableUserTypes.get
 				.filter(_ != PublicUserType)
 				.foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
 					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
@@ -214,6 +223,19 @@ object PermissionsAuthority {
 			}
 		}
 	}
+}
+
+
+object PermissionsAuthority {
+	private val paWrapper: Initializable[PermissionsAuthority] = new Initializable[PermissionsAuthority]()
+	def setPA(pa: PermissionsAuthority): PermissionsAuthority = paWrapper.set(pa)
+	def isBooted: Boolean = paWrapper.isInitialized
+	implicit lazy val PA: PermissionsAuthority = paWrapper.get
+
+	val stripeURL: String = "https://api.stripe.com/v1/"
+	val SEC_COOKIE_NAME = "CBIDB-SEC"
+	val ROOT_AUTH_HEADER = "origin-root"
+	val BOUNCER_AUTH_HEADER = "origin-bouncer"
 
 	trait PersistenceSystem {
 		val pbs: PersistenceBrokerStatic

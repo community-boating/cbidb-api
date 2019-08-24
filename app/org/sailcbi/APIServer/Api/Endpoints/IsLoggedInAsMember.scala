@@ -12,9 +12,9 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends Controller {
-	def get(): Action[AnyContent] = Action.async { request =>
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			val authResult = PermissionsAuthority.getRequestCacheMember(None, ParsedRequest(request))
+			val authResult = PA.getRequestCacheMember(None, ParsedRequest(request))
 			authResult._2 match {
 				case Some(rc) => Future {
 					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))

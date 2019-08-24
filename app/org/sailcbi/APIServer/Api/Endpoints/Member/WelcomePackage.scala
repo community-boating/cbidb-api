@@ -15,9 +15,9 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.{ExecutionContext, Future}
 
 class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
-	def get(): Action[AnyContent] = Action.async(req => {
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
-		val logger = PermissionsAuthority.logger
+		val logger = PA.logger
 		val maybeRC = getRCOptionMember(ParsedRequest(req))
 		if (maybeRC.isEmpty) Future {
 			Ok(ResultError.UNAUTHORIZED)

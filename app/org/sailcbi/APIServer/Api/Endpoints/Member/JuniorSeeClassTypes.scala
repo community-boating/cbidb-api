@@ -15,9 +15,9 @@ import scala.concurrent.ExecutionContext
 class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Controller {
 	case class SeeTypeResult(typeId: Int, canSee: Boolean)
 
-	def get(juniorId: Int): Action[AnyContent] = Action { request =>
+	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 		val pb: PersistenceBroker = rc.pb
 		val cb: CacheBroker = rc.cb
 

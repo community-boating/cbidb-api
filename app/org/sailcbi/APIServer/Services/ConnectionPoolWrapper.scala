@@ -5,7 +5,7 @@ import java.sql.Connection
 import org.sailcbi.APIServer.CbiUtil.Profiler
 import com.zaxxer.hikari.HikariDataSource
 
-class ConnectionPoolWrapper(private val source: HikariDataSource) {
+class ConnectionPoolWrapper(private val source: HikariDataSource) (implicit val PA: PermissionsAuthority) {
 	def withConnection[T](block: Connection => T): T = {
 		var c: Connection = null
 		try {
@@ -16,7 +16,7 @@ class ConnectionPoolWrapper(private val source: HikariDataSource) {
 			ret
 		} catch {
 			case e: Throwable => {
-				PermissionsAuthority.logger.error("Error using a DB connection: ", e)
+				PA.logger.error("Error using a DB connection: ", e)
 				throw e
 			}
 		} finally {

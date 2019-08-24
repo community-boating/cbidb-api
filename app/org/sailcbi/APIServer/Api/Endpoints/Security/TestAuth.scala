@@ -15,13 +15,13 @@ class TestAuth @Inject()(implicit exec: ExecutionContext) extends Controller {
 
 	def getBouncer: Action[AnyContent] = get("bouncer")
 
-	private def get(role: String): Action[AnyContent] = Action.async { req =>
+	private def get(role: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val ut = role match {
 			case "root" => RootUserType
 			case "bouncer" => BouncerUserType
 		}
 		val pr = ParsedRequest(req)
-		val result = PermissionsAuthority.getRequestCache(ut, None, pr)
+		val result = PA.getRequestCache(ut, None, pr)
 
 		Future {
 			Ok(if (result._1.userType == ut) "true" else "false")

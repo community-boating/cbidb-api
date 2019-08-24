@@ -8,12 +8,12 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_M
 import org.sailcbi.APIServer.Storable.Fields.NullableDateDatabaseField
 import org.sailcbi.APIServer.Storable.StorableClass
 
-class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField) extends FieldValue[Option[LocalDate]](instance, field) {
+class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField)(implicit PA: PermissionsAuthority) extends FieldValue[Option[LocalDate]](instance, field) {
 	def getPersistenceLiteral: String = {
 		val d = super.get
 		d match {
 			case None => "NULL"
-			case Some(d) => PermissionsAuthority.getPersistenceSystem match {
+			case Some(d) => PA.getPersistenceSystem match {
 				case PERSISTENCE_SYSTEM_MYSQL => "'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'"
 				case PERSISTENCE_SYSTEM_ORACLE => "TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
 			}

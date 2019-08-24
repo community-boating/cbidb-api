@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Reporting.ReportingFilters._
 import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import org.sailcbi.APIServer.Storable.StorableClass
 import javax.inject.Inject
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}

@@ -16,13 +16,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class CreateChargeFromToken @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
-	def doPost(req: ParsedRequest): Future[Result] = {
-		val logger = PermissionsAuthority.logger
+	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
+		val logger = PA.logger
 		val rc = getRC(ApexUserType, req)
 		val pb = rc.pb
 		val stripeIOController = new StripeIOController(
-			PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
-			PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb),
+			PA.stripeAPIIOMechanism.get(rc)(ws),
+			PA.stripeDatabaseIOMechanism.get(rc)(pb),
 			logger
 		)
 		val params = req.postParams

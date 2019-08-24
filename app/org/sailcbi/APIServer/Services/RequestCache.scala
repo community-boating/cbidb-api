@@ -10,11 +10,11 @@ import org.sailcbi.APIServer.Services.Authentication._
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-class RequestCache private[RequestCache](val auth: AuthenticationInstance) {
+class RequestCache private[RequestCache](val auth: AuthenticationInstance)(implicit val PA: PermissionsAuthority) {
 	private val self = this
 	val pb: PersistenceBroker = {
 		if (auth.userType == RootUserType) new OracleBroker(this, false)
-		else new OracleBroker(this, PermissionsAuthority.preparedQueriesOnly.getOrElse(true))
+		else new OracleBroker(this, PA.preparedQueriesOnly.getOrElse(true))
 	}
 	val cb: CacheBroker = new RedisBroker
 
@@ -53,7 +53,7 @@ object RequestCache {
 		rootCB: CacheBroker,
 		apexToken: String,
 		kioskToken: String
-	 ): (AuthenticationInstance, Option[RequestCache]) = {
+	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = {
 		println("\n\n====================================================")
 		println("====================================================")
 		println("====================================================")
@@ -61,7 +61,7 @@ object RequestCache {
 		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 		println("Headers: " + parsedRequest.headers)
 		// For all the enabled user types (besides public), see if the request is authenticated against any of them.
-		val authentication: AuthenticationInstance = PermissionsAuthority.authenticate(parsedRequest)
+		val authentication: AuthenticationInstance = PA.authenticate(parsedRequest)
 
 		// Cross-site request?
 		// Someday I'll flesh this out more

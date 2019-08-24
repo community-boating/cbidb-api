@@ -9,13 +9,14 @@ import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import javax.inject.Inject
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 
 class JpClassInstances @Inject()(implicit val exec: ExecutionContext)
 		extends AuthenticatedRequest with CacheableResultFromPreparedQuery[JpClassInstancesParamsObject, GetJpClassInstancesResult] {
-	def get(startDate: Option[String]): Action[AnyContent] = {
+	def get(startDate: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = {
 		val params = JpClassInstancesParamsObject(DateUtil.parseWithDefault(startDate))
 		val pq = new GetJpClassInstances(params.startDate)
 		evaluate(PublicUserType, params, pq)

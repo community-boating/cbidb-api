@@ -31,8 +31,8 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
-	def doPost(req: ParsedRequest): Future[Result] = {
-		val rc: RequestCache = PermissionsAuthority.getRequestCache(StaffUserType, None, req)._2.get
+	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
+		val rc: RequestCache = PA.getRequestCache(StaffUserType, None, req)._2.get
 		println(rc.auth.userName)
 		if (rc.auth.userType != StaffUserType) {
 			Future {

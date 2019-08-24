@@ -14,9 +14,9 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.ExecutionContext
 
 class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends Controller {
-	def get(juniorId: Int): Action[AnyContent] = Action { request =>
+	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 		val pb: PersistenceBroker = rc.pb
 		val cb: CacheBroker = rc.cb
 
@@ -48,12 +48,12 @@ class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends Controller {
 		Ok(resultJson)
 	}
 
-	def post() = Action { request =>
+	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)
 			val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
 			println("required info post: juniorId is " + juniorId)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson

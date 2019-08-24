@@ -15,9 +15,9 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
-	def get(typeId: Int, juniorId: Int): Action[AnyContent] = Action.async(req => {
+	def get(typeId: Int, juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		val maybeRC = PermissionsAuthority.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2
+		val maybeRC = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2
 		if (maybeRC.isEmpty) Future {
 			Ok("{\"error\": \"Unauthorized\"}")
 		} else {

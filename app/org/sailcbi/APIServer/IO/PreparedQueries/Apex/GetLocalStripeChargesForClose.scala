@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 
-class GetLocalStripeChargesForClose(closeId: Int) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
+class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
 	val getQuery: String =
 		s"""
 		   |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds
@@ -28,7 +28,7 @@ class GetLocalStripeChargesForClose(closeId: Int) extends HardcodedQueryForSelec
 			closeId = Some(rs.getInt(3).toString),
 			orderId = Some(rs.getInt(4).toString),
 			token = Some(rs.getString(5)),
-			cbiInstance = PermissionsAuthority.instanceName.peek,
+			cbiInstance = PA.instanceName.peek,
 			refunds = refunds
 		)
 

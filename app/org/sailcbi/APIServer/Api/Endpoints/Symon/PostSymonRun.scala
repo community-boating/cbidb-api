@@ -14,8 +14,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class PostSymonRun @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
-	def doPost(req: ParsedRequest): Future[Result] = {
-		val logger = PermissionsAuthority.logger
+	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
+		val logger = PA.logger
 
 		try {
 			val rc = getRC(SymonUserType, req)

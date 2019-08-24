@@ -17,8 +17,8 @@ import play.api.http.HttpEntity
 import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 
 class RunApClassRoster @Inject() extends AuthenticatedRequest {
-	def get(instanceId: Int, signet: Option[String]): Action[AnyContent] = Action { req => {
-		val logger = PermissionsAuthority.logger
+	def get(instanceId: Int, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { req => {
+		val logger = PA.logger
 		val rc = getRC(
 			ApexUserType,
 			ParsedRequest(req)
@@ -55,7 +55,6 @@ class RunApClassRoster @Inject() extends AuthenticatedRequest {
 			header = ResponseHeader(200, Map()),
 			body = HttpEntity.Streamed(source, Some(output.toByteArray.length), Some("application/pdf"))
 		)
-	}
-	}
+	}}
 }
 

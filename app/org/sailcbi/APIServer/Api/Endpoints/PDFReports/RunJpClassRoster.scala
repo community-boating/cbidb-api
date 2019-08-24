@@ -16,8 +16,8 @@ import play.api.http.HttpEntity
 import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 
 class RunJpClassRoster @Inject() extends AuthenticatedRequest {
-	def get(instanceIds: String, signet: Option[String]): Action[AnyContent] = Action { req => {
-		val logger = PermissionsAuthority.logger
+	def get(instanceIds: String, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { req => {
+		val logger = PA.logger
 		val rc = getRC(
 			ApexUserType,
 			ParsedRequest(req)

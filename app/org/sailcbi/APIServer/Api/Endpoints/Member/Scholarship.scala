@@ -17,11 +17,11 @@ import scala.concurrent.ExecutionContext
 class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller {
 	val INFLATION_FACTOR = 1.05
 	val EII_MAX = 82000
-	def postNo() = Action(request => {
+	def postNo()(implicit PA: PermissionsAuthority) = Action(request => {
 		try {
-			val logger = PermissionsAuthority.logger
+			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -51,11 +51,11 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 			}
 		}
 	})
-	def postYes() = Action { request =>
+	def postYes()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
-			val logger = PermissionsAuthority.logger
+			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PermissionsAuthority.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

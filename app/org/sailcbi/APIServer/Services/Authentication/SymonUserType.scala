@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, Storable
 object SymonUserType extends NonMemberUserType {
 	val uniqueUserName = "SYMON"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		try {
 			println("here we go")
 			val host: String = request.postParams("symon-host")
@@ -18,7 +18,7 @@ object SymonUserType extends NonMemberUserType {
 			val mac = request.postParams("symon-mac")
 			val candidateHash = request.postParams("symon-hash")
 			println("All args were present")
-			val isValid = PermissionsAuthority.validateSymonHash(
+			val isValid = PA.validateSymonHash(
 				host = host,
 				program = program,
 				argString = argString,

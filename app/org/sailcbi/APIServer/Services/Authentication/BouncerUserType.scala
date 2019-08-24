@@ -13,10 +13,10 @@ object BouncerUserType extends NonMemberUserType {
 		rootCB: CacheBroker,
 		apexToken: String,
 		kioskToken: String
-	): Option[String] =
+	)(implicit PA: PermissionsAuthority): Option[String] =
 		if (
 			request.headers.get(PermissionsAuthority.BOUNCER_AUTH_HEADER).contains("true") &&
-					PermissionsAuthority.requestIsFromLocalHost(request)
+					PA.requestIsFromLocalHost(request)
 		) Some(uniqueUserName)
 		else None
 

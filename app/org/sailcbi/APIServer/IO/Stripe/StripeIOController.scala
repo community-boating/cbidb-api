@@ -11,13 +11,13 @@ import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
 import org.sailcbi.APIServer.Services.Logger.Logger
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, ServerStateContainer}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, ServerParameters}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger) {
+class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
 		apiIO.getStripeList[Charge](
 			"charges",
@@ -55,11 +55,11 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 				"amount" -> amountInCents.toString,
 				"currency" -> "usd",
 				"source" -> token,
-				"description" -> ("Charge for orderId " + orderId + " time " + ServerStateContainer.get.nowDateTimeString),
+				"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.get.nowDateTimeString),
 				"metadata[closeId]" -> closeId.toString,
 				"metadata[orderId]" -> orderId.toString,
 				"metadata[token]" -> token,
-				"metadata[cbiInstance]" -> PermissionsAuthority.instanceName.get
+				"metadata[cbiInstance]" -> PA.instanceName.get
 			)),
 			Some((c: Charge) => dbIO.createObject(c))
 		)

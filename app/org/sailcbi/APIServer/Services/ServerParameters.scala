@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-case class ServerStateContainer private[Services](
+case class ServerParameters private[Services](
 	serverTimeOffsetSeconds: Long
 ) {
 	def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)
@@ -12,8 +12,4 @@ case class ServerStateContainer private[Services](
 	val dateTimeFormatDefault: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 	def nowDateTimeString: String = nowDateTime.format(dateTimeFormatDefault)
-}
-
-object ServerStateContainer {
-	def get: ServerStateContainer = ServerBootLoader.ssc
 }

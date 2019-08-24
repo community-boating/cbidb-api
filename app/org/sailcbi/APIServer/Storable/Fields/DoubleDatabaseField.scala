@@ -4,8 +4,8 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_M
 import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Double](entity, persistenceFieldName) {
-	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
+class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Double](entity, persistenceFieldName) {
+	def getFieldType: String = PA.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
@@ -22,7 +22,7 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		Filter(t => s"$t.$getPersistenceFieldName < $c")
 	}
 
-	def inList(l: List[Double]): Filter = PermissionsAuthority.getPersistenceSystem match {
+	def inList(l: List[Double]): Filter = PA.getPersistenceSystem match {
 		case r: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Double]): List[List[Double]] = {
 				if (ids.length <= r.pbs.MAX_EXPR_IN_LIST) List(ids)

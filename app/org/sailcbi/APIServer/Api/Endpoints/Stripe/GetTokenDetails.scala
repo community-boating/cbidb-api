@@ -13,13 +13,13 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 class GetTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
-	def get(token: String): Action[AnyContent] = Action.async { req => {
-		val logger = PermissionsAuthority.logger
+	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
+		val logger = PA.logger
 		val rc = getRC(ApexUserType, ParsedRequest(req))
 		val pb = rc.pb
 		val stripeIOController = new StripeIOController(
-			PermissionsAuthority.stripeAPIIOMechanism.get(rc)(ws),
-			PermissionsAuthority.stripeDatabaseIOMechanism.get(rc)(pb),
+			PA.stripeAPIIOMechanism.get(rc)(ws),
+			PA.stripeDatabaseIOMechanism.get(rc)(pb),
 			logger
 		)
 

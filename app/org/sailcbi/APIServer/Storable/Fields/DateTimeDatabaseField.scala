@@ -7,10 +7,10 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
+class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-	def getFieldType: String = PermissionsAuthority.getPersistenceSystem match {
+	def getFieldType: String = PA.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "datetime"
 		case PERSISTENCE_SYSTEM_ORACLE => "date"
 	}
@@ -23,7 +23,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	def isYearConstant(year: Int): Filter = PermissionsAuthority.getPersistenceSystem match {
+	def isYearConstant(year: Int): Filter = PA.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -33,7 +33,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		case PERSISTENCE_SYSTEM_ORACLE => Filter(t => s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
 	}
 
-	def isDateConstant(date: LocalDate): Filter = PermissionsAuthority.getPersistenceSystem match {
+	def isDateConstant(date: LocalDate): Filter = PA.getPersistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL =>
 			Filter(t =>
 				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +

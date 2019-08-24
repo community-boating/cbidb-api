@@ -17,10 +17,10 @@ import play.api.http.HttpEntity
 import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 
 class RunJpSpecialNeedsReport @Inject() extends AuthenticatedRequest {
-	def get(from: String, to: String, signet: Option[String]): Action[AnyContent] = Action { req => {
+	def get(from: String, to: String, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { req => {
 		val fromZDT: ZonedDateTime = DateUtil.toBostonTime(DateUtil.parse(from))
 		val toZDT: ZonedDateTime = DateUtil.toBostonTime(DateUtil.parse(to))
-		val logger = PermissionsAuthority.logger
+		val logger = PA.logger
 		val rc = getRC(
 			ApexUserType,
 			ParsedRequest(req)

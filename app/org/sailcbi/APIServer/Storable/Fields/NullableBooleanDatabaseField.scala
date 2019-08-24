@@ -4,12 +4,12 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
+class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def getFieldType: String = getFieldLength match {
 		case l if l == 1 => "char(" + getFieldLength + ")"
-		case _ => PermissionsAuthority.getPersistenceSystem match {
+		case _ => PA.getPersistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL => "char(1)"
 			case PERSISTENCE_SYSTEM_ORACLE => "char(1)"
 		}

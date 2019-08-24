@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, Storable
 object ApexUserType extends NonMemberUserType {
 	val uniqueUserName = "APEX"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] = {
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val headers = request.headers.toMap
 		val headerKey = "apex-token"
 		if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
@@ -15,7 +15,7 @@ object ApexUserType extends NonMemberUserType {
 			// signet?
 			val signetKey = "apex-signet"
 			if (
-				headers.contains(signetKey) && PermissionsAuthority.validateApexSignet(Some(headers(signetKey).mkString("")))
+				headers.contains(signetKey) && PA.validateApexSignet(Some(headers(signetKey).mkString("")))
 			) Some(uniqueUserName)
 			else None
 		}

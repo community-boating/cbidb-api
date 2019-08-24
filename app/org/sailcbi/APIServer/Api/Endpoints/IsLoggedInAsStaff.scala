@@ -12,9 +12,10 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.{ExecutionContext, Future}
 
 class IsLoggedInAsStaff @Inject()(implicit exec: ExecutionContext) extends Controller {
-	def get(): Action[AnyContent] = Action.async { request =>
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			val authResult = PermissionsAuthority.getRequestCache(StaffUserType, None, ParsedRequest(request))
+			val authResult = PA.getRequestCache(StaffUserType, None, ParsedRequest(request))
+			println("blah")
 			authResult._2 match {
 				case Some(rc) => Future {
 					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
@@ -27,7 +28,8 @@ class IsLoggedInAsStaff @Inject()(implicit exec: ExecutionContext) extends Contr
 			case _: UnauthorizedAccessException => Future {
 				Ok(ResultError.UNAUTHORIZED)
 			}
-			case _: Throwable => Future {
+			case e: Throwable => Future {
+				e.printStackTrace()
 				Ok(ResultError.UNAUTHORIZED)
 			}
 		}

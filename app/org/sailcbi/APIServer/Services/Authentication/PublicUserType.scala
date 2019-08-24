@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, Storable
 object PublicUserType extends NonMemberUserType {
 	val uniqueUserName = "PUBLIC"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		Some(uniqueUserName)
 
 	// Anyone can downgrade from anything to public

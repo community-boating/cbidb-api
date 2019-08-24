@@ -4,11 +4,11 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false) extends DatabaseField[Boolean](entity, persistenceFieldName) {
+class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false)(implicit PA: PermissionsAuthority) extends DatabaseField[Boolean](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def getFieldType: String = getFieldLength match {
-		case _ => PermissionsAuthority.getPersistenceSystem match {
+		case _ => PA.getPersistenceSystem match {
 			case _: PERSISTENCE_SYSTEM_RELATIONAL => "char(1)"
 		}
 	}

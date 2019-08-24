@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
 
 object MemberUserType extends UserType {
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String): Option[String] =
+	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
 
 	def getAuthenticatedUsernameFromSuperiorAuth(

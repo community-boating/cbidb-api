@@ -18,8 +18,8 @@ import play.api.mvc._
 
 
 class RunDailyCloseReport @Inject() extends AuthenticatedRequest {
-	def get(closeId: Int, signet: Option[String]): Action[AnyContent] = Action { req => {
-		val logger = PermissionsAuthority.logger
+	def get(closeId: Int, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { req => {
+		val logger = PA.logger
 		try {
 			val rc = getRC(
 				ApexUserType,
