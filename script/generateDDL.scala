@@ -1,9 +1,9 @@
 import java.io.File
 
-import Entities._
-import Services.{MysqlBroker, PersistenceBroker}
-import Storable.Fields.FieldValue.FieldValue
-import Storable.{StorableClass, StorableObject}
+import org.sailcbi.APIServer.Entities._
+import org.sailcbi.APIServer.Services.{MysqlBroker, PersistenceBroker}
+import org.sailcbi.APIServer.Storable.Fields.FieldValue.FieldValue
+import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 ////////////////////////////////////
 implicit val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]
@@ -30,7 +30,7 @@ val entities: List[Entity] = List(
 
 // start: validate all entities are present
 val entityNamesFromFiles: Set[String] = {
-  val path ="app/Entities"
+  val path ="app/org.sailcbi.APIServer.Entities"
   val d = new File(path)
   if (d.exists && d.isDirectory) {
     d.listFiles.filter(_.isFile).map(f => {
@@ -48,7 +48,7 @@ val entityNamesFromClasses: Set[String] = entities.map(e => {
   rawName.substring(9, rawName.length-1)
 }).toSet
 
-if (!entityNamesFromFiles.equals(entityNamesFromClasses)) throw new Exception("Entities are missing")
+if (!entityNamesFromFiles.equals(entityNamesFromClasses)) throw new Exception("org.sailcbi.APIServer.Entities are missing")
 
 // end : validate
 

@@ -1,39 +1,39 @@
-GET     /ping                               Api.Endpoints.Ping.get()
-GET     /flag                           Api.Endpoints.Public.FlagColor.get()
-POST    /stripe/create-charge-from-token    Api.Endpoints.Stripe.CreateChargeFromToken.post()
-GET     /stripe/token-details               Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
-POST    /stripe/sync-db                     Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
-POST 	/symon				Api.Endpoints.Symon.PostSymonRun.post()
-GET     /ip                                     Api.Endpoints.GetIP.get()
+GET     /ping                               org.sailcbi.APIServer.Api.Endpoints.Ping.get()
+GET     /flag                           org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.get()
+POST    /stripe/create-charge-from-token    org.sailcbi.APIServer.Api.Endpoints.Stripe.CreateChargeFromToken.post()
+GET     /stripe/token-details               org.sailcbi.APIServer.Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
+POST    /stripe/sync-db                     org.sailcbi.APIServer.Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
+POST 	/symon				org.sailcbi.APIServer.Api.Endpoints.Symon.PostSymonRun.post()
+GET     /ip                                     org.sailcbi.APIServer.Api.Endpoints.GetIP.get()
 
-GET     /jp-class-instances                 Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
-GET     /jp-class-sections                 Api.Endpoints.Public.JpClassSections.get(startDate: Option[String])
-GET     /ap-class-instances                 Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
-GET     /jp-teams                           Api.Endpoints.Public.JpTeams.get()
+GET     /jp-class-instances                 org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstances.get(startDate: Option[String])
+GET     /jp-class-sections                 org.sailcbi.APIServer.Api.Endpoints.Public.JpClassSections.get(startDate: Option[String])
+GET     /ap-class-instances                 org.sailcbi.APIServer.Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
+GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.get()
 
-GET     /member-welcome                     Api.Endpoints.Member.WelcomePackage.get()
+GET     /member-welcome                     org.sailcbi.APIServer.Api.Endpoints.Member.WelcomePackage.get()
 
-POST    /junior/required                    Api.Endpoints.Member.RequiredInfo.post()
-GET    /junior/required                     Api.Endpoints.Member.RequiredInfo.get(personId: Int)
+POST    /junior/required                    org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.post()
+GET    /junior/required                     org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.get(personId: Int)
 
-POST    /junior/emerg                               Api.Endpoints.Member.EmergencyContact.post()
-GET    /junior/emerg                               Api.Endpoints.Member.EmergencyContact.get(personId: Int)
+POST    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.post()
+GET    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.get(personId: Int)
 
-POST    /junior/swim-proof                               Api.Endpoints.Member.SwimProof.post()
-GET    /junior/swim-proof                               Api.Endpoints.Member.SwimProof.get(personId: Int)
+POST    /junior/swim-proof                               org.sailcbi.APIServer.Api.Endpoints.Member.SwimProof.post()
+GET    /junior/swim-proof                               org.sailcbi.APIServer.Api.Endpoints.Member.SwimProof.get(personId: Int)
 
-POST    /junior/survey                               Api.Endpoints.Member.SurveyInfo.post()
-GET    /junior/survey                               Api.Endpoints.Member.SurveyInfo.get(personId: Int)
-
-
-POST    /junior/scholarship-no                    Api.Endpoints.Member.Scholarship.postNo()
-POST    /junior/scholarship-yes                    Api.Endpoints.Member.Scholarship.postYes()
-
-GET    /junior/see-types                    Api.Endpoints.Member.JuniorSeeClassTypes.get(personId: Int)
-GET    /junior/get-class-instances                    Api.Endpoints.Member.GetClassInstances.get(typeId: Int, juniorId: Int)
+POST    /junior/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.SurveyInfo.post()
+GET    /junior/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.SurveyInfo.get(personId: Int)
 
 
-GET     /is-logged-in-as-member              Api.Endpoints.IsLoggedInAsMember.get()
+POST    /junior/scholarship-no                    org.sailcbi.APIServer.Api.Endpoints.Member.Scholarship.postNo()
+POST    /junior/scholarship-yes                    org.sailcbi.APIServer.Api.Endpoints.Member.Scholarship.postYes()
+
+GET    /junior/see-types                    org.sailcbi.APIServer.Api.Endpoints.Member.JuniorSeeClassTypes.get(personId: Int)
+GET    /junior/get-class-instances                    org.sailcbi.APIServer.Api.Endpoints.Member.GetClassInstances.get(typeId: Int, juniorId: Int)
+
+
+GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

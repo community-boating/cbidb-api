@@ -1,8 +1,8 @@
 package ScalaTest
 
-import CbiUtil.{Failed, Failover, Rejected, Resolved}
-import IO.HTTP.FromScalajHTTP
-import IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
+import org.sailcbi.APIServer.CbiUtil.{Failed, Failover, Rejected, Resolved}
+import org.sailcbi.APIServer.IO.HTTP.FromScalajHTTP
+import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

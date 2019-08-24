@@ -1,7 +1,7 @@
 package ScalaTest
 
-import Services.Emailer.SSMTPEmailer
-import Services.Shell.ShellManager
+import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
+import org.sailcbi.APIServer.Services.Shell.ShellManager
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

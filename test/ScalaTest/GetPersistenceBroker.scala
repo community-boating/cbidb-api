@@ -1,6 +1,6 @@
 package ScalaTest
 
-import Services.{OracleConnectionPoolConstructor, PermissionsAuthority, PersistenceBroker, RelationalBroker}
+import org.sailcbi.APIServer.Services.{OracleConnectionPoolConstructor, PermissionsAuthority, PersistenceBroker, RelationalBroker}
 
 object GetPersistenceBroker {
   def apply(block: PersistenceBroker => Unit): Unit = {

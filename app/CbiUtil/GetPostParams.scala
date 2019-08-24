@@ -1,5 +1,0 @@
-package CbiUtil
-
-object GetPostParams {
-
-}

@@ -1,8 +1,8 @@
 package ScalaTest.Database
 
-import Entities.EntityDefinitions.{JpClassInstance, JpClassType}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassType}
 import ScalaTest.GetPersistenceBroker
-import Storable.StorableQuery.{ColumnAlias, JoinPoint, QueryBuilder, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, JoinPoint, QueryBuilder, TableAlias}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

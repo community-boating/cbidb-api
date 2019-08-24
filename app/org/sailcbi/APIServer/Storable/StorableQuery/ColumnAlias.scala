@@ -1,0 +1,12 @@
+package org.sailcbi.APIServer.Storable.StorableQuery
+
+import org.sailcbi.APIServer.Storable.Fields.DatabaseField
+import org.sailcbi.APIServer.Storable.Filter
+
+case class ColumnAlias[T <: DatabaseField[_]](table: TableAlias, field: T ) {
+	def filter(makeFilter: T => Filter): AliasedFilter = AliasedFilter(table.name, makeFilter(field))
+}
+
+object ColumnAlias {
+	def wrap[T <: DatabaseField[_]](field: T): ColumnAlias[T] = ColumnAlias(TableAlias("t", field.entity), field)
+}

@@ -1,13 +1,13 @@
 package ScalaTest.Database
 
-import Api.Endpoints.ReportingAPI.GetReportRunOptions
-import Entities.EntityDefinitions.{JpClassInstance, JpClassType}
-import Reporting.{Report, ReportFactory}
-import Reporting.ReportingFilters.{ARG_DATE, ARG_DOUBLE, ARG_DROPDOWN, ARG_INT, ReportingFilterFactoryDropdown}
+import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassType}
+import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
+import org.sailcbi.APIServer.Reporting.ReportingFilters.{ARG_DATE, ARG_DOUBLE, ARG_DROPDOWN, ARG_INT, ReportingFilterFactoryDropdown}
 import ScalaTest.GetPersistenceBroker
-import Services.{ServerBootLoader, ServerStateContainer}
-import Storable.StorableClass
-import Storable.StorableQuery.{ColumnAlias, JoinPoint, QueryBuilder, TableAlias}
+import org.sailcbi.APIServer.Services.{ServerBootLoader, ServerStateContainer}
+import org.sailcbi.APIServer.Storable.StorableClass
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, JoinPoint, QueryBuilder, TableAlias}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

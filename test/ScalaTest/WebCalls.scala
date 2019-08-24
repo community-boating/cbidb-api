@@ -1,6 +1,6 @@
 package ScalaTest
 
-import IO.HTTP.{FromScalajHTTP, GET}
+import org.sailcbi.APIServer.IO.HTTP.{FromScalajHTTP, GET}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

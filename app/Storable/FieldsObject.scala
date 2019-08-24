@@ -1,5 +1,0 @@
-package Storable
-
-trait FieldsObject {
-
-}
