@@ -13,8 +13,9 @@ import org.sailcbi.APIServer.Services.Authentication._
 class RequestCache private[Services](val auth: AuthenticationInstance, dbConnection: DatabaseConnection)(implicit val PA: PermissionsAuthority) {
 	private val self = this
 	val pb: PersistenceBroker = {
-		val pbReadOnly = PA.isTestMode
-		if (auth.userType == RootUserType) new OracleBroker(dbConnection, this, false, false)
+		println("In RC:  " + PA.toString)
+		val pbReadOnly = PA.readOnlyDatabase
+		if (auth.userType == RootUserType) new OracleBroker(dbConnection, this, false, pbReadOnly)
 		else new OracleBroker(dbConnection, this, PA.preparedQueriesOnly, pbReadOnly)
 	}
 	val cb: CacheBroker = new RedisBroker

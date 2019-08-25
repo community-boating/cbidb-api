@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import java.time.{LocalDate, LocalDateTime}
-
 import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
 
 class QueryBuilderResultRow(

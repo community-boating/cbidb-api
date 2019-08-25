@@ -21,6 +21,7 @@ import play.api.libs.ws.WSClient
 class PermissionsAuthority private[Services] (
 	val serverParameters: ServerParameters,
 	val isTestMode: Boolean,
+	val readOnlyDatabase: Boolean,
 	private val dbConnection: DatabaseConnection,
 	val allowableUserTypes: Set[UserType],
 	private val apexToken: String,
@@ -32,29 +33,18 @@ class PermissionsAuthority private[Services] (
 	val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism],
 	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism]
 )  {
-	println("inside PermissionsAuthority constructor")
+	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
+	println(this.toString)
 	def instanceName: String = dbConnection.mainSchemaName
 
 	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
-	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
-
 	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 
+	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
 	private lazy val bouncerPB = bouncerRC.pb
 
 	def testDB = rootPB.testDB
-
-	// This should only be called by the unit tester.
-	// If it's ever called when the application is runnning, it shoudl return None.
-	// If the unit tester is running then the initializables aren't set,
-	// so try to get their value, catch the exception, and return the PB
-	def getRootPB: Option[PersistenceBroker] = {
-		if (isTestMode) {
-			println("@@@@ Giving away the root PB; was this the test runner?")
-			Some(rootPB)
-		} else None
-	}
 
 	def logger: Logger = if (!isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
@@ -140,7 +130,6 @@ class PermissionsAuthority private[Services] (
 		}
 	}
 
-
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
@@ -194,14 +183,28 @@ class PermissionsAuthority private[Services] (
 			}
 		}
 	}
+
+	def assertRC(auth: AuthenticationInstance): RequestCache = {
+		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
+		else new RequestCache(auth, dbConnection)
+	}
+
+	def closeDB(): Unit = dbConnection.close()
 }
 
 
 object PermissionsAuthority {
-	private val paWrapper: Initializable[PermissionsAuthority] = new Initializable[PermissionsAuthority]()
+	private var paWrapper: Initializable[PermissionsAuthority] = new Initializable[PermissionsAuthority]()
 	def setPA(pa: PermissionsAuthority): PermissionsAuthority = paWrapper.set(pa)
 	def isBooted: Boolean = paWrapper.isInitialized
-	implicit lazy val PA: PermissionsAuthority = paWrapper.get
+	implicit def PA: PermissionsAuthority = paWrapper.get
+	def clearPA(): Unit = {
+		println("in clearPA()")
+		if (isBooted && paWrapper.get.isTestMode) {
+
+			this.paWrapper = new Initializable[PermissionsAuthority]()
+		}
+	}
 
 	val stripeURL: String = "https://api.stripe.com/v1/"
 	val SEC_COOKIE_NAME = "CBIDB-SEC"

@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 abstract class ServerBootLoader {
-	protected def load(lifecycle: Option[ApplicationLifecycle], isTestMode: Boolean): PermissionsAuthority = {
+	protected def load(lifecycle: Option[ApplicationLifecycle], isTestMode: Boolean, readOnlyDatabase: Boolean): PermissionsAuthority = {
 		def getOptionalProperty(serverProps: ServerInstanceProperties, propname: String): Option[String] = {
 			try {
 				serverProps.getProperty(propname) match {
@@ -90,6 +90,7 @@ abstract class ServerBootLoader {
 					serverTimeOffsetSeconds = 0
 				),
 				isTestMode = isTestMode,
+				readOnlyDatabase = readOnlyDatabase,
 				dbConnection = dbConnection,
 				allowableUserTypes = serverProps.enabledAuthMechanisms,
 				apexToken = serverProps.getProperty("ApexToken"),

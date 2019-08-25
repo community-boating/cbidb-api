@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
 
 class ServerBootLoaderLive @Inject()(lifecycle: ApplicationLifecycle) extends ServerBootLoader {
-	val PA = this.load(Some(lifecycle), false)
+	val PA = this.load(Some(lifecycle), false, false)
 	println("Live loader::::: setting PA!")
 	PermissionsAuthority.setPA(PA)
 }
