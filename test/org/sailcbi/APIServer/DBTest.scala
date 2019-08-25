@@ -65,6 +65,7 @@ class DBTest extends FunSuite {
 			})
 			val types2 = pb.getAllObjectsOfClass(JpClassType)
 			println(types2.size)
+			assert(types.size == types2.size + 1)
 		})
 	}
 }
