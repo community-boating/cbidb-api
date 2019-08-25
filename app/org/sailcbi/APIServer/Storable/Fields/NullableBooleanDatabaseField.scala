@@ -9,7 +9,7 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 
 	def getFieldType: String = getFieldLength match {
 		case l if l == 1 => "char(" + getFieldLength + ")"
-		case _ => PA.getPersistenceSystem match {
+		case _ => PA.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL => "char(1)"
 			case PERSISTENCE_SYSTEM_ORACLE => "char(1)"
 		}

@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Services
 
 import java.sql.Connection
 
-import org.sailcbi.APIServer.CbiUtil.Profiler
 import com.zaxxer.hikari.HikariDataSource
 
 class ConnectionPoolWrapper(private val source: HikariDataSource)  {

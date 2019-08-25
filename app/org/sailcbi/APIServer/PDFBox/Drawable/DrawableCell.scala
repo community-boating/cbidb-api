@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.PDFBox.Drawable
 
 import java.awt.Color
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator._
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class DrawableCell(
 						  val text: String,

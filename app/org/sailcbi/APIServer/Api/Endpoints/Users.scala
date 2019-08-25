@@ -2,12 +2,11 @@ package org.sailcbi.APIServer.Api.Endpoints
 
 import java.time.LocalDateTime
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Users.UsersParamsObject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import javax.inject.Inject
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext

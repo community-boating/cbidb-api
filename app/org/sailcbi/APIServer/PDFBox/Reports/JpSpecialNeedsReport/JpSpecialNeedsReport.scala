@@ -2,12 +2,12 @@ package org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport
 
 import java.awt.Color
 
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.PDFReport
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.{JpSpecialNeedsData, JpSpecialNeedsReportModel}
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.View.JpSpecialNeedsView
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 
 class JpSpecialNeedsReport(data: JpSpecialNeedsReportModel) extends PDFReport(data) {
 	val defaultFont: PDFont = PDType1Font.HELVETICA

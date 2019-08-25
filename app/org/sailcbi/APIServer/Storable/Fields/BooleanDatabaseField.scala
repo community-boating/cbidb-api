@@ -8,7 +8,7 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 	def getFieldLength: Int = 1
 
 	def getFieldType: String = getFieldLength match {
-		case _ => PA.getPersistenceSystem match {
+		case _ => PA.persistenceSystem match {
 			case _: PERSISTENCE_SYSTEM_RELATIONAL => "char(1)"
 		}
 	}

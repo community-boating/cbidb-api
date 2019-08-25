@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.ProtoStorable
-import javax.inject.Inject
 import play.api.mvc.{Action, Controller}
 
 import scala.collection.mutable.ArrayBuffer

@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.PDFBox
 
 import java.awt.Color
 
-import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Alignment}
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDFont
+import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Alignment}
 
 class ContentStreamDecorator(
 	contentStream: PDPageContentStream,

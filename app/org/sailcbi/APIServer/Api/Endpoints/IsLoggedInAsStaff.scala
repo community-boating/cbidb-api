@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 

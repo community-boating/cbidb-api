@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.Taxables
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable._
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.TaxablesItem
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class TaxablesTable(
 						   items: List[TaxablesItem], defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float

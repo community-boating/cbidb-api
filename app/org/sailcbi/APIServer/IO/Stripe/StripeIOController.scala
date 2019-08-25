@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
 import org.sailcbi.APIServer.Services.Logger.Logger
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, ServerParameters}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -55,7 +55,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 				"amount" -> amountInCents.toString,
 				"currency" -> "usd",
 				"source" -> token,
-				"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.get.nowDateTimeString),
+				"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
 				"metadata[closeId]" -> closeId.toString,
 				"metadata[orderId]" -> orderId.toString,
 				"metadata[token]" -> token,

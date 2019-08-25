@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.View
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable._
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Model.{ApClassRosterModel, ApRosterData}
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ApClassRosterView(
 							   data: ApClassRosterModel,

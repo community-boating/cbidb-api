@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import play.api.libs.json.{JsArray, JsString, Json}
+import play.api.libs.json.{JsArray, Json}
 
 class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
 	val getQuery: String =

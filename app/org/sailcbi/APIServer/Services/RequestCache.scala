@@ -15,7 +15,7 @@ class RequestCache private[Services](val auth: AuthenticationInstance, dbConnect
 	val pb: PersistenceBroker = {
 		val pbReadOnly = PA.isTestMode
 		if (auth.userType == RootUserType) new OracleBroker(dbConnection, this, false, false)
-		else new OracleBroker(dbConnection, this, PA.preparedQueriesOnly.getOrElse(true), pbReadOnly)
+		else new OracleBroker(dbConnection, this, PA.preparedQueriesOnly, pbReadOnly)
 	}
 	val cb: CacheBroker = new RedisBroker
 

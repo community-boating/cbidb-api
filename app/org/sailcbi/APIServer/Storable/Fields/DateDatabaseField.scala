@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, Sto
 class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit val PA: PermissionsAuthority) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-	def getFieldType: String = PA.getPersistenceSystem match {
+	def getFieldType: String = PA.persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
 	}
 
@@ -23,7 +23,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		}
 	}
 
-	def isYearConstant(year: Int): Filter = PA.getPersistenceSystem match {
+	def isYearConstant(year: Int): Filter = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -42,7 +42,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 
 	private def dateComparison(date: LocalDate, comp: DateComparison): Filter = {
 		val comparator: String = comp.comparator
-		PA.getPersistenceSystem match {
+		PA.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
 				Filter(t => s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'")
 			case PERSISTENCE_SYSTEM_ORACLE =>

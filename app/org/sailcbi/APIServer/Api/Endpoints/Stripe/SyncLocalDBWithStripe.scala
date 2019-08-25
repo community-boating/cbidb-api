@@ -1,16 +1,15 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest}
 import org.sailcbi.APIServer.IO.Stripe.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class SyncLocalDBWithStripe @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {

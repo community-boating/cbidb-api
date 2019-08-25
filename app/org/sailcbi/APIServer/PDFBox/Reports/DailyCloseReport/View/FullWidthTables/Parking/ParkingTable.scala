@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.Parking
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, DrawableTable, MultiDrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.ParkingData
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ParkingTable(
 						  data: ParkingData,

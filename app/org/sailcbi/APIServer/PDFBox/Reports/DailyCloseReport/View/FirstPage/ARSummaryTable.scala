@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FirstPage
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, Drawable, DrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.DailyCloseReportModel
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ARSummaryTable(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {
 	val widthLeft = 120f

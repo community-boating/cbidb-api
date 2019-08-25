@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, Sto
 class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Double]] = row.doubleFields.get(this.getRuntimeFieldName)
 
-	def getFieldType: String = PA.getPersistenceSystem match {
+	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}

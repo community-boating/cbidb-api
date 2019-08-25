@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.Retail
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable._
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.RetailData
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class RetailTable(
 						 data: List[RetailData],

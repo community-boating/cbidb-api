@@ -3,12 +3,12 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstances.JpClassInstancesParamsObject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import javax.inject.Inject
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 

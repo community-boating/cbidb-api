@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.CbiUtil
 
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 object GetSQLLiteral {
 	def apply(s: String): String = "'" + GetSQLLiteralPrepared(s) + "'"

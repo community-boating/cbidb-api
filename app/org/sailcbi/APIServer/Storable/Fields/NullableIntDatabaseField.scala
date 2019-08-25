@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, Sto
 class NullableIntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)
 
-	def getFieldType: String = PA.getPersistenceSystem match {
+	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}

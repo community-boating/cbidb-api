@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.View
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, DrawableTable, MultiDrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class JpSpecialNeedsView(
 	from: ZonedDateTime,

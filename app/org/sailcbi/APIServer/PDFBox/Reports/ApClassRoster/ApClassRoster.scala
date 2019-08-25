@@ -2,13 +2,13 @@ package org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster
 
 import java.awt.Color
 
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.PDFReport
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Model.{ApClassRosterModel, ApRosterData, ApSignupNotesData, ApSpecialNeedsData}
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.View.{ApClassRosterView, ApRosterTitle, ApSignupNotesView, ApSpecialNeedsView}
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 
 class ApClassRoster(data: ApClassRosterModel) extends PDFReport(data) {
 	val defaultFont: PDFont = PDType1Font.HELVETICA

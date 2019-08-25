@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.Services.Authentication.KioskUserType
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
+import org.sailcbi.APIServer.Services.CacheBroker
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 

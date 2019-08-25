@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.View
 
 import java.time.format.DateTimeFormatter
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, Drawable, DrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Model.ApClassRosterModel
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class ApRosterTitle(data: ApClassRosterModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {
 	//val date: String = data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY hh:mma (EE)"))

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.PDFBox.Drawable
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.CbiUtil.FlatZip
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class DrawableTable(val rows: List[DrawableRow], thickness: Int) extends Drawable {
 	def height: Float = rows.foldLeft(0f)((h, r) => h + r.height)

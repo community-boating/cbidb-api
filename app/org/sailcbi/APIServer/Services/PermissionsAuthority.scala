@@ -6,61 +6,34 @@ import java.sql.ResultSet
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
-import com.zaxxer.hikari.HikariDataSource
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
+import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
-import play.api.Mode
 import play.api.libs.ws.WSClient
-import play.api.mvc.{AnyContent, Request}
 
 
 class PermissionsAuthority private[Services] (
+	val serverParameters: ServerParameters,
 	val isTestMode: Boolean,
-	private val dbConnection: DatabaseConnection
+	private val dbConnection: DatabaseConnection,
+	val allowableUserTypes: Set[UserType],
+	private val apexToken: String,
+	private val kioskToken: String,
+	private val apexDebugSignet: Option[String],
+	private val symonSalt: Option[String],
+	val preparedQueriesOnly: Boolean,
+	val persistenceSystem: PersistenceSystem,
+	val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism],
+	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism]
 )  {
 	println("inside PermissionsAuthority constructor")
 	def instanceName: String = dbConnection.mainSchemaName
-
-	val allowableUserTypes = new Initializable[Set[UserType]]
-	val persistenceSystem = new Initializable[PersistenceSystem]
-
-	def getPersistenceSystem: PersistenceSystem = persistenceSystem.get
-
-	val preparedQueriesOnly = new Initializable[Boolean]
-
-	private val apexDebugSignet = new Initializable[Option[String]]
-
-	def setApexDebugSignet(os: Option[String]): Option[String] = apexDebugSignet.set(os)
-
-	private val apexToken = new Initializable[String]
-
-	def setApexToken(s: String): String = apexToken.set(s)
-
-	val serverParameters = new Initializable[ServerParameters]
-	def setServerParameters(sp: ServerParameters): ServerParameters = serverParameters.set(sp)
-
-	private val kioskToken = new Initializable[String]
-
-	def setKioskToken(s: String): String = kioskToken.set(s)
-
-	private val stripeAPIKey = new Initializable[String]
-
-	def setStripeAPIKey(s: String): String = stripeAPIKey.set(s)
-
-	private val symonSalt = new Initializable[Option[String]]
-
-	def setSymonSalt(s: Option[String]): Option[String] = symonSalt.set(s)
-
-	val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
-	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism] = new Secret(rc => rc.auth.userType == ApexUserType)
-			.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 
 	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
 	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
@@ -71,7 +44,6 @@ class PermissionsAuthority private[Services] (
 	private lazy val bouncerPB = bouncerRC.pb
 
 	def testDB = rootPB.testDB
-
 
 	// This should only be called by the unit tester.
 	// If it's ever called when the application is runnning, it shoudl return None.
@@ -104,8 +76,8 @@ class PermissionsAuthority private[Services] (
 			requiredUserName,
 			parsedRequest,
 			rootCB,
-			apexToken.get,
-			kioskToken.get,
+			apexToken,
+			kioskToken,
 			dbConnection
 		)
 
@@ -113,7 +85,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
+		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
 
 	def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
@@ -121,7 +93,7 @@ class PermissionsAuthority private[Services] (
 		juniorId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
 		println("about to validate junior id in request....")
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request juniorId match the auth'd parent id?
@@ -152,7 +124,7 @@ class PermissionsAuthority private[Services] (
 		parsedRequest: ParsedRequest,
 		parentId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken.get, kioskToken.get, dbConnection)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request parentId match the auth'd parent id?
@@ -171,7 +143,7 @@ class PermissionsAuthority private[Services] (
 
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
 		if (
-			allowableUserTypes.get.contains(userType) && // requested user type is enabled in this server instance
+			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
 					authenticate(request).userType == BouncerUserType
 		) userType.getPwHashForUser(userName, bouncerPB)
 		else None
@@ -187,7 +159,7 @@ class PermissionsAuthority private[Services] (
 	): Boolean = {
 		println("here we go")
 		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
-		val input = symonSalt.get.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get.get
+		val input = symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get
 		println(input)
 		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
 		val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
@@ -196,15 +168,15 @@ class PermissionsAuthority private[Services] (
 		expectedHash == candidateHash
 	}
 
-	def validateApexSignet(candidate: Option[String]): Boolean = apexDebugSignet.getOrElse(None) == candidate
+	def validateApexSignet(candidate: Option[String]): Boolean = apexDebugSignet == candidate
 
 	def authenticate(parsedRequest: ParsedRequest): AuthenticationInstance = {
-		val ret: Option[AuthenticationInstance] = allowableUserTypes.get
+		val ret: Option[AuthenticationInstance] = allowableUserTypes
 				.filter(_ != PublicUserType)
 				.foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
 					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
 					case Some(x) => Some(x)
-					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken.get, kioskToken.get) match {
+					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken, kioskToken) match {
 						case None => None
 						case Some(x: String) => {
 							println("AUTHENTICATION:  Request is authenticated as " + ut)

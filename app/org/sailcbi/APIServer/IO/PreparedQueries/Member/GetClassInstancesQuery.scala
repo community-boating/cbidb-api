@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import java.sql.ResultSet
 
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
+import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
 import play.api.libs.json.Json
 

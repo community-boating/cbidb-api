@@ -2,6 +2,9 @@ package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTabl
 
 import java.awt.Color
 
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable.MultiPageDrawable
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model._
@@ -19,9 +22,6 @@ import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTable
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.Taxables.TaxablesTable
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.WaiversPrivsCards._
 import org.sailcbi.APIServer.PDFBox.{ContentStreamDecorator, PDFReport}
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class FullWidthTables(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float, topMargin: Float) extends MultiPageDrawable {
 	val marginBetweenReports: Float = 10f

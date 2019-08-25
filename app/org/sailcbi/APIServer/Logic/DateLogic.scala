@@ -5,7 +5,7 @@ import java.time.{LocalDate, LocalDateTime, Month}
 
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.MembershipType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ServerParameters}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 
 class DateLogic(rc: RequestCache) {
 	// TODO: also hardcoded in apex.  Need a data solution for spring/fall, and # of regular weeks
@@ -60,7 +60,7 @@ class DateLogic(rc: RequestCache) {
 
 object DateLogic {
 	implicit val PA: PermissionsAuthority = PermissionsAuthority.PA
-	def now: LocalDateTime = LocalDateTime.now.plusSeconds(PA.serverParameters.get.serverTimeOffsetSeconds)
+	def now: LocalDateTime = LocalDateTime.now.plusSeconds(PA.serverParameters.serverTimeOffsetSeconds)
 
 	def currentSeason(asOf: LocalDate = now.toLocalDate): Int = {
 		val currentYear = asOf.getYear

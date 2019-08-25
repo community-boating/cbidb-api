@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Int](entity, persistenceFieldName) {
-	def getFieldType: String = PA.getPersistenceSystem match {
+	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
@@ -25,7 +25,7 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 		Filter(t => s"$t.$getPersistenceFieldName < $c")
 	}
 
-	def inList(l: List[Int]): Filter = PA.getPersistenceSystem match {
+	def inList(l: List[Int]): Filter = PA.persistenceSystem match {
 		case ps: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Int]): List[List[Int]] = {
 				if (ids.length <= ps.pbs.MAX_EXPR_IN_LIST) List(ids)

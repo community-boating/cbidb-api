@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.PDFBox.Abstract
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.CbiUtil.FlatZip
 import org.sailcbi.APIServer.PDFBox.Drawable.{Alignment, DrawableRow}
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 abstract class RowData {
 	def cellValues: List[String]

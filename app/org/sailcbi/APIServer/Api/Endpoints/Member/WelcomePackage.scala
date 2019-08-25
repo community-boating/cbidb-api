@@ -2,13 +2,13 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import java.sql.ResultSet
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 

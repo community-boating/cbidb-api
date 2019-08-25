@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
@@ -7,7 +8,6 @@ import org.sailcbi.APIServer.IO.PreparedQueries.Apex._
 import org.sailcbi.APIServer.IO.Stripe.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Result}
 

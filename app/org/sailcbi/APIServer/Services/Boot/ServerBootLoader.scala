@@ -2,8 +2,9 @@ package org.sailcbi.APIServer.Services.Boot
 
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
-import org.sailcbi.APIServer.Services.{DatabaseConnection, OracleDatabaseConnection, PermissionsAuthority, RelationalBroker, ServerInstanceProperties, ServerParameters}
-import play.api.Mode
+import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -56,6 +57,7 @@ abstract class ServerBootLoader {
 		if (PermissionsAuthority.isBooted) PermissionsAuthority.PA
 		else {
 			println(" ***************     BOOTING UP SERVER   ***************  ")
+			writeToTempFile("going up!")
 
 			val dbConnection = getDBPools()
 			lifecycle match {
@@ -67,39 +69,8 @@ abstract class ServerBootLoader {
 				case None =>
 			}
 
-			val PA = new PermissionsAuthority(
-				isTestMode = isTestMode,
-				dbConnection = dbConnection
-			)
-
-			writeToTempFile("going up!")
-			// Initialize server params
-			PA.setServerParameters(ServerParameters(
-				serverTimeOffsetSeconds = 0
-			))
-
 			// Get server instance properties
 			val serverProps = new ServerInstanceProperties("conf/private/server-properties")
-
-
-
-			// Initialize PermissionsAuthority with activated AuthenticationMechanisms
-			PA.allowableUserTypes.set(serverProps.enabledAuthMechanisms)
-			println("Set enabled auth mechanisms: " + serverProps.enabledAuthMechanisms)
-
-			// Init PA with APEX access token
-			PA.setApexToken(serverProps.getProperty("ApexToken"))
-
-			PA.setKioskToken(serverProps.getProperty("KioskToken"))
-
-			val debugSignet: Option[String] = getOptionalProperty(serverProps, "ApexDebugSignet")
-
-			PA.setApexDebugSignet(debugSignet)
-
-			println("set apex debug signet to " + debugSignet)
-
-			val symonSalt: Option[String] = getOptionalProperty(serverProps, "SymonSalt")
-			PA.setSymonSalt(symonSalt)
 
 			val preparedQueriesOnly = {
 				try {
@@ -113,14 +84,24 @@ abstract class ServerBootLoader {
 					} // default to secure option
 				}
 			}
-			PA.preparedQueriesOnly.set(preparedQueriesOnly)
-			println("Prepared queries only: " + PA.preparedQueriesOnly.get)
 
-			// Init PA with persistence system
-			PA.persistenceSystem.set(PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE)
-
-			PA.stripeAPIIOMechanism.set(
-				ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, serverProps.getProperty("StripeAPIKey"), new FromWSClient(ws))
+			val PA = new PermissionsAuthority(
+				serverParameters = ServerParameters(
+					serverTimeOffsetSeconds = 0
+				),
+				isTestMode = isTestMode,
+				dbConnection = dbConnection,
+				allowableUserTypes = serverProps.enabledAuthMechanisms,
+				apexToken = serverProps.getProperty("ApexToken"),
+				kioskToken = serverProps.getProperty("KioskToken"),
+				apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
+				symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
+				preparedQueriesOnly = preparedQueriesOnly,
+				persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
+				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
+					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, serverProps.getProperty("StripeAPIKey"), new FromWSClient(ws))),
+				stripeDatabaseIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
+					.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 			)
 
 			try {

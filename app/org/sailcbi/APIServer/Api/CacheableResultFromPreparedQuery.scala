@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.{NonMemberUserType, UserType}
+import org.sailcbi.APIServer.Services.Authentication.NonMemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PersistenceBroker}
 import play.api.libs.json.{JsArray, JsObject}

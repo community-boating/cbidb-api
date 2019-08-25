@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Storable.Fields.DateDatabaseField
 import org.sailcbi.APIServer.Storable.StorableClass
 
 class DateFieldValue(instance: StorableClass, field: DateDatabaseField)(implicit PA: PermissionsAuthority) extends FieldValue[LocalDate](instance, field) {
-	def getPersistenceLiteral: String = PA.getPersistenceSystem match {
+	def getPersistenceLiteral: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "'" + super.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'"
 		case PERSISTENCE_SYSTEM_ORACLE => "TO_DATE('" + super.get.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
 	}

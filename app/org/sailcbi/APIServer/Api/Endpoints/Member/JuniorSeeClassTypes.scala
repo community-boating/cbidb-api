@@ -2,12 +2,12 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import java.sql.ResultSet
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
-import javax.inject.Inject
-import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject, JsValue}
+import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext

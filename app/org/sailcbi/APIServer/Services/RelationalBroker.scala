@@ -4,13 +4,12 @@ import java.security.MessageDigest
 import java.sql.{Date, PreparedStatement, ResultSet, Statement}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-import org.sailcbi.APIServer.CbiUtil.{Initializable, Profiler}
+import org.sailcbi.APIServer.CbiUtil.Profiler
 import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.Storable.Fields.FieldValue.FieldValue
 import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, QueryBuilder, QueryBuilderResultRow, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, QueryBuilder, QueryBuilderResultRow}
 import org.sailcbi.APIServer.Storable._
-import com.zaxxer.hikari.HikariDataSource
 
 import scala.collection.mutable.ListBuffer
 

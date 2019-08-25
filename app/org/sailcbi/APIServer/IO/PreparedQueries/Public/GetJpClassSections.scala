@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import play.api.libs.json.{JsArray, JsString, Json}
+import play.api.libs.json.{JsArray, Json}
 
 class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassSectionsResult](Set(PublicUserType)) {
 	val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))

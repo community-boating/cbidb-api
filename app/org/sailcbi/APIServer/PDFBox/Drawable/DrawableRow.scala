@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.PDFBox.Drawable
 
-import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.apache.pdfbox.pdmodel.font.PDFont
+import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 
 class DrawableRow(val cells: List[DrawableCell], thickness: Int) {
 	def height: Float = cells.map(_.getHeight).reduce((a, b) => if (b > a) b else a)

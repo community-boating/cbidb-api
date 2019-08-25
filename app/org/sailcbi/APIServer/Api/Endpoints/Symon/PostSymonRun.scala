@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Symon
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.IO.PreparedQueries.Symon.StoreSymonRun
 import org.sailcbi.APIServer.Services.Authentication.SymonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import javax.inject.Inject
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Result}
 

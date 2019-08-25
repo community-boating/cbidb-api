@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.APVouchers
 
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Abstract.AbstractTable
 import org.sailcbi.APIServer.PDFBox.Drawable._
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.APVoucherData
-import org.apache.pdfbox.pdmodel.font.PDFont
 
 class APVouchersTable(
 							 vouchers: List[APVoucherData],

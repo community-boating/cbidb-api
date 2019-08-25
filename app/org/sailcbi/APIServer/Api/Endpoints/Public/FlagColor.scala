@@ -2,14 +2,14 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import java.time.LocalDateTime
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import javax.inject.Inject
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}

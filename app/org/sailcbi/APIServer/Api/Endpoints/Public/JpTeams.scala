@@ -2,11 +2,11 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import java.time.LocalDateTime
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import javax.inject.Inject
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 

@@ -1,11 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
+import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.GetUserHasRoleQuery
 import org.sailcbi.APIServer.Services.Authentication._
-import javax.inject.Inject
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
