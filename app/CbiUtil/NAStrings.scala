@@ -9,7 +9,7 @@ object NAStrings {
 			case "none" => None
 			case "no" => None
 			case "zero" => None
-			case ss => Some(ss)
+			case _ => Some(s)
 		}
 	}
 }
