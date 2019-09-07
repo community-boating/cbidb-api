@@ -24,16 +24,4 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends A
 			Future(Ok(Json.toJson(queryResult)))
 		}
 	})
-	def public(typeId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
-		val parsedRequest = ParsedRequest(req)
-		val maybeRC = PA.getRequestCache(PublicUserType, None, parsedRequest)._2
-		if (maybeRC.isEmpty) Future {
-			Ok("{\"error\": \"Unauthorized\"}")
-		} else {
-			val rc = maybeRC.get
-			val pb = rc.pb
-			val queryResult = pb.executePreparedQueryForSelect(GetClassInstancesQuery.public(None, typeId)).toArray
-			Future(Ok(Json.toJson(queryResult)))
-		}
-	})
 }

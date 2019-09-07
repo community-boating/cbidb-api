@@ -31,7 +31,7 @@ POST    /junior/scholarship-yes                    org.sailcbi.APIServer.Api.End
 
 GET    /junior/see-types                    org.sailcbi.APIServer.Api.Endpoints.Member.JuniorSeeClassTypes.get(personId: Int)
 GET    /junior/get-class-instances                    org.sailcbi.APIServer.Api.Endpoints.Member.GetClassInstances.junior(typeId: Int, juniorId: Int)
-GET    /class-instances-by-type                    org.sailcbi.APIServer.Api.Endpoints.Member.GetClassInstances.public(typeId: Int)
+GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.get()
 
 
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()

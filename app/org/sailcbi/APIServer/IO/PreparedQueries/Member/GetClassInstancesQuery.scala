@@ -2,24 +2,47 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import java.sql.ResultSet
 
-import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
+import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpClassInstancesResult
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsArray, Json}
 
 object GetClassInstancesQuery {
 	def byJunior(week: Option[Int], typeId: Int, juniorId: Int): HardcodedQueryForSelect[GetClassInstancesQueryResult] = {
 		new HardcodedQueryForSelect[GetClassInstancesQueryResult](Set(MemberUserType)) {
-			override def getQuery: String = query(week, typeId, Some(juniorId))
+			override def getQuery: String = query(week, Some(typeId), Some(juniorId))
 
 			override def mapResultSetRowToCaseObject(rs: ResultSet): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
 		}
 	}
 
-	def public(week: Option[Int], typeId: Int): HardcodedQueryForSelect[GetClassInstancesQueryResult] = {
-		new HardcodedQueryForSelect[GetClassInstancesQueryResult](Set(PublicUserType)) {
-			override def getQuery: String = query(week, typeId, None)
+	def public(): HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult] = {
+		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(PublicUserType)) {
+			override def getQuery: String = query(None, None, None)
 
 			override def mapResultSetRowToCaseObject(rs: ResultSet): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
+
+			override val columnNames: List[String] = List(
+				"INSTANCE_ID",
+				"CLASS_NAME",
+				"FIRST_DAY",
+				"LAST_DAY",
+				"CLASS_TIME",
+				"NOTES",
+				"SPOTS_LEFT",
+				"ACTION"
+			)
+
+			override def mapCaseObjectToJsArray(o: GetClassInstancesQueryResult): JsArray = JsArray(IndexedSeq(
+				Json.toJson(o.instanceId),
+				Json.toJson(o.className),
+				Json.toJson(o.firstDay),
+				Json.toJson(o.lastDay),
+				Json.toJson(o.classTime),
+				Json.toJson(o.notes),
+				Json.toJson(o.spotsLeft),
+				Json.toJson(o.action)
+			))
 		}
 	}
 
@@ -34,13 +57,23 @@ object GetClassInstancesQuery {
 		rs.getString(8)
 	)
 
-	def query(week: Option[Int], typeId: Int, juniorId: Option[Int]): String = {
+	def query(week: Option[Int], typeId: Option[Int], juniorId: Option[Int]): String = {
 		val reserveEligible = juniorId match {
 			case Some(j) => s"jp_class_pkg.is_reserve_eligible(i.instance_id,${j})"
 			case None => "'N'"
 		}
 
 		val weekString = week.getOrElse("null")
+
+		val typeIdClause = typeId match {
+			case Some(t) => s"and t.type_id = $typeId"
+			case None => ""
+		}
+
+		val weekClause = week match {
+			case Some(w) => s"and week = $weekString"
+			case None => ""
+		}
 
 		s"""
 		   |select
@@ -103,12 +136,12 @@ object GetClassInstancesQuery {
 		   |where i.type_id = t.type_id
 		   |and bk.instance_id = i.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
 		   |and (nvl($weekString, '%nu'||'ll%') = '%nu' || 'll%' or (
-		   |    s1.session_datetime between (select monday from jp_weeks where season = util_pkg.get_current_season and week = $weekString)
-		   |    and (select sunday from jp_weeks where season = util_pkg.get_current_season and week = $weekString)
+		   |    s1.session_datetime between (select monday from jp_weeks where season = util_pkg.get_current_season $weekClause)
+		   |    and (select sunday from jp_weeks where season = util_pkg.get_current_season $weekClause)
 		   |))
 		   |and to_char(s1.session_datetime,'YYYY') = util_pkg.get_current_season
 		   |and ${juniorId.map(j => s"jp_class_pkg.see_instance($j,i.instance_id)").getOrElse("'Y'")}  = 'Y'
-		   |and t.type_id = $typeId
+		   |$typeIdClause
 		   |and nvl(i.price,0) = 0
 		   |and nvl(i.reserved_for_group,'N') <> 'Y'
 		   |order by s1.session_datetime
