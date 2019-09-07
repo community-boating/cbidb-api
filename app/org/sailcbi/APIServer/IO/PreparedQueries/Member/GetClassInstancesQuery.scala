@@ -31,7 +31,9 @@ object GetClassInstancesQuery {
 				"NOTES",
 				"SPOTS_LEFT",
 				"ACTION",
-				"TYPE_ID"
+				"TYPE_ID",
+				"START_DATETIME_RAW",
+				"END_DATETIME_RAW"
 			)
 
 			override def mapCaseObjectToJsArray(o: GetClassInstancesQueryResult): JsArray = JsArray(IndexedSeq(
@@ -43,7 +45,9 @@ object GetClassInstancesQuery {
 				Json.toJson(o.notes),
 				Json.toJson(o.spotsLeft),
 				Json.toJson(o.action),
-				Json.toJson(o.typeId)
+				Json.toJson(o.typeId),
+				Json.toJson(o.startDatetimeRaw),
+				Json.toJson(o.endDatetimeRaw)
 			))
 		}
 	}
@@ -57,7 +61,9 @@ object GetClassInstancesQuery {
 		rs.getString(6),
 		rs.getString(7),
 		rs.getString(8),
-		rs.getInt(9)
+		rs.getInt(9),
+		rs.getString(10),
+		rs.getString(11)
 	)
 
 	def query(week: Option[Int], typeId: Option[Int], juniorId: Option[Int]): String = {
@@ -135,7 +141,9 @@ object GetClassInstancesQuery {
 		   |    end)
 		   |  end)
 		   |end) as action,
-		   |i.type_id
+		   |i.type_id,
+		   |to_char(s1.session_datetime,'MM/DD/YYYY HH24:MI') as start_datetime_raw,
+		   |to_char(s2.session_datetime,'MM/DD/YYYY HH24:MI') as end_datetime_raw
 		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk
 		   |where i.type_id = t.type_id
 		   |and bk.instance_id = i.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
@@ -163,7 +171,9 @@ case class GetClassInstancesQueryResult(
 	notes: String,
 	spotsLeft: String,
 	action: String,
-	typeId: Int
+	typeId: Int,
+	startDatetimeRaw: String,
+	endDatetimeRaw: String
 )
 
 object GetClassInstancesQueryResult {
