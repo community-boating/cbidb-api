@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
-import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
+import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
@@ -32,15 +32,15 @@ object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransact
 
 	val apexTableName = "STRIPE_BALANCE_TRANSACTIONS"
 	val persistenceFieldsMap: Map[String, BalanceTransaction => String] = Map(
-		"TRANSACTION_ID" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.id)),
-		"AMOUNT_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.amount)),
-		"DESCRIPTION" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.description)),
-		"FEE_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.fee)),
-		"NET_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.net)),
-		"SOURCE" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.source)),
-		"STATUS" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.status)),
-		"TYPE" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.`type`)),
-		"PAYOUT" -> ((bt: BalanceTransaction) => GetSQLLiteral(bt.payout))
+		"TRANSACTION_ID" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.id)),
+		"AMOUNT_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.amount)),
+		"DESCRIPTION" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.description)),
+		"FEE_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.fee)),
+		"NET_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.net)),
+		"SOURCE" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.source)),
+		"STATUS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.status)),
+		"TYPE" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.`type`)),
+		"PAYOUT" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.payout))
 	)
 	val pkColumnName = "TRANSACTION_ID"
 	val getURL: String = "balance/history"

@@ -8,7 +8,7 @@ object GetSQLLiteralPrepared {
 
 	def apply(s: Option[String]): String = s match {
 		case Some(x) => apply(x);
-		case None => "null"
+		case None => null
 	}
 
 	def apply(i: Int): String = i.toString

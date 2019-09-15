@@ -5,7 +5,10 @@ import java.time.ZonedDateTime
 object GetSQLLiteral {
 	def apply(s: String): String = "'" + GetSQLLiteralPrepared(s) + "'"
 
-	def apply(s: Option[String]): String = GetSQLLiteralPrepared(s)
+	def apply(s: Option[String]): String = GetSQLLiteralPrepared(s) match {
+		case null => "null"
+		case s: String => "'" + s + "'"
+	}
 
 	def apply(i: Int): String = GetSQLLiteralPrepared(i)
 

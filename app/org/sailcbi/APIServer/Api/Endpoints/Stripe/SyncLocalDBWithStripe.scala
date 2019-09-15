@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest}
+import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest, Succeeded}
 import org.sailcbi.APIServer.IO.Stripe.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
@@ -26,7 +26,7 @@ class SyncLocalDBWithStripe @Inject()(ws: WSClient)(implicit exec: ExecutionCont
 				logger.error("Error syncing balance transactions", e)
 				Ok("Error.")
 			}
-			case _ => Ok("balance transactions sync'd")
+			case Succeeded(r) => Ok(s"balance transactions sync'd; completed ${r._1} inserts, ${r._2} updates, ${r._3} deletes.")
 		})
 	}
 	}

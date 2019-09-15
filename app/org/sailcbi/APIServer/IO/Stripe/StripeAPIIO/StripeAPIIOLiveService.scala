@@ -101,7 +101,7 @@ class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMecha
 
 			val f3: Future[Failover[List[T], ServiceRequestResult[List[T], StripeError]]] = f2.map(_.andThen(
 				(jsvs: List[JsValue]) => jsvs.map(jsv => {
-					println("about to construct " + jsv)
+					//println("about to construct " + jsv)
 					constructor(jsv)
 				})
 			))

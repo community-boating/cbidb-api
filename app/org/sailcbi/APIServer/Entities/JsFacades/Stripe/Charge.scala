@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
-import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
+import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.Services.PersistenceBroker
 import play.api.libs.json.{JsValue, Json}
@@ -43,15 +43,15 @@ object Charge extends StripeCastableToStorableObject[Charge] {
 
 	val apexTableName = "STRIPE_CHARGES"
 	val persistenceFieldsMap: Map[String, Charge => String] = Map(
-		"CHARGE_ID" -> ((c: Charge) => GetSQLLiteral(c.id)),
-		"AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteral(c.amount)),
-		"CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteral(c.created)),
-		"PAID" -> ((c: Charge) => GetSQLLiteral(c.paid)),
-		"STATUS" -> ((c: Charge) => GetSQLLiteral(c.status)),
-		"CLOSE_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.closeId)),
-		"ORDER_ID" -> ((c: Charge) => GetSQLLiteral(c.metadata.orderId)),
-		"TOKEN" -> ((c: Charge) => GetSQLLiteral(c.metadata.token)),
-		"REFUNDS" -> ((c: Charge) => GetSQLLiteral(c.metadata.refunds)),
+		"CHARGE_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.id)),
+		"AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteralPrepared(c.amount)),
+		"CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteralPrepared(c.created)),
+		"PAID" -> ((c: Charge) => GetSQLLiteralPrepared(c.paid)),
+		"STATUS" -> ((c: Charge) => GetSQLLiteralPrepared(c.status)),
+		"CLOSE_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.closeId)),
+		"ORDER_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.orderId)),
+		"TOKEN" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.token)),
+		"REFUNDS" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.refunds)),
 	)
 	val pkColumnName = "CHARGE_ID"
 	val getURL: String = "charges"

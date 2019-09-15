@@ -64,7 +64,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 			Some((c: Charge) => dbIO.createObject(c))
 		)
 
-	def syncBalanceTransactions: Future[ServiceRequestResult[Unit, Unit]] = {
+	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
 		// Update DB with all payouts
 		updateLocalDBFromStripeForStorable(
 			Payout,
@@ -89,8 +89,11 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 					COMMIT_TYPE_ASSERT_NO_ACTION,
 					Some(constructor)
 				)
-			})).map(serviceResultList => serviceResultList.foldLeft(Succeeded(Unit): ServiceRequestResult[Unit, Unit])((result, e) => result match {
-				case Succeeded(_) => e
+			})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
+				case Succeeded((c, u, d)) => {
+					val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
+					Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
+				}
 				case x => x
 			}))
 		})
@@ -105,7 +108,7 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 		updateCommitType: CommitType,
 		deleteCommitType: CommitType,
 		constructor: Option[JsValue => T] = None
-	): Future[ServiceRequestResult[Unit, Unit]] = {
+	): Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
 		val localObjects: List[T] = getLocalObjectsQuery(dbIO)
 		getRemoteObjects(castableObj, getReqParameters, filterGetReqResults, constructor).map(remotes => {
 			commitDeltaToDatabase(
@@ -139,13 +142,15 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 		insertCommitType: CommitType,
 		updateCommitType: CommitType,
 		deleteCommitType: CommitType
-	): ServiceRequestResult[Unit, Unit] = {
+	): ServiceRequestResult[(Int, Int, Int), Unit] = {
 		try {
 			println("About to commit delta")
 			println(delta.toCreate.size + " inserts to do")
-			insertCommitType match {
-				case COMMIT_TYPE_DO => delta.toCreate.foreach(dbIO.createObject(_))
-				case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toCreate.nonEmpty) logger.warning("Found unexpected inserts " + delta.toCreate.map(_.pkSqlLiteral).mkString(","))
+			println(delta.toUpdate.size + " updates to do")
+			println(delta.toDestroy.size + " deletes to do")
+			deleteCommitType match {
+				case COMMIT_TYPE_DO => delta.toDestroy.foreach(dbIO.deleteObject(_))
+				case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toDestroy.nonEmpty) logger.warning("Found unexpected deletes " + delta.toDestroy.map(_.pkSqlLiteral).mkString(","))
 				case COMMIT_TYPE_SKIP =>
 			}
 			updateCommitType match {
@@ -153,12 +158,12 @@ class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMech
 				case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toUpdate.nonEmpty) logger.warning("Found unexpected updates " + delta.toUpdate.map(_.pkSqlLiteral).mkString(","))
 				case COMMIT_TYPE_SKIP =>
 			}
-			deleteCommitType match {
-				case COMMIT_TYPE_DO => delta.toDestroy.foreach(dbIO.deleteObject(_))
-				case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toDestroy.nonEmpty) logger.warning("Found unexpected deletes " + delta.toDestroy.map(_.pkSqlLiteral).mkString(","))
+			insertCommitType match {
+				case COMMIT_TYPE_DO => delta.toCreate.foreach(dbIO.createObject(_))
+				case COMMIT_TYPE_ASSERT_NO_ACTION => if (delta.toCreate.nonEmpty) logger.warning("Found unexpected inserts " + delta.toCreate.map(_.pkSqlLiteral).mkString(","))
 				case COMMIT_TYPE_SKIP =>
 			}
-			Succeeded(Unit)
+			Succeeded((delta.toCreate.size, delta.toUpdate.size, delta.toDestroy.size))
 		} catch {
 			case e: Throwable => CriticalError(e)
 		}

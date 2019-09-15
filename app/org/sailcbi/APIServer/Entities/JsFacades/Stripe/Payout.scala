@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import java.time.{Instant, ZonedDateTime}
 
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral}
+import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import play.api.libs.json.{JsValue, Json}
 
@@ -27,11 +27,11 @@ object Payout extends StripeCastableToStorableObject[Payout] {
 
 	val apexTableName = "STRIPE_PAYOUTS"
 	val persistenceFieldsMap: Map[String, Payout => String] = Map(
-		"PAYOUT_ID" -> ((p: Payout) => GetSQLLiteral(p.id)),
-		"AMOUNT_IN_CENTS" -> ((p: Payout) => GetSQLLiteral(p.amount)),
-		"ARRIVAL_DATETIME" -> ((p: Payout) => GetSQLLiteral(p.arrivalZonedDateTime)),
-		"BALANCE_TRANSACTION_ID" -> ((p: Payout) => GetSQLLiteral(p.balance_transaction)),
-		"STATUS" -> ((p: Payout) => GetSQLLiteral(p.status))
+		"PAYOUT_ID" -> ((p: Payout) => GetSQLLiteralPrepared(p.id)),
+		"AMOUNT_IN_CENTS" -> ((p: Payout) => GetSQLLiteralPrepared(p.amount)),
+		"ARRIVAL_DATETIME" -> ((p: Payout) => GetSQLLiteralPrepared(p.arrivalZonedDateTime)),
+		"BALANCE_TRANSACTION_ID" -> ((p: Payout) => GetSQLLiteralPrepared(p.balance_transaction)),
+		"STATUS" -> ((p: Payout) => GetSQLLiteralPrepared(p.status))
 	)
 	val pkColumnName = "PAYOUT_ID"
 	val getURL: String = "payouts"
