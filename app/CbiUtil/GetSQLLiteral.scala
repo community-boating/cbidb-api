@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object GetSQLLiteral {
-	def apply(s: String): String = "'" + s + "'"
+	def apply(s: String): String = "'" + s.replace("'", "''") + "'"
 
 	def apply(s: Option[String]): String = s match {
 		case Some(x) => apply(x);
