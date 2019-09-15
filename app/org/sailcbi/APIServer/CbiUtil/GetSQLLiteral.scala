@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.CbiUtil
 import java.time.ZonedDateTime
 
 object GetSQLLiteral {
-	def apply(s: String): String = "'" + GetSQLLiteralPrepared(s) + "'"
+	def apply(s: String): String = "'" + GetSQLLiteralPrepared(s).replace("'", "''") + "'"
 
 	def apply(s: Option[String]): String = GetSQLLiteralPrepared(s) match {
 		case null => "null"
