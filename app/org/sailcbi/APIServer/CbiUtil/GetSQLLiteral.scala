@@ -7,7 +7,7 @@ object GetSQLLiteral {
 
 	def apply(s: Option[String]): String = GetSQLLiteralPrepared(s) match {
 		case null => "null"
-		case s: String => "'" + s + "'"
+		case s: String => apply(s)
 	}
 
 	def apply(i: Int): String = GetSQLLiteralPrepared(i)
