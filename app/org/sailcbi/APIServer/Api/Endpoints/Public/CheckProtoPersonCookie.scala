@@ -22,6 +22,7 @@ class CheckProtoPersonCookie extends Controller {
 			val cookie = Cookie(
 				name = cookieName,
 				value = scala.util.Random.alphanumeric.take(40).mkString,
+				maxAge = Some(60 * 60 * 24), // 24hr
 				secure = secure,
 				httpOnly = true
 			)
