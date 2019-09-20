@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Member
 import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
-import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpClassInstancesResult
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
 import play.api.libs.json.{JsArray, Json}
 

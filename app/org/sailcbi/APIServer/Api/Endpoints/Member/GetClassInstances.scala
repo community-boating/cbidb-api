@@ -4,7 +4,6 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.GetClassInstancesQuery
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}

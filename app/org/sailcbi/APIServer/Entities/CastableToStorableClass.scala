@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities
 
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PersistenceBroker
 
