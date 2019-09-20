@@ -5,17 +5,19 @@ import org.sailcbi.APIServer.Services.Authentication._
 
 class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation, ServerInstanceProperties.requiredProperties) {
 	// 3rd member is a function that returns true if the user type is permitted, false if we need to force-disable it even if conf says enable
-	private val definedAuthMechanisms: Set[(UserType, String, () => Boolean)] = Set(
-		(MemberUserType, "MemberAuthEnabled", () => true),
-		(StaffUserType, "StaffAuthEnabled", () => true),
+	// TODO: verify this is the order we want.  If someone can auth as multiple of these, first one wins.  Member has to go before protoperson e.g.
+	private val definedAuthMechanisms: List[(UserType, String, () => Boolean)] = List(
+		(RootUserType, "RootAuthEnabled", () => true),
+		(BouncerUserType, "BouncerAuthEnabled", () => true),
 		(ApexUserType, "ApexAuthEnabled", () => true),
 		(KioskUserType, "KioskAuthEnabled", () => true),
 		(SymonUserType, "SymonAuthEnabled", () => getPropAsOption("SymonSalt").isDefined),
-		(BouncerUserType, "BouncerAuthEnabled", () => true),
-		(RootUserType, "RootAuthEnabled", () => true)
+		(StaffUserType, "StaffAuthEnabled", () => true),
+		(MemberUserType, "MemberAuthEnabled", () => true),
+		(ProtoPersonUserType, "ProtoPersonAuthEnabled", () => true)
 	)
 
-	val enabledAuthMechanisms: Set[UserType] =
+	val enabledAuthMechanisms: List[UserType] =
 		definedAuthMechanisms
 				.filter(t => getRequiredBoolean(t._2))
 				.filter(t => t._3()) // check the nuke function
@@ -47,6 +49,7 @@ object ServerInstanceProperties {
 		"SymonAuthEnabled",
 		"BouncerAuthEnabled",
 		"RootAuthEnabled",
+		"ProtoPersonAuthEnabled",
 		"ApexToken",
 		"ApexDebugSignet",
 		"StripeAPIKey",

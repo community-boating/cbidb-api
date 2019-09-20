@@ -23,7 +23,7 @@ class PermissionsAuthority private[Services] (
 	val isTestMode: Boolean,
 	val readOnlyDatabase: Boolean,
 	private val dbConnection: DatabaseConnection,
-	val allowableUserTypes: Set[UserType],
+	val allowableUserTypes: List[UserType],
 	private val apexToken: String,
 	private val kioskToken: String,
 	private val apexDebugSignet: Option[String],

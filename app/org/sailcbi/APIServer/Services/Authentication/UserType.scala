@@ -49,7 +49,8 @@ abstract class UserType {
 				case None => None
 				case Some(s: String) => {
 					val split = s.split(",")
-					if (split.length != 2) None
+					if (split.length != 2) None // essentially panics if there are commas in the username
+					// If the comma is the first char, userName will be ""
 					val userName = split(0)
 					val expires = split(1)
 					println("expires ")
