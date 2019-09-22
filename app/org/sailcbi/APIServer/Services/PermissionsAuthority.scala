@@ -38,6 +38,8 @@ class PermissionsAuthority private[Services] (
 	def instanceName: String = dbConnection.mainSchemaName
 
 	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
+	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
+	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 

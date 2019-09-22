@@ -31,20 +31,20 @@ object ProtoPersonUserType extends NonMemberUserType {
 
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 
-	def getAuthedPersonId(userName: String, rootPB: PersistenceBroker): Int = {
-		val ids = rootPB.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
+	def getAuthedPersonId(cookieValue: String, pb: PersistenceBroker): Option[Int] = {
+		val ids = pb.executePreparedQueryForSelect(getMatchingPersonIDsQuery(cookieValue))
 		// TODO: critical error if this list has >1 element
-		ids.head
+		ids.headOption
 	}
 
-	def getMatchingPersonIDsQuery(userName: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
 		override def getQuery: String =
 			"""
 			  |select p.person_id from persons p, (
 			  |    select person_id from persons minus select person_id from persons_to_delete
 			  | ) ilv where p.person_id = ilv.person_id and PROTOPERSON_COOKIE = ?
 				""".stripMargin
-		override val params: List[String] = List(userName)
+		override val params: List[String] = List(cookieValue)
 		override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
 	}
 }
