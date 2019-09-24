@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -21,7 +21,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 		val cb: CacheBroker = rc.cb
 
 		val select = new PreparedQueryForSelect[EmergencyContactShape](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): EmergencyContactShape =
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): EmergencyContactShape =
 				EmergencyContactShape(
 					juniorId,
 					rs.getOptionString(1),

@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpClassInstanceData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetJpClassInstanceData(instanceId: Int) extends HardcodedQueryForSelect[JpClassInstanceData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -22,10 +23,10 @@ class GetJpClassInstanceData(instanceId: Int) extends HardcodedQueryForSelect[Jp
 		   | group by i.instance_id, t.type_name
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): JpClassInstanceData = JpClassInstanceData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): JpClassInstanceData = JpClassInstanceData(
 		rs.getInt(1),
 		rs.getString(2),
 		rs.getInt(3),
-		DateUtil.toBostonTime(rs.getTimestamp(4).toLocalDateTime)
+		DateUtil.toBostonTime(rs.getLocalDateTime(4))
 	)
 }

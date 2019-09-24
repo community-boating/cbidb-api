@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.GCCompsData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GCCompsQuery(closeId: Int) extends HardcodedQueryForSelect[GCCompsData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -25,7 +26,7 @@ class GCCompsQuery(closeId: Int) extends HardcodedQueryForSelect[GCCompsData](Se
 		   |    order by 1,2
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GCCompsData = new GCCompsData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GCCompsData = new GCCompsData(
 		recipient = rs.getStringOrEmptyString(1),
 		certNumber = rs.getStringOrEmptyString(2),
 		value = Currency.cents(rs.getInt(5))

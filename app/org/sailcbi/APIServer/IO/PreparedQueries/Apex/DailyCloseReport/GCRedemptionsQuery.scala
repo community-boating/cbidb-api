@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.GCRedemptionData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GCRedemptionsQuery(closeId: Int) extends HardcodedQueryForSelect[GCRedemptionData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -55,7 +56,7 @@ class GCRedemptionsQuery(closeId: Int) extends HardcodedQueryForSelect[GCRedempt
 		   |and fagc.close_id = $closeId
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GCRedemptionData = new GCRedemptionData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GCRedemptionData = new GCRedemptionData(
 		lastName = rs.getStringOrEmptyString(1),
 		firstName = rs.getStringOrEmptyString(2),
 		certNumber = rs.getStringOrEmptyString(5),

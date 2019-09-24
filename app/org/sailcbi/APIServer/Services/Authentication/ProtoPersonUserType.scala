@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
 
 
@@ -45,6 +45,6 @@ object ProtoPersonUserType extends NonMemberUserType {
 			  | ) ilv where p.person_id = ilv.person_id and PROTOPERSON_COOKIE = ?
 				""".stripMargin
 		override val params: List[String] = List(cookieValue)
-		override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+		override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 	}
 }

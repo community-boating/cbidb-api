@@ -54,7 +54,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			profiler.lap("starting rows")
 			while (rs.next) {
 				rowCounter += 1
-				resultObjects += pq.mapResultSetRowToCaseObject(rs)
+				resultObjects += pq.mapResultSetRowToCaseObject(ResultSetWrapper(rs))
 			}
 			profiler.lap("finsihed rows")
 			val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
@@ -218,6 +218,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 				(params.get.indices zip params.get).foreach(t => {
 					ps.setString(t._1 + 1, t._2)
 				})
+				println("Parameterized with " + params)
 			}
 			ps.executeUpdate()
 			if (pkPersistenceName.isDefined) {

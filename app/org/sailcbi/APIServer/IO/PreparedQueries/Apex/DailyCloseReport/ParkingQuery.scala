@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.ParkingData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ParkingQuery(closeId: Int) extends HardcodedQueryForSelect[ParkingData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -23,7 +24,7 @@ class ParkingQuery(closeId: Int) extends HardcodedQueryForSelect[ParkingData](Se
 		   |      order by 1
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): ParkingData = new ParkingData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ParkingData = new ParkingData(
 		open = rs.getInt(1),
 		close = rs.getInt(2),
 		plusMinus = rs.getInt(3),

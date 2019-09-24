@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, Controller}
 
@@ -85,7 +85,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 							   |
 						 """.stripMargin
 
-						def mapResultSetRowToCaseObject(rs: ResultSet): Double = rs.getDouble(1)
+						def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 					}
 					val eiis = pb.executePreparedQueryForSelect(eiiQ)
 					if (eiis.length == 1) {
@@ -166,7 +166,7 @@ object Scholarship {
 				   |select price from membership_types where membership_type_id = ${MagicIds.JUNIOR_SUMMER_MEMBERSHIP_TYPE_ID}
 							 """.stripMargin
 
-			def mapResultSetRowToCaseObject(rs: ResultSet): Double = rs.getDouble(1)
+			def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 		}
 		pb.executePreparedQueryForSelect(q).head
 	}
@@ -189,7 +189,7 @@ object Scholarship {
 				   |select person_pkg.jp_price($eii, $income, $totalKids) from dual
 				   |""".stripMargin
 
-			def mapResultSetRowToCaseObject(rs: ResultSet): Double = rs.getDouble(1)
+			def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 		}
 		pb.executePreparedQueryForSelect(q).head
 	}

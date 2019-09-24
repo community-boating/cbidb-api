@@ -7,6 +7,7 @@ import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, NAStrings}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetSpecialNeedsData(from: ZonedDateTime, to: ZonedDateTime) extends HardcodedQueryForSelect[JpSpecialNeedsData](Set(ApexUserType)) {
 	val fromLiteral: String = GetSQLLiteral(from, true)
@@ -30,7 +31,7 @@ class GetSpecialNeedsData(from: ZonedDateTime, to: ZonedDateTime) extends Hardco
 		   | order by 3,2
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): JpSpecialNeedsData = JpSpecialNeedsData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): JpSpecialNeedsData = JpSpecialNeedsData(
 		personId = rs.getInt(1),
 		firstName = rs.getString(2),
 		lastName = rs.getString(3),

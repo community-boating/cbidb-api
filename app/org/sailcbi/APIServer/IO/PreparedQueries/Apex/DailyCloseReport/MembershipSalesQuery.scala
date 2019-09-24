@@ -7,6 +7,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.MembershipSale
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[MembershipSale](Set(ApexUserType)) {
 	val taxDiscrepanciesId: String = MagicIds.FO_ITEM_TAX_DISCREPANCIES.toString
@@ -67,30 +68,16 @@ class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[Members
        |      order by 4, 6, 5, 3, 2
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): MembershipSale = new MembershipSale(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): MembershipSale = new MembershipSale(
 		closeId,
-		fullName = {
-			val lastname = rs.getStringOrEmptyString(3)
-			val firstName = rs.getStringOrEmptyString(2)
-			if (rs.wasNull()) lastname
-			else lastname + ", " + firstName
+		fullName = rs.getOptionString(2) match {
+			case Some(firstName) => rs.getStringOrEmptyString(3) + ", " + firstName
+			case None => rs.getStringOrEmptyString(3)
 		},
 		membershipType = rs.getStringOrEmptyString(4),
-		discountAmount = {
-			val ret = rs.getInt(7)
-			if (rs.wasNull()) None
-			else Some(Currency.cents(ret))
-		},
-		discountName = {
-			val ret = rs.getString(6)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
-		location = {
-			val ret = rs.getString(1)
-			if (rs.wasNull()) "In-Person"
-			else ret
-		},
+		discountAmount = rs.getOptionInt(7).map(Currency.cents),
+		discountName = rs.getOptionString(6),
+		location = rs.getOptionString(1).getOrElse("In-Person"),
 		price = Currency.cents(rs.getInt(5))
 	)
 }

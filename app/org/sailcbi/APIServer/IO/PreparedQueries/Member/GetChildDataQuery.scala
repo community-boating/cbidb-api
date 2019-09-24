@@ -4,11 +4,12 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.Json
 
 // TODO: replace with entity-based arch
 class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDataQueryResult](allowedUserTypes = Set(MemberUserType)) {
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetChildDataQueryResult =
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetChildDataQueryResult =
 		GetChildDataQueryResult(
 			rs.getInt(1),
 			rs.getString(2),

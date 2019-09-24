@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class CloseCash(closeId: Int) extends HardcodedQueryForSelect[CloseCashResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -24,7 +25,7 @@ class CloseCash(closeId: Int) extends HardcodedQueryForSelect[CloseCashResult](S
 		   |and c.close_id = $closeId
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): CloseCashResult = new CloseCashResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): CloseCashResult = new CloseCashResult(
 		rs.getInt(1),
 		rs.getStringOrEmptyString(2),
 		rs.getString(3) == "O",

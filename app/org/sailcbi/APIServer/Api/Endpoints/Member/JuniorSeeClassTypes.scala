@@ -6,7 +6,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject}
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -22,7 +22,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Con
 		val cb: CacheBroker = rc.cb
 
 		val select = new PreparedQueryForSelect[SeeTypeResult](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): SeeTypeResult =
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SeeTypeResult =
 				SeeTypeResult(rs.getInt(1), rs.getBooleanFromChar(2))
 
 			// Limiting to class types in current use reduces query time from ~1200ms to ~900ms

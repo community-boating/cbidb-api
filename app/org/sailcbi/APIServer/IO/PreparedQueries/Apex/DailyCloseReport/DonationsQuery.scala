@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.Donation
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set(ApexUserType)) {
 	val getQuery: String =
@@ -40,10 +41,10 @@ class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set
        |      order by 2,1
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): Donation = new Donation(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Donation = new Donation(
 		name = rs.getStringOrEmptyString(2),
 		fundName = rs.getStringOrEmptyString(4),
-		donationDate = DateUtil.toBostonTime(rs.getTimestamp(5).toLocalDateTime),
+		donationDate = DateUtil.toBostonTime(rs.getLocalDateTime(5)),
 		location = rs.getStringOrEmptyString(1),
 		amount = Currency.cents(rs.getInt(3))
 	)

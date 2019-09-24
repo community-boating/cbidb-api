@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteralPrepared, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -21,7 +21,7 @@ class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends Controller {
 		val cb: CacheBroker = rc.cb
 
 		val select = new PreparedQueryForSelect[SurveyInfoShape](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): SurveyInfoShape =
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SurveyInfoShape =
 				SurveyInfoShape(
 					juniorId,
 					rs.getOptionString(1),

@@ -5,7 +5,7 @@ import java.sql.ResultSet
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 
 class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
 	val getQuery: String =
@@ -17,7 +17,7 @@ class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAutho
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): Charge = {
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Charge = {
 		// TODO: put this in a library somewhere
 		val refunds = rs.getString(9) match {
 			case "null" | null => None

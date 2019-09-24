@@ -19,7 +19,7 @@ object MemberUserType extends UserType {
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): Result = Result(rs.getString(1), rs.getString(2))
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select email, pw_hash from persons where pw_hash is not null and lower(email) = ?"
 
@@ -43,7 +43,7 @@ object MemberUserType extends UserType {
 				  | ) ilv where p.person_id = ilv.person_id and lower(email) = lower(?) and pw_hash is not null order by 1 desc
 				""".stripMargin
 			override val params: List[String] = List(userName)
-			override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
 		val ids = rootPB.executePreparedQueryForSelect(q)
 		// TODO: critical error if this list has >1 element

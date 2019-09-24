@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsString}
 
 class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColorResult](Set(PublicUserType)) {
@@ -12,7 +13,7 @@ class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColo
 		  |select flag from flag_changes where change_datetime = (select max(change_datetime) from flag_changes)
 		""".stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetFlagColorResult = GetFlagColorResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetFlagColorResult = GetFlagColorResult(
 		rs.getString(1),
 	)
 

@@ -6,6 +6,7 @@ import java.time.ZonedDateTime
 import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class CloseProps(closeId: Int) extends HardcodedQueryForSelect[ClosePropsResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -34,7 +35,7 @@ class CloseProps(closeId: Int) extends HardcodedQueryForSelect[ClosePropsResult]
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): ClosePropsResult = new ClosePropsResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ClosePropsResult = new ClosePropsResult(
 		rs.getInt(1),
 		Currency.dollars(rs.getDouble(2)),
 		Currency.dollars(rs.getDouble(3)),
@@ -43,22 +44,10 @@ class CloseProps(closeId: Int) extends HardcodedQueryForSelect[ClosePropsResult]
 		Currency.dollars(rs.getDouble(6)),
 		Currency.dollars(rs.getDouble(7)),
 		Currency.dollars(rs.getDouble(8)),
-		{
-			val ret = rs.getTimestamp(9)
-			if (rs.wasNull()) None
-			else Some(DateUtil.toBostonTime(ret.toLocalDateTime))
-		},
-		Currency.dollars(rs.getDouble(10)),
-		{
-			val notes = rs.getString(11); if (rs.wasNull()) None else Some(notes)
-		},
-		{
-			val firstName = rs.getString(13)
-			val firstNameWasNull = rs.wasNull()
-			val lastName = rs.getString(14)
-			if (rs.wasNull() || firstNameWasNull) None
-			else Some(firstName + " " + lastName)
-		},
+		rs.getOptionLocalDateTime(9).map(DateUtil.toBostonTime),
+		Currency.dollars(rs.getOptionDouble(10).getOrElse(0d)),
+		rs.getOptionString(11),
+		rs.getOptionString(13).flatMap(firstName => rs.getOptionString(14).map(lastName => firstName + " " + lastName)),
 		Currency.dollars(rs.getDouble(15))
 	)
 }

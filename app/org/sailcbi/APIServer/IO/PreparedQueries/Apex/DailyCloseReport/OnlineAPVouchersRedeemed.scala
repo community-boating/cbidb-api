@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class OnlineAPVouchersRedeemed(closeId: Int) extends HardcodedQueryForSelect[OnlineAPVouchersRedeemedResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -20,7 +21,7 @@ class OnlineAPVouchersRedeemed(closeId: Int) extends HardcodedQueryForSelect[Onl
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): OnlineAPVouchersRedeemedResult = new OnlineAPVouchersRedeemedResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): OnlineAPVouchersRedeemedResult = new OnlineAPVouchersRedeemedResult(
 		rs.getInt(1),
 		Currency.dollars(rs.getDouble(2))
 	)

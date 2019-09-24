@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.APClassData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ApClassSignupsQuery(closeId: Int) extends HardcodedQueryForSelect[APClassData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -53,11 +54,11 @@ class ApClassSignupsQuery(closeId: Int) extends HardcodedQueryForSelect[APClassD
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): APClassData = new APClassData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): APClassData = new APClassData(
 		lastName = rs.getStringOrEmptyString(3),
 		firstName = rs.getStringOrEmptyString(2),
 		className = rs.getStringOrEmptyString(4),
-		firstSession = DateUtil.toBostonTime(rs.getTimestamp(6).toLocalDateTime),
+		firstSession = DateUtil.toBostonTime(rs.getLocalDateTime(6)),
 		price = Currency.cents(rs.getInt(5)),
 		payment = rs.getStringOrEmptyString(7)
 	)

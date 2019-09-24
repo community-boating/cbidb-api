@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.APVoucherData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ApVouchersQuery(closeId: Int) extends HardcodedQueryForSelect[APVoucherData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -31,7 +32,7 @@ class ApVouchersQuery(closeId: Int) extends HardcodedQueryForSelect[APVoucherDat
 		   |      and void_close_id = $closeId
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): APVoucherData = new APVoucherData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): APVoucherData = new APVoucherData(
 		lastName = rs.getStringOrEmptyString(2),
 		firstName = rs.getStringOrEmptyString(1),
 		price = Currency.cents(rs.getInt(3)),

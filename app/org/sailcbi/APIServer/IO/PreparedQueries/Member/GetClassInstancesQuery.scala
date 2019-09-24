@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
 object GetClassInstancesQuery {
@@ -11,7 +12,7 @@ object GetClassInstancesQuery {
 		new HardcodedQueryForSelect[GetClassInstancesQueryResult](Set(MemberUserType)) {
 			override def getQuery: String = query(week, Some(typeId), Some(juniorId))
 
-			override def mapResultSetRowToCaseObject(rs: ResultSet): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
 		}
 	}
 
@@ -19,7 +20,7 @@ object GetClassInstancesQuery {
 		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(PublicUserType)) {
 			override def getQuery: String = query(None, None, None)
 
-			override def mapResultSetRowToCaseObject(rs: ResultSet): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
 
 			override val columnNames: List[String] = List(
 				"INSTANCE_ID",
@@ -51,7 +52,7 @@ object GetClassInstancesQuery {
 		}
 	}
 
-	def mapResultSetRowToCaseObjectImpl(rs: ResultSet): GetClassInstancesQueryResult = GetClassInstancesQueryResult(
+	def mapResultSetRowToCaseObjectImpl(rs: ResultSetWrapper): GetClassInstancesQueryResult = GetClassInstancesQueryResult(
 		rs.getInt(1),
 		rs.getString(2),
 		rs.getString(3),

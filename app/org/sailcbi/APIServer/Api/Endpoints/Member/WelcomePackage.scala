@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 
@@ -32,7 +32,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rs: ResultSet): Int = 1
+				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = 1
 			}).nonEmpty
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")

@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.ReplacementCardData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ReplacementCardsQuery(closeId: Int) extends HardcodedQueryForSelect[ReplacementCardData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -21,7 +22,7 @@ class ReplacementCardsQuery(closeId: Int) extends HardcodedQueryForSelect[Replac
 		   |      order by 2,1
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): ReplacementCardData = new ReplacementCardData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ReplacementCardData = new ReplacementCardData(
 		fullName = rs.getStringOrEmptyString(2) + ", " + rs.getStringOrEmptyString(1),
 		price = Currency.cents(rs.getInt(3))
 	)

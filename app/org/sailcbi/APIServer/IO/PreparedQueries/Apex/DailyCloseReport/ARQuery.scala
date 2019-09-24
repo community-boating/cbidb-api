@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.AR
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ARQuery(closeId: Int) extends HardcodedQueryForSelect[AR](Set(ApexUserType)) {
 	val getQuery: String =
@@ -19,7 +20,7 @@ class ARQuery(closeId: Int) extends HardcodedQueryForSelect[AR](Set(ApexUserType
 		   |      order by is_online,display_order
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): AR = new AR(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): AR = new AR(
 		rs.getStringOrEmptyString(1),
 		Currency.cents(rs.getInt(2))
 	)

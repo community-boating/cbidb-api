@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.GCSalesData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GCSalesQuery(closeId: Int) extends HardcodedQueryForSelect[GCSalesData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -43,15 +44,11 @@ class GCSalesQuery(closeId: Int) extends HardcodedQueryForSelect[GCSalesData](Se
 		   |order by 1,2
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GCSalesData = new GCSalesData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GCSalesData = new GCSalesData(
 		purchaser = rs.getStringOrEmptyString(1),
 		recipient = rs.getStringOrEmptyString(2),
 		certNumber = rs.getStringOrEmptyString(3),
 		paid = Currency.cents(rs.getInt(5)),
-		value = {
-			val discount = rs.getInt(7)
-			if (rs.wasNull()) None
-			else Some(Currency.cents(rs.getInt(6)).format() + " (Discount amt: " + Currency.cents(discount).format() + ")")
-		}
+		value = rs.getOptionInt(7).map(i => Currency.cents(rs.getInt(6)).format() + " (Discount amt: " + Currency.cents(i).format() + ")")
 	)
 }

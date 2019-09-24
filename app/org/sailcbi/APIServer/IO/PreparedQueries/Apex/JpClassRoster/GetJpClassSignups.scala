@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.{Initializable, NAStrings}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpRosterData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRosterData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -32,7 +33,7 @@ class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRoste
 		   | order by p.name_last, p.name_first
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): JpRosterData = new JpRosterData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): JpRosterData = new JpRosterData(
 		personId = rs.getInt(1),
 		firstName = rs.getString(2),
 		lastName = rs.getString(3),

@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -22,7 +22,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 		val cb: CacheBroker = rc.cb
 
 		val select = new PreparedQueryForSelect[RequiredInfoShape](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): RequiredInfoShape =
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): RequiredInfoShape =
 				RequiredInfoShape(
 					juniorId,
 					rs.getOptionString(1),
@@ -165,7 +165,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 	}
 	def tooOld(pb: PersistenceBroker, dob: String): Option[ValidationError] = {
 		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
 				s"""
@@ -183,7 +183,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Int): Option[ValidationError] = {
 		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1).equals("Y")
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
 				s"""

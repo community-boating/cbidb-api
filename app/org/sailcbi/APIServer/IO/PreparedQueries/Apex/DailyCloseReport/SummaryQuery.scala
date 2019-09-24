@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.SummaryItem
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class SummaryQuery(closeId: Int) extends HardcodedQueryForSelect[SummaryItem](Set(ApexUserType)) {
 	val getQuery: String =
@@ -68,36 +69,15 @@ class SummaryQuery(closeId: Int) extends HardcodedQueryForSelect[SummaryItem](Se
        |    order by 1,2 nulls first
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): SummaryItem = new SummaryItem(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SummaryItem = new SummaryItem(
 		itemName = rs.getStringOrEmptyString(1),
-		discountName = {
-			val ret = rs.getString(2)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
-		inpersonCount = {
-			val ret = rs.getInt(3)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
-		inpersonTotal = {
-			val ipTotal = Currency.cents(rs.getInt(4))
-			if (rs.wasNull()) None
-			else {
-				val taxTotal = Currency.cents(rs.getInt(5))
-				if (rs.wasNull()) Some(ipTotal.format())
-				else Some(ipTotal.format() + " + " + taxTotal.format())
-			}
-		},
-		onlineCount = {
-			val ret = rs.getInt(6)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
-		onlineTotal = {
-			val ret = rs.getInt(7)
-			if (rs.wasNull()) None
-			else Some(Currency.cents(ret))
-		}
+		discountName = rs.getOptionString(2),
+		inpersonCount = rs.getOptionInt(3),
+		inpersonTotal = rs.getOptionInt(4).map(ip => rs.getOptionInt(5) match {
+			case Some(tax) => Currency.cents(ip).format() + " + " + Currency.cents(tax).format()
+			case None => Currency.cents(ip).format()
+		}),
+		onlineCount = rs.getOptionInt(6),
+		onlineTotal = rs.getOptionInt(7).map(Currency.cents)
 	)
 }

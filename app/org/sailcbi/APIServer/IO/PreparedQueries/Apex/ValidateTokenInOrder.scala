@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryForSelect[ValidateTokenInOrderResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -19,10 +20,10 @@ class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryFor
 
 	val params = List(orderId.toString, token)
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): ValidateTokenInOrderResult = ValidateTokenInOrderResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ValidateTokenInOrderResult = ValidateTokenInOrderResult(
 		rs.getInt(1),
 		rs.getString(2),
-		rs.getTimestamp(3).toLocalDateTime
+		rs.getLocalDateTime(3)
 	)
 }
 

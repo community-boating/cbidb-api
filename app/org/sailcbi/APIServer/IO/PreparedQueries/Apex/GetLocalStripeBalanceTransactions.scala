@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Payout}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryForSelect[BalanceTransaction](Set(ApexUserType), true) {
 	val getQuery: String =
@@ -15,7 +16,7 @@ class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryFor
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): BalanceTransaction = BalanceTransaction(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): BalanceTransaction = BalanceTransaction(
 		id = rs.getString(1),
 		amount = rs.getInt(2),
 		description = rs.getOptionString(3),

@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
 class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
@@ -19,7 +20,7 @@ class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsRes
 		  |group by t.team_id, t.team_name
 		""".stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetJpTeamsResult = GetJpTeamsResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetJpTeamsResult = GetJpTeamsResult(
 		rs.getInt(1),
 		rs.getString(2),
 		rs.getInt(3)

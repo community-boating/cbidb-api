@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class StripeRevenue(closeId: Int) extends HardcodedQueryForSelect[StripeRevenueResult](Set(ApexUserType), true) {
 	val getQuery: String =
@@ -21,7 +22,7 @@ class StripeRevenue(closeId: Int) extends HardcodedQueryForSelect[StripeRevenueR
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): StripeRevenueResult = new StripeRevenueResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): StripeRevenueResult = new StripeRevenueResult(
 		rs.getInt(1),
 		Currency.cents(rs.getInt(2))
 	)

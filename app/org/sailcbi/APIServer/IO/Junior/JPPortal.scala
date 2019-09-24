@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.{PersistenceBroker, ResultSetWrapper}
 
 object JPPortal {
 	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
@@ -44,7 +44,7 @@ object JPPortal {
 
 			override def getQuery: String =
 				"""
-				  |insert into person_relationships(a,b,type_id) values (?, ?, ?);
+				  |insert into person_relationships(a,b,type_id) values (?, ?, ?)
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForInsert(createAcctLink)
@@ -52,11 +52,11 @@ object JPPortal {
 		juniorPersonId
 	}
 
-	def getMinSignupTimeForParent(pb: PersistenceBroker, parentPersonId: Int): LocalDateTime = {
-		val q = new PreparedQueryForSelect[LocalDateTime](Set(ProtoPersonUserType)) {
-			override val params: List[String] = List(parentPersonId)
+	def getMinSignupTimeForParent(pb: PersistenceBroker, parentPersonId: Int): Option[LocalDateTime] = {
+		val q = new PreparedQueryForSelect[Option[LocalDateTime]](Set(ProtoPersonUserType)) {
+			override val params: List[String] = List(parentPersonId.toString)
 
-			override def mapResultSetRowToCaseObject(rs: ResultSet): LocalDateTime = new LocalDateTime(rs.getDate(1))
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Option[LocalDateTime] = rs.getOptionLocalDateTime(1)
 
 			override def getQuery: String =
 				"""

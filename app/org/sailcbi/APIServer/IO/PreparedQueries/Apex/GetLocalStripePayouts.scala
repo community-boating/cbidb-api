@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.Payout
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexUserType), true) {
 	val getQuery: String =
@@ -16,10 +17,10 @@ class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexUser
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): Payout = Payout(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Payout = Payout(
 		id = rs.getString(1),
 		amount = rs.getInt(2),
-		arrival_date = rs.getTimestamp(3).toLocalDateTime.atZone(DateUtil.HOME_TIME_ZONE).toEpochSecond,
+		arrival_date = rs.getLocalDateTime(3).atZone(DateUtil.HOME_TIME_ZONE).toEpochSecond,
 		balance_transaction = rs.getString(4),
 		status = rs.getString(5)
 	)

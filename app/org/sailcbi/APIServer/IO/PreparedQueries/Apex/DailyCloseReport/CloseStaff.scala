@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -19,7 +20,7 @@ class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult]
 		   |and cu.user_id = u.user_id
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): CloseStaffResult = new CloseStaffResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): CloseStaffResult = new CloseStaffResult(
 		rs.getInt(1),
 		rs.getString(2) == "C",
 		rs.getInt(3),

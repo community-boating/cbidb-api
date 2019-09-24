@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.RetailData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class RetailQuery(closeId: Int) extends HardcodedQueryForSelect[RetailData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -82,7 +83,7 @@ class RetailQuery(closeId: Int) extends HardcodedQueryForSelect[RetailData](Set(
        |      order by 1
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): RetailData = new RetailData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): RetailData = new RetailData(
 		itemName = rs.getStringOrEmptyString(1),
 		numberSold = rs.getInt(2),
 		discounts = Currency.cents(rs.getInt(4)),

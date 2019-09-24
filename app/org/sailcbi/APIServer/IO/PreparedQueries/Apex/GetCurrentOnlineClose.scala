@@ -5,6 +5,7 @@ import java.time.LocalDate
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType)) {
 	val getQuery: String =
@@ -13,14 +14,10 @@ class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineClos
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetCurrentOnlineCloseResult = GetCurrentOnlineCloseResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetCurrentOnlineCloseResult = GetCurrentOnlineCloseResult(
 		rs.getInt(1),
-		rs.getDate(2).toLocalDate,
-		try {
-			Some(rs.getDate(3).toLocalDate)
-		} catch {
-			case _: Throwable => None
-		},
+		rs.getLocalDate(2),
+		rs.getOptionLocalDate(3)
 	)
 }
 

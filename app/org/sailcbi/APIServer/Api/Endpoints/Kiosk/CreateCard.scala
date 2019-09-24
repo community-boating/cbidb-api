@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
 import org.sailcbi.APIServer.Services.Authentication.KioskUserType
-import org.sailcbi.APIServer.Services.CacheBroker
+import org.sailcbi.APIServer.Services.{CacheBroker, ResultSetWrapper}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import play.api.libs.json.{JsNumber, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
@@ -56,7 +56,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends Authenticate
 					val parsed = CreateCardParams.apply(params.get)
 					println(parsed)
 					val getCardNumber = new HardcodedQueryForSelect[Int](Set(KioskUserType)) {
-						override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
 						override def getQuery: String = "select GUEST_CARD_SEQ.nextval from dual"
 					}
@@ -64,7 +64,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends Authenticate
 					val cardNumber = pb.executePreparedQueryForSelect(getCardNumber).head
 
 					val getClose = new HardcodedQueryForSelect[Int](Set(KioskUserType)) {
-						override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
 						override def getQuery: String = "select c.close_id from fo_closes c, current_closes cur where close_id = inperson_close"
 					}

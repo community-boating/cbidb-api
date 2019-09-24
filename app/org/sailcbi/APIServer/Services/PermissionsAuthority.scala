@@ -97,7 +97,7 @@ class PermissionsAuthority private[Services] (
 					   |where a = ${authedPersonId}
 					   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
 					""".stripMargin
-				override def mapResultSetRowToCaseObject(rs: ResultSet): Int = rs.getInt(1)
+				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 			}
 			val juniorIds = rootPB.executePreparedQueryForSelect(getAuthedJuniorIDs)
 			if (juniorIds.contains(juniorId)) {

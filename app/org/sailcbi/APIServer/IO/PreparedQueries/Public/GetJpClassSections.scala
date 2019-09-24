@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
 class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassSectionsResult](Set(PublicUserType)) {
@@ -45,7 +46,7 @@ class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCa
 		|
 	""".stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetJpClassSectionsResult = GetJpClassSectionsResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetJpClassSectionsResult = GetJpClassSectionsResult(
 		rs.getInt(1),
 		rs.getOptionString(2),
 		rs.getInt(3),

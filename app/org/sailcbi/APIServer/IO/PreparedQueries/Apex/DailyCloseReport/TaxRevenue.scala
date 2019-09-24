@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class TaxRevenue(closeId: Int) extends HardcodedQueryForSelect[TaxRevenueResult](Set(ApexUserType)) {
 	val taxDiscrepanciesId = MagicIds.FO_ITEM_TAX_DISCREPANCIES
@@ -22,7 +23,7 @@ class TaxRevenue(closeId: Int) extends HardcodedQueryForSelect[TaxRevenueResult]
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): TaxRevenueResult = new TaxRevenueResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): TaxRevenueResult = new TaxRevenueResult(
 		rs.getInt(1),
 		Currency.dollars(rs.getDouble(2))
 	)

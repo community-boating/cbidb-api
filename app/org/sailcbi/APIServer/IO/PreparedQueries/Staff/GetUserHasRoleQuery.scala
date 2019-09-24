@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetUserHasRoleQuery(userName: String, roleAlias: String) extends PreparedQueryForSelect[Boolean](Set(StaffUserType)) {
 
@@ -17,5 +18,5 @@ class GetUserHasRoleQuery(userName: String, roleAlias: String) extends PreparedQ
 		userName.toUpperCase(), roleAlias.toUpperCase()
 	)
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): Boolean = rs.getString(1) == "Y"
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1) == "Y"
 }

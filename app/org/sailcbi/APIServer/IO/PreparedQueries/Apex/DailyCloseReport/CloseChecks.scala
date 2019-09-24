@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.Check
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class CloseChecks(closeId: Int) extends HardcodedQueryForSelect[Check](Set(ApexUserType)) {
 	val getQuery: String =
@@ -16,17 +17,9 @@ class CloseChecks(closeId: Int) extends HardcodedQueryForSelect[Check](Set(ApexU
 		   |  from fo_checks c where close_id = $closeId
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): Check = new Check(
-		{
-			val ret = rs.getString(1)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Check = new Check(
+		rs.getOptionString(1),
 		Currency.cents(rs.getInt(2)),
-		{
-			val ret = rs.getString(3)
-			if (rs.wasNull()) None
-			else Some(ret)
-		}
+		rs.getOptionString(3)
 	)
 }

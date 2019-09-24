@@ -19,7 +19,7 @@ object StaffUserType extends NonMemberUserType {
 	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSet): Result = Result(rs.getString(1), rs.getString(2))
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select user_name, pw_hash from users where lower(user_name) = ?"
 

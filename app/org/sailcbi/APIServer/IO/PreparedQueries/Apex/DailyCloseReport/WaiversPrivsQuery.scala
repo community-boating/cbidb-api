@@ -6,6 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.WaiverPrivData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class WaiversPrivsQuery(closeId: Int) extends HardcodedQueryForSelect[WaiverPrivData](Set(ApexUserType)) {
 	val getQuery: String =
@@ -56,13 +57,9 @@ class WaiversPrivsQuery(closeId: Int) extends HardcodedQueryForSelect[WaiverPriv
 		   |      order by 1,2
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): WaiverPrivData = new WaiverPrivData(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): WaiverPrivData = new WaiverPrivData(
 		identifier = rs.getStringOrEmptyString(1),
-		location = {
-			val ret = rs.getString(4)
-			if (rs.wasNull()) ""
-			else ret
-		},
+		location = rs.getOptionString(4).getOrElse(""),
 		fullName = rs.getStringOrEmptyString(2),
 		price = Currency.cents(rs.getInt(3))
 	)

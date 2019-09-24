@@ -7,6 +7,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.TaxablesItem
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class TaxablesQuery(closeId: Int) extends HardcodedQueryForSelect[TaxablesItem](Set(ApexUserType)) {
 	val taxDiscrepanciesId: String = MagicIds.FO_ITEM_TAX_DISCREPANCIES.toString
@@ -36,14 +37,10 @@ class TaxablesQuery(closeId: Int) extends HardcodedQueryForSelect[TaxablesItem](
 		   |
     """.stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): TaxablesItem = new TaxablesItem(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): TaxablesItem = new TaxablesItem(
 		closeId,
 		rs.getStringOrEmptyString(1),
-		{
-			val ret = rs.getString(2)
-			if (rs.wasNull()) None
-			else Some(ret)
-		},
+		rs.getOptionString(2),
 		rs.getInt(3),
 		Currency.cents(rs.getInt(4)),
 		Currency.cents(rs.getInt(5))

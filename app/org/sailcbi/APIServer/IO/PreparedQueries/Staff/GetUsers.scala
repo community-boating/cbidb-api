@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsString}
 
 class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult](Set(StaffUserType)) {
@@ -12,7 +13,7 @@ class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult]
 		  |select user_id, user_name, name_first, name_last, email, active, hide_from_close from users
 		""".stripMargin
 
-	override def mapResultSetRowToCaseObject(rs: ResultSet): GetUsersResult = GetUsersResult(
+	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetUsersResult = GetUsersResult(
 		rs.getInt(1),
 		rs.getString(2),
 		rs.getString(3),
