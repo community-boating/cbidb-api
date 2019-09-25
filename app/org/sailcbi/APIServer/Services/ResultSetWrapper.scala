@@ -7,8 +7,8 @@ class ResultSetWrapper(rs: ResultSet) {
 	def getOptionString(c: Int): Option[String] = getValue(_.getString, c)
 	def getOptionInt(c: Int): Option[Int] = getValue(_.getInt, c)
 	def getOptionDouble(c: Int): Option[Double] = getValue(_.getDouble, c)
-	def getOptionLocalDate(c: Int): Option[LocalDate] = getValue(rs => cc => rs.getDate(cc).toLocalDate, c)
-	def getOptionLocalDateTime(c: Int): Option[LocalDateTime] = getValue(rs => cc => rs.getTimestamp(cc).toLocalDateTime, c)
+	def getOptionLocalDate(c: Int): Option[LocalDate] = getValue(_.getDate, c).map(_.toLocalDate)
+	def getOptionLocalDateTime(c: Int): Option[LocalDateTime] = getValue(_.getTimestamp, c).map(_.toLocalDateTime)
 
 	@deprecated
 	def getString(c: Int): String = getOptionString(c).orNull

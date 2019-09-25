@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
@@ -51,6 +51,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 	// TODO: rollbacks
 
 	private def doPost(rc: RequestCache, pr: ParsedRequest, body: AddJuniorClassReservationShape): Unit = {
+
 		val pb: PersistenceBroker = rc.pb
 		val cookieValue = pr.cookies(ProtoPersonUserType.COOKIE_NAME).value
 
@@ -74,5 +75,25 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		// create new signup with the min(signup_time) of all this protoparent's other signups
 		val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
 		println("min signup is " + minSignupTime)
+
+		// TODO: make a JPPortal.startnewJuniorTransation() that returns the personID as well as the rollback stuff scoped to that personid
+		val rollback = () => {
+			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(juniorPersonId.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from person_relationships where b = ?
+					  |""".stripMargin
+			}
+			val deletePerson = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(juniorPersonId.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from persons where person_id = ?
+					  |""".stripMargin
+			}
+		}
 	}
 }
