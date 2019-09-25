@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper

@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
-import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

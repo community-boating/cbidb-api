@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect

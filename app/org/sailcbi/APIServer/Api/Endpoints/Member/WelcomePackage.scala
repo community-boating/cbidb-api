@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.sql.ResultSet
-
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}

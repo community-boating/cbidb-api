@@ -1,12 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.sql.ResultSet
-
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject}
 import play.api.mvc.{Action, AnyContent, Controller}
 

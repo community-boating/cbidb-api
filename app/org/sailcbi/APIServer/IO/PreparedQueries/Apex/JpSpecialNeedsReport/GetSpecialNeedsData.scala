@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpSpecialNeedsReport
 
-import java.sql.ResultSet
 import java.time.ZonedDateTime
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, NAStrings}

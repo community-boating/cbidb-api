@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper

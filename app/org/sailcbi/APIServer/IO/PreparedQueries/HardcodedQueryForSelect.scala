@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

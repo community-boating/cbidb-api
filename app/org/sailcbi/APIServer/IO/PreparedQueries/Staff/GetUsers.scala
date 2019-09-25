@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper

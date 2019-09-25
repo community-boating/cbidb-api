@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.IO.Junior
 
-import java.sql.ResultSet
 import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.Entities.MagicIds

@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.Payout
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect

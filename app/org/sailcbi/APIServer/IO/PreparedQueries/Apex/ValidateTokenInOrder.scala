@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import java.sql.ResultSet
 import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect

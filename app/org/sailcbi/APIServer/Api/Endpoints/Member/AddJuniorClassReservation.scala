@@ -1,14 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.LocalDateTime
-
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, Controller}
 

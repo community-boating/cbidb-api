@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper

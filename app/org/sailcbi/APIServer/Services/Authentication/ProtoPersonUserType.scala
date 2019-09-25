@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.Services.Authentication
 
-import java.sql.ResultSet
-
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, ResultSetWrapper}

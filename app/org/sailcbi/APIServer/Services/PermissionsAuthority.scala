@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Services
 
 import java.math.BigInteger
 import java.security.MessageDigest
-import java.sql.ResultSet
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
