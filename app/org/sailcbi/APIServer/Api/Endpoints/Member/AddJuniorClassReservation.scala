@@ -68,30 +68,10 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		}
 
 		// Create new protojunior
-		val juniorPersonId = JPPortal.persistProtoJunior(pb, parentPersonId, body.juniorFirstName)
+		val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(pb, parentPersonId, body.juniorFirstName)
 
 		// create new signup with the min(signup_time) of all this protoparent's other signups
 		val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
 		println("min signup is " + minSignupTime)
-
-		// TODO: make a JPPortal.startnewJuniorTransation() that returns the personID as well as the rollback stuff scoped to that personid
-		val rollback = () => {
-			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(juniorPersonId.toString)
-
-				override def getQuery: String =
-					"""
-					  |delete from person_relationships where b = ?
-					  |""".stripMargin
-			}
-			val deletePerson = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(juniorPersonId.toString)
-
-				override def getQuery: String =
-					"""
-					  |delete from persons where person_id = ?
-					  |""".stripMargin
-			}
-		}
 	}
 }
