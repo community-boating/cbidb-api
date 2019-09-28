@@ -2,9 +2,10 @@ package org.sailcbi.APIServer.IO.Junior
 
 import java.time.LocalDateTime
 
+import org.sailcbi.APIServer.CbiUtil.Failover
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.{ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PersistenceBroker, ResultSetWrapper}
 
 object JPPortal {
@@ -85,5 +86,81 @@ object JPPortal {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForSelect(q).headOption.flatten
+	}
+
+	def spotsLeft(pb: PersistenceBroker, instanceId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {
+			override val params: List[String] = List(instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.spots_left(?) from dual
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).headOption.getOrElse(0)
+	}
+
+	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+		val q = new PreparedQueryForSelect[String](Set(PublicUserType)) {
+			override val params: List[String] = List(juniorId.toString, instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.see_type(?, i.type_id) from jp_class_instances i where i.instance_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).headOption.getOrElse('N') == "Y"
+	}
+
+	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+		val q = new PreparedQueryForSelect[String](Set(PublicUserType)) {
+			override val params: List[String] = List(juniorId.toString, instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.see_instance(?, ?) from dual
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).headOption.getOrElse('N') == "Y"
+	}
+
+	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(PublicUserType)) {
+			override val params: List[String] = List(juniorId.toString, instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.allow_enroll(?, ?) from dual
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).headOption.flatten.isEmpty
+	}
+
+	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int): Option[String] = {
+//		val hasSpots = spotsLeft(pb, instanceId) > 0
+//		val seeType = seeTypeFromInstanceId(pb, juniorPersonId, instanceId)
+//		val seeInstance = seeInstance(pb, juniorPersonId, instanceId)
+//		val allowEnroll = allowEnroll(pb, juniorPersonId, instanceId)
+
+		None
+	}
+
+	// Return Some(error message) on fail, None on success
+	def attemptSignup(pb: PersistenceBroker, juniorPersonId: Int, beginnerInstanceId: Option[Int], intermediateInstanceId: Option[Int]): Option[String] = {
+		beginnerInstanceId match {
+			case Some(b) => {
+
+			}
+			case None =>
+		}
+		None
 	}
 }
