@@ -5,8 +5,14 @@ import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 
 object DateUtil {
 	val HOME_TIME_ZONE: ZoneId = ZoneId.of("America/New_York")
+	val DATE_FORMAT = "MM/dd/yyyy"
+	val DATE_TIME_FORMAT = "MM/dd/yyyy  HH:mm:ss"
+	val DATE_FORMAT_SQL = "MM/DD/YYYY"
+	val DATE_TIME_FORMAT_SQL = "MM/DD/YYYY HH24:MI:SS"
+	val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT)
+	val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
 
-	def parse(dateLiteral: String, formatString: String = "MM/dd/yyyy"): LocalDate =
+	def parse(dateLiteral: String, formatString: String = DATE_FORMAT): LocalDate =
 		LocalDate.parse(dateLiteral, DateTimeFormatter.ofPattern(formatString))
 
 	def betweenInclusive(test: LocalDate, start: LocalDate, end: LocalDate): Boolean = {
@@ -24,7 +30,7 @@ object DateUtil {
 			case Some(d) => {
 				"^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$".r.findFirstIn(d)
 				match {
-					case Some(_) => LocalDate.parse(d, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+					case Some(_) => LocalDate.parse(d, DATE_FORMATTER)
 					case None => default
 				}
 			}

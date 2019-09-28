@@ -26,5 +26,9 @@ class Initializable[T] {
 	def peek: Option[T] = value
 
 	def isInitialized: Boolean = value.isDefined
+
+	def forEach(f: T => Unit): Unit = {
+		if (isInitialized) f(this.get)
+	}
 }
 

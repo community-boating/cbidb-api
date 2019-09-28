@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.Junior
 
 import java.time.LocalDateTime
 
-import org.sailcbi.APIServer.CbiUtil.Failover
+import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializable, DefinedInitializableNullary, Failover}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{ProtoPersonUserType, PublicUserType}
@@ -89,7 +89,7 @@ object JPPortal {
 	}
 
 	def spotsLeft(pb: PersistenceBroker, instanceId: Int): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -103,7 +103,7 @@ object JPPortal {
 	}
 
 	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
-		val q = new PreparedQueryForSelect[String](Set(PublicUserType)) {
+		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
@@ -113,11 +113,14 @@ object JPPortal {
 				  |select jp_class_pkg.see_type(?, i.type_id) from jp_class_instances i where i.instance_id = ?
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForSelect(q).headOption.getOrElse('N') == "Y"
+		val queryResult = pb.executePreparedQueryForSelect(q).headOption
+		val ret = queryResult.getOrElse('N') == "Y"
+		println("seeTypeFromInstanceId: queryResult: " + queryResult + "; returning " + ret)
+		ret
 	}
 
 	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
-		val q = new PreparedQueryForSelect[String](Set(PublicUserType)) {
+		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
@@ -127,11 +130,14 @@ object JPPortal {
 				  |select jp_class_pkg.see_instance(?, ?) from dual
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForSelect(q).headOption.getOrElse('N') == "Y"
+		val queryResult = pb.executePreparedQueryForSelect(q).headOption
+		val ret = queryResult.getOrElse('N') == "Y"
+		println("seeInstance: queryResult: " + queryResult + "; returning " + ret)
+		ret
 	}
 
-	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
-		val q = new PreparedQueryForSelect[Option[String]](Set(PublicUserType)) {
+	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Option[String] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
@@ -141,26 +147,101 @@ object JPPortal {
 				  |select jp_class_pkg.allow_enroll(?, ?) from dual
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForSelect(q).headOption.flatten.isEmpty
+		val ret = pb.executePreparedQueryForSelect(q).headOption.flatten
+		println("allow enroll result: " + ret)
+		ret
 	}
 
-	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int): Option[String] = {
-//		val hasSpots = spotsLeft(pb, instanceId) > 0
-//		val seeType = seeTypeFromInstanceId(pb, juniorPersonId, instanceId)
-//		val seeInstance = seeInstance(pb, juniorPersonId, instanceId)
-//		val allowEnroll = allowEnroll(pb, juniorPersonId, instanceId)
+	// either an error message or a rollback function
+	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime]): Either[String, () => Unit] = {
+		lazy val hasSpots = {
+			val spots = JPPortal.spotsLeft(pb, instanceId)
+			if (spots > 0) Right(spots)
+			else Left("The class has filled.")
+		}
 
-		None
+		lazy val seeType = if(JPPortal.seeTypeFromInstanceId(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class type.")
+		lazy val seeInstance = if(JPPortal.seeInstance(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class.")
+		lazy val allowEnroll = JPPortal.allowEnroll(pb, juniorPersonId, instanceId) match {
+			case None => Right()
+			case Some(err) => Left(err)
+		}
+
+		val validationResult = for {
+			_ <- hasSpots
+			_ <- seeType
+			_ <- seeInstance
+			x <- allowEnroll
+		} yield x
+
+		validationResult.map(_ => {
+			println("inserting signup for " + instanceId)
+			val q = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(
+					instanceId.toString,
+					juniorPersonId.toString,
+					"P",
+
+				) ++ (signupDatetime match {
+					case Some(dt) => List(signupDatetime.get.format(DateUtil.DATE_TIME_FORMATTER))
+					case None => List.empty
+				})
+				override val pkName: Option[String] = Some("SIGNUP_ID")
+
+				override def getQuery: String =
+					s"""
+					  |insert into jp_class_signups(instance_id, person_id, signup_type ${if (signupDatetime.isDefined) ", signup_datetime" else ""})
+					  |values (?, ?, ? ${if (signupDatetime.isDefined) s", to_date(?, ${DateUtil.DATE_TIME_FORMAT_SQL})" else ""})
+					  |""".stripMargin
+			}
+			val signupId = pb.executePreparedQueryForInsert(q)
+			println("inserted, got back signup id " + signupId)
+			// return a rollback fn
+			() => {
+				println("Rolling back " + signupId.get)
+				val rollbackQ = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+					override val params: List[String] = List(signupId.get)
+
+					override def getQuery: String =
+						"""
+						  |delete from jp_class_signups where signup_id = ?
+						  |""".stripMargin
+				}
+				pb.executePreparedQueryForUpdateOrDelete(rollbackQ)
+			}
+		})
 	}
 
 	// Return Some(error message) on fail, None on success
-	def attemptSignup(pb: PersistenceBroker, juniorPersonId: Int, beginnerInstanceId: Option[Int], intermediateInstanceId: Option[Int]): Option[String] = {
-		beginnerInstanceId match {
-			case Some(b) => {
+	def attemptSignup(
+		pb: PersistenceBroker,
+		juniorPersonId: Int,
+		beginnerInstanceId: Option[Int],
+		intermediateInstanceId: Option[Int],
+		signupDatetime: Option[LocalDateTime]
+	): Option[String] = {
+		// Make each of these initializables; they will only be initialized if the elements before them in the for comp were successes
+		// If it's not initialized then we know it was never run, and therefore we don't need to run its rollback
+		val beginnerResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
+			case None => Right(() => {})
+			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
+		})
 
-			}
-			case None =>
-		}
-		None
+		val intermediateResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
+			case None => Right(() => {})
+			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
+		})
+
+		val totalResult = for {
+			_ <- beginnerResult.get()
+			x <- intermediateResult.get()
+		} yield x
+
+		if (totalResult.isLeft) {
+			beginnerResult.forEach({
+				case Right(rollback) => rollback()
+			})
+			Some(totalResult.swap.getOrElse(""))
+		} else None
 	}
 }
