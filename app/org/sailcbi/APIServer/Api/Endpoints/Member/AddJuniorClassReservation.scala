@@ -75,5 +75,8 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		println("min signup is " + minSignupTime)
 		val signupResult = JPPortal.attemptSignup(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime)
 		println(" result is:" + signupResult)
+		if (signupResult.isDefined) {
+			rollbackCreateJunior()
+		}
 	}
 }

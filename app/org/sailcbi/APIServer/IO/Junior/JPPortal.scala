@@ -227,7 +227,7 @@ object JPPortal {
 			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
 		})
 
-		val intermediateResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
+		val intermediateResult = new DefinedInitializableNullary(() => intermediateInstanceId match {
 			case None => Right(() => {})
 			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
 		})
@@ -238,8 +238,12 @@ object JPPortal {
 		} yield x
 
 		if (totalResult.isLeft) {
+			println("was a fail")
 			beginnerResult.forEach({
-				case Right(rollback) => rollback()
+				case Right(rollback) => {
+					println("should be calling the rollback...")
+					rollback()
+				}
 			})
 			Some(totalResult.swap.getOrElse(""))
 		} else None
