@@ -1,13 +1,14 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
+import org.sailcbi.APIServer.Api.ValidationError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsNumber, JsObject, JsValue}
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.ExecutionContext
@@ -28,8 +29,12 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 					println(v)
 					val parsed = AddJuniorClassReservationShape.apply(v)
 
-					doPost(rc, parsedRequest, parsed)
-					Ok("done")
+					doPost(rc, parsedRequest, parsed) match {
+						case Left(err) => Ok(err.toResultError().asJsObject())
+						case Right(juniorId) => Ok(new JsObject(Map(
+							"personId" -> JsNumber(juniorId)
+						)))
+					}
 				}
 				case Some(v) => {
 					println("wut dis " + v)
@@ -46,9 +51,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		}
 	}
 
-	// TODO: rollbacks
-
-	private def doPost(rc: RequestCache, pr: ParsedRequest, body: AddJuniorClassReservationShape): Unit = {
+	private def doPost(rc: RequestCache, pr: ParsedRequest, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
 
 		val pb: PersistenceBroker = rc.pb
 		val cookieValue = pr.cookies(ProtoPersonUserType.COOKIE_NAME).value
@@ -77,6 +80,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		println(" result is:" + signupResult)
 		if (signupResult.isDefined) {
 			rollbackCreateJunior()
-		}
+			Left(ValidationError.from(signupResult.get))
+		} else Right(juniorPersonId)
 	}
 }
