@@ -29,7 +29,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 					println(v)
 					val parsed = AddJuniorClassReservationShape.apply(v)
 
-					doPost(rc, parsedRequest, parsed) match {
+					doPost(rc, parsed) match {
 						case Left(err) => Ok(err.toResultError().asJsObject())
 						case Right(juniorId) => Ok(new JsObject(Map(
 							"personId" -> JsNumber(juniorId)
@@ -51,20 +51,18 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		}
 	}
 
-	private def doPost(rc: RequestCache, pr: ParsedRequest, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
-
+	private def doPost(rc: RequestCache, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
 		val pb: PersistenceBroker = rc.pb
-		val cookieValue = pr.cookies(ProtoPersonUserType.COOKIE_NAME).value
 
 		// Create protoparent if it doenst exist
-		val protoParentExists = ProtoPersonUserType.getAuthedPersonId(cookieValue, pb).isDefined
+		val protoParentPersonId = ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb)
 		val parentPersonId = {
-			if (protoParentExists) {
-				val ret = ProtoPersonUserType.getAuthedPersonId(cookieValue, pb).get
+			if (protoParentPersonId.isDefined) {
+				val ret = protoParentPersonId.get
 				println("reusing existing protoparent record for this cookie val " + ret)
 				ret
 			} else {
-				val ret = JPPortal.persistProtoParent(pb, cookieValue)
+				val ret = JPPortal.persistProtoParent(pb, rc.auth.userName)
 				println("created new protoparent: " + ret)
 				ret
 			}

@@ -73,6 +73,57 @@ object JPPortal {
 		(juniorPersonId, rollback)
 	}
 
+	def deleteProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String): Either[String, Int] = {
+		val matchingIdsQuery = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+			override val params: List[String] = List(parentPersonId.toString, firstName)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select p.person_id from persons p, person_relationships rl
+				  |where p.person_id = rl.b and rl.a = ?
+				  |and p.name_first = ?
+				  |""".stripMargin
+		}
+
+		val ids = pb.executePreparedQueryForSelect(matchingIdsQuery)
+		if (ids.length == 1) {
+			val id = ids.head
+			val deleteSignups = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(id.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from jp_class_signups where person_id = ?
+					  |""".stripMargin
+			}
+			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(id.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from person_relationships where b = ?
+					  |""".stripMargin
+			}
+			val deletePerson = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(id.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from persons where person_id = ?
+					  |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(deleteSignups)
+			pb.executePreparedQueryForUpdateOrDelete(deletePersonRelationship)
+			pb.executePreparedQueryForUpdateOrDelete(deletePerson)
+			Right(id)
+		} else {
+			Left("Unable to locate distinct junior to delete")
+		}
+	}
+
 	def getMinSignupTimeForParent(pb: PersistenceBroker, parentPersonId: Int): Option[LocalDateTime] = {
 		val q = new PreparedQueryForSelect[Option[LocalDateTime]](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(parentPersonId.toString)
