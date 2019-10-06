@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import java.time.LocalDateTime
+
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
@@ -23,11 +25,12 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			val q = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {
 				override val params: List[String] = List(rc.auth.userName)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = ClassInfo(rsw.getString(1), rsw.getInt(2))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo =
+					ClassInfo(rsw.getString(1), rsw.getInt(2), rsw.getLocalDateTime(3))
 
 				override def getQuery: String =
 					"""
-					  |select k.name_first, si.instance_id
+					  |select k.name_first, si.instance_id, si.signup_datetime
 					  |from persons par, person_relationships rl, persons k, jp_class_signups si
 					  |where par.person_id = rl.a and rl.b = k.person_id and k.person_id = si.person_id
 					  |and par.PROTOPERSON_COOKIE = ?
@@ -46,7 +49,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 		}
 	}
 
-	case class ClassInfo(juniorFirstName: String, instanceId: Int)
+	case class ClassInfo(juniorFirstName: String, instanceId: Int, signupDatetime: LocalDateTime)
 	object ClassInfo {
 		implicit val format = Json.format[ClassInfo]
 		def apply(v: JsValue): ClassInfo = v.as[ClassInfo]

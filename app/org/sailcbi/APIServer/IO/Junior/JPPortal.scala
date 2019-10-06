@@ -181,17 +181,17 @@ object JPPortal {
 					instanceId.toString,
 					juniorPersonId.toString,
 					"P",
-
-				) ++ (signupDatetime match {
-					case Some(dt) => List(signupDatetime.get.format(DateUtil.DATE_TIME_FORMATTER))
-					case None => List.empty
-				})
+					(signupDatetime match {
+						case Some(dt) => signupDatetime.get
+						case None => LocalDateTime.now()
+					}).format(DateUtil.DATE_TIME_FORMATTER)
+				)
 				override val pkName: Option[String] = Some("SIGNUP_ID")
 
 				override def getQuery: String =
 					s"""
-					  |insert into jp_class_signups(instance_id, person_id, signup_type ${if (signupDatetime.isDefined) ", signup_datetime" else ""})
-					  |values (?, ?, ? ${if (signupDatetime.isDefined) s", to_date(?, ${DateUtil.DATE_TIME_FORMAT_SQL})" else ""})
+					  |insert into jp_class_signups(instance_id, person_id, signup_type, signup_datetime)
+					  |values (?, ?, ? , to_date(?, '${DateUtil.DATE_TIME_FORMAT_SQL}'))
 					  |""".stripMargin
 			}
 			val signupId = pb.executePreparedQueryForInsert(q)
