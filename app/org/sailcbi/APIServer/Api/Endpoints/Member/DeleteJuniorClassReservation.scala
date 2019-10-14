@@ -1,13 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.ValidationError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json.{JsNumber, JsObject, JsValue}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.ExecutionContext

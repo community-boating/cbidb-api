@@ -1,13 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.Endpoints.Member.AddJuniorClassReservationShape
-import org.sailcbi.APIServer.Api.ValidationError
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
 
@@ -31,7 +29,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends Controller
 						pwHash = cms.pwHash,
 						protoPersonValue = protoPersonCookieValMaybe
 					) match {
-						case Left(v: ValidationError) => Ok(v.toResultError().asJsObject())
+						case Left(v: ValidationResult) => Ok(v.toResultError.asJsObject())
 						case Right(id: Int) => Ok(new JsObject(Map(
 							"personId" -> JsNumber(id)
 						)))
@@ -69,15 +67,16 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends Controller
 		pwHash: String,
 		protoPersonValue: Option[String]
 	): Either[ValidationError, Int] = {
-		val nothingBlank = List(
-			ValidationError.inline(firstName)(s => s != null && s.length > 0, "First Name must be specified."),
-			ValidationError.inline(lastName)(s => s != null && s.length > 0, "Last Name must be specified."),
-			ValidationError.inline(username)(s => s != null && s.length > 0, "Email must be specified.")
-		)
-
-		ValidationError.combine(nothingBlank.filter(_.isDefined).map(_.orNull)) match {
-			case Some(v) => Left(v)
-			case None => Right(-1)
+		ValidationResult.combine(List(
+			ValidationResult.inline(firstName)(s => s != null && s.length > 0, "First Name must be specified."),
+			ValidationResult.inline(lastName)(s => s != null && s.length > 0, "Last Name must be specified."),
+			(for {
+				_ <- ValidationResult.inline(username)(s => s != null && s.length > 0, "Email must be specified.")
+				x <- ValidationResult.inline(username)(s => "(?i)^[A-Z0-9._%-]+@[A-Z0-9._%-]+\\.[A-Z]{2,4}$".r.findFirstMatchIn(s).isDefined, "Email is not valid.")
+			} yield x)
+		)) match {
+			case ve: ValidationError => Left(ve)
+			case ValidationOk => Right(-1)
 		}
 	}
 }

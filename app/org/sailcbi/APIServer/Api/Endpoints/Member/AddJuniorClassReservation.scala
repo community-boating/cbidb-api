@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.ValidationError
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
@@ -30,7 +29,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 					val parsed = AddJuniorClassReservationShape.apply(v)
 
 					doPost(rc, parsed) match {
-						case Left(err) => Ok(err.toResultError().asJsObject())
+						case Left(err) => Ok(err.toResultError.asJsObject())
 						case Right(juniorId) => Ok(new JsObject(Map(
 							"personId" -> JsNumber(juniorId)
 						)))
@@ -78,7 +77,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		println(" result is:" + signupResult)
 		if (signupResult.isDefined) {
 			rollbackCreateJunior()
-			Left(ValidationError.from(signupResult.get))
+			Left(ValidationResult.from(signupResult.get))
 		} else Right(juniorPersonId)
 	}
 }

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{ResultError, ValidationError}
+import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -105,21 +105,21 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 					val unconditionalValidations = List(
 						tooOld(pb, dob),
 						tooYoung(pb, dob, juniorId),
-						ValidationError.checkBlank(parsed.firstName, "First Name"),
-						ValidationError.checkBlank(parsed.lastName, "Last Name"),
-						ValidationError.checkBlank(parsed.dob, "Date of Birth"),
-						ValidationError.checkBlank(parsed.addr1, "Address"),
-						ValidationError.checkBlank(parsed.city, "City"),
-						ValidationError.checkBlank(parsed.state, "State"),
-						ValidationError.checkBlank(parsed.zip, "Zip code"),
-						ValidationError.checkBlank(parsed.primaryPhone, "Primary phone number"),
-						ValidationError.checkBlank(parsed.primaryPhoneType, "Primary phone number type"),
-						ValidationError.inline(parsed.zip)(zip => "^[0-9]{5}(-[0-9]{4})?$".r.findFirstIn(zip.getOrElse("")).isDefined, "Zip code is an invalid format."),
-						ValidationError.inline(parsed.childEmail)(
+						ValidationResult.checkBlank(parsed.firstName, "First Name"),
+						ValidationResult.checkBlank(parsed.lastName, "Last Name"),
+						ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
+						ValidationResult.checkBlank(parsed.addr1, "Address"),
+						ValidationResult.checkBlank(parsed.city, "City"),
+						ValidationResult.checkBlank(parsed.state, "State"),
+						ValidationResult.checkBlank(parsed.zip, "Zip code"),
+						ValidationResult.checkBlank(parsed.primaryPhone, "Primary phone number"),
+						ValidationResult.checkBlank(parsed.primaryPhoneType, "Primary phone number type"),
+						ValidationResult.inline(parsed.zip)(zip => "^[0-9]{5}(-[0-9]{4})?$".r.findFirstIn(zip.getOrElse("")).isDefined, "Zip code is an invalid format."),
+						ValidationResult.inline(parsed.childEmail)(
 							childEmail => "^[A-Za-z0-9._%-]+@[A-Za-z0-9._%-]+\\.[A-Za-z]{2,4}$".r.findFirstIn(childEmail.getOrElse("")).isDefined,
 							"Child email is not valid."
 						),
-						ValidationError.inline(parsed.primaryPhone)(
+						ValidationResult.inline(parsed.primaryPhone)(
 							phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
 							"Primary Phone is not valid."
 						)
@@ -127,25 +127,25 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 					val conditionalValidations = List((
 						parsed.alternatePhone.isDefined,
-						ValidationError.inline(parsed.alternatePhone)(
+						ValidationResult.inline(parsed.alternatePhone)(
 							phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
 							"Alternate Phone is not valid."
 						)
 					), (
 						parsed.alternatePhone.isDefined,
-						ValidationError.checkBlankCustom(parsed.alternatePhoneType, "Alternate phone type must be specified if alternate phone number is provided."),
+						ValidationResult.checkBlankCustom(parsed.alternatePhoneType, "Alternate phone type must be specified if alternate phone number is provided."),
 					)).filter(_._1).map(_._2)
 
 					// Run all validations and combine into one
-					val validation = ValidationError.combine((unconditionalValidations ::: conditionalValidations).filter(_.isDefined).map(_.orNull))
+					val validation = ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 
 					// TODO: add more validations, come up with some chained try/promise arch
 					validation match {
-						case Some(v) => Ok(v.toResultError().asJsObject())
-							case None => {
-								doUpdate(pb, parsed)
-								Ok(successResponse)
-							}
+						case ve: ValidationError => Ok(ve.toResultError.asJsObject())
+						case ValidationOk => {
+							doUpdate(pb, parsed)
+							Ok(successResponse)
+						}
 					}
 				}
 				case Some(v) => {
@@ -161,7 +161,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 			}
 		}
 	}
-	def tooOld(pb: PersistenceBroker, dob: String): Option[ValidationError] = {
+	def tooOld(pb: PersistenceBroker, dob: String): ValidationResult = {
 		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -173,13 +173,13 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 			override val params: List[String] = List(dob)
 		}).head
 		if (notTooOld) {
-			None
+			ValidationOk
 		} else {
-			Some(ValidationError.from("Prospective juniors must be 17 or younger and may not turn 18 before the program begins."))
+			ValidationResult.from("Prospective juniors must be 17 or younger and may not turn 18 before the program begins.")
 		}
 	}
 
-	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Int): Option[ValidationError] = {
+	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Int): ValidationResult = {
 		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -193,9 +193,9 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 			override val params: List[String] = List(dob, juniorId.toString)
 		}).nonEmpty
 		if (notTooYoung) {
-			None
+			ValidationOk
 		} else {
-			Some(ValidationError.from("Prospective junior members must be at least 10 years old by August 31st to participate in the Junior Program."))
+			ValidationResult.from("Prospective junior members must be at least 10 years old by August 31st to participate in the Junior Program.")
 		}
 	}
 

@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.IO.Junior
 
 import java.time.LocalDateTime
 
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializable, DefinedInitializableNullary, Failover}
+import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{ProtoPersonUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.{PersistenceBroker, ResultSetWrapper}
 
 object JPPortal {
