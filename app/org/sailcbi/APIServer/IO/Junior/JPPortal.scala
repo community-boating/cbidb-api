@@ -15,8 +15,8 @@ object JPPortal {
 			override val pkName: Option[String] = Some("PERSON_ID")
 
 			override def getQuery: String =
-				"""
-				  |insert into persons (temp, protoperson_cookie, proto_state) values ('P', ?, 'I')
+				s"""
+				  |insert into persons (temp, protoperson_cookie, proto_state, person_type) values ('P', ?, 'I', ${MagicIds.PERSON_TYPE.JP_PARENT})
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForInsert(pq).get.toInt
@@ -73,52 +73,52 @@ object JPPortal {
 		(juniorPersonId, rollback)
 	}
 
-	def deleteProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String): Either[String, Int] = {
+	def deleteProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String): Either[String, String] = {
 		val matchingIdsQuery = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(parentPersonId.toString, firstName)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
-				"""
+				s"""
 				  |select p.person_id from persons p, person_relationships rl
 				  |where p.person_id = rl.b and rl.a = ?
 				  |and p.name_first = ?
+				  |and proto_state = '${MagicIds.PERSONS_PROTO_STATE.IS_PROTO}'
 				  |""".stripMargin
 		}
 
 		val ids = pb.executePreparedQueryForSelect(matchingIdsQuery)
-		if (ids.length == 1) {
-			val id = ids.head
+		if (ids.nonEmpty) {
 			val deleteSignups = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(id.toString)
+				override val params: List[String] = List()
 
 				override def getQuery: String =
-					"""
-					  |delete from jp_class_signups where person_id = ?
+					s"""
+					  |delete from jp_class_signups where person_id in (${ids.mkString(", ")})
 					  |""".stripMargin
 			}
 			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(id.toString)
+				override val params: List[String] = List()
 
 				override def getQuery: String =
-					"""
-					  |delete from person_relationships where b = ?
+					s"""
+					  |delete from person_relationships where b in (${ids.mkString(", ")})
 					  |""".stripMargin
 			}
 			val deletePerson = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(id.toString)
+				override val params: List[String] = List()
 
 				override def getQuery: String =
-					"""
-					  |delete from persons where person_id = ?
+					s"""
+					  |delete from persons where person_id in (${ids.mkString(", ")})
 					  |""".stripMargin
 			}
 
 			pb.executePreparedQueryForUpdateOrDelete(deleteSignups)
 			pb.executePreparedQueryForUpdateOrDelete(deletePersonRelationship)
 			pb.executePreparedQueryForUpdateOrDelete(deletePerson)
-			Right(id)
+			Right(ids.mkString(", "))
 		} else {
 			Left("Unable to locate distinct junior to delete")
 		}

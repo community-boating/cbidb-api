@@ -51,33 +51,37 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 	}
 
 	private def doPost(rc: RequestCache, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
-		val pb: PersistenceBroker = rc.pb
+		if (body.juniorFirstName == null || body.juniorFirstName.length() == 0) {
+			Left(ValidationResult.from("Please specify junior name."))
+		} else {
+			val pb: PersistenceBroker = rc.pb
 
-		// Create protoparent if it doenst exist
-		val protoParentPersonId = ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb)
-		val parentPersonId = {
-			if (protoParentPersonId.isDefined) {
-				val ret = protoParentPersonId.get
-				println("reusing existing protoparent record for this cookie val " + ret)
-				ret
-			} else {
-				val ret = JPPortal.persistProtoParent(pb, rc.auth.userName)
-				println("created new protoparent: " + ret)
-				ret
+			// Create protoparent if it doenst exist
+			val protoParentPersonId = ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val parentPersonId = {
+				if (protoParentPersonId.isDefined) {
+					val ret = protoParentPersonId.get
+					println("reusing existing protoparent record for this cookie val " + ret)
+					ret
+				} else {
+					val ret = JPPortal.persistProtoParent(pb, rc.auth.userName)
+					println("created new protoparent: " + ret)
+					ret
+				}
 			}
+
+			// Create new protojunior
+			val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(pb, parentPersonId, body.juniorFirstName)
+
+			// create new signup with the min(signup_time) of all this protoparent's other signups
+			val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
+			println("min signup is " + minSignupTime)
+			val signupResult = JPPortal.attemptSignup(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime)
+			println(" result is:" + signupResult)
+			if (signupResult.isDefined) {
+				rollbackCreateJunior()
+				Left(ValidationResult.from(signupResult.get))
+			} else Right(juniorPersonId)
 		}
-
-		// Create new protojunior
-		val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(pb, parentPersonId, body.juniorFirstName)
-
-		// create new signup with the min(signup_time) of all this protoparent's other signups
-		val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
-		println("min signup is " + minSignupTime)
-		val signupResult = JPPortal.attemptSignup(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime)
-		println(" result is:" + signupResult)
-		if (signupResult.isDefined) {
-			rollbackCreateJunior()
-			Left(ValidationResult.from(signupResult.get))
-		} else Right(juniorPersonId)
 	}
 }

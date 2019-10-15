@@ -74,11 +74,12 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 				val pool = if (pq.useTempSchema) dbConnection.tempPool else dbConnection.mainPool
 				pool.withConnection(c => {
 					println("executing prepared update/delete:")
+					println(p.getQuery)
 					val preparedStatement = c.prepareStatement(p.getQuery)
 					(p.params.indices zip p.params).foreach(t => {
+						println(s"setting index ${t._1 + 1} to ${t._2}")
 						preparedStatement.setString(t._1 + 1, t._2)
 					})
-					println(p.getQuery)
 					println("Parameterized with " + p.params)
 					preparedStatement.executeUpdate()
 				})

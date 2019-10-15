@@ -7,4 +7,11 @@ object MagicIds {
 	val FO_INPERSON_CC_SOURCE_IDs: List[Int] = List(1, 2, 581, 582, 701, 702)
 	val JUNIOR_SUMMER_MEMBERSHIP_TYPE_ID: Int = 10
 	val PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK = 2
+	object PERSONS_PROTO_STATE {
+		val IS_PROTO = "I"
+		val WAS_PROTO = "W"
+	}
+	object PERSON_TYPE {
+		val JP_PARENT = 41
+	}
 }
