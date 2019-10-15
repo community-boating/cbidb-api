@@ -5,8 +5,9 @@ import java.time.LocalDateTime
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.Logic.JuniorProgramLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.{PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 
 object JPPortal {
 	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
@@ -153,6 +154,22 @@ object JPPortal {
 		pb.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
+	def alreadyStarted(pb: PersistenceBroker, instanceId: Int): Either[String, Unit] = {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+			override val params: List[String] = List(instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select bk.instance_id from jp_class_bookends bk, jp_class_sessions fs
+				  |where bk.first_session = fs.session_id and bk.instance_id = ?
+				  |and fs.session_datetime > util_pkg.get_sysdate
+				  |""".stripMargin
+		}
+		if (pb.executePreparedQueryForSelect(q).nonEmpty) Right() else Left("That class has already started.")
+	}
+
 	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
@@ -204,12 +221,14 @@ object JPPortal {
 	}
 
 	// either an error message or a rollback function
-	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime]): Either[String, () => Unit] = {
+	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime])(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
 		lazy val hasSpots = {
 			val spots = JPPortal.spotsLeft(pb, instanceId)
 			if (spots > 0) Right(spots)
-			else Left("The class has filled.")
+			else Left("The class has no open seats at this time.  Wait listing is available once payment is processed and registration is complete.")
 		}
+
+		lazy val alreadyStarted = JPPortal.alreadyStarted(pb, instanceId)
 
 		lazy val seeType = if(JPPortal.seeTypeFromInstanceId(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class type.")
 		lazy val seeInstance = if(JPPortal.seeInstance(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class.")
@@ -219,6 +238,7 @@ object JPPortal {
 		}
 
 		val validationResult = for {
+			_ <- alreadyStarted
 			_ <- hasSpots
 			_ <- seeType
 			_ <- seeInstance
@@ -234,7 +254,7 @@ object JPPortal {
 					"P",
 					(signupDatetime match {
 						case Some(dt) => signupDatetime.get
-						case None => LocalDateTime.now()
+						case None => pa.now()
 					}).format(DateUtil.DATE_TIME_FORMATTER)
 				)
 				override val pkName: Option[String] = Some("SIGNUP_ID")
@@ -295,8 +315,23 @@ object JPPortal {
 					println("should be calling the rollback...")
 					rollback()
 				}
+				case _ =>
 			})
 			Some(totalResult.swap.getOrElse(""))
 		} else None
+	}
+
+	def pruneOldReservations(pb: PersistenceBroker): Int = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+			override val params: List[String] = List.empty
+
+			override def getQuery: String =
+				s"""
+				  |delete from jp_class_signups
+				  |where signup_type = 'P'
+				  |and signup_datetime + (${JuniorProgramLogic.SIGNUP_RESERVATION_HOLD_MINUTES} / (24 * 60)) < util_pkg.get_sysdate
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 }

@@ -14,6 +14,7 @@ class CheckProtoPersonCookie extends Controller {
 			val cookie = request.cookies.get(ProtoPersonUserType.COOKIE_NAME).get.value
 			try {
 				val rc = PA.getRequestCache(PublicUserType, None, ParsedRequest(request))
+				PA.sleep()
 				val pb = rc._2.get.pb
 				val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {
 					override val params: List[String] = List(cookie)
@@ -50,7 +51,7 @@ class CheckProtoPersonCookie extends Controller {
 		val cookie = Cookie(
 			name = ProtoPersonUserType.COOKIE_NAME,
 			value = ProtoPersonUserType.COOKIE_VALUE_PREFIX + scala.util.Random.alphanumeric.take(30).mkString,
-			maxAge = Some(60 * 60 * 24), // 24hr
+			maxAge = Some(60 * 60 * 18), // 18hr
 			secure = secure,
 			httpOnly = true
 		)

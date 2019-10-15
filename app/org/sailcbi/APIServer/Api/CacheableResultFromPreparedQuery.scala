@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.NonMemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Action, AnyContent}
 
@@ -25,9 +25,10 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableRe
 		getFuture(cb, pb, params, calculateValue)
 	}
 
-	protected def evaluate(ut: NonMemberUserType, params: T, pq: PQ): Action[AnyContent] = Action.async { request =>
+	protected def evaluate(ut: NonMemberUserType, params: T, pq: PQ)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
 			val rc = getRC(ut, ParsedRequest(request))
+			PA.sleep()
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 			getFuture(cb, pb, params, pq).map(s => {

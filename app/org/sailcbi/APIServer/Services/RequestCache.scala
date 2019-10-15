@@ -48,6 +48,9 @@ class RequestCache private[Services](val auth: AuthenticationInstance, dbConnect
 object RequestCache {
 	// TODO: better way to handle requests authenticated against multiple mechanisms?
 	// TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things
+
+	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
+	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
 	def construct(
 		requiredUserType: UserType,
 		requiredUserName: Option[String],
@@ -56,7 +59,7 @@ object RequestCache {
 		apexToken: String,
 		kioskToken: String,
 		dbConnection: DatabaseConnection
-	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = {
+	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = synchronized {
 		println("\n\n====================================================")
 		println("====================================================")
 		println("====================================================")

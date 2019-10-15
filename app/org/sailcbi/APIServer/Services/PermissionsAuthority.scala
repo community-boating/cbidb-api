@@ -3,11 +3,11 @@ package org.sailcbi.APIServer.Services
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
 import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication._
@@ -36,6 +36,16 @@ class PermissionsAuthority private[Services] (
 	println(this.toString)
 	def instanceName: String = dbConnection.mainSchemaName
 
+	def sleep(): Unit = {
+//		println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+//		println("sleepytime...")
+//		println("Active threads: " + Thread.activeCount())
+//		println("Current thread ID: " + Thread.currentThread().getId)
+//		println("Current thread name: " + Thread.currentThread().getName)
+//		println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+//		Thread.sleep(4000)
+	}
+
 	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
@@ -44,6 +54,17 @@ class PermissionsAuthority private[Services] (
 
 	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
 	private lazy val bouncerPB = bouncerRC.pb
+
+	def now(): LocalDateTime = {
+		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootUserType)) {
+			override val params: List[String] = List()
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): LocalDateTime = rsw.getLocalDateTime(1)
+
+			override def getQuery: String = "select util_pkg.get_sysdate from dual"
+		}
+		rootPB.executePreparedQueryForSelect(q).head
+	}
 
 	def testDB = rootPB.testDB
 

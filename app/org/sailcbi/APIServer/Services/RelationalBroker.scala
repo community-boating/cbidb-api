@@ -31,11 +31,11 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			val rs: ResultSet = pq match {
 				case p: PreparedQueryForSelect[T] => {
 					println("executing prepared select:")
+					println(pq.getQuery)
 					val preparedStatement = c.prepareStatement(pq.getQuery)
 					(p.params.indices zip p.params).foreach(t => {
 						preparedStatement.setString(t._1 + 1, t._2)
 					})
-					println(pq.getQuery)
 					println("Parameterized with " + p.params)
 					preparedStatement.executeQuery
 				}
