@@ -32,7 +32,7 @@ object MemberUserType extends UserType {
 
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 
-	def getAuthedPersonId(userName: String, rootPB: PersistenceBroker): Int = {
+	def getAuthedPersonId(userName: String, pb: PersistenceBroker): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def getQuery: String =
 				"""
@@ -43,7 +43,7 @@ object MemberUserType extends UserType {
 			override val params: List[String] = List(userName)
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
-		val ids = rootPB.executePreparedQueryForSelect(q)
+		val ids = pb.executePreparedQueryForSelect(q)
 		// TODO: critical error if this list has >1 element
 		ids.head
 	}
