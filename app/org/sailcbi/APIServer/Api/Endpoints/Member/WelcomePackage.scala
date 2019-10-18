@@ -25,6 +25,17 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			profiler.lap("about to do first query")
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
+			val nameQ = new PreparedQueryForSelect[(String, String)](Set(MemberUserType)) {
+				override val params: List[String] = List(personId.toString)
+
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String) = (rsw.getString(1), rsw.getString(2))
+
+				override def getQuery: String =
+					"""
+					  |select name_first, name_last from persons where person_id = ?
+					  |""".stripMargin
+			}
+			val (nameFirst, nameLast) = pb.executePreparedQueryForSelect(nameQ).head
 			val pricesMaybe = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
 				override def getQuery: String = """
 					  |select
@@ -43,7 +54,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val result = WelcomePackageResult(personId, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData)
+			val result = WelcomePackageResult(personId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -52,6 +63,8 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 
 	case class WelcomePackageResult(
 		parentPersonId: Int,
+		parentFirstName: String,
+		parentLastName: String,
 		userName: String,
 		jpPrice: Option[Double],
 		jpOffseasonPrice: Option[Double],
