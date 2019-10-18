@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.TestUserType
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import org.sailcbi.APIServer.Storable._
@@ -62,6 +62,11 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 		executeQueryBuilderImplementation(qb)
 	}
 
+	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
+		if (TestUserType(pc.allowedUserTypes, rc.auth.userType)) executeProcedureImpl(pc)
+		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.userType)
+	}
+
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
 	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T]
 
@@ -80,6 +85,8 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int
 
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
+
+	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
 
 	// TODO: implement some IDs
 	private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible

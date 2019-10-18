@@ -7,7 +7,7 @@ import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForSelect}
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
 import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication._
@@ -67,6 +67,15 @@ class PermissionsAuthority private[Services] (
 	}
 
 	def testDB = rootPB.testDB
+
+	def procedureTest() = {
+		println("starting executeProcedure...")
+		val ret = rootPB.executeProcedure(PreparedProcedureCall.test)
+		println("finished executeProcedure")
+
+		println("procedure call complete with named params.....")
+		println(s"(b, c, ss, persons) = $ret")
+	}
 
 	def logger: Logger = if (!isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 

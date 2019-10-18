@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services
 
 import java.security.MessageDigest
-import java.sql.{Date, PreparedStatement, ResultSet, Statement}
+import java.sql.{CallableStatement, Date, PreparedStatement, ResultSet, Statement}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import org.sailcbi.APIServer.CbiUtil.Profiler
@@ -391,6 +391,30 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		println(rows)
 
 		List(new QueryBuilderResultRow(intValues, stringValues))
+	}
+
+	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
+		val pool = if (pc.useTempSchema) dbConnection.tempPool else dbConnection.mainPool
+		pool.withConnection(conn => {
+			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
+
+			// register outs and inouts
+			pc.registerOutParameters.foreach(Function.tupled((paramName: String, dataType: Int) => {
+				callable.registerOutParameter(paramName, dataType)
+			}))
+
+			pc.setInParametersInt.foreach(Function.tupled((paramName: String, value: Int) => {
+				callable.setInt(paramName, value)
+			}))
+
+			pc.setIntParametersVarchar.foreach(Function.tupled((paramName: String, value: String) => {
+				callable.setString(paramName, value)
+			}))
+
+			val hadResults: Boolean = callable.execute()
+
+			pc.getOutResults(callable)
+		})
 	}
 
 	// TODO: do these belong here or in util somewhere?

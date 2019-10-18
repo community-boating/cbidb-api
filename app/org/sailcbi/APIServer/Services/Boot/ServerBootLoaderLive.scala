@@ -8,4 +8,5 @@ class ServerBootLoaderLive @Inject()(lifecycle: ApplicationLifecycle) extends Se
 	val PA = this.load(Some(lifecycle), false, false)
 	println("Live loader::::: setting PA!")
 	PermissionsAuthority.setPA(PA)
+	PA.procedureTest()
 }
