@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.IO.Stripe.StripeAPIIO
+package org.sailcbi.APIServer.Services.StripeAPIIO
 
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
@@ -8,10 +8,7 @@ import play.api.libs.json.{JsArray, JsObject, JsValue}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-// TODO: separate the core methods from the things like getCharges, getTokenDetails that are just concrete implementations of the core methods
-// Maybe the instance things should go in a companion, which is parameterized with a API Mechanism object?
-// The only things in this class should be core talking-to-stripe functionality
-class StripeAPIIOLiveService(baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
+class StripeAPIIOLiveService private[Services] (baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
 	def getOrPostStripeSingleton[T](
 		url: String,
 		constructor: JsValue => T,

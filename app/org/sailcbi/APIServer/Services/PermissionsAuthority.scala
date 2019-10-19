@@ -8,8 +8,8 @@ import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
-import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
-import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
+import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
@@ -21,20 +21,14 @@ class PermissionsAuthority private[Services] (
 	val serverParameters: ServerParameters,
 	val isTestMode: Boolean,
 	val readOnlyDatabase: Boolean,
-	private val dbConnection: DatabaseConnection,
 	val allowableUserTypes: List[UserType],
-	private val apexToken: String,
-	private val kioskToken: String,
-	private val apexDebugSignet: Option[String],
-	private val symonSalt: Option[String],
 	val preparedQueriesOnly: Boolean,
 	val persistenceSystem: PersistenceSystem,
-	val stripeAPIIOMechanism: Secret[WSClient => StripeAPIIOMechanism],
-	val stripeDatabaseIOMechanism: Secret[PersistenceBroker => StripeDatabaseIOMechanism]
+	secrets: PermissionsAuthoritySecrets
 )  {
 	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
 	println(this.toString)
-	def instanceName: String = dbConnection.mainSchemaName
+	def instanceName: String = secrets.dbConnection.mainSchemaName
 
 	def sleep(): Unit = {
 //		println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -46,13 +40,13 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, dbConnection)
+	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, dbConnection)
+	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, secrets)
 	private lazy val bouncerPB = bouncerRC.pb
 
 	def now(): LocalDateTime = {
@@ -97,16 +91,14 @@ class PermissionsAuthority private[Services] (
 			requiredUserName,
 			parsedRequest,
 			rootCB,
-			apexToken,
-			kioskToken,
-			dbConnection
+			secrets
 		)
 
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
+		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
 
 	def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
@@ -114,7 +106,7 @@ class PermissionsAuthority private[Services] (
 		juniorId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
 		println("about to validate junior id in request....")
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request juniorId match the auth'd parent id?
@@ -145,7 +137,7 @@ class PermissionsAuthority private[Services] (
 		parsedRequest: ParsedRequest,
 		parentId: Int
 	): (AuthenticationInstance, Option[RequestCache]) = {
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, apexToken, kioskToken, dbConnection)
+		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
 		if (ret._1.userType == MemberUserType) {
 			// auth was successful
 			//... but does the request parentId match the auth'd parent id?
@@ -179,7 +171,7 @@ class PermissionsAuthority private[Services] (
 	): Boolean = {
 		println("here we go")
 		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
-		val input = symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt.get
+		val input = secrets.symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + secrets.symonSalt.get
 		println(input)
 		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
 		val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
@@ -188,7 +180,7 @@ class PermissionsAuthority private[Services] (
 		expectedHash == candidateHash
 	}
 
-	def validateApexSignet(candidate: Option[String]): Boolean = apexDebugSignet == candidate
+	def validateApexSignet(candidate: Option[String]): Boolean = secrets.apexDebugSignet == candidate
 
 	def authenticate(parsedRequest: ParsedRequest): AuthenticationInstance = {
 		val ret: Option[AuthenticationInstance] = allowableUserTypes
@@ -196,7 +188,7 @@ class PermissionsAuthority private[Services] (
 				.foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
 					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
 					case Some(x) => Some(x)
-					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, apexToken, kioskToken) match {
+					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
 						case None => None
 						case Some(x: String) => {
 							println("AUTHENTICATION:  Request is authenticated as " + ut)
@@ -217,10 +209,10 @@ class PermissionsAuthority private[Services] (
 
 	def assertRC(auth: AuthenticationInstance): RequestCache = {
 		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
-		else new RequestCache(auth, dbConnection)
+		else new RequestCache(auth, secrets)
 	}
 
-	def closeDB(): Unit = dbConnection.close()
+	def closeDB(): Unit = secrets.dbConnection.close()
 }
 
 

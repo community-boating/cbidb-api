@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
-import org.sailcbi.APIServer.IO.Stripe.StripeIOController
+import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
@@ -17,11 +17,7 @@ class GetTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) e
 		val logger = PA.logger
 		val rc = getRC(ApexUserType, ParsedRequest(req))
 		val pb = rc.pb
-		val stripeIOController = new StripeIOController(
-			PA.stripeAPIIOMechanism.get(rc)(ws),
-			PA.stripeDatabaseIOMechanism.get(rc)(pb),
-			logger
-		)
+		val stripeIOController = rc.getStripeIOController(ws)
 
 		stripeIOController.getTokenDetails(token).map({
 			case s: NetSuccess[Token, StripeError] => {

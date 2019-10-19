@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services.Boot
 
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
-import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOLiveService
-import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
+import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOLiveService
+import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
@@ -91,18 +91,21 @@ abstract class ServerBootLoader {
 				),
 				isTestMode = isTestMode,
 				readOnlyDatabase = readOnlyDatabase,
-				dbConnection = dbConnection,
 				allowableUserTypes = serverProps.enabledAuthMechanisms,
-				apexToken = serverProps.getProperty("ApexToken"),
-				kioskToken = serverProps.getProperty("KioskToken"),
-				apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
-				symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
 				preparedQueriesOnly = preparedQueriesOnly,
 				persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
-				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
-					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, serverProps.getProperty("StripeAPIKey"), new FromWSClient(ws))),
-				stripeDatabaseIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
-					.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
+				secrets = PermissionsAuthoritySecrets(
+					dbConnection = dbConnection,
+					apexToken = serverProps.getProperty("ApexToken"),
+					kioskToken = serverProps.getProperty("KioskToken"),
+					apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
+					symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
+					stripeSecretKey = serverProps.getProperty("StripeAPIKey")
+				)
+//				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
+//					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, , new FromWSClient(ws))),
+//				stripeDatabaseIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
+//					.setImmediate(pb => new StripeDatabaseIOMechanism(pb))
 			)
 
 			try {

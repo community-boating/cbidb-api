@@ -5,20 +5,46 @@ import java.time.format.DateTimeFormatter
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
+import org.sailcbi.APIServer.IO.HTTP.FromWSClient
+import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
+import play.api.libs.ws.WSClient
+
+import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-class RequestCache private[Services](val auth: AuthenticationInstance, dbConnection: DatabaseConnection)(implicit val PA: PermissionsAuthority) {
+class RequestCache private[Services](
+	val auth: AuthenticationInstance,
+	secrets: PermissionsAuthoritySecrets
+)(implicit val PA: PermissionsAuthority) {
 	private val self = this
 	val pb: PersistenceBroker = {
 		println("In RC:  " + PA.toString)
 		val pbReadOnly = PA.readOnlyDatabase
-		if (auth.userType == RootUserType) new OracleBroker(dbConnection, this, false, pbReadOnly)
-		else new OracleBroker(dbConnection, this, PA.preparedQueriesOnly, pbReadOnly)
+		if (auth.userType == RootUserType) new OracleBroker(secrets.dbConnection, this, false, pbReadOnly)
+		else new OracleBroker(secrets.dbConnection, this, PA.preparedQueriesOnly, pbReadOnly)
 	}
+
 	val cb: CacheBroker = new RedisBroker
+
+	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
+		PermissionsAuthority.stripeURL,
+		secrets.stripeSecretKey,
+		new FromWSClient(ws)
+	)
+
+	private lazy val stripeDatabaseIOMechanism = new StripeDatabaseIOMechanism(pb)
+
+	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController = new StripeIOController(
+		this,
+		getStripeAPIIOMechanism(ws),
+		stripeDatabaseIOMechanism,
+		PA.logger
+	)
 
 	// TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
 	// TODO: dont do this every request.
@@ -56,9 +82,7 @@ object RequestCache {
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		rootCB: CacheBroker,
-		apexToken: String,
-		kioskToken: String,
-		dbConnection: DatabaseConnection
+		secrets: PermissionsAuthoritySecrets
 	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = synchronized {
 		println("\n\n====================================================")
 		println("====================================================")
@@ -100,12 +124,12 @@ object RequestCache {
 				// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
 				// so this architecture will make that request behave exactly as if the member requested it themselves
 				if (authentication.userType == requiredUserType) {
-					(authentication, Some(new RequestCache(authentication, dbConnection)))
+					(authentication, Some(new RequestCache(authentication, secrets)))
 				} else {
 					requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
 						case Some(lowerAuth: AuthenticationInstance) => {
 							println("@@@ Successfully downgraded to " + lowerAuth.userType)
-							(authentication, Some(new RequestCache(lowerAuth, dbConnection)))
+							(authentication, Some(new RequestCache(lowerAuth, secrets)))
 						}
 						case None => {
 							println("@@@ Unable to downgrade auth to " + requiredUserType)

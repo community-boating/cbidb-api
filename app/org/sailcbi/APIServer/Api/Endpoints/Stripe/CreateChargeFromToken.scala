@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex._
-import org.sailcbi.APIServer.IO.Stripe.StripeIOController
+import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
@@ -20,11 +20,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit exec: ExecutionCont
 		val logger = PA.logger
 		val rc = getRC(ApexUserType, req)
 		val pb = rc.pb
-		val stripeIOController = new StripeIOController(
-			PA.stripeAPIIOMechanism.get(rc)(ws),
-			PA.stripeDatabaseIOMechanism.get(rc)(pb),
-			logger
-		)
+		val stripeIOController = rc.getStripeIOController(ws)
 		val params = req.postParams
 		val token: String = params("token")
 		val orderId: Int = params("orderId").toInt

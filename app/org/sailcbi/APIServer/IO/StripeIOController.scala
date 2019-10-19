@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.IO.Stripe
+package org.sailcbi.APIServer.IO
 
 import java.time.ZonedDateTime
 
@@ -7,17 +7,16 @@ import org.sailcbi.APIServer.Entities.CastableToStorableClass
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripePayouts}
-import org.sailcbi.APIServer.IO.Stripe.StripeAPIIO.StripeAPIIOMechanism
-import org.sailcbi.APIServer.IO.Stripe.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
 import org.sailcbi.APIServer.Services.Logger.Logger
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
+import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StripeIOController(apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
+class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
 		apiIO.getStripeList[Charge](
 			"charges",

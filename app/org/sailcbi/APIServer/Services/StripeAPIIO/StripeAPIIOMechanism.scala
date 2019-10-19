@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.IO.Stripe.StripeAPIIO
+package org.sailcbi.APIServer.Services.StripeAPIIO
 
 import org.sailcbi.APIServer.CbiUtil.ServiceRequestResult
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
@@ -7,7 +7,7 @@ import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
-abstract class StripeAPIIOMechanism {
+abstract class StripeAPIIOMechanism private[Services] {
 	def getOrPostStripeSingleton[T](
 		url: String,
 		constructor: JsValue => T,
