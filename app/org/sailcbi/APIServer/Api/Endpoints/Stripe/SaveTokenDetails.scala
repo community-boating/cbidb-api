@@ -25,7 +25,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 
 		pr.postJSON match {
 			case Some(jsv: JsValue) => {
-				val parsedBody = SaveTokenDetailsShape(jsv)
+				val parsedBody = SaveTokenDetailsRequestShape(jsv)
 				stripeIOController.getTokenDetails(parsedBody.token).map({
 					case s: NetSuccess[Token, StripeError] => {
 						println("Get token details success " + s.successObject)
@@ -51,8 +51,18 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 						}
 
 						pb.executePreparedQueryForInsert(insertQ)
-						implicit val format = SaveTokenDetailsShape.format
-						Ok(Json.toJson(parsedBody))
+
+						val response: SaveTokenDetailsResponseShape = SaveTokenDetailsResponseShape(
+							parsedBody.token,
+							parsedBody.orderId,
+							s.successObject.card.last4,
+							s.successObject.card.exp_month.toString,
+							s.successObject.card.exp_year.toString,
+							s.successObject.card.address_zip
+						)
+
+						implicit val format = SaveTokenDetailsResponseShape.format
+						Ok(Json.toJson(response))
 					}
 					case v: ValidationError[Token, StripeError] => {
 						logger.warning("Get token details validation error " + v.errorObject)
@@ -73,11 +83,19 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 		}
 	}}
 
-	case class SaveTokenDetailsShape(token: String, orderId: Int)
+	case class SaveTokenDetailsRequestShape(token: String, orderId: Int)
 
-	object SaveTokenDetailsShape {
-		implicit val format = Json.format[SaveTokenDetailsShape]
+	object SaveTokenDetailsRequestShape {
+		implicit val format = Json.format[SaveTokenDetailsRequestShape]
 
-		def apply(v: JsValue): SaveTokenDetailsShape = v.as[SaveTokenDetailsShape]
+		def apply(v: JsValue): SaveTokenDetailsRequestShape = v.as[SaveTokenDetailsRequestShape]
+	}
+
+	case class SaveTokenDetailsResponseShape(token: String, orderId: Int, last4: String, expMonth: String, expYear: String, zip: Option[String])
+
+	object SaveTokenDetailsResponseShape {
+		implicit val format = Json.format[SaveTokenDetailsResponseShape]
+
+		def apply(v: JsValue): SaveTokenDetailsResponseShape = v.as[SaveTokenDetailsResponseShape]
 	}
 }
