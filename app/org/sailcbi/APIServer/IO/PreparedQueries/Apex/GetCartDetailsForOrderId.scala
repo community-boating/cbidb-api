@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GetCartDetailsForOrderId(orderId: Int) extends HardcodedQueryForSelect[GetCartDetailsForOrderIdResult](Set(ApexUserType)) {
+class GetCartDetailsForOrderId(orderId: Int) extends HardcodedQueryForSelect[GetCartDetailsForOrderIdResult](Set(ApexUserType, MemberUserType)) {
 	val getQuery: String =
 		s"""
 		   |select order_id, round(sum(price)*100)

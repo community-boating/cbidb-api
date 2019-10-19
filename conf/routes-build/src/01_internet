@@ -6,6 +6,7 @@ POST    /stripe/sync-db                     org.sailcbi.APIServer.Api.Endpoints.
 
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
 POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
+POST     /stripe/submit-payment               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.post()
 
 POST 	/symon				org.sailcbi.APIServer.Api.Endpoints.Symon.PostSymonRun.post()
 GET     /ip                                     org.sailcbi.APIServer.Api.Endpoints.GetIP.get()

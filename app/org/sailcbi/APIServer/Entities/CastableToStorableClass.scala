@@ -9,7 +9,7 @@ trait CastableToStorableClass {
 	val persistenceValues: Map[String, String]
 	val pkSqlLiteral: String
 
-	def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(Set(ApexUserType), true) {
+	def getInsertPreparedQuery: PreparedQueryForInsert = new PreparedQueryForInsert(storableObject.allowedUserTypes, true) {
 		override val pkName: Option[String] = Some(storableObject.pkColumnName)
 		val columnNamesAndValues: List[(String, String)] = persistenceValues.toList
 		val columnNames: String = columnNamesAndValues.map(_._1).mkString(", ")
@@ -26,7 +26,7 @@ trait CastableToStorableClass {
 
 	}
 
-	def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(Set(ApexUserType), true) {
+	def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(storableObject.allowedUserTypes, true) {
 		val setStatements: String = persistenceValues.toList.map(t => t._1 + " = ?").mkString(", ")
 		val values: List[String] = persistenceValues.toList.map(t => t._2)
 
@@ -40,7 +40,7 @@ trait CastableToStorableClass {
 		override val params: List[String] = values
 	}
 
-	def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(Set(ApexUserType), true) {
+	def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(storableObject.allowedUserTypes, true) {
 		override def getQuery: String =
 			s"""
 			   |delete from ${storableObject.apexTableName} where ${storableObject.pkColumnName} = $pkSqlLiteral

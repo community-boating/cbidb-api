@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 case class BalanceTransaction(
@@ -22,6 +23,8 @@ case class BalanceTransaction(
 
 object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransaction] {
 	implicit val balanceTransactionJSONFormat = Json.format[BalanceTransaction]
+
+	override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
 
 	def apply(v: JsValue, po: Payout): BalanceTransaction = {
 		val newThing: JsObject = v.as[JsObject] ++ JsObject(Map("payout" -> JsString(po.id)))

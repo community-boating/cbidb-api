@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Logic.JuniorProgramLogic
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
@@ -351,10 +352,45 @@ object JPPortal {
 			)
 
 
-			override def setIntParametersVarchar: Map[String, String] = Map.empty
+			override def setInParametersVarchar: Map[String, String] = Map.empty
+			override def setInParametersDouble: Map[String, Double] = Map.empty
 			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_order_id")
 			override def getQuery: String = "cc_pkg.get_or_create_order_id(?, ?)"
 		}
 		pb.executeProcedure(pc)
+	}
+
+	def getCardData(pb: PersistenceBroker, orderId: Int): Option[StripeTokenSavedShape] = {
+		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StripeTokenSavedShape = new StripeTokenSavedShape(
+				token = rsw.getString(2),
+				orderId = rsw.getInt(1),
+				last4 = rsw.getString(3),
+				expMonth = rsw.getInt(4).toString,
+				expYear = rsw.getInt(5).toString,
+				zip = rsw.getOptionString(6)
+			)
+
+			override def getQuery: String =
+				"""
+				  |select ORDER_ID, TOKEN, CARD_LAST_DIGITS, CARD_EXP_MONTH, CARD_EXP_YEAR, CARD_ZIP
+				  |from active_stripe_tokens where order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(cardDataQ).headOption
+	}
+
+	def getOrderTotal(pb: PersistenceBroker, orderId: Int): Double = {
+
+		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
+
+			override def getQuery: String = "select cc_pkg.calculate_total(?) from dual"
+		}
+		pb.executePreparedQueryForSelect(orderTotalQ).head
 	}
 }

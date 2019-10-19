@@ -24,7 +24,9 @@ abstract class PreparedProcedureCall[T](
 	 * Map of param name to varchar value
 	 * @return
 	 */
-	def setIntParametersVarchar: Map[String, String]
+	def setInParametersVarchar: Map[String, String]
+
+	def setInParametersDouble: Map[String, Double]
 
 	def getOutResults(cs: CallableStatement): T
 }
@@ -50,9 +52,11 @@ object PreparedProcedureCall {
 			io_c -> 492
 		)
 
-		override def setIntParametersVarchar: Map[String, String] = Map(
+		override def setInParametersVarchar: Map[String, String] = Map(
 			i_s -> "TestString"
 		)
+
+		override def setInParametersDouble: Map[String, Double] = Map.empty
 		override def getOutResults(cs: CallableStatement): (Int, Int, String, Int) = (
 			cs.getInt(o_b),
 			cs.getInt(io_c),

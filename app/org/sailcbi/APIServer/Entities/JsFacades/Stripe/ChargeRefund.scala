@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsValue, Json}
 
 case class ChargeRefund(
@@ -17,6 +18,8 @@ case class ChargeRefund(
 
 object ChargeRefund extends StripeCastableToStorableObject[ChargeRefund] {
 	implicit val chargeRefundJSONFormat = Json.format[ChargeRefund]
+
+	override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
 
 	def apply(v: JsValue): ChargeRefund = v.as[ChargeRefund]
 

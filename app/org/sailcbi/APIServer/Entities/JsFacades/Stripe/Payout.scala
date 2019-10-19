@@ -4,6 +4,7 @@ import java.time.{Instant, ZonedDateTime}
 
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsValue, Json}
 
 case class Payout(
@@ -22,6 +23,8 @@ case class Payout(
 
 object Payout extends StripeCastableToStorableObject[Payout] {
 	implicit val balanceTransactionJSONFormat = Json.format[Payout]
+
+	override val allowedUserTypes: Set[UserType] = Set(ApexUserType)
 
 	def apply(v: JsValue): Payout = v.as[Payout]
 

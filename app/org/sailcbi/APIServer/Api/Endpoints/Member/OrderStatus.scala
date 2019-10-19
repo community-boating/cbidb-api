@@ -23,34 +23,10 @@ class OrderStatus @Inject()(implicit val exec: ExecutionContext) extends Authent
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = JPPortal.getOrderId(pb, personId)
 
-			val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberUserType)) {
-				override val params: List[String] = List(orderId.toString)
+			val orderTotal = JPPortal.getOrderTotal(pb, orderId)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StripeTokenSavedShape = new StripeTokenSavedShape(
-					token = rsw.getString(2),
-					orderId = rsw.getInt(1),
-					last4 = rsw.getString(3),
-					expMonth = rsw.getInt(4).toString,
-					expYear = rsw.getInt(5).toString,
-					zip = rsw.getOptionString(6)
-				)
+			val cardData = JPPortal.getCardData(pb, orderId)
 
-				override def getQuery: String =
-					"""
-					  |select ORDER_ID, TOKEN, CARD_LAST_DIGITS, CARD_EXP_MONTH, CARD_EXP_YEAR, CARD_ZIP
-					  |from active_stripe_tokens where order_id = ?
-					  |""".stripMargin
-			}
-			val cardData = pb.executePreparedQueryForSelect(cardDataQ).headOption
-
-			val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
-				override val params: List[String] = List(orderId.toString)
-
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
-
-				override def getQuery: String = "select cc_pkg.calculate_total(?) from dual"
-			}
-			val orderTotal = pb.executePreparedQueryForSelect(orderTotalQ).head
 			val result = OrderStatusResult(
 				orderId = orderId,
 				total = orderTotal,

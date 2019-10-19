@@ -396,6 +396,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
 		val pool = if (pc.useTempSchema) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(conn => {
+			println("STARTING PROCEDURE CALL: " + pc.getQuery)
 			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
 
 			// register outs and inouts
@@ -404,11 +405,18 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			}))
 
 			pc.setInParametersInt.foreach(Function.tupled((paramName: String, value: Int) => {
+				println(s"$paramName = $value")
 				callable.setInt(paramName, value)
 			}))
 
-			pc.setIntParametersVarchar.foreach(Function.tupled((paramName: String, value: String) => {
+			pc.setInParametersVarchar.foreach(Function.tupled((paramName: String, value: String) => {
+				println(s"$paramName = $value")
 				callable.setString(paramName, value)
+			}))
+
+			pc.setInParametersDouble.foreach(Function.tupled((paramName: String, value: Double) => {
+				println(s"$paramName = $value")
+				callable.setDouble(paramName, value)
 			}))
 
 			val hadResults: Boolean = callable.execute()
