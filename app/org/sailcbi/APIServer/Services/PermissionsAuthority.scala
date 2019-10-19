@@ -8,13 +8,10 @@ import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
-import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
-import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
-import play.api.libs.ws.WSClient
 
 
 class PermissionsAuthority private[Services] (

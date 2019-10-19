@@ -4,7 +4,6 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient

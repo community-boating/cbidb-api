@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest, Succeeded}
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient

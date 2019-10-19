@@ -8,8 +8,8 @@ import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, Prepare
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
-import play.api.libs.json.{JsNull, JsNumber, JsObject, JsString, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, Controller, Result}
+import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext
 

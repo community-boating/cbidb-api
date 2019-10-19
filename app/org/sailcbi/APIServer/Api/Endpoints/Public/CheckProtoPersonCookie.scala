@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
-import play.api.mvc.{Action, AnyContent, Controller, Cookie, Request, Result}
+import play.api.mvc._
 
 class CheckProtoPersonCookie extends Controller {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request => {

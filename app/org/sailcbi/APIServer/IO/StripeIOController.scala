@@ -1,104 +1,90 @@
 package org.sailcbi.APIServer.IO
 
-import java.time.ZonedDateTime
-
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.CastableToStorableClass
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripePayouts}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.Logger.Logger
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
-	def getCharges(since: Option[ZonedDateTime], chargesPerRequest: Int = 100): Future[List[Charge]] =
-		apiIO.getStripeList[Charge](
-			"charges",
-			Charge.apply,
-			(c: Charge) => c.id,
-			since match {
-				case None => List.empty
-				case Some(d) => List("created[gte]=" + d.toEpochSecond)
-			},
-			chargesPerRequest
-		).map({
-			case Succeeded(t) => t
-			case Warning(t, _) => t
-			case _ => throw new Exception("failed to get charges")
-		})
-
-	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] =
-		apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
-
-	def getBalanceTransactions: Future[ServiceRequestResult[List[BalanceTransaction], StripeError]] =
-		apiIO.getStripeList(
-			"balance/history",
-			BalanceTransaction.apply,
-			(bt: BalanceTransaction) => bt.id,
-			List.empty,
-			100
-		)
-
-	def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] =
-		apiIO.getOrPostStripeSingleton(
-			"charges",
-			Charge.apply,
-			POST,
-			Some(Map(
-				"amount" -> amountInCents.toString,
-				"currency" -> "usd",
-				"source" -> token,
-				"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
-				"metadata[closeId]" -> closeId.toString,
-				"metadata[orderId]" -> orderId.toString,
-				"metadata[token]" -> token,
-				"metadata[cbiInstance]" -> PA.instanceName
-			)),
-			Some((c: Charge) => dbIO.createObject(c))
-		)
-
-	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
-		// Update DB with all payouts
-		updateLocalDBFromStripeForStorable(
-			Payout,
-			List.empty,
-			None,
-			(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
-			COMMIT_TYPE_DO,
-			COMMIT_TYPE_DO,
-			COMMIT_TYPE_ASSERT_NO_ACTION
-		).flatMap(_ => {
-			val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
-			// For each payout, update DB with all associated BTs
-			Future.sequence(payouts.map(po => {
-				val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
-				updateLocalDBFromStripeForStorable(
-					BalanceTransaction,
-					List("payout=" + po.id),
-					Some((bt: BalanceTransaction) => bt.`type` != "payout"),
-					(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
-					COMMIT_TYPE_DO,
-					COMMIT_TYPE_DO,
-					COMMIT_TYPE_ASSERT_NO_ACTION,
-					Some(constructor)
-				)
-			})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
-				case Succeeded((c, u, d)) => {
-					val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
-					Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
-				}
-				case x => x
-			}))
-		})
+	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
+		if (TestUserType(Set(ApexUserType, PublicUserType, MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
+		}
+		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
 	}
 
-	def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
+	def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
+		if (TestUserType(Set(ApexUserType, MemberUserType, PublicUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"charges",
+				Charge.apply,
+				POST,
+				Some(Map(
+					"amount" -> amountInCents.toString,
+					"currency" -> "usd",
+					"source" -> token,
+					"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
+					"metadata[closeId]" -> closeId.toString,
+					"metadata[orderId]" -> orderId.toString,
+					"metadata[token]" -> token,
+					"metadata[cbiInstance]" -> PA.instanceName
+				)),
+				Some((c: Charge) => dbIO.createObject(c))
+			)
+		}
+		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+	}
+
+	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
+		if (TestUserType(Set(ApexUserType), rc.auth.userType)) {
+			// Update DB with all payouts
+			updateLocalDBFromStripeForStorable(
+				Payout,
+				List.empty,
+				None,
+				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
+				COMMIT_TYPE_DO,
+				COMMIT_TYPE_DO,
+				COMMIT_TYPE_ASSERT_NO_ACTION
+			).flatMap(_ => {
+				val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
+				// For each payout, update DB with all associated BTs
+				Future.sequence(payouts.map(po => {
+					val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
+					updateLocalDBFromStripeForStorable(
+						BalanceTransaction,
+						List("payout=" + po.id),
+						Some((bt: BalanceTransaction) => bt.`type` != "payout"),
+						(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
+						COMMIT_TYPE_DO,
+						COMMIT_TYPE_DO,
+						COMMIT_TYPE_ASSERT_NO_ACTION,
+						Some(constructor)
+					)
+				})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
+					case Succeeded((c, u, d)) => {
+						val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
+						Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
+					}
+					case x => x
+				}))
+			})
+		}
+		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+	}
+
+	private def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
 		castableObj: StripeCastableToStorableObject[T],
 		getReqParameters: List[String],
 		filterGetReqResults: Option[T => Boolean],
@@ -119,7 +105,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		})
 	}
 
-	def getRemoteObjects[T <: CastableToStorableClass](
+	private def getRemoteObjects[T <: CastableToStorableClass](
 		castableObj: StripeCastableToStorableObject[T],
 		getReqParameters: List[String],
 		filterGetReqResults: Option[T => Boolean],

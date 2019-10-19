@@ -1,13 +1,8 @@
 package org.sailcbi.APIServer.Services.Boot
 
-import org.sailcbi.APIServer.IO.HTTP.FromWSClient
-import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOLiveService
-import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 abstract class ServerBootLoader {

@@ -6,8 +6,8 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
 
