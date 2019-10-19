@@ -4,6 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
+import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, PublicUserType}
@@ -52,7 +53,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 
 						pb.executePreparedQueryForInsert(insertQ)
 
-						val response: SaveTokenDetailsResponseShape = SaveTokenDetailsResponseShape(
+						val response: StripeTokenSavedShape = StripeTokenSavedShape(
 							parsedBody.token,
 							parsedBody.orderId,
 							s.successObject.card.last4,
@@ -61,7 +62,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 							s.successObject.card.address_zip
 						)
 
-						implicit val format = SaveTokenDetailsResponseShape.format
+						implicit val format = StripeTokenSavedShape.format
 						Ok(Json.toJson(response))
 					}
 					case v: ValidationError[Token, StripeError] => {
@@ -89,13 +90,5 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) 
 		implicit val format = Json.format[SaveTokenDetailsRequestShape]
 
 		def apply(v: JsValue): SaveTokenDetailsRequestShape = v.as[SaveTokenDetailsRequestShape]
-	}
-
-	case class SaveTokenDetailsResponseShape(token: String, orderId: Int, last4: String, expMonth: String, expYear: String, zip: Option[String])
-
-	object SaveTokenDetailsResponseShape {
-		implicit val format = Json.format[SaveTokenDetailsResponseShape]
-
-		def apply(v: JsValue): SaveTokenDetailsResponseShape = v.as[SaveTokenDetailsResponseShape]
 	}
 }
