@@ -9,19 +9,19 @@ abstract class PreparedProcedureCall[T](
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
 	/**
-	 * Map of 1-indexed param position, to datatype (e.g. java.sql.Types.INTEGER)
+	 * Map of param name to datatype (e.g. java.sql.Types.INTEGER)
 	 * @return
 	 */
 	def registerOutParameters: Map[String, Int]
 
 	/**
-	 * Map of 1-indexed param position, to in value
+	 * Map of param name to int value
 	 * @return
 	 */
 	def setInParametersInt: Map[String, Int]
 
 	/**
-	 * Map of 1-indexed param position, to in value
+	 * Map of param name to varchar value
 	 * @return
 	 */
 	def setIntParametersVarchar: Map[String, String]

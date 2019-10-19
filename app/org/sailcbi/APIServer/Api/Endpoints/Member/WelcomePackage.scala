@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
+import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -25,6 +26,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			profiler.lap("about to do first query")
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
+			val orderId = JPPortal.getOrderId(pb, personId)
 			val nameQ = new PreparedQueryForSelect[(String, String)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
@@ -54,7 +56,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val result = WelcomePackageResult(personId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData)
+			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -63,6 +65,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 
 	case class WelcomePackageResult(
 		parentPersonId: Int,
+		orderId: Int,
 		parentFirstName: String,
 		parentLastName: String,
 		userName: String,

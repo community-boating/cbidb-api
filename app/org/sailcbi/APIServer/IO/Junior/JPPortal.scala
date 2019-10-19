@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.IO.Junior
 
+import java.sql.CallableStatement
 import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Logic.JuniorProgramLogic
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 
 object JPPortal {
@@ -333,5 +334,27 @@ object JPPortal {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(q)
+	}
+
+	def getOrderId(pb: PersistenceBroker, personId: Int): Int = {
+		val pc = new PreparedProcedureCall[Int](Set(MemberUserType)) {
+//			procedure get_or_create_order_id(
+//					i_person_id in number,
+//					o_order_id out number
+//			) ;
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_order_id" -> java.sql.Types.INTEGER
+			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> personId
+			)
+
+
+			override def setIntParametersVarchar: Map[String, String] = Map.empty
+			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_order_id")
+			override def getQuery: String = "cc_pkg.get_or_create_order_id(?, ?)"
+		}
+		pb.executeProcedure(pc)
 	}
 }

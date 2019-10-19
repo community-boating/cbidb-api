@@ -11,6 +11,7 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 
+// Called by apex to get details so apex can save to prod db itself.  Legacy
 class GetTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
 	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
@@ -40,6 +41,5 @@ class GetTokenDetails @Inject()(ws: WSClient)(implicit exec: ExecutionContext) e
 				Ok(List("failure", "cbi-api-error", e.e.getMessage).mkString("$$"))
 			}
 		})
-	}
-	}
+	}}
 }
