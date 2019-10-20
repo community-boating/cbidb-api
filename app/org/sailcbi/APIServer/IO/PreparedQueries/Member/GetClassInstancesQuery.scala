@@ -31,7 +31,8 @@ object GetClassInstancesQuery {
 				"ACTION",
 				"TYPE_ID",
 				"START_DATETIME_RAW",
-				"END_DATETIME_RAW"
+				"END_DATETIME_RAW",
+				"WEEK"
 			)
 
 			override def mapCaseObjectToJsArray(o: GetClassInstancesQueryResult): JsArray = JsArray(IndexedSeq(
@@ -45,7 +46,8 @@ object GetClassInstancesQuery {
 				Json.toJson(o.action),
 				Json.toJson(o.typeId),
 				Json.toJson(o.startDatetimeRaw),
-				Json.toJson(o.endDatetimeRaw)
+				Json.toJson(o.endDatetimeRaw),
+				Json.toJson(o.week)
 			))
 		}
 	}
@@ -61,7 +63,8 @@ object GetClassInstancesQuery {
 		rs.getString(8),
 		rs.getInt(9),
 		rs.getString(10),
-		rs.getString(11)
+		rs.getString(11),
+		rs.getInt(12)
 	)
 
 	def query(week: Option[Int], typeId: Option[Int], juniorId: Option[Int]): String = {
@@ -141,10 +144,12 @@ object GetClassInstancesQuery {
 		   |end) as action,
 		   |i.type_id,
 		   |to_char(s1.session_datetime,'MM/DD/YYYY HH24:MI') as start_datetime_raw,
-		   |to_char(s2.session_datetime,'MM/DD/YYYY HH24:MI') as end_datetime_raw
-		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk
+		   |to_char(s2.session_datetime,'MM/DD/YYYY HH24:MI') as end_datetime_raw,
+		   |w.week
+		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w
 		   |where i.type_id = t.type_id
 		   |and bk.instance_id = i.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
+		   |and s1.session_datetime between w.monday and w.monday + 6
 		   |and (nvl($weekString, '%nu'||'ll%') = '%nu' || 'll%' or (
 		   |    s1.session_datetime between (select monday from jp_weeks where season = util_pkg.get_current_season $weekClause)
 		   |    and (select sunday from jp_weeks where season = util_pkg.get_current_season $weekClause)
@@ -171,7 +176,8 @@ case class GetClassInstancesQueryResult(
 	action: String,
 	typeId: Int,
 	startDatetimeRaw: String,
-	endDatetimeRaw: String
+	endDatetimeRaw: String,
+	week: Int
 )
 
 object GetClassInstancesQueryResult {

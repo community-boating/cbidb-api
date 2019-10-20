@@ -16,6 +16,8 @@ GET     /jp-class-sections                 org.sailcbi.APIServer.Api.Endpoints.P
 GET     /ap-class-instances                 org.sailcbi.APIServer.Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
 GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.get()
 
+GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
+
 GET     /member-welcome                     org.sailcbi.APIServer.Api.Endpoints.Member.WelcomePackage.get()
 
 POST    /junior/required                    org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.post()
