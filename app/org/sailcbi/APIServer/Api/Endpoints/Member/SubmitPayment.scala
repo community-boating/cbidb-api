@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import java.sql.CallableStatement
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.AuthenticatedRequest
+import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, Failed, Failover, NetSuccess, ParsedRequest, Resolved, ValidationError, Warning}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.Junior.JPPortal
@@ -11,6 +11,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetCartDetailsForOrderId, 
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import play.api.libs.json.{JsNumber, JsObject}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
@@ -90,7 +91,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			}
 
 			stripeResult.map(result => {
-				val parseQ = new PreparedProcedureCall[Option[String]](Set(MemberUserType)) {
+				val parseQ = new PreparedProcedureCall[(Option[Int], Option[String])](Set(MemberUserType)) {
 					//						procedure start_stripe_transaction_parse(
 					//								i_order_id in number,
 					//								i_total in number,
@@ -120,21 +121,33 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 					override def setInParametersVarchar: Map[String, String] = Map(
 						"i_charge_success" -> (if (result.isLeft) "N" else "Y"),
-						"i_charge_id" -> result.getOrElse(null).successObject.id,
+						"i_charge_id" -> (if (result.isLeft) null else result.getOrElse(null).successObject.id),
 						"i_error_code" -> (if (result.isLeft) result.swap.getOrElse(null)._1 else null),
 						"i_stripe_error_msg" -> (if (result.isLeft) result.swap.getOrElse(null)._2 else null),
 					)
-					override def getOutResults(cs: CallableStatement): Option[String] = {
-						val ret = cs.getString("o_error_msg")
-						if (cs.wasNull()) None else Some(ret)
+					override def getOutResults(cs: CallableStatement): (Option[Int], Option[String]) = {
+						val err = {
+							val ret = cs.getString("o_error_msg")
+							if (cs.wasNull()) None else Some(ret)
+						}
+						val successAttemptId = {
+							val ret = cs.getInt("o_success_attempt_id")
+							if (cs.wasNull()) None else Some(ret)
+						}
+						(successAttemptId, err)
 					}
 					override def getQuery: String = "api_pkg.start_stripe_transaction_parse(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 				}
 
 				val parseError = pb.executeProcedure(parseQ)
-				println(parseError)
+				println("Final submit payment result:  " + parseError)
 
-				Ok("blah")
+				parseError._2 match {
+					case None => Ok(new JsObject(Map(
+						"successAttemptId" -> JsNumber(parseError._1.get)
+					)))
+					case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+				}
 			})
 		} catch {
 			case e: Throwable => {
