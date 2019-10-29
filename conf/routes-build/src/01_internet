@@ -40,6 +40,8 @@ GET    /junior/see-types                    org.sailcbi.APIServer.Api.Endpoints.
 GET    /junior/get-class-instances                    org.sailcbi.APIServer.Api.Endpoints.Member.GetClassInstances.junior(typeId: Int, juniorId: Int)
 GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.get()
 
+POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
+
 
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 
