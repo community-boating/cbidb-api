@@ -4,6 +4,7 @@ sealed abstract class ValidationResult {
 	def flatMap(f: ValidationResult => ValidationResult): ValidationResult
 	def map(f: ValidationResult => ValidationResult): ValidationResult
 	def combine(vr: ValidationResult): ValidationResult
+	def isOk: Boolean
 }
 
 case class ValidationError(errors: List[String]) extends ValidationResult {
@@ -19,12 +20,14 @@ case class ValidationError(errors: List[String]) extends ValidationResult {
 
 	def flatMap(f: ValidationResult => ValidationResult): ValidationResult = this
 	def map(f: ValidationResult => ValidationResult): ValidationResult = this
+	def isOk = false
 }
 
 case object ValidationOk extends ValidationResult {
 	def flatMap(f: ValidationResult => ValidationResult): ValidationResult = f(this)
 	def map(f: ValidationResult => ValidationResult): ValidationResult = f(this)
 	def combine(vr: ValidationResult): ValidationResult = vr
+	def isOk = true
 }
 
 object ValidationResult {

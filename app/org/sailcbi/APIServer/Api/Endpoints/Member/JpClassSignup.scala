@@ -1,9 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.ResultError
+import org.sailcbi.APIServer.Api.{ResultError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -23,6 +26,8 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 					val parsed = JpClassSignupPostShape.apply(v)
 					println(parsed)
 
+				//	val wlRecordExists = if (parsed.doEnroll) ValidationOk else JPPortal.waitListExists(pb, parsed.instanceId)
+
 					Ok("cool")
 				}
 				case Some(v) => {
@@ -40,7 +45,11 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 		}
 	}
 
-	case class JpClassSignupPostShape (doEnroll: Boolean)
+	case class JpClassSignupPostShape (
+		juniorId: Int,
+		instanceId: Int,
+		doEnroll: Boolean
+	)
 
 	object JpClassSignupPostShape {
 		implicit val format = Json.format[JpClassSignupPostShape]
