@@ -207,7 +207,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 	}
 
 	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[String]] = None): Option[String] = {
-		println(sql)
+		println(sql.replace("\t", "\\t"))
 		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(c => {
 			val ps: PreparedStatement = pkPersistenceName match {

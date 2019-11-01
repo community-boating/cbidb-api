@@ -413,63 +413,6 @@ object JPPortal {
 		}
 	}
 
-	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
-		val canSeeInstance = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
-
-			override def getQuery: String =
-				s"""
-				   |select jp_class_pkg.see_instance(?, ?) from dual
-				   |""".stripMargin
-
-			override val params: List[String] = List(juniorId.toString, instanceId.toString)
-		}).head
-		if (canSeeInstance) {
-			ValidationOk
-		} else {
-			ValidationResult.from("You are not eligible to take that class.")
-		}
-	}
-
-	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
-		val allowEnrollError = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Option[String] = rs.getOptionString(1)
-
-			override def getQuery: String =
-				s"""
-				   |select jp_class_pkg.allow_enroll(?, ?) from dual
-				   |""".stripMargin
-
-			override val params: List[String] = List(juniorId.toString, instanceId.toString)
-		}).head
-
-		allowEnrollError match {
-			case None => ValidationOk
-			case Some(s) => ValidationResult.from(s)
-		}
-	}
-
-	def alreadyStarted(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
-		val started = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
-
-			override def getQuery: String =
-				s"""
-				   |select 1 from jp_class_sessions fs, jp_class_bookends bk
-				   |where bk.first_session = fs.session_id and bk.instance_id = ?
-				   |and fs.session_datetime < util_pkg.get_sysdate
-				   |""".stripMargin
-
-			override val params: List[String] = List(instanceId.toString)
-		}).nonEmpty
-
-		if (started) {
-			ValidationResult.from("That class has already started.")
-		} else {
-			ValidationOk
-		}
-	}
-
 	def waitListExists(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
 		val wlExists = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
