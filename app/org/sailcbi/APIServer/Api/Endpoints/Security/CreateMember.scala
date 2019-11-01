@@ -138,7 +138,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends Controller
 							  |    'P',
 							  |    '${MagicIds.PERSON_TYPE.JP_PARENT}',
 							  |    ?
-							  |  );
+							  |  )
 							  |""".stripMargin
 					}
 					val newPersonId = pb.executePreparedQueryForInsert(insertQ).get.toInt
