@@ -173,6 +173,13 @@ object JPPortal {
 		if (pb.executePreparedQueryForSelect(q).nonEmpty) Right() else Left("That class has already started.")
 	}
 
+	def alreadyStartedAsValidationResult(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
+		alreadyStarted(pb, instanceId) match {
+			case Left(s) => ValidationResult.from(s)
+			case Right(_) => ValidationOk
+		}
+	}
+
 	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
@@ -190,6 +197,11 @@ object JPPortal {
 		ret
 	}
 
+	def seeTypeFromInstanceIdAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+		if (seeTypeFromInstanceId(pb, juniorId, instanceId)) ValidationOk
+		else ValidationResult.from("You are not eligible for this class type.")
+	}
+
 	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
@@ -205,6 +217,11 @@ object JPPortal {
 		val ret = queryResult.getOrElse('N') == "Y"
 		println("seeInstance: queryResult: " + queryResult + "; returning " + ret)
 		ret
+	}
+
+	def seeInstanceAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+		if (seeInstance(pb, juniorId, instanceId)) ValidationOk
+		else ValidationResult.from("You are not eligible for this class.")
 	}
 
 	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Option[String] = {

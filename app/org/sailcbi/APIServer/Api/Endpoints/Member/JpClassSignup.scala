@@ -28,8 +28,11 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 					val pb: PersistenceBroker = rc.pb
 					println(parsed)
 
-					val wlRecordExists = if (parsed.doEnroll) ValidationOk else JPPortal.waitListExists(pb, parsed.instanceId)
-					val seeType = () => if (JPPortal.seeTypeFromInstanceId(pb, parsed.juniorId, parsed.instanceId)) ValidationOk else ValidationResult.from("")
+
+					lazy val seeType = JPPortal.seeTypeFromInstanceIdAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+					lazy val seeInstance = JPPortal.seeInstanceAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+					lazy val alreadyStarted = JPPortal.alreadyStartedAsValidationResult(pb, parsed.instanceId)
+					lazy val wlRecordExists = if (parsed.doEnroll) ValidationOk else JPPortal.waitListExists(pb, parsed.instanceId)
 
 					Ok("cool")
 				}

@@ -5,6 +5,8 @@ sealed abstract class ValidationResult {
 	def map(f: ValidationResult => ValidationResult): ValidationResult
 	def combine(vr: ValidationResult): ValidationResult
 	def isOk: Boolean
+	def toEither: Either[List[String], Unit]
+	def append(newError: String): ValidationError
 }
 
 case class ValidationError(errors: List[String]) extends ValidationResult {
@@ -12,22 +14,25 @@ case class ValidationError(errors: List[String]) extends ValidationResult {
 		code="validation_error",
 		message=errors.map(_.replace('\n', ' ')).mkString("\\n")
 	)
-	def append(newError: String) = ValidationError(newError :: errors)
-	def combine(vr: ValidationResult): ValidationResult = vr match {
+	override def append(newError: String) = ValidationError(newError :: errors)
+	override def combine(vr: ValidationResult): ValidationResult = vr match {
 		case ve: ValidationError => ValidationError(ve.errors ::: errors)
 		case _ => this
 	}
 
-	def flatMap(f: ValidationResult => ValidationResult): ValidationResult = this
-	def map(f: ValidationResult => ValidationResult): ValidationResult = this
-	def isOk = false
+	override def flatMap(f: ValidationResult => ValidationResult): ValidationResult = this
+	override def map(f: ValidationResult => ValidationResult): ValidationResult = this
+	override def isOk = false
+	override def toEither: Either[List[String], Unit] = Left(errors)
 }
 
 case object ValidationOk extends ValidationResult {
-	def flatMap(f: ValidationResult => ValidationResult): ValidationResult = f(this)
-	def map(f: ValidationResult => ValidationResult): ValidationResult = f(this)
-	def combine(vr: ValidationResult): ValidationResult = vr
-	def isOk = true
+	override def append(newError: String) = ValidationError(List(newError))
+	override def flatMap(f: ValidationResult => ValidationResult): ValidationResult = f(this)
+	override def map(f: ValidationResult => ValidationResult): ValidationResult = f(this)
+	override def combine(vr: ValidationResult): ValidationResult = vr
+	override def isOk = true
+	override def toEither: Either[List[String], Unit] = Right()
 }
 
 object ValidationResult {
