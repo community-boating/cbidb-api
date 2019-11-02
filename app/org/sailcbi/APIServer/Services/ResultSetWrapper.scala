@@ -10,18 +10,17 @@ class ResultSetWrapper(rs: ResultSet) {
 	def getOptionLocalDate(c: Int): Option[LocalDate] = getValue(_.getDate, c).map(_.toLocalDate)
 	def getOptionLocalDateTime(c: Int): Option[LocalDateTime] = getValue(_.getTimestamp, c).map(_.toLocalDateTime)
 
-	@deprecated
 	def getString(c: Int): String = getOptionString(c).orNull
-	@deprecated
+
 	// per javadoc on java.sql.ResultSet.getInt, if the value is SQL NULL then the method returns 0 since the method returns primitive ints
 	// since that is totally unacceptable, we're throwing.
 	def getInt(c: Int): Int = getOptionInt(c).get
-	@deprecated
+
 	// liekwise for doubles
 	def getDouble(c: Int): Double = getOptionDouble(c).get
-	@deprecated
+
 	def getLocalDate(c: Int): LocalDate = getOptionLocalDate(c).orNull
-	@deprecated
+
 	def getLocalDateTime(c: Int): LocalDateTime = getOptionLocalDateTime(c).orNull
 
 	def getStringOrEmptyString(c: Int): String = {

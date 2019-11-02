@@ -1,4 +1,5 @@
 GET     /ping                               org.sailcbi.APIServer.Api.Endpoints.Ping.get()
+GET     /ping-db                               org.sailcbi.APIServer.Api.Endpoints.Public.PingDB.get()
 GET     /flag                           org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.get()
 POST    /stripe/create-charge-from-token    org.sailcbi.APIServer.Api.Endpoints.Stripe.CreateChargeFromToken.post()
 GET     /stripe/token-details               org.sailcbi.APIServer.Api.Endpoints.Stripe.GetTokenDetails.get(token: String)

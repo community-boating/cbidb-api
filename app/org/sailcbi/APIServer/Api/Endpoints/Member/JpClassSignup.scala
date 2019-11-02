@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -24,9 +24,12 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 				}
 				case Some(v: JsValue) => {
 					val parsed = JpClassSignupPostShape.apply(v)
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId)._2.get
+					val pb: PersistenceBroker = rc.pb
 					println(parsed)
 
-				//	val wlRecordExists = if (parsed.doEnroll) ValidationOk else JPPortal.waitListExists(pb, parsed.instanceId)
+					val wlRecordExists = if (parsed.doEnroll) ValidationOk else JPPortal.waitListExists(pb, parsed.instanceId)
+					val seeType = () => if (JPPortal.seeTypeFromInstanceId(pb, parsed.juniorId, parsed.instanceId)) ValidationOk else ValidationResult.from("")
 
 					Ok("cool")
 				}

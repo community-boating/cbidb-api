@@ -395,24 +395,6 @@ object JPPortal {
 		pb.executePreparedQueryForSelect(orderTotalQ).head
 	}
 
-	def seeType(pb: PersistenceBroker, juniorId: Int, typeId: Int): ValidationResult = {
-		val canSeeType = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
-
-			override def getQuery: String =
-				s"""
-				   |select jp_class_pkg.see_type(?, ?) from dual
-				   |""".stripMargin
-
-			override val params: List[String] = List(juniorId.toString, typeId.toString)
-		}).head
-		if (canSeeType) {
-			ValidationOk
-		} else {
-			ValidationResult.from("You are not eligible to take that class.")
-		}
-	}
-
 	def waitListExists(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
 		val wlExists = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
