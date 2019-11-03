@@ -42,7 +42,7 @@ GET    /junior/get-class-instances                    org.sailcbi.APIServer.Api.
 GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.get()
 
 POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
-
+POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJpClassSignup.post()
 
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 

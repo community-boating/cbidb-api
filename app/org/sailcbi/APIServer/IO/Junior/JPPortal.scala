@@ -339,7 +339,7 @@ object JPPortal {
 
 			override def setInParametersVarchar: Map[String, String] = Map(
 				"p_override" -> "N",
-				"p_send_email" -> "Y",
+				"p_send_email" -> "N",
 				"p_enroll_type" -> enrollType,
 				"p_do_fallback_wl" -> "N",
 				"p_signup_datetime" -> signupDatetime.map(_.format(DateUtil.DATE_TIME_FORMATTER)).orNull
@@ -500,5 +500,36 @@ object JPPortal {
 
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 		}).nonEmpty
+	}
+
+	def attemptDeleteSignup(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+		val proc = new PreparedProcedureCall[Option[String]](Set(MemberUserType)) {
+//			procedure attempt_delete_signup(
+//					i_person_id in number,
+//					i_instance_id in number,
+//					o_error out clob
+//			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> juniorId,
+				"i_instance_id" -> instanceId
+			)
+
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_error" -> java.sql.Types.CLOB
+			)
+
+			override def getOutResults(cs: CallableStatement): Option[String] = {
+				val ret = cs.getString("o_error")
+				if (cs.wasNull()) None
+				else Some(ret)
+			}
+
+			override def getQuery: String = "jp_class_pkg.attempt_delete_signup(?, ?, ?)"
+		}
+		pb.executeProcedure(proc) match {
+			case None => ValidationOk
+			case Some(s) => ValidationResult.from(s)
+		}
 	}
 }
