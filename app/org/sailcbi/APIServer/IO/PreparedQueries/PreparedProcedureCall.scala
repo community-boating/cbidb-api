@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
 import java.sql.CallableStatement
+import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserType}
 
@@ -18,15 +19,20 @@ abstract class PreparedProcedureCall[T](
 	 * Map of param name to int value
 	 * @return
 	 */
-	def setInParametersInt: Map[String, Int]
+	def setInParametersInt: Map[String, Int] = Map.empty
 
 	/**
 	 * Map of param name to varchar value
 	 * @return
 	 */
-	def setInParametersVarchar: Map[String, String]
+	def setInParametersVarchar: Map[String, String] = Map.empty
 
-	def setInParametersDouble: Map[String, Double]
+	def setInParametersDouble: Map[String, Double] = Map.empty
+
+	// Date params DO NOT WORK
+	// Everything will appear to work and then it will act as though the transaction was not committed
+	// Send strings instead and cast to date oracle-side
+	// def setInParametersDateTime: Map[String, LocalDateTime] = Map.empty
 
 	def getOutResults(cs: CallableStatement): T
 }

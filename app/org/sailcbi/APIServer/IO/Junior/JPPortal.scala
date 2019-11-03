@@ -140,11 +140,13 @@ object JPPortal {
 				  |where si.person_id = rl.b and rl.a = ? and si.signup_type = 'P'
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForSelect(q).headOption.flatten
+		val list = pb.executePreparedQueryForSelect(q)
+		println(list)
+		list.headOption.flatten
 	}
 
 	def spotsLeft(pb: PersistenceBroker, instanceId: Int): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -157,8 +159,13 @@ object JPPortal {
 		pb.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
+	def hasSpotsLeft(pb: PersistenceBroker, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
+		if (spotsLeft(pb, instanceId) > 0) ValidationOk
+		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
+	}
+
 	def alreadyStarted(pb: PersistenceBroker, instanceId: Int): Either[String, Unit] = {
-		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -181,7 +188,7 @@ object JPPortal {
 	}
 
 	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
-		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
@@ -203,7 +210,7 @@ object JPPortal {
 	}
 
 	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
-		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
@@ -225,7 +232,7 @@ object JPPortal {
 	}
 
 	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Option[String] = {
-		val q = new PreparedQueryForSelect[Option[String]](Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForSelect[Option[String]](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
@@ -240,8 +247,15 @@ object JPPortal {
 		ret
 	}
 
+	def allowEnrollAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+		allowEnroll(pb, juniorId, instanceId) match {
+			case None => ValidationOk
+			case Some(s) => ValidationResult.from(s)
+		}
+	}
+
 	// either an error message or a rollback function
-	def attemptSingleClassSignup(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime])(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
+	def attemptSingleClassSignupReservation(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime])(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
 		lazy val hasSpots = {
 			val spots = JPPortal.spotsLeft(pb, instanceId)
 			if (spots > 0) Right(spots)
@@ -267,25 +281,8 @@ object JPPortal {
 
 		validationResult.map(_ => {
 			println("inserting signup for " + instanceId)
-			val q = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
-				override val params: List[String] = List(
-					instanceId.toString,
-					juniorPersonId.toString,
-					"P",
-					(signupDatetime match {
-						case Some(dt) => signupDatetime.get
-						case None => pa.now()
-					}).format(DateUtil.DATE_TIME_FORMATTER)
-				)
-				override val pkName: Option[String] = Some("SIGNUP_ID")
-
-				override def getQuery: String =
-					s"""
-					  |insert into jp_class_signups(instance_id, person_id, signup_type, signup_datetime)
-					  |values (?, ?, ? , to_date(?, '${DateUtil.DATE_TIME_FORMAT_SQL}'))
-					  |""".stripMargin
-			}
-			val signupId = pb.executePreparedQueryForInsert(q)
+			println("datetime is " + signupDatetime)
+			val signupId = actuallyEnroll(pb, instanceId, juniorPersonId, signupDatetime, doEnroll = true, fullEnroll = false)
 			println("inserted, got back signup id " + signupId)
 			// return a rollback fn
 			() => {
@@ -303,8 +300,60 @@ object JPPortal {
 		})
 	}
 
+	def actuallyEnroll(
+		pb: PersistenceBroker,
+		instanceId: Int,
+		juniorPersonId: Int,
+		signupDatetime: Option[LocalDateTime],
+		doEnroll: Boolean,
+		fullEnroll: Boolean
+	)(implicit pa: PermissionsAuthority): Option[String] = {
+//		procedure signup(
+//				p_instance_id in number,
+//				p_junior_id in number,
+//				p_override in char,
+//				p_send_email in char default 'Y',
+//				p_signup_datetime in date default null,
+//				p_enroll_type in char default 'E',
+//				p_do_fallback_wl in char default 'Y',
+//				o_signup_id out number
+//		)
+
+		val enrollType = {
+			if (doEnroll) {
+				if (fullEnroll) "E"
+				else "P"
+			} else "W"
+		}
+
+		val proc = new PreparedProcedureCall[Int](Set(ProtoPersonUserType, MemberUserType)) {
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_signup_id" -> java.sql.Types.INTEGER
+			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"p_instance_id" -> instanceId,
+				"p_junior_id" -> juniorPersonId
+			)
+
+
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"p_override" -> "N",
+				"p_send_email" -> "Y",
+				"p_enroll_type" -> enrollType,
+				"p_do_fallback_wl" -> "N",
+				"p_signup_datetime" -> signupDatetime.map(_.format(DateUtil.DATE_TIME_FORMATTER)).orNull
+			)
+
+			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_signup_id")
+			override def getQuery: String = "jp_class_pkg.signup_core(?, ?, ?, ?, ?, ?, ?, ?)"
+		}
+
+		Some(pb.executeProcedure(proc).toString)
+	}
+
 	// Return Some(error message) on fail, None on success
-	def attemptSignup(
+	def attemptSignupReservation(
 		pb: PersistenceBroker,
 		juniorPersonId: Int,
 		beginnerInstanceId: Option[Int],
@@ -315,12 +364,12 @@ object JPPortal {
 		// If it's not initialized then we know it was never run, and therefore we don't need to run its rollback
 		val beginnerResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
+			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime)
 		})
 
 		val intermediateResult = new DefinedInitializableNullary(() => intermediateInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignup(pb, juniorPersonId, id, signupDatetime)
+			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime)
 		})
 
 		val totalResult = for {
@@ -430,8 +479,8 @@ object JPPortal {
 		}
 	}
 
-	def canWaitListJoin(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
-		val canJoin = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+	def canWaitListJoin(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+		pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
 			override def getQuery: String =
@@ -451,11 +500,5 @@ object JPPortal {
 
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 		}).nonEmpty
-
-		if (canJoin) {
-			ValidationOk
-		} else {
-			ValidationResult.from("There was an error enrolling you into this class. If this message persists please call the Front Office at 617-523-1038.")
-		}
 	}
 }

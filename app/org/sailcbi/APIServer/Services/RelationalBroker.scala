@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-import org.sailcbi.APIServer.CbiUtil.Profiler
+import org.sailcbi.APIServer.CbiUtil.{DateUtil, Profiler}
 import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.Storable.Fields.FieldValue.FieldValue
 import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
@@ -419,7 +419,27 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 				callable.setDouble(paramName, value)
 			}))
 
+			// Date params DO NOT WORK
+			// Everything will appear to work and then it will act as though the transaction was not committed
+			// Send strings instead and cast to date oracle-side
+
+//			pc.setInParametersDateTime.foreach(Function.tupled((paramName: String, value: LocalDateTime) => {
+//				if (value == null) {
+//					println(s"$paramName = $value")
+//					callable.setDate(paramName, null)
+//				} else {
+//					println("not null!")
+//					val utilDate: java.util.Date = java.util.Date.from(DateUtil.toBostonTime(value).toInstant)
+//					println(utilDate.getTime)
+//					val sqlDate: java.sql.Date = new java.sql.Date(utilDate.getTime)
+//					println(s"$paramName = $sqlDate")
+//					callable.setDate(paramName, sqlDate)
+//				}
+//
+//			}))
+
 			val hadResults: Boolean = callable.execute()
+			conn.commit()
 
 			pc.getOutResults(callable)
 		})
