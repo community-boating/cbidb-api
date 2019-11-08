@@ -532,4 +532,132 @@ object JPPortal {
 			case Some(s) => ValidationResult.from(s)
 		}
 	}
+
+	case class SignupForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String)
+
+	def getSignupsForReport(pb: PersistenceBroker, juniorId: Int): List[SignupForReport] = {
+		val q = new PreparedQueryForSelect[SignupForReport](Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SignupForReport = SignupForReport(
+				rsw.getInt(1),
+				rsw.getInt(2),
+				rsw.getString(3),
+				rsw.getString(4),
+				rsw.getString(5),
+				rsw.getString(6)
+			)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |i.instance_id,
+				  |t.type_id,
+				  |t.type_name as class_name,
+				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |to_char(s1.session_datetime,'Mon ddth')||
+				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
+				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
+				  |to_char(s1.session_datetime+(nvl(s1.length_override,t.session_length)/24),'HH:MIPM')||'  '||
+				  |to_char(s1.session_datetime,'Dy')||
+				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||
+				  |to_char(s2.session_datetime,'Dy') end)  as class_times
+				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_class_signups si, jp_weeks w
+				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
+				  |and si.instance_Id = i.instance_id and si.person_id = ? and trunc(s2.session_datetime) >= trunc(util_pkg.get_sysdate)
+				  |and s1.session_datetime between w.monday and (w.sunday)
+				  |and si.signup_type = 'E'
+				  |order by s1.session_datetime
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
+	case class WaitListTopForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String, offerExpiresString: String)
+
+	// TODO: differentiate between expired and not expired
+//	def getWaitListTopsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListTopForReport] = {
+//		val q = new PreparedQueryForSelect[WaitListTopForReport](Set(MemberUserType)) {
+//			override val params: List[String] = List(juniorId.toString)
+//
+//			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): WaitListTopForReport = WaitListTopForReport(
+//				rsw.getInt(1),
+//				rsw.getInt(2),
+//				rsw.getString(3),
+//				rsw.getString(4),
+//				rsw.getString(5),
+//				rsw.getString(6),
+//				rsw.getString(7)
+//			)
+//
+//			override def getQuery: String =
+//				"""
+//				  |select
+//				  |i.instance_id,
+//				  |t.type_id,
+//				  |t.type_name as class_name,
+//				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+//				  |to_char(s1.session_datetime,'Mon ddth')||
+//				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
+//				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
+//				  |to_char(s1.session_datetime+(nvl(s1.length_override,t.session_length)/24),'HH:MIPM')||'  '||
+//				  |to_char(s1.session_datetime,'Dy')||
+//				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||
+//				  |to_char(s2.session_datetime,'Dy') end)  as class_times,
+//				  |to_char(offer_exp_datetime,'Month ddth HH:MIPM') as offer_exp
+//				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
+//				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
+//				  |and si.signup_id = wlr.signup_id (+)
+//				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
+//				  |and s1.session_datetime between w.monday and (w.sunday)
+//				  |and si.signup_type = 'W'
+//				  |and wlr.wl_result is not null and wlr.wl_result <> 'F'
+//				  |order by s1.session_datetime
+//				  |""".stripMargin
+//		}
+//		pb.executePreparedQueryForSelect(q)
+//	}
+
+	case class WaitListForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String, wlPosition: Int)
+
+	def getWaitListsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListForReport] = {
+		val q = new PreparedQueryForSelect[WaitListForReport](Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): WaitListForReport = WaitListForReport(
+				rsw.getInt(1),
+				rsw.getInt(2),
+				rsw.getString(3),
+				rsw.getString(4),
+				rsw.getString(5),
+				rsw.getString(6),
+				rsw.getInt(7)
+			)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |i.instance_id,
+				  |t.type_id,
+				  |t.type_name as class_name,
+				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |to_char(s1.session_datetime,'Mon ddth')||(case when s1.session_datetime <> s2.session_datetime then ' - '||
+				  |to_char(s2.session_datetime,'Mon ddth') end) as class_date,
+				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
+				  |to_char(s1.session_datetime+(nvl(s1.length_override,t.session_length)/24),'HH:MIPM')||'  '||
+				  |to_char(s1.session_datetime,'Dy')||(case when s1.session_datetime <> s2.session_datetime then ' - '||
+				  |to_char(s2.session_datetime,'Dy') end)  as class_times,
+				  |(select count(*) from jp_class_signups where instance_id = i.instance_id and signup_type = 'W' and sequence <= si.sequence) as line_length
+				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
+				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
+				  |and si.signup_id = wlr.signup_id (+)
+				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
+				  |and s1.session_datetime between w.monday and (w.sunday)
+				  |and si.signup_type = 'W'
+				  |and wlr.wl_result is null
+				  |order by s1.session_datetime
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
 }

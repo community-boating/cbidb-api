@@ -50,7 +50,8 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 					"""
 					  |select k.name_first, si.instance_id, si.signup_datetime, util_pkg.get_sysdate
 					  |from persons par, person_relationships rl, persons k, jp_class_signups si
-					  |where par.person_id = rl.a and rl.b = k.person_id and k.person_id = si.person_id
+					  |where par.person_id = rl.a and rl.b = k.person_id and k.person_id = si.person_id and si.signup_type = 'P'
+					  |and k.proto_state = 'I'
 					  |and par.PROTOPERSON_COOKIE = ?
 					  |""".stripMargin
 			}
