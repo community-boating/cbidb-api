@@ -588,7 +588,8 @@ object JPPortal {
 		dateString: String,
 		timeString: String,
 		offerExpiresString: String,
-		offerExpDatetime: LocalDateTime
+		offerExpDatetime: LocalDateTime,
+		nowDateTime: LocalDateTime
 	)
 	object WaitListTopForReport {
 
@@ -609,7 +610,8 @@ object JPPortal {
 				rsw.getString(5),
 				rsw.getString(6),
 				rsw.getString(7),
-				rsw.getLocalDateTime(8)
+				rsw.getLocalDateTime(8),
+				rsw.getLocalDateTime(9)
 			)
 
 			override def getQuery: String =
@@ -627,7 +629,8 @@ object JPPortal {
 				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||
 				  |to_char(s2.session_datetime,'Dy') end)  as class_times,
 				  |to_char(offer_exp_datetime,'Month ddth HH:MIPM') as offer_exp,
-				  |offer_exp_datetime
+				  |offer_exp_datetime,
+				  |util_pkg.get_sysdate
 				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
 				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
 				  |and si.signup_id = wlr.signup_id (+)
