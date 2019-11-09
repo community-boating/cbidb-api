@@ -11,6 +11,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, Prepared
 import org.sailcbi.APIServer.Logic.JuniorProgramLogic
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import play.api.libs.json.{JsValue, Json}
 
 object JPPortal {
 	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
@@ -534,6 +535,12 @@ object JPPortal {
 	}
 
 	case class SignupForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String)
+	object SignupForReport {
+
+		implicit val format = Json.format[SignupForReport]
+
+		def apply(v: JsValue): SignupForReport = v.as[SignupForReport]
+	}
 
 	def getSignupsForReport(pb: PersistenceBroker, juniorId: Int): List[SignupForReport] = {
 		val q = new PreparedQueryForSelect[SignupForReport](Set(MemberUserType)) {
@@ -573,52 +580,74 @@ object JPPortal {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	case class WaitListTopForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String, offerExpiresString: String)
+	case class WaitListTopForReport(
+		instanceId: Int,
+		typeId: Int,
+		className: String,
+		week: String,
+		dateString: String,
+		timeString: String,
+		offerExpiresString: String,
+		offerExpDatetime: LocalDateTime
+	)
+	object WaitListTopForReport {
 
-	// TODO: differentiate between expired and not expired
-//	def getWaitListTopsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListTopForReport] = {
-//		val q = new PreparedQueryForSelect[WaitListTopForReport](Set(MemberUserType)) {
-//			override val params: List[String] = List(juniorId.toString)
-//
-//			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): WaitListTopForReport = WaitListTopForReport(
-//				rsw.getInt(1),
-//				rsw.getInt(2),
-//				rsw.getString(3),
-//				rsw.getString(4),
-//				rsw.getString(5),
-//				rsw.getString(6),
-//				rsw.getString(7)
-//			)
-//
-//			override def getQuery: String =
-//				"""
-//				  |select
-//				  |i.instance_id,
-//				  |t.type_id,
-//				  |t.type_name as class_name,
-//				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
-//				  |to_char(s1.session_datetime,'Mon ddth')||
-//				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
-//				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
-//				  |to_char(s1.session_datetime+(nvl(s1.length_override,t.session_length)/24),'HH:MIPM')||'  '||
-//				  |to_char(s1.session_datetime,'Dy')||
-//				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||
-//				  |to_char(s2.session_datetime,'Dy') end)  as class_times,
-//				  |to_char(offer_exp_datetime,'Month ddth HH:MIPM') as offer_exp
-//				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
-//				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
-//				  |and si.signup_id = wlr.signup_id (+)
-//				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
-//				  |and s1.session_datetime between w.monday and (w.sunday)
-//				  |and si.signup_type = 'W'
-//				  |and wlr.wl_result is not null and wlr.wl_result <> 'F'
-//				  |order by s1.session_datetime
-//				  |""".stripMargin
-//		}
-//		pb.executePreparedQueryForSelect(q)
-//	}
+		implicit val format = Json.format[WaitListTopForReport]
+
+		def apply(v: JsValue): WaitListTopForReport = v.as[WaitListTopForReport]
+	}
+
+	def getWaitListTopsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListTopForReport] = {
+		val q = new PreparedQueryForSelect[WaitListTopForReport](Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): WaitListTopForReport = WaitListTopForReport(
+				rsw.getInt(1),
+				rsw.getInt(2),
+				rsw.getString(3),
+				rsw.getString(4),
+				rsw.getString(5),
+				rsw.getString(6),
+				rsw.getString(7),
+				rsw.getLocalDateTime(8)
+			)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |i.instance_id,
+				  |t.type_id,
+				  |t.type_name as class_name,
+				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |to_char(s1.session_datetime,'Mon ddth')||
+				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
+				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
+				  |to_char(s1.session_datetime+(nvl(s1.length_override,t.session_length)/24),'HH:MIPM')||'  '||
+				  |to_char(s1.session_datetime,'Dy')||
+				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||
+				  |to_char(s2.session_datetime,'Dy') end)  as class_times,
+				  |to_char(offer_exp_datetime,'Month ddth HH:MIPM') as offer_exp,
+				  |offer_exp_datetime
+				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
+				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
+				  |and si.signup_id = wlr.signup_id (+)
+				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
+				  |and s1.session_datetime between w.monday and (w.sunday)
+				  |and si.signup_type = 'W'
+				  |and wlr.wl_result is not null and wlr.wl_result <> 'F'
+				  |order by s1.session_datetime
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
 
 	case class WaitListForReport(instanceId: Int, typeId: Int, className: String, week: String, dateString: String, timeString: String, wlPosition: Int)
+	object WaitListForReport {
+
+		implicit val format = Json.format[WaitListForReport]
+
+		def apply(v: JsValue): WaitListForReport = v.as[WaitListForReport]
+	}
 
 	def getWaitListsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListForReport] = {
 		val q = new PreparedQueryForSelect[WaitListForReport](Set(MemberUserType)) {

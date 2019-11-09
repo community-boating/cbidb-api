@@ -44,6 +44,8 @@ GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.
 POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
 POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJpClassSignup.post()
 
+GET     /junior/get-signups                 org.sailcbi.APIServer.Api.Endpoints.Member.GetAllJuniorClassSignups.get(juniorId: Int)
+
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 
 GET     /check-proto-person-cookie              org.sailcbi.APIServer.Api.Endpoints.Public.CheckProtoPersonCookie.get()
