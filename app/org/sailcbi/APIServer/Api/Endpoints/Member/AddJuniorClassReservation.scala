@@ -71,7 +71,12 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 			}
 
 			// Create new protojunior
-			val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(pb, parentPersonId, body.juniorFirstName)
+			val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(
+				pb,
+				parentPersonId,
+				body.juniorFirstName,
+				body.beginnerInstanceId.isDefined || body.intermediateInstanceId.isDefined
+			)
 
 			// create new signup with the min(signup_time) of all this protoparent's other signups
 			val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)

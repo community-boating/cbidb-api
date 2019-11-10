@@ -8,7 +8,6 @@ import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Logic.JuniorProgramLogic
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
@@ -27,7 +26,7 @@ object JPPortal {
 		pb.executePreparedQueryForInsert(pq).get.toInt
 	}
 
-	def persistProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String): (Int, () => Unit) = {
+	def persistProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
 		val createJunior = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(firstName)
 			override val pkName: Option[String] = Some("PERSON_ID")
@@ -54,7 +53,47 @@ object JPPortal {
 		}
 		pb.executePreparedQueryForInsert(createAcctLink)
 
+		val orderId = getOrderId(pb, parentPersonId)
+
+		val createSCM = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
+			override val params: List[String] = List(
+				juniorPersonId.toString,
+				orderId.toString,
+				if (hasClassReservations) "Y" else null
+			)
+			override val pkName: Option[String] = None
+
+			override def getQuery: String =
+				"""
+				  |insert into shopping_cart_memberships(
+				  |      person_id,
+				  |      membership_type_id,
+				  |      ready_to_buy,
+				  |      order_id,
+				  |      price,
+				  |      HAS_JP_CLASS_RESERVATIONS
+				  |    ) values (
+				  |      ?,
+				  |      10,
+				  |      'N',
+				  |      ?,
+				  |      (select price from membership_types where membership_type_id = 10),
+				  |      ?
+				  |    )
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForInsert(createSCM)
+
 		val rollback = () => {
+			val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(juniorPersonId.toString, orderId.toString)
+
+				override def getQuery: String =
+					"""
+					  |delete from shopping_cart_memberships where person_id = ? and order_id = ?
+					  |""".stripMargin
+			}
 			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
 				override val params: List[String] = List(juniorPersonId.toString)
 
@@ -71,7 +110,7 @@ object JPPortal {
 					  |delete from persons where person_id = ?
 					  |""".stripMargin
 			}
-
+			pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
 			pb.executePreparedQueryForUpdateOrDelete(deletePersonRelationship)
 			val deletedCt = pb.executePreparedQueryForUpdateOrDelete(deletePerson)
 		}
@@ -103,6 +142,14 @@ object JPPortal {
 					  |delete from jp_class_signups where person_id in (${ids.mkString(", ")})
 					  |""".stripMargin
 			}
+			val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+				override val params: List[String] = List()
+
+				override def getQuery: String =
+					s"""
+					  |delete from shopping_cart_memberships where person_id in (${ids.mkString(", ")})
+					  |""".stripMargin
+			}
 			val deletePersonRelationship = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
 				override val params: List[String] = List()
 
@@ -121,6 +168,7 @@ object JPPortal {
 			}
 
 			pb.executePreparedQueryForUpdateOrDelete(deleteSignups)
+			pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
 			pb.executePreparedQueryForUpdateOrDelete(deletePersonRelationship)
 			pb.executePreparedQueryForUpdateOrDelete(deletePerson)
 			Right(ids.mkString(", "))
@@ -399,14 +447,14 @@ object JPPortal {
 				s"""
 				  |delete from jp_class_signups
 				  |where signup_type = 'P'
-				  |and signup_datetime + (${JuniorProgramLogic.SIGNUP_RESERVATION_HOLD_MINUTES} / (24 * 60)) < util_pkg.get_sysdate
+				  |and signup_datetime + (jp_class_pkg.get_minutes_to_reserve_class / (24 * 60)) < util_pkg.get_sysdate
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 
 	def getOrderId(pb: PersistenceBroker, personId: Int): Int = {
-		val pc = new PreparedProcedureCall[Int](Set(MemberUserType)) {
+		val pc = new PreparedProcedureCall[Int](Set(MemberUserType, ProtoPersonUserType)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
 //					o_order_id out number

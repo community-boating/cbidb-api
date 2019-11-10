@@ -7,7 +7,6 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Logic.JuniorProgramLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
@@ -34,8 +33,8 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = {
 					val signupDatetime = rsw.getLocalDateTime(3)
-					val expDatetime = rsw.getLocalDateTime(3).plusMinutes(JuniorProgramLogic.SIGNUP_RESERVATION_HOLD_MINUTES)
-					val currentTime = rsw.getLocalDateTime(4)
+					val expDatetime = rsw.getLocalDateTime(4)
+					val currentTime = rsw.getLocalDateTime(5)
 					val minutesRemaining = if (expDatetime.isBefore(currentTime)) -1L else currentTime.until(expDatetime, ChronoUnit.MINUTES)
 					ClassInfo(
 						juniorFirstName =  rsw.getString(1),
@@ -48,7 +47,9 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 
 				override def getQuery: String =
 					"""
-					  |select k.name_first, si.instance_id, si.signup_datetime, util_pkg.get_sysdate
+					  |select k.name_first, si.instance_id, si.signup_datetime,
+					  |si.signup_datetime + (jp_class_pkg.get_minutes_to_reserve_class / (24 * 60)) as exp_datetime,
+					  |util_pkg.get_sysdate
 					  |from persons par, person_relationships rl, persons k, jp_class_signups si
 					  |where par.person_id = rl.a and rl.b = k.person_id and k.person_id = si.person_id and si.signup_type = 'P'
 					  |and k.proto_state = 'I'

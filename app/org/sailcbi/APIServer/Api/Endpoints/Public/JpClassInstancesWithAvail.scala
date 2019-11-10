@@ -23,7 +23,7 @@ class JpClassInstancesWithAvail @Inject()(implicit val exec: ExecutionContext)
 	def getCacheBrokerKey(params: JpClassInstancesWithAvailParamsObject): CacheKey = "jp-class-instances-avail"
 
 	def getExpirationTime: LocalDateTime = {
-		LocalDateTime.now.plusSeconds(5)
+		LocalDateTime.now.plusSeconds(1)
 	}
 }
 

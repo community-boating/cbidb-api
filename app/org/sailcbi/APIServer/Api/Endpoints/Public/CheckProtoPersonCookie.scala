@@ -11,6 +11,7 @@ class CheckProtoPersonCookie extends Controller {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request => {
 		val hasCookie = request.cookies.toSet.map((c: Cookie) => c.name).contains(ProtoPersonUserType.COOKIE_NAME)
 		if (hasCookie) {
+			// the request has a cookie...
 			val cookie = request.cookies.get(ProtoPersonUserType.COOKIE_NAME).get.value
 			try {
 				val rc = PA.getRequestCache(PublicUserType, None, ParsedRequest(request))
@@ -30,8 +31,10 @@ class CheckProtoPersonCookie extends Controller {
 				}
 				val existingPersons = pb.executePreparedQueryForSelect(q)
 				if (existingPersons.isEmpty) {
+        			// ... and the cookie is not attached to a non-proto user.  OK to keep using
 					Ok("Detected existing cookie")
 				} else {
+					//... but the cookie is attached to a non-proto parent.  Make a new one
 					setCookie(request, "Overriding stale cookie with new")
 				}
 			} catch {
@@ -51,7 +54,7 @@ class CheckProtoPersonCookie extends Controller {
 		val cookie = Cookie(
 			name = ProtoPersonUserType.COOKIE_NAME,
 			value = ProtoPersonUserType.COOKIE_VALUE_PREFIX + scala.util.Random.alphanumeric.take(30).mkString,
-			maxAge = Some(60 * 60 * 18), // 18hr
+			maxAge = Some(60 * 60 * 24 * 3), // 3 days
 			secure = secure,
 			httpOnly = true
 		)
