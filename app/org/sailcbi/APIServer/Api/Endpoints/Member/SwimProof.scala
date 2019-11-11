@@ -22,7 +22,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends Controller {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SwimProofShape =
 				SwimProofShape(
 					juniorId,
-					rs.getOptionInt(1)
+					rs.getOptionInt(1).map(_.toString)
 				)
 
 			override def getQuery: String =

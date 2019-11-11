@@ -4,7 +4,7 @@ import play.api.libs.json.{JsValue, Json}
 
 case class SwimProofShape(
 	personId: Int,
-	swimProofId: Option[Int]
+	swimProofId: Option[String]
 )
 
 object SwimProofShape {
