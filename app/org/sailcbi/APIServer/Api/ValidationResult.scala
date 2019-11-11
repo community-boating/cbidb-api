@@ -12,7 +12,7 @@ sealed abstract class ValidationResult {
 case class ValidationError(errors: List[String]) extends ValidationResult {
 	def toResultError: ResultError = ResultError(
 		code="validation_error",
-		message=errors.map(_.replace('\n', ' ')).mkString("\\n")
+		message=errors.reverse.map(_.replace('\n', ' ')).mkString("\\n")
 	)
 	override def append(newError: String) = ValidationError(newError :: errors)
 	override def combine(vr: ValidationResult): ValidationResult = vr match {

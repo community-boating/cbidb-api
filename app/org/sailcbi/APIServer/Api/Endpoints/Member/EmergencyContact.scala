@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext
@@ -79,48 +80,55 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 					val parsed = EmergencyContactShape.apply(v)
 					println(parsed)
 
-
-					val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-						override def getQuery: String =
-							s"""
-							   |update persons set
-							   |EMERG1_NAME = ?,
-							   |EMERG1_RELATION = ?,
-							   |EMERG1_PHONE_PRIMARY = ?,
-							   |EMERG1_PHONE_PRIMARY_TYPE = ?,
-							   |EMERG1_PHONE_ALTERNATE = ?,
-							   |EMERG1_PHONE_ALTERNATE_TYPE = ?,
-							   |
-                 |EMERG2_NAME = ?,
-							   |EMERG2_RELATION = ?,
-							   |EMERG2_PHONE_PRIMARY = ?,
-							   |EMERG2_PHONE_PRIMARY_TYPE = ?,
-							   |EMERG2_PHONE_ALTERNATE = ?,
-							   |EMERG2_PHONE_ALTERNATE_TYPE = ?
-							   |where person_id = ?
+					runValidations(parsed, pb, None) match {
+						case ve: ValidationError => Ok(ve.toResultError.asJsObject())
+						case ValidationOk => {
+							val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+								override def getQuery: String =
+									s"""
+									   |update persons set
+									   |EMERG1_NAME = ?,
+									   |EMERG1_RELATION = ?,
+									   |EMERG1_PHONE_PRIMARY = ?,
+									   |EMERG1_PHONE_PRIMARY_TYPE = ?,
+									   |EMERG1_PHONE_ALTERNATE = ?,
+									   |EMERG1_PHONE_ALTERNATE_TYPE = ?,
+									   |
+									   |EMERG2_NAME = ?,
+									   |EMERG2_RELATION = ?,
+									   |EMERG2_PHONE_PRIMARY = ?,
+									   |EMERG2_PHONE_PRIMARY_TYPE = ?,
+									   |EMERG2_PHONE_ALTERNATE = ?,
+									   |EMERG2_PHONE_ALTERNATE_TYPE = ?
+									   |where person_id = ?
               """.stripMargin
 
-						override val params: List[String] = List(
-							parsed.emerg1Name.orNull,
-							parsed.emerg1Relation.orNull,
-							parsed.emerg1PhonePrimary.orNull,
-							parsed.emerg1PhonePrimaryType.orNull,
-							parsed.emerg1PhoneAlternate.orNull,
-							parsed.emerg1PhoneAlternateType.orNull,
+								override val params: List[String] = List(
+									parsed.emerg1Name.orNull,
+									parsed.emerg1Relation.orNull,
+									parsed.emerg1PhonePrimary.orNull,
+									parsed.emerg1PhonePrimaryType.orNull,
+									parsed.emerg1PhoneAlternate.orNull,
+									parsed.emerg1PhoneAlternateType.orNull,
 
-							parsed.emerg2Name.orNull,
-							parsed.emerg2Relation.orNull,
-							parsed.emerg2PhonePrimary.orNull,
-							parsed.emerg2PhonePrimaryType.orNull,
-							parsed.emerg2PhoneAlternate.orNull,
-							parsed.emerg2PhoneAlternateType.orNull,
-							parsed.personId.toString
-						)
+									parsed.emerg2Name.orNull,
+									parsed.emerg2Relation.orNull,
+									parsed.emerg2PhonePrimary.orNull,
+									parsed.emerg2PhonePrimaryType.orNull,
+									parsed.emerg2PhoneAlternate.orNull,
+									parsed.emerg2PhoneAlternateType.orNull,
+									parsed.personId.toString
+								)
+							}
+
+							pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+
+							Ok(new JsObject(Map(
+								"personId" -> JsNumber(parsed.personId)
+							)))
+						}
 					}
 
-					pb.executePreparedQueryForUpdateOrDelete(updateQuery)
-
-					Ok("done")
 				}
 				case Some(v) => {
 					println("wut dis " + v)
@@ -134,5 +142,42 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 				Ok("Internal Error")
 			}
 		}
+	}
+
+	def runValidations(parsed: EmergencyContactShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
+		val phoneRegex = "^[0-9]{10}(x[0-9]+)?$".r
+
+		val unconditionalValidations = List(
+			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
+			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),
+			ValidationResult.checkBlank(parsed.emerg1PhonePrimary, "First Contact Primary Phone"),
+			ValidationResult.inline(parsed.emerg1PhonePrimary)(
+				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				"First Contact Primary Phone is not valid."
+			),
+			ValidationResult.checkBlank(parsed.emerg1PhonePrimaryType, "First Contact Primary Phone Type"),
+		)
+
+		val conditionalValidations = List((
+			parsed.emerg1PhoneAlternate.isDefined,
+			ValidationResult.inline(parsed.emerg1PhoneAlternate)(
+				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				"First Contact Alternate Phone is not valid."
+			)
+		), (
+			parsed.emerg2PhonePrimary.isDefined,
+			ValidationResult.inline(parsed.emerg2PhonePrimary)(
+				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				"Second Contact Primary Phone is not valid."
+			)
+		), (
+			parsed.emerg2PhoneAlternate.isDefined,
+			ValidationResult.inline(parsed.emerg2PhoneAlternate)(
+				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				"Second Contact Alternate Phone is not valid."
+			)
+		)).filter(_._1).map(_._2)
+
+		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 	}
 }

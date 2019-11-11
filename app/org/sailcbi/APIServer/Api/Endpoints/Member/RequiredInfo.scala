@@ -4,6 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
@@ -108,7 +109,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 							runValidations(parsed, pb, Some(id.toString().toInt)) match {
 								case ve: ValidationError => Ok(ve.toResultError.asJsObject())
 								case ValidationOk => {
-									doUpdate(pb, parsed)
+									doUpdate(pb, parsed, MemberUserType.getAuthedPersonId(rc.auth.userName, pb))
 									Ok(new JsObject(Map(
 										"personId" -> JsNumber(juniorId)
 									)))
@@ -300,10 +301,12 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 
 		pb.executePreparedQueryForInsert(createRelationshipQuery)
 
+		JPPortal.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
+
 		juniorPersonId
 	}
 
-	def doUpdate(pb: PersistenceBroker, data: RequiredInfoShape): Unit = {
+	def doUpdate(pb: PersistenceBroker, data: RequiredInfoShape, parentPersonId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
@@ -356,5 +359,6 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 		}
 
 		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+		JPPortal.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
 	}
 }

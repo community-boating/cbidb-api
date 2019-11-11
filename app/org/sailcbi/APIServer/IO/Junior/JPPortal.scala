@@ -740,4 +740,47 @@ object JPPortal {
 		}
 		pb.executePreparedQueryForSelect(q)
 	}
+
+	def addSCMIfNotMember(pb: PersistenceBroker, parentPersonId: Int, juniorId: Int): Unit = {
+		val getCurrentMembership = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select 1 from active_jp_members where person_id = ?
+				  |""".stripMargin
+		}
+		val hasCurrentMembership = pb.executePreparedQueryForSelect(getCurrentMembership).nonEmpty
+		if (!hasCurrentMembership) {
+			val orderId = getOrderId(pb, parentPersonId)
+
+			val createSCM = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val params: List[String] = List(
+					juniorId.toString,
+					orderId.toString
+				)
+				override val pkName: Option[String] = None
+
+				override def getQuery: String =
+					"""
+					  |insert into shopping_cart_memberships(
+					  |      person_id,
+					  |      membership_type_id,
+					  |      ready_to_buy,
+					  |      order_id,
+					  |      price
+					  |    ) values (
+					  |      ?,
+					  |      10,
+					  |      'N',
+					  |      ?,
+					  |      (select price from membership_types where membership_type_id = 10)
+					  |    )
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForInsert(createSCM)
+		}
+	}
 }

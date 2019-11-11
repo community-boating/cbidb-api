@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import java.time.LocalDateTime
+
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
@@ -27,17 +29,18 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
 			val orderId = JPPortal.getOrderId(pb, personId)
-			val nameQ = new PreparedQueryForSelect[(String, String)](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String) = (rsw.getString(1), rsw.getString(2))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int) =
+					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4))
 
 				override def getQuery: String =
 					"""
-					  |select name_first, name_last from persons where person_id = ?
+					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast) = pb.executePreparedQueryForSelect(nameQ).head
+			val (nameFirst, nameLast, sysdate, season) = pb.executePreparedQueryForSelect(nameQ).head
 			val pricesMaybe = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
 				override def getQuery: String = """
 					  |select
@@ -56,7 +59,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData)
+			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData, sysdate, season)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -71,7 +74,9 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 		userName: String,
 		jpPrice: Option[Double],
 		jpOffseasonPrice: Option[Double],
-		children: List[GetChildDataQueryResult]
+		children: List[GetChildDataQueryResult],
+		serverTime: LocalDateTime,
+		season: Int
 	)
 
 	object WelcomePackageResult {
