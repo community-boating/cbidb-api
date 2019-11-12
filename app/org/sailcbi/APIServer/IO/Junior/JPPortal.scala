@@ -783,4 +783,18 @@ object JPPortal {
 			pb.executePreparedQueryForInsert(createSCM)
 		}
 	}
+
+	def deleteRegistration(pb: PersistenceBroker, parentPersonId: Int, juniorId: Int): ValidationResult = {
+		val orderId = getOrderId(pb, parentPersonId)
+		val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_memberships where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
+		ValidationOk
+	}
 }
