@@ -1,5 +1,4 @@
 GET     /reporting/get-report-run-options   org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.get()
-GET     /auth/getPwHash                     org.sailcbi.APIServer.Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String ?= "staff")
 GET     /auth/getUserHasRole                   org.sailcbi.APIServer.Api.Endpoints.Security.GetUserHasRole.get(userName: String, role: String)
 GET     /is-logged-in-as-staff              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsStaff.get()
 POST    /report                             org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.post()
