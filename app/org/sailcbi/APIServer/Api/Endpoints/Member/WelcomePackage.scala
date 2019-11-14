@@ -59,7 +59,9 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData, sysdate, season)
+			val canCheckout = JPPortal.canCheckout(pb, personId, orderId)
+
+			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData, sysdate, season, canCheckout)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -76,7 +78,8 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 		jpOffseasonPrice: Option[Double],
 		children: List[GetChildDataQueryResult],
 		serverTime: LocalDateTime,
-		season: Int
+		season: Int,
+		canCheckout: Boolean
 	)
 
 	object WelcomePackageResult {

@@ -19,6 +19,8 @@ GET     /jp-class-sections                 org.sailcbi.APIServer.Api.Endpoints.P
 GET     /ap-class-instances                 org.sailcbi.APIServer.Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
 GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.get()
 
+GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.get()
+
 GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
 
 GET     /member-welcome                     org.sailcbi.APIServer.Api.Endpoints.Member.WelcomePackage.get()
@@ -47,6 +49,10 @@ GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.
 
 POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
 POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJpClassSignup.post()
+
+
+GET    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.get(juniorId: Int, instanceId: Int)
+POST    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.post()
 
 GET     /junior/get-signups                 org.sailcbi.APIServer.Api.Endpoints.Member.GetAllJuniorClassSignups.get(juniorId: Int)
 

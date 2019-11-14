@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.IO.Junior
 import java.sql.CallableStatement
 import java.time.LocalDateTime
 
-import org.sailcbi.APIServer.Api.{ValidationOk, ValidationResult}
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
@@ -796,5 +796,98 @@ object JPPortal {
 		}
 		pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
 		ValidationOk
+	}
+
+	def canCheckout(pb: PersistenceBroker, parentPersonId: Int, orderId: Int): Boolean = {
+		val incompleteItemsQuery = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override val params: List[String] = List(parentPersonId.toString, parentPersonId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |1
+				  |from persons p, shopping_cart_memberships sc
+				  |where p.person_id = sc.person_id
+				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
+				  |and (sc.ready_to_buy = 'N')
+				  |
+				  |""".stripMargin
+		}
+
+		val hasIncompleteItems = pb.executePreparedQueryForSelect(incompleteItemsQuery).nonEmpty
+
+		val completeItemsQuery = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override val params: List[String] = List(
+				parentPersonId.toString,
+				parentPersonId.toString,
+				orderId.toString,
+				parentPersonId.toString,
+				parentPersonId.toString
+			)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |1
+				  |from persons p, shopping_cart_memberships sc
+				  |where p.person_id = sc.person_id
+				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
+				  |and (sc.ready_to_buy = 'Y')
+				  |
+				  |union all
+				  |
+				  |select 1 from persons p, shopping_cart_jpc scj
+				  |where p.person_id = scj.person_id
+				  |and scj.order_id = ?
+				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
+				  |and (scj.ready_to_buy = 'Y')
+				  |""".stripMargin
+		}
+
+		val hasCompleteItems = pb.executePreparedQueryForSelect(completeItemsQuery).nonEmpty
+
+		hasCompleteItems && !hasIncompleteItems
+	}
+
+	def getSignupNote(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString, instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override def getQuery: String =
+				"""
+				  |select PARENT_SIGNUP_NOTE from jp_class_signups
+				  |where person_id = ? and instance_id = ?
+				  |""".stripMargin
+		}
+		val result = pb.executePreparedQueryForSelect(q)
+		if (result.length == 1) Right(result.head)
+		else Left(ValidationResult.from("Unable to locate signup for this class."))
+	}
+
+	def saveSignupNote(pb: PersistenceBroker, juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(
+				signupNote.orNull,
+				juniorId.toString,
+				instanceId.toString
+			)
+
+			override def getQuery: String =
+				"""
+				  |update jp_class_signups
+				  |set parent_signup_note = ?
+				  |where person_id = ? and instance_id = ?
+				  |""".stripMargin
+		}
+
+		val result = pb.executePreparedQueryForUpdateOrDelete(q)
+		if (result == 1) ValidationOk
+		else ValidationResult.from("Unable to update signup note.")
 	}
 }

@@ -91,6 +91,7 @@ class PermissionsAuthority private[Services] (
 			secrets
 		)
 
+	@deprecated
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
