@@ -440,7 +440,7 @@ object JPPortal {
 	}
 
 	def pruneOldReservations(pb: PersistenceBroker): Int = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List.empty
 
 			override def getQuery: String =

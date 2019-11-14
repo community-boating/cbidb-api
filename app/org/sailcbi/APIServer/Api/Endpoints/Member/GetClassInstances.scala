@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -21,6 +22,9 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends A
 		} else {
 			val rc = maybeRC.get
 			val pb = rc.pb
+
+			JPPortal.pruneOldReservations(pb)
+
 			val instances = pb.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray
 			val classInfoQuery = new PreparedQueryForSelect[ClassTypeInfo](Set(MemberUserType)) {
 				override val params: List[String] = List(typeId.toString)

@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsArray, JsObject, JsString, JsValue, Json}
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.ExecutionContext
@@ -28,7 +28,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			val deleted = JPPortal.pruneOldReservations(pb)
 			println(s"deleted $deleted old reservations...")
 
-			val q = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {
+			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {
 				override val params: List[String] = List(rc.auth.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = {
@@ -56,9 +56,37 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 					  |and par.PROTOPERSON_COOKIE = ?
 					  |""".stripMargin
 			}
+			val signups = pb.executePreparedQueryForSelect(signupsQ)
+
+			val noSignupJuniors = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
+				override val params: List[String] = List(rc.auth.userName)
+
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
+
+				override def getQuery: String =
+					"""
+					  |select k.name_first
+					  |from persons par
+					  |inner join person_relationships rl
+					  | on par.person_id = rl.a
+					  | inner join persons k
+					  |  on k.person_id = rl.b
+					  |  left outer join jp_class_signups si
+					  |  on k.person_id = si.person_id and si.signup_type = 'P'
+					  |where k.proto_state = 'I'
+					  |and par.PROTOPERSON_COOKIE = ?
+					  |and si.signup_id is null
+					  |
+					  |""".stripMargin
+			}
+
 			implicit val classInfoFormat = ClassInfo.format
-			val results: JsValue = Json.toJson(pb.executePreparedQueryForSelect(q).map(o => Json.toJson(o)))
-			Ok(results)
+			val results: JsValue = Json.toJson(signups.map(o => Json.toJson(o)))
+			val noSignups: JsArray = JsArray(pb.executePreparedQueryForSelect(noSignupJuniors).toArray.map(JsString))
+			Ok(JsObject(Map(
+				"instances" -> results,
+				"noSignups" -> noSignups
+			)))
 		} catch {
 			case _: UnauthorizedAccessException => Ok("Access Denied")
 			case e: Throwable => {
