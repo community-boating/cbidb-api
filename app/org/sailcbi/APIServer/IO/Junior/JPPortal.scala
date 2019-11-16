@@ -742,6 +742,7 @@ object JPPortal {
 	}
 
 	def addSCMIfNotMember(pb: PersistenceBroker, parentPersonId: Int, juniorId: Int): Unit = {
+		val orderId = getOrderId(pb, parentPersonId)
 		val getCurrentMembership = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -753,8 +754,22 @@ object JPPortal {
 				  |""".stripMargin
 		}
 		val hasCurrentMembership = pb.executePreparedQueryForSelect(getCurrentMembership).nonEmpty
-		if (!hasCurrentMembership) {
-			val orderId = getOrderId(pb, parentPersonId)
+
+		val hasSCMQuery = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override val params: List[String] = List(
+				juniorId.toString,
+				orderId.toString
+			)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select 1 from shopping_cart_memberships where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		val hasSCM = pb.executePreparedQueryForSelect(hasSCMQuery).nonEmpty
+		if (!hasCurrentMembership && !hasSCM) {
 
 			val createSCM = new PreparedQueryForInsert(Set(MemberUserType)) {
 				override val params: List[String] = List(
