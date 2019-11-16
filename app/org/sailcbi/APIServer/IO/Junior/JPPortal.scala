@@ -810,6 +810,17 @@ object JPPortal {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
+
+		val deleteClassReservations = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(juniorId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from jp_class_signups where person_id = ? and signup_type = 'P'
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForUpdateOrDelete(deleteClassReservations)
 		ValidationOk
 	}
 
