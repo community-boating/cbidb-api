@@ -232,6 +232,8 @@ object PermissionsAuthority {
 	val ROOT_AUTH_HEADER = "origin-root"
 	val BOUNCER_AUTH_HEADER = "origin-bouncer"
 
+	val EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB = "$$CBIDB_PUBLIC_WEB_EFUSE"
+
 	trait PersistenceSystem {
 		val pbs: PersistenceBrokerStatic
 	}

@@ -1,0 +1,31 @@
+package org.sailcbi.APIServer.Api.Endpoints.Public
+
+import javax.inject.Inject
+import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+import play.api.libs.json.{JsNumber, JsObject, JsString}
+import play.api.mvc.{Action, Controller}
+
+import scala.concurrent.ExecutionContext
+
+class CheckEFusePublicWeb @Inject()(implicit exec: ExecutionContext) extends Controller {
+	def get()(implicit PA: PermissionsAuthority) = Action { request =>
+		try {
+			val logger = PA.logger
+			val parsedRequest = ParsedRequest(request)
+			val rc: RequestCache = PA.getRequestCache(PublicUserType, None, parsedRequest)._2.get
+			Ok(rc.cb.get(PermissionsAuthority.EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB).getOrElse("-1"))
+
+		} catch {
+			case _: UnauthorizedAccessException => Ok("Access Denied")
+			case e: Throwable => {
+				println(e)
+				e.printStackTrace()
+				Ok("Internal Error")
+			}
+		}
+	}
+}
