@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
@@ -145,14 +145,12 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 	}
 
 	def runValidations(parsed: EmergencyContactShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
-		val phoneRegex = "^[0-9]{10}(x[0-9]+)?$".r
-
 		val unconditionalValidations = List(
 			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
 			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),
 			ValidationResult.checkBlank(parsed.emerg1PhonePrimary, "First Contact Primary Phone"),
 			ValidationResult.inline(parsed.emerg1PhonePrimary)(
-				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 				"First Contact Primary Phone is not valid."
 			),
 			ValidationResult.checkBlank(parsed.emerg1PhonePrimaryType, "First Contact Primary Phone Type"),
@@ -161,19 +159,19 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 		val conditionalValidations = List((
 			parsed.emerg1PhoneAlternate.isDefined,
 			ValidationResult.inline(parsed.emerg1PhoneAlternate)(
-				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 				"First Contact Alternate Phone is not valid."
 			)
 		), (
 			parsed.emerg2PhonePrimary.isDefined,
 			ValidationResult.inline(parsed.emerg2PhonePrimary)(
-				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 				"Second Contact Primary Phone is not valid."
 			)
 		), (
 			parsed.emerg2PhoneAlternate.isDefined,
 			ValidationResult.inline(parsed.emerg2PhoneAlternate)(
-				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 				"Second Contact Alternate Phone is not valid."
 			)
 		)).filter(_._1).map(_._2)

@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest}
+import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
@@ -150,8 +150,6 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 	def runValidations(parsed: RequiredInfoShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
-		val phoneRegex = "^[0-9]{10}(x[0-9]+)?$".r
-
 		val unconditionalValidations = List(
 			tooOld(pb, dob),
 			tooYoung(pb, dob, juniorId),
@@ -170,7 +168,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 				"Child email is not valid."
 			),
 			ValidationResult.inline(parsed.primaryPhone)(
-				phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 				"Primary Phone is not valid."
 			)
 		)
@@ -178,7 +176,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 		val conditionalValidations = List((
 				parsed.alternatePhone.isDefined,
 				ValidationResult.inline(parsed.alternatePhone)(
-					phone => phoneRegex.findFirstIn(phone.getOrElse("")).isDefined,
+					phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
 					"Alternate Phone is not valid."
 				)
 		), (
