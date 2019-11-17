@@ -55,6 +55,7 @@ POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.End
 
 GET    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.get(juniorId: Int, instanceId: Int)
 POST    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.post()
+POST    /junior/signup-note-proto                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.postProto()
 
 GET     /junior/get-signups                 org.sailcbi.APIServer.Api.Endpoints.Member.GetAllJuniorClassSignups.get(juniorId: Int)
 

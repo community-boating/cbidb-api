@@ -32,24 +32,27 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 				override val params: List[String] = List(rc.auth.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = {
-					val signupDatetime = rsw.getLocalDateTime(3)
-					val expDatetime = rsw.getLocalDateTime(4)
-					val currentTime = rsw.getLocalDateTime(5)
+					val signupDatetime = rsw.getLocalDateTime(4)
+					val expDatetime = rsw.getLocalDateTime(5)
+					val currentTime = rsw.getLocalDateTime(6)
 					val minutesRemaining = if (expDatetime.isBefore(currentTime)) -1L else currentTime.until(expDatetime, ChronoUnit.MINUTES)
 					ClassInfo(
-						juniorFirstName =  rsw.getString(1),
-						instanceId = rsw.getInt(2),
+						juniorPersonId = rsw.getInt(1),
+						juniorFirstName =  rsw.getString(2),
+						instanceId = rsw.getInt(3),
 						signupDatetime = signupDatetime,
 						expirationDateTime = expDatetime,
-						minutesRemaining = minutesRemaining
+						minutesRemaining = minutesRemaining,
+						signupNote = rsw.getOptionString(7)
 					)
 				}
 
 				override def getQuery: String =
 					"""
-					  |select k.name_first, si.instance_id, si.signup_datetime,
+					  |select k.person_id, k.name_first, si.instance_id, si.signup_datetime,
 					  |si.signup_datetime + (jp_class_pkg.get_minutes_to_reserve_class / (24 * 60)) as exp_datetime,
-					  |util_pkg.get_sysdate
+					  |util_pkg.get_sysdate,
+					  |si.parent_signup_note
 					  |from persons par, person_relationships rl, persons k, jp_class_signups si
 					  |where par.person_id = rl.a and rl.b = k.person_id and k.person_id = si.person_id and si.signup_type = 'P'
 					  |and k.proto_state = 'I'
@@ -97,7 +100,16 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 		}
 	}
 
-	case class ClassInfo(juniorFirstName: String, instanceId: Int, signupDatetime: LocalDateTime, expirationDateTime: LocalDateTime, minutesRemaining: Long)
+	case class ClassInfo(
+		juniorPersonId: Int,
+		juniorFirstName: String,
+		instanceId: Int,
+		signupDatetime: LocalDateTime,
+		expirationDateTime: LocalDateTime,
+		minutesRemaining: Long,
+		signupNote: Option[String]
+	)
+
 	object ClassInfo {
 		implicit val format = Json.format[ClassInfo]
 		def apply(v: JsValue): ClassInfo = v.as[ClassInfo]

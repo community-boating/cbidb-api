@@ -897,7 +897,7 @@ object JPPortal {
 	}
 
 	def saveSignupNote(pb: PersistenceBroker, juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ProtoPersonUserType)) {
 			override val params: List[String] = List(
 				signupNote.orNull,
 				juniorId.toString,
