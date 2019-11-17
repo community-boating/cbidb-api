@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert}
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
@@ -68,27 +68,35 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 					val parsed = ScholarshipYesShape.apply(v)
 					Scholarship.setOthersNonCurrent(pb, personId)
 
-					val reducedKids = Scholarship.reduceKids(Kids(parsed.infantCount, parsed.preschoolerCount, parsed.schoolagerCount, parsed.teenagerCount))
-					val eiiQ = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
+					val adults = {
+						if (parsed.numberWorkers < 1) 1
+						else if (parsed.numberWorkers > 2) 2
+						else parsed.numberWorkers
+					}
+
+					val children = {
+						if (parsed.childCount < 1) 1
+						else if (parsed.childCount > 6) 6
+						else parsed.childCount
+					}
+
+					val eiiQ = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
 						def getQuery: String =
 							s"""
-							   |select $INFLATION_FACTOR * least($EII_MAX,(ANNUAL_TOTAL + 12*(PRECAUTIONARY + RETIREMENT + CHILDRENS_EDUCATION_TRAINING)))
-							   |from eii
-							   |where worker_ct = ${if (parsed.numberWorkers > 2) 2 else parsed.numberWorkers}
-							   | and benefits = ${if (parsed.hasBenefits) "'Y'" else "'N'"}
-							   | and infant_ct = ${reducedKids.infants}
-							   | and preschooler_ct = ${reducedKids.preschoolers}
-							   | and schoolage_ct = ${reducedKids.schoolagers}
-							   | and teenage_ct = ${reducedKids.teenagers}
+							   |select eii
+							   |from eii_mit
+							   |where adults = ?
+							   |and children = ?
 							   |
 						 """.stripMargin
 
 						def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
+
+						override val params: List[String] = List(adults.toString, children.toString)
 					}
 					val eiis = pb.executePreparedQueryForSelect(eiiQ)
 					if (eiis.length == 1) {
-						val totalKids = parsed.infantCount + parsed.preschoolerCount + parsed.schoolagerCount + parsed.teenagerCount
-						val myJpPrice = Scholarship.getMyJpPrice(pb, eiis.head, parsed.income, totalKids)
+						val myJpPrice = Scholarship.getMyJpPrice(pb, eiis.head, parsed.income, children)
 						val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
 							val params: List[String] = List(personId.toString)
 							override val pkName: Option[String] = None
@@ -99,32 +107,22 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 								   |(PERSON_ID,
 								   |        SEASON,
 								   |        WORKERS,
-								   |        BENEFITS,
-								   |        INFANTS,
-								   |        PRESCHOOLERS,
-								   |        SCHOOLAGERS,
-								   |        TEENAGERS,
+								   |        CHILDREN,
 								   |        INCOME,
 								   |        COMPUTED_EII,
 								   |        COMPUTED_PRICE,
 								   |        IS_APPLYING,
-								   |        IS_CURRENT,
-								   |        utilized_inflation_factor
+								   |        IS_CURRENT
 								   |  ) values (
 									   |  ?,
 									   |  2019,
 									   |  ${parsed.numberWorkers},
-									   |  ${if (parsed.hasBenefits) "'Y'" else "'N'"},
-									   |  ${parsed.infantCount},
-									   |  ${parsed.preschoolerCount},
-									   |  ${parsed.schoolagerCount},
-									   |  ${parsed.teenagerCount},
+									   |  ${parsed.childCount},
 									   |  ${parsed.income},
 									   |  ${eiis.head},
 									   | $myJpPrice,
 									   | 'Y',
-									   | 'Y',
-									   | $INFLATION_FACTOR
+									   | 'Y'
 								   |  )
 						 """.stripMargin
 						}
@@ -181,6 +179,7 @@ object Scholarship {
 	}
 
 	def getMyJpPrice(pb: PersistenceBroker, eii: Double, income: Double, totalKids: Int): Double = {
+		println(s"calling get jp price with eii $eii, income $income, kids $totalKids")
 		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
 			def getQuery: String =
 				s"""

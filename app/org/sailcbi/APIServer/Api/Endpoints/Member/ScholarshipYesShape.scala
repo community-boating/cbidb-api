@@ -5,11 +5,7 @@ import play.api.libs.json.{JsValue, Json}
 
 case class ScholarshipYesShape(
 	numberWorkers: Int,
-	hasBenefits: Boolean,
-	infantCount: Int,
-	preschoolerCount: Int,
-	schoolagerCount: Int,
-	teenagerCount: Int,
+	childCount: Int,
 	income: Double
 )
 
