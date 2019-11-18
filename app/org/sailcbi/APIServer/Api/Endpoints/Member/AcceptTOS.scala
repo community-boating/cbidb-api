@@ -18,8 +18,6 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends Controller {
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
-			val pb = rc.pb
 			val data = request.body.asJson
 			data match {
 				case None => {
@@ -29,6 +27,8 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends Controller {
 				case Some(v: JsValue) => {
 					println(v)
 					val parsed = AcceptTOSShape.apply(v)
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId)._2.get
+					val pb = rc.pb
 
 					val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 					val orderId = JPPortal.getOrderId(pb, parentId)
