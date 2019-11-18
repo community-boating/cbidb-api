@@ -34,7 +34,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 					s"""
 					   |insert into eii_responses
 					   |(person_id, season, is_current, is_applying, computed_eii, COMPUTED_PRICE) values
-					   | (?, 2019, 'Y', 'N', null, $jpPrice)
+					   | (?, util_pkg.get_current_season, 'Y', 'N', null, $jpPrice)
 							 """.stripMargin
 			}
 
@@ -115,7 +115,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 								   |        IS_CURRENT
 								   |  ) values (
 									   |  ?,
-									   |  2019,
+									   |  util_pkg.get_current_season,
 									   |  ${parsed.numberWorkers},
 									   |  ${parsed.childCount},
 									   |  ${parsed.income},
