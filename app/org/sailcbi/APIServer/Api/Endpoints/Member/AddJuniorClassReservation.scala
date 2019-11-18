@@ -70,6 +70,8 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 				}
 			}
 
+			val orderId = JPPortal.getOrderId(pb, parentPersonId)
+
 			// Create new protojunior
 			val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(
 				pb,
@@ -81,7 +83,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 			// create new signup with the min(signup_time) of all this protoparent's other signups
 			val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
 			println("min signup is " + minSignupTime)
-			val signupResult = JPPortal.attemptSignupReservation(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime)
+			val signupResult = JPPortal.attemptSignupReservation(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
 			println(" result is:" + signupResult)
 			if (signupResult.isDefined) {
 				rollbackCreateJunior()

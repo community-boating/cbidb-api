@@ -29,6 +29,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
 			val orderId = JPPortal.getOrderId(pb, personId)
+			JPPortal.assessDiscounts(pb, orderId)
 			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 

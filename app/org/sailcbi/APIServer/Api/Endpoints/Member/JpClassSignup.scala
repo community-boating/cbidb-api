@@ -66,7 +66,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 
 					finalResult match {
 						case ValidationOk => {
-							val signupId = JPPortal.actuallyEnroll(pb, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true).orNull
+							val signupId = JPPortal.actuallyEnroll(pb, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true, None).orNull
 							Ok(new JsObject(Map("signupId" -> JsNumber(signupId.toInt))))
 						}
 						case e: ValidationError => Ok(e.toResultError.asJsObject())

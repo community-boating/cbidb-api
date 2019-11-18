@@ -23,7 +23,9 @@ object JPPortal {
 				  |insert into persons (temp, protoperson_cookie, proto_state, person_type) values ('P', ?, 'I', ${MagicIds.PERSON_TYPE.JP_PARENT})
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForInsert(pq).get.toInt
+		val parentId = pb.executePreparedQueryForInsert(pq).get.toInt
+		getOrderId(pb, parentId)
+		parentId
 	}
 
 	def persistProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
@@ -304,7 +306,13 @@ object JPPortal {
 	}
 
 	// either an error message or a rollback function
-	def attemptSingleClassSignupReservation(pb: PersistenceBroker, juniorPersonId: Int, instanceId: Int, signupDatetime: Option[LocalDateTime])(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
+	def attemptSingleClassSignupReservation(
+		pb: PersistenceBroker,
+		juniorPersonId: Int,
+		instanceId: Int,
+		signupDatetime: Option[LocalDateTime],
+		orderId: Int
+	)(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
 		lazy val hasSpots = {
 			val spots = JPPortal.spotsLeft(pb, instanceId)
 			if (spots > 0) Right(spots)
@@ -331,7 +339,7 @@ object JPPortal {
 		validationResult.map(_ => {
 			println("inserting signup for " + instanceId)
 			println("datetime is " + signupDatetime)
-			val signupId = actuallyEnroll(pb, instanceId, juniorPersonId, signupDatetime, doEnroll = true, fullEnroll = false)
+			val signupId = actuallyEnroll(pb, instanceId, juniorPersonId, signupDatetime, doEnroll = true, fullEnroll = false, Some(orderId))
 			println("inserted, got back signup id " + signupId)
 			// return a rollback fn
 			() => {
@@ -355,7 +363,8 @@ object JPPortal {
 		juniorPersonId: Int,
 		signupDatetime: Option[LocalDateTime],
 		doEnroll: Boolean,
-		fullEnroll: Boolean
+		fullEnroll: Boolean,
+		orderId: Option[Int]
 	)(implicit pa: PermissionsAuthority): Option[String] = {
 //		procedure signup(
 //				p_instance_id in number,
@@ -382,7 +391,8 @@ object JPPortal {
 
 			override def setInParametersInt: Map[String, Int] = Map(
 				"p_instance_id" -> instanceId,
-				"p_junior_id" -> juniorPersonId
+				"p_junior_id" -> juniorPersonId,
+				"p_order_id" -> orderId.getOrElse(-1)
 			)
 
 
@@ -395,7 +405,7 @@ object JPPortal {
 			)
 
 			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_signup_id")
-			override def getQuery: String = "jp_class_pkg.signup_core(?, ?, ?, ?, ?, ?, ?, ?)"
+			override def getQuery: String = "jp_class_pkg.signup_core(?, ?, ?, ?, ?, ?, ?, ?, ?)"
 		}
 
 		Some(pb.executeProcedure(proc).toString)
@@ -407,18 +417,19 @@ object JPPortal {
 		juniorPersonId: Int,
 		beginnerInstanceId: Option[Int],
 		intermediateInstanceId: Option[Int],
-		signupDatetime: Option[LocalDateTime]
+		signupDatetime: Option[LocalDateTime],
+		orderId: Int
 	): Option[String] = {
 		// Make each of these initializables; they will only be initialized if the elements before them in the for comp were successes
 		// If it's not initialized then we know it was never run, and therefore we don't need to run its rollback
 		val beginnerResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime)
+			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
 		})
 
 		val intermediateResult = new DefinedInitializableNullary(() => intermediateInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime)
+			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
 		})
 
 		val totalResult = for {
@@ -915,5 +926,26 @@ object JPPortal {
 		val result = pb.executePreparedQueryForUpdateOrDelete(q)
 		if (result == 1) ValidationOk
 		else ValidationResult.from("Unable to update signup note.")
+	}
+
+	def assessDiscounts(pb: PersistenceBroker, orderId: Int): Unit = {
+		val ppc = new PreparedProcedureCall[Unit](Set(MemberUserType)) {
+//			procedure assess_discounts(
+//				p_order_id in number
+//			);
+			override def registerOutParameters: Map[String, Int] = Map.empty
+
+			override def getOutResults(cs: CallableStatement): Unit = Unit
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"p_order_id" -> orderId
+			)
+
+			override def getQuery: String =
+				"""
+				  |cc_pkg.assess_discounts(?)
+				  |""".stripMargin
+		}
+		pb.executeProcedure(ppc)
 	}
 }
