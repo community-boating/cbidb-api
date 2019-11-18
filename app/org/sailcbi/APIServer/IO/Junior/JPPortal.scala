@@ -693,7 +693,7 @@ object JPPortal {
 				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
 				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
 				  |and si.signup_id = wlr.signup_id (+)
-				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
+				  |and si.instance_Id = i.instance_id and si.person_id = ? and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
 				  |and s1.session_datetime between w.monday and (w.sunday)
 				  |and si.signup_type = 'W'
 				  |and wlr.wl_result is not null and wlr.wl_result <> 'F'
@@ -742,7 +742,7 @@ object JPPortal {
 				  |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w, jp_class_signups si, jp_class_wl_results wlr
 				  |where i.type_id = t.type_id and bk.instance_Id = i.instance_id and bk.first_session = s1.session_id and bk.last_session = s2.session_id
 				  |and si.signup_id = wlr.signup_id (+)
-				  |and si.instance_Id = i.instance_id and si.person_id = :AI_JUNIOR_ID and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
+				  |and si.instance_Id = i.instance_id and si.person_id = ? and trunc(s1.session_datetime) >= trunc(util_pkg.get_sysdate)
 				  |and s1.session_datetime between w.monday and (w.sunday)
 				  |and si.signup_type = 'W'
 				  |and wlr.wl_result is null
