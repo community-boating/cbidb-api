@@ -72,6 +72,9 @@ POST    /junior/abort-mem-reg                               org.sailcbi.APIServe
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
+POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
+POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
+
 POST /auth/create-member                org.sailcbi.APIServer.Api.Endpoints.Security.CreateMember.post()
 GET     /auth/getPwHash                     org.sailcbi.APIServer.Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String ?= "staff")
 # Map static resources from the /public folder to the /assets URL path
