@@ -11,7 +11,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CreatePerson @Inject()(implicit PA: PermissionsAuthority, exec: ExecutionContext) extends InjectedController {
+class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 
 	object errors {
 		val NOT_JSON = JsObject(Map(
@@ -28,7 +28,7 @@ class CreatePerson @Inject()(implicit PA: PermissionsAuthority, exec: ExecutionC
 		))
 	}
 
-	def post: Action[AnyContent] = Action.async { request =>
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		PA.withRequestCache(KioskUserType, None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb

@@ -11,7 +11,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import scala.concurrent.ExecutionContext
 
 // Called by apex to get details so apex can save to prod db itself.  Legacy
-class GetTokenDetails @Inject()(ws: WSClient)(implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
+class GetTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		PA.withRequestCache(ApexUserType, None, ParsedRequest(req), rc => {

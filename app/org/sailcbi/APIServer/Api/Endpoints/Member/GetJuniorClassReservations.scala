@@ -20,9 +20,6 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val x: String = null
-			println(x.length)
-
 			val deleted = JPPortal.pruneOldReservations(pb)
 			println(s"deleted $deleted old reservations...")
 

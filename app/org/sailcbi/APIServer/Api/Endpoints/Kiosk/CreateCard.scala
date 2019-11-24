@@ -11,7 +11,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CreateCard @Inject()(implicit PA: PermissionsAuthority, exec: ExecutionContext) extends InjectedController {
+class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	object errors {
 		val NOT_JSON = JsObject(Map(
 			"code" -> JsString("not_json"),
@@ -27,7 +27,7 @@ class CreateCard @Inject()(implicit PA: PermissionsAuthority, exec: ExecutionCon
 		))
 	}
 
-	def post: Action[AnyContent] = Action.async { request => {
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		PA.withRequestCache(KioskUserType, None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb

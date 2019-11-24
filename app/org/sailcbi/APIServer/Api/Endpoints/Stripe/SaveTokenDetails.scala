@@ -14,7 +14,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import scala.concurrent.{ExecutionContext, Future}
 
 // Called by react to get details and save to prod DB in one swoop
-class SaveTokenDetails @Inject()(ws: WSClient)(implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
+class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val logger = PA.logger
 		val pr = ParsedRequest(req)

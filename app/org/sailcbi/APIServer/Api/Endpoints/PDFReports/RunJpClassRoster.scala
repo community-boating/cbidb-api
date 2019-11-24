@@ -16,8 +16,8 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RunJpClassRoster @Inject() (implicit PA: PermissionsAuthority, exec: ExecutionContext) extends InjectedController {
-	def get(instanceIds: String, signet: Option[String]): Action[AnyContent] = Action.async { req => {
+class RunJpClassRoster @Inject() (implicit exec: ExecutionContext) extends InjectedController {
+	def get(instanceIds: String, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		val pr = ParsedRequest(req)
 				.addHeader("apex-signet", signet.getOrElse(""))

@@ -17,8 +17,8 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RunDailyCloseReport @Inject() (implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
-	def get(closeId: Int, signet: Option[String]): Action[AnyContent] = Action.async { req => {
+class RunDailyCloseReport @Inject() (implicit val exec: ExecutionContext) extends InjectedController {
+	def get(closeId: Int, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		val pr = ParsedRequest(req)
 				.addHeader("apex-signet", signet.getOrElse(""))

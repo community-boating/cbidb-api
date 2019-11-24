@@ -16,7 +16,7 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetReportRunOptions @Inject()(implicit val PA: PermissionsAuthority, val exec: ExecutionContext)
+class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 		extends CacheableResultFromPreparedQuery[GetReportRunOptionsParamsObject, GetReportRunOptionsResult] {
 	def getCacheBrokerKey(params: GetReportRunOptionsParamsObject): CacheKey = "report-run-options"
 
@@ -24,7 +24,7 @@ class GetReportRunOptions @Inject()(implicit val PA: PermissionsAuthority, val e
 		LocalDateTime.now.plusSeconds(5)
 	}
 
-	def get(): Action[AnyContent] = Action.async { request =>
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		PA.withRequestCache(StaffUserType, None, ParsedRequest(request), rc => {
 			val pb = rc.pb
 			val params = new GetReportRunOptionsParamsObject

@@ -17,8 +17,8 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RunJpSpecialNeedsReport @Inject() (implicit PA: PermissionsAuthority, exec: ExecutionContext) extends InjectedController {
-	def get(from: String, to: String, signet: Option[String]): Action[AnyContent] = Action.async { req => {
+class RunJpSpecialNeedsReport @Inject() (implicit exec: ExecutionContext) extends InjectedController {
+	def get(from: String, to: String, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val fromZDT: ZonedDateTime = DateUtil.toBostonTime(DateUtil.parse(from))
 		val toZDT: ZonedDateTime = DateUtil.toBostonTime(DateUtil.parse(to))
 		val logger = PA.logger

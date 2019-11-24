@@ -11,7 +11,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
+class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
