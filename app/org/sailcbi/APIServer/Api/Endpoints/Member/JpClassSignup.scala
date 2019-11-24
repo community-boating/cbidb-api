@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
 
@@ -25,7 +25,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controlle
 				}
 				case Some(v: JsValue) => {
 					val parsed = JpClassSignupPostShape.apply(v)
-					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId)._2.get
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId).get
 					val pb: PersistenceBroker = rc.pb
 					println(parsed)
 

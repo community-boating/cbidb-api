@@ -17,7 +17,7 @@ class ClearCard @Inject()(implicit val exec: ExecutionContext) extends Authentic
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
 		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

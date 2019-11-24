@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -22,7 +22,7 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Con
 				}
 				case Some(v: JsValue) => {
 					val parsed = JpClassSignupDeletePostShape.apply(v)
-					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId)._2.get
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId).get
 					val pb: PersistenceBroker = rc.pb
 					println(parsed)
 

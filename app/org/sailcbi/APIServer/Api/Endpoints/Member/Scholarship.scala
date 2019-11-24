@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, Controller}
@@ -19,7 +19,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -53,7 +53,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller 
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

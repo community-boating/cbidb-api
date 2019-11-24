@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Controller {
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 		val pb: PersistenceBroker = rc.pb
 		val cb: CacheBroker = rc.cb
 
@@ -67,7 +67,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Contro
 		try {
 			val parsedRequest = ParsedRequest(request)
 			val juniorId = request.body.asJson.map(json => json("personId").toString().toInt).get
-			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson

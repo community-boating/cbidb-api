@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.FullCart
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -18,7 +18,7 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Contro
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.ProtoStorable
 import play.api.mvc.{Action, Controller}
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class UserCrud @Inject()(implicit exec: ExecutionContext, PA: PermissionsAuthority) extends Controller {
 	def post() = Action { request =>
 		try {
-			val rc: RequestCache = PA.getRequestCache(StaffUserType, None, ParsedRequest(request))._2.get
+			val rc: RequestCache = PA.getRequestCache(StaffUserType, None, ParsedRequest(request)).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asFormUrlEncoded

@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, PublicUserType}
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -26,7 +26,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends Controlle
 					new Status(400)("no body")
 				}
 				case Some(v: JsValue) => {
-					val rc: RequestCache = PA.getRequestCache(BouncerUserType, None, parsedRequest)._2.get
+					val rc: RequestCache = PA.getRequestCache(BouncerUserType, None, parsedRequest).get
 					println(v)
 					val parsed = ResetPasswordShape.apply(v)
 					println(parsed)

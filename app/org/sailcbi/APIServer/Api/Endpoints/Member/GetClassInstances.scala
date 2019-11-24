@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
 	def junior(typeId: Int, juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		val maybeRC = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2
+		val maybeRC = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)
 		if (maybeRC.isEmpty) Future {
 			Ok("{\"error\": \"Unauthorized\"}")
 		} else {

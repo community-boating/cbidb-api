@@ -22,7 +22,7 @@ class TestAuth @Inject()(implicit exec: ExecutionContext) extends Controller {
 		val result = PA.getRequestCache(ut, None, pr)
 
 		Future {
-			Ok(if (result._1.userType == ut) "true" else "false")
+			Ok(if (result.get.auth.userType == ut) "true" else "false")
 		}
 	}
 }

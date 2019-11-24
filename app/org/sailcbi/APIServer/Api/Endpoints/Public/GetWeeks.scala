@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext
 class GetWeeks @Inject()(implicit exec: ExecutionContext) extends Controller {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action(req => {
 		val parsedRequest = ParsedRequest(req)
-		val rc = PA.getRequestCache(PublicUserType, None, parsedRequest)._2.get
+		val rc = PA.getRequestCache(PublicUserType, None, parsedRequest).get
 		val pb = rc.pb
 
 		val q = new PreparedQueryForSelect[GetWeeksResult](Set(PublicUserType)) {

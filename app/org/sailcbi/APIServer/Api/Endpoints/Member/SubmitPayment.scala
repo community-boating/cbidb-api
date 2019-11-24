@@ -22,7 +22,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val parsedRequest = ParsedRequest(request)
 		val logger = PA.logger
 		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, Controller}
 
@@ -14,7 +14,7 @@ class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends Cont
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
 			val authResult = PA.getRequestCacheMember(None, ParsedRequest(request))
-			authResult._2 match {
+			authResult match {
 				case Some(rc) => Future {
 					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
 				}

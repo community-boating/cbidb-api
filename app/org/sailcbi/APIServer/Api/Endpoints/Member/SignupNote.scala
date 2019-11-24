@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNull, JsNumber, JsObject, JsString, JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -21,7 +21,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends Controller {
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 			val pb = rc.pb
 
 			JPPortal.getSignupNote(pb, juniorId, instanceId) match {
@@ -63,7 +63,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends Controller {
 				case Some(v: JsValue) => {
 					println(v)
 					val parsed = SignupNoteShape.apply(v)
-					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId)._2.get
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId).get
 					val pb = rc.pb
 					implicit val format = SignupNoteShape.format
 
@@ -100,9 +100,9 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends Controller {
 					println(v)
 					val parsed = SignupNoteShape.apply(v)
 					val authResult = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest)
-					val username = authResult._1.userName
+					val username = authResult.get.auth.userName
 					println("protoperson username is " + username)
-					val rc: RequestCache = authResult._2.get
+					val rc: RequestCache = authResult.get
 					val pb = rc.pb
 					val parentPersonId = ProtoPersonUserType.getAuthedPersonId(username, pb).get
 					println("parent personId is " + parentPersonId)

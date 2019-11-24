@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
 class PingDB @Inject()(implicit exec: ExecutionContext) extends Controller {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PA.getRequestCache(PublicUserType, None, parsedRequest)._2.get
+		val rc: RequestCache = PA.getRequestCache(PublicUserType, None, parsedRequest).get
 		val pb: PersistenceBroker = rc.pb
 
 		val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {

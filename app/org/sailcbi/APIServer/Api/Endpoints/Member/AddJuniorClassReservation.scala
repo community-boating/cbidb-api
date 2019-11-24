@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue}
 import play.api.mvc.{Action, Controller}
@@ -17,7 +17,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
 			val data = request.body.asJson
 			data match {
 				case None => {

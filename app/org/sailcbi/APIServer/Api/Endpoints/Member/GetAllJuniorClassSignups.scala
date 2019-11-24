@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal.{SignupForReport, WaitListForRep
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
@@ -19,7 +19,7 @@ class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) e
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action(req => {
 		try {
 			val parsedRequest = ParsedRequest(req)
-			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 

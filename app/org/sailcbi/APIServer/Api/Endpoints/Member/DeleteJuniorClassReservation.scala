@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc.{Action, Controller}
 
@@ -15,7 +15,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
 			val pb = rc.pb
 			parsedRequest.postParams.get("name") match {
 				case None => {

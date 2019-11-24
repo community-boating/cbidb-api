@@ -17,7 +17,7 @@ class OrderStatus @Inject()(implicit val exec: ExecutionContext) extends Authent
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
 		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

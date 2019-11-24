@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.Services.Authentication.KioskUserType
 import org.sailcbi.APIServer.Services.CacheBroker
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 

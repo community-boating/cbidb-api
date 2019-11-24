@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, Controller}
@@ -27,7 +27,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends Controller {
 				case Some(v: JsValue) => {
 					println(v)
 					val parsed = AcceptTOSShape.apply(v)
-					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId)._2.get
+					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId).get
 					val pb = rc.pb
 
 					val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)

@@ -15,7 +15,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Con
 
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
-		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+		val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 		val pb: PersistenceBroker = rc.pb
 		val cb: CacheBroker = rc.cb
 

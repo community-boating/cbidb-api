@@ -9,6 +9,7 @@ import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import play.api.libs.ws.WSClient
@@ -18,6 +19,7 @@ import scala.concurrent.ExecutionContext
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
 class RequestCache private[Services](
+	val trueAuth: AuthenticationInstance,
 	val auth: AuthenticationInstance,
 	secrets: PermissionsAuthoritySecrets
 )(implicit val PA: PermissionsAuthority) {
@@ -77,13 +79,13 @@ object RequestCache {
 
 	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
 	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
-	def construct(
+	def apply(
 		requiredUserType: UserType,
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		rootCB: CacheBroker,
 		secrets: PermissionsAuthoritySecrets
-	 )(implicit PA: PermissionsAuthority): (AuthenticationInstance, Option[RequestCache]) = synchronized {
+	 )(implicit PA: PermissionsAuthority): Option[RequestCache] = synchronized {
 		println("\n\n====================================================")
 		println("====================================================")
 		println("====================================================")
@@ -97,44 +99,43 @@ object RequestCache {
 		// Someday I'll flesh this out more
 		// For now, non-public requests may not be cross site
 		// auth'd GETs are ok if the CORS status is Unknown
-		val shortCircuitResult: Option[(AuthenticationInstance, Option[RequestCache])] = {
-			def nuke(): Option[(AuthenticationInstance, Option[RequestCache])] = {
-				println("@@@  Nuking RC due to potential CSRF")
-				Some((authentication, None))
-			}
-
+		val corsOK = {
 			if (requiredUserType == StaffUserType || requiredUserType == MemberUserType) {
 				CORS.getCORSStatus(parsedRequest.headers) match {
-					case Some(UNKNOWN) => if (parsedRequest.method == ParsedRequest.methods.GET) None else nuke()
-					case Some(CROSS_SITE) | None => nuke()
-					case _ => None
+					case Some(UNKNOWN) => parsedRequest.method == ParsedRequest.methods.GET
+					case Some(CROSS_SITE) | None => false
+					case _ => true
 				}
-			} else None
+			} else true
 		}
 
-		shortCircuitResult match {
-			case Some(r) => r
-			case None => {
-				println("@@@  CSRF check passed")
-				println("Authenticated as " + authentication.userType)
+		if (!corsOK) {
+			println("@@@  Nuking RC due to potential CSRF")
+			throw new CORSException
+		} else {
+			println("@@@  CSRF check passed")
+			println("Authenticated as " + authentication.userType)
 
-				// requiredUserType says what this request endpoint requires
-				// If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
-				// attempt to downgrade to the desired auth
-				// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
-				// so this architecture will make that request behave exactly as if the member requested it themselves
-				if (authentication.userType == requiredUserType) {
-					(authentication, Some(new RequestCache(authentication, secrets)))
-				} else {
-					requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
-						case Some(lowerAuth: AuthenticationInstance) => {
-							println("@@@ Successfully downgraded to " + lowerAuth.userType)
-							(authentication, Some(new RequestCache(lowerAuth, secrets)))
-						}
-						case None => {
-							println("@@@ Unable to downgrade auth to " + requiredUserType)
-							(authentication, None)
-						}
+			// requiredUserType says what this request endpoint requires
+			// If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
+			// attempt to downgrade to the desired auth
+			// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
+			// so this architecture will make that request behave exactly as if the member requested it themselves
+			if (authentication.userType == requiredUserType) {
+				Some(new RequestCache(authentication, authentication, secrets))
+			} else {
+				requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
+					case Some(lowerAuth: AuthenticationInstance) => {
+						println("@@@ Successfully downgraded to " + lowerAuth.userType)
+						Some(new RequestCache(
+							trueAuth = authentication,
+							auth = lowerAuth,
+							secrets
+						))
+					}
+					case None => {
+						println("@@@ Unable to downgrade auth to " + requiredUserType)
+						None
 					}
 				}
 			}

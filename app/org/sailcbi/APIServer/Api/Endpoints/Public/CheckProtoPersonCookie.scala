@@ -16,7 +16,7 @@ class CheckProtoPersonCookie extends Controller {
 			try {
 				val rc = PA.getRequestCache(PublicUserType, None, ParsedRequest(request))
 				PA.sleep()
-				val pb = rc._2.get.pb
+				val pb = rc.get.pb
 				val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {
 					override val params: List[String] = List(cookie)
 

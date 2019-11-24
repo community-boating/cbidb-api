@@ -12,6 +12,7 @@ import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
+import play.api.mvc.Result
 
 
 class PermissionsAuthority private[Services] (
@@ -37,13 +38,13 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, secrets)
+	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, AuthenticationInstance.ROOT, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, secrets)
+	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, AuthenticationInstance.BOUNCER, secrets)
 	private lazy val bouncerPB = bouncerRC.pb
 
 	def now(): LocalDateTime = {
@@ -82,8 +83,8 @@ class PermissionsAuthority private[Services] (
 		requiredUserType: NonMemberUserType,
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(
+	): Option[RequestCache] =
+		RequestCache(
 			requiredUserType,
 			requiredUserName,
 			parsedRequest,
@@ -91,64 +92,83 @@ class PermissionsAuthority private[Services] (
 			secrets
 		)
 
+//	def withRequestCache(
+//		requiredUserType: NonMemberUserType,
+//		requiredUserName: Option[String],
+//		parsedRequest: ParsedRequest,
+//		block: RequestCache => Result
+//	) = {
+//
+//	}
+
 	@deprecated
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): (AuthenticationInstance, Option[RequestCache]) =
-		RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
+	): Option[RequestCache] =
+		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
 
 	def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int
-	): (AuthenticationInstance, Option[RequestCache]) = {
+	): Option[RequestCache] = {
 		println("about to validate junior id in request....")
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
-		if (ret._1.userType == MemberUserType) {
-			// auth was successful
-			//... but does the request juniorId match the auth'd parent id?
-			val authedPersonId = MemberUserType.getAuthedPersonId(ret._1.userName, rootPB)
-			val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
-				override def getQuery: String =
-					s"""
-					   |select b from person_relationships rl
-					   |where a = ${authedPersonId}
-					   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
+		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
+			case None => None
+			case Some(ret) => {
+				if (ret.auth.userType == MemberUserType) {
+					// auth was successful
+					//... but does the request juniorId match the auth'd parent id?
+					val authedPersonId = MemberUserType.getAuthedPersonId(ret.auth.userName, rootPB)
+					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
+						override def getQuery: String =
+							s"""
+							   |select b from person_relationships rl
+							   |where a = ${authedPersonId}
+							   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
 					""".stripMargin
-				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+					}
+					val juniorIds = rootPB.executePreparedQueryForSelect(getAuthedJuniorIDs)
+					if (juniorIds.contains(juniorId)) {
+						Some(ret)
+					} else {
+						throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
+					}
+				} else {
+					// auth wasn't successful anyway
+					Some(ret)
+				}
 			}
-			val juniorIds = rootPB.executePreparedQueryForSelect(getAuthedJuniorIDs)
-			if (juniorIds.contains(juniorId)) {
-				ret
-			} else {
-				throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
-			}
-		} else {
-			// auth wasn't successful anyway
-			ret
 		}
+
 	}
 
 	def getRequestCacheMemberWithParentId(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int
-	): (AuthenticationInstance, Option[RequestCache]) = {
-		val ret = RequestCache.construct(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
-		if (ret._1.userType == MemberUserType) {
-			// auth was successful
-			//... but does the request parentId match the auth'd parent id?
-			val authedPersonId = MemberUserType.getAuthedPersonId(ret._1.userName, rootPB)
-			if (authedPersonId == parentId) {
-				ret
-			} else {
-				throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
+	): Option[RequestCache] = {
+		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
+			case None => None
+			case Some(ret) => {
+				if (ret.auth.userType == MemberUserType) {
+					// auth was successful
+					//... but does the request parentId match the auth'd parent id?
+					val authedPersonId = MemberUserType.getAuthedPersonId(ret.auth.userName, rootPB)
+					if (authedPersonId == parentId) {
+						Some(ret)
+					} else {
+						throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
+					}
+				} else {
+					// auth wasn't successful anyway
+					Some(ret)
+				}
 			}
-		} else {
-			// auth wasn't successful anyway
-			ret
 		}
+
 	}
 
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
@@ -207,7 +227,7 @@ class PermissionsAuthority private[Services] (
 
 	def assertRC(auth: AuthenticationInstance): RequestCache = {
 		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
-		else new RequestCache(auth, secrets)
+		else new RequestCache(auth, auth, secrets)
 	}
 
 	def closeDB(): Unit = secrets.dbConnection.close()
@@ -250,8 +270,5 @@ object PermissionsAuthority {
 		val pbs: RelationalBrokerStatic = MysqlBrokerStatic
 	}
 
-	class UnauthorizedAccessException(
-		private val message: String = "Unauthorized Access Denied",
-		private val cause: Throwable = None.orNull
-	) extends Exception(message, cause)
+
 }

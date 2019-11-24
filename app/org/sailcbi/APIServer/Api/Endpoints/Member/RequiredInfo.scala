@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.PermissionsAuthority.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -18,7 +18,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 
@@ -104,7 +104,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 						case Some(id: JsValue) => {
 							val juniorId: Int = id.toString().toInt
 							println(s"its an update: $juniorId")
-							val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId)._2.get
+							val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
 							val pb = rc.pb
 							runValidations(parsed, pb, Some(id.toString().toInt)) match {
 								case ve: ValidationError => Ok(ve.toResultError.asJsObject())
@@ -118,7 +118,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends Controller
 						}
 						case None => {
 							println(s"its a create")
-							val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest)._2.get
+							val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
 							val pb = rc.pb
 							runValidations(parsed, pb, None) match {
 								case ve: ValidationError => Ok(ve.toResultError.asJsObject())
