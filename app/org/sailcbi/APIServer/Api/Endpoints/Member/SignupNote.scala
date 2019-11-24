@@ -1,22 +1,20 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.temporal.ChronoUnit
-
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
-import play.api.libs.json.{JsNull, JsNumber, JsObject, JsString, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.libs.json._
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class SignupNote @Inject()(implicit exec: ExecutionContext) extends Controller {
+class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int, instanceId: Int)(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val logger = PA.logger

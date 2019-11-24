@@ -9,11 +9,11 @@ import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CreateMember @Inject()(implicit exec: ExecutionContext) extends Controller {
+class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)

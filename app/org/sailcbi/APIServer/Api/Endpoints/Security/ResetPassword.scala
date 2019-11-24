@@ -1,20 +1,18 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import java.sql.CallableStatement
-
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, PublicUserType}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class ResetPassword @Inject()(implicit exec: ExecutionContext) extends Controller {
+class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val logger = PA.logger

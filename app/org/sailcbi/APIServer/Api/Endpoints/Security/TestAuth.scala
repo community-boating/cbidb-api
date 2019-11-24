@@ -4,11 +4,11 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, RootUserType}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestAuth @Inject()(implicit exec: ExecutionContext) extends Controller {
+class TestAuth @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def getRoot: Action[AnyContent] = get("root")
 
 	def getBouncer: Action[AnyContent] = get("bouncer")

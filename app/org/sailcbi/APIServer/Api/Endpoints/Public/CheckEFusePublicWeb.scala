@@ -2,16 +2,14 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.libs.json.{JsNumber, JsObject, JsString}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CheckEFusePublicWeb @Inject()(implicit exec: ExecutionContext) extends Controller {
+class CheckEFusePublicWeb @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val logger = PA.logger

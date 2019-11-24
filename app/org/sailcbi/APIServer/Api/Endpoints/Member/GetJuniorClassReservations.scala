@@ -8,22 +8,20 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
-import play.api.libs.json.{JsArray, JsObject, JsString, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
+import play.api.libs.json._
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends Controller {
+class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val logger = PA.logger
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
-			PA.sleep()
-
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
 			val pb = rc.pb
+
+			val x: String = null
+			println(x.length)
 
 			val deleted = JPPortal.pruneOldReservations(pb)
 			println(s"deleted $deleted old reservations...")
@@ -90,14 +88,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 				"instances" -> results,
 				"noSignups" -> noSignups
 			)))
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+		})
 	}
 
 	case class ClassInfo(

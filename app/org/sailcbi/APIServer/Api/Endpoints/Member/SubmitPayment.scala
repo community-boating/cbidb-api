@@ -3,12 +3,12 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import java.sql.CallableStatement
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, Failed, Failover, NetSuccess, ParsedRequest, Resolved, ValidationError, Warning}
+import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
+import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult, GetCurrentOnlineClose}
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedProcedureCall
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject}

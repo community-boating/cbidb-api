@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.ExecutionContext
 
-class OOME @Inject()(implicit exec: ExecutionContext) extends Controller {
+class OOME @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post(): Action[AnyContent] = Action { _ => {
 		Ok("Uncomment this to create an OOME")
 		/*

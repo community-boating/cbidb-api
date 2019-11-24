@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
 import java.sql.CallableStatement
-import java.time.LocalDateTime
 
 import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserType}
 

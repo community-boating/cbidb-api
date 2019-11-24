@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
-import play.api.libs.json.{JsArray, JsNumber, JsString}
+import play.api.libs.json.{JsArray, JsNumber}
 
 class GetStaticYearlyData extends HardcodedQueryForSelectCastableToJSObject[GetStaticYearlyDataResult](Set(PublicUserType)) {
 	val getQuery: String =

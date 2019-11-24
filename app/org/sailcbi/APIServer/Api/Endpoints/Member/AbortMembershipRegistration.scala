@@ -7,12 +7,12 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) extends Controller {
+class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)

@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, Profiler}
+import org.sailcbi.APIServer.CbiUtil.Profiler
 import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.Storable.Fields.FieldValue.FieldValue
 import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}

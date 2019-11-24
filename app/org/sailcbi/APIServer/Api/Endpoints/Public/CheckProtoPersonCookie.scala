@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services.Authentication.{ProtoPersonUserType, Publi
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.mvc._
 
-class CheckProtoPersonCookie extends Controller {
+class CheckProtoPersonCookie extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request => {
 		val hasCookie = request.cookies.toSet.map((c: Cookie) => c.name).contains(ProtoPersonUserType.COOKIE_NAME)
 		if (hasCookie) {

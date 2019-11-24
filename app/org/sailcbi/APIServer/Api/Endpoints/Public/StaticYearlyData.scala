@@ -1,16 +1,13 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import java.time.{LocalDate, LocalDateTime}
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.StaticYearlyDataParamsObject
 import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
-import org.sailcbi.APIServer.CbiUtil.DateUtil
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelectCastableToJSObject, PreparedQueryForSelect}
-import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult, GetStaticYearlyData, GetStaticYearlyDataResult}
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType, PublicUserType}
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
+import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetStaticYearlyData, GetStaticYearlyDataResult}
+import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext

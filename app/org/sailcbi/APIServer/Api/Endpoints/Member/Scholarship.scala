@@ -8,11 +8,11 @@ import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class Scholarship @Inject()(implicit exec: ExecutionContext) extends Controller {
+class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	val INFLATION_FACTOR = 1.05
 	val EII_MAX = 82000
 	def postNo()(implicit PA: PermissionsAuthority) = Action(request => {

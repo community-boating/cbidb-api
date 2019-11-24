@@ -6,11 +6,11 @@ import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.ExecutionContext
 
-class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Controller {
+class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	case class SeeTypeResult(typeId: Int, canSee: Boolean)
 
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>

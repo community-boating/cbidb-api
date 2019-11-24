@@ -7,12 +7,12 @@ import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.ProtoStorable
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
 
-class UserCrud @Inject()(implicit exec: ExecutionContext, PA: PermissionsAuthority) extends Controller {
+class UserCrud @Inject()(implicit exec: ExecutionContext, PA: PermissionsAuthority) extends InjectedController {
 	def post() = Action { request =>
 		try {
 			val rc: RequestCache = PA.getRequestCache(StaffUserType, None, ParsedRequest(request)).get

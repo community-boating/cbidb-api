@@ -1,20 +1,17 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk, ValidationResult}
+import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 
-class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends Controller {
+class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val parsedRequest = ParsedRequest(request)

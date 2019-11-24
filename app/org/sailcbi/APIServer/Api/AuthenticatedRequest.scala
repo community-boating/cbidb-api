@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc._
 
 trait AuthenticatedRequest {
-	class RequestClass extends Controller
+	class RequestClass extends InjectedController
 
 	protected val requestClass = new RequestClass
 	protected val Ok = requestClass.Ok

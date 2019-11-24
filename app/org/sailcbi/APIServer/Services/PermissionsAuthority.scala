@@ -100,16 +100,23 @@ class PermissionsAuthority private[Services] (
 		parsedRequest: ParsedRequest,
 		block: RequestCache => Result
 	): Result = {
-		getRequestCache(requiredUserType, requiredUserName, parsedRequest) match {
-			case None => {
-				logger.warning("Auth fail", new UnauthorizedAccessException())
-				Results.Ok(ResultError.UNAUTHORIZED)
+		try {
+			getRequestCache(requiredUserType, requiredUserName, parsedRequest) match {
+				case None => {
+					logger.warning("Auth fail", new UnauthorizedAccessException())
+					Results.Ok(ResultError.UNAUTHORIZED)
+				}
+				case Some(rc) => block(rc)
 			}
-			case Some(rc) => block(rc)
+		} catch {
+			case _: UnauthorizedAccessException => Results.Ok(ResultError.UNAUTHORIZED)
+			case e: Throwable => {
+				logger.error(e.getMessage, e)
+				Results.Ok(ResultError.UNKNOWN)
+			}
 		}
 	}
 
-	@deprecated
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest

@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
-import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper

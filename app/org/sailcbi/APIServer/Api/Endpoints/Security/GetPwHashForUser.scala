@@ -4,11 +4,11 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, StaffUserType, UserType}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Controller {
+class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(userName: String, userType: String = "staff")(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		Future {
 			println("userType is " + userType)

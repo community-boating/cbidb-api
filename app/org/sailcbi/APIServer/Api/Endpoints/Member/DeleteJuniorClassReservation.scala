@@ -6,11 +6,11 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) extends Controller {
+class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action { request =>
 		try {
 			val logger = PA.logger
