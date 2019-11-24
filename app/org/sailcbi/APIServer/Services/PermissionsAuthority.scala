@@ -5,14 +5,16 @@ import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
+import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
-import play.api.mvc.Result
+import play.api.mvc.{Result, Results}
 
 
 class PermissionsAuthority private[Services] (
@@ -92,14 +94,20 @@ class PermissionsAuthority private[Services] (
 			secrets
 		)
 
-//	def withRequestCache(
-//		requiredUserType: NonMemberUserType,
-//		requiredUserName: Option[String],
-//		parsedRequest: ParsedRequest,
-//		block: RequestCache => Result
-//	) = {
-//
-//	}
+	def withRequestCache(
+		requiredUserType: NonMemberUserType,
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		block: RequestCache => Result
+	): Result = {
+		getRequestCache(requiredUserType, requiredUserName, parsedRequest) match {
+			case None => {
+				logger.warning("Auth fail", new UnauthorizedAccessException())
+				Results.Ok(ResultError.UNAUTHORIZED)
+			}
+			case Some(rc) => block(rc)
+		}
+	}
 
 	@deprecated
 	def getRequestCacheMember(
