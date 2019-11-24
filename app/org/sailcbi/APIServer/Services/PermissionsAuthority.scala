@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
+import org.sailcbi.APIServer.Services.Exception.{PostBodyNotJSONException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
 import play.api.mvc.{Result, Results}
@@ -97,6 +97,7 @@ class PermissionsAuthority private[Services] (
 			}
 		} catch {
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
+			case _: PostBodyNotJSONException => Future(Results.Status(400)(ResultError.NOT_JSON))
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
 				Future(Results.Status(400)(ResultError.UNKNOWN))
@@ -104,7 +105,7 @@ class PermissionsAuthority private[Services] (
 		}
 	}
 
-	def getRequestCache(
+	private def getRequestCache(
 		requiredUserType: NonMemberUserType,
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest

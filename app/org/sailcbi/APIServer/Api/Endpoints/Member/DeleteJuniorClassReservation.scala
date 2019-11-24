@@ -8,34 +8,26 @@ import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.mvc.InjectedController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val logger = PA.logger
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
+	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
+		val logger = PA.logger
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
 			val pb = rc.pb
 			parsedRequest.postParams.get("name") match {
 				case None => {
 					println("no body")
-					new Status(400)("no body")
+					Future(new Status(400)("no body"))
 				}
 				case Some(name: String) => {
 					println(name)
 
 					JPPortal.deleteProtoJunior(pb, ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb).get, name)
-					Ok("WIP")
+					Future(Ok("deleted"))
 				}
 			}
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+		})
 	}
 }

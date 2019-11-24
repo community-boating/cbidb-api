@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api
 
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 
 case class ResultError (
 	code: String,
@@ -20,4 +20,12 @@ object ResultError {
 		code="unknown",
 		message="An unknown error occurred."
 	).asJsObject()
+	val NOT_JSON = ResultError(
+		code="not_json",
+		message="Post body not parsable as json."
+	)
+	val BAD_PARAMS = ResultError(
+		code="bad_parameters",
+		message="JSON parameters were not correct."
+	)
 }

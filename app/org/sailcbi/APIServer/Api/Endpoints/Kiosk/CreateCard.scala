@@ -13,14 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	object errors {
-		val NOT_JSON = JsObject(Map(
-			"code" -> JsString("not_json"),
-			"message" -> JsString("Post body not parsable as json.")
-		))
-		val BAD_PARAMS = JsObject(Map(
-			"code" -> JsString("bad_parameters"),
-			"message" -> JsString("JSON parameters were not correct.")
-		))
+
 		val CONTRAINT = JsObject(Map(
 			"code" -> JsString("sql_constraint"),
 			"message" -> JsString("Insert failed due to database constraint.  Probably that personId doesn't exist.")
@@ -37,7 +30,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			// TODO: if we're keeping this, redo with chained try's or something rather than pyramid of ifs
 			if (params.isEmpty) {
 				Future {
-					Status(400)(JsObject(Map("error" -> errors.NOT_JSON)))
+					Status(400)(JsObject(Map("error" -> ResultError.NOT_JSON.asJsObject())))
 				}
 			} else {
 				try {
@@ -93,7 +86,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 					case e: play.api.libs.json.JsResultException => {
 						println(e)
 						Future {
-							Status(400)(JsObject(Map("error" -> errors.BAD_PARAMS)))
+							Status(400)(JsObject(Map("error" -> ResultError.BAD_PARAMS.asJsObject())))
 						}
 					}
 					case e: Throwable => {

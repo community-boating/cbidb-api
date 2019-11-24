@@ -8,46 +8,24 @@ import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue}
-import play.api.mvc.InjectedController
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val logger = PA.logger
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
-			val data = request.body.asJson
-			data match {
-				case None => {
-					println("no body")
-					new Status(400)("no body")
-				}
-				case Some(v: JsValue) => {
-					println(v)
-					val parsed = AddJuniorClassReservationShape.apply(v)
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val logger = PA.logger
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+			val parsed = RequestCache.parsePostBodyJSON(request.body.asJson, AddJuniorClassReservationShape.apply)
 
-					doPost(rc, parsed) match {
-						case Left(err) => Ok(err.toResultError.asJsObject())
-						case Right(juniorId) => Ok(new JsObject(Map(
-							"personId" -> JsNumber(juniorId)
-						)))
-					}
-				}
-				case Some(v) => {
-					println("wut dis " + v)
-					Ok("wat")
-				}
+			doPost(rc, parsed) match {
+				case Left(err) => Future(Ok(err.toResultError.asJsObject()))
+				case Right(juniorId) => Future(Ok(new JsObject(Map(
+					"personId" -> JsNumber(juniorId)
+				))))
 			}
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+		})
 	}
 
 	private def doPost(rc: RequestCache, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {

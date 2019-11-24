@@ -13,25 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IsLoggedInAsStaff @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		try {
-			val authResult = PA.getRequestCache(StaffUserType, None, ParsedRequest(request))
-			println("blah")
-			authResult match {
-				case Some(rc) => Future {
-					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
-				}
-				case None => Future {
-					Ok(ResultError.UNAUTHORIZED)
-				}
-			}
-		} catch {
-			case _: UnauthorizedAccessException => Future {
-				Ok(ResultError.UNAUTHORIZED)
-			}
-			case e: Throwable => Future {
-				e.printStackTrace()
-				Ok(ResultError.UNAUTHORIZED)
-			}
-		}
+		PA.withRequestCache(StaffUserType, None, ParsedRequest(request), rc => {
+			Future(Ok(JsObject(Map("value" -> JsString(rc.auth.userName)))))
+		})
 	}
 }
