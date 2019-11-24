@@ -1,33 +1,24 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.GetUserHasRoleQuery
 import org.sailcbi.APIServer.Services.Authentication._
-import play.api.mvc.{Action, AnyContent}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetUserHasRole @Inject()(implicit exec: ExecutionContext) extends AuthenticatedRequest {
+class GetUserHasRole @Inject()(implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
 	def get(userName: String, role: String): Action[AnyContent] = Action.async { req =>
-		Future {
-			println("headers: " + req.headers)
-			try {
-				val rc = getRC(StaffUserType, ParsedRequest(req))
-				val pb = rc.pb
-				val result = pb.executePreparedQueryForSelect(new GetUserHasRoleQuery(userName, role)).head
-				if (result) {
-					Ok("{\"result\": true}")
-				} else {
-					Ok("{\"result\": false}")
-				}
-			} catch {
-				case e: Exception => {
-					println(e)
-					Ok("{\"result\": false}")
-				}
+		PA.withRequestCache(StaffUserType, None, ParsedRequest(req), rc => {
+			val pb = rc.pb
+			val result = pb.executePreparedQueryForSelect(new GetUserHasRoleQuery(userName, role)).head
+			if (result) {
+				Future(Ok("{\"result\": true}"))
+			} else {
+				Future(Ok("{\"result\": false}"))
 			}
-		}
+		})
 	}
 }

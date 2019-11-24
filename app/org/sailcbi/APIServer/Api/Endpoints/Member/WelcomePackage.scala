@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import java.time.LocalDateTime
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, ResultError}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
@@ -11,19 +10,15 @@ import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
+class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PA.logger
-		val maybeRC = getRCOptionMember(ParsedRequest(req))
-		if (maybeRC.isEmpty) Future {
-			Ok(ResultError.UNAUTHORIZED)
-		} else {
-			val rc = maybeRC.get
+		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
 			val pb = rc.pb
 			profiler.lap("about to do first query")
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -44,11 +39,11 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			val (nameFirst, nameLast, sysdate, season) = pb.executePreparedQueryForSelect(nameQ).head
 			val pricesMaybe = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
 				override def getQuery: String = """
-					  |select
-					  | person_pkg.get_computed_jp_price(person_id),
-					  | person_pkg.get_jp_offseason_price(person_id)
-					  | from eii_responses
-					  |where person_id = ? and season = util_pkg.get_current_season and is_current = 'Y'
+												  |select
+												  | person_pkg.get_computed_jp_price(person_id),
+												  | person_pkg.get_jp_offseason_price(person_id)
+												  | from eii_responses
+												  |where person_id = ? and season = util_pkg.get_current_season and is_current = 'Y'
 					""".stripMargin
 
 				override val params: List[String] = List(personId.toString)
@@ -66,7 +61,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Auth
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
-		}
+		})
 	})
 
 	case class WelcomePackageResult(

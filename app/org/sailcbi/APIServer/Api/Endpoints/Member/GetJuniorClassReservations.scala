@@ -12,10 +12,10 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json._
 import play.api.mvc.InjectedController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def get()(implicit PA: PermissionsAuthority) = Action { request =>
+	def get()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
 			val pb = rc.pb
@@ -84,10 +84,10 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			implicit val classInfoFormat = ClassInfo.format
 			val results: JsValue = Json.toJson(signups.map(o => Json.toJson(o)))
 			val noSignups: JsArray = JsArray(pb.executePreparedQueryForSelect(noSignupJuniors).toArray.map(JsString))
-			Ok(JsObject(Map(
+			Future{Ok(JsObject(Map(
 				"instances" -> results,
 				"noSignups" -> noSignups
-			)))
+			)))}
 		})
 	}
 

@@ -2,15 +2,14 @@ package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.NonMemberUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.Future
 
-trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableResult[T, U] with AuthenticatedRequest {
+trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableResult[T, U] with InjectedController {
 	private def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, ws: WSClient, url: String): Future[String] = {
 		val calculateValue: (() => Future[JsObject]) = () => {
 			val request: WSRequest = ws.url(url)
@@ -26,21 +25,13 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableRe
 		getFuture(cb, pb, params, calculateValue)
 	}
 
-	protected def evaluate(ut: NonMemberUserType, params: T, ws: WSClient, url: String): Action[AnyContent] = Action.async { request =>
-		try {
-			val rc = getRC(ut, ParsedRequest(request))
+	protected def evaluate(ut: NonMemberUserType, params: T, ws: WSClient, url: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
+		PA.withRequestCache(ut, None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 			getFuture(cb, pb, params, ws, url).map(s => {
 				Ok(s).as("application/json")
 			})
-		} catch {
-			case _: UnauthorizedAccessException => Future {
-				Ok("Access Denied")
-			}
-			case _: Throwable => Future {
-				Ok("Internal Error")
-			}
-		}
-	}
+		})
+	}}
 }

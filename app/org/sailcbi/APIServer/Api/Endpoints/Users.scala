@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Users.UsersParamsObject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
+import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import play.api.mvc.{Action, AnyContent}
@@ -12,7 +12,7 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 class Users @Inject()(implicit val exec: ExecutionContext)
-		extends AuthenticatedRequest with CacheableResultFromPreparedQuery[UsersParamsObject, GetUsersResult] {
+		extends CacheableResultFromPreparedQuery[UsersParamsObject, GetUsersResult] {
 	def get(): Action[AnyContent] = {
 		val params = new UsersParamsObject()
 		val pq = new GetUsers

@@ -13,11 +13,11 @@ case class ResultError (
 object ResultError {
 	implicit val format = Json.format[ResultError]
 	val UNAUTHORIZED: JsObject = ResultError(
-		code="unauthorized",
-		message="Unauthorized"
+		code="access_denied",
+		message="Authentication failure."
 	).asJsObject()
 	val UNKNOWN: JsObject = ResultError(
 		code="unknown",
-		message="An internal error has occurred."
+		message="An unknown error occurred."
 	).asJsObject()
 }

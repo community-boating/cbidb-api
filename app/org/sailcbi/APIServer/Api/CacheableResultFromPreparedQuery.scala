@@ -6,11 +6,11 @@ import org.sailcbi.APIServer.Services.Authentication.NonMemberUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsArray, JsObject}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.Future
 
-trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableResult[T, U] with AuthenticatedRequest {
+trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableResult[T, U] with InjectedController {
 	type PQ = HardcodedQueryForSelectCastableToJSObject[U]
 
 	protected def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
@@ -27,13 +27,14 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableRe
 
 	protected def evaluate(ut: NonMemberUserType, params: T, pq: PQ)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			val rc = getRC(ut, ParsedRequest(request))
-			PA.sleep()
-			val cb: CacheBroker = rc.cb
-			val pb = rc.pb
-			getFuture(cb, pb, params, pq).map(s => {
-				Ok(s).as("application/json")
+			PA.withRequestCache(ut, None, ParsedRequest(request), rc => {
+				val cb: CacheBroker = rc.cb
+				val pb = rc.pb
+				getFuture(cb, pb, params, pq).map(s => {
+					Ok(s).as("application/json")
+				})
 			})
+
 		} catch {
 			case _: UnauthorizedAccessException => Future {
 				Ok("Access Denied")

@@ -1,17 +1,16 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.ExecutionContext
 
-class ClearCard @Inject()(implicit val exec: ExecutionContext) extends AuthenticatedRequest {
+class ClearCard @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
 		val parsedRequest = ParsedRequest(request)
 		try {

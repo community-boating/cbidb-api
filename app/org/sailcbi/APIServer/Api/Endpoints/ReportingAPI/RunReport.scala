@@ -7,7 +7,7 @@ import akka.util.ByteString
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResult, ParamsObject}
+import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.Report
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
@@ -20,7 +20,7 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class RunReport @Inject()(implicit val exec: ExecutionContext)
-		extends AuthenticatedRequest with CacheableResult[RunReportParamsObject, GetReportRunOptionsResult] {
+		extends CacheableResultFromPreparedQuery[RunReportParamsObject, GetReportRunOptionsResult] {
 
 	object OUTPUT_TYPE {
 		val JSCON = "jscon"

@@ -4,21 +4,19 @@ import java.time.LocalDateTime
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
+import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.{Action, AnyContent}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class FlagColor @Inject()(implicit val exec: ExecutionContext)
-		extends AuthenticatedRequest with CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
+		extends CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		try {
-			val rc = getRC(PublicUserType, ParsedRequest(request))
+		PA.withRequestCache(PublicUserType, None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 			getFuture(cb, pb, new FlagColorParamsObject, new GetFlagColor).map(s => {
@@ -30,14 +28,7 @@ class FlagColor @Inject()(implicit val exec: ExecutionContext)
 
 				Ok("var FLAG_COLOR = \"" + f + "\"")
 			})
-		} catch {
-			case _: UnauthorizedAccessException => Future {
-				Ok("Access Denied")
-			}
-			case _: Throwable => Future {
-				Ok("Internal Error")
-			}
-		}
+		})
 	}
 
 	def getCacheBrokerKey(params: FlagColorParamsObject): CacheKey = "flag-color"

@@ -4,21 +4,20 @@ import java.time.LocalDateTime
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResult, ParamsObject}
+import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
 import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
-		extends AuthenticatedRequest with CacheableResult[GetReportRunOptionsParamsObject, GetReportRunOptionsResult] {
+class GetReportRunOptions @Inject()(implicit val PA: PermissionsAuthority, val exec: ExecutionContext)
+		extends CacheableResultFromPreparedQuery[GetReportRunOptionsParamsObject, GetReportRunOptionsResult] {
 	def getCacheBrokerKey(params: GetReportRunOptionsParamsObject): CacheKey = "report-run-options"
 
 	def getExpirationTime: LocalDateTime = {
@@ -26,23 +25,13 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 	}
 
 	def get(): Action[AnyContent] = Action.async { request =>
-		println("HEADERS: " + request.headers)
-		try {
-			val rc = getRC(StaffUserType, ParsedRequest(request))
-			val cb = rc.cb
+		PA.withRequestCache(StaffUserType, None, ParsedRequest(request), rc => {
 			val pb = rc.pb
 			val params = new GetReportRunOptionsParamsObject
-			getFuture(cb, pb, params, getJSONResultFuture(pb)).map(s => {
+			getFuture(rc.cb, pb, params, getJSONResultFuture(pb)).map(s => {
 				Ok(s).as("application/json")
 			})
-		} catch {
-			case _: UnauthorizedAccessException => Future {
-				Ok("Access Denied")
-			}
-			case _: Throwable => Future {
-				Ok("Internal Error")
-			}
-		}
+		})
 	}
 
 	def getJSONResultFuture(pb: PersistenceBroker): (() => Future[JsObject]) = () => Future {

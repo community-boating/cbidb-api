@@ -1,24 +1,22 @@
 package org.sailcbi.APIServer.Api.Endpoints.Symon
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.AuthenticatedRequest
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.IO.PreparedQueries.Symon.StoreSymonRun
 import org.sailcbi.APIServer.Services.Authentication.SymonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PostSymonRun @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends AuthenticatedRequest {
+class PostSymonRun @Inject()(ws: WSClient)(implicit val PA: PermissionsAuthority, val exec: ExecutionContext) extends InjectedController {
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		val logger = PA.logger
 
-		try {
-			val rc = getRC(SymonUserType, req)
+		PA.withRequestCache(SymonUserType, None, req, rc => {
 			val pb = rc.pb
 
 			if (
@@ -43,11 +41,6 @@ class PostSymonRun @Inject()(ws: WSClient)(implicit exec: ExecutionContext) exte
 					Ok("inserted.")
 				}
 			}
-		} catch {
-			case _: Throwable => Future {
-				Ok("Unable to log symon run")
-			}
-		}
-
+		})
 	}
 }

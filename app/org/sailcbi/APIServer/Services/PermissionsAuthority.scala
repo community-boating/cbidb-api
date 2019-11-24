@@ -16,6 +16,8 @@ import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTest
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
 import play.api.mvc.{Result, Results}
 
+import scala.concurrent.{ExecutionContext, Future}
+
 
 class PermissionsAuthority private[Services] (
 	val serverParameters: ServerParameters,
@@ -81,6 +83,27 @@ class PermissionsAuthority private[Services] (
 		allowedIPs.contains(request.remoteAddress)
 	}
 
+	private def withRCWrapper(
+		get: () => Option[RequestCache],
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] = {
+		try {
+			get() match {
+				case None => {
+					logger.warning("Auth fail", new UnauthorizedAccessException())
+					Future(Results.Ok(ResultError.UNAUTHORIZED))
+				}
+				case Some(rc) => block(rc)
+			}
+		} catch {
+			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
+			case e: Throwable => {
+				logger.error(e.getMessage, e)
+				Future(Results.Status(400)(ResultError.UNKNOWN))
+			}
+		}
+	}
+
 	def getRequestCache(
 		requiredUserType: NonMemberUserType,
 		requiredUserName: Option[String],
@@ -98,30 +121,22 @@ class PermissionsAuthority private[Services] (
 		requiredUserType: NonMemberUserType,
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache => Result
-	): Result = {
-		try {
-			getRequestCache(requiredUserType, requiredUserName, parsedRequest) match {
-				case None => {
-					logger.warning("Auth fail", new UnauthorizedAccessException())
-					Results.Ok(ResultError.UNAUTHORIZED)
-				}
-				case Some(rc) => block(rc)
-			}
-		} catch {
-			case _: UnauthorizedAccessException => Results.Ok(ResultError.UNAUTHORIZED)
-			case e: Throwable => {
-				logger.error(e.getMessage, e)
-				Results.Ok(ResultError.UNKNOWN)
-			}
-		}
-	}
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] =
+		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
 	def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): Option[RequestCache] =
 		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
+
+	def withRequestCacheMember(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] =
+		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
 
 	def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
@@ -157,8 +172,15 @@ class PermissionsAuthority private[Services] (
 				}
 			}
 		}
-
 	}
+
+	def withRequestCacheMemberWithJuniorId(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		juniorId: Int,
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] =
+		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
 
 	def getRequestCacheMemberWithParentId(
 		requiredUserName: Option[String],
@@ -183,8 +205,15 @@ class PermissionsAuthority private[Services] (
 				}
 			}
 		}
-
 	}
+
+	def withRequestCacheMemberWithParentId(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		parentId: Int,
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] =
+		withRCWrapper(() => getRequestCacheMemberWithParentId(requiredUserName, parsedRequest, parentId), block)
 
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
 		if (

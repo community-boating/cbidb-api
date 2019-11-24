@@ -5,7 +5,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassSections.JpClassSectionsParamsObject
-import org.sailcbi.APIServer.Api.{AuthenticatedRequest, CacheableResultFromPreparedQuery, ParamsObject}
+import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassSections, GetJpClassSectionsResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
@@ -15,7 +15,7 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 class JpClassSections @Inject()(implicit val exec: ExecutionContext)
-	extends AuthenticatedRequest with CacheableResultFromPreparedQuery[JpClassSectionsParamsObject, GetJpClassSectionsResult] {
+	extends CacheableResultFromPreparedQuery[JpClassSectionsParamsObject, GetJpClassSectionsResult] {
 	def get(startDate: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = {
 		val params = JpClassSectionsParamsObject(DateUtil.parseWithDefault(startDate))
 		val pq = new GetJpClassSections(params.startDate)
