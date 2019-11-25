@@ -12,7 +12,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, Resul
 import play.api.libs.json._
 import play.api.mvc.InjectedController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int, instanceId: Int)(implicit PA: PermissionsAuthority) = Action { request =>
@@ -84,7 +84,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			}
 		}
 	}
-	def postProto()(implicit PA: PermissionsAuthority) = Action { request =>
+	def postProto()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		try {
 			val logger = PA.logger
 			val parsedRequest = ParsedRequest(request)
@@ -92,59 +92,60 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			data match {
 				case None => {
 					println("no body")
-					new Status(400)("no body")
+					Future(new Status(400)("no body"))
 				}
 				case Some(v: JsValue) => {
 					println(v)
 					val parsed = SignupNoteShape.apply(v)
-					val authResult = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest)
-					val username = authResult.get.auth.userName
-					println("protoperson username is " + username)
-					val rc: RequestCache = authResult.get
-					val pb = rc.pb
-					val parentPersonId = ProtoPersonUserType.getAuthedPersonId(username, pb).get
-					println("parent personId is " + parentPersonId)
+					PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+						val username = rc.auth.userName
+						println("protoperson username is " + username)
+						val pb = rc.pb
+						val parentPersonId = ProtoPersonUserType.getAuthedPersonId(username, pb).get
+						println("parent personId is " + parentPersonId)
 
-					val juniorMatchesParent = {
-						val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
-							override val params: List[String] = List(
-								parentPersonId.toString,
-								parsed.juniorId.toString
-							)
+						val juniorMatchesParent = {
+							val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+								override val params: List[String] = List(
+									parentPersonId.toString,
+									parsed.juniorId.toString
+								)
 
-							override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+								override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
-							override def getQuery: String =
-								s"""
-								  |select 1 from person_relationships where a = ? and b = ?
-								  |and type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
-								  |""".stripMargin
+								override def getQuery: String =
+									s"""
+									   |select 1 from person_relationships where a = ? and b = ?
+									   |and type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
+									   |""".stripMargin
+							}
+							pb.executePreparedQueryForSelect(q).nonEmpty
 						}
-						pb.executePreparedQueryForSelect(q).nonEmpty
-					}
 
-					if (!juniorMatchesParent) {
-						val ve = ValidationResult.from("Unable to locate junior")
-						Ok(ve.toResultError.asJsObject())
-					} else {
-						implicit val format = SignupNoteShape.format
-						JPPortal.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
-							case ValidationOk => Ok(Json.toJson(parsed))
-							case e: ValidationError => Ok(e.toResultError.asJsObject())
+						if (!juniorMatchesParent) {
+							val ve = ValidationResult.from("Unable to locate junior")
+							Future(Ok(ve.toResultError.asJsObject()))
+						} else {
+							implicit val format = SignupNoteShape.format
+							JPPortal.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
+								case ValidationOk => Future(Ok(Json.toJson(parsed)))
+								case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+							}
 						}
-					}
+					})
+
 				}
 				case Some(v) => {
 					println("wut dis " + v)
-					Ok("wat")
+					Future(Ok("wat"))
 				}
 			}
 		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
+			case _: UnauthorizedAccessException => Future(Ok("Access Denied"))
 			case e: Throwable => {
 				println(e)
 				e.printStackTrace()
-				Ok("Internal Error")
+				Future(Ok("Internal Error"))
 			}
 		}
 	}

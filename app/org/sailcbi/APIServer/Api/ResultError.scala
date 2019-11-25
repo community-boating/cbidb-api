@@ -23,9 +23,9 @@ object ResultError {
 	val NOT_JSON = ResultError(
 		code="not_json",
 		message="Post body not parsable as json."
-	)
+	).asJsObject()
 	val BAD_PARAMS = ResultError(
 		code="bad_parameters",
 		message="JSON parameters were not correct."
-	)
+	).asJsObject()
 }

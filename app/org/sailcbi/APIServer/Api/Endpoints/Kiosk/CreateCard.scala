@@ -30,7 +30,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			// TODO: if we're keeping this, redo with chained try's or something rather than pyramid of ifs
 			if (params.isEmpty) {
 				Future {
-					Status(400)(JsObject(Map("error" -> ResultError.NOT_JSON.asJsObject())))
+					Status(400)(JsObject(Map("error" -> ResultError.NOT_JSON)))
 				}
 			} else {
 				try {
@@ -86,7 +86,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 					case e: play.api.libs.json.JsResultException => {
 						println(e)
 						Future {
-							Status(400)(JsObject(Map("error" -> ResultError.BAD_PARAMS.asJsObject())))
+							Status(400)(JsObject(Map("error" -> ResultError.BAD_PARAMS)))
 						}
 					}
 					case e: Throwable => {
