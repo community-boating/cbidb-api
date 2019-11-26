@@ -14,6 +14,7 @@ import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Exception.{PostBodyNotJSONException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
+import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -83,18 +84,9 @@ class PermissionsAuthority private[Services] (
 		allowedIPs.contains(request.remoteAddress)
 	}
 
-	private def withRCWrapper(
-		get: () => Option[RequestCache],
-		block: RequestCache => Future[Result]
-	)(implicit exec: ExecutionContext): Future[Result] = {
+	private def wrapInStandardTryCatch(block: () => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
 		try {
-			get() match {
-				case None => {
-					logger.warning("Auth fail", new UnauthorizedAccessException())
-					Future(Results.Ok(ResultError.UNAUTHORIZED))
-				}
-				case Some(rc) => block(rc)
-			}
+			block()
 		} catch {
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
 			case _: PostBodyNotJSONException => Future(Results.Status(400)(ResultError.NOT_JSON))
@@ -103,6 +95,19 @@ class PermissionsAuthority private[Services] (
 				Future(Results.Status(400)(ResultError.UNKNOWN))
 			}
 		}
+	}
+
+	private def withRCWrapper(
+		get: () => Option[RequestCache],
+		block: RequestCache => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] = {
+		wrapInStandardTryCatch(() => get() match {
+			case None => {
+				logger.warning("Auth fail", new UnauthorizedAccessException())
+				Future(Results.Ok(ResultError.UNAUTHORIZED))
+			}
+			case Some(rc) => block(rc)
+		})
 	}
 
 	private def getRequestCache(
@@ -276,6 +281,16 @@ class PermissionsAuthority private[Services] (
 	}
 
 	def closeDB(): Unit = secrets.dbConnection.close()
+
+	def withParsedPostBodyJSON[T](body: Option[JsValue], ctor: JsValue => T)(block: T => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
+		wrapInStandardTryCatch(() => {
+			body match {
+				case None => throw new PostBodyNotJSONException
+				case Some(v: JsValue) => block(ctor(v))
+				case Some(_) => throw new PostBodyNotJSONException
+			}
+		})
+	}
 }
 
 

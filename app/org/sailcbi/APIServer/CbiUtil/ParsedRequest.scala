@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.CbiUtil
 
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 
@@ -29,15 +30,21 @@ object ParsedRequest {
 		val GET = "GET"
 	}
 
-	def apply(request: Request[AnyContent]): ParsedRequest = ParsedRequest(
-		headers = request.headers,
-		cookies = request.cookies,
-		path = request.path,
-		method = request.method,
-		remoteAddress = request.remoteAddress,
-		postParams = getPostParams(request),
-		postJSON = request.body.asJson
-	)
+	def apply(request: Request[AnyContent])(implicit PA: PermissionsAuthority): ParsedRequest = try {
+		ParsedRequest(
+			headers = request.headers,
+			cookies = request.cookies,
+			path = request.path,
+			method = request.method,
+			remoteAddress = request.remoteAddress,
+			postParams = getPostParams(request),
+			postJSON = request.body.asJson
+		)
+	} catch {
+		case e: Throwable => {
+			PA.logger.error("Failure to parse request", e)
+			throw e
+	}}
 
 	private def getPostParams(request: Request[AnyContent]): Map[String, String] = {
 		request.body.asFormUrlEncoded match {

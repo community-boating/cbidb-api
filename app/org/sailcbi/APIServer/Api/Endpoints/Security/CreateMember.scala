@@ -11,44 +11,29 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, 
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCache(ProtoPersonUserType, None, parsedRequest).get
-			println(parsedRequest)
-			parsedRequest.postJSON match {
-				case Some(v: JsValue) => {
-					val cms = CreateMemberShape.apply(v)
-					val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonUserType.COOKIE_NAME).map(_.value)
-					println(cms)
-					println(protoPersonCookieValMaybe)
-					createMember(
-						rc.pb,
-						firstName = cms.firstName,
-						lastName = cms.lastName,
-						username = cms.username,
-						pwHash = cms.pwHash,
-						protoPersonValue = protoPersonCookieValMaybe
-					) match {
-						case Left(v: ValidationResult) => Ok(v.toResultError.asJsObject())
-						case Right(id: Int) => Ok(new JsObject(Map(
-							"personId" -> JsNumber(id)
-						)))
-					}
+	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+			PA.withParsedPostBodyJSON(parsedRequest.postJSON, CreateMemberShape.apply)(cms => {
+				val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonUserType.COOKIE_NAME).map(_.value)
+				createMember(
+					rc.pb,
+					firstName = cms.firstName,
+					lastName = cms.lastName,
+					username = cms.username,
+					pwHash = cms.pwHash,
+					protoPersonValue = protoPersonCookieValMaybe
+				) match {
+					case Left(v: ValidationResult) => Future(Ok(v.toResultError.asJsObject()))
+					case Right(id: Int) => Future(Ok(new JsObject(Map(
+						"personId" -> JsNumber(id)
+					))))
 				}
-				case None => Ok("Internal Error")
-			}
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+			})
+		})
 	}
 
 	case class CreateMemberShape(

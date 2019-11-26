@@ -17,14 +17,14 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
-			val parsed = RequestCache.parsePostBodyJSON(request.body.asJson, AddJuniorClassReservationShape.apply)
-
-			doPost(rc, parsed) match {
-				case Left(err) => Future(Ok(err.toResultError.asJsObject()))
-				case Right(juniorId) => Future(Ok(new JsObject(Map(
-					"personId" -> JsNumber(juniorId)
-				))))
-			}
+			PA.withParsedPostBodyJSON(request.body.asJson, AddJuniorClassReservationShape.apply)(parsed => {
+				doPost(rc, parsed) match {
+					case Left(err) => Future(Ok(err.toResultError.asJsObject()))
+					case Right(juniorId) => Future(Ok(new JsObject(Map(
+						"personId" -> JsNumber(juniorId)
+					))))
+				}
+			})
 		})
 	}
 

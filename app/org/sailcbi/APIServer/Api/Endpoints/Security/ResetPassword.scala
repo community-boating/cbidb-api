@@ -10,48 +10,26 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, 
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val logger = PA.logger
-			val parsedRequest = ParsedRequest(request)
-			val data = request.body.asJson
-			data match {
-				case None => {
-					println("no body")
-					new Status(400)("no body")
-				}
-				case Some(v: JsValue) => {
-					val rc: RequestCache = PA.getRequestCache(BouncerUserType, None, parsedRequest).get
-					println(v)
-					val parsed = ResetPasswordShape.apply(v)
-					println(parsed)
-					val pb = rc.pb
+	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
+		val logger = PA.logger
+		val parsedRequest = ParsedRequest(request)
+		PA.withParsedPostBodyJSON(request.body.asJson, ResetPasswordShape.apply)(parsed => {
+			PA.withRequestCache(BouncerUserType, None, parsedRequest, rc => {
+				val pb = rc.pb
 
-					validateHash(pb, parsed.email, parsed.hash) match {
-						case ValidationOk => {
-							markHashesUsed(pb, parsed.email)
-							setNewPassword(pb, parsed.email, parsed.pwHash)
-							Ok(JsObject(Map("success" -> JsBoolean(true))))
-						}
-						case ve: ValidationError => Ok(ve.toResultError.asJsObject())
+				validateHash(pb, parsed.email, parsed.hash) match {
+					case ValidationOk => {
+						markHashesUsed(pb, parsed.email)
+						setNewPassword(pb, parsed.email, parsed.pwHash)
+						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					}
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 				}
-				case Some(v) => {
-					println("wut dis " + v)
-					Ok("wat")
-				}
-			}
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+			})
+		})
 	}
 
 	def validateHash(pb: PersistenceBroker, email: String, hash: String): ValidationResult = {

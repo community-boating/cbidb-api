@@ -19,10 +19,12 @@ class TestAuth @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 			case "bouncer" => BouncerUserType
 		}
 		val pr = ParsedRequest(req)
-		val result = PA.getRequestCache(ut, None, pr)
+		PA.withRequestCache(ut, None, pr, rc => {
+			Future {
+				Ok(if (rc.auth.userType == ut) "true" else "false")
+			}
+		})
 
-		Future {
-			Ok(if (result.get.auth.userType == ut) "true" else "false")
-		}
+
 	}
 }

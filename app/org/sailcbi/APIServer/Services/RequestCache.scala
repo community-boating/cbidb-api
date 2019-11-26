@@ -143,12 +143,4 @@ object RequestCache {
 			}
 		}
 	}
-
-	def parsePostBodyJSON[T](body: Option[JsValue], ctor: JsValue => T): T = {
-		body match {
-			case None => throw new PostBodyNotJSONException
-			case Some(v: JsValue) => ctor(v)
-			case Some(v) => throw new PostBodyNotJSONException
-		}
-	}
 }
