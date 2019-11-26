@@ -5,17 +5,16 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class OrderStatus @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
+		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -32,11 +31,8 @@ class OrderStatus @Inject()(implicit val exec: ExecutionContext) extends Injecte
 			)
 
 			implicit val format = OrderStatusResult.format
-			Ok(Json.toJson(result))
-		} catch {
-			case _: Throwable => Ok("Internal Error.")
-		}
-
+			Future(Ok(Json.toJson(result)))
+		})
 	}
 
 	case class OrderStatusResult(orderId: Int, total: Double, cardData: Option[StripeTokenSavedShape])

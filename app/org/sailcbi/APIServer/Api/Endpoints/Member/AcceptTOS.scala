@@ -5,61 +5,39 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.InjectedController
+import org.sailcbi.APIServer.Services.PermissionsAuthority
+import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val logger = PA.logger
-			val parsedRequest = ParsedRequest(request)
-			val data = request.body.asJson
-			data match {
-				case None => {
-					println("no body")
-					new Status(400)("no body")
-				}
-				case Some(v: JsValue) => {
-					println(v)
-					val parsed = AcceptTOSShape.apply(v)
-					val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId).get
-					val pb = rc.pb
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val logger = PA.logger
+		val parsedRequest = ParsedRequest(request)
+		PA.withParsedPostBodyJSON(request.body.asJson, AcceptTOSShape.apply)(parsed => {
+			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId, rc => {
+				val pb = rc.pb
 
-					val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-					val orderId = JPPortal.getOrderId(pb, parentId)
+				val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val orderId = JPPortal.getOrderId(pb, parentId)
 
-					val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-						override val params: List[String] = List(parsed.personId.toString, orderId.toString)
+				val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+					override val params: List[String] = List(parsed.personId.toString, orderId.toString)
 
-						override def getQuery: String =
-							"""
-							  |update shopping_cart_memberships
-							  |  set ready_to_buy = 'Y'
-							  |  where person_id = ?
-							  |  and ready_to_buy = 'N'
-							  |  and order_id = ?
-							  |""".stripMargin
-					}
-					pb.executePreparedQueryForUpdateOrDelete(q)
-					Ok("done")
+					override def getQuery: String =
+						"""
+						  |update shopping_cart_memberships
+						  |  set ready_to_buy = 'Y'
+						  |  where person_id = ?
+						  |  and ready_to_buy = 'N'
+						  |  and order_id = ?
+						  |""".stripMargin
 				}
-				case Some(v) => {
-					println("wut dis " + v)
-					Ok("wat")
-				}
-			}
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				e.printStackTrace()
-				Ok("Internal Error")
-			}
-		}
+				pb.executePreparedQueryForUpdateOrDelete(q)
+				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+			})
+		})
 	}
 
 	case class AcceptTOSShape(personId: Int)

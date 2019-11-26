@@ -5,16 +5,15 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ClearCard @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
+	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
+		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -26,10 +25,7 @@ class ClearCard @Inject()(implicit val exec: ExecutionContext) extends InjectedC
 				override def getQuery: String = "update stripe_tokens set active = 'N' where order_id = ?"
 			}
 			pb.executePreparedQueryForUpdateOrDelete(clearQ)
-			Ok("done")
-		} catch {
-			case _: Throwable => Ok("Internal Error.")
-		}
-
+			Future(Ok("done"))
+		})
 	}
 }

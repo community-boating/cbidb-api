@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api
 
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, Json}
 
 case class ResultError (
 	code: String,

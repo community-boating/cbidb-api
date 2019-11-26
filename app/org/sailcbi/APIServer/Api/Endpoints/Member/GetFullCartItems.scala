@@ -5,18 +5,16 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.FullCart
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
-		try {
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
@@ -25,18 +23,7 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 			val fullCartItemsQuery = new FullCart(orderId)
 
 			val resultObj = pb.executePreparedQueryForSelect(fullCartItemsQuery)
-			Ok(Json.toJson(resultObj))
-		} catch {
-			case e: UnauthorizedAccessException => {
-				e.printStackTrace()
-				Ok("Access Denied")
-			}
-			case e: Throwable => {
-				println(e)
-				Ok("Internal Error")
-			}
-		}
-
+			Future(Ok(Json.toJson(resultObj)))
+		})
 	}
-
 }

@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult, GetCurrentOnlineClose}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedProcedureCall
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -21,19 +21,18 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		val logger = PA.logger
-		try {
-			val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
+		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = JPPortal.getOrderId(pb, personId)
 
 			val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberUserType)) {
-//				procedure start_stripe_trans_preflight(
-//						i_order_id in number,
-//						o_attempt_id out number,
-//						o_error_msg out varchar2
-//				);
+				//				procedure start_stripe_trans_preflight(
+				//						i_order_id in number,
+				//						o_attempt_id out number,
+				//						o_error_msg out varchar2
+				//				);
 				override def registerOutParameters: Map[String, Int] = Map(
 					"o_attempt_id" -> java.sql.Types.INTEGER,
 					"o_error_msg" -> java.sql.Types.VARCHAR
@@ -149,12 +148,6 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
 				}
 			})
-		} catch {
-			case e: Throwable => {
-				e.printStackTrace()
-				Future(Ok("Internal Error."))
-			}
-		}
-
+		})
 	}
 }

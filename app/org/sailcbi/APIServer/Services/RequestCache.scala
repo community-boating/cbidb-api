@@ -3,17 +3,15 @@ package org.sailcbi.APIServer.Services
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import org.sailcbi.APIServer.Api.Endpoints.Member.AddJuniorClassReservationShape
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication._
-import org.sailcbi.APIServer.Services.Exception.{CORSException, PostBodyNotJSONException}
+import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import play.api.libs.json.{JsNumber, JsObject, JsValue}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext

@@ -131,7 +131,7 @@ class PermissionsAuthority private[Services] (
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
-	def getRequestCacheMember(
+	private def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): Option[RequestCache] =
@@ -144,7 +144,7 @@ class PermissionsAuthority private[Services] (
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
 
-	def getRequestCacheMemberWithJuniorId(
+	private def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int
@@ -188,7 +188,7 @@ class PermissionsAuthority private[Services] (
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
 
-	def getRequestCacheMemberWithParentId(
+	private def getRequestCacheMemberWithParentId(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int

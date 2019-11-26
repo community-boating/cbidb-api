@@ -1,24 +1,22 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{ResultError, ValidationError, ValidationOk, ValidationResult}
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action { request =>
-		try {
-			val parsedRequest = ParsedRequest(request)
-			val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
+	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val pb: PersistenceBroker = rc.pb
 			val cb: CacheBroker = rc.cb
 
@@ -70,81 +68,57 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					   |medications,
 					   |special_needs
 					   |from persons where person_id = ?
-        """.stripMargin
+	""".stripMargin
 
 				override val params: List[String] = List(juniorId.toString)
 			}
 
 			val resultObj = pb.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
-			Ok(resultJson)
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				Ok("Internal Error")
-			}
-		}
+			Future(Ok(resultJson))
+		})
 	}
 
-	def post()(implicit PA: PermissionsAuthority) = Action { request =>
-		try {
-			val parsedRequest = ParsedRequest(request)
-			parsedRequest.postJSON match {
+	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, RequiredInfoShape.apply)(parsed => {
+			import JsValueWrapper.wrapJsValue
+			request.body.asJson.map(json => json.getNonNull("personId")).get match {
+				case Some(id: JsValue) => {
+					val juniorId: Int = id.toString().toInt
+					println(s"its an update: $juniorId")
+					PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+						val pb = rc.pb
+						runValidations(parsed, pb, Some(id.toString().toInt)) match {
+							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+							case ValidationOk => {
+								doUpdate(pb, parsed, MemberUserType.getAuthedPersonId(rc.auth.userName, pb))
+								Future(Ok(new JsObject(Map(
+									"personId" -> JsNumber(juniorId)
+								))))
+							}
+						}
+					})
+
+				}
 				case None => {
-					println("no body")
-					Ok(ResultError.UNKNOWN)
-				}
-				case Some(v: JsValue) => {
-					val parsed = RequiredInfoShape.apply(v)
-					println(parsed)
-
-					import JsValueWrapper.wrapJsValue
-					request.body.asJson.map(json => json.getNonNull("personId")).get match {
-						case Some(id: JsValue) => {
-							val juniorId: Int = id.toString().toInt
-							println(s"its an update: $juniorId")
-							val rc: RequestCache = PA.getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId).get
-							val pb = rc.pb
-							runValidations(parsed, pb, Some(id.toString().toInt)) match {
-								case ve: ValidationError => Ok(ve.toResultError.asJsObject())
-								case ValidationOk => {
-									doUpdate(pb, parsed, MemberUserType.getAuthedPersonId(rc.auth.userName, pb))
-									Ok(new JsObject(Map(
-										"personId" -> JsNumber(juniorId)
-									)))
-								}
+					println(s"its a create")
+					PA.withRequestCacheMember(None, parsedRequest, rc => {
+						val pb = rc.pb
+						runValidations(parsed, pb, None) match {
+							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+							case ValidationOk => {
+								val newJuniorId = doCreate(pb, parsed, MemberUserType.getAuthedPersonId(rc.auth.userName, pb))
+								Future(Ok(new JsObject(Map(
+									"personId" -> JsNumber(newJuniorId)
+								))))
 							}
 						}
-						case None => {
-							println(s"its a create")
-							val rc: RequestCache = PA.getRequestCacheMember(None, parsedRequest).get
-							val pb = rc.pb
-							runValidations(parsed, pb, None) match {
-								case ve: ValidationError => Ok(ve.toResultError.asJsObject())
-								case ValidationOk => {
-									val newJuniorId = doCreate(pb, parsed, MemberUserType.getAuthedPersonId(rc.auth.userName, pb))
-									Ok(new JsObject(Map(
-										"personId" -> JsNumber(newJuniorId)
-									)))
-								}
-							}
-						}
-					}
-				}
-				case Some(v) => {
-					println("wut dis " + v)
-					Ok(ResultError.UNKNOWN)
-				}
-			}
+					})
 
-		} catch {
-			case _: UnauthorizedAccessException => Ok("Access Denied")
-			case e: Throwable => {
-				println(e)
-				Ok("Internal Error")
+				}
 			}
-		}
+		})
 	}
 
 	def runValidations(parsed: RequiredInfoShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
