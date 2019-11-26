@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.CbiUtil
 
+import io.sentry.Sentry
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContent, Cookies, Headers, Request}
@@ -43,6 +44,7 @@ object ParsedRequest {
 	} catch {
 		case e: Throwable => {
 			PA.logger.error("Failure to parse request", e)
+			Sentry.capture(e)
 			throw e
 	}}
 

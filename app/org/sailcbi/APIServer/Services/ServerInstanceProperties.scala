@@ -56,6 +56,7 @@ object ServerInstanceProperties {
 		"PreparedQueriesOnly",
 		"RoutesSecurityLevel",
 		"SymonSalt",
-		"KioskToken"
+		"KioskToken",
+		"sentryDSN"
 	)
 }

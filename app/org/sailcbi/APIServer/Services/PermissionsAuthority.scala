@@ -5,6 +5,7 @@ import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
+import io.sentry.Sentry
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -31,6 +32,8 @@ class PermissionsAuthority private[Services] (
 )  {
 	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
 	println(this.toString)
+	// Initialize sentry
+	Sentry.init(secrets.sentryDSN)
 	def instanceName: String = secrets.dbConnection.mainSchemaName
 
 	def sleep(): Unit = {
@@ -89,9 +92,13 @@ class PermissionsAuthority private[Services] (
 			block()
 		} catch {
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
-			case _: PostBodyNotJSONException => Future(Results.Status(400)(ResultError.NOT_JSON))
+			case e: PostBodyNotJSONException => {
+				Sentry.capture(e)
+				Future(Results.Status(400)(ResultError.NOT_JSON))
+			}
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
+				Sentry.capture(e)
 				Future(Results.Status(400)(ResultError.UNKNOWN))
 			}
 		}
@@ -102,10 +109,7 @@ class PermissionsAuthority private[Services] (
 		block: RequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
-			case None => {
-				logger.warning("Auth fail", new UnauthorizedAccessException())
-				Future(Results.Ok(ResultError.UNAUTHORIZED))
-			}
+			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
 			case Some(rc) => block(rc)
 		})
 	}

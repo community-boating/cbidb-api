@@ -6,5 +6,6 @@ case class PermissionsAuthoritySecrets(
 	kioskToken: String,
 	apexDebugSignet: Option[String],
 	symonSalt: Option[String],
-	stripeSecretKey: String
+	stripeSecretKey: String,
+	sentryDSN: String
 )

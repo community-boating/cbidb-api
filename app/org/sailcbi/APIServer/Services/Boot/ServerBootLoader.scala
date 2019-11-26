@@ -95,7 +95,8 @@ abstract class ServerBootLoader {
 					kioskToken = serverProps.getProperty("KioskToken"),
 					apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
 					symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
-					stripeSecretKey = serverProps.getProperty("StripeAPIKey")
+					stripeSecretKey = serverProps.getProperty("StripeAPIKey"),
+					sentryDSN = serverProps.getProperty("sentryDSN")
 				)
 //				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
 //					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, , new FromWSClient(ws))),
