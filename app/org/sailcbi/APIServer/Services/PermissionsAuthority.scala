@@ -12,7 +12,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
-import org.sailcbi.APIServer.Services.Exception.{PostBodyNotJSONException, UnauthorizedAccessException}
+import org.sailcbi.APIServer.Services.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
 import play.api.libs.json.JsValue
@@ -92,6 +92,7 @@ class PermissionsAuthority private[Services] (
 			block()
 		} catch {
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
+			case _: CORSException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
 			case e: PostBodyNotJSONException => {
 				Sentry.capture(e)
 				Future(Results.Status(400)(ResultError.NOT_JSON))
