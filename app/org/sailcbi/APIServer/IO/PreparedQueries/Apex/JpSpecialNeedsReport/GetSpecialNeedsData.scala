@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpSpecialNeedsReport
 import java.time.ZonedDateTime
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, NAStrings}
-import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
+import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

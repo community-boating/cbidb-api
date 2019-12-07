@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserType}
 import org.sailcbi.APIServer.Services.PersistenceBroker
 import play.api.libs.json.{JsValue, Json}
@@ -15,7 +16,7 @@ case class Charge(
 						 status: String
 				 ) extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = Charge
-	val persistenceValues: Map[String, String] = Charge.persistenceValues(this)
+	val persistenceValues: Map[String, PreparedValue] = Charge.persistenceValues(this)
 	val pkSqlLiteral: String = GetSQLLiteral(id)
 
 	// e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
@@ -45,16 +46,16 @@ object Charge extends StripeCastableToStorableObject[Charge] {
 	def apply(v: JsValue): Charge = v.as[Charge]
 
 	val apexTableName = "STRIPE_CHARGES"
-	val persistenceFieldsMap: Map[String, Charge => String] = Map(
-		"CHARGE_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.id)),
-		"AMOUNT_IN_CENTS" -> ((c: Charge) => GetSQLLiteralPrepared(c.amount)),
-		"CREATED_EPOCH" -> ((c: Charge) => GetSQLLiteralPrepared(c.created)),
-		"PAID" -> ((c: Charge) => GetSQLLiteralPrepared(c.paid)),
-		"STATUS" -> ((c: Charge) => GetSQLLiteralPrepared(c.status)),
-		"CLOSE_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.closeId)),
-		"ORDER_ID" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.orderId)),
-		"TOKEN" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.token)),
-		"REFUNDS" -> ((c: Charge) => GetSQLLiteralPrepared(c.metadata.refunds)),
+	val persistenceFieldsMap: Map[String, Charge => PreparedValue] = Map(
+		"CHARGE_ID" -> ((c: Charge) => c.id),
+		"AMOUNT_IN_CENTS" -> ((c: Charge) => c.amount),
+		"CREATED_EPOCH" -> ((c: Charge) => c.created),
+		"PAID" -> ((c: Charge) => c.paid),
+		"STATUS" -> ((c: Charge) => c.status),
+		"CLOSE_ID" -> ((c: Charge) => c.metadata.closeId),
+		"ORDER_ID" -> ((c: Charge) => c.metadata.orderId),
+		"TOKEN" -> ((c: Charge) => c.metadata.token),
+		"REFUNDS" -> ((c: Charge) => c.metadata.refunds),
 	)
 	val pkColumnName = "CHARGE_ID"
 	val getURL: String = "charges"

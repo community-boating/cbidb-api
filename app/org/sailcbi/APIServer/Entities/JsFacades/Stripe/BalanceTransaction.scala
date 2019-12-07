@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
@@ -18,7 +19,7 @@ case class BalanceTransaction(
 ) extends CastableToStorableClass {
 	val pkSqlLiteral: String = GetSQLLiteral(id)
 	val storableObject: CastableToStorableObject[_] = BalanceTransaction
-	val persistenceValues: Map[String, String] = BalanceTransaction.persistenceValues(this)
+	val persistenceValues: Map[String, PreparedValue] = BalanceTransaction.persistenceValues(this)
 }
 
 object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransaction] {
@@ -34,16 +35,16 @@ object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransact
 	def apply(v: JsValue): BalanceTransaction = v.as[BalanceTransaction]
 
 	val apexTableName = "STRIPE_BALANCE_TRANSACTIONS"
-	val persistenceFieldsMap: Map[String, BalanceTransaction => String] = Map(
-		"TRANSACTION_ID" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.id)),
-		"AMOUNT_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.amount)),
-		"DESCRIPTION" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.description)),
-		"FEE_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.fee)),
-		"NET_IN_CENTS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.net)),
-		"SOURCE" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.source)),
-		"STATUS" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.status)),
-		"TYPE" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.`type`)),
-		"PAYOUT" -> ((bt: BalanceTransaction) => GetSQLLiteralPrepared(bt.payout))
+	val persistenceFieldsMap: Map[String, BalanceTransaction => PreparedValue] = Map(
+		"TRANSACTION_ID" -> ((bt: BalanceTransaction) => bt.id),
+		"AMOUNT_IN_CENTS" -> ((bt: BalanceTransaction) => bt.amount),
+		"DESCRIPTION" -> ((bt: BalanceTransaction) => bt.description),
+		"FEE_IN_CENTS" -> ((bt: BalanceTransaction) => bt.fee),
+		"NET_IN_CENTS" -> ((bt: BalanceTransaction) => bt.net),
+		"SOURCE" -> ((bt: BalanceTransaction) => bt.source),
+		"STATUS" -> ((bt: BalanceTransaction) => bt.status),
+		"TYPE" -> ((bt: BalanceTransaction) => bt.`type`),
+		"PAYOUT" -> ((bt: BalanceTransaction) => bt.payout)
 	)
 	val pkColumnName = "TRANSACTION_ID"
 	val getURL: String = "balance/history"

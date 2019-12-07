@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsValue, Json}
 
@@ -12,7 +13,7 @@ case class ChargeRefund(
 							   amountInCents: Int
 					   ) extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = ChargeRefund
-	val persistenceValues: Map[String, String] = ChargeRefund.persistenceValues(this)
+	val persistenceValues: Map[String, PreparedValue] = ChargeRefund.persistenceValues(this)
 	val pkSqlLiteral: String = GetSQLLiteral(refundId)
 }
 
@@ -24,11 +25,11 @@ object ChargeRefund extends StripeCastableToStorableObject[ChargeRefund] {
 	def apply(v: JsValue): ChargeRefund = v.as[ChargeRefund]
 
 	val apexTableName = "STRIPE_REFUNDS"
-	val persistenceFieldsMap: Map[String, ChargeRefund => String] = Map(
-		"REFUND_ID" -> ((r: ChargeRefund) => GetSQLLiteralPrepared(r.refundId)),
-		"CHARGE_ID" -> ((r: ChargeRefund) => GetSQLLiteralPrepared(r.chargeId)),
-		"CLOSE_ID" -> ((r: ChargeRefund) => GetSQLLiteralPrepared(r.closeId)),
-		"AMOUNT_IN_CENTS" -> ((r: ChargeRefund) => GetSQLLiteralPrepared(r.amountInCents))
+	val persistenceFieldsMap: Map[String, ChargeRefund => PreparedValue] = Map(
+		"REFUND_ID" -> ((r: ChargeRefund) => r.refundId),
+		"CHARGE_ID" -> ((r: ChargeRefund) => r.chargeId),
+		"CLOSE_ID" -> ((r: ChargeRefund) => r.closeId),
+		"AMOUNT_IN_CENTS" -> ((r: ChargeRefund) => r.amountInCents)
 	)
 	val pkColumnName = "REFUND_ID"
 	val getURL: String = "refunds"

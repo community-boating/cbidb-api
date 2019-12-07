@@ -38,7 +38,7 @@ class Temp extends FunSuite {
 		val sel = new PreparedQueryForSelect[T](Set(RootUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): T = getFromRSW(rsw)
 
-			override val preparedParams: List[PreparedValue] = List(PreparedString(pk.get))
+			override val preparedParams: List[PreparedValue] = List(pk.get)
 
 			override def getQuery: String =
 				"""
@@ -50,7 +50,7 @@ class Temp extends FunSuite {
 
 		val del = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
 			override def getQuery: String = "delete from promotions where promo_id = ?"
-			override val preparedParams = List(PreparedString(pk.get))
+			override val preparedParams = List(pk.get)
 		}
 
 		pb.executePreparedQueryForUpdateOrDelete(del)

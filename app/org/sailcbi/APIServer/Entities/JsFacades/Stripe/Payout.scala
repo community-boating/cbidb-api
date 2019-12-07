@@ -4,6 +4,7 @@ import java.time.{Instant, ZonedDateTime}
 
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}
 import play.api.libs.json.{JsValue, Json}
 
@@ -16,7 +17,7 @@ case class Payout(
 				 ) extends CastableToStorableClass {
 	val pkSqlLiteral: String = GetSQLLiteral(id)
 	val storableObject: CastableToStorableObject[_] = Payout
-	val persistenceValues: Map[String, String] = Payout.persistenceValues(this)
+	val persistenceValues: Map[String, PreparedValue] = Payout.persistenceValues(this)
 
 	lazy val arrivalZonedDateTime: ZonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(arrival_date), DateUtil.HOME_TIME_ZONE)
 }
@@ -29,12 +30,12 @@ object Payout extends StripeCastableToStorableObject[Payout] {
 	def apply(v: JsValue): Payout = v.as[Payout]
 
 	val apexTableName = "STRIPE_PAYOUTS"
-	val persistenceFieldsMap: Map[String, Payout => String] = Map(
-		"PAYOUT_ID" -> ((p: Payout) => GetSQLLiteralPrepared(p.id)),
-		"AMOUNT_IN_CENTS" -> ((p: Payout) => GetSQLLiteralPrepared(p.amount)),
-		"ARRIVAL_DATETIME" -> ((p: Payout) => GetSQLLiteralPrepared(p.arrivalZonedDateTime)),
-		"BALANCE_TRANSACTION_ID" -> ((p: Payout) => GetSQLLiteralPrepared(p.balance_transaction)),
-		"STATUS" -> ((p: Payout) => GetSQLLiteralPrepared(p.status))
+	val persistenceFieldsMap: Map[String, Payout => PreparedValue] = Map(
+		"PAYOUT_ID" -> ((p: Payout) => p.id),
+		"AMOUNT_IN_CENTS" -> ((p: Payout) => p.amount),
+		"ARRIVAL_DATETIME" -> ((p: Payout) => p.arrivalZonedDateTime),
+		"BALANCE_TRANSACTION_ID" -> ((p: Payout) => p.balance_transaction),
+		"STATUS" -> ((p: Payout) => p.status)
 	)
 	val pkColumnName = "PAYOUT_ID"
 	val getURL: String = "payouts"
