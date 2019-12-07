@@ -11,7 +11,7 @@ class VerifyPas(userName: String, pas: String, procName: String, argString: Stri
 		   |
     """.stripMargin
 
-	val params: List[String] = List(userName, pas, procName, argString)
+	override val params: List[String] = List(userName, pas, procName, argString)
 
 	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1) == "Y"
 }

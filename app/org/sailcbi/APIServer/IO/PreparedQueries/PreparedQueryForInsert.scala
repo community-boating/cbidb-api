@@ -6,5 +6,15 @@ abstract class PreparedQueryForInsert(
 	override val allowedUserTypes: Set[UserType],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQueryForInsert(allowedUserTypes, useTempSchema) {
-	val params: List[String]
+	val params: List[String] = List.empty
+	val preparedParams: List[PreparedValue] = List.empty
+
+	def getParams: List[PreparedValue] = {
+		if (params.nonEmpty && preparedParams.isEmpty) {
+			// legacy mode, use the old string params
+			params.map(PreparedString)
+		} else {
+			preparedParams
+		}
+	}
 }

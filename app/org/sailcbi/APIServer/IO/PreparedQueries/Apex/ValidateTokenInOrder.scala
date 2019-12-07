@@ -17,7 +17,7 @@ class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryFor
 		   |
     """.stripMargin
 
-	val params = List(orderId.toString, token)
+	override val params = List(orderId.toString, token)
 
 	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ValidateTokenInOrderResult = ValidateTokenInOrderResult(
 		rs.getInt(1),

@@ -25,7 +25,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 			Scholarship.setOthersNonCurrent(pb, personId)
 			val jpPrice = Scholarship.getBaseJpPrice(pb)
 			val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
-				val params: List[String] = List(personId.toString)
+				override val params: List[String] = List(personId.toString)
 				override val pkName: Option[String] = None
 
 				override def getQuery: String =
@@ -80,7 +80,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 				if (eiis.length == 1) {
 					val myJpPrice = Scholarship.getMyJpPrice(pb, eiis.head, parsed.income, children)
 					val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
-						val params: List[String] = List(personId.toString)
+						override val params: List[String] = List(personId.toString)
 						override val pkName: Option[String] = None
 
 						override def getQuery: String =

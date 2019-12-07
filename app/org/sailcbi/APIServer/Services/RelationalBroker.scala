@@ -33,10 +33,8 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 					println("executing prepared select:")
 					println(pq.getQuery)
 					val preparedStatement = c.prepareStatement(pq.getQuery)
-					(p.params.indices zip p.params).foreach(t => {
-						preparedStatement.setString(t._1 + 1, t._2)
-					})
-					println("Parameterized with " + p.params)
+					p.getParams.zipWithIndex.foreach(t => t._1.set(preparedStatement)(t._2+1))
+					println("Parameterized with " + p.getParams)
 					preparedStatement.executeQuery
 				}
 				case _ => {
@@ -64,7 +62,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 	}
 
 	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
-		case p: PreparedQueryForInsert => executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.asInstanceOf[PreparedQueryForInsert].params))
+		case p: PreparedQueryForInsert => executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.asInstanceOf[PreparedQueryForInsert].getParams))
 		case hq: HardcodedQueryForInsert => executeSQLForInsert(hq.getQuery, hq.pkName, hq.useTempSchema)
 	}
 
@@ -76,11 +74,14 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 					println("executing prepared update/delete:")
 					println(p.getQuery)
 					val preparedStatement = c.prepareStatement(p.getQuery)
-					(p.params.indices zip p.params).foreach(t => {
-						println(s"setting index ${t._1 + 1} to ${t._2}")
-						preparedStatement.setString(t._1 + 1, t._2)
-					})
-					println("Parameterized with " + p.params)
+
+					p.getParams.zipWithIndex.foreach(t => t._1.set(preparedStatement)(t._2+1))
+					println("Parameterized with " + p.getParams)
+//					(p.params.indices zip p.params).foreach(t => {
+//						println(s"setting index ${t._1 + 1} to ${t._2}")
+//						preparedStatement.setString(t._1 + 1, t._2)
+//					})
+//					println("Parameterized with " + p.params)
 					preparedStatement.executeUpdate()
 				})
 			}
@@ -206,7 +207,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		})
 	}
 
-	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[String]] = None): Option[String] = {
+	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[PreparedValue]] = None): Option[String] = {
 		println(sql.replace("\t", "\\t"))
 		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(c => {
@@ -216,10 +217,12 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			}
 
 			if (params.isDefined) {
-				(params.get.indices zip params.get).foreach(t => {
-					ps.setString(t._1 + 1, t._2)
-				})
-				println("Parameterized with " + params)
+				params.get.zipWithIndex.foreach(t => t._1.set(ps)(t._2+1))
+				println("Parameterized with " + params.get)
+//				(params.get.indices zip params.get).foreach(t => {
+//					ps.setString(t._1 + 1, t._2)
+//				})
+//				println("Parameterized with " + params)
 			}
 			ps.executeUpdate()
 			if (pkPersistenceName.isDefined) {

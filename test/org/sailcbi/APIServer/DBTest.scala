@@ -68,4 +68,22 @@ class DBTest extends FunSuite {
 			assert(types.size == types2.size + 1)
 		})
 	}
+	test("sdfgnjkdgfjk") {
+		ServerBootLoaderTest.withPAWriteable(pa => {
+			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val pb = rc.pb
+
+			val q = new PreparedQueryForInsert(Set(RootUserType)) {
+				override val params: List[String] = List()
+				override val pkName: Option[String] = Some("PROMO_ID")
+
+				override def getQuery: String =
+					"""
+					  |insert into promotions (start_date) values (?)
+					  |""".stripMargin
+			}
+
+			pb.executePreparedQueryForInsert(q)
+		})
+	}
 }
