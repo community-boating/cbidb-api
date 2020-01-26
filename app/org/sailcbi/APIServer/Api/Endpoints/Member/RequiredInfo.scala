@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
@@ -127,6 +127,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		val unconditionalValidations = List(
 			tooOld(pb, dob),
 			tooYoung(pb, dob, juniorId),
+			cannotAlterDOB(pb, dob, juniorId),
 			ValidationResult.checkBlank(parsed.firstName, "First Name"),
 			ValidationResult.checkBlank(parsed.lastName, "Last Name"),
 			ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
@@ -162,6 +163,26 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 	}
 
+	def cannotAlterDOB(pb: PersistenceBroker, dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
+		case None => ValidationOk
+		case Some(id) => {
+			val (existingDOB, currentSeason, firstMembershipYear) =
+				pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(String, Int, Option[Int])](Set(MemberUserType)) {
+					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int, Option[Int]) = (rsw.getString(1), rsw.getInt(2), rsw.getOptionInt(3))
+
+					override def getQuery: String =
+						"""
+						  |select to_char(dob, 'MM/DD/YYYY'), util_pkg.get_current_season, min(to_char(expiration_date,'YYYY')) from persons p left outer join persons_memberships pm
+						  |on p.person_id = pm.person_id where p.person_id = ? group by to_char(dob, 'MM/DD/YYYY'), util_pkg.get_current_season
+						  |""".stripMargin
+
+					override val params: List[String] = List(id.toString)
+				}).head
+			if (existingDOB == dob) ValidationOk
+			else if (firstMembershipYear.getOrElse(currentSeason) == currentSeason) ValidationOk
+			else ValidationResult.from("DOB cannot be altered.  If DOB is inaccurate please email the Front Office at info@community-boating.org")
+		}
+	}
 
 	def tooOld(pb: PersistenceBroker, dob: String): ValidationResult = {
 		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
