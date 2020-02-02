@@ -149,7 +149,7 @@ object GetClassInstancesQuery {
 		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w
 		   |where i.type_id = t.type_id
 		   |and bk.instance_id = i.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
-		   |and s1.session_datetime between w.monday and w.monday + 6
+		   |and s1.session_datetime between w.monday and w.sunday
 		   |and (nvl($weekString, '%nu'||'ll%') = '%nu' || 'll%' or (
 		   |    s1.session_datetime between (select monday from jp_weeks where season = util_pkg.get_current_season $weekClause)
 		   |    and (select sunday from jp_weeks where season = util_pkg.get_current_season $weekClause)
