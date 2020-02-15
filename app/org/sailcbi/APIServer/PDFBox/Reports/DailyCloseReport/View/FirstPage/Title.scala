@@ -15,7 +15,7 @@ class Title(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, d
 		defaultBoldFont, defaultFontSize, 0, 0
 	)
 	val date: String = data.closeProps.closedDatetime match {
-		case Some(d) => d.format(DateTimeFormatter.ofPattern("dd MMMM YYYY hh:mma (EE)"))
+		case Some(d) => d.format(DateTimeFormatter.ofPattern("dd MMMM yyyy hh:mma (EE)"))
 		case None => "(close still open)"
 	}
 	val dateTable = DrawableTable(

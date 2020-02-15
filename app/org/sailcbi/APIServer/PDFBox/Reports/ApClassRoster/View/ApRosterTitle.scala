@@ -8,11 +8,10 @@ import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, Drawable, DrawableTa
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Model.ApClassRosterModel
 
 class ApRosterTitle(data: ApClassRosterModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {
-	//val date: String = data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY hh:mma (EE)"))
 	val title: String = List(
 		data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("hh:mma")),
 		data.instanceData.typeName,
-		"(" + data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("EE MM/dd/YYYY")) + ")",
+		"(" + data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("EE MM/dd/yyyy")) + ")",
 	).mkString(" ")
 
 	val dateTable = DrawableTable(

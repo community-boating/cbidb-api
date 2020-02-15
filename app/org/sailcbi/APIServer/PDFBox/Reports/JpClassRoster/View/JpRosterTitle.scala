@@ -11,7 +11,7 @@ class JpRosterTitle(data: JpClassRosterModel, maxWidth: Float, defaultFont: PDFo
 	val title: String = List(
 		data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("hh:mma")),
 		data.instanceData.typeName,
-		"(" + data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("EE MM/dd/YYYY")) + ")",
+		"(" + data.instanceData.firstSessionTime.format(DateTimeFormatter.ofPattern("EE MM/dd/yyyy")) + ")",
 	).mkString(" ")
 
 	val dateTable = DrawableTable(
