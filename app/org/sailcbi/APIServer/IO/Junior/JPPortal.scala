@@ -7,6 +7,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
+import org.sailcbi.APIServer.IO.PreparedQueries.Member.{JpOffseasonClasses, JpOffseasonClassesResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}

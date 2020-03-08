@@ -49,6 +49,8 @@ GET    /junior/see-types                    org.sailcbi.APIServer.Api.Endpoints.
 GET    /junior/get-class-instances                    org.sailcbi.APIServer.Api.Endpoints.Member.GetClassInstances.junior(typeId: Int, juniorId: Int)
 GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.get()
 
+GET     /junior/offseason-classes               org.sailcbi.APIServer.Api.Endpoints.Member.GetOffseasonClassInstances.get(juniorId: Int)
+
 POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
 POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJpClassSignup.post()
 
