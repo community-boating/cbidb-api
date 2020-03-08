@@ -948,4 +948,47 @@ object JPPortal {
 		}
 		pb.executeProcedure(ppc)
 	}
+
+	def removeOffseasonWaitlist(pb: PersistenceBroker, juniorId: Int): Unit = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select signup_id from jp_class_signups si, jp_class_instances i, jp_class_types t,
+				  |      jp_class_bookends bk, jp_class_sessions fs, jp_weeks w
+				  |      where si.instance_id = i.instance_id and i.type_id = t.type_id
+				  |      and si.person_id = ? and si.signup_type = 'W'
+				  |      and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
+				  |      and fs.session_datetime between w.monday and w.sunday
+				  |      and w.week in (0,11,12) and w.season = util_pkg.get_current_season
+				  |""".stripMargin
+
+			override val params: List[String] = List(juniorId.toString)
+		}
+
+		val ids = pb.executePreparedQueryForSelect(q)
+
+		if (ids.nonEmpty) {
+			val deleteSignupsQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override val params: List[String] = List(juniorId.toString)
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_signups where person_id = ? and signup_id in (${ids.mkString(",")})
+					   |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(deleteSignupsQ)
+
+			val deleteWLQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_wl_results wl
+					   |where wl.signup_id in (${ids.mkString(",")})
+					   |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(deleteWLQ)
+		}
+	}
 }

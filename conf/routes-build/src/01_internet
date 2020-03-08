@@ -52,6 +52,8 @@ GET    /class-instances-with-avail                    org.sailcbi.APIServer.Api.
 POST    /junior/class-signup                org.sailcbi.APIServer.Api.Endpoints.Member.JpClassSignup.post()
 POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJpClassSignup.post()
 
+POST    /junior/offseason-wl-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteOffseasonWaitlist.post()
+
 
 GET    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.get(juniorId: Int, instanceId: Int)
 POST    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.post()
