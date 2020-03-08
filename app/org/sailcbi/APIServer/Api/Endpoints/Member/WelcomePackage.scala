@@ -25,18 +25,20 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 			profiler.lap("got person id")
 			val orderId = JPPortal.getOrderId(pb, personId)
 			JPPortal.assessDiscounts(pb, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int)](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int) =
-					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, Double, Double) =
+					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getDouble(5), rsw.getDouble(6))
 
 				override def getQuery: String =
 					"""
-					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season from persons where person_id = ?
+					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season,
+					  |person_pkg.get_computed_jp_price(null), person_pkg.get_jp_offseason_price(null)
+					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season) = pb.executePreparedQueryForSelect(nameQ).head
+			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase) = pb.executePreparedQueryForSelect(nameQ).head
 			val pricesMaybe = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
 				override def getQuery: String = """
 												  |select
@@ -57,7 +59,21 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 
 			val canCheckout = JPPortal.canCheckout(pb, personId, orderId)
 
-			val result = WelcomePackageResult(personId, orderId, nameFirst, nameLast, rc.auth.userName, pricesMaybe.map(_._1), pricesMaybe.map(_._2), childData, sysdate, season, canCheckout)
+			val result = WelcomePackageResult(
+				personId,
+				orderId,
+				nameFirst,
+				nameLast,
+				rc.auth.userName,
+				jpPriceBase,
+				jpOffseasonPriceBase,
+				pricesMaybe.map(_._1),
+				pricesMaybe.map(_._2),
+				childData,
+				sysdate,
+				season,
+				canCheckout
+			)
 			implicit val format = WelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -70,6 +86,8 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 		parentFirstName: String,
 		parentLastName: String,
 		userName: String,
+		jpPriceBase: Double,
+		jpOffseasonPriceBase: Double,
 		jpPrice: Option[Double],
 		jpOffseasonPrice: Option[Double],
 		children: List[GetChildDataQueryResult],
