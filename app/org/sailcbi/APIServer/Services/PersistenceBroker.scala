@@ -21,7 +21,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
 	}
 
-	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T] = {
+	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
 		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
@@ -72,7 +72,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 
 	protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T]
 
-	protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fetchSize: Int = 50): List[T]
+	protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T]
 
 	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T]
 

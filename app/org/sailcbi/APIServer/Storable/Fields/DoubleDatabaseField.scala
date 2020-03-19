@@ -10,19 +10,19 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Double] = {
-		row.doubleFields.get(this.getRuntimeFieldName) match {
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Double] = {
+		row.doubleFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null Double field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
 
-	def lessThanConstant(c: Double): Filter = {
-		Filter(t => s"$t.$getPersistenceFieldName < $c")
+	def lessThanConstant(c: Double): String => Filter = {
+		t => Filter(s"$t.$getPersistenceFieldName < $c")
 	}
 
-	def inList(l: List[Double]): Filter = PA.persistenceSystem match {
+	def inList(l: List[Double]): String => Filter = t => PA.persistenceSystem match {
 		case r: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Double]): List[List[Double]] = {
 				if (ids.length <= r.pbs.MAX_EXPR_IN_LIST) List(ids)
@@ -32,14 +32,14 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 				}
 			}
 
-			if (l.isEmpty) Filter(t => "")
-			else Filter(t => groupIDs(l).map(group => {
+			if (l.isEmpty) Filter("")
+			else Filter(groupIDs(l).map(group => {
 				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 			}).mkString(" OR "))
 		}
 	}
 
-	def equalsConstant(d: Double): Filter = Filter(t => s"$t.$getPersistenceFieldName = $d")
+	def equalsConstant(d: Double): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $d")
 
 	def getValueFromString(s: String): Option[Double] = {
 		try {

@@ -5,18 +5,18 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_M
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Double]] = row.doubleFields.get(this.getRuntimeFieldName)
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Double]] = row.doubleFields.get(key)
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
-	def lessThanConstant(c: Double): Filter = {
-		Filter(t => s"$t.$getPersistenceFieldName < $c")
+	def lessThanConstant(c: Double): String => Filter = t => {
+		Filter(s"$t.$getPersistenceFieldName < $c")
 	}
 
-	def inList(l: List[Double]): Filter = {
+	def inList(l: List[Double]): String => Filter = t => {
 		def groupIDs(ids: List[Double]): List[List[Double]] = {
 			val MAX_IDS = 900
 			if (ids.length <= MAX_IDS) List(ids)
@@ -26,15 +26,15 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 			}
 		}
 
-		if (l.isEmpty) Filter(t => "")
-		else Filter(t => groupIDs(l).map(group => {
+		if (l.isEmpty) Filter("")
+		else Filter(groupIDs(l).map(group => {
 			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 		}).mkString(" OR "))
 	}
 
-	def equalsConstant(i: Option[Double]): Filter = i match {
-		case Some(x: Double) => Filter(t => s"$t.$getPersistenceFieldName = $i")
-		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def equalsConstant(i: Option[Double]): String => Filter = t => i match {
+		case Some(x: Double) => Filter(s"$t.$getPersistenceFieldName = $i")
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
 	}
 
 	def getValueFromString(s: String): Option[Option[Double]] = {

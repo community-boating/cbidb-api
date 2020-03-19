@@ -15,15 +15,15 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[LocalDate]] = row.dateFields.get(this.getRuntimeFieldName)
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[LocalDate]] = row.dateFields.get(key)
 
-	def isYearConstant(year: Int): Filter = PA.persistenceSystem match {
+	def isYearConstant(year: Int): String => Filter = t => PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(t => s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}")
+			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}")
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(t => s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
 	}
 
 	def getValueFromString(s: String): Option[Option[LocalDate]] = {
@@ -37,23 +37,23 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		}
 	}
 
-	private def dateComparison(date: LocalDate, comp: DateComparison): Filter = {
+	private def dateComparison(date: LocalDate, comp: DateComparison): String => Filter = t => {
 		val comparator: String = comp.comparator
 		PA.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(t => s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'")
+				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'")
 			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(t => s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
+				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
 		}
 	}
 
-	def isDateConstant(date: LocalDate): Filter = dateComparison(date, DATE_=)
+	def isDateConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_=)
 
-	def greaterThanConstant(date: LocalDate): Filter = dateComparison(date, DATE_>)
+	def greaterThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>)
 
-	def lessThanConstant(date: LocalDate): Filter = dateComparison(date, DATE_<)
+	def lessThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<)
 
-	def greaterEqualConstant(date: LocalDate): Filter = dateComparison(date, DATE_>=)
+	def greaterEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>=)
 
-	def lessEqualConstant(date: LocalDate): Filter = dateComparison(date, DATE_<=)
+	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
 }

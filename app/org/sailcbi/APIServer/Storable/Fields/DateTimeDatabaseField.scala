@@ -15,32 +15,32 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		case PERSISTENCE_SYSTEM_ORACLE => "date"
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[LocalDateTime] = {
-		row.dateTimeFields.get(this.getRuntimeFieldName) match {
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[LocalDateTime] = {
+		row.dateTimeFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null DateTime field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
 
-	def isYearConstant(year: Int): Filter = PA.persistenceSystem match {
+	def isYearConstant(year: Int): String => Filter = t => PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
 			val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-			Filter(t => s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}")
+			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}")
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(t => s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
 	}
 
-	def isDateConstant(date: LocalDate): Filter = PA.persistenceSystem match {
+	def isDateConstant(date: LocalDate): String => Filter = t => PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL =>
-			Filter(t =>
+			Filter(
 				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +
 						s"$t.$getPersistenceFieldName < '${date.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}'"
 			)
 		case PERSISTENCE_SYSTEM_ORACLE =>
-			Filter(t => s"TRUNC($t.$getPersistenceFieldName) = TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
+			Filter(s"TRUNC($t.$getPersistenceFieldName) = TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
 	}
 
 	def getValueFromString(s: String): Option[LocalDateTime] = {

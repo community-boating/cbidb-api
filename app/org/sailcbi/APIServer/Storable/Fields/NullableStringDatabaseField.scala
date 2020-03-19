@@ -15,16 +15,16 @@ class NullableStringDatabaseField(override val entity: StorableObject[_ <: Stora
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[String]] = row.stringFields.get(this.getRuntimeFieldName)
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[String]] = row.stringFields.get(key)
 
-	def equalsConstant(os: Option[String]): Filter = os match {
-		case Some(s: String) => Filter(t => s"$t.$getPersistenceFieldName = '$s'")
-		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def equalsConstant(os: Option[String]): String => Filter = t => os match {
+		case Some(s: String) => Filter(s"$t.$getPersistenceFieldName = '$s'")
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
 	}
 
-	def equalsConstantLowercase(os: Option[String]): Filter = os match {
-		case Some(s: String) => Filter(t => s"lower($t.$getPersistenceFieldName) = '${s.toLowerCase()}'")
-		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def equalsConstantLowercase(os: Option[String]): String => Filter = t => os match {
+		case Some(s: String) => Filter(s"lower($t.$getPersistenceFieldName) = '${s.toLowerCase()}'")
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
 	}
 
 	def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))

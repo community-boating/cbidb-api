@@ -15,20 +15,20 @@ class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[String] = {
-		row.stringFields.get(this.getRuntimeFieldName) match {
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[String] = {
+		row.stringFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new Exception("non-null String field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
 
-	def equalsConstant(c: String): Filter =
-		Filter(t => s"$t.$getPersistenceFieldName = '$c'")
+	def equalsConstant(c: String): String => Filter =
+		t => Filter(s"$t.$getPersistenceFieldName = '$c'")
 
 
-	def equalsConstantLowercase(c: String): Filter =
-		Filter(t => s"lower($t.$getPersistenceFieldName) = '${c.toLowerCase()}'")
+	def equalsConstantLowercase(c: String): String => Filter =
+		t => Filter(s"lower($t.$getPersistenceFieldName) = '${c.toLowerCase()}'")
 
 	def getValueFromString(s: String): Option[String] = Some(s)
 }

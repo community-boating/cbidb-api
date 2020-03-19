@@ -2,21 +2,22 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableIntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Int]] = row.intFields.get(this.getRuntimeFieldName)
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Int]] = row.intFields.get(key)
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
-	def lessThanConstant(c: Int): Filter = {
-		Filter(t => s"$t.$getPersistenceFieldName < $c")
+	def lessThanConstant(c: Int): String => Filter = t => {
+		Filter(s"$t.$getPersistenceFieldName < $c")
 	}
 
-	def inList(l: List[Int]): Filter = {
+	def inList(l: List[Int]): String => Filter = t => {
 		def groupIDs(ids: List[Int]): List[List[Int]] = {
 			val MAX_IDS = 900
 			if (ids.length <= MAX_IDS) List(ids)
@@ -26,15 +27,15 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 			}
 		}
 
-		if (l.isEmpty) Filter(t => "")
-		else Filter(t => groupIDs(l).map(group => {
+		if (l.isEmpty) Filter("")
+		else Filter(groupIDs(l).map(group => {
 			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
 		}).mkString(" OR "))
 	}
 
-	def equalsConstant(i: Option[Int]): Filter = i match {
-		case Some(x: Int) => Filter(t => s"$t.$getPersistenceFieldName = $i")
-		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def equalsConstant(i: Option[Int]): String => Filter = t => i match {
+		case Some(x: Int) => Filter(s"$t.$getPersistenceFieldName = $i")
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
 	}
 
 	def getValueFromString(s: String): Option[Option[Int]] = {

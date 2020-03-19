@@ -1,5 +1,8 @@
 package org.sailcbi.APIServer.Storable.Fields
 
+import java.time.LocalDate
+
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
@@ -19,11 +22,18 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 		case None => runtimeFieldName = Some(s)
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T]
+	def findValueInProtoStorableImpl[U](row: ProtoStorable[U], key: U): Option[T]
 
-	def isNull: Filter = Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def findValueInProtoStorableAliased(tableAlias: String, row: ProtoStorable[ColumnAlias[_]]): Option[T] = {
+		this.findValueInProtoStorableImpl(row, ColumnAlias(TableAlias(this.entity, tableAlias), this))
+	}
 
-	def isNotNull: Filter = Filter(t => s"$t.$getPersistenceFieldName IS NOT NULL")
+	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T] =
+		this.findValueInProtoStorableImpl(row, this.getRuntimeFieldName)
+
+	def isNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NULL")
+
+	def isNotNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NOT NULL")
 
 	def getValueFromString(s: String): Option[T]
 }

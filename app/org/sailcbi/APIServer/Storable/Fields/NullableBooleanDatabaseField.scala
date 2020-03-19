@@ -15,8 +15,8 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Option[Boolean]] = {
-		row.stringFields.get(this.getRuntimeFieldName) match {
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Boolean]] = {
+		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(Some(true))
 			case Some(Some("N")) => Some(Some(false))
 			case Some(None) => Some(None)
@@ -24,9 +24,9 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		}
 	}
 
-	def equals(b: Option[Boolean]): Filter = b match {
-		case Some(x) => Filter(t => s"$t.$getPersistenceFieldName = '${if (x) "Y" else "N"}'")
-		case None => Filter(t => s"$t.$getPersistenceFieldName IS NULL")
+	def equals(b: Option[Boolean]): String => Filter = t => b match {
+		case Some(x) => Filter(s"$t.$getPersistenceFieldName = '${if (x) "Y" else "N"}'")
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
 	}
 
 	def getValueFromString(s: String): Option[Option[Boolean]] = s.toLowerCase match {

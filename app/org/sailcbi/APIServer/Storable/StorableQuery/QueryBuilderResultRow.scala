@@ -1,27 +1,9 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField, StringDatabaseField}
+import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import org.sailcbi.APIServer.Storable.ProtoStorable
 
-class QueryBuilderResultRow(
-								   intValues: Map[ColumnAlias[_ <: DatabaseField[_]], Option[Int]],
-//	doubleFields: Map[ColumnAlias[Double], Option[Double]],
-								   stringValues: Map[ColumnAlias[_ <: DatabaseField[_]], Option[String]],
-//	dateFields: Map[ColumnAlias[LocalDate], Option[LocalDate]],
-//	dateTimeFields: Map[ColumnAlias[LocalDateTime], Option[LocalDateTime]]
-) {
-//	fields.foreach(field => field.field match {
-//		case a: IntDatabaseField => intValues += (field.asInstanceOf[ColumnAlias[Int]] -> 4)
-//		case b: StringDatabaseField => stringValues += (field.asInstanceOf[ColumnAlias[String]] -> "b")
-//	})
-
-	def getValue[T <: DatabaseField[_]](field: ColumnAlias[T]): T = field.field match {
-		case a: IntDatabaseField => {
-			println(field.field.getPersistenceFieldName + " is an int!")
-			intValues(field.asInstanceOf[ColumnAlias[_ <: DatabaseField[_]]]).asInstanceOf[T]
-		}
-		case b: StringDatabaseField => {
-			println(field.field.getPersistenceFieldName + " is a string!")
-			stringValues(field.asInstanceOf[ColumnAlias[_ <: DatabaseField[_]]]).asInstanceOf[T]
-		}
-	}
+class QueryBuilderResultRow(ps: ProtoStorable[ColumnAlias[_]]) {
+	def getValue[T](field: ColumnAlias[T]): T =
+		field.field.findValueInProtoStorableAliased(field.table.name, ps.asInstanceOf[ProtoStorable[ColumnAlias[_]]]).get
 }

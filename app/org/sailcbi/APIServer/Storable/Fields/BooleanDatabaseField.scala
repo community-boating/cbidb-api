@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false)(implicit PA: PermissionsAuthority) extends DatabaseField[Boolean](entity, persistenceFieldName) {
@@ -13,8 +14,8 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		}
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[Boolean] = {
-		row.stringFields.get(this.getRuntimeFieldName) match {
+	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Boolean] = {
+		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(true)
 			case Some(Some("N")) => Some(false)
 			case Some(None) =>
@@ -24,8 +25,8 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		}
 	}
 
-	def equals(b: Boolean): Filter =
-		Filter(t => s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'")
+	def equals(b: Boolean): String => Filter =
+		t => Filter(s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'")
 
 	def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
 		case "true" => Some(true)

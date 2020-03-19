@@ -74,7 +74,7 @@ class DBTest extends FunSuite {
 			val pb = rc.pb
 
 			val q = new PreparedQueryForInsert(Set(RootUserType)) {
-				override val params: List[String] = List()
+				override val params: List[String] = List(null)
 				override val pkName: Option[String] = Some("PROMO_ID")
 
 				override def getQuery: String =
