@@ -60,4 +60,6 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 	def greaterEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>=)
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
+
+	def alias(tableAlias: TableAlias): ColumnAlias[LocalDate, DateDatabaseField] = ColumnAlias(tableAlias, this)
 }

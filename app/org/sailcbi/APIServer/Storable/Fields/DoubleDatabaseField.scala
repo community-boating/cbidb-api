@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Double](entity, persistenceFieldName) {
@@ -49,4 +50,6 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 			case _: Throwable => None
 		}
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Double, DoubleDatabaseField] = ColumnAlias(tableAlias, this)
 }

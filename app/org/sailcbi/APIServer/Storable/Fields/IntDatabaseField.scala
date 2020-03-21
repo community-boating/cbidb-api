@@ -6,8 +6,6 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Int](entity, persistenceFieldName) {
-	def asDatabaseField: DatabaseField[Int] = this
-
 	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
@@ -19,10 +17,6 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 			case Some(None) => throw new Exception("non-null Int field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
-	}
-
-	def lessThanConstant(c: Int): String => Filter = t => {
-		Filter(s"$t.$getPersistenceFieldName < $c")
 	}
 
 	def inList(l: List[Int]): String => Filter = t => PA.persistenceSystem match {
@@ -42,7 +36,11 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 		}
 	}
 
+	def lessThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName < $c")
+
 	def equalsConstant(i: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $i")
+
+	def greaterThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName > $c")
 
 	def getValueFromString(s: String): Option[Int] = {
 		try {
@@ -52,4 +50,6 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 			case _: Throwable => None
 		}
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Int, IntDatabaseField] = ColumnAlias(tableAlias, this)
 }

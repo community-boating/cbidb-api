@@ -18,8 +18,8 @@ class QueryBuilderTest extends FunSuite {
 			val types = TableAlias.wrap(JpClassType)
 
 			object columns {
-				val typeId = ColumnAlias(types, JpClassType.fields.typeId)
-				val typeName = ColumnAlias(types, JpClassType.fields.typeName)
+				val typeId = JpClassType.fields.typeId.alias(types)
+				val typeName = JpClassType.fields.typeName.alias(types)
 			}
 
 			val q = QueryBuilder(
@@ -45,16 +45,47 @@ class QueryBuilderTest extends FunSuite {
 			val instances = TableAlias.wrap(JpClassInstance)
 
 			object columns {
-				val types_typeId = ColumnAlias(types, JpClassType.fields.typeId)
-				val instances_typeId = ColumnAlias(instances, JpClassInstance.fields.typeId)
-				val typeName = ColumnAlias(types, JpClassType.fields.typeName)
-				val instanceId = ColumnAlias(instances, JpClassInstance.fields.instanceId)
+				val types_typeId = JpClassType.fields.typeId.alias(types)
+				val instances_typeId = JpClassInstance.fields.typeId.alias(instances)
+				val typeName = JpClassType.fields.typeName.alias(types)
+				val instanceId = JpClassInstance.fields.instanceId.alias(instances)
 			}
 
 			val q = QueryBuilder(
 				fields=List(columns.types_typeId, columns.typeName, columns.instanceId),
 				joinPoints = List(JoinPoint(columns.types_typeId, columns.instances_typeId)),
 				filters=List()
+			)
+
+			val results = pb.executeQueryBuilder(q)
+			results.foreach(row => {
+				val typeId = row.getValue(columns.types_typeId)
+				val typeName = row.getValue(columns.typeName)
+				val instanceId = row.getValue(columns.instanceId)
+				println( instanceId + ":  " + typeId + "(" + typeName + ")")
+			})
+		})
+	}
+
+	test("2 tables, filters") {
+		ServerBootLoaderTest.withPA(pa => {
+			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val pb = rc.pb
+
+			val types = TableAlias.wrap(JpClassType)
+			val instances = TableAlias.wrap(JpClassInstance)
+
+			object columns {
+				val types_typeId = JpClassType.fields.typeId.alias(types)
+				val instances_typeId = JpClassInstance.fields.typeId.alias(instances)
+				val typeName = JpClassType.fields.typeName.alias(types)
+				val instanceId = JpClassInstance.fields.instanceId.alias(instances)
+			}
+
+			val q = QueryBuilder(
+				fields=List(columns.types_typeId, columns.typeName, columns.instanceId),
+				joinPoints = List(JoinPoint(columns.types_typeId, columns.instances_typeId)),
+				filters=List(columns.types_typeId.wrapFilter(_.lessThanConstant(10)))
 			)
 
 			val results = pb.executeQueryBuilder(q)

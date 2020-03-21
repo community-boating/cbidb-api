@@ -24,8 +24,12 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def findValueInProtoStorableImpl[U](row: ProtoStorable[U], key: U): Option[T]
 
-	def findValueInProtoStorableAliased(tableAlias: String, row: ProtoStorable[ColumnAlias[_]]): Option[T] = {
-		this.findValueInProtoStorableImpl(row, ColumnAlias(TableAlias(this.entity, tableAlias), this))
+	def findValueInProtoStorableAliased(tableAlias: String, row: ProtoStorable[ColumnAlias[_, _]]): Option[T] = {
+		val ca = ColumnAlias[T, DatabaseField[T]](TableAlias(this.entity, tableAlias), this)
+		this.findValueInProtoStorableImpl[ColumnAlias[T, DatabaseField[T]]](
+			row.asInstanceOf[ProtoStorable[ColumnAlias[T, DatabaseField[T]]]],
+			ca
+		)
 	}
 
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T] =

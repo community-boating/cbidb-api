@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
@@ -35,4 +36,6 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		case "" => Some(None)
 		case _ => None
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Option[Boolean], NullableBooleanDatabaseField] = ColumnAlias(tableAlias, this)
 }

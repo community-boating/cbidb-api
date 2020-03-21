@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableStringDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, fieldLength: Int)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
@@ -28,4 +29,6 @@ class NullableStringDatabaseField(override val entity: StorableObject[_ <: Stora
 	}
 
 	def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Option[String], NullableStringDatabaseField] = ColumnAlias(tableAlias, this)
 }

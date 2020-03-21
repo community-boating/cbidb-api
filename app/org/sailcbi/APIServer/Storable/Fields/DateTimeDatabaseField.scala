@@ -5,6 +5,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
@@ -50,4 +51,6 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 			case _: Throwable => None
 		}
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[LocalDateTime, DateTimeDatabaseField] = ColumnAlias(tableAlias, this)
 }

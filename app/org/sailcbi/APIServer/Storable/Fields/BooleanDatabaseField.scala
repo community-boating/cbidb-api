@@ -33,4 +33,6 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		case "false" => Some(false)
 		case _ => None
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Boolean, BooleanDatabaseField] = ColumnAlias(tableAlias, this)
 }

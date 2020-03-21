@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.Filter
 
 case class QueryBuilder(
-	fields: List[ColumnAlias[_]],
+	fields: List[ColumnAlias[_, _]],
 	joinPoints: List[JoinPoint[_]],
 	filters: List[Filter]
 ) {

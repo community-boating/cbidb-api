@@ -49,4 +49,6 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 			}
 		}
 	}
+
+	def alias(tableAlias: TableAlias): ColumnAlias[Option[Int], NullableIntDatabaseField] = ColumnAlias(tableAlias, this)
 }
