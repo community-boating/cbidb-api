@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
@@ -17,7 +17,7 @@ class ClearCard @Inject()(implicit val exec: ExecutionContext) extends InjectedC
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = JPPortal.getOrderId(pb, personId)
+			val orderId = PortalLogic.getOrderId(pb, personId)
 
 			val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 				override val params: List[String] = List(orderId.toString)

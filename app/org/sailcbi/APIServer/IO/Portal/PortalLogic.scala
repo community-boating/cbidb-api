@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.IO.Junior
+package org.sailcbi.APIServer.IO.Portal
 
 import java.sql.CallableStatement
 import java.time.LocalDateTime
@@ -13,7 +13,7 @@ import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPerso
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 
-object JPPortal {
+object PortalLogic {
 	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(cookieValue)
@@ -315,16 +315,16 @@ object JPPortal {
 		orderId: Int
 	)(implicit pa: PermissionsAuthority): Either[String, () => Unit] = {
 		lazy val hasSpots = {
-			val spots = JPPortal.spotsLeft(pb, instanceId)
+			val spots = PortalLogic.spotsLeft(pb, instanceId)
 			if (spots > 0) Right(spots)
 			else Left("The class has no open seats at this time.  Wait listing is available once payment is processed and registration is complete.")
 		}
 
-		lazy val alreadyStarted = JPPortal.alreadyStarted(pb, instanceId)
+		lazy val alreadyStarted = PortalLogic.alreadyStarted(pb, instanceId)
 
-		lazy val seeType = if(JPPortal.seeTypeFromInstanceId(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class type.")
-		lazy val seeInstance = if(JPPortal.seeInstance(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class.")
-		lazy val allowEnroll = JPPortal.allowEnroll(pb, juniorPersonId, instanceId) match {
+		lazy val seeType = if(PortalLogic.seeTypeFromInstanceId(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class type.")
+		lazy val seeInstance = if(PortalLogic.seeInstance(pb, juniorPersonId, instanceId)) Right() else Left("You are not eligible for this class.")
+		lazy val allowEnroll = PortalLogic.allowEnroll(pb, juniorPersonId, instanceId) match {
 			case None => Right()
 			case Some(err) => Left(err)
 		}
@@ -425,12 +425,12 @@ object JPPortal {
 		// If it's not initialized then we know it was never run, and therefore we don't need to run its rollback
 		val beginnerResult = new DefinedInitializableNullary(() => beginnerInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
+			case Some(id) => PortalLogic.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
 		})
 
 		val intermediateResult = new DefinedInitializableNullary(() => intermediateInstanceId match {
 			case None => Right(() => {})
-			case Some(id) => JPPortal.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
+			case Some(id) => PortalLogic.attemptSingleClassSignupReservation(pb, juniorPersonId, id, signupDatetime, orderId)
 		})
 
 		val totalResult = for {

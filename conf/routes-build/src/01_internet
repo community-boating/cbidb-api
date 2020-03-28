@@ -25,7 +25,8 @@ GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
 
-GET     /member-welcome                     org.sailcbi.APIServer.Api.Endpoints.Member.WelcomePackage.get()
+GET     /member-welcome-jp                     org.sailcbi.APIServer.Api.Endpoints.Member.JPWelcomePackage.get()
+GET     /member-welcome-ap                     org.sailcbi.APIServer.Api.Endpoints.Member.APWelcomePackage.get()
 
 POST    /junior/required                    org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.post()
 GET    /junior/required                     org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.get(personId: Int)

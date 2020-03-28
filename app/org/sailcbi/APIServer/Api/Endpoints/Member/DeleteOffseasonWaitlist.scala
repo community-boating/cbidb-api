@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -17,7 +17,7 @@ class DeleteOffseasonWaitlist @Inject()(implicit exec: ExecutionContext) extends
 				val pb: PersistenceBroker = rc.pb
 				println(parsed)
 
-				JPPortal.removeOffseasonWaitlist(pb, parsed.juniorId)
+				PortalLogic.removeOffseasonWaitlist(pb, parsed.juniorId)
 				Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
 			})
 		})

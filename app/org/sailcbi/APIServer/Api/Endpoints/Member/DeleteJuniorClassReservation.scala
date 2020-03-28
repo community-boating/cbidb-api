@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
@@ -23,7 +23,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 				case Some(name: String) => {
 					println(name)
 
-					JPPortal.deleteProtoJunior(pb, ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb).get, name)
+					PortalLogic.deleteProtoJunior(pb, ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb).get, name)
 					Future(Ok("deleted"))
 				}
 			}

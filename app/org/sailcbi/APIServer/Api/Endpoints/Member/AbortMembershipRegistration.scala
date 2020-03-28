@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
@@ -20,7 +20,7 @@ class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) ext
 
 				val parentPersonId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 
-				JPPortal.deleteRegistration(pb, parentPersonId, parsed.juniorId) match {
+				PortalLogic.deleteRegistration(pb, parentPersonId, parsed.juniorId) match {
 					case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 				}

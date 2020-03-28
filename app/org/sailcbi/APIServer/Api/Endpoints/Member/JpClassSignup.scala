@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -19,7 +19,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				println(parsed)
 
 				val doEnroll = parsed.doEnroll
-				val wlJoin = doEnroll && JPPortal.canWaitListJoin(pb, parsed.juniorId, parsed.instanceId)
+				val wlJoin = doEnroll && PortalLogic.canWaitListJoin(pb, parsed.juniorId, parsed.instanceId)
 
 				//any:            see_type
 				//any:            see_instance
@@ -28,19 +28,19 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				//enroll:         spots_left
 				//wljoin:         wl record exists
 				//enroll/wljoin:  allow_enroll
-				lazy val seeType = JPPortal.seeTypeFromInstanceIdAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
-				lazy val seeInstance = JPPortal.seeInstanceAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
-				lazy val alreadyStarted = JPPortal.alreadyStartedAsValidationResult(pb, parsed.instanceId)
+				lazy val seeType = PortalLogic.seeTypeFromInstanceIdAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+				lazy val seeInstance = PortalLogic.seeInstanceAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+				lazy val alreadyStarted = PortalLogic.alreadyStartedAsValidationResult(pb, parsed.instanceId)
 				lazy val wlExistsOnClass = {
 					if (doEnroll) ValidationOk
-					else JPPortal.waitListExists(pb, parsed.instanceId)
+					else PortalLogic.waitListExists(pb, parsed.instanceId)
 				}
 				lazy val hasSeats = {
-					if (doEnroll && !wlJoin) JPPortal.hasSpotsLeft(pb, parsed.instanceId, Some("The class is full."))
+					if (doEnroll && !wlJoin) PortalLogic.hasSpotsLeft(pb, parsed.instanceId, Some("The class is full."))
 					else ValidationOk
 				}
 				lazy val allowEnroll = {
-					if (doEnroll) JPPortal.allowEnrollAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+					if (doEnroll) PortalLogic.allowEnrollAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
 					else ValidationOk
 				}
 
@@ -55,7 +55,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 
 				finalResult match {
 					case ValidationOk => {
-						val signupId = JPPortal.actuallyEnroll(pb, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true, None).orNull
+						val signupId = PortalLogic.actuallyEnroll(pb, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true, None).orNull
 						Future(Ok(new JsObject(Map("signupId" -> JsNumber(signupId.toInt)))))
 					}
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))

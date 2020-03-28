@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
@@ -20,7 +20,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				val pb = rc.pb
 
 				val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = JPPortal.getOrderId(pb, parentId)
+				val orderId = PortalLogic.getOrderId(pb, parentId)
 
 				val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 					override val params: List[String] = List(parsed.personId.toString, orderId.toString)

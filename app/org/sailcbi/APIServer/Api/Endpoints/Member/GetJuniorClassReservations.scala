@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
@@ -20,7 +20,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val deleted = JPPortal.pruneOldReservations(pb)
+			val deleted = PortalLogic.pruneOldReservations(pb)
 			println(s"deleted $deleted old reservations...")
 
 			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {

@@ -6,7 +6,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult, GetCurrentOnlineClose}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedProcedureCall
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -25,7 +25,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = JPPortal.getOrderId(pb, personId)
+			val orderId = PortalLogic.getOrderId(pb, personId)
 
 			val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberUserType)) {
 				//				procedure start_stripe_trans_preflight(
@@ -58,7 +58,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 			val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
 
-			val cardData = JPPortal.getCardData(pb, orderId).get
+			val cardData = PortalLogic.getCardData(pb, orderId).get
 
 			val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
@@ -115,7 +115,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					)
 
 					override def setInParametersDouble: Map[String, Double] = Map(
-						"i_total" -> JPPortal.getOrderTotal(pb, orderId)
+						"i_total" -> PortalLogic.getOrderTotal(pb, orderId)
 					)
 
 					override def setInParametersVarchar: Map[String, String] = Map(

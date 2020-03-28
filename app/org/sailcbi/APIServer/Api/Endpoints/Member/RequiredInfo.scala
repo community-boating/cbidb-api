@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services._
@@ -294,7 +294,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 
 		pb.executePreparedQueryForInsert(createRelationshipQuery)
 
-		JPPortal.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
+		PortalLogic.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
 
 		juniorPersonId
 	}
@@ -352,6 +352,6 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 
 		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
-		JPPortal.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
+		PortalLogic.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
 	}
 }

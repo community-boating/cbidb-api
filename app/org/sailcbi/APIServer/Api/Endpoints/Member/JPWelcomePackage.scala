@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -14,7 +14,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
+class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PA.logger
@@ -23,8 +23,8 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 			profiler.lap("about to do first query")
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			profiler.lap("got person id")
-			val orderId = JPPortal.getOrderId(pb, personId)
-			JPPortal.assessDiscounts(pb, orderId)
+			val orderId = PortalLogic.getOrderId(pb, personId)
+			PortalLogic.assessDiscounts(pb, orderId)
 			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
@@ -57,9 +57,9 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val canCheckout = JPPortal.canCheckout(pb, personId, orderId)
+			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
 
-			val result = WelcomePackageResult(
+			val result = JPWelcomePackageResult(
 				personId,
 				orderId,
 				nameFirst,
@@ -74,13 +74,13 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 				season,
 				canCheckout
 			)
-			implicit val format = WelcomePackageResult.format
+			implicit val format = JPWelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
 		})
 	})
 
-	case class WelcomePackageResult(
+	case class JPWelcomePackageResult(
 		parentPersonId: Int,
 		orderId: Int,
 		parentFirstName: String,
@@ -96,7 +96,7 @@ class WelcomePackage @Inject()(implicit val exec: ExecutionContext) extends Inje
 		canCheckout: Boolean
 	)
 
-	object WelcomePackageResult {
-		implicit val format = Json.format[WelcomePackageResult]
+	object JPWelcomePackageResult {
+		implicit val format = Json.format[JPWelcomePackageResult]
 	}
 }

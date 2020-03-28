@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
-import org.sailcbi.APIServer.IO.Junior.JPPortal.{SignupForReport, WaitListForReport, WaitListTopForReport}
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.{SignupForReport, WaitListForReport, WaitListTopForReport}
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -20,9 +20,9 @@ class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) e
 			implicit val format = AllSignupsResponse.format
 			val signups: AllSignupsResponse = AllSignupsResponse(
 				juniorId,
-				JPPortal.getSignupsForReport(pb, juniorId),
-				JPPortal.getWaitListTopsForReport(pb, juniorId),
-				JPPortal.getWaitListsForReport(pb, juniorId)
+				PortalLogic.getSignupsForReport(pb, juniorId),
+				PortalLogic.getWaitListTopsForReport(pb, juniorId),
+				PortalLogic.getWaitListsForReport(pb, juniorId)
 			)
 
 

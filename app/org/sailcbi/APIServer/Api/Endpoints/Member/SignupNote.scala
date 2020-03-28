@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
@@ -20,7 +20,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val pb = rc.pb
 
-			JPPortal.getSignupNote(pb, juniorId, instanceId) match {
+			PortalLogic.getSignupNote(pb, juniorId, instanceId) match {
 				case Right(os) => os match {
 					case Some(s) => Future(Ok(new JsObject(Map(
 						"juniorId" -> JsNumber(juniorId),
@@ -48,7 +48,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				val pb = rc.pb
 				implicit val format = SignupNoteShape.format
 
-				JPPortal.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
+				PortalLogic.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 				}
@@ -90,7 +90,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 					Future(Ok(ve.toResultError.asJsObject()))
 				} else {
 					implicit val format = SignupNoteShape.format
-					JPPortal.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
+					PortalLogic.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 						case ValidationOk => Future(Ok(Json.toJson(parsed)))
 						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					}

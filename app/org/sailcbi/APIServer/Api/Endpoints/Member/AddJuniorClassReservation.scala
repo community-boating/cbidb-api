@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject}
@@ -41,16 +41,16 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 					println("reusing existing protoparent record for this cookie val " + ret)
 					ret
 				} else {
-					val ret = JPPortal.persistProtoParent(pb, rc.auth.userName)
+					val ret = PortalLogic.persistProtoParent(pb, rc.auth.userName)
 					println("created new protoparent: " + ret)
 					ret
 				}
 			}
 
-			val orderId = JPPortal.getOrderId(pb, parentPersonId)
+			val orderId = PortalLogic.getOrderId(pb, parentPersonId)
 
 			// Create new protojunior
-			val (juniorPersonId, rollbackCreateJunior) = JPPortal.persistProtoJunior(
+			val (juniorPersonId, rollbackCreateJunior) = PortalLogic.persistProtoJunior(
 				pb,
 				parentPersonId,
 				body.juniorFirstName,
@@ -58,9 +58,9 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 			)
 
 			// create new signup with the min(signup_time) of all this protoparent's other signups
-			val minSignupTime = JPPortal.getMinSignupTimeForParent(pb, parentPersonId)
+			val minSignupTime = PortalLogic.getMinSignupTimeForParent(pb, parentPersonId)
 			println("min signup is " + minSignupTime)
-			val signupResult = JPPortal.attemptSignupReservation(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
+			val signupResult = PortalLogic.attemptSignupReservation(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
 			println(" result is:" + signupResult)
 			if (signupResult.isDefined) {
 				rollbackCreateJunior()

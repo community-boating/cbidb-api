@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
-import org.sailcbi.APIServer.IO.Junior.JPPortal
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsValue, Json}
@@ -18,11 +18,11 @@ class OrderStatus @Inject()(implicit val exec: ExecutionContext) extends Injecte
 			val pb: PersistenceBroker = rc.pb
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = JPPortal.getOrderId(pb, personId)
+			val orderId = PortalLogic.getOrderId(pb, personId)
 
-			val orderTotal = JPPortal.getOrderTotal(pb, orderId)
+			val orderTotal = PortalLogic.getOrderTotal(pb, orderId)
 
-			val cardData = JPPortal.getCardData(pb, orderId)
+			val cardData = PortalLogic.getCardData(pb, orderId)
 
 			val result = OrderStatusResult(
 				orderId = orderId,
