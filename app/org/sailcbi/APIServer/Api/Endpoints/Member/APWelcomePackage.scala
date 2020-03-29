@@ -33,7 +33,7 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 
 				override def getQuery: String =
 					"""
-					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season,
+					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
