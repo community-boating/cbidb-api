@@ -25,19 +25,25 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int)](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, String, Int, String)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int) =
-					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, String, Int, String) =
+					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getString(5), rsw.getString(6).toInt, rsw.getString(7))
 
 				override def getQuery: String =
 					"""
-					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season
+					  |select name_first,
+					  |name_last,
+					  |util_pkg.get_sysdate,
+					  |util_pkg.get_current_season,
+					  |person_pkg.ap_status(person_id) as status,
+					  |person_pkg.ap_actions(person_id, 'Y') as actions,
+					  |ratings_pkg.ap_ratings(person_id)
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season) = pb.executePreparedQueryForSelect(nameQ).head
+			val (nameFirst, nameLast, sysdate, season, status, actions, ratings) = pb.executePreparedQueryForSelect(nameQ).head
 
 			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
 
@@ -49,6 +55,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				rc.auth.userName,
 				sysdate,
 				season,
+				status,
+				actions,
+				ratings,
 				canCheckout
 			)
 			implicit val format = APWelcomePackageResult.format
@@ -65,6 +74,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		userName: String,
 		serverTime: LocalDateTime,
 		season: Int,
+		status: String,
+		actions: Int,
+		ratings: String,
 		canCheckout: Boolean
 	)
 
