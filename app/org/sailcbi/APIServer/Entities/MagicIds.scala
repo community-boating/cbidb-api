@@ -14,4 +14,13 @@ object MagicIds {
 	object PERSON_TYPE {
 		val JP_PARENT = 41
 	}
+	object DISCOUNTS {
+		val RENEWAL_DISCOUNT_ID = 8
+	}
+	object MEMBERSHIP_TYPES {
+		val FULL_YEAR_TYPE_ID = 1
+	}
+	object PROGRAM_TYPES {
+		val ADULT_PROGRAM_ID = 1
+	}
 }

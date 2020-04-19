@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.Portal
 
 import java.sql.CallableStatement
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
@@ -28,7 +28,6 @@ object PortalLogic {
 		getOrderId(pb, parentId)
 		parentId
 	}
-
 	def persistProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
 		val createJunior = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(firstName)
@@ -992,4 +991,40 @@ object PortalLogic {
 			pb.executePreparedQueryForUpdateOrDelete(deleteWLQ)
 		}
 	}
+
+	def getFYRenewalDiscountAmount(pb: PersistenceBroker): (Double, Int) = {
+		val q = new PreparedQueryForSelect[(Double, Int)](Set(MemberUserType)) {
+			override val params: List[String] = List()
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Int) = (rsw.getDouble(1), rsw.getInt(2))
+
+			override def getQuery: String =
+				s"""
+				  |select nvl(md.discount_amt,0) as amt, dai.instance_id as active_instance from memberships_discounts md, discount_active_instances dai
+					|where md.instance_id = dai.instance_id and md.type_id = ${MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID}
+					|and dai.discount_id = ${MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID}
+				  |""".stripMargin
+		}
+		val result = pb.executePreparedQueryForSelect(q)
+		result.head
+	}
+
+	def getFYExpirationDate(pb: PersistenceBroker, personId: Int): (Int, LocalDate) = {
+		val q = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberUserType)) {
+			override val params: List[String] = List(personId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, LocalDate) =
+				(rsw.getInt(1), rsw.getLocalDate(2))
+
+			override def getQuery: String =
+				s"""
+					|select membership_type_id, expiration_date from persons_memberships where assign_id =
+					| (select max(assign_id) from persons_memberships where person_id = ? and void_close_id is null and membership_type_id in
+					| (select membership_type_id from membership_types where program_id = ${MagicIds.PROGRAM_TYPES.ADULT_PROGRAM_ID}))
+					|""".stripMargin
+		}
+		val result = pb.executePreparedQueryForSelect(q)
+		result.head
+	}
 }
+

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, LocalDate}
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
@@ -25,11 +25,11 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, String, Int, String)](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, String, Int, String, Boolean)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, String, Int, String) =
-					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getString(5), rsw.getString(6).toInt, rsw.getString(7))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, String, Int, String, Boolean) =
+					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getString(5), rsw.getString(6).toInt, rsw.getString(7), rsw.getBooleanFromChar(8))
 
 				override def getQuery: String =
 					"""
@@ -39,11 +39,23 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					  |util_pkg.get_current_season,
 					  |person_pkg.ap_status(person_id) as status,
 					  |person_pkg.ap_actions(person_id, 'Y') as actions,
-					  |ratings_pkg.ap_ratings(person_id)
+					  |ratings_pkg.ap_ratings(person_id),
+						|check_yearly_date('4TH_PORTAL_LINKS')
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season, status, actions, ratings) = pb.executePreparedQueryForSelect(nameQ).head
+			val (nameFirst, nameLast, sysdate, season, status, actions, ratings, show4thLink) = pb.executePreparedQueryForSelect(nameQ).head
+
+			val (renewalDiscountAmt, _) = PortalLogic.getFYRenewalDiscountAmount(pb)
+
+			val expirationDate = {
+				if (BitVector.testBit(actions, 3) || BitVector.testBit(actions, 7)) {
+					val (_, expirationDate) = PortalLogic.getFYExpirationDate(pb, personId)
+					Some(expirationDate)
+				} else {
+					None
+				}
+			}
 
 			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
 
@@ -58,7 +70,10 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				status,
 				actions,
 				ratings,
-				canCheckout
+				canCheckout,
+				renewalDiscountAmt,
+				expirationDate,
+				show4thLink
 			)
 			implicit val format = APWelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
@@ -77,7 +92,10 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		status: String,
 		actions: Int,
 		ratings: String,
-		canCheckout: Boolean
+		canCheckout: Boolean,
+		renewalDiscountAmt: Double,
+		expirationDate: Option[LocalDate],
+		show4thLink: Boolean
 	)
 
 	object APWelcomePackageResult {
