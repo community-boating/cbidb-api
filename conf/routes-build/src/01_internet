@@ -31,6 +31,9 @@ GET     /member-welcome-ap                     org.sailcbi.APIServer.Api.Endpoin
 POST    /junior/required                    org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.post()
 GET    /junior/required                     org.sailcbi.APIServer.Api.Endpoints.Member.RequiredInfo.get(personId: Int)
 
+POST    /member/required                    org.sailcbi.APIServer.Api.Endpoints.Member.APRequiredInfo.post()
+GET    /member/required                     org.sailcbi.APIServer.Api.Endpoints.Member.APRequiredInfo.get()
+
 POST    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.post()
 GET    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.get(personId: Int)
 
