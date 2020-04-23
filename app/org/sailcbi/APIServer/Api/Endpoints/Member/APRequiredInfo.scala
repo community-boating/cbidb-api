@@ -101,107 +101,61 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	}
 
 	def runValidations(parsed: APRequiredInfoShape, pb: PersistenceBroker, personId: Int): ValidationResult = {
-		ValidationOk
-//		val dob = parsed.dob.getOrElse("")
-//
-//		val unconditionalValidations = List(
-//			tooOld(pb, dob),
-//			tooYoung(pb, dob, juniorId),
-//			cannotAlterDOB(pb, dob, juniorId),
-//			ValidationResult.checkBlank(parsed.firstName, "First Name"),
-//			ValidationResult.checkBlank(parsed.lastName, "Last Name"),
-//			ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
-//			ValidationResult.checkBlank(parsed.addr1, "Address"),
-//			ValidationResult.checkBlank(parsed.city, "City"),
-//			ValidationResult.checkBlank(parsed.state, "State"),
-//			ValidationResult.checkBlank(parsed.zip, "Zip code"),
-//			ValidationResult.checkBlank(parsed.primaryPhone, "Primary phone number"),
-//			ValidationResult.checkBlank(parsed.primaryPhoneType, "Primary phone number type"),
-//			ValidationResult.inline(parsed.zip)(zip => "^[0-9]{5}(-[0-9]{4})?$".r.findFirstIn(zip.getOrElse("")).isDefined, "Zip code is an invalid format."),
-//			ValidationResult.inline(parsed.childEmail)(
-//				childEmail => childEmail.getOrElse("").length == 0 || "^[A-Za-z0-9._%-]+@[A-Za-z0-9._%-]+\\.[A-Za-z]{2,4}$".r.findFirstIn(childEmail.getOrElse("")).isDefined,
-//				"Child email is not valid."
-//			),
-//			ValidationResult.inline(parsed.primaryPhone)(
-//				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
-//				"Primary Phone is not valid."
-//			)
-//		)
-//
-//		val conditionalValidations = List((
-//				parsed.alternatePhone.isDefined,
-//				ValidationResult.inline(parsed.alternatePhone)(
-//					phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
-//					"Alternate Phone is not valid."
-//				)
-//		), (
-//				parsed.alternatePhone.isDefined,
-//				ValidationResult.checkBlankCustom(parsed.alternatePhoneType, "Alternate phone type must be specified if alternate phone number is provided."),
-//		)).filter(_._1).map(_._2)
-//
-//		// Run all validations and combine into one
-//		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
+		val dob = parsed.dob.getOrElse("")
+
+		val unconditionalValidations = List(
+			tooYoung(pb, dob),
+			ValidationResult.checkBlank(parsed.firstName, "First Name"),
+			ValidationResult.checkBlank(parsed.lastName, "Last Name"),
+			ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
+			ValidationResult.checkBlank(parsed.addr1, "Address"),
+			ValidationResult.checkBlank(parsed.city, "City"),
+			ValidationResult.checkBlank(parsed.state, "State"),
+			ValidationResult.checkBlank(parsed.zip, "Zip code"),
+			ValidationResult.checkBlank(parsed.primaryPhone, "Primary phone number"),
+			ValidationResult.checkBlank(parsed.primaryPhoneType, "Primary phone number type"),
+			ValidationResult.inline(parsed.zip)(zip => "^[0-9]{5}(-[0-9]{4})?$".r.findFirstIn(zip.getOrElse("")).isDefined, "Zip code is an invalid format."),
+			ValidationResult.inline(parsed.primaryPhone)(
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
+				"Primary Phone is not valid."
+			)
+		)
+
+		val conditionalValidations = List((
+			parsed.alternatePhone.isDefined,
+			ValidationResult.inline(parsed.alternatePhone)(
+				phone => PhoneUtil.regex.findFirstIn(phone.getOrElse("")).isDefined,
+				"Alternate Phone is not valid."
+			)
+		), (
+			parsed.alternatePhone.isDefined,
+			ValidationResult.checkBlankCustom(parsed.alternatePhoneType, "Alternate phone type must be specified if alternate phone number is provided."),
+		)).filter(_._1).map(_._2)
+
+		// Run all validations and combine into one
+		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 	}
 
-//	def cannotAlterDOB(pb: PersistenceBroker, dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
-//		case None => ValidationOk
-//		case Some(id) => {
-//			val (existingDOB, currentSeason, firstMembershipYear) =
-//				pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(String, Int, Option[Int])](Set(MemberUserType)) {
-//					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int, Option[Int]) = (rsw.getString(1), rsw.getInt(2), rsw.getOptionInt(3))
-//
-//					override def getQuery: String =
-//						"""
-//						  |select to_char(dob, 'MM/DD/YYYY'), util_pkg.get_current_season, min(to_char(expiration_date,'YYYY')) from persons p left outer join persons_memberships pm
-//						  |on p.person_id = pm.person_id where p.person_id = ? group by to_char(dob, 'MM/DD/YYYY'), util_pkg.get_current_season
-//						  |""".stripMargin
-//
-//					override val params: List[String] = List(id.toString)
-//				}).head
-//			if (existingDOB == dob) ValidationOk
-//			else if (firstMembershipYear.getOrElse(currentSeason) == currentSeason) ValidationOk
-//			else ValidationResult.from("DOB cannot be altered.  If DOB is inaccurate please email the Front Office at info@community-boating.org")
-//		}
-//	}
-//
-//	def tooOld(pb: PersistenceBroker, dob: String): ValidationResult = {
-//		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-//			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
-//
-//			override def getQuery: String =
-//				s"""
-//				   |select person_pkg.is_jp_max_age(to_date(?,'MM/DD/YYYY')) from dual
-//				   |""".stripMargin
-//
-//			override val params: List[String] = List(dob)
-//		}).head
-//		if (notTooOld) {
-//			ValidationOk
-//		} else {
-//			ValidationResult.from("Prospective juniors must be 17 or younger and may not turn 18 before the program begins.")
-//		}
-//	}
-//
-//	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Option[Int]): ValidationResult = {
-//		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
-//			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
-//
-//			override def getQuery: String =
-//				s"""
-//				   |select 1 from dual
-//				   |   where person_pkg.is_jp_min_age(to_date(?,'MM/DD/YYYY')) = 'Y'
-//				   |   or exists (select 1 from persons where person_id = ? and ignore_jp_min_age = 'Y')
-//				   |""".stripMargin
-//
-//			// TODO: redo this without a sentinel
-//			override val params: List[String] = List(dob, juniorId.getOrElse(-999).toString)
-//		}).nonEmpty
-//		if (notTooYoung) {
-//			ValidationOk
-//		} else {
-//			ValidationResult.from("Prospective junior members must be at least 10 years old by August 31st to participate in the Junior Program.")
-//		}
-//	}
+
+	def tooYoung(pb: PersistenceBroker, dob: String): ValidationResult = {
+		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
+
+			override def getQuery: String =
+				s"""
+				   |select 1 from dual
+				   |   where util_pkg.age(to_date(?,'MM/DD/YYYY'), util_pkg.get_sysdate) >= 18
+				   |""".stripMargin
+
+			override val params: List[String] = List(dob)
+		}).nonEmpty
+
+		if (notTooYoung) {
+			ValidationOk
+		} else {
+			ValidationResult.from("Prospective adult members must be at least 18 years old.")
+		}
+	}
 
 	def doUpdate(pb: PersistenceBroker, data: APRequiredInfoShape, personId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
