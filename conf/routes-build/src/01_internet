@@ -37,6 +37,9 @@ GET    /member/required                     org.sailcbi.APIServer.Api.Endpoints.
 POST    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.post()
 GET    /junior/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.EmergencyContact.get(personId: Int)
 
+POST    /member/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.ApEmergencyContact.post()
+GET    /member/emerg                               org.sailcbi.APIServer.Api.Endpoints.Member.ApEmergencyContact.get()
+
 POST    /junior/swim-proof                               org.sailcbi.APIServer.Api.Endpoints.Member.SwimProof.post()
 GET    /junior/swim-proof                               org.sailcbi.APIServer.Api.Endpoints.Member.SwimProof.get(personId: Int)
 
