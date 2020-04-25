@@ -48,8 +48,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 
 			val (renewalDiscountAmt, _) = PortalLogic.getFYRenewalDiscountAmount(pb)
 
+
 			val expirationDate = {
-				if (BitVector.testBit(actions, 3) || BitVector.testBit(actions, 7)) {
+				if (BitVector.testBit(actions, 4) || BitVector.testBit(actions, 7)) {
 					val (_, expirationDate) = PortalLogic.getFYExpirationDate(pb, personId)
 					Some(expirationDate)
 				} else {
