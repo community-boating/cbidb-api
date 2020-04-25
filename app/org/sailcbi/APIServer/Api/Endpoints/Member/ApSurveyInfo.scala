@@ -29,7 +29,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						language = rs.getOptionString(7),
 						ethnicity = rs.getOptionString(8).map(s => s.split(":")),
 						ethnicityOther = rs.getOptionString(9),
-						student = rs.getOptionString(10).map(_.equals("Y"))
+						student = rs.getOptionString(10),
+						school = rs.getOptionString(11)
 					)
 
 				override def getQuery: String =
@@ -44,7 +45,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					   |language,
 					   |ethnicity,
 					   |ethnicity_other,
-					   |student
+					   |student,
+					   |school
 					   |from persons where person_id = ?
 					""".stripMargin
 
@@ -79,7 +81,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						   |language = ?,
 						   |ethnicity = ?,
 						   |ethnicity_other = ?,
-						   |student = ?
+						   |student = ?,
+						   |school = ?
 						   |where person_id = ?
 		  				""".stripMargin
 
@@ -94,6 +97,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						parsed.ethnicity.map(_.mkString(":")).orNull,
 						parsed.ethnicityOther.orNull,
 						parsed.student.map(GetSQLLiteralPrepared.apply).orNull,
+						parsed.school.orNull,
 						personId.toString
 					)
 				}
@@ -115,7 +119,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		language: Option[String],
 		ethnicity: Option[Array[String]],
 		ethnicityOther: Option[String],
-		student: Option[Boolean]
+		student: Option[String],
+		school: Option[String]
 	)
 
 	object ApSurveyInfoShape {

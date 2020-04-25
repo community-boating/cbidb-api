@@ -50,6 +50,7 @@ POST    /member/survey                               org.sailcbi.APIServer.Api.E
 GET    /member/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.ApSurveyInfo.get()
 
 POST    /junior/accept-tos                               org.sailcbi.APIServer.Api.Endpoints.Member.AcceptTOS.post()
+POST    /member/accept-tos                               org.sailcbi.APIServer.Api.Endpoints.Member.AcceptTOS.postAP()
 
 
 POST    /junior/scholarship-no                    org.sailcbi.APIServer.Api.Endpoints.Member.Scholarship.postNo()
