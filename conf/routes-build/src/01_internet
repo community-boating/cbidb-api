@@ -46,6 +46,9 @@ GET    /junior/swim-proof                               org.sailcbi.APIServer.Ap
 POST    /junior/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.SurveyInfo.post()
 GET    /junior/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.SurveyInfo.get(personId: Int)
 
+POST    /member/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.ApSurveyInfo.post()
+GET    /member/survey                               org.sailcbi.APIServer.Api.Endpoints.Member.ApSurveyInfo.get()
+
 POST    /junior/accept-tos                               org.sailcbi.APIServer.Api.Endpoints.Member.AcceptTOS.post()
 
 
