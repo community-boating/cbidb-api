@@ -25,11 +25,26 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, String, Int, String, Boolean)](Set(MemberUserType)) {
-				override val params: List[String] = List(personId.toString)
+			type ResultUntyped = (
+				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean
+			)
+			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberUserType)) {
+				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, String, Int, String, Boolean) =
-					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getString(5), rsw.getString(6).toInt, rsw.getString(7), rsw.getBooleanFromChar(8))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ResultUntyped = (
+					rsw.getString(1),
+					rsw.getString(2),
+					rsw.getLocalDateTime(3),
+					rsw.getInt(4),
+					rsw.getString(5),
+					rsw.getString(6).toInt,
+					rsw.getString(7),
+					rsw.getBooleanFromChar(8),
+					rsw.getBooleanFromChar(9),
+					rsw.getBooleanFromChar(10),
+					rsw.getBooleanFromChar(11),
+					rsw.getBooleanFromChar(12)
+				)
 
 				override def getQuery: String =
 					"""
@@ -40,11 +55,28 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					  |person_pkg.ap_status(person_id) as status,
 					  |person_pkg.ap_actions(person_id, 'Y') as actions,
 					  |ratings_pkg.ap_ratings(person_id),
-						|check_yearly_date('4TH_PORTAL_LINKS')
+						|check_yearly_date('4TH_PORTAL_LINKS'),
+						|person_pkg.eligible_for_senior_online(?),
+						|person_pkg.eligible_for_youth_online(?),
+						|person_pkg.eligible_for_veteran_online(?),
+						|person_pkg.can_renew(?)
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season, status, actions, ratings, show4thLink) = pb.executePreparedQueryForSelect(nameQ).head
+			val (
+				nameFirst,
+				nameLast,
+				sysdate,
+				season,
+				status,
+				actions,
+				ratings,
+				show4thLink,
+				eligibleForSeniorOnline,
+				eligibleForYouthOnline,
+				eligibleForVeteranOnline,
+				canRenew
+			) = pb.executePreparedQueryForSelect(nameQ).head
 
 			val (renewalDiscountAmt, _) = PortalLogic.getFYRenewalDiscountAmount(pb)
 
@@ -74,7 +106,11 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				canCheckout,
 				renewalDiscountAmt,
 				expirationDate,
-				show4thLink
+				show4thLink,
+				eligibleForSeniorOnline,
+				eligibleForYouthOnline,
+				eligibleForVeteranOnline,
+				canRenew
 			)
 			implicit val format = APWelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
@@ -96,7 +132,11 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		canCheckout: Boolean,
 		renewalDiscountAmt: Double,
 		expirationDate: Option[LocalDate],
-		show4thLink: Boolean
+		show4thLink: Boolean,
+		eligibleForSeniorOnline: Boolean,
+		eligibleForYouthOnline: Boolean,
+		eligibleForVeteranOnline: Boolean,
+		canRenew: Boolean
 	)
 
 	object APWelcomePackageResult {
