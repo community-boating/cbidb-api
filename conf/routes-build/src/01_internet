@@ -84,6 +84,7 @@ GET    /junior/get-junior-class-reservations       org.sailcbi.APIServer.Api.End
 POST    /junior/delete-junior-class-reservation     org.sailcbi.APIServer.Api.Endpoints.Member.DeleteJuniorClassReservation.post()
 
 POST    /junior/abort-mem-reg                               org.sailcbi.APIServer.Api.Endpoints.Member.AbortMembershipRegistration.post()
+POST    /member/abort-mem-reg                               org.sailcbi.APIServer.Api.Endpoints.Member.ApAbortMembershipRegistration.post()
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 

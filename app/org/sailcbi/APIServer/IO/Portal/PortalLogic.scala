@@ -835,6 +835,43 @@ object PortalLogic {
 		ValidationOk
 	}
 
+	def apDeleteReservation(pb: PersistenceBroker, memberID: Int): ValidationResult = {
+		val orderId = getOrderId(pb, memberID)
+		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString, memberID.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_guest_privs where sc_membership_id in (
+				  |	select item_id from shopping_cart_memberships where order_id = ? and person_id = ?
+				  |) and order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteSCGP)
+
+		val deleteSCDW = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(memberID.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_waivers where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteSCDW)
+
+		val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(memberID.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_memberships where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
+
+		ValidationOk
+	}
+
 	def canCheckout(pb: PersistenceBroker, parentPersonId: Int, orderId: Int): Boolean = {
 		val incompleteItemsQuery = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override val params: List[String] = List(parentPersonId.toString, parentPersonId.toString)
