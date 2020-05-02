@@ -1,15 +1,17 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.{LocalDateTime, LocalDate}
+import java.time.{LocalDate, LocalDateTime}
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler}
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.DiscountWithAmount
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -78,8 +80,15 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				canRenew
 			) = pb.executePreparedQueryForSelect(nameQ).head
 
-			val (renewalDiscountAmt, _) = PortalLogic.getFYRenewalDiscountAmount(pb)
-
+			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(pb)
+			val fullYearDiscounts = discountsWithAmounts.filter(_.membershipTypeId == MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID)
+			val renewalDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID ).get.discountAmount
+			val seniorDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.SENIOR_DISCOUNT_ID ).get.discountAmount
+			val youthDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.YOUTH_DISCOUNT_ID ).get.discountAmount
+			val studentDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID ).get.discountAmount
+			val veteranDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.VETERAN_DISCOUNT_ID ).get.discountAmount
+			val mghDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MGH_DISCOUNT_ID ).get.discountAmount
+			val fyBasePrice = fullYearDiscounts.head.fullPrice
 
 			val expirationDate = {
 				if (BitVector.testBit(actions, 4) || BitVector.testBit(actions, 7)) {
@@ -92,26 +101,37 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 
 			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
 
-			val result = APWelcomePackageResult(
-				personId,
-				orderId,
-				nameFirst,
-				nameLast,
-				rc.auth.userName,
-				sysdate,
-				season,
-				status,
-				actions,
-				ratings,
-				canCheckout,
-				renewalDiscountAmt,
-				expirationDate,
-				show4thLink,
-				eligibleForSeniorOnline,
-				eligibleForYouthOnline,
-				eligibleForVeteranOnline,
-				canRenew
+			val discountsResult = DiscountsResult(
+				eligibleForSeniorOnline = eligibleForSeniorOnline,
+				eligibleForYouthOnline = eligibleForYouthOnline,
+				eligibleForVeteranOnline = eligibleForVeteranOnline,
+				canRenew = canRenew,
+				renewalDiscountAmt = renewalDiscountAmt,
+				seniorDiscountAmt = seniorDiscountAmt,
+				youthDiscountAmt = youthDiscountAmt,
+				studentDiscountAmt = studentDiscountAmt,
+				veteranDiscountAmt = veteranDiscountAmt,
+				mghDiscountAmt = mghDiscountAmt,
+				fyBasePrice = fyBasePrice
 			)
+
+			val result: APWelcomePackageResult = APWelcomePackageResult(
+				personId = personId,
+				orderId = orderId,
+				firstName = nameFirst,
+				lastName = nameLast,
+				userName = rc.auth.userName,
+				serverTime = sysdate,
+				season = season,
+				status = status,
+				actions = actions,
+				ratings = ratings,
+				canCheckout = canCheckout,
+				expirationDate = expirationDate,
+				show4thLink = show4thLink,
+				discountsResult = discountsResult
+			)
+			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
@@ -130,16 +150,35 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		actions: Int,
 		ratings: String,
 		canCheckout: Boolean,
-		renewalDiscountAmt: Double,
 		expirationDate: Option[LocalDate],
 		show4thLink: Boolean,
-		eligibleForSeniorOnline: Boolean,
-		eligibleForYouthOnline: Boolean,
-		eligibleForVeteranOnline: Boolean,
-		canRenew: Boolean
+		discountsResult: DiscountsResult
 	)
 
 	object APWelcomePackageResult {
 		implicit val format = Json.format[APWelcomePackageResult]
+
+		def apply(v: JsValue): APWelcomePackageResult = v.as[APWelcomePackageResult]
+	}
+
+	case class DiscountsResult (
+		eligibleForSeniorOnline: Boolean,
+		eligibleForYouthOnline: Boolean,
+		eligibleForVeteranOnline: Boolean,
+		canRenew: Boolean,
+		renewalDiscountAmt: Double,
+		seniorDiscountAmt: Double,
+		youthDiscountAmt: Double,
+		studentDiscountAmt: Double,
+		veteranDiscountAmt: Double,
+		mghDiscountAmt: Double,
+		fyBasePrice: Double
+	)
+
+	object DiscountsResult {
+		implicit val format = Json.format[DiscountsResult]
+
+		def apply(v: JsValue): DiscountsResult = v.as[DiscountsResult]
 	}
 }
+

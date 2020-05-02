@@ -1029,21 +1029,32 @@ object PortalLogic {
 		}
 	}
 
-	def getFYRenewalDiscountAmount(pb: PersistenceBroker): (Double, Int) = {
-		val q = new PreparedQueryForSelect[(Double, Int)](Set(MemberUserType)) {
+	def getDiscountsWithAmounts(pb: PersistenceBroker): List[DiscountWithAmount] = {
+		val q = new PreparedQueryForSelect[DiscountWithAmount](Set(MemberUserType)) {
 			override val params: List[String] = List()
 
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Int) = (rsw.getDouble(1), rsw.getInt(2))
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DiscountWithAmount =
+				DiscountWithAmount(
+					discountId = rsw.getInt(1),
+					instanceId = rsw.getInt(2),
+					membershipTypeId = rsw.getInt(3),
+					fullPrice = rsw.getDouble(4),
+					discountAmount = rsw.getDouble(5)
+				)
 
 			override def getQuery: String =
 				s"""
-				  |select nvl(md.discount_amt,0) as amt, dai.instance_id as active_instance from memberships_discounts md, discount_active_instances dai
-					|where md.instance_id = dai.instance_id and md.type_id = ${MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID}
-					|and dai.discount_id = ${MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID}
-				  |""".stripMargin
+					|select
+					|dai.discount_id,
+					|dai.instance_id,
+					|m.membership_type_id,
+					|m.price,
+					|nvl(md.discount_amt,0) as amt
+					|from memberships_discounts md, discount_active_instances dai, membership_types m
+					|where md.instance_id = dai.instance_id and m.membership_type_id = md.type_id
+					|""".stripMargin
 		}
-		val result = pb.executePreparedQueryForSelect(q)
-		result.head
+		pb.executePreparedQueryForSelect(q)
 	}
 
 	def getFYExpirationDate(pb: PersistenceBroker, personId: Int): (Int, LocalDate) = {
@@ -1084,5 +1095,13 @@ object PortalLogic {
 		val result = pb.executePreparedQueryForSelect(q)
 		result.head
 	}
+
+	case class DiscountWithAmount (
+		discountId: Int,
+		instanceId: Int,
+		membershipTypeId: Int,
+		fullPrice: Double,
+		discountAmount: Double
+	)
 }
 

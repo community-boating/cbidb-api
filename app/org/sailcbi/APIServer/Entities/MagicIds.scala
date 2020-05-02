@@ -16,6 +16,11 @@ object MagicIds {
 	}
 	object DISCOUNTS {
 		val RENEWAL_DISCOUNT_ID = 8
+		val YOUTH_DISCOUNT_ID = 2
+		val SENIOR_DISCOUNT_ID = 1
+		val STUDENT_DISCOUNT_ID = 3
+		val MGH_DISCOUNT_ID = 7
+		val VETERAN_DISCOUNT_ID = 442
 	}
 	object MEMBERSHIP_TYPES {
 		val FULL_YEAR_TYPE_ID = 1
