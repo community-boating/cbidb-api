@@ -1063,5 +1063,26 @@ object PortalLogic {
 		val result = pb.executePreparedQueryForSelect(q)
 		result.head
 	}
+
+	def getAPDiscountEligibilities(pb: PersistenceBroker, personId: Int): (Boolean, Boolean, Boolean, Boolean) = {
+		val q = new PreparedQueryForSelect[(Boolean, Boolean, Boolean, Boolean)](Set(MemberUserType)) {
+			override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Boolean, Boolean, Boolean, Boolean) =
+				(rsw.getBooleanFromChar(1), rsw.getBooleanFromChar(2), rsw.getBooleanFromChar(3), rsw.getBooleanFromChar(4))
+
+			override def getQuery: String =
+				s"""
+				   |select
+				   |person_pkg.eligible_for_youth_online(?),
+				   |person_pkg.eligible_for_senior_online(?),
+				   |person_pkg.eligible_for_veteran_online(?),
+				   |person_pkg.can_renew(?)
+				   |from dual
+				   |""".stripMargin
+		}
+		val result = pb.executePreparedQueryForSelect(q)
+		result.head
+	}
 }
 
