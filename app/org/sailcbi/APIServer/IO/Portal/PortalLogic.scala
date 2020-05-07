@@ -1096,6 +1096,189 @@ object PortalLogic {
 		result.head
 	}
 
+	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountId: Option[Int]): Unit = {
+		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(personId.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |select count(*) from shopping_cart_memberships where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		val count = pb.executePreparedQueryForSelect(existingSCMs).head
+
+		if (count == 0) {
+			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val pkName: Option[String] = Some("ITEM_ID")
+
+				override val params: List[String] = List(
+					memTypeId.toString,
+					memTypeId.toString,
+					personId.toString,
+					orderId.toString
+				)
+
+				override def getQuery: String =
+					"""
+					  |insert into shopping_cart_memberships (
+					  |      membership_type_id,
+					  |      price,
+					  |      person_id,
+					  |      ready_to_buy,
+					  |      order_id
+					  |    ) values (
+					  |      ?,
+					  |      (select price from membership_types where membership_type_id = ?),
+					  |      ?,
+					  |      'N',
+					  |      ?
+					  |    )
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForInsert(insertQ)
+		} else {
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override val params: List[String] = List(
+					memTypeId.toString,
+					memTypeId.toString,
+					personId.toString,
+					orderId.toString
+				)
+				override def getQuery: String =
+					"""
+					  |update shopping_cart_memberships
+					  |    set membership_type_id = ?,
+					  |    price = (select price from membership_types where membership_type_id = ?),
+					  |    discount_id = null
+					  |    where person_id = ?
+					  |    and order_id = ?
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForUpdateOrDelete(updateQ)
+		}
+	}
+
+	def apSetGuestPrivs(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+		val countQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(
+				orderId.toString,
+				personId.toString,
+				orderId.toString
+			)
+
+			override def getQuery: String =
+				"""
+				  |select count(*) from shopping_cart_guest_privs
+				  |where sc_membership_id in (select item_id from shopping_cart_memberships where order_id = ? and person_id = ?)
+				  |and order_id = ?
+				  |""".stripMargin
+		}
+		val count = pb.executePreparedQueryForSelect(countQ).head
+
+		if (count == 0 && wantIt) {
+			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val pkName: Option[String] = Some("ITEM_ID")
+
+				override val params: List[String] = List(
+					orderId.toString,
+					personId.toString,
+					orderId.toString
+				)
+
+				override def getQuery: String =
+					"""
+					  |insert into shopping_cart_guest_privs(
+					  |      sc_membership_id,
+					  |      order_id,
+					  |      price
+					  |    ) values (
+					  |      (select max(item_id) from shopping_cart_memberships where order_id = ? and person_id = ?),
+					  |      ?,
+					  |      global_constant_pkg.get_value_number('GP_PRICE')
+					  |    )
+					  |""".stripMargin
+			}
+
+			pb.executePreparedQueryForInsert(insertQ)
+		} else if (!wantIt) {
+			val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override val params: List[String] = List(
+					orderId.toString,
+					personId.toString,
+					orderId.toString
+				)
+				override def getQuery: String =
+					"""
+					  |delete from shopping_cart_guest_privs
+					  |    where sc_membership_id in (select item_id from shopping_cart_memberships where order_id = ? and person_id = ?)
+					  |    and order_id = ?
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForUpdateOrDelete(deleteQ)
+		}
+	}
+
+	def apSetDamageWaiver(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+		val countQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(
+				personId.toString,
+				orderId.toString
+			)
+
+			override def getQuery: String =
+				"""
+				  |select count(*) from shopping_cart_waivers where person_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		val count = pb.executePreparedQueryForSelect(countQ).head
+
+		if (count == 0 && wantIt) {
+			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val pkName: Option[String] = Some("ITEM_ID")
+
+				override val params: List[String] = List(
+					personId.toString,
+					orderId.toString
+				)
+
+				override def getQuery: String =
+					"""
+					  |insert into shopping_cart_waivers(
+					  |      person_id,
+					  |      order_id,
+					  |      price
+					  |    ) values (
+					  |      ?,
+					  |      ?,
+					  |      global_constant_pkg.get_value_number('DW_PRICE')
+					  |    )
+					  |""".stripMargin
+			}
+
+			pb.executePreparedQueryForInsert(insertQ)
+		} else if (!wantIt) {
+			val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override val params: List[String] = List(
+					personId.toString,
+					orderId.toString
+				)
+				override def getQuery: String =
+					"""
+					  |delete from shopping_cart_waivers
+					  |    where person_id = ?
+					  |    and order_id = ?
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForUpdateOrDelete(deleteQ)
+		}
+	}
+
 	case class DiscountWithAmount (
 		discountId: Int,
 		instanceId: Int,
