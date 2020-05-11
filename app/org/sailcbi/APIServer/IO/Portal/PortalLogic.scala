@@ -1096,7 +1096,22 @@ object PortalLogic {
 		result.head
 	}
 
-	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountId: Option[Int]): Unit = {
+	def getDiscountActiveInstanceForDiscount(pb: PersistenceBroker, discountId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(discountId.toString)
+
+			override def getQuery: String =
+				"""
+				  |select instance_id from discount_active_instances where discount_id = ?
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForSelect(q).head
+	}
+
+	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): Unit = {
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1117,7 +1132,8 @@ object PortalLogic {
 					memTypeId.toString,
 					memTypeId.toString,
 					personId.toString,
-					orderId.toString
+					orderId.toString,
+					requestedDiscountInstanceId.map(_.toString).orNull
 				)
 
 				override def getQuery: String =
@@ -1127,12 +1143,14 @@ object PortalLogic {
 					  |      price,
 					  |      person_id,
 					  |      ready_to_buy,
-					  |      order_id
+					  |      order_id,
+					  |      requested_discount_instance_id
 					  |    ) values (
 					  |      ?,
 					  |      (select price from membership_types where membership_type_id = ?),
 					  |      ?,
 					  |      'N',
+					  |      ?,
 					  |      ?
 					  |    )
 					  |""".stripMargin
@@ -1143,6 +1161,7 @@ object PortalLogic {
 				override val params: List[String] = List(
 					memTypeId.toString,
 					memTypeId.toString,
+					requestedDiscountInstanceId.map(_.toString).orNull,
 					personId.toString,
 					orderId.toString
 				)
@@ -1151,7 +1170,7 @@ object PortalLogic {
 					  |update shopping_cart_memberships
 					  |    set membership_type_id = ?,
 					  |    price = (select price from membership_types where membership_type_id = ?),
-					  |    discount_id = null
+					  |    requested_discount_instance_id = ?
 					  |    where person_id = ?
 					  |    and order_id = ?
 					  |""".stripMargin

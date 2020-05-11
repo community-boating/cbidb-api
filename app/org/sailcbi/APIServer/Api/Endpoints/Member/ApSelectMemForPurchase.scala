@@ -20,7 +20,9 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSelectMemForPurchaseShape.apply)(parsed => {
 				val orderId = PortalLogic.getOrderId(pb, personId)
 				// TODO: check mem type is valid
-				PortalLogic.apSelectMemForPurchase(pb, personId, orderId, 1, None)
+
+				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(pb, _))
+				PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
 
 				PortalLogic.assessDiscounts(pb, orderId)
 
