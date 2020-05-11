@@ -28,10 +28,10 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)
 			type ResultUntyped = (
-				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean
+				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean
 			)
 			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberUserType)) {
-				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
+				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ResultUntyped = (
 					rsw.getString(1),
@@ -45,11 +45,13 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					rsw.getBooleanFromChar(9),
 					rsw.getBooleanFromChar(10),
 					rsw.getBooleanFromChar(11),
-					rsw.getBooleanFromChar(12)
+					rsw.getBooleanFromChar(12),
+					rsw.getBooleanFromChar(13),
+					rsw.getBooleanFromChar(14)
 				)
 
 				override def getQuery: String =
-					"""
+					s"""
 					  |select name_first,
 					  |name_last,
 					  |util_pkg.get_sysdate,
@@ -61,7 +63,15 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 						|person_pkg.eligible_for_senior_online(?),
 						|person_pkg.eligible_for_youth_online(?),
 						|person_pkg.eligible_for_veteran_online(?),
-						|person_pkg.can_renew(?)
+					  |(case when exists (
+					  |    select 1 from persons_discounts_eligible
+					  |      where person_id = ? and discount_id = ${MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID} and season = util_pkg.get_current_season
+					  |) then 'Y' else 'N' end) as student_eligible,
+					  |(case when exists (
+					  |    select 1 from persons_discounts_eligible
+					  |      where person_id = ? and discount_id = ${MagicIds.DISCOUNTS.MGH_DISCOUNT_ID} and season = util_pkg.get_current_season
+					  |) then 'Y' else 'N' end) as mgh_eligible,
+					  |person_pkg.can_renew(?)
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
@@ -77,6 +87,8 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				eligibleForSeniorOnline,
 				eligibleForYouthOnline,
 				eligibleForVeteranOnline,
+				eligibleForStudent,
+				eligibleForMGH,
 				canRenew
 			) = pb.executePreparedQueryForSelect(nameQ).head
 
@@ -105,6 +117,8 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				eligibleForSeniorOnline = eligibleForSeniorOnline,
 				eligibleForYouthOnline = eligibleForYouthOnline,
 				eligibleForVeteranOnline = eligibleForVeteranOnline,
+				eligibleForStudent = eligibleForStudent,
+				eligibleForMGH = eligibleForMGH,
 				canRenew = canRenew,
 				renewalDiscountAmt = renewalDiscountAmt,
 				seniorDiscountAmt = seniorDiscountAmt,
@@ -165,6 +179,8 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		eligibleForSeniorOnline: Boolean,
 		eligibleForYouthOnline: Boolean,
 		eligibleForVeteranOnline: Boolean,
+		eligibleForStudent: Boolean,
+		eligibleForMGH: Boolean,
 		canRenew: Boolean,
 		renewalDiscountAmt: Double,
 		seniorDiscountAmt: Double,

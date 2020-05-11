@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{JpOffseasonClasses, JpOffseasonClassesResult}
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
@@ -1112,6 +1112,24 @@ object PortalLogic {
 	}
 
 	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): Unit = {
+//		val discountAmt = requestedDiscountInstanceId.map(instanceId => {
+//			val q = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
+//				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
+//
+//				override def getParams: List[PreparedValue] = List(
+//					instanceId.toString,
+//					memTypeId.toString
+//				)
+//
+//				override def getQuery: String =
+//					"""
+//					  |select select md.discount_amt from memberships_discounts md
+//					  |where instance_id = ? and type_id = ?
+//					  |""".stripMargin
+//			}
+//			pb.executePreparedQueryForSelect(q).head
+//		})
+
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
