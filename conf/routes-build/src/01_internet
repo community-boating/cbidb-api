@@ -21,6 +21,8 @@ GET     /jp-class-sections                 org.sailcbi.APIServer.Api.Endpoints.P
 GET     /ap-class-instances                 org.sailcbi.APIServer.Api.Endpoints.Public.ApClassInstances.get(startDate: Option[String])
 GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.get()
 
+GET     /donation-funds                 org.sailcbi.APIServer.Api.Endpoints.Public.GetDonationFunds.get()
+
 GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.get()
 
 GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
@@ -93,6 +95,11 @@ POST    /member/select-guest-privs                     org.sailcbi.APIServer.Api
 
 GET    /member/select-damage-waiver                     org.sailcbi.APIServer.Api.Endpoints.Member.ApSelectPurchaseDamageWaiver.get()
 POST    /member/select-damage-waiver                     org.sailcbi.APIServer.Api.Endpoints.Member.ApSelectPurchaseDamageWaiver.post()
+
+POST    /member/add-donation                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.add()
+POST    /member/delete-donation                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.delete()
+
+
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 

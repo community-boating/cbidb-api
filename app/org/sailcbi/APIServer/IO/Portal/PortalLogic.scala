@@ -1316,6 +1316,77 @@ object PortalLogic {
 		}
 	}
 
+	def addDonationToOrder(pb: PersistenceBroker, orderId: Int, fundId: Int, amount: Double): ValidationResult = {
+		if (amount <= 0) {
+			ValidationResult.from("Donation amount must be >= $0.")
+		} else {
+			val existsQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+				override val params: List[String] = List(orderId.toString, fundId.toString)
+
+				override def getQuery: String =
+					"""
+					  |select 1 from shopping_cart_donations where order_id = ? and fund_id = ?
+					  |""".stripMargin
+			}
+			val exists = pb.executePreparedQueryForSelect(existsQ).nonEmpty
+			if (exists) {
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+					override val params: List[String] = List(amount.toString, orderId.toString, fundId.toString)
+					override def getQuery: String =
+						"""
+						  |update shopping_cart_donations
+						  |set amount = ?
+						  |where order_id = ? and fund_id = ?
+						  |""".stripMargin
+				}
+				pb.executePreparedQueryForUpdateOrDelete(updateQ)
+			} else {
+				val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+					override val pkName: Option[String] = Some("ITEM_ID")
+
+					override val params: List[String] = List(
+						orderId.toString,
+						amount.toString,
+						fundId.toString
+					)
+
+					override def getQuery: String =
+						"""
+						  |insert into shopping_cart_donations(
+						  |      order_id,
+						  |      amount,
+						  |      fund_id,
+						  |      initiative_id
+						  |    ) values (
+						  |      ?,
+						  |      round(?, 2),
+						  |      ?,
+						  |      16
+						  |    )
+						  |""".stripMargin
+				}
+				pb.executePreparedQueryForInsert(insertQ)
+			}
+
+			ValidationOk
+		}
+
+	}
+
+	def deleteDonationFromOrder(pb: PersistenceBroker, orderId: Int, fundId: Int): Unit = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString, fundId.toString)
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_donations
+				  |where order_id = ? and fund_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(q)
+	}
+
 	case class DiscountWithAmount (
 		discountId: Int,
 		instanceId: Int,
