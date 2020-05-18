@@ -99,7 +99,10 @@ POST    /member/select-damage-waiver                     org.sailcbi.APIServer.A
 POST    /member/add-donation                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.add()
 POST    /member/delete-donation                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.delete()
 
+POST    /member/add-promo-code                    org.sailcbi.APIServer.Api.Endpoints.Member.AddPromoCode.post()
 
+POST    /member/apply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.add()
+POST    /member/unapply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.delete()
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 

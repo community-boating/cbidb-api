@@ -1387,6 +1387,123 @@ object PortalLogic {
 		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 
+	def attemptAddPromoCode(pb: PersistenceBroker, orderId: Int, code: String): Unit = {
+		val getDiscountQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(code, code)
+
+			override def getQuery: String =
+				"""
+				  |select di.instance_id from discounts d, discount_active_instances dai, discount_instances di
+				  |    where d.discount_id = dai.discount_id and dai.instance_id = di.instance_id
+				  |	and (
+				  |	   (di.is_case_sensitive = 'Y' and di.universal_code = ?)
+				  |	 or
+				  |	   (nvl(di.is_case_sensitive,'N') <> 'Y' and lower(di.universal_code) = lower(?))
+				  |	)
+				  |""".stripMargin
+		}
+
+		val instances = pb.executePreparedQueryForSelect(getDiscountQ)
+		if (instances.nonEmpty) {
+			val instanceId = instances.head
+			val existsQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+				override val params: List[String] = List(orderId.toString, instanceId.toString)
+
+				override def getQuery: String =
+					"""
+					  |select 1 from orders_promos where order_id = ? and instance_id = ?
+					  |""".stripMargin
+			}
+			if (pb.executePreparedQueryForSelect(existsQ).isEmpty) {
+				val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+					override val pkName: Option[String] =Some("ASSIGN_ID")
+
+					override val params: List[String] = List(orderId.toString, instanceId.toString)
+
+					override def getQuery: String =
+						"""
+						  |insert into orders_promos(
+						  |	    order_id,
+						  |		instance_id
+						  |	  ) values (
+						  |	    ?,
+						  |		?
+						  |	  )
+						  |""".stripMargin
+				}
+				pb.executePreparedQueryForInsert(insertQ)
+			}
+		}
+	}
+
+	def addGiftCertificateToOrder(pb: PersistenceBroker, gcNumber: Int, gcCode: String, orderId: Int, now: LocalDate): ValidationResult = {
+		val validQ = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, LocalDate) =
+				(rsw.getInt(1), rsw.getLocalDate(2))
+
+			override val params: List[String] = List(gcNumber.toString, gcCode)
+
+			override def getQuery: String =
+				"""
+				  |  select gc.cert_id, trunc(gcp.expiration_date)
+				  |  from gift_certificates gc, gift_cert_current_states gccs, gift_cert_purchases gcp
+				  |  where gc.cert_id = gccs.cert_id and gc.cert_id = gcp.cert_id
+				  |  and gc.cert_number = ?
+				  |  and upper(gc.redemption_code) = upper(?)
+				  |  and (
+				  |    gccs.membership_type_id is not null or nvl(gccs.value,0) > 0
+				  |  )
+				  |
+				  |  minus
+				  |
+				  |  select sc.cert_id, trunc(gcp.expiration_date)
+				  |  from shopping_cart_appl_gc sc, gift_cert_purchases gcp
+				  |  where sc.cert_id = gcp.cert_id
+				  |""".stripMargin
+		}
+		val certs = pb.executePreparedQueryForSelect(validQ)
+		if (certs.nonEmpty) {
+			val (certId, certExp) = certs.head
+			if (now.isAfter(certExp)) {
+				ValidationResult.from("That gift certificate has expired.")
+			} else {
+				val proc = new PreparedProcedureCall[Unit](Set(MemberUserType)) {
+
+					override def setInParametersInt: Map[String, Int] = Map(
+						"P_CERT_ID" -> certId,
+						"p_order_id" -> orderId
+					)
+
+					override def getQuery: String = "cc_pkg.apply_gc(?, ?)"
+
+					override def registerOutParameters: Map[String, Int] = Map.empty
+
+					override def getOutResults(cs: CallableStatement): Unit = Unit
+				}
+				pb.executeProcedure(proc)
+				ValidationOk
+			}
+		} else {
+			ValidationResult.from("Gift certificate could not be redeemed; please try again.")
+		}
+	}
+
+	def unapplyGCFromOrder(pb: PersistenceBroker, orderId: Int, certId: Int): Unit = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(certId.toString, orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_appl_gc where cert_id = ? and order_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(q)
+	}
+
 	case class DiscountWithAmount (
 		discountId: Int,
 		instanceId: Int,
