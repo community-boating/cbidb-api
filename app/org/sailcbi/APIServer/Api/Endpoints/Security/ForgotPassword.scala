@@ -36,6 +36,14 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 
 				val matchingRecords = pb.executePreparedQueryForSelect(q)
 
+				val appID: Int = parsed.program match {
+					case "JP" => -1
+					case "AP" => -2
+					case x => {
+						throw new Exception("Unrecognized program " + x)
+					}
+				}
+
 				if (matchingRecords.size != 1) {
 					Future(Ok(ValidationResult.from(
 						"""
@@ -50,7 +58,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						)
 
 						override def setInParametersInt: Map[String, Int] = Map(
-							"p_app_id" -> -1
+							"p_app_id" -> appID
 						)
 						override def registerOutParameters: Map[String, Int] = Map.empty
 
@@ -68,7 +76,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 		})
 	}
 
-	case class ForgotPasswordShape(email: String)
+	case class ForgotPasswordShape(email: String, program: String)
 
 	object ForgotPasswordShape {
 		implicit val format = Json.format[ForgotPasswordShape]
