@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQueryResult, JpOffseasonClasses}
+import org.sailcbi.APIServer.IO.PreparedQueries.Member.JpOffseasonClasses
 import org.sailcbi.APIServer.Services.PermissionsAuthority
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}

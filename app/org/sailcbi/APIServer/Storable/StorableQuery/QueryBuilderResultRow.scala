@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.ProtoStorable
 
 class QueryBuilderResultRow(ps: ProtoStorable[ColumnAlias[_, _]]) {

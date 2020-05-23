@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.Storable.Fields
 
-import java.time.LocalDate
-
 import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 

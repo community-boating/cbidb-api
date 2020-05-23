@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import java.time.{Instant, ZonedDateTime}
 
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, GetSQLLiteralPrepared}
+import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserType}

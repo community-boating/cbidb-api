@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
-import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.APClassData
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
+import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.APClassData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

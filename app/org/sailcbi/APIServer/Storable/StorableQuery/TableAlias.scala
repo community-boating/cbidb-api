@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import org.sailcbi.APIServer.Services.RelationalBroker
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 case class TableAlias(obj: StorableObject[_ <: StorableClass], name: String) {

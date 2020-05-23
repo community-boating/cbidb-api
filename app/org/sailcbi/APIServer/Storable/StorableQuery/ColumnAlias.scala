@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField}
-import org.sailcbi.APIServer.Storable.{FieldsObject, Filter, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Storable.Fields.DatabaseField
+import org.sailcbi.APIServer.Storable.Filter
 
 case class ColumnAlias[T, U <: DatabaseField[T]](table: TableAlias, field: U) {
 	def wrapFilter(f: U => String => Filter): Filter = f(field)(table.name)

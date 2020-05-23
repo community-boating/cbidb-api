@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster
 
 import org.sailcbi.APIServer.CbiUtil.DateUtil
-import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpClassInstanceData
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
+import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpClassInstanceData
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

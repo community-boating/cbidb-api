@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.Filter
 
 case class QueryBuilder(
