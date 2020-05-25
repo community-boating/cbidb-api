@@ -28,4 +28,6 @@ object MagicIds {
 	object PROGRAM_TYPES {
 		val ADULT_PROGRAM_ID = 1
 	}
+	val MIN_AGE_FOR_SENIOR = 65
+	val MAX_AGE_FOR_YOUTH = 20
 }

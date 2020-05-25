@@ -26,7 +26,7 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)
 			type ResultUntyped = (
-				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean
+				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean
 			)
 			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
@@ -45,7 +45,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					rsw.getBooleanFromChar(11),
 					rsw.getBooleanFromChar(12),
 					rsw.getBooleanFromChar(13),
-					rsw.getBooleanFromChar(14)
+					rsw.getBooleanFromChar(14),
+					rsw.getBooleanFromChar(15),
+					rsw.getBooleanFromChar(16)
 				)
 
 				override def getQuery: String =
@@ -69,7 +71,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					  |    select 1 from persons_discounts_eligible
 					  |      where person_id = ? and discount_id = ${MagicIds.DISCOUNTS.MGH_DISCOUNT_ID} and season = util_pkg.get_current_season
 					  |) then 'Y' else 'N' end) as mgh_eligible,
-					  |person_pkg.can_renew(?)
+					  |person_pkg.can_renew(?),
+					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) >= ${MagicIds.MIN_AGE_FOR_SENIOR} then 'Y' else 'N' end) as senior_available,
+					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) between 18 and ${MagicIds.MAX_AGE_FOR_YOUTH} then 'Y' else 'N' end) as youth_available
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
@@ -87,7 +91,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				eligibleForVeteranOnline,
 				eligibleForStudent,
 				eligibleForMGH,
-				canRenew
+				canRenew,
+				seniorAvailable,
+				youthAvailable
 			) = pb.executePreparedQueryForSelect(nameQ).head
 
 			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(pb)
@@ -124,7 +130,9 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				studentDiscountAmt = studentDiscountAmt,
 				veteranDiscountAmt = veteranDiscountAmt,
 				mghDiscountAmt = mghDiscountAmt,
-				fyBasePrice = fyBasePrice
+				fyBasePrice = fyBasePrice,
+				seniorAvailable = seniorAvailable,
+				youthAvailable = youthAvailable
 			)
 
 			val result: APWelcomePackageResult = APWelcomePackageResult(
@@ -179,6 +187,8 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		eligibleForVeteranOnline: Boolean,
 		eligibleForStudent: Boolean,
 		eligibleForMGH: Boolean,
+		seniorAvailable: Boolean,
+		youthAvailable: Boolean,
 		canRenew: Boolean,
 		renewalDiscountAmt: Double,
 		seniorDiscountAmt: Double,
