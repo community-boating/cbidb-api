@@ -1444,7 +1444,7 @@ object PortalLogic {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, LocalDate) =
 				(rsw.getInt(1), rsw.getLocalDate(2))
 
-			override val params: List[String] = List(gcNumber.toString, gcCode)
+			override val params: List[String] = List(gcNumber.toString, gcCode, orderId.toString)
 
 			override def getQuery: String =
 				"""
@@ -1462,6 +1462,7 @@ object PortalLogic {
 				  |  select sc.cert_id, trunc(gcp.expiration_date)
 				  |  from shopping_cart_appl_gc sc, gift_cert_purchases gcp
 				  |  where sc.cert_id = gcp.cert_id
+				  |  and sc.order_id = ?
 				  |""".stripMargin
 		}
 		val certs = pb.executePreparedQueryForSelect(validQ)
