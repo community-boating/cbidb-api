@@ -26,6 +26,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
+			val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 			val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberUserType)) {
 				//				procedure start_stripe_trans_preflight(
@@ -60,31 +61,40 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 			val cardData = PortalLogic.getCardData(pb, orderId).get
 
-			val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
-
-			val stripeResult: Future[Either[(String, String), NetSuccess[Charge, StripeError]]] = Failover(rc.getStripeIOController(ws).createCharge(orderDetails.priceInCents, cardData.token, orderId, closeId)) match {
-				case Resolved(f) => f.map({
-					case s: NetSuccess[Charge, StripeError] => {
-						println("Create charge net success: " + s.successObject)
-						if (s.isInstanceOf[Warning[Charge, StripeError]]) {
-							println("Warning: " + s.asInstanceOf[Warning[Charge, StripeError]].e)
-							logger.warning("Nonblocking warning creating stripe charge", s.asInstanceOf[Warning[Charge, StripeError]].e)
+			type ErrorCode = String
+			type ErrorMessage = String
+			type ChargeID = String
+			val stripeResult: Future[Either[(ErrorCode, ErrorMessage), ChargeID]] = {
+				println("order total cents is: " + orderDetails.priceInCents)
+				if (orderDetails.priceInCents <= 0) {
+					println("skipping charge")
+					Future(Right(null))
+				} else {
+					Failover(rc.getStripeIOController(ws).createCharge(orderDetails.priceInCents, cardData.token, orderId, closeId)) match {
+						case Resolved(f) => f.map({
+							case s: NetSuccess[Charge, StripeError] => {
+								println("Create charge net success: " + s.successObject)
+								if (s.isInstanceOf[Warning[Charge, StripeError]]) {
+									println("Warning: " + s.asInstanceOf[Warning[Charge, StripeError]].e)
+									logger.warning("Nonblocking warning creating stripe charge", s.asInstanceOf[Warning[Charge, StripeError]].e)
+								}
+								Right(s.successObject.id)
+							}
+							case v: ValidationError[Charge, StripeError] => {
+								println("Create charge validation error: " + v.errorObject)
+								Left(v.errorObject.`type`, v.errorObject.message)
+							}
+							case e: CriticalError[Charge, StripeError] => {
+								logger.error("Create charge critical error: ", e.e)
+								Left("cbi-api-error", e.e.getMessage)
+							}
+						})
+						case Failed(e) => {
+							logger.error("Error creating charge", e)
+							Future {
+								Left("cbi-api-error", e.getMessage)
+							}
 						}
-						Right(s)
-					}
-					case v: ValidationError[Charge, StripeError] => {
-						println("Create charge validation error: " + v.errorObject)
-						Left(v.errorObject.`type`, v.errorObject.message)
-					}
-					case e: CriticalError[Charge, StripeError] => {
-						logger.error("Create charge critical error: ", e.e)
-						Left("cbi-api-error", e.e.getMessage)
-					}
-				})
-				case Failed(e) => {
-					logger.error("Error creating charge", e)
-					Future {
-						Left("cbi-api-error", e.getMessage)
 					}
 				}
 			}
@@ -120,7 +130,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 					override def setInParametersVarchar: Map[String, String] = Map(
 						"i_charge_success" -> (if (result.isLeft) "N" else "Y"),
-						"i_charge_id" -> (if (result.isLeft) null else result.getOrElse(null).successObject.id),
+						"i_charge_id" -> (if (result.isLeft) null else result.getOrElse(null)),
 						"i_error_code" -> (if (result.isLeft) result.swap.getOrElse(null)._1 else null),
 						"i_stripe_error_msg" -> (if (result.isLeft) result.swap.getOrElse(null)._2 else null),
 					)
