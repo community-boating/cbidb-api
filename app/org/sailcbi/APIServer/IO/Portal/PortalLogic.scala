@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, ProtoPersonUserType}
+import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 
@@ -1502,6 +1502,79 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(q)
+	}
+
+	def apCanClaim(pb: PersistenceBroker, email: String): Either[String, Int] = {
+		val proc = new PreparedProcedureCall[Either[String, Int]](Set(PublicUserType, BouncerUserType)) {
+			//					procedure ap_claim_by_email_proc(
+			//							i_email in varchar2,
+			//							o_person_id out number,
+			//							o_error out varchar2
+			//					) as
+
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"i_email" -> email,
+			)
+
+			override def getQuery: String = "person_pkg.ap_claim_by_email_proc(?, ?, ?)"
+
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_person_id" -> java.sql.Types.INTEGER,
+				"o_error" -> java.sql.Types.VARCHAR
+			)
+
+			override def getOutResults(cs: CallableStatement): Either[String, Int] = {
+				val error = cs.getString("o_error")
+				if (error != null) {
+					Left(error)
+				} else {
+					Right(cs.getInt("o_person_id"))
+				}
+			}
+		}
+		pb.executeProcedure(proc)
+	}
+
+	def apDoClaim(pb: PersistenceBroker, personId: Int): Unit = {
+		val proc = new PreparedProcedureCall[Unit](Set(BouncerUserType)) {
+//			procedure ap_verify_access(
+//					p_person_id in number,
+//					p_app_id in number default 610
+//			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"p_person_id" -> personId,
+				"p_app_id" -> -1
+			)
+
+			override def getQuery: String = "email_pkg.ap_verify_access(?, ?)"
+
+			override def registerOutParameters: Map[String, Int] = Map.empty
+
+			override def getOutResults(cs: CallableStatement): Unit = Unit
+		}
+		pb.executeProcedure(proc)
+	}
+
+	def validateClaimAcctHash(pb: PersistenceBroker, email: String, personId: Int, hash: String): ValidationResult = {
+		val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(
+				personId.toString,
+				email,
+				personId.toString,
+				hash
+			)
+
+			override def getQuery: String =
+				"""
+				  |select 1 from persons where person_id = ? and lower(email) = lower(?) and pw_hash is null and public_auth.hash('AP_EMAIL',?) = ?
+				  |""".stripMargin
+		}
+		val exists = pb.executePreparedQueryForSelect(q).nonEmpty
+		if (exists) ValidationOk
+		else ValidationResult.from("An internal error occurred; if this message persists please contact CBI at 617-523-1038")
 	}
 
 	case class DiscountWithAmount (
