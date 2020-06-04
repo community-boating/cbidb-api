@@ -106,6 +106,8 @@ POST    /member/unapply-gc                    org.sailcbi.APIServer.Api.Endpoint
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
+GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
+
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()

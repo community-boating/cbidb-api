@@ -1577,6 +1577,57 @@ object PortalLogic {
 		else ValidationResult.from("An internal error occurred; if this message persists please contact CBI at 617-523-1038")
 	}
 
+	def getAllMembershipPrices(pb: PersistenceBroker): List[(Int, Double)] = {
+		val q = new PreparedQueryForSelect[(Int, Double)](Set(PublicUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Double) =
+				(rsw.getInt(1), rsw.getDouble(2))
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |membership_type_id,
+				  |price
+				  |from membership_types where active = 'Y'
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
+	def getDwGpPrices(pb: PersistenceBroker): (Double, Double) = {
+		val q = new PreparedQueryForSelect[(Double, Double)](Set(PublicUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Double) =
+				(rsw.getDouble(1), rsw.getDouble(2))
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |global_constant_pkg.get_value_number('DW_PRICE'),
+				  |global_constant_pkg.get_value_number('GP_PRICE')
+				  |from dual
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).head
+	}
+
+	def getAllDiscounts(pb: PersistenceBroker): List[(Int, Int, Double)] = {
+		val q = new PreparedQueryForSelect[(Int, Int, Double)](Set(PublicUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Int, Double) =
+				(rsw.getInt(1), rsw.getInt(2), rsw.getDouble(3))
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |md.type_id,
+				  |dai.discount_id,
+				  |md.discount_amt
+				  |from discount_active_instances dai, memberships_discounts md
+				  |where dai.instance_id = md.instance_id
+				  |and md.discount_amt is not null
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
 	case class DiscountWithAmount (
 		discountId: Int,
 		instanceId: Int,
