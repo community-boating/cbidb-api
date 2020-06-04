@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -20,9 +20,13 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
-				PortalLogic.addGiftCertificateToOrder(pb, parsed.gcNumber, parsed.gcCode, orderId, PA.now.toLocalDate) match{
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
-					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
+					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject()))
+				} else {
+					PortalLogic.addGiftCertificateToOrder(pb, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+						case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+					}
 				}
 			})
 		})
@@ -44,8 +48,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	}
 
 	case class ApplyGCShape(
-		gcNumber: Int,
-		gcCode: String
+		gcNumber: Option[Int],
+		gcCode: Option[String]
 	)
 
 	object ApplyGCShape {
