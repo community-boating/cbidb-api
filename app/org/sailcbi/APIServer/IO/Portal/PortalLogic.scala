@@ -1628,6 +1628,19 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
+	def getStripeCustomerId(pb: PersistenceBroker, personId: Int): Option[String] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override val params: List[String] = List(personId.toString)
+			override def getQuery: String =
+				"""
+				  |select stripe_customer_id from persons where person_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).head
+	}
+
 	case class DiscountWithAmount (
 		discountId: Int,
 		instanceId: Int,
