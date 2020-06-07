@@ -5,13 +5,14 @@ import org.sailcbi.APIServer.Entities.CastableToStorableClass
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripePayouts}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.Logger.Logger
 import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.libs.json.JsValue
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
+import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -82,6 +83,71 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 			})
 		}
 		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+	}
+
+	def createStripeCustomerFromPerson(pb: PersistenceBroker, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
+		val (optionEmail, optionStripeCustomerId) = {
+			type ValidationResult = (Option[String], Option[String]) // email, existing stripe customerID
+			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberUserType)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ValidationResult =
+					(rsw.getOptionString(1), rsw.getOptionString(2))
+
+				override val params: List[String] = List(personId.toString)
+
+				override def getQuery: String =
+					"""
+					  |select email, stripe_customer_id from persons where person_id = ?
+					  |""".stripMargin
+			}
+			pb.executePreparedQueryForSelect(q).head
+		}
+
+		if (optionEmail.isEmpty){
+			println("stripe create customer: email is blank")
+			Future(ValidationError(StripeError("validation", "Email address cannot be blank.")))
+		} else if (optionStripeCustomerId.nonEmpty) {
+			println("stripe create customer: exists")
+			Future(ValidationError(StripeError("validation", "Stripe customer record already exists.")))
+		} else {
+			if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+				apiIO.getOrPostStripeSingleton(
+					"customers",
+					Customer.apply,
+					POST,
+					Some(Map(
+						"email" -> optionEmail.get,
+						"metadata[personId]" -> personId.toString,
+						"metadata[cbiInstance]" -> PA.instanceName
+					)),
+					Some((c: Customer) => {
+						val update = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+							override val params: List[String] = List(c.id, personId.toString)
+							override def getQuery: String =
+								"""
+								  |update persons set stripe_customer_id = ? where person_id = ?
+								  |""".stripMargin
+						}
+						pb.executePreparedQueryForUpdateOrDelete(update)
+					})
+				)
+			}
+			else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.userType)
+		}
+	}
+
+	def getCustomerPortalURL(customerId: String): Future[ServiceRequestResult[String, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"billing_portal/sessions",
+				(jsv: JsValue) => jsv.asInstanceOf[JsObject]("url").asInstanceOf[JsString].value,
+				POST,
+				Some(Map(
+					"customer" -> customerId
+				)),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.userType)
 	}
 
 	private def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
