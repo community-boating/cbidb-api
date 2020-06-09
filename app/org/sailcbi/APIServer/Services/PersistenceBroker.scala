@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Services
 import org.sailcbi.APIServer.CbiUtil.TestUserType
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
+import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import org.sailcbi.APIServer.Storable._
 
@@ -27,9 +28,9 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
 	}
 
-	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T]): List[T] = {
+	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj)
+		else if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj, fields)
 		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
 	}
 
@@ -74,7 +75,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 
 	protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T]
 
-	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T]
+	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T]
 
 	protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
 

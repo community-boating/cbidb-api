@@ -92,12 +92,21 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		}
 	}
 
-	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T]): List[T] = {
+	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+		val profiler = new Profiler
+		val fieldsToGet = fields match{
+			case None => obj.fieldList
+			case Some(fl) => {
+				val fieldNames = fl.map(_.getPersistenceFieldName)
+				obj.fieldList.filter(f => fieldNames.contains(f.getPersistenceFieldName))
+			}
+		}
+		profiler.lap("did intersect")
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
-		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
+		sb.append(fieldsToGet.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), obj.fieldList.map(f => ColumnAlias.wrap(f)), 50, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), fieldsToGet.map(f => ColumnAlias.wrap(f)), 50, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
 		rows.map(r => obj.construct(r, rc))
 	}
 

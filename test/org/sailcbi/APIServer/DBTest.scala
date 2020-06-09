@@ -86,4 +86,16 @@ class DBTest extends FunSuite {
 			pb.executePreparedQueryForInsert(q)
 		})
 	}
+	test("just get some fields") {
+		ServerBootLoaderTest.withPA(pa => {
+			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val pb = rc.pb
+			val types = pb.getAllObjectsOfClass(JpClassType, Some(List(JpClassType.fields.typeName)))
+			val aType = types.head
+			println(aType.values.typeName.get)
+			assertThrows[AnyRef]({
+				println(aType.values.typeId.get)
+			})
+		})
+	}
 }
