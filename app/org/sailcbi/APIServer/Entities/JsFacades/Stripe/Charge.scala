@@ -8,13 +8,14 @@ import org.sailcbi.APIServer.Services.PersistenceBroker
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
-						 id: String,
-						 amount: Int,
-						 metadata: ChargeMetadata,
-						 created: Int,
-						 paid: Boolean,
-						 status: String
-				 ) extends CastableToStorableClass {
+	id: String,
+	amount: Int,
+	metadata: ChargeMetadata,
+	created: Int,
+	paid: Boolean,
+	status: String,
+	description: Option[String]
+) extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = Charge
 	val persistenceValues: Map[String, PreparedValue] = Charge.persistenceValues(this)
 	val pkSqlLiteral: String = GetSQLLiteral(id)
@@ -56,6 +57,7 @@ object Charge extends StripeCastableToStorableObject[Charge] {
 		"ORDER_ID" -> ((c: Charge) => c.metadata.orderId),
 		"TOKEN" -> ((c: Charge) => c.metadata.token),
 		"REFUNDS" -> ((c: Charge) => c.metadata.refunds),
+		"DESCRIPTION" -> ((c: Charge) => c.description),
 	)
 	val pkColumnName = "CHARGE_ID"
 	val getURL: String = "charges"
