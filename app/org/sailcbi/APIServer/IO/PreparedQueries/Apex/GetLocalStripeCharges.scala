@@ -16,18 +16,12 @@ class GetLocalStripeCharges (implicit PA: PermissionsAuthority) extends Hardcode
     """.stripMargin
 
 	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Charge = {
-		// TODO: put this in a library somewhere
-		val refunds = rs.getString(9) match {
-			case "null" | null => None
-			case s: String => Some(s)
-		}
-
 		val cmd = ChargeMetadata(
-			closeId = Some(rs.getInt(3).toString),
-			orderId = Some(rs.getInt(4).toString),
-			token = Some(rs.getString(5)),
+			closeId = rs.getOptionInt(3).map(_.toString), //Some(rs.getInt(3).toString),
+			orderId = rs.getOptionInt(4).map(_.toString), //Some(rs.getInt(4).toString),
+			token = rs.getOptionString(5), // Some(rs.getString(5)),
 			cbiInstance = Some(PA.instanceName),
-			refunds = refunds
+			refunds = rs.getOptionString(9)
 		)
 
 		Charge(
