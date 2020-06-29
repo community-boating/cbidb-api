@@ -81,6 +81,7 @@ class QueryBuilderTest extends FunSuite {
 		//		val typeName = JpClassType.fields.typeName.alias(types)
 				val instanceId = JpClassInstance.fields.instanceId.alias(instances)
 				val teamId = JpTeam.fields.teamId.alias(team)
+				val types_displayOrder = JpClassType.fields.displayOrder.alias(types)
 				val testint = 1
 			}
 			val q = QueryBuilder
@@ -108,7 +109,10 @@ class QueryBuilderTest extends FunSuite {
 				val instanceId = row.getValue(columns.instanceId)
 		//		val teamId = row.getValue(columns.teamId)
 				println( instanceId + ":  " + typeId /*+ "(" + typeName + ")  - "*/ /*+ teamId*/)
-			//	val classType = JpClassType.construct(row.ps, rc)
+				val classType = JpClassType.construct(row.ps, rc)
+				println("typeId: " + classType.values.typeId)
+				println("typeName: " + classType.values.typeName)
+				println("displayOrder: " + classType.values.displayOrder)
 			})
 		})
 	}

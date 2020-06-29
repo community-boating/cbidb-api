@@ -97,7 +97,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		sb.append("SELECT ")
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), 50, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), 50)
 		rows.map(r => obj.construct(r, rc))
 	}
 
@@ -107,7 +107,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-		val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), 6, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), 6)
 		if (rows.length == 1) Some(obj.construct(rows.head, rc))
 		else None
 	}
@@ -125,7 +125,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize)
 			rows.map(r => obj.construct(r, rc))
 		} else {
 			// Too many IDs; make a filter table
@@ -149,7 +149,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 				sb.append(" WHERE " + overallFilter.preparedSQL)
 				params = overallFilter.params
 			}
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize)
 			val p = new Profiler
 			val ret = rows.map(r => obj.construct(r, rc))
 			p.lap("finished construction")
@@ -197,7 +197,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
 			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
-			val rows: List[ProtoStorable[String]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize, _.field.asInstanceOf[DatabaseField[_]].getRuntimeFieldName)
+			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrap(f)), fetchSize)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
 			c.createStatement().executeUpdate(dropTableSQL)
@@ -246,7 +246,8 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 		})
 	}
 
-	private def getProtoStorablesFromSelect[T](sql: String, params: List[String], properties: List[ColumnAlias[_, _]], fetchSize: Int, getKey: ColumnAlias[_, _] => T): List[ProtoStorable[T]] = {
+	// This has to be parameterized, otherwise the compiler shits itself.  At this point shouldnt be anything but ColumnAlias
+	private def getProtoStorablesFromSelect[T <: ColumnAlias[_, _]](sql: String, params: List[String], properties: List[T], fetchSize: Int): List[ProtoStorable[T]] = {
 		println(sql)
 		val profiler = new Profiler
 		dbConnection.mainPool.withConnection(c => {
@@ -270,37 +271,37 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 				var dateTimeFields: Map[T, Option[LocalDateTime]] = Map()
 
 
-				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: ColumnAlias[_, _], i: Int) => {
+				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: T, i: Int) => {
 					ca.field match {
 						case _: IntDatabaseField | _: NullableIntDatabaseField => {
-							intFields += (getKey(ca) -> Some(rs.getInt(i)))
-							if (rs.wasNull()) intFields += (getKey(ca) -> None)
+							intFields += (ca -> Some(rs.getInt(i)))
+							if (rs.wasNull()) intFields += (ca -> None)
 						}
 						case _: DoubleDatabaseField | _: NullableDoubleDatabaseField => {
-							doubleFields += (getKey(ca) -> Some(rs.getDouble(i)))
-							if (rs.wasNull()) doubleFields += (getKey(ca) -> None)
+							doubleFields += ((ca) -> Some(rs.getDouble(i)))
+							if (rs.wasNull()) doubleFields += ((ca) -> None)
 						}
 						case _: StringDatabaseField | _: NullableStringDatabaseField => {
-							stringFields += (getKey(ca) -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += (getKey(ca) -> None)
+							stringFields += ((ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += ((ca) -> None)
 						}
 						case _: DateDatabaseField | _: NullableDateDatabaseField => {
-							dateFields += (getKey(ca) -> {
+							dateFields += ((ca) -> {
 								try {
 									Some(rs.getDate(i).toLocalDate)
 								} catch {
 									case _: Throwable => None
 								}
 							})
-							if (rs.wasNull()) dateFields += (getKey(ca) -> None)
+							if (rs.wasNull()) dateFields += ((ca) -> None)
 						}
 						case _: DateTimeDatabaseField => {
-							dateTimeFields += (getKey(ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
-							if (rs.wasNull()) dateTimeFields += (getKey(ca) -> None)
+							dateTimeFields += ((ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
+							if (rs.wasNull()) dateTimeFields += ((ca) -> None)
 						}
 						case _: BooleanDatabaseField => {
-							stringFields += (getKey(ca) -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += (getKey(ca) -> None)
+							stringFields += ((ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += ((ca) -> None)
 						}
 						case _ => {
 							println(" *********** UNKNOWN COLUMN TYPE FOR COL " + ca)
@@ -422,7 +423,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseConnecti
 
 		println("QueryBuilder SQL: " + sql)
 
-		getProtoStorablesFromSelect(sql, params, qb.fields, 500, ca => ca).map(ps => new QueryBuilderResultRow(ps))
+		getProtoStorablesFromSelect(sql, params, qb.fields, 500).map(ps => new QueryBuilderResultRow(ps))
 	}
 
 	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {

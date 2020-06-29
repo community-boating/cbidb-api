@@ -6,6 +6,11 @@ import org.sailcbi.APIServer.Storable.StorableClass
 abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 	private var value: Option[T] = None
 
+	override def toString: String = peek match {
+		case None => "(unset)"
+		case Some(t: T) => t.toString
+	}
+
 	def set(v: T): Unit = {
 		println("setting: " + instance.getCompanion.entityName + "." + field.getPersistenceFieldName)
 		value = Some(v)

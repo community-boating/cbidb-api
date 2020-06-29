@@ -30,8 +30,8 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 		)
 	}
 
-	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T] =
-		this.findValueInProtoStorableImpl(row, this.getRuntimeFieldName)
+	def findValueInProtoStorable(ca: ColumnAlias[_, _], row: ProtoStorable[ColumnAlias[_, _]]): Option[T] =
+		this.findValueInProtoStorableImpl(row, ca)
 
 	def isNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 
