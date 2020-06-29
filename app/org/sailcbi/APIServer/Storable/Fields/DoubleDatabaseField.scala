@@ -20,7 +20,7 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 	}
 
 	def lessThanConstant(c: Double): String => Filter = {
-		t => Filter(s"$t.$getPersistenceFieldName < $c")
+		t => Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
 	}
 
 	def inList(l: List[Double]): String => Filter = t => PA.persistenceSystem match {
@@ -33,14 +33,15 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 				}
 			}
 
-			if (l.isEmpty) Filter("")
-			else Filter(groupIDs(l).map(group => {
-				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
-			}).mkString(" OR "))
+			if (l.isEmpty) Filter.empty
+			else Filter.or(groupIDs(l).map(group => Filter(
+				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})",
+				List.empty
+			)))
 		}
 	}
 
-	def equalsConstant(d: Double): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $d")
+	def equalsConstant(d: Double): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $d", List.empty)
 
 	def getValueFromString(s: String): Option[Double] = {
 		try {

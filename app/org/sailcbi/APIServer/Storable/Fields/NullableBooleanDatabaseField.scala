@@ -26,8 +26,8 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 	}
 
 	def equals(b: Option[Boolean]): String => Filter = t => b match {
-		case Some(x) => Filter(s"$t.$getPersistenceFieldName = '${if (x) "Y" else "N"}'")
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
+		case Some(x) => Filter(s"$t.$getPersistenceFieldName = '${if (x) "Y" else "N"}'", List.empty)
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[Boolean]] = s.toLowerCase match {

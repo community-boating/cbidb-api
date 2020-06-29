@@ -29,19 +29,20 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
 			val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}")
+			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}", List.empty)
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
 	def isDateConstant(date: LocalDate): String => Filter = t => PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL =>
 			Filter(
 				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +
-						s"$t.$getPersistenceFieldName < '${date.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}'"
+						s"$t.$getPersistenceFieldName < '${date.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}'",
+				List.empty
 			)
 		case PERSISTENCE_SYSTEM_ORACLE =>
-			Filter(s"TRUNC($t.$getPersistenceFieldName) = TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
+			Filter(s"TRUNC($t.$getPersistenceFieldName) = TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[LocalDateTime] = {

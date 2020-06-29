@@ -19,13 +19,13 @@ class NullableStringDatabaseField(override val entity: StorableObject[_ <: Stora
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[String]] = row.stringFields.get(key)
 
 	def equalsConstant(os: Option[String]): String => Filter = t => os match {
-		case Some(s: String) => Filter(s"$t.$getPersistenceFieldName = '$s'")
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
+		case Some(s: String) => Filter(s"$t.$getPersistenceFieldName = ?", List(s))
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 	}
 
 	def equalsConstantLowercase(os: Option[String]): String => Filter = t => os match {
-		case Some(s: String) => Filter(s"lower($t.$getPersistenceFieldName) = '${s.toLowerCase()}'")
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
+		case Some(s: String) => Filter(s"lower($t.$getPersistenceFieldName) = ?", List(s.toLowerCase()))
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))

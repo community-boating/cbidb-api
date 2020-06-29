@@ -33,9 +33,15 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 	def findValueInProtoStorable(row: ProtoStorable[String]): Option[T] =
 		this.findValueInProtoStorableImpl(row, this.getRuntimeFieldName)
 
-	def isNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NULL")
+	def isNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 
-	def isNotNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NOT NULL")
+	def isNotNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NOT NULL", List.empty)
+
+	def equalsField[U <: DatabaseField[T]](c: ColumnAlias[T, U]): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = ${c.table.name}.${c.field.getPersistenceFieldName}", List.empty)
 
 	def getValueFromString(s: String): Option[T]
+}
+
+object DatabaseField {
+	def testFilter(s: String): Filter = Filter("? = ?", List(s, s))
 }

@@ -29,18 +29,19 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 				}
 			}
 
-			if (l.isEmpty) Filter("")
-			else Filter(groupIDs(l).map(group => {
-				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
-			}).mkString(" OR "))
+			if (l.isEmpty) Filter.empty
+			else Filter.or(groupIDs(l).map(group => Filter(
+				s"$t.$getPersistenceFieldName in (${group.mkString(", ")})",
+				List.empty
+			)))
 		}
 	}
 
-	def lessThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName < $c")
+	def lessThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
 
-	def equalsConstant(i: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $i")
+	def equalsConstant(i: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = $i", List.empty)
 
-	def greaterThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName > $c")
+	def greaterThanConstant(c: Int): String => Filter = t => Filter(s"$t.$getPersistenceFieldName > $c", List.empty)
 
 	def getValueFromString(s: String): Option[Int] = {
 		try {

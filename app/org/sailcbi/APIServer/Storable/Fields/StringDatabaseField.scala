@@ -25,11 +25,11 @@ class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass
 	}
 
 	def equalsConstant(c: String): String => Filter =
-		t => Filter(s"$t.$getPersistenceFieldName = '$c'")
+		t => Filter(s"$t.$getPersistenceFieldName = ?", List(c))
 
 
 	def equalsConstantLowercase(c: String): String => Filter =
-		t => Filter(s"lower($t.$getPersistenceFieldName) = '${c.toLowerCase()}'")
+		t => Filter(s"lower($t.$getPersistenceFieldName) = ?", List(c.toLowerCase()))
 
 	def getValueFromString(s: String): Option[String] = Some(s)
 

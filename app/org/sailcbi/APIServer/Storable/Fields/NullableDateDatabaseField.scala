@@ -22,9 +22,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}")
+			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[LocalDate]] = {
@@ -42,9 +42,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		val comparator: String = comp.comparator
 		PA.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'")
+				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
 			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
+				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
 		}
 	}
 

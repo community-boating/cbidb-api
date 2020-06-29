@@ -128,7 +128,10 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		fieldList
 	}
 
-	def construct(ps: ProtoStorable[String], rc: RequestCache): T = {
+	def construct(ps: ProtoStorable[String], rc: RequestCache): T =
+		construct(ps, rc, None)
+
+	def construct(ps: ProtoStorable[String], rc: RequestCache, tableAlias: Option[String]): T = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])
