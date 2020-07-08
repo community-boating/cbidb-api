@@ -10,7 +10,7 @@ class ChecksTable(
 				 ) extends AbstractTable[Check](
 	checks,
 	new MultiDrawableTable(List(DrawableTable(
-		List(List("Check #", "Amount", "School")),
+		List(List("Check #", "Amount", "Name / School")),
 		List(50f, 70f, 170f),
 		List(ALIGN_CENTER, ALIGN_CENTER, ALIGN_CENTER),
 		defaultFont,
