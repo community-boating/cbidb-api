@@ -78,7 +78,7 @@ GET     /junior/get-signups                 org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 
-GET     /check-proto-person-cookie              org.sailcbi.APIServer.Api.Endpoints.Public.CheckProtoPersonCookie.get()
+POST     /auth/check-proto-person-cookie              org.sailcbi.APIServer.Api.Endpoints.Security.CheckProtoPersonCookie.post()
 
 POST    /junior/add-junior-class-reservation       org.sailcbi.APIServer.Api.Endpoints.Member.AddJuniorClassReservation.post()
 

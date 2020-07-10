@@ -32,6 +32,7 @@ class PermissionsAuthority private[Services] (
 )  {
 	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
 	println(this.toString)
+	println("AllowableUserTypes: ", allowableUserTypes)
 	// Initialize sentry
 	Sentry.init(secrets.sentryDSN)
 	def instanceName: String = secrets.dbConnection.mainSchemaName
@@ -80,11 +81,12 @@ class PermissionsAuthority private[Services] (
 	def logger: Logger = if (!isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
 	def requestIsFromLocalHost(request: ParsedRequest): Boolean = {
+		val addressRegex = "127\\.0\\.0\\.1(:[0-9]+)?".r
 		val allowedIPs = Set(
 			"127.0.0.1",
 			"0:0:0:0:0:0:0:1"
 		)
-		allowedIPs.contains(request.remoteAddress)
+		allowedIPs.contains(request.remoteAddress) || addressRegex.findFirstIn(request.remoteAddress).isDefined
 	}
 
 	private def wrapInStandardTryCatch(block: () => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
