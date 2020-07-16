@@ -104,6 +104,14 @@ POST    /member/add-promo-code                    org.sailcbi.APIServer.Api.Endp
 POST    /member/apply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.add()
 POST    /member/unapply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.delete()
 
+GET     /member/ap-class-type-avail         org.sailcbi.APIServer.Api.Endpoints.Member.ApClassTypeAvailabilities.get()
+
+GET     /member/ap-classes-for-calendar         org.sailcbi.APIServer.Api.Endpoints.Member.GetApClassesForCalendar.get()
+
+POST    /member/ap-class-signup             org.sailcbi.APIServer.Api.Endpoints.Member.ApClassSignup.post()
+
+POST    /member/ap-class-unenroll             org.sailcbi.APIServer.Api.Endpoints.Member.ApClassUnenroll.post()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()

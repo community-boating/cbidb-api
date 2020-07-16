@@ -1056,6 +1056,14 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
+	case class DiscountWithAmount (
+		discountId: Int,
+		instanceId: Int,
+		membershipTypeId: Int,
+		fullPrice: Double,
+		discountAmount: Double
+	)
+
 	def getFYExpirationDate(pb: PersistenceBroker, personId: Int): (Int, LocalDate) = {
 		val q = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberUserType)) {
 			override val params: List[String] = List(personId.toString)
@@ -1628,12 +1636,229 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	case class DiscountWithAmount (
-		discountId: Int,
-		instanceId: Int,
-		membershipTypeId: Int,
-		fullPrice: Double,
-		discountAmount: Double
+	def getApClassTypeAvailabilities(pb: PersistenceBroker, personId: Int): List[ApClassAvailability] = {
+		val q = new PreparedQueryForSelect[ApClassAvailability](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassAvailability = ApClassAvailability(
+				typeName=rsw.getString(2),
+				typeId=rsw.getInt(1),
+				availabilityFlag=rsw.getInt(4),
+				displayOrder = rsw.getDouble(3),
+				noSignup = rsw.getOptionBooleanFromChar(5).getOrElse(false),
+				seeTypeError = rsw.getOptionString(6),
+				description = rsw.getString(7)
+			)
+
+			override val params: List[String] = List(personId.toString, personId.toString)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |type_id,
+				  |type_name,
+				  |display_order,
+				  |ap_class_pkg.get_type_visibility(?, type_id),
+				  |t.no_signup,
+				  |ap_class_pkg.see_type(?, t.type_id),
+				  |t.desc_long
+				  |from ap_class_types t
+				  |order by t.display_order
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+	case class ApClassAvailability (
+		typeId: Int,
+		typeName: String,
+		availabilityFlag: Int,
+		displayOrder: Double,
+		noSignup: Boolean,
+		seeTypeError: Option[String],
+		description: String
 	)
+
+	object ApClassAvailability {
+		implicit val format = Json.format[ApClassAvailability]
+
+		def apply(v: JsValue): ApClassAvailability = v.as[ApClassAvailability]
+	}
+
+	def getApClassesForCalendar(pb: PersistenceBroker, personId: Int): List[ApClassInstanceForCalendar] = {
+		val instancesQ: PreparedQueryForSelect[ApClassInstanceForCalendar] = new PreparedQueryForSelect[ApClassInstanceForCalendar](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassInstanceForCalendar = ApClassInstanceForCalendar(
+				instanceId = rsw.getInt(2),
+				typeName = rsw.getString(1),
+				sessions = List.empty,
+				signupType = rsw.getOptionString(3),
+				waitlistResult = rsw.getOptionString(4),
+				typeId = rsw.getInt(5),
+				seeInstanceError = rsw.getOptionString(6),
+				spotsLeft = rsw.getInt(7),
+				price = rsw.getOptionDouble(8).getOrElse(0),
+			)
+
+			override val params: List[String] = List(personId.toString, personId.toString)
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |t.type_name,
+				  |i.instance_id,
+				  |si.signup_type,
+				  |wlr.wl_result,
+				  |t.type_id,
+				  |ap_class_pkg.see_instance(?, i.instance_id),
+				  |ap_class_pkg.spots_left(i.instance_id),
+				  |i.price
+				  |from ap_class_types t, ap_class_formats f, ap_class_bookends bk, ap_class_sessions fs, ap_class_instances i
+				  |left outer join ap_class_signups si
+				  |on si.instance_id = i.instance_id and si.person_id = ?
+				  |and (si.signup_type is null or si.signup_type not in ('U','A'))
+				  |left outer join ap_class_wl_results wlr
+				  |on si.signup_id = wlr.signup_id
+				  |where i.format_id = f.format_id and f.type_id = t.type_id
+				  |and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
+				  |and fs.session_datetime > (add_months(util_pkg.get_sysdate, -18))
+				  |and fs.session_datetime < (add_months(util_pkg.get_sysdate, 6))
+				  |and i.cancelled_datetime is null
+				  |and nvl(i.hide_online,'N') <> 'Y'
+				  |order by fs.session_datetime
+				  |
+				  |""".stripMargin
+		}
+
+		val instances = pb.executePreparedQueryForSelect(instancesQ, 2000)
+		val instanceIDs = instances.map(_.instanceId)
+		val sessionsQ = new PreparedQueryForSelect[ApClassSessionForCalendar](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassSessionForCalendar = ApClassSessionForCalendar(
+				sessionId = rsw.getInt(1),
+				instanceId = rsw.getInt(2),
+				sessionDatetime = rsw.getLocalDateTime(3),
+				sessionLength = rsw.getDouble(4)
+
+			)
+
+			override def getQuery: String =
+				s"""
+				  |select
+				  |s.session_id,
+				  |s.instance_id,
+				  |s.session_Datetime,
+				  |s.session_length
+				  |from ap_class_sessions s, ap_class_instances i
+				  |where s.instance_id = i.instance_id
+				  |and s.session_datetime > (add_months(util_pkg.get_sysdate, -18))
+				  |and s.session_datetime < (add_months(util_pkg.get_sysdate, 6))
+				  |and i.cancelled_datetime is null
+				  |and nvl(i.hide_online,'N') <> 'Y'
+				  |order by s.session_datetime
+				  |""".stripMargin
+		}
+		val sessions = pb.executePreparedQueryForSelect(sessionsQ, 2000)
+		instances.map(i => {
+			val sessionsForInstance = sessions.filter(_.instanceId == i.instanceId)
+			i.copy(sessions = sessionsForInstance)
+		}).filter(i => i.sessions.nonEmpty)
+	}
+
+	case class ApClassSessionForCalendar(
+		sessionId: Int,
+		instanceId: Int,
+		sessionDatetime: LocalDateTime,
+		sessionLength: Double
+	)
+
+	object ApClassSessionForCalendar {
+		implicit val format = Json.format[ApClassSessionForCalendar]
+
+		def apply(v: JsValue): ApClassSessionForCalendar = v.as[ApClassSessionForCalendar]
+	}
+
+	case class ApClassInstanceForCalendar (
+		instanceId: Int,
+		typeName: String,
+		typeId: Int,
+		sessions: List[ApClassSessionForCalendar],
+		signupType: Option[String],
+		waitlistResult: Option[String],
+		seeInstanceError: Option[String],
+		spotsLeft: Int,
+		price: Double
+	)
+
+	object ApClassInstanceForCalendar{
+		implicit val format = Json.format[ApClassInstanceForCalendar]
+
+		def apply(v: JsValue): ApClassInstanceForCalendar = v.as[ApClassInstanceForCalendar]
+	}
+
+	def apClassSignup(pb: PersistenceBroker, personId: Int, instanceId: Int, isWaitlist: Boolean): Option[String] = {
+		val ppc = new PreparedProcedureCall[String](Set(MemberUserType)) {
+//			procedure do_signup(
+//					i_person_id in number,
+//					i_instance_id in number,
+//					i_signup_type in char,
+//					i_do_override in char default 'N',
+//					i_order_id in number,
+//					i_payment_medium in varchar2,
+//					o_signup_type out char,
+//					o_error_msg out clob
+//			)
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_signup_type" -> java.sql.Types.CHAR,
+				"o_error_msg" -> java.sql.Types.CLOB
+			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> personId,
+				"i_instance_id" -> instanceId,
+				"i_order_id" -> getOrderId(pb, personId),
+			)
+
+
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"i_signup_type" -> { if (isWaitlist) "W" else "E" },
+				"i_do_override" -> "N",
+				"i_payment_medium" -> null,
+			)
+
+			override def getOutResults(cs: CallableStatement): String = cs.getString("o_error_msg")
+
+			override def getQuery: String = "ap_class_pkg.do_signup(?, ?, ?, ?, ?, ?, ?, ?)"
+		}
+
+		pb.executeProcedure(ppc) match {
+			case null => None
+			case s: String => Some(s)
+		}
+	}
+
+	def apClassUnenroll(pb: PersistenceBroker, personId: Int, instanceId: Int): Unit = {
+		val ppc = new PreparedProcedureCall[Unit](Set(MemberUserType)) {
+//			procedure cancel_signup(
+//					p_person_id in number,
+//					p_instance_id in number,
+//					p_cancel_type in char,
+//					p_is_online in char
+//			)
+			override def setInParametersInt: Map[String, Int] = Map(
+				"p_person_id" -> personId,
+				"p_instance_id" -> instanceId,
+			)
+
+
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"p_cancel_type" -> "U",
+				"p_is_online" -> "Y",
+			)
+
+			override def getQuery: String = "ap_class_pkg.cancel_signup(?, ?, ?, ?)"
+
+			override def registerOutParameters: Map[String, Int] = Map.empty
+
+			override def getOutResults(cs: CallableStatement): Unit = Unit
+		}
+
+		pb.executeProcedure(ppc)
+	}
 }
 
