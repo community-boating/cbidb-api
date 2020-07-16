@@ -837,13 +837,11 @@ object PortalLogic {
 	def apDeleteReservation(pb: PersistenceBroker, memberID: Int): ValidationResult = {
 		val orderId = getOrderId(pb, memberID)
 		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-			override val params: List[String] = List(orderId.toString, memberID.toString, orderId.toString)
+			override val params: List[String] = List(orderId.toString)
 
 			override def getQuery: String =
 				"""
-				  |delete from shopping_cart_guest_privs where sc_membership_id in (
-				  |	select item_id from shopping_cart_memberships where order_id = ? and person_id = ?
-				  |) and order_id = ?
+				  |delete from shopping_cart_guest_privs where order_id = ?
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(deleteSCGP)
@@ -897,7 +895,9 @@ object PortalLogic {
 				parentPersonId.toString,
 				orderId.toString,
 				parentPersonId.toString,
-				parentPersonId.toString
+				parentPersonId.toString,
+				orderId.toString,
+				orderId.toString
 			)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -918,6 +918,16 @@ object PortalLogic {
 				  |and scj.order_id = ?
 				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
 				  |and (scj.ready_to_buy = 'Y')
+				  |
+				  |union all
+				  |
+				  |select 1 from shopping_cart_guest_privs
+				  |where real_membership_id is not null and order_id = ?
+				  |
+				  |union all
+				  |
+				  |select 1 from shopping_cart_waivers
+				  |where order_id = ?
 				  |""".stripMargin
 		}
 
@@ -1224,28 +1234,69 @@ object PortalLogic {
 		val count = pb.executePreparedQueryForSelect(countQ).head
 
 		if (count == 0 && wantIt) {
-			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+
+			val scmQ = new PreparedQueryForSelect[Option[Int]](Set(MemberUserType)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Int] = rsw.getOptionInt(1)
+
+				override val params: List[String] = List(orderId.toString, personId.toString)
+
+				override def getQuery: String =
+					"""
+					  |select max(item_id) from shopping_cart_memberships where order_id = ? and person_id = ?
+					  |""".stripMargin
+			}
+
+			val scmId = pb.executePreparedQueryForSelect(scmQ).headOption.flatten
+
+			lazy val realMemInsertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
 				override val pkName: Option[String] = Some("ITEM_ID")
 
-				override val params: List[String] = List(
-					orderId.toString,
-					personId.toString,
-					orderId.toString
-				)
+				override val params: List[String] = List(personId.toString, orderId.toString)
 
 				override def getQuery: String =
 					"""
 					  |insert into shopping_cart_guest_privs(
-					  |      sc_membership_id,
+					  |      real_membership_id,
 					  |      order_id,
 					  |      price
 					  |    ) values (
-					  |      (select max(item_id) from shopping_cart_memberships where order_id = ? and person_id = ?),
+					  |      (select max(assign_id) from persons_memberships
+					  |        left outer join guest_privs gp on gp.membership_id = assign_id
+					  |        where gp.membership_id is null and assign_id =
+					  |        (select max(assign_id) from persons_memberships where person_id = ? and void_close_id is null and membership_type_id in
+					  |        (select membership_type_id from membership_types where program_id = 1)
+					  |      )),
 					  |      ?,
 					  |      global_constant_pkg.get_value_number('GP_PRICE')
 					  |    )
 					  |""".stripMargin
 			}
+
+			val insertQ = scmId.fold(
+				realMemInsertQ
+			)(
+				(scmId: Int) => new PreparedQueryForInsert(Set(MemberUserType)) {
+					override val pkName: Option[String] = Some("ITEM_ID")
+
+					override val params: List[String] = List(
+						scmId.toString,
+						orderId.toString
+					)
+
+					override def getQuery: String =
+						"""
+						  |insert into shopping_cart_guest_privs(
+						  |      sc_membership_id,
+						  |      order_id,
+						  |      price
+						  |    ) values (
+						  |      ?,
+						  |      ?,
+						  |      global_constant_pkg.get_value_number('GP_PRICE')
+						  |    )
+						  |""".stripMargin
+				}
+			)
 
 			pb.executePreparedQueryForInsert(insertQ)
 		} else if (!wantIt) {
