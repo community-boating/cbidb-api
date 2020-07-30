@@ -34,7 +34,12 @@ class PermissionsAuthority private[Services] (
 	println(this.toString)
 	println("AllowableUserTypes: ", allowableUserTypes)
 	// Initialize sentry
-	Sentry.init(secrets.sentryDSN)
+	secrets.sentryDSN.foreach(Sentry.init)
+	if (secrets.sentryDSN.isDefined) {
+		println("sentry is defined")
+	} else {
+		println("sentry is NOT defined")
+	}
 	def instanceName: String = secrets.dbConnection.mainSchemaName
 
 	def sleep(): Unit = {
