@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -18,6 +18,11 @@ class ApClassSession extends StorableClass {
 		val sessionDateTime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDateTime)
 	}
 
+	override val valuesList = List(
+		values.sessionId,
+		values.instanceId,
+		values.sessionDateTime
+	)
 }
 
 object ApClassSession extends StorableObject[ApClassSession] {

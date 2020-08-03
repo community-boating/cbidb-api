@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue._
+import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
 import org.sailcbi.APIServer.Storable.StorableClass
 

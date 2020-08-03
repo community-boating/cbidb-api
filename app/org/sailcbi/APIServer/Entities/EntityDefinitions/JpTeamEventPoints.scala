@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.IntFieldValue
+import org.sailcbi.APIServer.Storable.FieldValues.IntFieldValue
 import org.sailcbi.APIServer.Storable.Fields.IntDatabaseField
 import org.sailcbi.APIServer.Storable._
 
@@ -18,6 +18,11 @@ class JpTeamEventPoints extends StorableClass {
 		val points = new IntFieldValue(self, JpTeamEventPoints.fields.points)
 	}
 
+	override val valuesList = List(
+		values.rowId,
+		values.teamId,
+		values.points
+	)
 }
 
 object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {

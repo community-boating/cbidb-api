@@ -7,32 +7,38 @@ import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
 import io.sentry.Sentry
 import org.sailcbi.APIServer.Api.ResultError
-import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
+import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect}
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
+import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.io.{Directory, File}
+import scala.reflect.runtime.universe
 
 
 class PermissionsAuthority private[Services] (
 	val serverParameters: ServerParameters,
 	val isTestMode: Boolean,
+	val isDebugMode: Boolean,
 	val readOnlyDatabase: Boolean,
 	val allowableUserTypes: List[UserType],
 	val preparedQueriesOnly: Boolean,
 	val persistenceSystem: PersistenceSystem,
 	secrets: PermissionsAuthoritySecrets
 )  {
+	private val ENTITY_PACKAGE_PATH = "org.sailcbi.APIServer.Entities.EntityDefinitions"
 	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
 	println(this.toString)
 	println("AllowableUserTypes: ", allowableUserTypes)
+	println("PA Debug: " + this.isDebugMode)
 	// Initialize sentry
 	secrets.sentryDSN.foreach(Sentry.init)
 	if (secrets.sentryDSN.isDefined) {
@@ -40,6 +46,16 @@ class PermissionsAuthority private[Services] (
 	} else {
 		println("sentry is NOT defined")
 	}
+
+	def bootChecks(): Unit = {
+		if (this.isDebugMode) {
+			println("running PA boot checks")
+			if (this.checkAllValueListsMatchReflection.nonEmpty) {
+				throw new Exception("ValuesList is not correct for: " + this.checkAllValueListsMatchReflection)
+			}
+		}
+	}
+
 	def instanceName: String = secrets.dbConnection.mainSchemaName
 
 	def sleep(): Unit = {
@@ -302,6 +318,63 @@ class PermissionsAuthority private[Services] (
 				case Some(_) => throw new PostBodyNotJSONException
 			}
 		})
+	}
+
+
+
+	def getAllEntityFiles: List[String] = {
+		val folder = Directory("app/" + ENTITY_PACKAGE_PATH.replace(".", "/"))
+		folder.list.toList.map(path => "([^\\.]*)\\.scala".r.findFirstMatchIn(path.name).get.group(1))
+	}
+
+	def getCompanionForEntityFile[T](name: String)(implicit man: Manifest[T]): T = {
+		val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+		val module = runtimeMirror.staticModule(ENTITY_PACKAGE_PATH + "." + name + "$")
+		runtimeMirror.reflectModule(module).instance.asInstanceOf[T]
+	}
+
+	def instantiateAllEntityCompanions(): List[StorableObject[_]] = {
+		val files = getAllEntityFiles
+		files.foreach(f => getCompanionForEntityFile[Any](f))
+		println(files)
+		StorableObject.getEntities
+	}
+
+	def checkAllEntitiesHaveValuesList: List[StorableObject[_]] = {
+		val files = getAllEntityFiles
+		files.map(f => getCompanionForEntityFile[StorableObject[_]](f)).filter(!_.hasValueList)
+	}
+
+	def checkAllValueListsMatchReflection: List[StorableObject[_]] = {
+		val files = getAllEntityFiles
+		files.map(f => getCompanionForEntityFile[StorableObject[_]](f)).filter(!_.valueListMatchesReflection)
+	}
+
+	def nukeDB(): Unit = {
+		if (!isTestMode) throw new Exception("nukeDB can only be called in test mode")
+		else {
+			this.instantiateAllEntityCompanions()
+			StorableObject.getEntities.foreach(e => {
+				val q = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
+					override def getQuery: String = "delete from " + e.entityName
+				}
+				val result = rootPB.executePreparedQueryForUpdateOrDelete(q)
+				println(s"deleted $result rows from ${e.entityName}")
+			})
+		}
+	}
+
+	def withSeedState(entities: List[StorableClass], block: () => Unit): Unit = {
+		if (!isTestMode) throw new Exception("withSeedState can only be called in test mode")
+		else {
+			this.nukeDB()
+			try {
+				entities.foreach(e => rootPB.commitObjectToDatabase(e))
+				block()
+			} finally {
+				this.nukeDB()
+			}
+		}
 	}
 }
 

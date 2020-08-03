@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.InitializableFromCollectionElement
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -19,6 +19,11 @@ class MembershipType extends StorableClass {
 		val programId = new IntFieldValue(self, MembershipType.fields.programId)
 	}
 
+	override val valuesList = List(
+		values.membershipTypeId,
+		values.membershipTypeName,
+		values.programId
+	)
 }
 
 object MembershipType extends StorableObject[MembershipType] {

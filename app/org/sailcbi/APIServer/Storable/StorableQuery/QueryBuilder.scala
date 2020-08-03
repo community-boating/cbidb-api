@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Storable.Filter
 import scala.reflect.runtime.universe._
 
 class QueryBuilder(
-	val tables: List[TableAlias],
+	val tables: List[(TableAlias, Boolean)],
 	val joins: List[TableJoin],
 	val where: List[Filter],
 	val fields: List[ColumnAlias[_, _]]
@@ -12,16 +12,16 @@ class QueryBuilder(
 	// TODO: try to detect invalid setup and throw. e.g. two TableAliases, same name, different StorableObject
 	// TODO: enforce n-1 join points for n tables unless a crossJoin flag is set
 	val tableAliasesHash: Set[String] = {
-		this.tables.map(_.name).toSet
+		this.tables.map(_._1.name).toSet
 	}
 
-	def innerJoin(t: TableAlias, on: Filter): QueryBuilder = this.join(INNER_JOIN)(t, on)
+	def innerJoin(t: TableAliasInnerJoined, on: Filter): QueryBuilder = this.join(t, on, false)
 
-	def leftOuterJoin(t: TableAlias, on: Filter): QueryBuilder = this.join(LEFT_OUTER_JOIN)(t, on)
+	def outerJoin(t: TableAliasOuterJoined, on: Filter): QueryBuilder = this.join(t, on, true)
 
-	private def join(joinType: JoinType)(t: TableAlias, on: Filter): QueryBuilder = new QueryBuilder(
-		tables = t :: tables,
-		joins = TableJoin(joinType, on) :: joins,
+	private def join(t: TableAlias, on: Filter, outerJoin: Boolean): QueryBuilder = new QueryBuilder(
+		tables = (t, outerJoin) :: tables,
+		joins = TableJoin(on) :: joins,
 		where = where,
 		fields = fields
 	)
@@ -50,7 +50,7 @@ class QueryBuilder(
 
 object QueryBuilder {
 	def from(t: TableAlias): QueryBuilder = new QueryBuilder(
-		tables = List(t),
+		tables = List((t, false)),
 		joins = List.empty,
 		where = List.empty,
 		fields = List.empty

@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Storable.Fields.FieldValue
+package org.sailcbi.APIServer.Storable.FieldValues
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -9,13 +9,13 @@ import org.sailcbi.APIServer.Storable.Fields.NullableDateDatabaseField
 import org.sailcbi.APIServer.Storable.StorableClass
 
 class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField)(implicit PA: PermissionsAuthority) extends FieldValue[Option[LocalDate]](instance, field) {
-	def getPersistenceLiteral: String = {
+	def getPersistenceLiteral: (String, List[String]) = {
 		val d = super.get
 		d match {
-			case None => "NULL"
+			case None => ("NULL", List.empty)
 			case Some(d) => PA.persistenceSystem match {
-				case PERSISTENCE_SYSTEM_MYSQL => "'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'"
-				case PERSISTENCE_SYSTEM_ORACLE => "TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
+				case PERSISTENCE_SYSTEM_MYSQL => ("'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'", List.empty)
+				case PERSISTENCE_SYSTEM_ORACLE => ("TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')", List.empty)
 			}
 		}
 	}

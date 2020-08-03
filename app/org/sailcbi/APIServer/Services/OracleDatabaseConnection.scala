@@ -4,7 +4,7 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 
 object OracleDatabaseConnection {
-	def apply(confFileLocation: String): DatabaseConnection = {
+	def apply(confFileLocation: String): DatabaseHighLevelConnection = {
 		val pw = new PropertiesWrapper(confFileLocation, Array[String]("username", "password", "host", "port", "sid", "schema", "temptableschema"))
 
 		// TODO: unclear if this does anything
@@ -23,7 +23,7 @@ object OracleDatabaseConnection {
 		val mainConfig = getDataSourceConfig(host, port, sid, username, password)
 		val tempConfig = getDataSourceConfig(host, port, sid, tempUsername, tempPassword)
 
-		DatabaseConnection(
+		DatabaseHighLevelConnection(
 			mainPool = new ConnectionPoolWrapper(new HikariDataSource(mainConfig)),
 			tempPool = new ConnectionPoolWrapper(new HikariDataSource(tempConfig)),
 			mainSchemaName = mainSchemaName,

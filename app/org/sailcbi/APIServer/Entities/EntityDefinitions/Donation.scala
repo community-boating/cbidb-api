@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -19,6 +19,12 @@ class Donation extends StorableClass {
 		val donationDate = new DateFieldValue(self, Donation.fields.donationDate)
 	}
 
+	override val valuesList = List(
+		values.donationId,
+		values.personId,
+		values.amount,
+		values.donationDate
+	)
 }
 
 object Donation extends StorableObject[Donation] {

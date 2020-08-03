@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -14,6 +14,10 @@ class Tag extends StorableClass {
 		val tagName = new StringFieldValue(self, Tag.fields.tagName)
 	}
 
+	override val valuesList = List(
+		values.tagId,
+		values.tagName
+	)
 }
 
 object Tag extends StorableObject[Tag] {

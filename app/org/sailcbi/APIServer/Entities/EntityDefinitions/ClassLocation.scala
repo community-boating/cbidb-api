@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -14,6 +14,10 @@ class ClassLocation extends StorableClass {
 		val locationName = new StringFieldValue(self, ClassLocation.fields.locationName)
 	}
 
+	override val valuesList = List(
+		values.locationId,
+		values.locationName
+	)
 }
 
 object ClassLocation extends StorableObject[ClassLocation] {

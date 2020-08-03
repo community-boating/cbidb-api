@@ -2,11 +2,13 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAlias, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableIntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Int]] = row.intFields.get(key)
+
+	def isNullable: Boolean = true
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
@@ -51,5 +53,6 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 		}
 	}
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Option[Int], NullableIntDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

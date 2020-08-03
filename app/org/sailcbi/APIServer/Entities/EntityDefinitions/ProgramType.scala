@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -14,6 +14,10 @@ class ProgramType extends StorableClass {
 		val programName = new StringFieldValue(self, ProgramType.fields.programName)
 	}
 
+	override val valuesList = List(
+		values.programId,
+		values.programName
+	)
 }
 
 object ProgramType extends StorableObject[ProgramType] {

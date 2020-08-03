@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAlias, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Double](entity, persistenceFieldName) {
@@ -11,10 +11,12 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
+	def isNullable: Boolean = false
+
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Double] = {
 		row.doubleFields.get(key) match {
 			case Some(Some(x)) => Some(x)
-			case Some(None) => throw new Exception("non-null Double field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
+			case Some(None) => throw new NonNullFieldWasNullException("non-null Double field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
@@ -52,5 +54,6 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		}
 	}
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Double, DoubleDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Double, DoubleDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Double, DoubleDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.{Initializable, InitializableFromCollectionSubset}
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -21,6 +21,13 @@ class JpClassInstance extends StorableClass {
 		val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
 		val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
 	}
+
+	override val valuesList = List(
+		values.instanceId,
+		values.instructorId,
+		values.locationId,
+		values.typeId
+	)
 
 	object calculatedValues extends CalculatedValuesObject {
 		val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {

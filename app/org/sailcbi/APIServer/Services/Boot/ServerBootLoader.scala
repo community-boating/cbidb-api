@@ -32,7 +32,7 @@ abstract class ServerBootLoader {
 			//		writer.close()
 		}
 
-		def getDBPools(attempts: Int = 0): DatabaseConnection = {
+		def getDBPools(attempts: Int = 0): DatabaseHighLevelConnection = {
 			val MAX_ATTEMPTS = 3
 			try {
 				OracleDatabaseConnection("conf/private/oracle-credentials")
@@ -84,6 +84,7 @@ abstract class ServerBootLoader {
 				serverParameters = ServerParameters(
 					serverTimeOffsetSeconds = 0
 				),
+				isDebugMode = getOptionalProperty(serverProps, "PADebug").getOrElse("false").equals("true"),
 				isTestMode = isTestMode,
 				readOnlyDatabase = readOnlyDatabase,
 				allowableUserTypes = serverProps.enabledAuthMechanisms,

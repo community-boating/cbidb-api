@@ -2,7 +2,7 @@ import java.io.File
 
 import org.sailcbi.APIServer.Entities._
 import org.sailcbi.APIServer.Services.{MysqlBroker, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.FieldValue
+import org.sailcbi.APIServer.Storable.FieldValues.FieldValue
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 ////////////////////////////////////

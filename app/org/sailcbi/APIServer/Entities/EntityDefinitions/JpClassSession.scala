@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.{DefinedInitializable, Initializable}
 import org.sailcbi.APIServer.Services.RequestCache
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -21,12 +21,17 @@ class JpClassSession extends StorableClass {
 		val sessionDateTime = new DateTimeFieldValue(self, JpClassSession.fields.sessionDateTime)
 	}
 
+	override val valuesList = List(
+		values.sessionId,
+		values.instanceId,
+		values.sessionDateTime
+	)
+
 	object calculatedValues extends CalculatedValuesObject {
 		val jpWeekAlias = new DefinedInitializable[RequestCache, Option[String]]((rc: RequestCache) => {
 			rc.logic.dateLogic.getJpWeekAlias(myself.values.sessionDateTime.get.toLocalDate)
 		})
 	}
-
 }
 
 object JpClassSession extends StorableObject[JpClassSession] {

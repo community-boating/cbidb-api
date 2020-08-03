@@ -6,11 +6,13 @@ import java.time.format.DateTimeFormatter
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAlias, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableDateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[LocalDate]](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+	def isNullable: Boolean = true
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
@@ -58,5 +60,6 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Option[LocalDate], NullableDateDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

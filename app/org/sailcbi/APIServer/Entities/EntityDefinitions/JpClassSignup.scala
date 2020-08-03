@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{DateTimeFieldValue, IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -20,6 +20,13 @@ class JpClassSignup extends StorableClass {
 		val signupDatetime = new DateTimeFieldValue(self, JpClassSignup.fields.signupDatetime)
 	}
 
+	override val valuesList = List(
+		values.signupId,
+		values.instanceId,
+		values.signupType,
+		values.personId,
+		values.signupDatetime
+	)
 }
 
 object JpClassSignup extends StorableObject[JpClassSignup] {

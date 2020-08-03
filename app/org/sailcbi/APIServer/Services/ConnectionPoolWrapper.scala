@@ -9,9 +9,7 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 		var c: Connection = null
 		try {
 			c = source.getConnection()
-			println("starting block")
 			val ret = block(c)
-			println("finished block")
 			ret
 		} catch {
 			case e: Throwable => {
@@ -19,9 +17,7 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 				throw e
 			}
 		} finally {
-			println("about to close connection")
 			c.close()
-			println("closed connection")
 		}
 	}
 

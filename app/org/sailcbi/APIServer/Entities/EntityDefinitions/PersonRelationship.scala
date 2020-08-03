@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.IntFieldValue
+import org.sailcbi.APIServer.Storable.FieldValues.IntFieldValue
 import org.sailcbi.APIServer.Storable.Fields.IntDatabaseField
 import org.sailcbi.APIServer.Storable._
 
@@ -20,6 +20,12 @@ class PersonRelationship extends StorableClass {
 		val typeId = new IntFieldValue(self, PersonRelationship.fields.typeId)
 	}
 
+	override val valuesList = List(
+		values.relationId,
+		values.a,
+		values.b,
+		values.typeId
+	)
 }
 
 object PersonRelationship extends StorableObject[PersonRelationship] {

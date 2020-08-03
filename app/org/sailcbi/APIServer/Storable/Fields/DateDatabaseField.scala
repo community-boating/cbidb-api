@@ -6,11 +6,13 @@ import java.time.format.DateTimeFormatter
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAlias, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit val PA: PermissionsAuthority) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+	def isNullable: Boolean = false
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
@@ -19,7 +21,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[LocalDate] = {
 		row.dateFields.get(key) match {
 			case Some(Some(x)) => Some(x)
-			case Some(None) => throw new Exception("non-null Date field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
+			case Some(None) => throw new NonNullFieldWasNullException("non-null Date field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
@@ -61,5 +63,6 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
 
-	def alias(tableAlias: TableAlias): ColumnAlias[LocalDate, DateDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[LocalDate, DateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[LocalDate, DateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

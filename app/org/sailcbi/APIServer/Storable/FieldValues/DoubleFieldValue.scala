@@ -1,8 +1,8 @@
-package org.sailcbi.APIServer.Storable.Fields.FieldValue
+package org.sailcbi.APIServer.Storable.FieldValues
 
 import org.sailcbi.APIServer.Storable.Fields.DoubleDatabaseField
 import org.sailcbi.APIServer.Storable.StorableClass
 
 class DoubleFieldValue(instance: StorableClass, field: DoubleDatabaseField) extends FieldValue[Double](instance, field) {
-	def getPersistenceLiteral: String = super.get.toString
+	def getPersistenceLiteral: (String, List[String]) = (super.get.toString, List.empty)
 }

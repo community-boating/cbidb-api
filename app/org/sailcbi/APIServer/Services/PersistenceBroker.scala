@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderR
 import org.sailcbi.APIServer.Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean) {
+abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -37,6 +37,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseConnect
 	final def commitObjectToDatabase(i: StorableClass): Unit = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+		else if (i.valuesList.isEmpty) throw new Exception("Refusing to commit object with empty valuesList: " + i.getCompanion.entityName)
 		else if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
 		else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
 	}
