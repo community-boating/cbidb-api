@@ -27,7 +27,7 @@ class ChecksARPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBold
 		arTable.getDrawables(710, None, Some(1)).head.draw(contentStreamDecorator, left, top)
 		val checksDrawables = checksTable.getDrawables(710, None, Some(1))
 		checksDrawables.foreach(d => {
-			d.draw(contentStreamDecorator, left + 200, top)
+			d.draw(contentStreamDecorator, left + 170, top)
 		})
 	}
 }

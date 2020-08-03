@@ -59,7 +59,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 			val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
 
-			val cardData = PortalLogic.getCardData(pb, orderId).get
+
 
 			type ErrorCode = String
 			type ErrorMessage = String
@@ -70,6 +70,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					println("skipping charge")
 					Future(Right(null))
 				} else {
+					val cardData = PortalLogic.getCardData(pb, orderId).get
 					Failover(rc.getStripeIOController(ws).createCharge(orderDetails.priceInCents, cardData.token, orderId, closeId)) match {
 						case Resolved(f) => f.map({
 							case s: NetSuccess[Charge, StripeError] => {

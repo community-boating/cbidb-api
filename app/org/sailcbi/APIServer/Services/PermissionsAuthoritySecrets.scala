@@ -7,5 +7,5 @@ case class PermissionsAuthoritySecrets(
 	apexDebugSignet: Option[String],
 	symonSalt: Option[String],
 	stripeSecretKey: String,
-	sentryDSN: String
+	sentryDSN: Option[String]
 )
