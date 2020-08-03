@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.CastableToStorableClass
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
-import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripePayouts}
+import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.Logger.Logger
@@ -50,36 +50,46 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		if (TestUserType(Set(ApexUserType), rc.auth.userType)) {
 			// Update DB with all payouts
 			updateLocalDBFromStripeForStorable(
-				Payout,
+				Charge,
 				List.empty,
-				None,
-				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
+				Some((c: Charge) => c.status == "succeeded"),
+				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Charge, new GetLocalStripeCharges),
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_ASSERT_NO_ACTION
-			).flatMap(_ => {
-				val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
-				// For each payout, update DB with all associated BTs
-				Future.sequence(payouts.map(po => {
-					val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
-					updateLocalDBFromStripeForStorable(
-						BalanceTransaction,
-						List("payout=" + po.id),
-						Some((bt: BalanceTransaction) => bt.`type` != "payout"),
-						(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
-						COMMIT_TYPE_DO,
-						COMMIT_TYPE_DO,
-						COMMIT_TYPE_ASSERT_NO_ACTION,
-						Some(constructor)
-					)
-				})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
-					case Succeeded((c, u, d)) => {
-						val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
-						Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
-					}
-					case x => x
-				}))
-			})
+			).flatMap(_ =>
+				updateLocalDBFromStripeForStorable(
+					Payout,
+					List.empty,
+					None,
+					(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
+					COMMIT_TYPE_DO,
+					COMMIT_TYPE_DO,
+					COMMIT_TYPE_ASSERT_NO_ACTION
+				).flatMap(_ => {
+					val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
+					// For each payout, update DB with all associated BTs
+					Future.sequence(payouts.map(po => {
+						val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
+						updateLocalDBFromStripeForStorable(
+							BalanceTransaction,
+							List("payout=" + po.id),
+							Some((bt: BalanceTransaction) => bt.`type` != "payout"),
+							(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
+							COMMIT_TYPE_DO,
+							COMMIT_TYPE_DO,
+							COMMIT_TYPE_ASSERT_NO_ACTION,
+							Some(constructor)
+						)
+					})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
+						case Succeeded((c, u, d)) => {
+							val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
+							Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
+						}
+						case x => x
+					}))
+				})
+			)
 		}
 		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
 	}

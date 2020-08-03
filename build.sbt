@@ -4,7 +4,7 @@ version := "0.1.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.11"
 
 maintainer in Linux := "Jonathan Cole <jon@community-boating.org>"
 

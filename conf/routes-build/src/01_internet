@@ -78,7 +78,7 @@ GET     /junior/get-signups                 org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /is-logged-in-as-member              org.sailcbi.APIServer.Api.Endpoints.IsLoggedInAsMember.get()
 
-GET     /check-proto-person-cookie              org.sailcbi.APIServer.Api.Endpoints.Public.CheckProtoPersonCookie.get()
+POST     /auth/check-proto-person-cookie              org.sailcbi.APIServer.Api.Endpoints.Security.CheckProtoPersonCookie.post()
 
 POST    /junior/add-junior-class-reservation       org.sailcbi.APIServer.Api.Endpoints.Member.AddJuniorClassReservation.post()
 
@@ -104,6 +104,14 @@ POST    /member/add-promo-code                    org.sailcbi.APIServer.Api.Endp
 POST    /member/apply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.add()
 POST    /member/unapply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.delete()
 
+GET     /member/ap-class-type-avail         org.sailcbi.APIServer.Api.Endpoints.Member.ApClassTypeAvailabilities.get()
+
+GET     /member/ap-classes-for-calendar         org.sailcbi.APIServer.Api.Endpoints.Member.GetApClassesForCalendar.get()
+
+POST    /member/ap-class-signup             org.sailcbi.APIServer.Api.Endpoints.Member.ApClassSignup.post()
+
+POST    /member/ap-class-unenroll             org.sailcbi.APIServer.Api.Endpoints.Member.ApClassUnenroll.post()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
@@ -112,6 +120,7 @@ POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoi
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()
 POST    /auth/do-claim-acct                        org.sailcbi.APIServer.Api.Endpoints.Security.ApDoClaimAccount.post()
+POST    /auth/update-acct               org.sailcbi.APIServer.Api.Endpoints.Security.UpdateAccount.post()
 
 POST /auth/create-member                org.sailcbi.APIServer.Api.Endpoints.Security.CreateMember.post()
 GET     /auth/getPwHash                     org.sailcbi.APIServer.Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String ?= "staff")

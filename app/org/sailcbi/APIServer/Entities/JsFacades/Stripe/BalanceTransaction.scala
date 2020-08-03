@@ -15,7 +15,8 @@ case class BalanceTransaction(
 	source: String,
 	status: String,
 	`type`: String,
-	payout: String
+	payout: String,
+	created: Int
 ) extends CastableToStorableClass {
 	val pkSqlLiteral: String = GetSQLLiteral(id)
 	val storableObject: CastableToStorableObject[_] = BalanceTransaction
@@ -44,7 +45,8 @@ object BalanceTransaction extends StripeCastableToStorableObject[BalanceTransact
 		"SOURCE" -> ((bt: BalanceTransaction) => bt.source),
 		"STATUS" -> ((bt: BalanceTransaction) => bt.status),
 		"TYPE" -> ((bt: BalanceTransaction) => bt.`type`),
-		"PAYOUT" -> ((bt: BalanceTransaction) => bt.payout)
+		"PAYOUT" -> ((bt: BalanceTransaction) => bt.payout),
+		"CREATED" -> ((bt: BalanceTransaction) => bt.created)
 	)
 	val pkColumnName = "TRANSACTION_ID"
 	val getURL: String = "balance/history"
