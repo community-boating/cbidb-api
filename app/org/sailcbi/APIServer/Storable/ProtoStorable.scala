@@ -2,8 +2,6 @@ package org.sailcbi.APIServer.Storable
 
 import java.time.{LocalDate, LocalDateTime}
 
-import org.sailcbi.APIServer.Storable.Fields._
-
 // All the data necessary to construct an instance of a storable, in a bunch of hashtables keyed by the property names in the storable
 // Storables are almost always instantiated from one of these things as an intermediary,
 // whether the data came from the database or a POST request (to go to the database) etc

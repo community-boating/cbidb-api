@@ -7,7 +7,7 @@ import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 
 import io.sentry.Sentry
 import org.sailcbi.APIServer.Api.ResultError
-import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication._
@@ -20,7 +20,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.io.{Directory, File}
+import scala.reflect.io.Directory
 import scala.reflect.runtime.universe
 
 
@@ -53,6 +53,8 @@ class PermissionsAuthority private[Services] (
 			if (this.checkAllValueListsMatchReflection.nonEmpty) {
 				throw new Exception("ValuesList is not correct for: " + this.checkAllValueListsMatchReflection)
 			}
+		} else {
+			println("non debug mode, skipping boot checks")
 		}
 	}
 

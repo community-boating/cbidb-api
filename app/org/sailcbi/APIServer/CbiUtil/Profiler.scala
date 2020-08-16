@@ -1,9 +1,5 @@
 package org.sailcbi.APIServer.CbiUtil
 
-import java.text.DecimalFormat
-
-import scala.collection.mutable
-
 class Profiler {
 	private var stamp: Long = System.currentTimeMillis()
 

@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Storable.StorableQuery
 
 import org.sailcbi.APIServer.Storable.Filter
+
 import scala.reflect.runtime.universe._
 
 class QueryBuilder(

@@ -4,7 +4,7 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, ProtoPersonUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, ProtoPersonUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.mvc._
 

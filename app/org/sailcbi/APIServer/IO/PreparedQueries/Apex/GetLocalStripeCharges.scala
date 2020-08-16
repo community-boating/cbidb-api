@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import org.sailcbi.APIServer.CbiUtil.DateUtil
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, ChargeMetadata, Payout}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}

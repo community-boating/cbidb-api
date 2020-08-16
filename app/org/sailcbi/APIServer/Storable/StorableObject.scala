@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, TableAlias, TableAliasInnerJoined}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, TableAliasInnerJoined}
 
 import scala.Function.tupled
 import scala.reflect.runtime.universe._

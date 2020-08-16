@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Storable
 
-import org.sailcbi.APIServer.CbiUtil.{Initializable, Profiler}
+import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Storable.FieldValues.{FieldValue, _}
-import org.sailcbi.APIServer.Storable.Fields.{DatabaseField, IntDatabaseField}
+import org.sailcbi.APIServer.Storable.Fields.IntDatabaseField
 
 
 abstract class StorableClass {
