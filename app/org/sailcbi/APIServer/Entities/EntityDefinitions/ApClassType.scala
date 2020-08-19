@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -15,6 +15,11 @@ class ApClassType extends StorableClass {
 		val displayOrder = new IntFieldValue(self, ApClassType.fields.displayOrder)
 	}
 
+	override val valuesList = List(
+		values.typeId,
+		values.typeName,
+		values.displayOrder
+	)
 }
 
 object ApClassType extends StorableObject[ApClassType] {

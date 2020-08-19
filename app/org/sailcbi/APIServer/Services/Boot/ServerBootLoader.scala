@@ -32,7 +32,7 @@ abstract class ServerBootLoader {
 			//		writer.close()
 		}
 
-		def getDBPools(attempts: Int = 0): DatabaseConnection = {
+		def getDBPools(attempts: Int = 0): DatabaseHighLevelConnection = {
 			val MAX_ATTEMPTS = 3
 			try {
 				OracleDatabaseConnection("conf/private/oracle-credentials")
@@ -84,6 +84,7 @@ abstract class ServerBootLoader {
 				serverParameters = ServerParameters(
 					serverTimeOffsetSeconds = 0
 				),
+				isDebugMode = getOptionalProperty(serverProps, "PADebug").getOrElse("false").equals("true"),
 				isTestMode = isTestMode,
 				readOnlyDatabase = readOnlyDatabase,
 				allowableUserTypes = serverProps.enabledAuthMechanisms,
@@ -96,7 +97,7 @@ abstract class ServerBootLoader {
 					apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
 					symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
 					stripeSecretKey = serverProps.getProperty("StripeAPIKey"),
-					sentryDSN = serverProps.getProperty("sentryDSN")
+					sentryDSN = getOptionalProperty(serverProps, "sentryDSN")
 				)
 //				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
 //					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, , new FromWSClient(ws))),

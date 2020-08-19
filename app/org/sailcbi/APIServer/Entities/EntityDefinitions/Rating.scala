@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -15,6 +15,11 @@ class Rating extends StorableClass {
 		val overriddenBy = new NullableIntFieldValue(self, Rating.fields.overriddenBy)
 	}
 
+	override val valuesList = List(
+		values.ratingId,
+		values.ratingName,
+		values.overriddenBy
+	)
 }
 
 object Rating extends StorableObject[Rating] {

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -18,6 +18,11 @@ class ApClassFormat extends StorableClass {
 		val description = new NullableStringFieldValue(self, ApClassFormat.fields.description)
 	}
 
+	override val valuesList = List(
+		values.formatId,
+		values.typeId,
+		values.description
+	)
 }
 
 object ApClassFormat extends StorableObject[ApClassFormat] {

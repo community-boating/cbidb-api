@@ -2,11 +2,13 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false)(implicit PA: PermissionsAuthority) extends DatabaseField[Boolean](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
+
+	def isNullable: Boolean = nullImpliesFalse
 
 	def getFieldType: String = getFieldLength match {
 		case _ => PA.persistenceSystem match {
@@ -20,13 +22,13 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 			case Some(Some("N")) => Some(false)
 			case Some(None) =>
 				if (nullImpliesFalse) Some(false)
-				else throw new Exception("non-null Boolean field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
+				else throw new NonNullFieldWasNullException("non-null Boolean field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
 			case _ => None
 		}
 	}
 
 	def equals(b: Boolean): String => Filter =
-		t => Filter(s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'")
+		t => Filter(s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'", List.empty)
 
 	def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
 		case "true" => Some(true)
@@ -34,5 +36,6 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		case _ => None
 	}
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Boolean, BooleanDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Boolean, BooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Boolean, BooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

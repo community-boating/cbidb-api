@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.IntFieldValue
+import org.sailcbi.APIServer.Storable.FieldValues.IntFieldValue
 import org.sailcbi.APIServer.Storable.Fields.IntDatabaseField
 import org.sailcbi.APIServer.Storable._
 
@@ -21,6 +21,13 @@ class PersonRating extends StorableClass {
 		val ratingId = new IntFieldValue(self, PersonRating.fields.ratingId)
 		val programId = new IntFieldValue(self, PersonRating.fields.programId)
 	}
+
+	override val valuesList = List(
+		values.assignId,
+		values.personId,
+		values.ratingId,
+		values.programId
+	)
 
 	lazy val asCaseClass = CasePersonRating(
 		this.values.personId.get,

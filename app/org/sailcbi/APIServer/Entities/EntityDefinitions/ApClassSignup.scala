@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -18,6 +18,11 @@ class ApClassSignup extends StorableClass {
 		val signupType = new StringFieldValue(self, ApClassSignup.fields.signupType)
 	}
 
+	override val valuesList = List(
+		values.signupId,
+		values.instanceId,
+		values.signupType
+	)
 }
 
 object ApClassSignup extends StorableObject[ApClassSignup] {

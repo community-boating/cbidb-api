@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
 	val getQuery: String =
 		s"""
-		   |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds
+		   |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds, description
 		   |from STRIPE_CHARGES
 		   |where CLOSE_ID = $closeId
 		   |order by created_datetime
@@ -36,7 +36,8 @@ class GetLocalStripeChargesForClose(closeId: Int) (implicit PA: PermissionsAutho
 			metadata = cmd,
 			created = rs.getInt(6),
 			paid = rs.getString(7) == "Y",
-			status = rs.getString(8)
+			status = rs.getString(8),
+			description = rs.getOptionString(10)
 		)
 	}
 }

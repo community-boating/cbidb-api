@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 import org.sailcbi.APIServer.Services.PersistenceBroker
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, NullableStringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -29,6 +29,19 @@ class Person extends StorableClass {
 		val zip = new NullableStringFieldValue(self, Person.fields.zip)
 	}
 
+	override val valuesList = List(
+		values.personId,
+		values.nameFirst,
+		values.nameLast,
+		values.email,
+		values.pwHash,
+		values.addr1,
+		values.addr2,
+		values.addr3,
+		values.city,
+		values.state,
+		values.zip
+	)
 	def setPersonRatings(pb: PersistenceBroker): Unit = {
 		references.personRatings set pb.getObjectsByFilters(
 			PersonRating,

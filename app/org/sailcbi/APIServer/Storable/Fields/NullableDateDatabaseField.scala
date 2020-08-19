@@ -6,11 +6,13 @@ import java.time.format.DateTimeFormatter
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableDateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[LocalDate]](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+	def isNullable: Boolean = true
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
@@ -22,9 +24,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}")
+			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year")
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[LocalDate]] = {
@@ -42,9 +44,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		val comparator: String = comp.comparator
 		PA.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'")
+				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
 			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')")
+				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
 		}
 	}
 
@@ -58,5 +60,6 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Option[LocalDate], NullableDateDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

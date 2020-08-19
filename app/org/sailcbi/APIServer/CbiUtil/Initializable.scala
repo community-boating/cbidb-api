@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.CbiUtil
 
 class Initializable[T] {
-	var value: Option[T] = None
+	protected var value: Option[T] = None
 
 	def get: T = value match {
 		case Some(t: T) => t

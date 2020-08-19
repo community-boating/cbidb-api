@@ -6,7 +6,9 @@ import play.api.inject.ApplicationLifecycle
 
 class ServerBootLoaderLive @Inject()(lifecycle: ApplicationLifecycle) extends ServerBootLoader {
 	val PA = this.load(Some(lifecycle), false, false)
+	PA.instantiateAllEntityCompanions()
 	println("Live loader::::: setting PA!")
 	PermissionsAuthority.setPA(PA)
+	PA.bootChecks()
 	//PA.procedureTest()
 }

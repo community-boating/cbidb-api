@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -14,6 +14,10 @@ class JpTeam extends StorableClass {
 		val teamName = new StringFieldValue(self, JpTeam.fields.teamName)
 	}
 
+	override val valuesList = List(
+		values.teamId,
+		values.teamName
+	)
 }
 
 object JpTeam extends StorableObject[JpTeam] {

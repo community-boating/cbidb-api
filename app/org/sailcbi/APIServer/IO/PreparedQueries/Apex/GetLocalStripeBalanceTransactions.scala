@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Services.ResultSetWrapper
 class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryForSelect[BalanceTransaction](Set(ApexUserType), true) {
 	val getQuery: String =
 		s"""
-		   |select TRANSACTION_ID, AMOUNT_IN_CENTS, DESCRIPTION, FEE_IN_CENTS, NET_IN_CENTS, SOURCE, STATUS, TYPE
+		   |select TRANSACTION_ID, AMOUNT_IN_CENTS, DESCRIPTION, FEE_IN_CENTS, NET_IN_CENTS, SOURCE, STATUS, TYPE, CREATED
 		   |from STRIPE_BALANCE_TRANSACTIONS
 		   |where payout = ?
 		   |
@@ -23,7 +23,8 @@ class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryFor
 		source = rs.getString(6),
 		status = rs.getString(7),
 		`type` = rs.getString(8),
-		payout = payout.id
+		payout = payout.id,
+		created = rs.getInt(9)
 	)
 
 	override val params: List[String] = List(payout.id)

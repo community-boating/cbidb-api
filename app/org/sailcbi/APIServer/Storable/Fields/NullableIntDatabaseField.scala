@@ -2,11 +2,13 @@ package org.sailcbi.APIServer.Storable.Fields
 
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableIntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Int]](entity, persistenceFieldName) {
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Int]] = row.intFields.get(key)
+
+	def isNullable: Boolean = true
 
 	def getFieldType: String = PA.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
@@ -14,7 +16,7 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 	}
 
 	def lessThanConstant(c: Int): String => Filter = t => {
-		Filter(s"$t.$getPersistenceFieldName < $c")
+		Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
 	}
 
 	def inList(l: List[Int]): String => Filter = t => {
@@ -27,15 +29,16 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 			}
 		}
 
-		if (l.isEmpty) Filter("")
-		else Filter(groupIDs(l).map(group => {
-			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})"
-		}).mkString(" OR "))
+		if (l.isEmpty) Filter.empty
+		else Filter.or(groupIDs(l).map(group => Filter(
+			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})",
+			List.empty
+		)))
 	}
 
 	def equalsConstant(i: Option[Int]): String => Filter = t => i match {
-		case Some(x: Int) => Filter(s"$t.$getPersistenceFieldName = $i")
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL")
+		case Some(x: Int) => Filter(s"$t.$getPersistenceFieldName = $i", List.empty)
+		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[Int]] = {
@@ -50,5 +53,6 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 		}
 	}
 
-	def alias(tableAlias: TableAlias): ColumnAlias[Option[Int], NullableIntDatabaseField] = ColumnAlias(tableAlias, this)
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

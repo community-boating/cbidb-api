@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, NullableDateFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableDateFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableDateDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -21,6 +21,13 @@ class PersonMembership extends StorableClass {
 		val expirationDate = new NullableDateFieldValue(self, PersonMembership.fields.expirationDate)
 	}
 
+	override val valuesList = List(
+		values.assignId,
+		values.personId,
+		values.membershipTypeId,
+		values.startDate,
+		values.expirationDate
+	)
 }
 
 object PersonMembership extends StorableObject[PersonMembership] {

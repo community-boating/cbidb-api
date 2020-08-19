@@ -5,7 +5,6 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.ProtoStorable
 import play.api.mvc.InjectedController
 
 import scala.collection.mutable.ArrayBuffer
@@ -30,12 +29,12 @@ class UserCrud @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 
 					val postParams: Map[String, String] = v.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
 
-					val ps: ProtoStorable[String] = ProtoStorable.constructFromStrings(User, postParams)
-					println(ps)
-
-					val newUser: User = User.construct(ps, rc)
-					println("committing!")
-					pb.commitObjectToDatabase(newUser)
+//					val ps: ProtoStorable[String] = ProtoStorable.constructFromStrings(User, postParams)
+//					println(ps)
+//
+//					val newUser: User = User.construct(ps, rc)
+//					println("committing!")
+//					pb.commitObjectToDatabase(newUser)
 
 					val userFields: Set[String] = User.fieldList.map(_.getPersistenceFieldName).toSet
 					val reqFields: Set[String] = v.keySet

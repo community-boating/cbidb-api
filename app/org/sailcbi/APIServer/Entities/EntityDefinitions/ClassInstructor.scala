@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.Fields.FieldValue.{IntFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -15,6 +15,11 @@ class ClassInstructor extends StorableClass {
 		val nameLast = new StringFieldValue(self, ClassInstructor.fields.nameLast)
 	}
 
+	override val valuesList = List(
+		values.instructorId,
+		values.nameFirst,
+		values.nameLast
+	)
 }
 
 object ClassInstructor extends StorableObject[ClassInstructor] {

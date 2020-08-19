@@ -1,2 +1,2 @@
-cbi-db-api -J-Djava.security.egd=file:/dev/./urandom -J-XX:OnOutOfMemoryError=/srv/jvmoutofmemerror.sh -Dplay.http.secret.key='changeme' >> /var/log/cbi-db-api/application.log 2>&1
+cbi-db-api -J-Djava.security.egd=file:/dev/./urandom -J-XX:OnOutOfMemoryError=/srv/jvmoutofmemerror.sh -Dplay.http.secret.key='changeme' -Dconfig.resource=conf/application.conf >> /var/log/cbi-db-api/application.log 2>&1
 
