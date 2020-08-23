@@ -9,3 +9,6 @@ GET     /pdf/jp-spec-needs                     org.sailcbi.APIServer.Api.Endpoin
 
 POST    /fo-kiosk/create-person             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.post()
 POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCard.post()
+
+
+GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.get()

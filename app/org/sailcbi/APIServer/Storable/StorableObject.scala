@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, TableAliasInnerJoined}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, QueryBuilderResultRow, TableAliasInnerJoined}
 
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
@@ -141,6 +141,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		val valuesListReflection = embryo.getValuesListByReflection.map(_._2).sorted(FieldValue.OrderByPersistenceName)
 		valuesList equals valuesListReflection
 	}
+
+	def construct(qbrr: QueryBuilderResultRow)(implicit rc: RequestCache): T = construct(qbrr.ps, rc)
 
 	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache): T =
 		construct(ps, rc, None)

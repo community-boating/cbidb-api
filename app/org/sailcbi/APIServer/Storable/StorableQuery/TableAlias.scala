@@ -12,4 +12,5 @@ case class TableAliasOuterJoined(override val obj: StorableObject[_ <: StorableC
 object TableAlias {
 	def wrapForInnerJoin(obj: StorableObject[_ <: StorableClass]): TableAliasInnerJoined = TableAliasInnerJoined(obj, obj.entityName)
 	def wrapForOuterJoin(obj: StorableObject[_ <: StorableClass]): TableAliasOuterJoined = TableAliasOuterJoined(obj, obj.entityName)
+	def apply(obj: StorableObject[_ <: StorableClass]): TableAliasInnerJoined = wrapForInnerJoin(obj)
 }
