@@ -39,6 +39,6 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		case _ => None
 	}
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

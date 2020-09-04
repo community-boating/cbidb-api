@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Storable.Fields
 
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined}
+import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
@@ -42,6 +42,9 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 	def equalsField[U <: DatabaseField[T]](c: ColumnAliasInnerJoined[T, U]): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = ${c.table.name}.${c.field.getPersistenceFieldName}", List.empty)
 
 	def getValueFromString(s: String): Option[T]
+
+	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[T, this.type] = ColumnAliasInnerJoined(tableAlias, this)
+	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[T, this.type] = ColumnAliasOuterJoined(tableAlias, this)
 }
 
 object DatabaseField {

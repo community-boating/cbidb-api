@@ -18,6 +18,8 @@ class User extends StorableClass {
 		val active = new BooleanFieldValue(self, User.fields.active)
 		val hideFromClose = new BooleanFieldValue(self, User.fields.hideFromClose)
 		val pwHash = new NullableStringFieldValue(self, User.fields.pwHash)
+		val locked = new BooleanFieldValue(self, User.fields.locked)
+		val pwChangeRequired = new BooleanFieldValue(self, User.fields.pwChangeRequired)
 	}
 
 	override val valuesList = List(
@@ -28,7 +30,9 @@ class User extends StorableClass {
 		values.email,
 		values.active,
 		values.hideFromClose,
-		values.pwHash
+		values.pwHash,
+		values.locked,
+		values.pwChangeRequired 
 	)
 }
 
@@ -44,6 +48,8 @@ object User extends StorableObject[User] {
 		val active = new BooleanDatabaseField(self, "ACTIVE")
 		val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE", nullImpliesFalse = true)
 		val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
+		val locked = new BooleanDatabaseField(self, "LOCKED", nullImpliesFalse = true)
+		val pwChangeRequired = new BooleanDatabaseField(self, "PW_CHANGE_REQD", nullImpliesFalse = true)
 	}
 
 	def primaryKey: IntDatabaseField = fields.userId

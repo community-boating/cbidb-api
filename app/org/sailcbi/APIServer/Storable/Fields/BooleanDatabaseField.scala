@@ -16,6 +16,8 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		}
 	}
 
+	def booleanFieldMethod = "hi"
+
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Boolean] = {
 		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(true)
@@ -36,6 +38,6 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		case _ => None
 	}
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Boolean, BooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Boolean, BooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Boolean, BooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Boolean, BooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

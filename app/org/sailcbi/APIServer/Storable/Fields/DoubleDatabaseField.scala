@@ -54,6 +54,6 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		}
 	}
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Double, DoubleDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Double, DoubleDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Double, DoubleDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Double, DoubleDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

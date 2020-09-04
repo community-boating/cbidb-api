@@ -23,19 +23,43 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 				val qb = QueryBuilder
 					.from(users)
 					.select(List(
-						User.fields.userId.alias(users),
-						User.fields.userName.alias(users)
-					))
+						User.fields.userId,
+						User.fields.userName,
+						User.fields.nameLast,
+						User.fields.nameFirst,
+						User.fields.email,
+						User.fields.locked,
+						User.fields.pwChangeRequired,
+						User.fields.active,
+						User.fields.hideFromClose
+					).map(_.alias(users)))
 				pb.executeQueryBuilder(qb).map(User.construct)
 			}
 			implicit val format = UserShape.format
-			Future(Ok(Json.toJson(users.map(u => UserShape(u.values.userId.get, u.values.userName.get)))))
+			Future(Ok(Json.toJson(users.map(u => UserShape(
+				userId = u.values.userId.get,
+				userName = u.values.userName.get,
+				nameFirst = u.values.nameFirst.get,
+				nameLast = u.values.nameLast.get,
+				email = u.values.email.get,
+				locked = u.values.locked.get,
+				pwChangeRequired = u.values.pwChangeRequired.get,
+				active = u.values.active.get,
+				hideFromClose = u.values.hideFromClose.get
+			)))))
 		})
 	})
 
 	case class UserShape (
 		userId: Int,
-		userName: String
+		userName: String,
+		nameFirst: Option[String],
+		nameLast: Option[String],
+		email: String,
+		locked: Boolean,
+		pwChangeRequired: Boolean,
+		active: Boolean,
+		hideFromClose: Boolean
 	)
 
 	object UserShape {

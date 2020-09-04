@@ -32,6 +32,6 @@ class NullableStringDatabaseField(override val entity: StorableObject[_ <: Stora
 
 	def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[String], NullableStringDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[String], NullableStringDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[String], NullableStringDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[String], NullableStringDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

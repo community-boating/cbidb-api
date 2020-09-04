@@ -53,6 +53,6 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 		}
 	}
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Int], NullableIntDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

@@ -60,6 +60,6 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

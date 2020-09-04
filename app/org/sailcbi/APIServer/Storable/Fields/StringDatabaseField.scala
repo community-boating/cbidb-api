@@ -35,6 +35,6 @@ class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass
 
 	def getValueFromString(s: String): Option[String] = Some(s)
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[String, StringDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[String, StringDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[String, StringDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[String, StringDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

@@ -55,6 +55,6 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
+//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }
