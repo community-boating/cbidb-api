@@ -13,3 +13,4 @@ POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Ki
 
 GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getAll()
 GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOne(userId: Int)
+POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.PutUser.post()
