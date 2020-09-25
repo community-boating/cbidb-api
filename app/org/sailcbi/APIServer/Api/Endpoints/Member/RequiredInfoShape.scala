@@ -22,7 +22,8 @@ case class RequiredInfoShape(
 	alternatePhoneType: Option[String],
 	allergies: Option[String],
 	medications: Option[String],
-	specialNeeds: Option[String]
+	specialNeeds: Option[String],
+	editOnly: Option[Boolean]
 )
 
 object RequiredInfoShape {

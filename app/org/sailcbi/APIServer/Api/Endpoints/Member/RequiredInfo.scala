@@ -42,7 +42,8 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						rs.getOptionString(16),
 						rs.getOptionString(17),
 						rs.getOptionString(18),
-						rs.getOptionString(19)
+						rs.getOptionString(19),
+						editOnly = None
 					)
 
 				override def getQuery: String =
@@ -294,7 +295,9 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 
 		pb.executePreparedQueryForInsert(createRelationshipQuery)
 
-		PortalLogic.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
+		if (!data.editOnly.getOrElse(false)) {
+			PortalLogic.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
+		}
 
 		juniorPersonId
 	}
@@ -352,6 +355,8 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 
 		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
-		PortalLogic.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
+		if (!data.editOnly.getOrElse(false)) {
+			PortalLogic.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
+		}
 	}
 }
