@@ -42,6 +42,9 @@ class Person extends StorableClass {
 		values.state,
 		values.zip
 	)
+
+	override def toString: String = this.valuesList.filter(_.getPersistenceFieldName != "PW_HASH").toString()
+
 	def setPersonRatings(pb: PersistenceBroker): Unit = {
 		references.personRatings set pb.getObjectsByFilters(
 			PersonRating,

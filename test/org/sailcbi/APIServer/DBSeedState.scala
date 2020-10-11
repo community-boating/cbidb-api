@@ -35,11 +35,11 @@ class DBSeedState extends FunSuite {
 		ServerBootLoaderTest.withPAWriteable(pa => {
 			val seedState = List(
 				new User()
-					.set(_.active, true)
-					.set(_.nameFirst, Some("Bob"))
-					.set(_.nameLast, Some("Smith"))
-					.set(_.userName, "bsmith")
-					.set(_.email, "bsmith@sdfg.com")
+					.update(_.active, true)
+					.update(_.nameFirst, Some("Bob"))
+					.update(_.nameLast, Some("Smith"))
+					.update(_.userName, "bsmith")
+					.update(_.email, "bsmith@sdfg.com")
 					.withPK(9998)
 			)
 			val rc = pa.assertRC(AuthenticationInstance.ROOT)
@@ -49,7 +49,7 @@ class DBSeedState extends FunSuite {
 				val user = users.head
 				println("Seed user has id " + user.getID)
 				val startingValue = user.values.nameLast.get
-				user.values.nameLast.set(Some(user.values.nameLast.get.get + "!"))
+				user.values.nameLast.initialize(Some(user.values.nameLast.get.get + "!"))
 				pb.commitObjectToDatabase(user)
 
 				val usersAgain = pb.getAllObjectsOfClass(User, Some(List(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active)))

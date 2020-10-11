@@ -5,17 +5,26 @@ import org.sailcbi.APIServer.Storable.StorableClass
 
 abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 	private var value: Option[T] = None
+	private var dirty: Boolean = false
 
-	override def toString: String = peek match {
+	override def toString: String = getPersistenceFieldName + ": " + (peek match {
 		case None => "(unset)"
 		case Some(t: T) => t.toString
+	})
+
+	def initialize(v: T): Unit = {
+		value match {
+			case None => value = Some(v)
+			case Some(_) => throw new Exception("Attempted to initialize over a set field value")
+		}
 	}
 
-	def set(v: T): Unit = {
-	//	println("setting: " + instance.getCompanion.entityName + "." + field.getPersistenceFieldName)
+	def update(v: T): Unit = {
 		value = Some(v)
-		//instance.setDirty
+		dirty = true
 	}
+
+	def isDirty = dirty
 
 	def peek: Option[T] = value
 

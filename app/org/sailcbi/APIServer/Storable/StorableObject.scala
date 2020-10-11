@@ -174,7 +174,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		}).foreach(tupled((fieldName: String, field: IntDatabaseField) => {
 			embryo.intValueMap.get(fieldName) match {
 				case Some(fv: IntFieldValue) => field.findValueInProtoStorable(aliasField[Int, IntDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(i: Int) => fv.set(i)
+					case Some(i: Int) => fv.initialize(i)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -184,8 +184,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		nullableIntFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableIntDatabaseField) => {
 			embryo.nullableIntValueMap.get(fieldName) match {
 				case Some(fv: NullableIntFieldValue) => field.findValueInProtoStorable(aliasField[Option[Int], NullableIntDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(Some(i: Int)) => fv.set(Some(i))
-					case Some(None) => fv.set(None)
+					case Some(Some(i: Int)) => fv.initialize(Some(i))
+					case Some(None) => fv.initialize(None)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -195,7 +195,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		doubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DoubleDatabaseField) => {
 			embryo.doubleValueMap.get(fieldName) match {
 				case Some(fv: DoubleFieldValue) => field.findValueInProtoStorable(aliasField[Double, DoubleDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(d: Double) => fv.set(d)
+					case Some(d: Double) => fv.initialize(d)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -205,8 +205,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		nullableDoubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDoubleDatabaseField) => {
 			embryo.nullableDoubleValueMap.get(fieldName) match {
 				case Some(fv: NullableDoubleFieldValue) => field.findValueInProtoStorable(aliasField[Option[Double], NullableDoubleDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(Some(d: Double)) => fv.set(Some(d))
-					case Some(None) => fv.set(None)
+					case Some(Some(d: Double)) => fv.initialize(Some(d))
+					case Some(None) => fv.initialize(None)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -216,7 +216,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		stringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: StringDatabaseField) => {
 			embryo.stringValueMap.get(fieldName) match {
 				case Some(fv: StringFieldValue) => field.findValueInProtoStorable(aliasField[String, StringDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(s: String) => fv.set(s)
+					case Some(s: String) => fv.initialize(s)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -226,8 +226,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		nullableStringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableStringDatabaseField) => {
 			embryo.nullableStringValueMap.get(fieldName) match {
 				case Some(fv: NullableStringFieldValue) => field.findValueInProtoStorable(aliasField[Option[String], NullableStringDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(Some(s: String)) => fv.set(Some(s))
-					case Some(None) => fv.set(None)
+					case Some(Some(s: String)) => fv.initialize(Some(s))
+					case Some(None) => fv.initialize(None)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -237,7 +237,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		dateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateDatabaseField) => {
 			embryo.dateValueMap.get(fieldName) match {
 				case Some(fv: DateFieldValue) => field.findValueInProtoStorable(aliasField[LocalDate, DateDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(d: LocalDate) => fv.set(d)
+					case Some(d: LocalDate) => fv.initialize(d)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -247,8 +247,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		nullableDateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDateDatabaseField) => {
 			embryo.nullableDateValueMap.get(fieldName) match {
 				case Some(fv: NullableDateFieldValue) => field.findValueInProtoStorable(aliasField[Option[LocalDate], NullableDateDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(Some(d: LocalDate)) => fv.set(Some(d))
-					case Some(None) => fv.set(None)
+					case Some(Some(d: LocalDate)) => fv.initialize(Some(d))
+					case Some(None) => fv.initialize(None)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -258,7 +258,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		dateTimeFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateTimeDatabaseField) => {
 			embryo.dateTimeValueMap.get(fieldName) match {
 				case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(aliasField[LocalDateTime, DateTimeDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(dt: LocalDateTime) => fv.set(dt)
+					case Some(dt: LocalDateTime) => fv.initialize(dt)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
@@ -268,7 +268,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		booleanFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
 			embryo.booleanValueMap.get(fieldName) match {
 				case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(aliasField[Boolean, BooleanDatabaseField](field), ps.asInstanceOf[ProtoStorable[ColumnAlias[_, _]]]) match {
-					case Some(b: Boolean) => fv.set(b)
+					case Some(b: Boolean) => fv.initialize(b)
 					case None =>
 				}
 				case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)

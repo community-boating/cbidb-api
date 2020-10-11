@@ -368,7 +368,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		println(sb.toString())
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
 		executeSQLForInsert(sb.toString(), Some(i.getCompanion.primaryKey.getPersistenceFieldName), false, params) match {
-			case Some(s: String) => i.setPrimaryKeyValue(s.toInt)
+			case Some(s: String) => i.initializePrimaryKeyValue(s.toInt)
 			case None =>
 		}
 	}

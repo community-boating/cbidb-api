@@ -34,6 +34,8 @@ class User extends StorableClass {
 		values.locked,
 		values.pwChangeRequired 
 	)
+
+	override def toString: String = this.valuesList.filter(_.getPersistenceFieldName != "PW_HASH").toString()
 }
 
 object User extends StorableObject[User] {

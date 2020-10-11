@@ -24,6 +24,8 @@ abstract class StorableClass {
 	final val self: StorableClass = this
 	val values: ValuesObject
 
+	override def toString: String = this.valuesList.toString()
+
 	// TODO: unit test that verifies these are all correct.  Or some reflection hotness so they must be correct
 	private val companion = new Initializable[Companion]
 
@@ -55,8 +57,8 @@ abstract class StorableClass {
 		intValueMap(primaryKeyFieldRuntimeName)
 	}
 
-	def setPrimaryKeyValue(pk: Int): Unit = {
-		getPrimaryKeyFieldValue.set(pk)
+	def initializePrimaryKeyValue(pk: Int): Unit = {
+		getPrimaryKeyFieldValue.initialize(pk)
 	}
 
 	def getID: Int = getPrimaryKeyFieldValue.get
@@ -70,9 +72,9 @@ abstract class StorableClass {
 
 	def hasValuesList: Boolean = valuesList.nonEmpty
 
-	def set[T](getFieldValue: this.values.type => FieldValue[T], value: T): this.type = {
+	def update[T](getFieldValue: this.values.type => FieldValue[T], value: T): this.type = {
 		val fieldValue = getFieldValue(this.values)
-		fieldValue.set(value)
+		fieldValue.update(value)
 		this
 	}
 
@@ -80,21 +82,7 @@ abstract class StorableClass {
 		valuesList.filter(f => !f.getField.isNullable && f.getField.getRuntimeFieldName != getCompanion.primaryKey.getRuntimeFieldName).filter(!_.isSet)
 	}
 
-//	override def toString: String = {
-//		val entityName = this.companion
-//	}
-
-	// "clean" = internal state of this instance is consistent with the state of the database
-	// On construction, assume dirty; the codepath used by the DB adapter will set clean afterconstructing
-	private var clean: Boolean = false
-
-	def isClean: Boolean = clean
-
-	def setClean(): Unit =
-		clean = true
-
-	def setDirty(): Unit =
-		clean = false
+	def isDirty: Boolean = valuesList.foldLeft(false)((agg, a) => agg || a.isDirty)
 
 	def getValuesListByReflection: List[(String, FieldValue[_])] = {
 		import scala.reflect.runtime.universe._
