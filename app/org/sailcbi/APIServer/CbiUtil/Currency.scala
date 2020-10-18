@@ -3,6 +3,10 @@ package org.sailcbi.APIServer.CbiUtil
 import org.sailcbi.APIServer.CbiUtil.Currency.currencyAsNumeric
 
 class Currency(val cents: Int) {
+	override def equals(obj: Any): Boolean = obj match {
+		case c: Currency => this.cents == c.cents
+		case _ => false
+	}
 	def +(that: Currency): Currency = currencyAsNumeric.plus(this, that)
 
 	def -(that: Currency): Currency = currencyAsNumeric.minus(this, that)
