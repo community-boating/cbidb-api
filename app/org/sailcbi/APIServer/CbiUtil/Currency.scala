@@ -7,6 +7,20 @@ class Currency(val cents: Int) {
 
 	def -(that: Currency): Currency = currencyAsNumeric.minus(this, that)
 
+	/**
+	 * Suppose you have e.g. $10 and you want to split that into three "equal" payments
+	 * This would return List($3.34, $3.34, $3.32).
+	 * At the time of writing the only usecase for this is to determine monthly membership payments,
+	 * and I want the values to be scrictly decreasing. If there are other usecases that require different handling of uneven divisions,
+	 * add a {@code splitType} enum parameter
+	 * @return
+	 */
+	def splitIntoPayments(ct: Int): List[Currency] = {
+		val singlePaymentCents = (this.cents.toDouble / ct).ceil.toInt
+		val finalPaymentCents = this.cents - (singlePaymentCents * (ct-1))
+		List.range(1, ct).map(_ => Currency.cents(singlePaymentCents)) ::: List(Currency.cents(finalPaymentCents))
+	}
+
 	def format(commas: Boolean = true, zeroes: Boolean = true): String = {
 		val allDigits = Math.abs(this.cents).toString
 		val dollarsAndCents = {
