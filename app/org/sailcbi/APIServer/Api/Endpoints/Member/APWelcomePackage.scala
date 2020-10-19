@@ -3,10 +3,11 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import java.time.{LocalDate, LocalDateTime}
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil.{BitVector, Currency, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
@@ -135,6 +136,8 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				youthAvailable = youthAvailable
 			)
 
+			val now = PA.now()
+
 			val result: APWelcomePackageResult = APWelcomePackageResult(
 				personId = personId,
 				orderId = orderId,
@@ -149,10 +152,24 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				canCheckout = canCheckout,
 				expirationDate = expirationDate,
 				show4thLink = show4thLink,
-				discountsResult = discountsResult
+				discountsResult = discountsResult,
+				paymentSchedules = PortalLogic.getAllMembershipTypesWithPrices(pb)
+					.filter(m => MembershipLogic.membershipTypeAllowsStaggeredPayments(now.toLocalDate, m._1))
+					.map(m => {
+						MembershipTypePaymentSchedule(
+							membershipTypeId = m._1,
+							payments = MembershipLogic.getStaggeredPaymentOptions(
+								now.toLocalDate,
+								MembershipLogic.getMembershipStaggeredPaymentsEndDate(now.toLocalDate),
+								m._2.get,
+								MembershipLogic.getMembershipStaggeredDownPayment
+							).map(payment => MembershipTypePayment(payment._1, payment._2.cents))
+						)
+					})
 			)
 			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
+			implicit val paymentsFormat = MembershipTypePaymentSchedule.format
 			profiler.lap("finishing welcome pkg")
 			Future(Ok(Json.toJson(result)))
 		})
@@ -172,10 +189,12 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		canCheckout: Boolean,
 		expirationDate: Option[LocalDate],
 		show4thLink: Boolean,
-		discountsResult: DiscountsResult
+		discountsResult: DiscountsResult,
+		paymentSchedules: List[MembershipTypePaymentSchedule]
 	)
 
 	object APWelcomePackageResult {
+		implicit val paymentsFormat = MembershipTypePaymentSchedule.format
 		implicit val format = Json.format[APWelcomePackageResult]
 
 		def apply(v: JsValue): APWelcomePackageResult = v.as[APWelcomePackageResult]
@@ -203,6 +222,26 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		implicit val format = Json.format[DiscountsResult]
 
 		def apply(v: JsValue): DiscountsResult = v.as[DiscountsResult]
+	}
+
+	case class MembershipTypePayment(
+		paymentDate: LocalDate,
+		paymentAmount: Int
+	)
+	object MembershipTypePayment {
+		implicit val format = Json.format[MembershipTypePayment]
+
+		def apply(v: JsValue): MembershipTypePayment = v.as[MembershipTypePayment]
+	}
+
+	case class MembershipTypePaymentSchedule(
+		membershipTypeId: Int,
+		payments: List[MembershipTypePayment]
+	)
+	object MembershipTypePaymentSchedule {
+		implicit val format = Json.format[MembershipTypePaymentSchedule]
+
+		def apply(v: JsValue): MembershipTypePaymentSchedule = v.as[MembershipTypePaymentSchedule]
 	}
 }
 

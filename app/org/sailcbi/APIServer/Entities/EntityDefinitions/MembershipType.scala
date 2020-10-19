@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.InitializableFromCollectionElement
-import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, StringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
+import org.sailcbi.APIServer.Storable.Fields.{DoubleDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
 class MembershipType extends StorableClass {
@@ -17,12 +17,14 @@ class MembershipType extends StorableClass {
 		val membershipTypeId = new IntFieldValue(self, MembershipType.fields.membershipTypeId)
 		val membershipTypeName = new StringFieldValue(self, MembershipType.fields.membershipTypeName)
 		val programId = new IntFieldValue(self, MembershipType.fields.programId)
+		val price = new NullableDoubleFieldValue(self, MembershipType.fields.price)
 	}
 
 	override val valuesList = List(
 		values.membershipTypeId,
 		values.membershipTypeName,
-		values.programId
+		values.programId,
+		values.price
 	)
 }
 
@@ -33,6 +35,7 @@ object MembershipType extends StorableObject[MembershipType] {
 		val membershipTypeId = new IntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
 		val membershipTypeName = new StringDatabaseField(self, "MEMBERSHIP_TYPE_NAME", 100)
 		val programId = new IntDatabaseField(self, "PROGRAM_ID")
+		val price = new NullableDoubleDatabaseField(self, "PRICE")
 	}
 
 	def primaryKey: IntDatabaseField = fields.membershipTypeId

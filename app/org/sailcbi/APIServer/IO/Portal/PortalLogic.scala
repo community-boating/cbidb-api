@@ -4,7 +4,7 @@ import java.sql.CallableStatement
 import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
+import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
@@ -1923,6 +1923,19 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForSelect(q).head
+	}
+
+	def getAllMembershipTypesWithPrices(pb: PersistenceBroker): List[(Int, Option[Currency])]  = {
+		val q = new PreparedQueryForSelect[(Int, Option[Currency])](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Option[Currency]) =
+				(rsw.getInt(1), rsw.getOptionDouble(2).map(Currency.dollars))
+
+			override def getQuery: String =
+				"""
+				  |select membership_type_id, price from membership_types
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
 	}
 }
 
