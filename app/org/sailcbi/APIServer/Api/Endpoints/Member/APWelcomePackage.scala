@@ -136,7 +136,7 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				youthAvailable = youthAvailable
 			)
 
-			val now = PA.now()
+			val now = LocalDateTime.of(2020, 11, 10, 1, 1) // PA.now()
 
 			val result: APWelcomePackageResult = APWelcomePackageResult(
 				personId = personId,
@@ -158,12 +158,12 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					.map(m => {
 						MembershipTypePaymentSchedule(
 							membershipTypeId = m._1,
-							payments = MembershipLogic.getStaggeredPaymentOptions(
+							payments = ((now.toLocalDate, MembershipLogic.getMembershipStaggeredDownPayment) :: MembershipLogic.getStaggeredPaymentOptions(
 								now.toLocalDate,
 								MembershipLogic.getMembershipStaggeredPaymentsEndDate(now.toLocalDate),
 								m._2.get,
 								MembershipLogic.getMembershipStaggeredDownPayment
-							).map(payment => MembershipTypePayment(payment._1, payment._2.cents))
+							)).map(payment => MembershipTypePayment(payment._1, payment._2.cents))
 						)
 					})
 			)
@@ -226,7 +226,7 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 
 	case class MembershipTypePayment(
 		paymentDate: LocalDate,
-		paymentAmount: Int
+		paymentAmountCents: Int
 	)
 	object MembershipTypePayment {
 		implicit val format = Json.format[MembershipTypePayment]

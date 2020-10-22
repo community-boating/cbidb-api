@@ -14,7 +14,14 @@ object MembershipLogic {
 	def getMembershipStaggeredDownPayment: Currency = Currency.dollars(100)
 
 	def getMembershipStaggeredPaymentsEndDate(now: LocalDate): LocalDate = {
-		LocalDate.of(now.getYear, 4, 1)
+		val FINAL_MONTH = 4
+		val month = now.getMonthValue
+		if (month < FINAL_MONTH) {
+			LocalDate.of(now.getYear, FINAL_MONTH, 1)
+		} else {
+			LocalDate.of(now.getYear+1, FINAL_MONTH, 1)
+		}
+
 	}
 
 	def getStaggeredPaymentOptions(startDate: LocalDate, endDate: LocalDate, fullPrice: Currency, downPayment: Currency): List[(LocalDate, Currency)] = {
