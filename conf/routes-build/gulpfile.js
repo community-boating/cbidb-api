@@ -20,16 +20,16 @@ const SRC_DIR = 'src';
 const DIST_DIR = 'dist';
 
 function build(routeFiles) {
-	gulp.src(routeFiles)
+	return gulp.src(routeFiles)
 		.pipe(concat("routes"))
-		.pipe(gulp.dest(DIST_DIR))
+		.pipe(gulp.dest(DIST_DIR));
 
 }
 
 gulp.task('build', function() {
     var secLevel = ini.parse(fs.readFileSync('../private/server-properties', 'utf-8')).RoutesSecurityLevel;
 	var routeFiles = getRouteFiles(secLevel);
-	build(routeFiles);
+	return build(routeFiles);
 })
 
 function getRouteFiles(secLevel) {
