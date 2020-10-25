@@ -156,14 +156,12 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				paymentSchedules = PortalLogic.getAllMembershipTypesWithPrices(pb)
 					.filter(m => MembershipLogic.membershipTypeAllowsStaggeredPayments(now.toLocalDate, m._1))
 					.map(m => {
-						MembershipTypePaymentSchedule(
+						MembershipTypePaymentSchedules(
 							membershipTypeId = m._1,
-							payments = ((now.toLocalDate, MembershipLogic.getMembershipStaggeredDownPayment) :: MembershipLogic.getStaggeredPaymentOptions(
+							schedules = MembershipLogic.calculateAllPaymentSchedules(
 								now.toLocalDate,
-								MembershipLogic.getMembershipStaggeredPaymentsEndDate(now.toLocalDate),
-								m._2.get,
-								MembershipLogic.getMembershipStaggeredDownPayment
-							)).map(payment => MembershipTypePayment(payment._1, payment._2.cents))
+								m._2.get
+							).map(_.map(payment => MembershipTypePayment(payment._1, payment._2.cents)))
 						)
 					})
 			)
@@ -190,7 +188,7 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		expirationDate: Option[LocalDate],
 		show4thLink: Boolean,
 		discountsResult: DiscountsResult,
-		paymentSchedules: List[MembershipTypePaymentSchedule]
+		paymentSchedules: List[MembershipTypePaymentSchedules]
 	)
 
 	object APWelcomePackageResult {
@@ -234,14 +232,14 @@ class APWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		def apply(v: JsValue): MembershipTypePayment = v.as[MembershipTypePayment]
 	}
 
-	case class MembershipTypePaymentSchedule(
+	case class MembershipTypePaymentSchedules(
 		membershipTypeId: Int,
-		payments: List[MembershipTypePayment]
+		schedules: List[List[MembershipTypePayment]]
 	)
 	object MembershipTypePaymentSchedule {
-		implicit val format = Json.format[MembershipTypePaymentSchedule]
+		implicit val format = Json.format[MembershipTypePaymentSchedules]
 
-		def apply(v: JsValue): MembershipTypePaymentSchedule = v.as[MembershipTypePaymentSchedule]
+		def apply(v: JsValue): MembershipTypePaymentSchedules = v.as[MembershipTypePaymentSchedules]
 	}
 }
 

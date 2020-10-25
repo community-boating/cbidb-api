@@ -6,49 +6,31 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 
 object MembershipLogic {
-	def staggeredPaymentsAvailableNow(now: LocalDate): Boolean = {
-		val month = now.getMonthValue
-		month == 1 || month >= 9
+	/**
+	 * What is the longest a staggered payment schedule can be stretched. Per Ying, they should never start in eg 2020 for a membership in 2022
+	 * For simplicity, let's say if I start in December, why would I want to start later than next August
+	 * 0 means lump payment, 1 means two payments (1 additional month) etc
+	 */
+	val STAGGERED_PAYMENT_MAX_ADDL_MONTHS = 8
+
+	/**
+	 * @return List of all possible payments schedules less than {@code maxAddlMonths}long
+	 */
+	def calculateAllPaymentSchedules(startDate: LocalDate, fullPrice: Currency, maxAddlMonths: Int = STAGGERED_PAYMENT_MAX_ADDL_MONTHS): List[List[(LocalDate, Currency)]] = {
+		(0 to maxAddlMonths).toList.map(ct => calculatePaymentSchedule(startDate, fullPrice, ct))
 	}
 
-	def getMembershipStaggeredDownPayment: Currency = Currency.dollars(100)
-
-	def getMembershipStaggeredPaymentsEndDate(now: LocalDate): LocalDate = {
-		val FINAL_MONTH = 4
-		val month = now.getMonthValue
-		if (month < FINAL_MONTH) {
-			LocalDate.of(now.getYear, FINAL_MONTH, 1)
-		} else {
-			LocalDate.of(now.getYear+1, FINAL_MONTH, 1)
-		}
-
-	}
-
-	def getStaggeredPaymentOptions(startDate: LocalDate, endDate: LocalDate, fullPrice: Currency, downPayment: Currency): List[(LocalDate, Currency)] = {
-		val dates = {
-			def recurse(agg: List[LocalDate]): List[LocalDate] = {
-				val nextMonth = startDate.plusMonths(agg.size+1)
-				if (nextMonth.isEqual(endDate) || nextMonth.isAfter(endDate)) {
-					agg
-				} else {
-					recurse(nextMonth :: agg)
-				}
-			}
-			recurse(List.empty).reverse
-		}
-		val valueAfterDown = fullPrice - downPayment
-		val payments = valueAfterDown.splitIntoPayments(dates.length)
+	def calculatePaymentSchedule(startDate: LocalDate, fullPrice: Currency, additionalMonths: Int): List[(LocalDate, Currency)] = {
+		val dates = (0 to additionalMonths).map(startDate.plusMonths(_)).toList
+		val payments = fullPrice.splitIntoPayments(dates.length)
 		dates.zip(payments)
 	}
 
 	def membershipTypeAllowsStaggeredPayments(now: LocalDate, membershipTypeId: Int): Boolean = {
 		membershipTypeId match {
-			case
-				MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID
-				| MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID => staggeredPaymentsAvailableNow(now)
+			case MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID
+				 | MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID => true
 			case _ => false
 		}
 	}
-
-
 }
