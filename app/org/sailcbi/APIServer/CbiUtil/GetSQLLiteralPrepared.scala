@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.CbiUtil
 
-import java.time.ZonedDateTime
+import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
 object GetSQLLiteralPrepared {
@@ -14,6 +14,10 @@ object GetSQLLiteralPrepared {
 	def apply(i: Int): String = i.toString
 
 	def apply(b: Boolean): String = if (b) "Y" else "N"
+
+	def apply(ld: LocalDate): String = {
+		"TO_DATE('" + ld.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"
+	}
 
 	def apply(zdt: ZonedDateTime, truncateToDay: Boolean = false): String = {
 		if (truncateToDay) "TO_DATE('" + zdt.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')"

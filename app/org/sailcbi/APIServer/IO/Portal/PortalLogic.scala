@@ -4,10 +4,11 @@ import java.sql.CallableStatement
 import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary}
+import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
@@ -1936,6 +1937,77 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForSelect(q)
+	}
+
+	def canRenewOnEachDate(pb: PersistenceBroker, personId: Int, dates: List[LocalDate]): List[(LocalDate, Boolean)] = {
+		type CanRenewOnDate = (LocalDate, Boolean)
+		val q = new PreparedQueryForSelect[CanRenewOnDate](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDate, Boolean) =
+				(rsw.getLocalDate(1), rsw.getBooleanFromChar(2))
+
+			override def getQuery: String = dates.map(d => {
+				s"select ${GetSQLLiteralPrepared(d)}, person_pkg.can_renew($personId, ${GetSQLLiteralPrepared(d)}) from dual"
+			}).mkString(" UNION ALL ")
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
+	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
+		/** typeId, price, discountId, discountAmt */
+		type SCM = (Int, Double, Option[Int], Option[Double])
+
+		val scm = {
+			val q = new PreparedQueryForSelect[SCM](Set(MemberUserType)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCM =
+					(rsw.getInt(1), rsw.getDouble(2), rsw.getOptionInt(3), rsw.getOptionDouble(4))
+
+				override def getQuery: String =
+					s"""
+					  |select membership_type_id, price, di.discount_id, discount_amt
+					  |from shopping_cart_memberships scm left outer join discount_instances di
+					  |on scm.discount_instance_id = di.instance_id
+					  |where order_id = $orderId and person_id = $personId
+					  |""".stripMargin
+			}
+			val scms = pb.executePreparedQueryForSelect(q)
+			if (scms.length != 1) None
+			else Some(scms.head)
+		}
+
+		scm match {
+			case None => List.empty
+			case Some((typeId, price, discountIdOption, discountAmtOption)) => {
+				val priceAsCurrency = Currency.dollars(price)
+
+				// return a function mapping end date to price
+				// for renewals, if the end date is past their "can renew" date,
+				// then the price is the full price ie the current price plus the renewal discoutn amt added back on
+				// Otherwise its just the price that SCM says it is
+				val endDateToPrice = (endDates: List[LocalDate]) => {
+					val samePrice: LocalDate => Currency = _ => priceAsCurrency
+
+					discountIdOption match {
+						case Some(MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID) => {
+
+							// map of (proposed payment plan end date) => (can the user still renew on that date)
+							val canRenewOnEachDate = PortalLogic.canRenewOnEachDate(pb, personId, endDates).toMap
+
+							// return a fn that takes a date and checks it against the map above.
+							// If they cant renew, put the discount amt back on the price
+							(ld: LocalDate) => {
+								if (canRenewOnEachDate(ld)) {
+									priceAsCurrency
+								} else {
+									priceAsCurrency + Currency.dollars(discountAmtOption.get)
+								}
+							}
+						}
+						case _ => samePrice
+					}
+				}
+				MembershipLogic.calculateAllPaymentSchedules(now, endDateToPrice)
+			}
+		}
 	}
 }
 

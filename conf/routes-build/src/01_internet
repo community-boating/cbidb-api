@@ -118,6 +118,8 @@ POST    /member/ap-class-signup             org.sailcbi.APIServer.Api.Endpoints.
 
 POST    /member/ap-class-unenroll             org.sailcbi.APIServer.Api.Endpoints.Member.ApClassUnenroll.post()
 
+GET     /member/payment-plan-options        org.sailcbi.APIServer.Api.Endpoints.Member.GetMembershipPaymentPlansForCart.get()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()

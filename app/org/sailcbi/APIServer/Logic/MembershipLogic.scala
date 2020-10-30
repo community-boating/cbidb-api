@@ -15,14 +15,21 @@ object MembershipLogic {
 
 	/**
 	 * @return List of all possible payments schedules less than {@code maxAddlMonths}long
+	 * {@code priceFunction} takes a list of all the end dates, does a single expensive DB operation just once
+	 * (e.g. checks each of them for renewal eligibilty in one query), then returns a function on a single end date to total price
 	 */
-	def calculateAllPaymentSchedules(startDate: LocalDate, fullPrice: Currency, maxAddlMonths: Int = STAGGERED_PAYMENT_MAX_ADDL_MONTHS): List[List[(LocalDate, Currency)]] = {
-		(0 to maxAddlMonths).toList.map(ct => calculatePaymentSchedule(startDate, fullPrice, ct))
+	def calculateAllPaymentSchedules(startDate: LocalDate, priceFunction: List[LocalDate] => LocalDate => Currency, maxAddlMonths: Int = STAGGERED_PAYMENT_MAX_ADDL_MONTHS): List[List[(LocalDate, Currency)]] = {
+		val endDates = (0 to maxAddlMonths).toList.map(startDate.plusMonths(_))
+		// Call the DB, check renewal eligibility on each end date, keep the result as a hash for the next step
+		val priceFunctionApplied = priceFunction(endDates)
+		(0 to maxAddlMonths).toList.map(ct => calculatePaymentSchedule(startDate, priceFunctionApplied, ct))
 	}
 
-	def calculatePaymentSchedule(startDate: LocalDate, fullPrice: Currency, additionalMonths: Int): List[(LocalDate, Currency)] = {
+	def calculatePaymentSchedule(startDate: LocalDate, endDateToPrice: LocalDate => Currency, additionalMonths: Int): List[(LocalDate, Currency)] = {
 		val dates = (0 to additionalMonths).map(startDate.plusMonths(_)).toList
-		val payments = fullPrice.splitIntoPayments(dates.length)
+		val endDate = dates.last
+		val price = endDateToPrice(endDate)
+		val payments = price.splitIntoPayments(dates.length)
 		dates.zip(payments)
 	}
 
