@@ -1129,25 +1129,8 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): Unit = {
-//		val discountAmt = requestedDiscountInstanceId.map(instanceId => {
-//			val q = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
-//				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
-//
-//				override def getParams: List[PreparedValue] = List(
-//					instanceId.toString,
-//					memTypeId.toString
-//				)
-//
-//				override def getQuery: String =
-//					"""
-//					  |select select md.discount_amt from memberships_discounts md
-//					  |where instance_id = ? and type_id = ?
-//					  |""".stripMargin
-//			}
-//			pb.executePreparedQueryForSelect(q).head
-//		})
-
+	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
+	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1213,6 +1196,21 @@ object PortalLogic {
 			}
 			pb.executePreparedQueryForUpdateOrDelete(updateQ)
 		}
+
+		val paymentPlanAllowed = MembershipLogic.membershipTypeAllowsStaggeredPayments(memTypeId)
+
+		val gpdwQuery = new PreparedQueryForSelect[(Boolean, Boolean, Boolean)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Boolean, Boolean, Boolean) =
+				(rsw.getBooleanFromChar(1), rsw.getBooleanFromChar(2), rsw.getBooleanFromChar(3))
+
+			override def getQuery: String =
+				s"""
+				  |select cc_pkg.guest_privs_auto($personId, $memTypeId), cc_pkg.guest_privs_na($personId, $memTypeId), cc_pkg.damage_waiver_auto($personId, $memTypeId) from dual
+				  |""".stripMargin
+		}
+		val (guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = pb.executePreparedQueryForSelect(gpdwQuery).head
+
+		(paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto)
 	}
 
 	def apSetGuestPrivs(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {

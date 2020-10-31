@@ -33,7 +33,7 @@ object MembershipLogic {
 		dates.zip(payments)
 	}
 
-	def membershipTypeAllowsStaggeredPayments(now: LocalDate, membershipTypeId: Int): Boolean = {
+	def membershipTypeAllowsStaggeredPayments(membershipTypeId: Int): Boolean = {
 		membershipTypeId match {
 			case MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID
 				 | MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID => true
