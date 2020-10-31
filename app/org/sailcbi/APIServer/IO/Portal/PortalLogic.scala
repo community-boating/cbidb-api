@@ -1996,9 +1996,9 @@ object PortalLogic {
 							// If they cant renew, put the discount amt back on the price
 							(ld: LocalDate) => {
 								if (canRenewOnEachDate(ld)) {
-									priceAsCurrency
+									priceAsCurrency - Currency.dollars(discountAmtOption.getOrElse(0d))
 								} else {
-									priceAsCurrency + Currency.dollars(discountAmtOption.get)
+									priceAsCurrency
 								}
 							}
 						}
