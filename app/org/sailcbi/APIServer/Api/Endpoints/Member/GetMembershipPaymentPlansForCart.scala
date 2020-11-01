@@ -24,7 +24,7 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
-			val now = LocalDateTime.of(2020, 11, 10, 1, 1) // PA.now()
+			val now = PA.now()
 
 			val plans = PortalLogic.getPaymentPlansForMembershipInCart(pb, personId, orderId, now.toLocalDate).map(_.map(
 				payment => MembershipSinglePayment(payment._1, payment._2.cents)

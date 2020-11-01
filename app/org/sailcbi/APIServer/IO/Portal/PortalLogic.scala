@@ -1937,17 +1937,53 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	def canRenewOnEachDate(pb: PersistenceBroker, personId: Int, dates: List[LocalDate]): List[(LocalDate, Boolean)] = {
-		type CanRenewOnDate = (LocalDate, Boolean)
+	/** @return List[(Date, (canRenew, guestPrivsAuto))] */
+	def canRenewOnEachDate(pb: PersistenceBroker, personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
+		type CanRenewOnDate = (LocalDate, (Boolean, Boolean))
 		val q = new PreparedQueryForSelect[CanRenewOnDate](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDate, Boolean) =
-				(rsw.getLocalDate(1), rsw.getBooleanFromChar(2))
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): CanRenewOnDate =
+				(rsw.getLocalDate(1), (rsw.getBooleanFromChar(2), rsw.getBooleanFromChar(3)))
 
 			override def getQuery: String = dates.map(d => {
-				s"select ${GetSQLLiteralPrepared(d)}, person_pkg.can_renew($personId, ${GetSQLLiteralPrepared(d)}) from dual"
+				s"""
+				   |select
+				   |${GetSQLLiteralPrepared(d)},
+				   |person_pkg.can_renew($personId, ${GetSQLLiteralPrepared(d)}),
+				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${GetSQLLiteralPrepared(d)})
+				   |from dual
+				   |""".stripMargin
 			}).mkString(" UNION ALL ")
 		}
 		pb.executePreparedQueryForSelect(q)
+	}
+
+	/** @return (Option[GPPrice], Option[DWPrice]) */
+	def getGPAndDwFromCart(pb: PersistenceBroker, personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
+		type GpAndDwPrice = (Option[Currency], Option[Currency])
+		val ITEM_TYPE_DW = "Damage Waiver"
+		val ITEM_TYPE_GP = "Guest Privileges"
+		val q = new PreparedQueryForSelect[(String, Currency)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Currency) =
+				(rsw.getString(1), Currency.dollars(rsw.getDouble(2)))
+
+			override def getQuery: String =
+				s"""
+				  |select ITEM_TYPE, PRICE from full_cart
+				  |where order_id = $orderId
+				  |and ITEM_TYPE in ('$ITEM_TYPE_DW', '$ITEM_TYPE_GP')
+				  |""".stripMargin
+		}
+		val rows = pb.executePreparedQueryForSelect(q)
+
+		// Turn the 0-2 rows of GP and DW price into a single object
+		rows.foldLeft((None, None): GpAndDwPrice)((result, row) => {
+			val (itemType, price) = row
+			itemType match {
+				case ITEM_TYPE_GP => (Some(price), result._2)
+				case ITEM_TYPE_DW => (result._1, Some(price))
+				case _ => result
+			}
+		})
 	}
 
 	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
@@ -1974,8 +2010,10 @@ object PortalLogic {
 
 		scm match {
 			case None => List.empty
-			case Some((typeId, price, discountIdOption, discountAmtOption)) => {
-				val priceAsCurrency = Currency.dollars(price)
+			case Some((membershipTypeId, membershipPrice, discountIdOption, discountAmtOption)) => {
+				val (gpPriceOption, dwPriceOption) = PortalLogic.getGPAndDwFromCart(pb, personId, orderId)
+				val priceAsCurrency =
+					Currency.dollars(membershipPrice) + gpPriceOption.getOrElse(Currency.cents(0)) + dwPriceOption.getOrElse(Currency.cents(0))
 
 				// return a function mapping end date to price
 				// for renewals, if the end date is past their "can renew" date,
@@ -1986,14 +2024,14 @@ object PortalLogic {
 
 					discountIdOption match {
 						case Some(MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID) => {
-
 							// map of (proposed payment plan end date) => (can the user still renew on that date)
-							val canRenewOnEachDate = PortalLogic.canRenewOnEachDate(pb, personId, endDates).toMap
+							val canRenewOnEachDate = PortalLogic.canRenewOnEachDate(pb, personId, membershipTypeId, endDates).toMap
 
 							// return a fn that takes a date and checks it against the map above.
 							// If they cant renew, put the discount amt back on the price
 							(ld: LocalDate) => {
-								if (canRenewOnEachDate(ld)) {
+								val (canRenew, guestPrivsAuto) = canRenewOnEachDate(ld)
+								if (canRenew) {
 									priceAsCurrency - Currency.dollars(discountAmtOption.getOrElse(0d))
 								} else {
 									priceAsCurrency
