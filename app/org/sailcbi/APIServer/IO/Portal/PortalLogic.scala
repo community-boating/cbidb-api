@@ -1986,31 +1986,35 @@ object PortalLogic {
 		})
 	}
 
+	def getSingleAPSCM(pb: PersistenceBroker, personId: Int, orderId: Int): Option[(Int, Double, Option[Int], Option[Double], Int)] = {
+		/** typeId, price, discountId, discountAmt, addlStaggeredPayments */
+		type SCM = (Int, Double, Option[Int], Option[Double], Int)
+		val q = new PreparedQueryForSelect[SCM](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCM =
+				(rsw.getInt(1), rsw.getDouble(2), rsw.getOptionInt(3), rsw.getOptionDouble(4), rsw.getOptionInt(5).getOrElse(0))
+
+			override def getQuery: String =
+				s"""
+				   |select membership_type_id, price, di.discount_id, discount_amt, ADDL_STAGGERED_PAYMENTS
+				   |from shopping_cart_memberships scm left outer join discount_instances di
+				   |on scm.discount_instance_id = di.instance_id
+				   |where order_id = $orderId and person_id = $personId
+				   |""".stripMargin
+		}
+		val scms = pb.executePreparedQueryForSelect(q)
+		if (scms.length != 1) None
+		else Some(scms.head)
+	}
+
 	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
 		/** typeId, price, discountId, discountAmt */
-		type SCM = (Int, Double, Option[Int], Option[Double])
+		type SCM = (Int, Double, Option[Int], Option[Double], Int)
 
-		val scm = {
-			val q = new PreparedQueryForSelect[SCM](Set(MemberUserType)) {
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCM =
-					(rsw.getInt(1), rsw.getDouble(2), rsw.getOptionInt(3), rsw.getOptionDouble(4))
-
-				override def getQuery: String =
-					s"""
-					  |select membership_type_id, price, di.discount_id, discount_amt
-					  |from shopping_cart_memberships scm left outer join discount_instances di
-					  |on scm.discount_instance_id = di.instance_id
-					  |where order_id = $orderId and person_id = $personId
-					  |""".stripMargin
-			}
-			val scms = pb.executePreparedQueryForSelect(q)
-			if (scms.length != 1) None
-			else Some(scms.head)
-		}
+		val scm = PortalLogic.getSingleAPSCM(pb, personId, orderId)
 
 		scm match {
 			case None => List.empty
-			case Some((membershipTypeId, membershipPrice, discountIdOption, discountAmtOption)) => {
+			case Some((membershipTypeId, membershipPrice, discountIdOption, discountAmtOption, addlStaggeredMonths)) => {
 				val (gpPriceOption, dwPriceOption) = PortalLogic.getGPAndDwFromCart(pb, personId, orderId)
 				val priceAsCurrency =
 					Currency.dollars(membershipPrice) + gpPriceOption.getOrElse(Currency.cents(0)) + dwPriceOption.getOrElse(Currency.cents(0))
@@ -2047,17 +2051,25 @@ object PortalLogic {
 	}
 
 	def setPaymentPlanLength(pb: PersistenceBroker, personId: Int, orderId: Int, paymentPlanAddlMonths: Int): Unit = {
-		// TODO: validate this mem type is ok, maybe change price for renewal elig etc
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-			override def getQuery: String =
-				s"""
-				  |update shopping_cart_memberships
-				  |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
-				  |where person_id = $personId and order_id = $orderId
-				  |""".stripMargin
+		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
+			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
+			case None => true
 		}
 
-		pb.executePreparedQueryForUpdateOrDelete(updateQ)
+		if (typeIsOk) {
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override def getQuery: String =
+					s"""
+					   |update shopping_cart_memberships
+					   |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
+					   |where person_id = $personId and order_id = $orderId
+					   |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(updateQ)
+
+			PortalLogic.assessDiscounts(pb, orderId)
+		}
 	}
 }
 
