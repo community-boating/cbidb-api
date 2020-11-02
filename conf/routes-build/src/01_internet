@@ -120,6 +120,8 @@ POST    /member/ap-class-unenroll             org.sailcbi.APIServer.Api.Endpoint
 
 GET     /member/payment-plan-options        org.sailcbi.APIServer.Api.Endpoints.Member.GetMembershipPaymentPlansForCart.get()
 
+POST     /member/set-payment-plan            org.sailcbi.APIServer.Api.Endpoints.Member.ApSetMembershipPaymentCount.post()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()

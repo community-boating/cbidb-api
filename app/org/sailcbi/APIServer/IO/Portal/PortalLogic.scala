@@ -2045,5 +2045,19 @@ object PortalLogic {
 			}
 		}
 	}
+
+	def setPaymentPlanLength(pb: PersistenceBroker, personId: Int, orderId: Int, paymentPlanAddlMonths: Int): Unit = {
+		// TODO: validate this mem type is ok, maybe change price for renewal elig etc
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				  |update shopping_cart_memberships
+				  |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
+				  |where person_id = $personId and order_id = $orderId
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForUpdateOrDelete(updateQ)
+	}
 }
 
