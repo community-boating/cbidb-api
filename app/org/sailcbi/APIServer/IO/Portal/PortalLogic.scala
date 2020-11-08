@@ -495,8 +495,8 @@ object PortalLogic {
 				token = rsw.getString(2),
 				orderId = rsw.getInt(1),
 				last4 = rsw.getString(3),
-				expMonth = rsw.getInt(4).toString,
-				expYear = rsw.getInt(5).toString,
+				expMonth = rsw.getInt(4),
+				expYear = rsw.getInt(5),
 				zip = rsw.getOptionString(6)
 			)
 
@@ -1995,10 +1995,12 @@ object PortalLogic {
 
 			override def getQuery: String =
 				s"""
-				   |select membership_type_id, price, di.discount_id, discount_amt, ADDL_STAGGERED_PAYMENTS
-				   |from shopping_cart_memberships scm left outer join discount_instances di
+				   |select membership_type_id, price, di.discount_id, discount_amt, o.ADDL_STAGGERED_PAYMENTS
+				   |from shopping_cart_memberships scm
+				   |inner join order_numbers o on scm.order_id = o.order_id
+				   |left outer join discount_instances di
 				   |on scm.discount_instance_id = di.instance_id
-				   |where order_id = $orderId and person_id = $personId
+				   |where scm.order_id = $orderId and scm.person_id = $personId
 				   |""".stripMargin
 		}
 		val scms = pb.executePreparedQueryForSelect(q)
@@ -2060,9 +2062,9 @@ object PortalLogic {
 			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 				override def getQuery: String =
 					s"""
-					   |update shopping_cart_memberships
+					   |update order_numbers
 					   |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
-					   |where person_id = $personId and order_id = $orderId
+					   |where order_id = $orderId
 					   |""".stripMargin
 			}
 
@@ -2070,6 +2072,18 @@ object PortalLogic {
 
 			PortalLogic.assessDiscounts(pb, orderId)
 		}
+	}
+
+	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select nvl(ADDL_STAGGERED_PAYMENTS,0) from order_numbers where order_id = $orderId
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).head
 	}
 }
 

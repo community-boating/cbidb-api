@@ -22,7 +22,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		if (TestUserType(Set(ApexUserType, PublicUserType, MemberUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
 		}
-		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+		else throw new UnauthorizedAccessException("getTokenDetails denied to userType " + rc.auth.userType)
 	}
 
 	def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
@@ -44,7 +44,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				Some((c: Charge) => dbIO.createObject(c))
 			)
 		}
-		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.userType)
 	}
 
 	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
@@ -92,7 +92,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				})
 			)
 		}
-		else throw new UnauthorizedAccessException("getCharges denied to userType " + rc.auth.userType)
+		else throw new UnauthorizedAccessException("syncBalanceTransactions denied to userType " + rc.auth.userType)
 	}
 
 	def createStripeCustomerFromPerson(pb: PersistenceBroker, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
@@ -157,7 +157,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				None
 			)
 		}
-		else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.userType)
+		else throw new UnauthorizedAccessException("getCustomerPortalURL denied to userType " + rc.auth.userType)
 	}
 
 	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
@@ -185,7 +185,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 
 			})
 		}
-		else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.userType)
+		else throw new UnauthorizedAccessException("storePaymentMethod denied to userType " + rc.auth.userType)
 	}
 
 	def getCustomerObject(customerId: String): Future[ServiceRequestResult[Customer, StripeError]] = {
@@ -193,6 +193,57 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 			apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
 		}
 		else throw new UnauthorizedAccessException("getCustomerObject denied to userType " + rc.auth.userType)
+	}
+
+	def getCustomerDefaultPaymentMethod(customerId: String): Future[ServiceRequestResult[PaymentMethod, StripeError]] = {
+		getCustomerObject(customerId).flatMap({
+			case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[PaymentMethod, StripeError]])
+			case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {
+				case None => throw new Exception("No default payment method for customer " + customerId)
+				case Some(paymentMethod) => apiIO.getOrPostStripeSingleton(
+					PaymentMethod.getURL + "/" + paymentMethod,
+					PaymentMethod.apply,
+					GET,
+					None,
+					None
+				)
+			}
+		})
+	}
+
+	def chargeCustomersDefaultPaymentMethod(
+		customerId: String,
+		amountInCents: Int,
+		paymentStaggerId: Int,
+		orderId: Int,
+		closeId: Int
+	): Future[ServiceRequestResult[Charge, StripeError]] = {
+		if (TestUserType(Set(ApexUserType, MemberUserType), rc.auth.userType)) {
+			getCustomerObject(customerId).flatMap({
+				case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Charge, StripeError]])
+				case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {
+					case None => throw new Exception("No default payment method for customer " + customerId)
+					case Some(paymentMethod) => apiIO.getOrPostStripeSingleton(
+						"charges",
+						Charge.apply,
+						POST,
+						Some(Map(
+							"amount" -> amountInCents.toString,
+							"customer" -> customerId,
+							"currency" -> "usd",
+							"source" -> paymentMethod,
+							"description" -> ("Charge for paymentStaggerId " + paymentStaggerId + " time " + PA.serverParameters.nowDateTimeString),
+							"metadata[closeId]" -> closeId.toString,
+							"metadata[orderId]" -> orderId.toString,
+							"metadata[paymentStaggerId]" -> paymentStaggerId.toString,
+							"metadata[cbiInstance]" -> PA.instanceName
+						)),
+						Some((c: Charge) => dbIO.createObject(c))
+					)
+				}
+			})
+		}
+		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.userType)
 	}
 
 	private def updateLocalDBFromStripeForStorable[T <: CastableToStorableClass](
