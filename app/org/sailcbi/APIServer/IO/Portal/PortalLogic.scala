@@ -2085,5 +2085,14 @@ object PortalLogic {
 		}
 		pb.executePreparedQueryForSelect(q).head
 	}
+
+	def clearStripeTokensFromOrder(pb: PersistenceBroker, orderId: Int): Unit = {
+		val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString)
+
+			override def getQuery: String = "update stripe_tokens set active = 'N' where order_id = ?"
+		}
+		pb.executePreparedQueryForUpdateOrDelete(clearQ)
+	}
 }
 

@@ -21,6 +21,7 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
 				PortalLogic.setPaymentPlanLength(pb, personId, orderId, parsed.additionalPayments)
+				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
 
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)

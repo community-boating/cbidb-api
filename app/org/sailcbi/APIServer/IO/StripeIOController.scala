@@ -47,6 +47,19 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.userType)
 	}
 
+	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
+		if (TestUserType(Set( MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				s"payment_methods/${paymentMethodId}/detach",
+				null,
+				POST,
+				Some(Map.empty),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("detachPaymentMethod denied to userType " + rc.auth.userType)
+	}
+
 	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
 		if (TestUserType(Set(ApexUserType), rc.auth.userType)) {
 			// Update DB with all payouts
@@ -195,14 +208,14 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("getCustomerObject denied to userType " + rc.auth.userType)
 	}
 
-	def getCustomerDefaultPaymentMethod(customerId: String): Future[ServiceRequestResult[PaymentMethod, StripeError]] = {
+	def getCustomerDefaultPaymentMethod(customerId: String): Future[ServiceRequestResult[Option[PaymentMethod], StripeError]] = {
 		getCustomerObject(customerId).flatMap({
-			case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[PaymentMethod, StripeError]])
+			case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Option[PaymentMethod], StripeError]])
 			case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {
-				case None => throw new Exception("No default payment method for customer " + customerId)
+				case None => Future(Succeeded(None))
 				case Some(paymentMethod) => apiIO.getOrPostStripeSingleton(
 					PaymentMethod.getURL + "/" + paymentMethod,
-					PaymentMethod.apply,
+					jsv => Some(PaymentMethod.apply(jsv)),
 					GET,
 					None,
 					None

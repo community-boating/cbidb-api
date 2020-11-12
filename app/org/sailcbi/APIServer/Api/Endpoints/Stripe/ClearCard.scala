@@ -4,28 +4,40 @@ import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
+import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.PaymentMethod
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ClearCard @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
+class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
+			val stripeIOController = rc.getStripeIOController(ws)
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
+			val stripeCustomerId = PortalLogic.getStripeCustomerId(pb, personId)
 
-			val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-				override val params: List[String] = List(orderId.toString)
+			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(pb, orderId) > 0
 
-				override def getQuery: String = "update stripe_tokens set active = 'N' where order_id = ?"
+			if (orderHasStaggeredPayments) {
+				stripeIOController.getCustomerDefaultPaymentMethod(stripeCustomerId.get).flatMap({
+					case s: NetSuccess[Option[PaymentMethod], _] => s.successObject match {
+						case Some(pm: PaymentMethod) => stripeIOController.detachPaymentMethod(pm.id).map(_ => Ok("done"))
+						case None => Future(Ok("done"))
+					}
+					case f: NetFailure[_, _] => Future(Ok("error"))
+				})
+			} else {
+				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
+				Future(Ok("done"))
 			}
-			pb.executePreparedQueryForUpdateOrDelete(clearQ)
-			Future(Ok("done"))
 		})
 	}
 }

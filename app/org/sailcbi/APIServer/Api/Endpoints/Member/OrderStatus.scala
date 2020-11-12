@@ -32,15 +32,15 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			if (staggeredPaymentAdditionalMonths > 0) {
 				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
 				rc.getStripeIOController(ws).getCustomerDefaultPaymentMethod(customerId).map({
-					case c: NetSuccess[PaymentMethod, StripeError] => Ok(Json.toJson(OrderStatusResult(
+					case c: NetSuccess[Option[PaymentMethod], StripeError] => Ok(Json.toJson(OrderStatusResult(
 						orderId = orderId,
 						total = orderTotal,
 						paymentMethodRequired = true,
-						cardData = Some(SavedCardOrPaymentMethodData(
-							last4 = c.successObject.card.last4,
-							expMonth = c.successObject.card.exp_month,
-							expYear = c.successObject.card.exp_year,
-							zip = c.successObject.billing_details.address.postal_code
+						cardData = (c.successObject.asInstanceOf[Option[PaymentMethod]]).map(pm => SavedCardOrPaymentMethodData(
+							last4 = pm.card.last4,
+							expMonth = pm.card.exp_month,
+							expYear = pm.card.exp_year,
+							zip = pm.billing_details.address.postal_code
 						))
 					)))
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)

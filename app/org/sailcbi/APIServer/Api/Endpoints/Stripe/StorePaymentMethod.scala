@@ -23,7 +23,9 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 				customerIdOption match {
 					case None => Future(Ok("fail"))
 					case Some(customerId) => {
-						val stripeIOController = rc.getStripeIOController(ws).storePaymentMethod(customerId, parsed.paymentMethodId)
+						rc.getStripeIOController(ws).storePaymentMethod(customerId, parsed.paymentMethodId)
+						// Give stripe a second to update its internal state, otherwise if we ask for the order status too soon, it wont be ready
+						Thread.sleep(1000)
 						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					}
 				}
