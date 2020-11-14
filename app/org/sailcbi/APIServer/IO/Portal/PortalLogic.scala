@@ -2127,33 +2127,26 @@ object PortalLogic {
 		// Clear existing records.  Throw if there are paid records
 		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
-		val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get.tail
+		if (numberAdditionalPayments > 0) {
+			val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get
 
-		val selects = futurePayments.zipWithIndex.map(t => {
-			val ((payDate, payAmt), index) = t
+			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val pkName: Option[String] = None
 
-			s"""
-			   |select $orderId, ${index+1}, ${GetSQLLiteral(payDate)}, ${payAmt.cents}, ${GetSQLLiteral("N")} from dual
-			   |""".stripMargin
-		}).mkString(" UNION ALL ")
+				override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
+					val ((payDate, payAmt), index) = t
+					val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
+					values
+				})
 
-		val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
-			override val pkName: Option[String] = None
-
-			override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
-				val ((payDate, payAmt), index) = t
-				val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
-				values
-			})
-
-			override def getQuery: String =
-				s"""
-				  |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, amount_in_cents, paid)
-				  |values (?, ?, ?, ?, ?)
-				  |""".stripMargin
+				override def getQuery: String =
+					s"""
+					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, amount_in_cents, paid)
+					   |values (?, ?, ?, ?, ?)
+					   |""".stripMargin
+			}
+			pb.executePreparedQueryForInsert(insertQ)
 		}
-
-		pb.executePreparedQueryForInsert(insertQ)
 	}
 }
 
