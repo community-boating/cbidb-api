@@ -4,10 +4,10 @@ import java.sql.CallableStatement
 import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteralPrepared}
+import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
@@ -1947,9 +1947,9 @@ object PortalLogic {
 			override def getQuery: String = dates.map(d => {
 				s"""
 				   |select
-				   |${GetSQLLiteralPrepared(d)},
-				   |person_pkg.can_renew($personId, ${GetSQLLiteralPrepared(d)}),
-				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${GetSQLLiteralPrepared(d)})
+				   |${GetSQLLiteral(d)},
+				   |person_pkg.can_renew($personId, ${GetSQLLiteral(d)}),
+				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${GetSQLLiteral(d)})
 				   |from dual
 				   |""".stripMargin
 			}).mkString(" UNION ALL ")
@@ -2093,6 +2093,67 @@ object PortalLogic {
 			override def getQuery: String = "update stripe_tokens set active = 'N' where order_id = ?"
 		}
 		pb.executePreparedQueryForUpdateOrDelete(clearQ)
+	}
+
+	/**
+	 * Delete unpaid staggered payment records on the supplied orderId.  Throw if there are any payment records remaining afterward
+	 * @param pb
+	 * @param orderId
+	 */
+	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker, orderId: Int): Unit = {
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				  |delete from ORDER_STAGGERED_PAYMENTS
+				  |where order_id = $orderId and nvl(paid, 'N') <> 'Y' and paid_close_id is null and redeemed_close_id is null
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteQ)
+		val selectQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = 1
+
+			override def getQuery: String =
+				s"""
+				  |select 1 from ORDER_STAGGERED_PAYMENTS where order_id = $orderId
+				  |""".stripMargin
+		}
+		val recordsLeft = pb.executePreparedQueryForSelect(selectQ).length
+		if (recordsLeft > 0) {
+			throw new Exception (s"deleteStaggeredPaymentsWithEmptyAssertion called on orderId $orderId which has paid records")
+		}
+	}
+
+	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): Unit = {
+		// Clear existing records.  Throw if there are paid records
+		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
+
+		val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get.tail
+
+		val selects = futurePayments.zipWithIndex.map(t => {
+			val ((payDate, payAmt), index) = t
+
+			s"""
+			   |select $orderId, ${index+1}, ${GetSQLLiteral(payDate)}, ${payAmt.cents}, ${GetSQLLiteral("N")} from dual
+			   |""".stripMargin
+		}).mkString(" UNION ALL ")
+
+		val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+			override val pkName: Option[String] = None
+
+			override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
+				val ((payDate, payAmt), index) = t
+				val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
+				values
+			})
+
+			override def getQuery: String =
+				s"""
+				  |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, amount_in_cents, paid)
+				  |values (?, ?, ?, ?, ?)
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForInsert(insertQ)
 	}
 }
 

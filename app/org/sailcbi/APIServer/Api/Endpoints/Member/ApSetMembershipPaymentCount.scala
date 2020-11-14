@@ -20,7 +20,10 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
+				val now = PA.now().toLocalDate
+
 				PortalLogic.setPaymentPlanLength(pb, personId, orderId, parsed.additionalPayments)
+				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, parsed.additionalPayments)
 				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
 
 				Future(Ok(new JsObject(Map(

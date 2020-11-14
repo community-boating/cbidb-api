@@ -3,6 +3,9 @@ package org.sailcbi.APIServer.CbiUtil
 import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
+/**
+ * For use with Prepared Statements only. Do not inject these directly into SQL!
+ */
 object GetSQLLiteralPrepared {
 	def apply(s: String): String = s
 
