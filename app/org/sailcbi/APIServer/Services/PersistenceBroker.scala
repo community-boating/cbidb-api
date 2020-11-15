@@ -22,6 +22,12 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
 	}
 
+	final def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+		else if (entityVisible(obj)) countObjectsByFiltersImplementation(obj, filters)
+		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
+	}
+
 	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
@@ -61,7 +67,8 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 
 	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
 		// TODO: security
-		executeQueryBuilderImplementation(qb)
+		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+		else executeQueryBuilderImplementation(qb)
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
@@ -75,6 +82,8 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 	protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T]
 
 	protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T]
+
+	protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int
 
 	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T]
 

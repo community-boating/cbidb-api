@@ -30,9 +30,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							case ValidationOk => {
 								// do update
 								val user = pb.getObjectById(User, userId).get
-								user.update(_.email, parsed.email.get)
-								user.update(_.nameFirst, parsed.nameFirst)
-								user.update(_.nameLast, parsed.nameLast)
+								setValues(user, parsed)
 
 								pb.commitObjectToDatabase(user)
 
@@ -48,12 +46,16 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					println(s"its a create")
 					PA.withRequestCache(StaffUserType, None, parsedRequest, rc => {
 						val pb = rc.pb
-						runValidations(parsed, pb, None) match {
+						runValidations(parsed, pb, None).combine(checkUsernameUnique(pb, parsed.userName.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								val newJuniorId = -1  // do create
+								val user = new User
+								setValues(user, parsed)
+								user.update(_.userName, parsed.userName.get)
+
+								pb.commitObjectToDatabase(user)
 								Future(Ok(new JsObject(Map(
-									"userId" -> JsNumber(newJuniorId)
+									"userId" -> JsNumber(user.getID)
 								))))
 							}
 						}
@@ -64,7 +66,17 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		})
 	}
 
-	def runValidations(parsed: PutUserShape, pb: PersistenceBroker, userId: Option[Int]): ValidationResult = {
+	private def setValues(user: User, parsed: PutUserShape): Unit = {
+		user.update(_.email, parsed.email.get)
+		user.update(_.nameFirst, parsed.nameFirst)
+		user.update(_.nameLast, parsed.nameLast)
+		user.update(_.active, parsed.active.getOrElse(false))
+		user.update(_.pwChangeRequired, parsed.pwChangeRequired.getOrElse(false))
+		user.update(_.locked, parsed.locked.getOrElse(false))
+		user.update(_.hideFromClose, parsed.hideFromClose.getOrElse(false))
+	}
+
+	private def runValidations(parsed: PutUserShape, pb: PersistenceBroker, userId: Option[Int]): ValidationResult = {
 		ValidationResult.combine(List(
 			ValidationResult.checkBlank(parsed.userName, "Username"),
 			ValidationResult.checkBlank(parsed.email, "Email"),
@@ -73,12 +85,23 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		))
 	}
 
+	private def checkUsernameUnique(pb: PersistenceBroker, candidate: String): ValidationResult = {
+		val existingUsers = pb.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
+
+		if (existingUsers > 0) ValidationResult.from("That username is already in use")
+		else ValidationOk
+	}
+
 	case class PutUserShape(
 		userId: Option[Int],
 		userName: Option[String],
 		email: Option[String],
 		nameFirst: Option[String],
-		nameLast: Option[String]
+		nameLast: Option[String],
+		active: Option[Boolean],
+		hideFromClose: Option[Boolean],
+		locked: Option[Boolean],
+		pwChangeRequired: Option[Boolean]
 	)
 
 	object PutUserShape {

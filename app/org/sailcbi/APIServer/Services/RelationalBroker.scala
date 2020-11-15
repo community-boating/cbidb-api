@@ -153,6 +153,35 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		}
 	}
 
+	protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+		// Filter("") means a filter that can't possibly match anything.
+		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
+		// If there are any short circuit filters, don't bother talking to the database
+		if (filters.exists(f => f(obj.entityName).preparedSQL == "")) 0
+		else {
+			val sb: StringBuilder = new StringBuilder
+			sb.append("SELECT COUNT(*) FROM " + obj.entityName + " " + obj.entityName)
+			var params: List[String] = List.empty
+			if (filters.nonEmpty) {
+				val overallFilter = Filter.and(filters.map(f => f(obj.entityName)))
+				sb.append(" WHERE " + overallFilter.preparedSQL)
+				params = overallFilter.params
+			}
+			val sql = sb.toString()
+			dbConnection.mainPool.withConnection(c => {
+				println("counting objects: ")
+				println(sql)
+				val preparedStatement = c.prepareStatement(sql)
+				val preparedParams = params.map(PreparedString)
+				preparedParams.zipWithIndex.foreach(t => t._1.set(preparedStatement)(t._2+1))
+				println("Parameterized with " + preparedParams)
+				val rs: ResultSet = preparedStatement.executeQuery
+				rs.next()
+				rs.getInt(1)
+			})
+		}
+	}
+
 	private def getObjectsByIdsWithFilterTable[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
 		val tableName: String = {
 			val now: String = System.currentTimeMillis().toString

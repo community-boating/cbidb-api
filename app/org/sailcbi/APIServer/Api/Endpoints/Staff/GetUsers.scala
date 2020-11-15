@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
 import javax.inject.Inject
+import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, User}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
@@ -54,9 +55,14 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 	def getOne(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val logger = PA.logger
 		PA.withRequestCache(StaffUserType, None, ParsedRequest(req), rc => {
-			val user = get(Some(userId), rc).head
-			implicit val format = UserShape.format
-			Future(Ok(Json.toJson(user)))
+			get(Some(userId), rc) match {
+				case l :: _ => {
+					implicit val format = UserShape.format
+					Future(Ok(Json.toJson(l)))
+				}
+				case _ => Future(Ok(ValidationResult.from("No user found").toResultError.asJsObject()))
+			}
+
 		})
 	})
 
