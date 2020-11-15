@@ -8,6 +8,7 @@ abstract class PreparedQueryForInsert(
 ) extends HardcodedQueryForInsert(allowedUserTypes, useTempSchema) {
 	val params: List[String] = List.empty
 	val preparedParams: List[PreparedValue] = List.empty
+	val preparedParamsBatch: List[List[PreparedValue]] = List.empty
 
 	def getParams: List[PreparedValue] = {
 		if (params.nonEmpty && preparedParams.isEmpty) {

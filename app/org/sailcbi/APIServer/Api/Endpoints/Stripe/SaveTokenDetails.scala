@@ -55,8 +55,8 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 								parsedBody.token,
 								parsedBody.orderId,
 								s.successObject.card.last4,
-								s.successObject.card.exp_month.toString,
-								s.successObject.card.exp_year.toString,
+								s.successObject.card.exp_month,
+								s.successObject.card.exp_year,
 								s.successObject.card.address_zip
 							)
 

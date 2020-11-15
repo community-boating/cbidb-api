@@ -21,12 +21,15 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 				// TODO: check mem type is valid
 
 				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(pb, _))
-				PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
+				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
 
 				PortalLogic.assessDiscounts(pb, orderId)
 
 				Future(Ok(new JsObject(Map(
-					"success" -> JsBoolean(true)
+					"paymentPlanAllowed" -> JsBoolean(paymentPlanAllowed),
+					"guestPrivsAuto" -> JsBoolean(guestPrivsAuto),
+					"guestPrivsNA" -> JsBoolean(guestPrivsNA),
+					"damageWavierAuto" -> JsBoolean(dmgWaiverAuto),
 				))))
 			})
 		})

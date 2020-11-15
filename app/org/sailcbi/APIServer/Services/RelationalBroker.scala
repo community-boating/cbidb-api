@@ -62,7 +62,10 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 	}
 
 	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
-		case p: PreparedQueryForInsert => executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.asInstanceOf[PreparedQueryForInsert].getParams))
+		case p: PreparedQueryForInsert => {
+			if (p.preparedParamsBatch.isEmpty) executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.getParams), None)
+			else executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, None, Some(p.preparedParamsBatch))
+		}
 		case hq: HardcodedQueryForInsert => executeSQLForInsert(hq.getQuery, hq.pkName, hq.useTempSchema)
 	}
 
@@ -203,26 +206,47 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		})
 	}
 
-	private def executeSQLForInsert(sql: String, pkPersistenceName: Option[String], useTempConnection: Boolean = false, params: Option[List[PreparedValue]] = None): Option[String] = {
+	private def executeSQLForInsert(
+		sql: String,
+		pkPersistenceName: Option[String],
+		useTempConnection: Boolean = false,
+		params: Option[List[PreparedValue]] = None,
+		batchParams: Option[List[List[PreparedValue]]] = None,
+	): Option[String] = {
 		println(sql.replace("\t", "\\t"))
 		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
 		pool.withConnection(c => {
+			if (batchParams.isDefined && pkPersistenceName.isDefined) {
+				throw new Exception("Do not use PK return with batch insert, it doesn't work")
+			}
 			val ps: PreparedStatement = pkPersistenceName match {
 				case Some(s) => c.prepareStatement(sql, scala.Array(s))
 				case None => c.prepareStatement(sql)
 			}
 
-			if (params.isDefined) {
-				params.get.zipWithIndex.foreach(t => t._1.set(ps)(t._2+1))
-				println("Parameterized with " + params.get)
+			if (batchParams.isDefined) {
+				if (batchParams.get.length > 100) throw new Exception ("Aborting before inserting over 100 records in batch; implement batch pagination")
+				batchParams.get.foreach(row => {
+					row.zipWithIndex.foreach(t => t._1.set(ps)(t._2+1))
+					println("Parameterized with " + row)
+					ps.addBatch()
+				})
+				ps.executeBatch()
+				// Cant return a PK when there are multiple.  Could someday extend this to return a list of PKs
+				None
+			} else {
+				if (params.isDefined) {
+					params.get.zipWithIndex.foreach(t => t._1.set(ps)(t._2+1))
+					println("Parameterized with " + params.get)
+				}
+				ps.executeUpdate()
+				if (pkPersistenceName.isDefined) {
+					val rs = ps.getGeneratedKeys
+					if (rs.next) {
+						Some(rs.getString(1))
+					} else throw new Exception("No pk value came back from insert statement")
+				} else None
 			}
-			ps.executeUpdate()
-			if (pkPersistenceName.isDefined) {
-				val rs = ps.getGeneratedKeys
-				if (rs.next) {
-					Some(rs.getString(1))
-				} else throw new Exception("No pk value came back from insert statement")
-			} else None
 		})
 	}
 

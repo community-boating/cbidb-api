@@ -4,10 +4,11 @@ import java.sql.CallableStatement
 import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{DateUtil, DefinedInitializableNullary}
+import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteral, GetSQLLiteralPrepared}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
+import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
@@ -494,8 +495,8 @@ object PortalLogic {
 				token = rsw.getString(2),
 				orderId = rsw.getInt(1),
 				last4 = rsw.getString(3),
-				expMonth = rsw.getInt(4).toString,
-				expYear = rsw.getInt(5).toString,
+				expMonth = rsw.getInt(4),
+				expYear = rsw.getInt(5),
 				zip = rsw.getOptionString(6)
 			)
 
@@ -1128,25 +1129,8 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): Unit = {
-//		val discountAmt = requestedDiscountInstanceId.map(instanceId => {
-//			val q = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
-//				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
-//
-//				override def getParams: List[PreparedValue] = List(
-//					instanceId.toString,
-//					memTypeId.toString
-//				)
-//
-//				override def getQuery: String =
-//					"""
-//					  |select select md.discount_amt from memberships_discounts md
-//					  |where instance_id = ? and type_id = ?
-//					  |""".stripMargin
-//			}
-//			pb.executePreparedQueryForSelect(q).head
-//		})
-
+	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
+	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1212,6 +1196,21 @@ object PortalLogic {
 			}
 			pb.executePreparedQueryForUpdateOrDelete(updateQ)
 		}
+
+		val paymentPlanAllowed = MembershipLogic.membershipTypeAllowsStaggeredPayments(memTypeId)
+
+		val gpdwQuery = new PreparedQueryForSelect[(Boolean, Boolean, Boolean)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Boolean, Boolean, Boolean) =
+				(rsw.getBooleanFromChar(1), rsw.getBooleanFromChar(2), rsw.getBooleanFromChar(3))
+
+			override def getQuery: String =
+				s"""
+				  |select cc_pkg.guest_privs_auto($personId, $memTypeId), cc_pkg.guest_privs_na($personId, $memTypeId), cc_pkg.damage_waiver_auto($personId, $memTypeId) from dual
+				  |""".stripMargin
+		}
+		val (guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = pb.executePreparedQueryForSelect(gpdwQuery).head
+
+		(paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto)
 	}
 
 	def apSetGuestPrivs(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
@@ -1910,6 +1909,244 @@ object PortalLogic {
 		}
 
 		pb.executeProcedure(ppc)
+	}
+
+	def getStripeCustomerId(pb: PersistenceBroker, personId: Int): Option[String] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override val params: List[String] = List(personId.toString)
+			override def getQuery: String =
+				"""
+				  |select stripe_customer_id from persons where person_id = ?
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).head
+	}
+
+	def getAllMembershipTypesWithPrices(pb: PersistenceBroker): List[(Int, Option[Currency])]  = {
+		val q = new PreparedQueryForSelect[(Int, Option[Currency])](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Option[Currency]) =
+				(rsw.getInt(1), rsw.getOptionDouble(2).map(Currency.dollars))
+
+			override def getQuery: String =
+				"""
+				  |select membership_type_id, price from membership_types
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
+	/** @return List[(Date, (canRenew, guestPrivsAuto))] */
+	def canRenewOnEachDate(pb: PersistenceBroker, personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
+		type CanRenewOnDate = (LocalDate, (Boolean, Boolean))
+		val q = new PreparedQueryForSelect[CanRenewOnDate](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): CanRenewOnDate =
+				(rsw.getLocalDate(1), (rsw.getBooleanFromChar(2), rsw.getBooleanFromChar(3)))
+
+			override def getQuery: String = dates.map(d => {
+				s"""
+				   |select
+				   |${GetSQLLiteral(d)},
+				   |person_pkg.can_renew($personId, ${GetSQLLiteral(d)}),
+				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${GetSQLLiteral(d)})
+				   |from dual
+				   |""".stripMargin
+			}).mkString(" UNION ALL ")
+		}
+		pb.executePreparedQueryForSelect(q)
+	}
+
+	/** @return (Option[GPPrice], Option[DWPrice]) */
+	def getGPAndDwFromCart(pb: PersistenceBroker, personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
+		type GpAndDwPrice = (Option[Currency], Option[Currency])
+		val ITEM_TYPE_DW = "Damage Waiver"
+		val ITEM_TYPE_GP = "Guest Privileges"
+		val q = new PreparedQueryForSelect[(String, Currency)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Currency) =
+				(rsw.getString(1), Currency.dollars(rsw.getDouble(2)))
+
+			override def getQuery: String =
+				s"""
+				  |select ITEM_TYPE, PRICE from full_cart
+				  |where order_id = $orderId
+				  |and ITEM_TYPE in ('$ITEM_TYPE_DW', '$ITEM_TYPE_GP')
+				  |""".stripMargin
+		}
+		val rows = pb.executePreparedQueryForSelect(q)
+
+		// Turn the 0-2 rows of GP and DW price into a single object
+		rows.foldLeft((None, None): GpAndDwPrice)((result, row) => {
+			val (itemType, price) = row
+			itemType match {
+				case ITEM_TYPE_GP => (Some(price), result._2)
+				case ITEM_TYPE_DW => (result._1, Some(price))
+				case _ => result
+			}
+		})
+	}
+
+	def getSingleAPSCM(pb: PersistenceBroker, personId: Int, orderId: Int): Option[(Int, Double, Option[Int], Option[Double], Int)] = {
+		/** typeId, price, discountId, discountAmt, addlStaggeredPayments */
+		type SCM = (Int, Double, Option[Int], Option[Double], Int)
+		val q = new PreparedQueryForSelect[SCM](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCM =
+				(rsw.getInt(1), rsw.getDouble(2), rsw.getOptionInt(3), rsw.getOptionDouble(4), rsw.getOptionInt(5).getOrElse(0))
+
+			override def getQuery: String =
+				s"""
+				   |select membership_type_id, price, di.discount_id, discount_amt, o.ADDL_STAGGERED_PAYMENTS
+				   |from shopping_cart_memberships scm
+				   |inner join order_numbers o on scm.order_id = o.order_id
+				   |left outer join discount_instances di
+				   |on scm.discount_instance_id = di.instance_id
+				   |where scm.order_id = $orderId and scm.person_id = $personId
+				   |""".stripMargin
+		}
+		val scms = pb.executePreparedQueryForSelect(q)
+		if (scms.length != 1) None
+		else Some(scms.head)
+	}
+
+	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
+		/** typeId, price, discountId, discountAmt */
+		type SCM = (Int, Double, Option[Int], Option[Double], Int)
+
+		val scm = PortalLogic.getSingleAPSCM(pb, personId, orderId)
+
+		scm match {
+			case None => List.empty
+			case Some((membershipTypeId, membershipPrice, discountIdOption, discountAmtOption, addlStaggeredMonths)) => {
+				val (gpPriceOption, dwPriceOption) = PortalLogic.getGPAndDwFromCart(pb, personId, orderId)
+				val priceAsCurrency =
+					Currency.dollars(membershipPrice) + gpPriceOption.getOrElse(Currency.cents(0)) + dwPriceOption.getOrElse(Currency.cents(0))
+
+				// return a function mapping end date to price
+				// for renewals, if the end date is past their "can renew" date,
+				// then the price is the full price ie the current price plus the renewal discoutn amt added back on
+				// Otherwise its just the price that SCM says it is
+				val endDateToPrice = (endDates: List[LocalDate]) => {
+					val samePrice: LocalDate => Currency = _ => priceAsCurrency
+
+					discountIdOption match {
+						case Some(MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID) => {
+							// map of (proposed payment plan end date) => (can the user still renew on that date)
+							val canRenewOnEachDate = PortalLogic.canRenewOnEachDate(pb, personId, membershipTypeId, endDates).toMap
+
+							// return a fn that takes a date and checks it against the map above.
+							// If they cant renew, put the discount amt back on the price
+							(ld: LocalDate) => {
+								val (canRenew, guestPrivsAuto) = canRenewOnEachDate(ld)
+								if (canRenew) {
+									priceAsCurrency - Currency.dollars(discountAmtOption.getOrElse(0d))
+								} else {
+									priceAsCurrency
+								}
+							}
+						}
+						case _ => samePrice
+					}
+				}
+				MembershipLogic.calculateAllPaymentSchedules(now, endDateToPrice)
+			}
+		}
+	}
+
+	def setPaymentPlanLength(pb: PersistenceBroker, personId: Int, orderId: Int, paymentPlanAddlMonths: Int): Unit = {
+		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
+			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
+			case None => true
+		}
+
+		if (typeIsOk) {
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override def getQuery: String =
+					s"""
+					   |update order_numbers
+					   |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
+					   |where order_id = $orderId
+					   |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(updateQ)
+
+			PortalLogic.assessDiscounts(pb, orderId)
+		}
+	}
+
+	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select nvl(ADDL_STAGGERED_PAYMENTS,0) from order_numbers where order_id = $orderId
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForSelect(q).head
+	}
+
+	def clearStripeTokensFromOrder(pb: PersistenceBroker, orderId: Int): Unit = {
+		val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override val params: List[String] = List(orderId.toString)
+
+			override def getQuery: String = "update stripe_tokens set active = 'N' where order_id = ?"
+		}
+		pb.executePreparedQueryForUpdateOrDelete(clearQ)
+	}
+
+	/**
+	 * Delete unpaid staggered payment records on the supplied orderId.  Throw if there are any payment records remaining afterward
+	 * @param pb
+	 * @param orderId
+	 */
+	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker, orderId: Int): Unit = {
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				  |delete from ORDER_STAGGERED_PAYMENTS
+				  |where order_id = $orderId and nvl(paid, 'N') <> 'Y' and paid_close_id is null and redeemed_close_id is null
+				  |""".stripMargin
+		}
+		pb.executePreparedQueryForUpdateOrDelete(deleteQ)
+		val selectQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = 1
+
+			override def getQuery: String =
+				s"""
+				  |select 1 from ORDER_STAGGERED_PAYMENTS where order_id = $orderId
+				  |""".stripMargin
+		}
+		val recordsLeft = pb.executePreparedQueryForSelect(selectQ).length
+		if (recordsLeft > 0) {
+			throw new Exception (s"deleteStaggeredPaymentsWithEmptyAssertion called on orderId $orderId which has paid records")
+		}
+	}
+
+	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): Unit = {
+		// Clear existing records.  Throw if there are paid records
+		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
+
+		if (numberAdditionalPayments > 0) {
+			val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get
+
+			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+				override val pkName: Option[String] = None
+
+				override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
+					val ((payDate, payAmt), index) = t
+					val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
+					values
+				})
+
+				override def getQuery: String =
+					s"""
+					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, amount_in_cents, paid)
+					   |values (?, ?, ?, ?, ?)
+					   |""".stripMargin
+			}
+			pb.executePreparedQueryForInsert(insertQ)
+		}
 	}
 }
 
