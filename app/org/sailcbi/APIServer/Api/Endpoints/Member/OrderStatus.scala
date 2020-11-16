@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest, ServiceRequestResult}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, Customer, PaymentMethod, StripeError}
@@ -41,6 +43,9 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 							expMonth = pm.card.exp_month,
 							expYear = pm.card.exp_year,
 							zip = pm.billing_details.address.postal_code
+						)),
+						staggeredPayments = PortalLogic.getStaggeredPayments(pb, orderId).map(Function.tupled(
+							(ld, amt) => StaggeredPayment(ld, amt.cents)
 						))
 					)))
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
@@ -59,9 +64,20 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 						expYear = cd.expYear.toInt,
 						zip = cd.zip
 					)),
+					staggeredPayments = List.empty
 				))))
 			}
 		})
+	}
+
+	case class StaggeredPayment(
+		paymentDate: LocalDate,
+		paymentAmtCents: Int
+	)
+
+	object StaggeredPayment {
+		implicit val format = Json.format[StaggeredPayment]
+		def apply(v: JsValue): StaggeredPayment = v.as[StaggeredPayment]
 	}
 
 	case class OrderStatusResult(
@@ -69,6 +85,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		total: Double,
 		paymentMethodRequired: Boolean,
 		cardData: Option[SavedCardOrPaymentMethodData],
+		staggeredPayments: List[StaggeredPayment]
 	)
 
 	object OrderStatusResult {

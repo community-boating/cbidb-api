@@ -1427,6 +1427,8 @@ object PortalLogic {
 				pb.executePreparedQueryForInsert(insertQ)
 			}
 
+			updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
+
 			ValidationOk
 		}
 
@@ -1442,6 +1444,8 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		pb.executePreparedQueryForUpdateOrDelete(q)
+
+		updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
 	}
 
 	def attemptAddPromoCode(pb: PersistenceBroker, orderId: Int, code: String): Unit = {
@@ -2141,12 +2145,55 @@ object PortalLogic {
 
 				override def getQuery: String =
 					s"""
-					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, amount_in_cents, paid)
+					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, raw_amount_in_cents, paid)
 					   |values (?, ?, ?, ?, ?)
 					   |""".stripMargin
 			}
 			pb.executePreparedQueryForInsert(insertQ)
+
+			updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
 		}
+	}
+
+	def updateFirstStaggeredPaymentWithOneTimes(pb: PersistenceBroker, orderId: Int): Unit = {
+		// Add everything in the cart that is not staggered, to the first payment
+		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
+
+			override def getQuery: String =
+				s"""
+				   |select nvl(sum(nvl(price,0)),0) from full_cart
+				   |where order_id = $orderId
+				   |and item_type not in ('Membership', 'Damage Waiver', 'Discount', 'Gift Certificate Redeemed', 'Guest Privileges')
+				   |""".stripMargin
+		}
+		val oneTimePrice = pb.executePreparedQueryForSelect(cartQ).head
+		
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				   |update ORDER_STAGGERED_PAYMENTS
+				   |set addl_amount_in_cents = ${oneTimePrice.cents}
+				   |where order_id = $orderId and sequence = 1
+				   |""".stripMargin
+		}
+
+		pb.executePreparedQueryForUpdateOrDelete(updateQ)
+	}
+
+	def getStaggeredPayments(pb: PersistenceBroker, orderId: Int): List[(LocalDate, Currency)] = {
+		val q = new PreparedQueryForSelect[(LocalDate, Currency)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDate, Currency) =
+				(rsw.getLocalDate(1), Currency.cents(rsw.getInt(2)))
+
+			override def getQuery: String =
+				s"""
+				  |select payment_date, (nvl(raw_amount_in_cents,0) + nvl(addl_amount_in_cents,0)) from ORDER_STAGGERED_PAYMENTS
+				  |where order_id = $orderId order by sequence
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForSelect(q)
 	}
 }
 

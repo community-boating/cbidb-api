@@ -36,7 +36,7 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 		})
 	}
 
-	case class MembershipSinglePayment(paymentDate: LocalDate, paymentAmountCents: Int)
+	case class MembershipSinglePayment(paymentDate: LocalDate, paymentAmtCents: Int)
 
 	object MembershipSinglePayment{
 		implicit val format = Json.format[MembershipSinglePayment]
