@@ -2056,28 +2056,6 @@ object PortalLogic {
 		}
 	}
 
-	def setPaymentPlanLength(pb: PersistenceBroker, personId: Int, orderId: Int, paymentPlanAddlMonths: Int): Unit = {
-		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
-			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
-			case None => true
-		}
-
-		if (typeIsOk) {
-			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-				override def getQuery: String =
-					s"""
-					   |update order_numbers
-					   |set ADDL_STAGGERED_PAYMENTS = $paymentPlanAddlMonths
-					   |where order_id = $orderId
-					   |""".stripMargin
-			}
-
-			pb.executePreparedQueryForUpdateOrDelete(updateQ)
-
-			PortalLogic.assessDiscounts(pb, orderId)
-		}
-	}
-
 	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -2131,27 +2109,58 @@ object PortalLogic {
 		// Clear existing records.  Throw if there are paid records
 		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
-		if (numberAdditionalPayments > 0) {
-			val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get
+		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
+			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
+			case None => true
+		}
 
-			val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
-				override val pkName: Option[String] = None
-
-				override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
-					val ((payDate, payAmt), index) = t
-					val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
-					values
-				})
-
+		if (typeIsOk) {
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 				override def getQuery: String =
 					s"""
-					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, payment_date, raw_amount_in_cents, paid)
-					   |values (?, ?, ?, ?, ?)
+					   |update order_numbers
+					   |set ADDL_STAGGERED_PAYMENTS = $numberAdditionalPayments
+					   |where order_id = $orderId
 					   |""".stripMargin
 			}
-			pb.executePreparedQueryForInsert(insertQ)
 
-			updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
+			pb.executePreparedQueryForUpdateOrDelete(updateQ)
+
+			PortalLogic.assessDiscounts(pb, orderId)
+
+			if (numberAdditionalPayments > 0) {
+				val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get
+
+				val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
+					override val pkName: Option[String] = None
+
+					override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
+						val ((payDate, payAmt), index) = t
+						val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
+						values
+					})
+
+					override def getQuery: String =
+						s"""
+						   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, payment_date, raw_amount_in_cents, paid, addl_amount_in_cents)
+						   |values (?, ?, ?, ?, ?, 0)
+						   |""".stripMargin
+				}
+				pb.executePreparedQueryForInsert(insertQ)
+
+				updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
+			}
+		} else {
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				override def getQuery: String =
+					s"""
+					   |update order_numbers
+					   |set ADDL_STAGGERED_PAYMENTS = 0
+					   |where order_id = $orderId
+					   |""".stripMargin
+			}
+
+			pb.executePreparedQueryForUpdateOrDelete(updateQ)
 		}
 	}
 
