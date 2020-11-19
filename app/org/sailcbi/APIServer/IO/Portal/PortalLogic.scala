@@ -2145,7 +2145,7 @@ object PortalLogic {
 
 				override def getQuery: String =
 					s"""
-					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, sequence, payment_date, raw_amount_in_cents, paid)
+					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, payment_date, raw_amount_in_cents, paid)
 					   |values (?, ?, ?, ?, ?)
 					   |""".stripMargin
 			}
@@ -2174,7 +2174,7 @@ object PortalLogic {
 				s"""
 				   |update ORDER_STAGGERED_PAYMENTS
 				   |set addl_amount_in_cents = ${oneTimePrice.cents}
-				   |where order_id = $orderId and sequence = 1
+				   |where order_id = $orderId and seq = 1
 				   |""".stripMargin
 		}
 
@@ -2189,7 +2189,7 @@ object PortalLogic {
 			override def getQuery: String =
 				s"""
 				  |select payment_date, (nvl(raw_amount_in_cents,0) + nvl(addl_amount_in_cents,0)) from ORDER_STAGGERED_PAYMENTS
-				  |where order_id = $orderId order by sequence
+				  |where order_id = $orderId order by seq
 				  |""".stripMargin
 		}
 
