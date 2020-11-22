@@ -2,6 +2,10 @@ package org.sailcbi.APIServer.IO.HTTP
 
 sealed abstract class HTTPMethod
 
-case object GET extends HTTPMethod
+case object GET extends HTTPMethod {
+	override def toString: String = "GET"
+}
 
-case object POST extends HTTPMethod
+case object POST extends HTTPMethod {
+	override def toString: String = "POST"
+}

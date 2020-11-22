@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest, ServiceRequestResult}
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, Customer, PaymentMethod, StripeError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, Customer, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.HTTP.POST
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -21,6 +21,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb: PersistenceBroker = rc.pb
+			val stripe = rc.getStripeIOController(ws)
 
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
@@ -33,39 +34,44 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 			if (staggeredPaymentAdditionalMonths > 0) {
 				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
-				rc.getStripeIOController(ws).getCustomerDefaultPaymentMethod(customerId).map({
-					case c: NetSuccess[Option[PaymentMethod], StripeError] => Ok(Json.toJson(OrderStatusResult(
-						orderId = orderId,
-						total = orderTotal,
-						paymentMethodRequired = true,
-						cardData = (c.successObject.asInstanceOf[Option[PaymentMethod]]).map(pm => SavedCardOrPaymentMethodData(
-							last4 = pm.card.last4,
-							expMonth = pm.card.exp_month,
-							expYear = pm.card.exp_year,
-							zip = pm.billing_details.address.postal_code
-						)),
-						staggeredPayments = PortalLogic.getStaggeredPayments(pb, orderId).map(Function.tupled(
-							(ld, amt) => StaggeredPayment(ld, amt.cents)
-						))
-					)))
+
+				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
+					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, (orderTotal * 100).toInt).map(pi => {
+						Ok(Json.toJson(OrderStatusResult(
+							orderId = orderId,
+							total = orderTotal,
+							paymentMethodRequired = true,
+							cardData = (methodSuccess.successObject.asInstanceOf[Option[PaymentMethod]]).map(pm => SavedCardOrPaymentMethodData(
+								last4 = pm.card.last4,
+								expMonth = pm.card.exp_month,
+								expYear = pm.card.exp_year,
+								zip = pm.billing_details.address.postal_code
+							)),
+							staggeredPayments = PortalLogic.getStaggeredPayments(pb, orderId).map(Function.tupled(
+								(ld, amt) => StaggeredPayment(ld, amt.cents)
+							)),
+							paymentIntentId = pi.id
+						)))
+					})
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
 				})
-
-
 			} else {
 				val cardData = PortalLogic.getCardData(pb, orderId)
-				Future(Ok(Json.toJson(OrderStatusResult(
-					orderId = orderId,
-					total = orderTotal,
-					paymentMethodRequired = false,
-					cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
-						last4 = cd.last4,
-						expMonth = cd.expMonth.toInt,
-						expYear = cd.expYear.toInt,
-						zip = cd.zip
-					)),
-					staggeredPayments = List.empty
-				))))
+				PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, (orderTotal * 100).toInt).map(pi => {
+					Ok(Json.toJson(OrderStatusResult(
+						orderId = orderId,
+						total = orderTotal,
+						paymentMethodRequired = false,
+						cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
+							last4 = cd.last4,
+							expMonth = cd.expMonth.toInt,
+							expYear = cd.expYear.toInt,
+							zip = cd.zip
+						)),
+						staggeredPayments = List.empty,
+						paymentIntentId = pi.id
+					)))
+				})
 			}
 		})
 	}
@@ -85,7 +91,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		total: Double,
 		paymentMethodRequired: Boolean,
 		cardData: Option[SavedCardOrPaymentMethodData],
-		staggeredPayments: List[StaggeredPayment]
+		staggeredPayments: List[StaggeredPayment],
+		paymentIntentId: String
 	)
 
 	object OrderStatusResult {

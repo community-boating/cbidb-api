@@ -5,12 +5,12 @@ import java.sql.CallableStatement
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil._
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetCartDetailsForOrderId, GetCartDetailsForOrderIdResult, GetCurrentOnlineClose}
+import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedProcedureCall
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -57,21 +57,20 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 			val preflightResult = pb.executeProcedure(preflight)
 
-			val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
-
+			val orderTotalInCents: Int = (PortalLogic.getOrderTotal(pb, orderId) * 100).toInt
 
 
 			type ErrorCode = String
 			type ErrorMessage = String
 			type ChargeID = String
 			val stripeResult: Future[Either[(ErrorCode, ErrorMessage), ChargeID]] = {
-				println("order total cents is: " + orderDetails.priceInCents)
-				if (orderDetails.priceInCents <= 0) {
+				println("order total cents is: " + orderTotalInCents)
+				if (orderTotalInCents <= 0) {
 					println("skipping charge")
 					Future(Right(null))
 				} else {
-					val cardData = PortalLogic.getCardData(pb, orderId).get
-					Failover(rc.getStripeIOController(ws).createCharge(orderDetails.priceInCents, cardData.token, orderId, closeId)) match {
+
+					doCharge(rc, personId, orderId, orderTotalInCents, closeId) match {
 						case Resolved(f) => f.map({
 							case s: NetSuccess[Charge, StripeError] => {
 								println("Create charge net success: " + s.successObject)
@@ -122,7 +121,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					override def setInParametersInt: Map[String, Int] = Map(
 						"i_order_id" -> orderId,
 						"i_attempt_id" -> preflightResult._1,
-						"i_charge_total" -> orderDetails.priceInCents
+						"i_charge_total" -> orderTotalInCents
 					)
 
 					override def setInParametersDouble: Map[String, Double] = Map(
@@ -160,5 +159,21 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				}
 			})
 		})
+	}
+
+	private def doCharge(rc: RequestCache, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
+		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc.pb, orderId) > 0
+		val stripeController = rc.getStripeIOController(ws)
+
+		if (isStaggered) {
+			val customerId = PortalLogic.getStripeCustomerId(rc.pb, personId).get
+			Failover(stripeController.getCustomerDefaultPaymentMethod(customerId).flatMap({
+				case s: NetSuccess[Option[PaymentMethod], _] => stripeController.createCharge(orderTotalInCents, s.successObject.get.id, orderId, closeId)
+				case _ => throw new Exception("Unable to retrieve customerID")
+			}))
+		} else {
+			val cardData = PortalLogic.getCardData(rc.pb, orderId).get
+			Failover(stripeController.createCharge(orderTotalInCents, cardData.token, orderId, closeId))
+		}
 	}
 }

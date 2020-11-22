@@ -18,15 +18,19 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 				val pb = rc.pb
+				val stripe = rc.getStripeIOController(ws)
 				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val orderId = PortalLogic.getOrderId(pb, personId)
+				val totalInCents = (PortalLogic.getOrderTotal(pb, orderId) * 100).toInt
 				val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)
 				customerIdOption match {
 					case None => Future(Ok("fail"))
 					case Some(customerId) => {
-						rc.getStripeIOController(ws).storePaymentMethod(customerId, parsed.paymentMethodId)
-						// Give stripe a second to update its internal state, otherwise if we ask for the order status too soon, it wont be ready
-						Thread.sleep(1000)
-						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+						stripe.storePaymentMethod(customerId, parsed.paymentMethodId).flatMap(_ => {
+							PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, totalInCents).flatMap(pi => {
+								stripe.updatePaymentIntentWithPaymentMethod(pi.id, parsed.paymentMethodId).map(_ => Ok(JsObject(Map("success" -> JsBoolean(true))))	)
+							})
+						})
 					}
 				}
 			})

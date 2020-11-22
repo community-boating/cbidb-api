@@ -4,14 +4,19 @@ import java.sql.CallableStatement
 import java.time.{LocalDate, LocalDateTime}
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteral, GetSQLLiteralPrepared}
+import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteral, GetSQLLiteralPrepared, NetSuccess}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
+import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
-import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object PortalLogic {
 	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
@@ -511,7 +516,7 @@ object PortalLogic {
 
 	def getOrderTotal(pb: PersistenceBroker, orderId: Int): Double = {
 
-		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
+		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
@@ -2142,7 +2147,7 @@ object PortalLogic {
 
 					override def getQuery: String =
 						s"""
-						   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, payment_date, raw_amount_in_cents, paid, addl_amount_in_cents)
+						   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, expected_payment_date, raw_amount_in_cents, paid, addl_amount_in_cents)
 						   |values (?, ?, ?, ?, ?, 0)
 						   |""".stripMargin
 				}
@@ -2197,12 +2202,81 @@ object PortalLogic {
 
 			override def getQuery: String =
 				s"""
-				  |select payment_date, (nvl(raw_amount_in_cents,0) + nvl(addl_amount_in_cents,0)) from ORDER_STAGGERED_PAYMENTS
+				  |select expected_payment_date, (nvl(raw_amount_in_cents,0) + nvl(addl_amount_in_cents,0)) from ORDER_STAGGERED_PAYMENTS
 				  |where order_id = $orderId order by seq
 				  |""".stripMargin
 		}
 
 		pb.executePreparedQueryForSelect(q)
+	}
+
+	def getOrCreatePaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override def getQuery: String =
+				s"""
+				  |select STRIPE_PAYMENT_INTENT_ID from order_numbers where order_id = $orderId
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForSelect(q).head match {
+			case None => createPaymentIntent(pb, stripe, personId, orderId, totalInCents)
+			case Some(id) => stripe.getPaymentIntent(id).flatMap({
+				case s: NetSuccess[PaymentIntent, _] => {
+					val pi = s.successObject
+					if (pi.amount != totalInCents) {
+						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents).map(_ => {
+							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+								override def getQuery: String =
+									s"""
+									   |update order_numbers set
+									   |payment_intent_amt_cents = $totalInCents
+									   |where order_id = $orderId
+									   |""".stripMargin
+							}
+							pb.executePreparedQueryForUpdateOrDelete(updateQ)
+							pi
+						})
+					} else {
+						Future(pi)
+					}
+				}
+				case _ => throw new Exception("Failed to get PaymentIntent")
+			})
+		}
+	}
+
+	private def createPaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+		stripe.createPaymentIntent(orderId, None, totalInCents, PortalLogic.getStripeCustomerId(pb, personId).get).flatMap({
+			case intentSuccess: NetSuccess[PaymentIntent, _] => {
+				val pi = intentSuccess.successObject
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+					override val params: List[String] = List(pi.id)
+					override def getQuery: String =
+						s"""
+						   |update order_numbers set
+						   |STRIPE_PAYMENT_INTENT_ID = ?,
+						   |payment_intent_amt_cents = $totalInCents
+						   |where order_id = $orderId
+						   |""".stripMargin
+				}
+				pb.executePreparedQueryForUpdateOrDelete(updateQ)
+				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
+
+				// If there is already a payment method on the customer, stick it on this payment intent
+				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
+					case paymentMethodSuccess: NetSuccess[Option[PaymentMethod], _] => paymentMethodSuccess.successObject match {
+						case Some(pm: PaymentMethod) => {
+							stripe.updatePaymentIntentWithPaymentMethod(pi.id, pm.id).map(_ => pi)
+						}
+						case None => Future(pi)
+					}
+					case _ => throw new Exception("Failed to get payment method")
+				})
+			}
+			case _ => throw new Exception("Failed to create PaymentIntent")
+		})
 	}
 }
 

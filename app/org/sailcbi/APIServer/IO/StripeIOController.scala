@@ -25,7 +25,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("getTokenDetails denied to userType " + rc.auth.userType)
 	}
 
-	def createCharge(amountInCents: Int, token: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
+	def createCharge(amountInCents: Int, source: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
 		if (TestUserType(Set(ApexUserType, MemberUserType, PublicUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"charges",
@@ -34,17 +34,84 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				Some(Map(
 					"amount" -> amountInCents.toString,
 					"currency" -> "usd",
-					"source" -> token,
+					"source" -> source,
 					"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
 					"metadata[closeId]" -> closeId.toString,
 					"metadata[orderId]" -> orderId.toString,
-					"metadata[token]" -> token,
+					"metadata[source]" -> source,
 					"metadata[cbiInstance]" -> PA.instanceName
 				)),
 				Some((c: Charge) => dbIO.createObject(c))
 			)
 		}
 		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.userType)
+	}
+
+	/** If you call this, you must put the PI ID on the order */
+	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			val sourceBody = source match {
+				case None => Map.empty
+				case Some(s) => Map("payment_method" -> s)
+			}
+			apiIO.getOrPostStripeSingleton(
+				"payment_intents",
+				PaymentIntent.apply,
+				POST,
+				Some(Map(
+					"amount" -> totalInCents.toString,
+					"currency" -> "usd",
+					"customer" -> customerId,
+					"metadata[orderId]" -> orderId.toString,
+					"metadata[cbiInstance]" -> PA.instanceName
+				) ++ sourceBody),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("createPaymentIntent denied to userType " + rc.auth.userType)
+	}
+
+	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"payment_intents/" + intentId,
+				_ => Unit,
+				POST,
+				Some(Map(
+					"amount" -> totalInCents.toString,
+				)),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("updatePaymentIntentWithTotal denied to userType " + rc.auth.userType)
+	}
+
+	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"payment_intents/" + intentId,
+				_ => Unit,
+				POST,
+				Some(Map(
+					"payment_method" -> methodId,
+				)),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("updatePaymentIntentWithPaymentMethod denied to userType " + rc.auth.userType)
+	}
+
+	def getPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"payment_intents/" + paymentIntentId,
+				PaymentIntent.apply,
+				GET,
+				None,
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("getPaymentIntent denied to userType " + rc.auth.userType)
 	}
 
 	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
