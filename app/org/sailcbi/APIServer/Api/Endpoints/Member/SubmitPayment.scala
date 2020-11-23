@@ -5,7 +5,7 @@ import java.sql.CallableStatement
 import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil._
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentMethod, StripeError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedProcedureCall
@@ -166,10 +166,11 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val stripeController = rc.getStripeIOController(ws)
 
 		if (isStaggered) {
-			val customerId = PortalLogic.getStripeCustomerId(rc.pb, personId).get
-			Failover(stripeController.getCustomerDefaultPaymentMethod(customerId).flatMap({
-				case s: NetSuccess[Option[PaymentMethod], _] => stripeController.createCharge(orderTotalInCents, s.successObject.get.id, orderId, closeId)
-				case _ => throw new Exception("Unable to retrieve customerID")
+			Failover(PortalLogic.getOrCreatePaymentIntent(rc.pb, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
+				stripeController.confirmPaymentIntent(pi.id).map({
+					case s: NetSuccess[PaymentIntent, StripeError] => s.map(pi => pi.charges.data.head)
+					case _ => throw new Exception("Payment was not successful")
+				})
 			}))
 		} else {
 			val cardData = PortalLogic.getCardData(rc.pb, orderId).get

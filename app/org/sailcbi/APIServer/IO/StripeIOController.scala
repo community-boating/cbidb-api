@@ -62,6 +62,8 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 					"amount" -> totalInCents.toString,
 					"currency" -> "usd",
 					"customer" -> customerId,
+					"capture_method" -> "automatic",
+					"description" -> ("Charge for orderId " + orderId),
 					"metadata[orderId]" -> orderId.toString,
 					"metadata[cbiInstance]" -> PA.instanceName
 				) ++ sourceBody),
@@ -112,6 +114,19 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 			)
 		}
 		else throw new UnauthorizedAccessException("getPaymentIntent denied to userType " + rc.auth.userType)
+	}
+
+	def confirmPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
+		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+			apiIO.getOrPostStripeSingleton(
+				"payment_intents/" + paymentIntentId + "/confirm",
+				PaymentIntent.apply,
+				POST,
+				Some(Map.empty),
+				None
+			)
+		}
+		else throw new UnauthorizedAccessException("confirmPaymentIntent denied to userType " + rc.auth.userType)
 	}
 
 	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
