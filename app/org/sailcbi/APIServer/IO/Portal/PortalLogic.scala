@@ -872,6 +872,15 @@ object PortalLogic {
 		}
 		pb.executePreparedQueryForUpdateOrDelete(deleteSCM)
 
+		val deleteStaggers = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+			override def getQuery: String =
+				s"""
+				  |delete from order_staggered_payments where order_id = $orderId
+				  |""".stripMargin
+		}
+
+		pb.executePreparedQueryForUpdateOrDelete(deleteStaggers)
+
 		ValidationOk
 	}
 
