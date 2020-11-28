@@ -48,7 +48,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	/** If you call this, you must put the PI ID on the order */
-	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
+	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String, closeId: Int): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
 		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
 			val sourceBody = source match {
 				case None => Map.empty
@@ -65,6 +65,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 					"capture_method" -> "automatic",
 					"description" -> ("Charge for orderId " + orderId),
 					"metadata[orderId]" -> orderId.toString,
+					"metadata[closeId]" -> closeId.toString,
 					"metadata[cbiInstance]" -> PA.instanceName
 				) ++ sourceBody),
 				None
@@ -73,7 +74,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("createPaymentIntent denied to userType " + rc.auth.userType)
 	}
 
-	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
+	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int, closeId: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
 		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + intentId,
@@ -81,6 +82,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				POST,
 				Some(Map(
 					"amount" -> totalInCents.toString,
+					"metadata[closeId]" -> closeId.toString,
 				)),
 				None
 			)
@@ -123,7 +125,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 				PaymentIntent.apply,
 				POST,
 				Some(Map.empty),
-				None
+				Some((pi: PaymentIntent) => pi.charges.data.filter(c => c.paid).map(dbIO.createObject))
 			)
 		}
 		else throw new UnauthorizedAccessException("confirmPaymentIntent denied to userType " + rc.auth.userType)

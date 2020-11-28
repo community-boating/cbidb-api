@@ -166,6 +166,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val stripeController = rc.getStripeIOController(ws)
 
 		if (isStaggered) {
+			val closeId = rc.pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 			Failover(PortalLogic.getOrCreatePaymentIntent(rc.pb, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripeController.confirmPaymentIntent(pi.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => s.map(pi => pi.charges.data.head)

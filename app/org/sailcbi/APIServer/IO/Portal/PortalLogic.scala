@@ -8,6 +8,7 @@ import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNu
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
+import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
@@ -875,7 +876,7 @@ object PortalLogic {
 		val deleteStaggers = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
-				  |delete from order_staggered_payments where order_id = $orderId
+				  |delete from order_staggered_payments where order_id = $orderId and nvl(paid, 'N') <> 'Y'
 				  |""".stripMargin
 		}
 
@@ -2238,25 +2239,28 @@ object PortalLogic {
 	}
 
 	def getOrCreatePaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
-		val q = new PreparedQueryForSelect[String](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
+		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
+
+		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int) = (rsw.getString(1), rsw.getInt(2))
 
 			override def getQuery: String =
 				s"""
-				  |select PAYMENT_INTENT_ID from ORDERS_STRIPE_PAYMENT_INTENTS where order_id = $orderId and nvl(paid, 'N') <> 'Y'
+				  |select PAYMENT_INTENT_ID, paid_close_id from ORDERS_STRIPE_PAYMENT_INTENTS where order_id = $orderId and nvl(paid, 'N') <> 'Y'
 				  |""".stripMargin
 		}
 
-		val intentIds = pb.executePreparedQueryForSelect(q)
+		val intentIdsAndCloseIDs = pb.executePreparedQueryForSelect(q)
 
-		if (intentIds.isEmpty) {
-			createPaymentIntent(pb, stripe, personId, orderId)
-		} else if (intentIds.length == 1) {
-			stripe.getPaymentIntent(intentIds.head).flatMap({
+		if (intentIdsAndCloseIDs.isEmpty) {
+			createPaymentIntent(pb, stripe, personId, orderId, closeId)
+		} else if (intentIdsAndCloseIDs.length == 1) {
+			val (intentId, closeId) = intentIdsAndCloseIDs.head
+			stripe.getPaymentIntent(intentId).flatMap({
 				case s: NetSuccess[PaymentIntent, _] => {
 					val pi = s.successObject
-					if (pi.amount != totalInCents) {
-						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents).map(_ => {
+					if (pi.amount != totalInCents || pi.metadata.closeId.get.toInt != closeId) {
+						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents, closeId).map(_ => {
 							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 								override def getQuery: String =
 									s"""
@@ -2280,7 +2284,7 @@ object PortalLogic {
 		}
 	}
 
-	private def createPaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int): Future[PaymentIntent] = {
+	private def createPaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),
@@ -2296,7 +2300,7 @@ object PortalLogic {
 		val staggeredPayments = pb.executePreparedQueryForSelect(getStaggeredPaymentsQ)
 		val totalInCents = staggeredPayments.foldLeft(0)((amt, payment) => amt + payment._2.cents)
 
-		stripe.createPaymentIntent(orderId, None, totalInCents, PortalLogic.getStripeCustomerId(pb, personId).get).flatMap({
+		stripe.createPaymentIntent(orderId, None, totalInCents, PortalLogic.getStripeCustomerId(pb, personId).get, closeId).flatMap({
 			case intentSuccess: NetSuccess[PaymentIntent, _] => {
 				val pi = intentSuccess.successObject
 
@@ -2307,8 +2311,8 @@ object PortalLogic {
 
 					override def getQuery: String =
 						s"""
-						  |insert into ORDERS_STRIPE_PAYMENT_INTENTS (order_id, payment_intent_id, amount_in_cents, paid)
-						  |values ($orderId, ?, $totalInCents, 'N')
+						  |insert into ORDERS_STRIPE_PAYMENT_INTENTS (order_id, payment_intent_id, amount_in_cents, paid, PAID_CLOSE_ID)
+						  |values ($orderId, ?, $totalInCents, 'N', $closeId)
 						  |""".stripMargin
 				}
 
