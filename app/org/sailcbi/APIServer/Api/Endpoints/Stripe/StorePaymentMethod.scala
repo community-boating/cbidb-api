@@ -1,7 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Api.ResultError
+import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetFailure, NetSuccess, ParsedRequest, ValidationError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
@@ -26,9 +28,23 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 				customerIdOption match {
 					case None => Future(Ok("fail"))
 					case Some(customerId) => {
-						stripe.storePaymentMethod(customerId, parsed.paymentMethodId).flatMap(_ => {
-							PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, totalInCents).flatMap(pi => {
-								stripe.updatePaymentIntentWithPaymentMethod(pi.id, parsed.paymentMethodId).map(_ => Ok(JsObject(Map("success" -> JsBoolean(true))))	)
+						stripe.storePaymentMethod(customerId, parsed.paymentMethodId).flatMap({
+							case ve: ValidationError[_, StripeError] => {
+								if (ve.errorObject.`type` == "card_error") {
+									Future(Ok(ResultError("process_err", ve.errorObject.message).asJsObject()))
+								} else {
+									throw new Exception("non-card stripe error: " + ve.errorObject)
+								}
+							}
+							case e: CriticalError[_, StripeError] => throw e.e
+							case _: NetSuccess[_, StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, totalInCents).flatMap(pi => {
+								stripe.updatePaymentIntentWithPaymentMethod(pi.id, parsed.paymentMethodId).map({
+									case ve: ValidationError[_, StripeError] =>  {
+										println(ve.errorObject)
+										Ok(JsObject(Map("success" -> JsBoolean(true))))
+									}
+									case s: NetSuccess[_, _] => Ok(JsObject(Map("success" -> JsBoolean(true))))
+								})
 							})
 						})
 					}

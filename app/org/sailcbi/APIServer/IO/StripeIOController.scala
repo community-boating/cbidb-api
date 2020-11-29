@@ -90,11 +90,11 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("updatePaymentIntentWithTotal denied to userType " + rc.auth.userType)
 	}
 
-	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
+	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
 		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + intentId,
-				_ => Unit,
+				PaymentIntent.apply,
 				POST,
 				Some(Map(
 					"payment_method" -> methodId,
@@ -257,29 +257,28 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		else throw new UnauthorizedAccessException("getCustomerPortalURL denied to userType " + rc.auth.userType)
 	}
 
-	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
+	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[_, StripeError]] = {
 		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				s"payment_methods/$paymentMethodId/attach",
-				(jsv: JsValue) => Unit,
+				PaymentMethod.apply,
 				POST,
 				Some(Map(
 					"customer" -> customerId
 				)),
 				None
 			).flatMap({
-				case f: NetFailure[Unit.type, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Unit, StripeError]])
-				case _: NetSuccess[Unit.type, StripeError] =>
+				case f: NetFailure[PaymentMethod, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[PaymentMethod, StripeError]])
+				case _: NetSuccess[PaymentMethod, StripeError] =>
 					apiIO.getOrPostStripeSingleton(
 						"customers/" + customerId,
-						(jsv: JsValue) => Unit,
+						Customer.apply,
 						POST,
 						Some(Map(
 							"invoice_settings[default_payment_method]" -> paymentMethodId
 						)),
 						None
 					)
-
 			})
 		}
 		else throw new UnauthorizedAccessException("storePaymentMethod denied to userType " + rc.auth.userType)
