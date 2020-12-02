@@ -1949,7 +1949,7 @@ object PortalLogic {
 	}
 
 	def getStripeCustomerId(pb: PersistenceBroker, personId: Int): Option[String] = {
-		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
 
 			override val params: List[String] = List(personId.toString)
