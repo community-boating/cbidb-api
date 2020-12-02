@@ -494,7 +494,7 @@ object PortalLogic {
 	}
 
 	def getCardData(pb: PersistenceBroker, orderId: Int): Option[StripeTokenSavedShape] = {
-		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberUserType)) {
+		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StripeTokenSavedShape = new StripeTokenSavedShape(
@@ -2090,7 +2090,7 @@ object PortalLogic {
 	}
 
 	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
@@ -2241,7 +2241,7 @@ object PortalLogic {
 	def getOrCreatePaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
 		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
-		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberUserType)) {
+		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int) = (rsw.getString(1), rsw.getInt(2))
 
 			override def getQuery: String =
@@ -2261,7 +2261,7 @@ object PortalLogic {
 					val pi = s.successObject
 					if (pi.amount != totalInCents || pi.metadata.closeId.get.toInt != closeId) {
 						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents, closeId).map(_ => {
-							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
 								override def getQuery: String =
 									s"""
 									   |update ORDERS_STRIPE_PAYMENT_INTENTS set
@@ -2285,7 +2285,7 @@ object PortalLogic {
 	}
 
 	private def createPaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
-		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberUserType)) {
+		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),
 				Currency.cents(rsw.getOptionInt(2).getOrElse(0) + rsw.getOptionInt(3).getOrElse(0))
@@ -2304,7 +2304,7 @@ object PortalLogic {
 			case intentSuccess: NetSuccess[PaymentIntent, _] => {
 				val pi = intentSuccess.successObject
 
-				val createPI = new PreparedQueryForInsert(Set(MemberUserType)) {
+				val createPI = new PreparedQueryForInsert(Set(MemberUserType, ApexUserType)) {
 					override val pkName: Option[String] = Some("ROW_ID")
 
 					override val params: List[String] = List(pi.id)
@@ -2318,7 +2318,7 @@ object PortalLogic {
 
 				val rowId = pb.executePreparedQueryForInsert(createPI).get
 
-				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
 					override def getQuery: String =
 						s"""
 						   |update order_staggered_payments set

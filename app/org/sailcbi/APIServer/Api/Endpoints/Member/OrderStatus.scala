@@ -50,28 +50,26 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 							staggeredPayments = PortalLogic.getStaggeredPayments(pb, orderId).map(Function.tupled(
 								(ld, amt) => StaggeredPayment(ld, amt.cents)
 							)),
-							paymentIntentId = pi.id
+							paymentIntentId = Some(pi.id)
 						)))
 					})
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
 				})
 			} else {
 				val cardData = PortalLogic.getCardData(pb, orderId)
-				PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, (orderTotal * 100).toInt).map(pi => {
-					Ok(Json.toJson(OrderStatusResult(
-						orderId = orderId,
-						total = orderTotal,
-						paymentMethodRequired = false,
-						cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
-							last4 = cd.last4,
-							expMonth = cd.expMonth.toInt,
-							expYear = cd.expYear.toInt,
-							zip = cd.zip
-						)),
-						staggeredPayments = List.empty,
-						paymentIntentId = pi.id
-					)))
-				})
+				Future(Ok(Json.toJson(OrderStatusResult(
+					orderId = orderId,
+					total = orderTotal,
+					paymentMethodRequired = false,
+					cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
+						last4 = cd.last4,
+						expMonth = cd.expMonth.toInt,
+						expYear = cd.expYear.toInt,
+						zip = cd.zip
+					)),
+					staggeredPayments = List.empty,
+					paymentIntentId = None
+				))))
 			}
 		})
 	}
@@ -92,7 +90,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		paymentMethodRequired: Boolean,
 		cardData: Option[SavedCardOrPaymentMethodData],
 		staggeredPayments: List[StaggeredPayment],
-		paymentIntentId: String
+		paymentIntentId: Option[String]
 	)
 
 	object OrderStatusResult {
