@@ -2265,7 +2265,8 @@ object PortalLogic {
 								override def getQuery: String =
 									s"""
 									   |update ORDERS_STRIPE_PAYMENT_INTENTS set
-									   |AMOUNT_IN_CENTS = $totalInCents
+									   |AMOUNT_IN_CENTS = $totalInCents,
+									   |paid_close_id = $closeId
 									   |where order_id = $orderId
 									   |and nvl(paid, 'N') <> 'Y'
 									   |""".stripMargin
