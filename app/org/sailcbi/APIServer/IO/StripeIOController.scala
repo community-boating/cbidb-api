@@ -49,7 +49,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 
 	/** If you call this, you must put the PI ID on the order */
 	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String, closeId: Int): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			val sourceBody = source match {
 				case None => Map.empty
 				case Some(s) => Map("payment_method" -> s)
@@ -91,7 +91,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + intentId,
 				PaymentIntent.apply,
@@ -106,7 +106,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def getPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + paymentIntentId,
 				PaymentIntent.apply,
@@ -119,7 +119,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def confirmPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + paymentIntentId + "/confirm",
 				PaymentIntent.apply,
@@ -285,7 +285,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def getCustomerObject(customerId: String): Future[ServiceRequestResult[Customer, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
 		}
 		else throw new UnauthorizedAccessException("getCustomerObject denied to userType " + rc.auth.userType)
