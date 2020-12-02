@@ -75,7 +75,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int, closeId: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.userType)) {
+		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.userType)) {
 			apiIO.getOrPostStripeSingleton(
 				"payment_intents/" + intentId,
 				_ => Unit,
