@@ -213,6 +213,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 								  |where PAYMENT_INTENT_ID = ${pi.id}
 								  |""".stripMargin
 						}
+						rc.pb.executePreparedQueryForUpdateOrDelete(updatePIQ)
 						s.map(pi => pi.charges.data.head)
 					}
 					case v: ValidationError[_, StripeError] => v.asInstanceOf[ServiceRequestResult[Charge, StripeError]]
