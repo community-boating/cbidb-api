@@ -206,11 +206,12 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				stripeController.confirmPaymentIntent(pi.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => {
 						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
+							override val params: List[String] = List(pi.id)
 							override def getQuery: String =
 								s"""
 								  |update ORDERS_STRIPE_PAYMENT_INTENTS
 								  |set paid = 'Y'
-								  |where PAYMENT_INTENT_ID = ${pi.id}
+								  |where PAYMENT_INTENT_ID = ?
 								  |""".stripMargin
 						}
 						rc.pb.executePreparedQueryForUpdateOrDelete(updatePIQ)
