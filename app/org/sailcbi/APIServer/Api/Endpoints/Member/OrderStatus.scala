@@ -30,6 +30,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
 
+			val now = PA.now().toLocalDate
+
 			implicit val format = OrderStatusResult.format
 
 			if (staggeredPaymentAdditionalMonths > 0) {
@@ -47,7 +49,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								expYear = pm.card.exp_year,
 								zip = pm.billing_details.address.postal_code
 							)),
-							staggeredPayments = PortalLogic.getStaggeredPayments(pb, orderId).map(Function.tupled(
+							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
 								(ld, amt) => StaggeredPayment(ld, amt.cents)
 							)),
 							paymentIntentId = Some(pi.id)

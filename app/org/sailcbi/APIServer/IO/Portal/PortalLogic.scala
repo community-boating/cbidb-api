@@ -910,11 +910,12 @@ object PortalLogic {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
-				"""
+				s"""
 				  |select
 				  |1
 				  |from persons p, shopping_cart_memberships sc
 				  |where p.person_id = sc.person_id
+				  |and order_id = $orderId
 				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
 				  |and (sc.ready_to_buy = 'N')
 				  |
@@ -937,11 +938,12 @@ object PortalLogic {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
-				"""
+				s"""
 				  |select
 				  |1
 				  |from persons p, shopping_cart_memberships sc
 				  |where p.person_id = sc.person_id
+				  |and order_id = $orderId
 				  |and p.person_id in (select b from acct_links where a = ? union select to_number(?) from dual)
 				  |and (sc.ready_to_buy = 'Y')
 				  |
@@ -2138,7 +2140,7 @@ object PortalLogic {
 		}
 	}
 
-	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): Unit = {
+	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
 		// Clear existing records.  Throw if there are paid records
 		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
@@ -2181,8 +2183,10 @@ object PortalLogic {
 				}
 				pb.executePreparedQueryForInsert(insertQ)
 
-				updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
-			}
+				val toAdd = updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
+				val newFirstPayment = (futurePayments.head._1, futurePayments.head._2 + toAdd)
+				newFirstPayment :: futurePayments.tail
+			} else List.empty
 		} else {
 			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 				override def getQuery: String =
@@ -2194,10 +2198,11 @@ object PortalLogic {
 			}
 
 			pb.executePreparedQueryForUpdateOrDelete(updateQ)
+			List.empty
 		}
 	}
 
-	def updateFirstStaggeredPaymentWithOneTimes(pb: PersistenceBroker, orderId: Int): Unit = {
+	def updateFirstStaggeredPaymentWithOneTimes(pb: PersistenceBroker, orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
 		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
@@ -2221,21 +2226,8 @@ object PortalLogic {
 		}
 
 		pb.executePreparedQueryForUpdateOrDelete(updateQ)
-	}
 
-	def getStaggeredPayments(pb: PersistenceBroker, orderId: Int): List[(LocalDate, Currency)] = {
-		val q = new PreparedQueryForSelect[(LocalDate, Currency)](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDate, Currency) =
-				(rsw.getLocalDate(1), Currency.cents(rsw.getInt(2)))
-
-			override def getQuery: String =
-				s"""
-				  |select expected_payment_date, (nvl(raw_amount_in_cents,0) + nvl(addl_amount_in_cents,0)) from ORDER_STAGGERED_PAYMENTS
-				  |where order_id = $orderId order by seq
-				  |""".stripMargin
-		}
-
-		pb.executePreparedQueryForSelect(q)
+		oneTimePrice
 	}
 
 	def getOrCreatePaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
