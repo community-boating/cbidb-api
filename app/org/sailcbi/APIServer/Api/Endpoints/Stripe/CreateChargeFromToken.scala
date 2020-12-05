@@ -25,7 +25,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 			val orderId: Int = params("orderId").toInt
 
 			Failover({
-				(PortalLogic.getOrderTotal(pb, orderId) * 100).toInt
+				PortalLogic.getOrderTotalCents(pb, orderId)
 			}, (e: Throwable) => logger.error("Unknown order id " + orderId, e))
 					.andThenWithCatch(orderDetails => {
 						val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head

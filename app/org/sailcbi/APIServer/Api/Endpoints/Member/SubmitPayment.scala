@@ -47,7 +47,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val logger = PA.logger
 
 		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
-		val orderTotalInCents: Int = (PortalLogic.getOrderTotal(pb, orderId) * 100).toInt
+		val orderTotalInCents = PortalLogic.getOrderTotalCents(pb, orderId)
 
 		val stripe = rc.getStripeIOController(ws)
 
@@ -159,7 +159,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 						)
 
 						override def setInParametersDouble: Map[String, Double] = Map(
-							"i_total" -> PortalLogic.getOrderTotal(pb, orderId)
+							"i_total" -> PortalLogic.getOrderTotalDollars(pb, orderId)
 						)
 
 						override def setInParametersVarchar: Map[String, String] = Map(

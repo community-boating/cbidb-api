@@ -23,7 +23,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 				val stripe = rc.getStripeIOController(ws)
 				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
-				val totalInCents = (PortalLogic.getOrderTotal(pb, orderId) * 100).toInt
+				val totalInCents = PortalLogic.getOrderTotalCents(pb, orderId)
 				val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)
 				customerIdOption match {
 					case None => Future(Ok("fail"))

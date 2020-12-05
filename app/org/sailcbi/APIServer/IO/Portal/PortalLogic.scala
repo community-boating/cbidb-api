@@ -515,7 +515,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(cardDataQ).headOption
 	}
 
-	def getOrderTotal(pb: PersistenceBroker, orderId: Int): Double = {
+	def getOrderTotalDollars(pb: PersistenceBroker, orderId: Int): Double = {
 
 		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
@@ -526,6 +526,9 @@ object PortalLogic {
 		}
 		pb.executePreparedQueryForSelect(orderTotalQ).head
 	}
+
+	def getOrderTotalCents(pb: PersistenceBroker, orderId: Int): Int =
+		Currency.toCents(getOrderTotalDollars(pb, orderId))
 
 	def waitListExists(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
 		val wlExists = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {

@@ -1,9 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import java.time.LocalDate
-
 import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest, ServiceRequestResult}
+import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess, ParsedRequest, ServiceRequestResult}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, Customer, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.HTTP.POST
@@ -26,7 +25,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
-			val orderTotal = PortalLogic.getOrderTotal(pb, orderId)
+			val orderTotal = PortalLogic.getOrderTotalDollars(pb, orderId)
+			val orderTotalInCents = Currency.toCents(orderTotal)
 
 			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
 
@@ -38,7 +38,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
 
 				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, (orderTotal * 100).toInt).map(pi => {
+					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, orderTotalInCents).map(pi => {
 						Ok(Json.toJson(OrderStatusResult(
 							orderId = orderId,
 							total = orderTotal,
