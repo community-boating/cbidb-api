@@ -2048,7 +2048,7 @@ object PortalLogic {
 	}
 
 	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
-		/** typeId, price, discountId, discountAmt */
+		/** typeId, price, discountId, discountAmt, addlStaggeredPayments */
 		type SCM = (Int, Double, Option[Int], Option[Double], Int)
 
 		val scm = PortalLogic.getSingleAPSCM(pb, personId, orderId)
@@ -2065,7 +2065,7 @@ object PortalLogic {
 				// then the price is the full price ie the current price plus the renewal discoutn amt added back on
 				// Otherwise its just the price that SCM says it is
 				val endDateToPrice = (endDates: List[LocalDate]) => {
-					val samePrice: LocalDate => Currency = _ => priceAsCurrency
+					val samePrice: LocalDate => Currency = _ => priceAsCurrency - Currency.dollars(discountAmtOption.getOrElse(0d))
 
 					discountIdOption match {
 						case Some(MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID) => {

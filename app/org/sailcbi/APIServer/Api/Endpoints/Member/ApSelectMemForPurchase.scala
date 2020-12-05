@@ -23,9 +23,10 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(pb, _))
 				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
 				val now = PA.now().toLocalDate
-				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, 0)
 
 				PortalLogic.assessDiscounts(pb, orderId)
+				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, 0)
+
 
 				Future(Ok(new JsObject(Map(
 					"paymentPlanAllowed" -> JsBoolean(paymentPlanAllowed),

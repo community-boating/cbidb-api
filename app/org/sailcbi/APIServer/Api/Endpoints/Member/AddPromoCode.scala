@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import org.sailcbi.APIServer.Api.ValidationResult
+
 import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -17,17 +19,26 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 			val pb: PersistenceBroker = rc.pb
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
+			val now = PA.now().toLocalDate
 			PA.withParsedPostBodyJSON(request.body.asJson, AddPromoCodeShape.apply)(parsed => {
-				PortalLogic.attemptAddPromoCode(pb, orderId, parsed.promoCode)
-				PortalLogic.assessDiscounts(pb, orderId)
+				parsed.promoCode match {
+					case None =>Future(Ok(ValidationResult.from("Promo code must be speficied.").toResultError.asJsObject()))
+					case Some(promoCode) => {
+						PortalLogic.attemptAddPromoCode(pb, orderId, promoCode)
+						val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
+						PortalLogic.assessDiscounts(pb, orderId)
+						PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, staggeredPaymentAdditionalMonths)
 
-				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+						Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+					}
+				}
+
 			})
 		})
 	}
 
 	case class AddPromoCodeShape(
-		promoCode: String
+		promoCode: Option[String]
 	)
 
 	object AddPromoCodeShape {
