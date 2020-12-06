@@ -2027,12 +2027,16 @@ object PortalLogic {
 		})
 	}
 
-	def getSingleAPSCM(pb: PersistenceBroker, personId: Int, orderId: Int): Option[(Int, Double, Option[Int], Option[Double], Int)] = {
-		/** typeId, price, discountId, discountAmt, addlStaggeredPayments */
-		type SCM = (Int, Double, Option[Int], Option[Double], Int)
-		val q = new PreparedQueryForSelect[SCM](Set(MemberUserType)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCM =
-				(rsw.getInt(1), rsw.getDouble(2), rsw.getOptionInt(3), rsw.getOptionDouble(4), rsw.getOptionInt(5).getOrElse(0))
+	def getSingleAPSCM(pb: PersistenceBroker, personId: Int, orderId: Int): Option[SCMRecord] = {
+		val q = new PreparedQueryForSelect[SCMRecord](Set(MemberUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCMRecord =
+				SCMRecord(
+					membershipTypeId = rsw.getInt(1),
+					basePriceDollars = rsw.getDouble(2),
+					discountId = rsw.getOptionInt(3),
+					discountAmtDollars = rsw.getOptionDouble(4),
+					addlStaggeredPayments = rsw.getOptionInt(5).getOrElse(0)
+				)
 
 			override def getQuery: String =
 				s"""
@@ -2049,15 +2053,13 @@ object PortalLogic {
 		else Some(scms.head)
 	}
 
-	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): List[List[(LocalDate, Currency)]] = {
-		/** typeId, price, discountId, discountAmt, addlStaggeredPayments */
-		type SCM = (Int, Double, Option[Int], Option[Double], Int)
-
+	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
 		val scm = PortalLogic.getSingleAPSCM(pb, personId, orderId)
 
 		scm match {
-			case None => List.empty
-			case Some((membershipTypeId, membershipPrice, discountIdOption, discountAmtOption, addlStaggeredMonths)) => {
+			case None => (None, List.empty)
+			case Some(scmRecord) => {
+				val (membershipTypeId, membershipPrice, discountIdOption, discountAmtOption, addlStaggeredMonths) = SCMRecord.unapply(scmRecord).get
 				val (gpPriceOption, dwPriceOption) = PortalLogic.getGPAndDwFromCart(pb, personId, orderId)
 				val priceAsCurrency =
 					Currency.dollars(membershipPrice) + gpPriceOption.getOrElse(Currency.cents(0)) + dwPriceOption.getOrElse(Currency.cents(0))
@@ -2088,9 +2090,22 @@ object PortalLogic {
 						case _ => samePrice
 					}
 				}
-				MembershipLogic.calculateAllPaymentSchedules(now, endDateToPrice)
+				(Some(scmRecord), MembershipLogic.calculateAllPaymentSchedules(now, endDateToPrice))
 			}
 		}
+	}
+
+	case class SCMRecord (
+		membershipTypeId: Int,
+		basePriceDollars: Double,
+		discountId: Option[Int],
+		discountAmtDollars: Option[Double],
+		addlStaggeredPayments: Int
+	)
+
+	object SCMRecord {
+		implicit val format = Json.format[SCMRecord]
+		def apply(v: JsValue): SCMRecord = v.as[SCMRecord]
 	}
 
 	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
@@ -2160,7 +2175,7 @@ object PortalLogic {
 		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
 		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
-			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
+			case Some(scm) => MembershipLogic.membershipTypeAllowsStaggeredPayments(scm.membershipTypeId)
 			case None => true
 		}
 
@@ -2179,7 +2194,7 @@ object PortalLogic {
 			PortalLogic.assessDiscounts(pb, orderId)
 
 			if (numberAdditionalPayments > 0) {
-				val futurePayments = getPaymentPlansForMembershipInCart(pb, personId, orderId, now).find(_.size == numberAdditionalPayments+1).get
+				val futurePayments: List[(LocalDate, Currency)] = getPaymentPlansForMembershipInCart(pb, personId, orderId, now)._2.find(_.size == numberAdditionalPayments+1).get
 
 				val insertQ = new PreparedQueryForInsert(Set(MemberUserType)) {
 					override val pkName: Option[String] = None
