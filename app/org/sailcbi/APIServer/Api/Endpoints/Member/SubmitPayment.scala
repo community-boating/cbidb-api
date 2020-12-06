@@ -25,7 +25,12 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
-			startChargeProcess(rc, personId, orderId)
+			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+				case None => Ok(new JsObject(Map(
+					"successAttemptId" -> JsNumber(parseError._1.get)
+				)))
+				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+			})
 		})
 	}
 
@@ -38,11 +43,14 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val personId = params("personId").toInt
 			val orderId: Int = params("orderId").toInt
 
-			startChargeProcess(rc, personId, orderId)
+			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+				case None => Ok("success")
+				case Some(err: String) => Ok(err)
+			})
 		})
 	}
 
-	private def startChargeProcess(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[Result] = {
+	private def startChargeProcess(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val pb = rc.pb
 
 		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
@@ -74,7 +82,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		}
 	}
 
-	private def postPaymentIntent(rc: RequestCache, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[Result] = {
+	private def postPaymentIntent(rc: RequestCache, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val pb = rc.pb
 		val logger = PA.logger
 
@@ -197,12 +205,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val parseError = pb.executeProcedure(parseQ)
 			println("Final submit payment result:  " + parseError)
 
-			parseError._2 match {
-				case None => Ok(new JsObject(Map(
-					"successAttemptId" -> JsNumber(parseError._1.get)
-				)))
-				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
-			}
+			parseError
 		})
 	}
 
