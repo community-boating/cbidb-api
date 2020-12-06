@@ -519,7 +519,7 @@ object PortalLogic {
 		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getDouble(1)
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getOptionDouble(1).getOrElse(0)
 
 			override def getQuery: String = "select cc_pkg.calculate_total(?) from dual"
 		}
