@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil.{BitVector, NetFailure, NetSuccess, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
@@ -102,12 +102,12 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			) = pb.executePreparedQueryForSelect(nameQ).head
 
 			// do this async, user doesnt need to wait for it.
-//			if (stripeCustomerIdOption.isEmpty) {
-//				stripe.createStripeCustomerFromPerson(pb, personId).map({
-//					case f: NetFailure[_, _] => logger.error("Failed to create stripe customerId for person " + personId)
-//					case s: NetSuccess[_, _] =>
-//				})
-//			}
+			if (stripeCustomerIdOption.isEmpty) {
+				stripe.createStripeCustomerFromPerson(pb, personId).map({
+					case f: NetFailure[_, _] => logger.error("Failed to create stripe customerId for person " + personId)
+					case s: NetSuccess[_, _] =>
+				})
+			}
 
 			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(pb)
 			val fullYearDiscounts = discountsWithAmounts.filter(_.membershipTypeId == MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID)
