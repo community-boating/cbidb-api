@@ -1,10 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.sql.CallableStatement
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
@@ -14,6 +12,8 @@ import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
+import java.sql.CallableStatement
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {

@@ -1,21 +1,20 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import java.sql.CallableStatement
-import java.time.{LocalDate, LocalDateTime}
-
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil, DefinedInitializableNullary, GetSQLLiteral, GetSQLLiteralPrepared, NetSuccess}
+import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
+import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, BouncerUserType, MemberUserType, ProtoPersonUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 
+import java.sql.CallableStatement
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import java.time.LocalDate
-
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+
+import java.time.LocalDate
 
 class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexUserType, MemberUserType)) {
 	val getQuery: String =

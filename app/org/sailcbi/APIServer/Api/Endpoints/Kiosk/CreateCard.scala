@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
@@ -9,6 +8,7 @@ import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, Result
 import play.api.libs.json.{JsNumber, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedController {

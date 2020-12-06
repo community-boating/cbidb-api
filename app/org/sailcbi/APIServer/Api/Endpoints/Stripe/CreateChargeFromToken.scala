@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -10,6 +9,7 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {

@@ -1,8 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.{LocalDate, LocalDateTime}
-import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler, NetFailure, NetSuccess}
+import org.sailcbi.APIServer.CbiUtil.{BitVector, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
@@ -12,6 +10,8 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.{LocalDate, LocalDateTime}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {

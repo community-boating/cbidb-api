@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, RootUserType}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestAuth @Inject()(implicit exec: ExecutionContext) extends InjectedController {

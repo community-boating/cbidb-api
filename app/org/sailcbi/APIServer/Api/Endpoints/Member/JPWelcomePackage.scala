@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
@@ -12,6 +9,8 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends InjectedController {

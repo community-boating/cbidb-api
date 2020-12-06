@@ -1,8 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.Api.ValidationResult
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -10,6 +8,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedController {

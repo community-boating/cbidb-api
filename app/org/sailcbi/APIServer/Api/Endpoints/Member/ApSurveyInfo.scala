@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteralPrepared, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, 
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {

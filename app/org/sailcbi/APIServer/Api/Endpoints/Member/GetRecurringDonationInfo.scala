@@ -1,16 +1,15 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, GetSQLLiteralPrepared, NetFailure, NetSuccess, ParsedRequest, ValidationError}
+import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Customer, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetRecurringDonationInfo @Inject()(implicit exec: ExecutionContext, ws: WSClient) extends InjectedController {

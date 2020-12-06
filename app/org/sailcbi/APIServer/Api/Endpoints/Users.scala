@@ -1,14 +1,13 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Users.UsersParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import play.api.mvc.{Action, AnyContent}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class Users @Inject()(implicit val exec: ExecutionContext)

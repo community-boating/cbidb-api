@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) extends InjectedController {

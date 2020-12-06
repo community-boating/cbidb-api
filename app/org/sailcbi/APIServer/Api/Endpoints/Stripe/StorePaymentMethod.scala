@@ -1,17 +1,16 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetFailure, NetSuccess, ParsedRequest, ValidationError}
+import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient) extends InjectedController {

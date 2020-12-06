@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends InjectedController {

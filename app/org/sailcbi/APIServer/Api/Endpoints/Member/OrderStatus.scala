@@ -1,11 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.LocalDate
-import javax.inject.Inject
-import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess, ParsedRequest, ServiceRequestResult}
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, Customer, PaymentIntent, PaymentMethod, StripeError}
-import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
-import org.sailcbi.APIServer.IO.HTTP.POST
+import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess, ParsedRequest}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
@@ -13,6 +9,8 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {

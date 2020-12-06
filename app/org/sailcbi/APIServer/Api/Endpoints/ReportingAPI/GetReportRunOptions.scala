@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.ReportingAPI
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
@@ -14,6 +11,8 @@ import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)

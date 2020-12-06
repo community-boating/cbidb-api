@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
@@ -9,6 +8,7 @@ import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedController {

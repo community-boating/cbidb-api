@@ -1,16 +1,14 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.{LocalDate, LocalDateTime}
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext) extends InjectedController {

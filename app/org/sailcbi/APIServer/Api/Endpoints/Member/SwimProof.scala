@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedController {

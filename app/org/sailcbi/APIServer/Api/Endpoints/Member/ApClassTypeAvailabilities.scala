@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, Persis
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApClassTypeAvailabilities @Inject()(implicit exec: ExecutionContext) extends InjectedController {

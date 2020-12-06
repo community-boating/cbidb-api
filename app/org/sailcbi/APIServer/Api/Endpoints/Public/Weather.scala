@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.CacheableResultFromRemoteRequest
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
@@ -11,6 +8,8 @@ import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 

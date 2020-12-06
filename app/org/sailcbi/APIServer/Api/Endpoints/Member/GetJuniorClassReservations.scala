@@ -1,9 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
@@ -12,6 +8,9 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json._
 import play.api.mvc.InjectedController
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends InjectedController {

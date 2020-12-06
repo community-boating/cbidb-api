@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class Ping @Inject()(implicit exec: ExecutionContext) extends InjectedController {

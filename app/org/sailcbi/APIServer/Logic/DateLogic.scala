@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Logic
 
-import java.time.temporal.ChronoUnit
-import java.time.{LocalDate, LocalDateTime, Month}
-
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.MembershipType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+
+import java.time.temporal.ChronoUnit
+import java.time.{LocalDate, LocalDateTime, Month}
 
 class DateLogic(rc: RequestCache) {
 	// TODO: also hardcoded in apex.  Need a data solution for spring/fall, and # of regular weeks

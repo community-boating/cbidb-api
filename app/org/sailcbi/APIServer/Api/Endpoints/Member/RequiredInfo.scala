@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -11,6 +10,7 @@ import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {

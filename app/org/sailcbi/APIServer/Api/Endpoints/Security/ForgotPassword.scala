@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import java.sql.CallableStatement
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect}
@@ -11,6 +8,8 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
+import java.sql.CallableStatement
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends InjectedController {

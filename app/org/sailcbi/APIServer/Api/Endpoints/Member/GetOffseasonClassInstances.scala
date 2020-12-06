@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.JpOffseasonClasses
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetOffseasonClassInstances @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
