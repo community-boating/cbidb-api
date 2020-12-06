@@ -2118,8 +2118,20 @@ object PortalLogic {
 	 * Delete unpaid staggered payment records on the supplied orderId.  Throw if there are any payment records remaining afterward
 	 * @param pb
 	 * @param orderId
+	 * @return paymentIntentRowID from the deleted rows (if any)
 	 */
-	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker, orderId: Int): Unit = {
+	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker, orderId: Int): Option[Int] = {
+		val getintentRowID = new PreparedQueryForSelect[Option[Int]](Set(MemberUserType, ApexUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Int] = rsw.getOptionInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select max(PAYMENT_INTENT_ROW_ID) from order_staggered_payments
+				  |where order_id = $orderId
+				  |""".stripMargin
+		}
+		val piRowId = pb.executePreparedQueryForSelect(getintentRowID).head
+
 		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
@@ -2140,11 +2152,12 @@ object PortalLogic {
 		if (recordsLeft > 0) {
 			throw new Exception (s"deleteStaggeredPaymentsWithEmptyAssertion called on orderId $orderId which has paid records")
 		}
+		piRowId
 	}
 
 	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
 		// Clear existing records.  Throw if there are paid records
-		deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
+		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
 		val typeIsOk, dropDiscount = PortalLogic.getSingleAPSCM(pb, personId, orderId) match {
 			case Some((membershipTypeId, _, _, _, _)) => MembershipLogic.membershipTypeAllowsStaggeredPayments(membershipTypeId)
@@ -2173,14 +2186,22 @@ object PortalLogic {
 
 					override val preparedParamsBatch: List[List[PreparedValue]] = futurePayments.zipWithIndex.map(t => {
 						val ((payDate, payAmt), index) = t
-						val values: List[PreparedValue] = List(orderId, (index + 1).toString, payDate, payAmt.cents.toString, GetSQLLiteralPrepared("N"))
+						val piRowId: String = if(index == 0) piRowIdMaybe.map(_.toString).orNull else null
+						val values: List[PreparedValue] = List(
+							orderId,
+							(index + 1).toString,
+							payDate,
+							payAmt.cents.toString,
+							GetSQLLiteralPrepared("N"),
+							piRowId
+						)
 						values
 					})
 
 					override def getQuery: String =
 						s"""
-						   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, expected_payment_date, raw_amount_in_cents, paid, addl_amount_in_cents)
-						   |values (?, ?, ?, ?, ?, 0)
+						   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, expected_payment_date, raw_amount_in_cents, paid, addl_amount_in_cents, PAYMENT_INTENT_ROW_ID)
+						   |values (?, ?, ?, ?, ?, 0, ?)
 						   |""".stripMargin
 				}
 				pb.executePreparedQueryForInsert(insertQ)
