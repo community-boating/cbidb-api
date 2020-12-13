@@ -41,7 +41,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		}
 		users.map(u => UserShape(
 			userId = u.values.userId.get,
-			userName = u.values.userName.get,
+			username = u.values.userName.get,
 			nameFirst = u.values.nameFirst.get,
 			nameLast = u.values.nameLast.get,
 			email = u.values.email.get,
@@ -77,7 +77,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	case class UserShape (
 		userId: Int,
-		userName: String,
+		username: String,
 		nameFirst: Option[String],
 		nameLast: Option[String],
 		email: String,

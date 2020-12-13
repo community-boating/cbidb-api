@@ -25,6 +25,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					PA.withRequestCache(StaffUserType, None, parsedRequest, rc => {
 						val pb = rc.pb
 
+						println(parsed)
 						runValidations(parsed, pb, Some(userId)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
@@ -46,12 +47,12 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					println(s"its a create")
 					PA.withRequestCache(StaffUserType, None, parsedRequest, rc => {
 						val pb = rc.pb
-						runValidations(parsed, pb, None).combine(checkUsernameUnique(pb, parsed.userName.get)) match {
+						runValidations(parsed, pb, None).combine(checkUsernameUnique(pb, parsed.username.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
 								val user = new User
 								setValues(user, parsed)
-								user.update(_.userName, parsed.userName.get)
+								user.update(_.userName, parsed.username.get)
 
 								pb.commitObjectToDatabase(user)
 								Future(Ok(new JsObject(Map(
@@ -74,11 +75,12 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		user.update(_.pwChangeRequired, parsed.pwChangeRequired.getOrElse(false))
 		user.update(_.locked, parsed.locked.getOrElse(false))
 		user.update(_.hideFromClose, parsed.hideFromClose.getOrElse(false))
+		if (parsed.pwHash.isDefined) user.update(_.pwHash, parsed.pwHash)
 	}
 
 	private def runValidations(parsed: PutUserShape, pb: PersistenceBroker, userId: Option[Int]): ValidationResult = {
 		ValidationResult.combine(List(
-			ValidationResult.checkBlank(parsed.userName, "Username"),
+			ValidationResult.checkBlank(parsed.username, "Username"),
 			ValidationResult.checkBlank(parsed.email, "Email"),
 			ValidationResult.checkBlank(parsed.nameFirst, "First Name"),
 			ValidationResult.checkBlank(parsed.nameLast, "Last Name"),
@@ -94,14 +96,15 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 
 	case class PutUserShape(
 		userId: Option[Int],
-		userName: Option[String],
+		username: Option[String],
 		email: Option[String],
 		nameFirst: Option[String],
 		nameLast: Option[String],
 		active: Option[Boolean],
 		hideFromClose: Option[Boolean],
 		locked: Option[Boolean],
-		pwChangeRequired: Option[Boolean]
+		pwChangeRequired: Option[Boolean],
+		pwHash: Option[String]
 	)
 
 	object PutUserShape {
