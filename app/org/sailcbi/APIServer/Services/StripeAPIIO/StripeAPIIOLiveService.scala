@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Services.StripeAPIIO
 
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
-import org.sailcbi.APIServer.IO.HTTP.{GET, HTTPMechanism, HTTPMethod}
+import org.sailcbi.APIServer.IO.HTTP.{GET, HTTPMechanism, HTTPMethod, POST}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,6 +17,11 @@ class StripeAPIIOLiveService private[Services] (baseURL: String, secretKey: Stri
 		postSuccessAction: Option[T => _] = None
    ): Future[ServiceRequestResult[T, StripeError]] = {
 		def makeRequest(): Future[JsValue] = {
+			println("Making " + httpMethod.toString + " stripe call to " + url)
+			body match {
+				case Some(b) => println(b)
+				case _ =>
+			}
 			http.getJSON(
 				baseURL + url,
 				httpMethod,

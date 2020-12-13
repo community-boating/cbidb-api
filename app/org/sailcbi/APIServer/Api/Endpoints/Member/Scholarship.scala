@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
@@ -9,6 +8,7 @@ import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.InjectedController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedController {

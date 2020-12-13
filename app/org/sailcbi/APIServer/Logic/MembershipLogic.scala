@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Logic
 
-import java.time.LocalDate
-
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
+
+import java.time.LocalDate
 
 object MembershipLogic {
 	/**

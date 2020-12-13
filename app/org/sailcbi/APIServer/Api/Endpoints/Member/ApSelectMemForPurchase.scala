@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends InjectedController {
@@ -22,8 +22,11 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 
 				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(pb, _))
 				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
+				val now = PA.now().toLocalDate
 
 				PortalLogic.assessDiscounts(pb, orderId)
+				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, 0)
+
 
 				Future(Ok(new JsObject(Map(
 					"paymentPlanAllowed" -> JsBoolean(paymentPlanAllowed),

@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.StaticYearlyDataParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetStaticYearlyData, GetStaticYearlyDataResult}
@@ -10,6 +7,8 @@ import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class StaticYearlyData @Inject()(implicit val exec: ExecutionContext)

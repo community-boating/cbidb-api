@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
+import org.sailcbi.APIServer.CbiUtil.DateUtil
+
 import java.sql.PreparedStatement
 import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
-
-import org.sailcbi.APIServer.CbiUtil.DateUtil
 
 sealed abstract class PreparedValue {
 	def set(ps: PreparedStatement)(index: Int): Unit

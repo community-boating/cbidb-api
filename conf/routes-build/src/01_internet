@@ -12,6 +12,7 @@ GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
 POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
 POST     /stripe/submit-payment               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.post()
+POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
 
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()

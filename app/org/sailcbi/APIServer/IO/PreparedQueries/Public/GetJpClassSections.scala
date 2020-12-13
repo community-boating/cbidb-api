@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class GetJpClassSections(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassSectionsResult](Set(PublicUserType)) {
 	val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))

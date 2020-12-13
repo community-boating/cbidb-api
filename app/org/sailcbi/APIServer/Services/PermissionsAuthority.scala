@@ -22,6 +22,7 @@ import play.api.mvc.{Result, Results}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.io.Directory
 import scala.reflect.runtime.universe
+import scala.util.{Failure, Success}
 
 
 class PermissionsAuthority private[Services] (
@@ -114,7 +115,14 @@ class PermissionsAuthority private[Services] (
 
 	private def wrapInStandardTryCatch(block: () => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
 		try {
-			block()
+			block().transform({
+				case Success(r: Result) => Success(r)
+				case Failure(e: Throwable) => {
+					logger.error(e.getMessage, e)
+					Sentry.capture(e)
+					Success(Results.Status(400)(ResultError.UNKNOWN))
+				}
+			})
 		} catch {
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
 			case _: CORSException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))

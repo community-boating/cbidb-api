@@ -55,9 +55,11 @@ class Currency(val cents: Int) {
 object Currency {
 	def dollars(i: Int): Currency = new Currency(i * 100)
 
-	def dollars(d: Double): Currency = new Currency(Math.round(d * 100).toInt)
+	def dollars(d: Double): Currency = new Currency(Currency.toCents(d))
 
 	def cents(i: Int): Currency = new Currency(i)
+
+	def toCents(d: Double): Int = Math.round(d * 100d).toInt
 
 	implicit object currencyAsNumeric extends Numeric[Currency] {
 		override def plus(x: Currency, y: Currency): Currency = Currency.cents(x.cents + y.cents)

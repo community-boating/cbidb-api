@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest, Succeeded}
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class SyncLocalDBWithStripe @Inject()(ws: WSClient)(implicit exec: ExecutionContext) extends InjectedController {

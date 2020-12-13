@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import java.sql.CallableStatement
-
 import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserType}
+
+import java.sql.CallableStatement
 
 abstract class PreparedProcedureCall[T](
 	override val allowedUserTypes: Set[UserType],

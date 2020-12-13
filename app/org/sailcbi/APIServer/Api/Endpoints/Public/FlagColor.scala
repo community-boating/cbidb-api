@@ -1,8 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
@@ -11,6 +8,8 @@ import org.sailcbi.APIServer.Services.Authentication.PublicUserType
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.{Action, AnyContent}
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class FlagColor @Inject()(implicit val exec: ExecutionContext)

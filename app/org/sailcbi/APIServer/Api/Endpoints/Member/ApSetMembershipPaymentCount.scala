@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
@@ -8,6 +7,7 @@ import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) extends InjectedController {
@@ -22,7 +22,6 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 
 				val now = PA.now().toLocalDate
 
-				PortalLogic.setPaymentPlanLength(pb, personId, orderId, parsed.additionalPayments)
 				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, parsed.additionalPayments)
 				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
 

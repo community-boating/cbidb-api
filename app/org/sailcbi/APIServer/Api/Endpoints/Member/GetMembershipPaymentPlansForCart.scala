@@ -1,16 +1,14 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import java.time.{LocalDate, LocalDateTime}
-
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext) extends InjectedController {
@@ -26,17 +24,24 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 
 			val now = PA.now()
 
-			val plans = PortalLogic.getPaymentPlansForMembershipInCart(pb, personId, orderId, now.toLocalDate).map(_.map(
+			val plansResult = PortalLogic.getPaymentPlansForMembershipInCart(pb, personId, orderId, now.toLocalDate)
+
+			val scm = plansResult._1.get
+
+			val plans = plansResult._2.map(_.map(
 				payment => MembershipSinglePayment(payment._1, payment._2.cents)
 			))
 
 			implicit val format = MembershipSinglePayment.format
 
-			Future(Ok(Json.toJson(plans)))
+			Future(Ok(new JsObject(Map(
+				"scm" -> Json.toJson(scm),
+				"plans" -> Json.toJson(plans)
+			))))
 		})
 	}
 
-	case class MembershipSinglePayment(paymentDate: LocalDate, paymentAmountCents: Int)
+	case class MembershipSinglePayment(paymentDate: LocalDate, paymentAmtCents: Int)
 
 	object MembershipSinglePayment{
 		implicit val format = Json.format[MembershipSinglePayment]

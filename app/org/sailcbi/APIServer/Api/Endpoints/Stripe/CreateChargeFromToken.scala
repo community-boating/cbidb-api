@@ -1,14 +1,15 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex._
 import org.sailcbi.APIServer.Services.Authentication.ApexUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
@@ -24,8 +25,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 			val orderId: Int = params("orderId").toInt
 
 			Failover({
-				val orderDetails: GetCartDetailsForOrderIdResult = pb.executePreparedQueryForSelect(new GetCartDetailsForOrderId(orderId)).head
-				orderDetails
+				PortalLogic.getOrderTotalCents(pb, orderId)
 			}, (e: Throwable) => logger.error("Unknown order id " + orderId, e))
 					.andThenWithCatch(orderDetails => {
 						val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
@@ -38,7 +38,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 						nextPacket
 					}, (e: Throwable) => logger.error("Unable to get current online close", e))
 					.andThenWithCatch(packet => {
-						stripeIOController.createCharge(packet._1.priceInCents, token, orderId, packet._3.closeId)
+						stripeIOController.createCharge(packet._1, token, orderId, packet._3.closeId)
 					}, (e: Throwable) => logger.error("Unknown order id + orderID", e)) match {
 				case Resolved(f) => f.map({
 					case s: NetSuccess[Charge, StripeError] => {
