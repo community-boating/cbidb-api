@@ -168,6 +168,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 					val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
 					// For each payout, update DB with all associated BTs
 					Future.sequence(payouts.map(po => {
+						Thread.sleep(400)
 						val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
 						updateLocalDBFromStripeForStorable(
 							BalanceTransaction,
