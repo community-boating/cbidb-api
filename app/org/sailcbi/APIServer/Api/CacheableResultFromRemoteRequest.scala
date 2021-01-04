@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Authentication.{NonMemberUserType, UserTypeObject}
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, InjectedController}

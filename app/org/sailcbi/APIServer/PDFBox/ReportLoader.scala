@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.PDFBox
 
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 
 // A loader is a function from parameter to model
 // a single report (e.g. close report) has a single class of model

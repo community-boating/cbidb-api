@@ -5,7 +5,6 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelations
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
-import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 
 class MemberUserType(override val userName: String) extends UserType(userName) {

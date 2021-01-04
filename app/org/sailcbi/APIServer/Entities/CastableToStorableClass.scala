@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedValue}
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 
 trait CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_]

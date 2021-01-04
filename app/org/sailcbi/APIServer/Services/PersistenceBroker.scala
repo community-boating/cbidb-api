@@ -1,8 +1,6 @@
 package org.sailcbi.APIServer.Services
 
-import org.sailcbi.APIServer.CbiUtil.TestUserType
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
-import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}

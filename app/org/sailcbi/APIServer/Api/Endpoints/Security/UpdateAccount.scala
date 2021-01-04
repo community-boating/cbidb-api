@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 

@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport._
 import org.sailcbi.APIServer.PDFBox.ReportLoader
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.{DailyCloseReportModel, ParkingData}
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 
 object DailyCloseReportLiveLoader extends ReportLoader[DailyCloseReportLiveParameter, DailyCloseReportModel] {
 	override def apply(param: DailyCloseReportLiveParameter, rc: RequestCache[_]): DailyCloseReportModel = {

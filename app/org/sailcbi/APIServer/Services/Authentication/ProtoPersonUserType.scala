@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, ResultSetWrapper}
 
 class ProtoPersonUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[ProtoPersonUserType] = ProtoPersonUserType

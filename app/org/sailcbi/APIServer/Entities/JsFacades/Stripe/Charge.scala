@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserTypeObject}
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(

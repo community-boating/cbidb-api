@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.JsonUtil
-import org.sailcbi.APIServer.Services.{CacheBroker, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, RequestCache}
 import play.api.libs.json._
 
 import java.time.format.DateTimeFormatter

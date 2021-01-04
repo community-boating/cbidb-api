@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.Logger.Logger
 import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.ExecutionContext.Implicits.global
