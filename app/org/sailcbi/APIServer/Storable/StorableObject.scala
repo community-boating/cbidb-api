@@ -1,13 +1,11 @@
 package org.sailcbi.APIServer.Storable
 
-import java.time.{LocalDate, LocalDateTime}
-
-import org.sailcbi.APIServer.Services.Authentication._
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
 import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, TableAliasInnerJoined}
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
 
@@ -29,13 +27,11 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	val entityName: String
 	val fields: FieldsObject
 
-	final def getVisiblity(userType: UserType): EntityVisibility = userType.getEntityVisibility(self)
-
 	def primaryKey: IntDatabaseField
 
-	def peekInstanceForID(id: Int, pb: PersistenceBroker): Option[T] = pb.getObjectById(this, id)
+	def peekInstanceForID(id: Int, rc: RequestCache[_]): Option[T] = rc.getObjectById(this, id)
 
-	def getInstanceForID(id: Int, pb: PersistenceBroker): T = peekInstanceForID(id, pb).get
+	def getInstanceForID(id: Int, rc: RequestCache[_]): T = peekInstanceForID(id, rc).get
 
 	// Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
 	private lazy val fieldMaps = {
@@ -142,10 +138,10 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		valuesList equals valuesListReflection
 	}
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache): T =
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache[_]): T =
 		construct(ps, rc, None)
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache, tableAlias: Option[String]): T = {
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache[_], tableAlias: Option[String]): T = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])
@@ -155,17 +151,19 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			case None => ColumnAlias.wrapForInnerJoin(f).asInstanceOf[ColumnAliasInnerJoined[_, _]]
 		}
 
-		val filterFunction: (FieldDefinition => Boolean) = {
-			val visibility = rc.auth.userType.getEntityVisibility(self)
-			if (!visibility.entityVisible) (t: FieldDefinition) => {
-				println("whole entity not visible for " + t._2.getPersistenceFieldName)
-				false
-			}
-			else visibility.fieldList match {
-				case None => (fd: FieldDefinition) => true
-				case Some(s) => (fd: FieldDefinition) => s.contains(fd._2)
-			}
-		}
+		val filterFunction: (FieldDefinition => Boolean) = (fd: FieldDefinition) => true
+
+//		val filterFunction: (FieldDefinition => Boolean) = {
+//			val visibility = rc.auth.userType.getEntityVisibility(self)
+//			if (!visibility.entityVisible) (t: FieldDefinition) => {
+//				println("whole entity not visible for " + t._2.getPersistenceFieldName)
+//				false
+//			}
+//			else visibility.fieldList match {
+//				case None => (fd: FieldDefinition) => true
+//				case Some(s) => (fd: FieldDefinition) => s.contains(fd._2)
+//			}
+//		}
 
 		intFieldMap.filter(t => {
 			t._2 == self.primaryKey || filterFunction(t)

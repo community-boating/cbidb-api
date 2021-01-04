@@ -17,7 +17,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
 			val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
@@ -50,7 +50,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSelectPurchaseGuestPrivsShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val personId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
 				PortalLogic.apSetGuestPrivs(pb, personId, orderId, parsed.wantIt)

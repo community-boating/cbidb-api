@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteralPrepared, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -14,8 +14,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val pb = rc.pb
+			val personId = rc.auth.getAuthedPersonId(pb)
 
 			val select = new PreparedQueryForSelect[ApSurveyInfoShape](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApSurveyInfoShape =
@@ -65,8 +65,8 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val pb = rc.pb
+			val personId = rc.auth.getAuthedPersonId(pb)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSurveyInfoShape.apply)(parsed => {
 				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 					override def getQuery: String =

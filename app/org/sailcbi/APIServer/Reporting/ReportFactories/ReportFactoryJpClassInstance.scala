@@ -1,17 +1,17 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.JpClassInstance.{JpClassInstanceFilterFactoryType, JpClassInstanceFilterFactoryYear}
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactory
 import org.sailcbi.APIServer.Reporting.{ReportFactory, ReportingField}
 import org.sailcbi.APIServer.Storable.StorableObject
 
-class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
-	lazy val jpClassTypes: List[JpClassType] = pb.getObjectsByFilters(JpClassType, List(), 20)
+import java.time.format.DateTimeFormatter
 
-	lazy val jpClassSessions: List[JpClassSession] = pb.getObjectsByFilters(
+class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
+	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), 20)
+
+	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
 		List(JpClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
 		1000
@@ -21,7 +21,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
 
 	def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
 		val types: Map[Int, JpClassType] =
-			pb.getObjectsByFilters(JpClassType, List(), 20)
+			rc.getObjectsByFilters(JpClassType, List(), 20)
 					.map(t => (t.getID, t))
 					.foldLeft(Map(): Map[Int, JpClassType])((m: Map[Int, JpClassType], x: (Int, JpClassType)) => m + x)
 

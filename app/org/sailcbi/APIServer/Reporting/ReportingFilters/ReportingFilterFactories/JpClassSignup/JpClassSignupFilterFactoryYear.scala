@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassSession, JpClassSignup}
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 
 class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignup] {
 	val displayName: String = "By Season"
@@ -11,16 +11,16 @@ class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignu
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[JpClassSignup] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[JpClassSignup] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
 		val year = arg.toInt
-		implicit val pb: PersistenceBroker = _pb
-		val sessions = pb.getObjectsByFilters(
+		implicit val rc: RequestCache[_] = _rc
+		val sessions = rc.getObjectsByFilters(
 			JpClassSession,
 			List(JpClassSession.fields.sessionDateTime.isYearConstant(year)),
 			100
 		)
 		val instanceIDs = sessions.map(_.values.instanceId.get).toSet
-		pb.getObjectsByFilters(
+		rc.getObjectsByFilters(
 			JpClassSignup,
 			List(JpClassSignup.fields.instanceId.inList(instanceIDs.toList)),
 			100

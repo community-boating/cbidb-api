@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,8 +15,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
@@ -36,8 +35,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
 				PortalLogic.unapplyGCFromOrder(pb, orderId, parsed.certId)

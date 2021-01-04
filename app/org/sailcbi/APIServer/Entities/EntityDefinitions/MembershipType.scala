@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.InitializableFromCollectionElement
 import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{DoubleDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
+import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
 class MembershipType extends StorableClass {

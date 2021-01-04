@@ -1,23 +1,23 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactory
 import org.sailcbi.APIServer.Reporting.{ReportFactory, ReportingField}
 import org.sailcbi.APIServer.Storable.StorableObject
 
+import java.time.format.DateTimeFormatter
+
 class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	val entityCompanion: StorableObject[JpClassSignup] = JpClassSignup
 
-	lazy val jpClassTypes: List[JpClassType] = pb.getObjectsByFilters(JpClassType, List(), 20)
+	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), 20)
 
 	lazy val classInstanceIDs: Set[Int] = getInstances.map(_.values.instanceId.get).toSet
 
 	// decorated with types
 	lazy val jpClassInstances: List[JpClassInstance] = {
-		val classInstances: List[JpClassInstance] = pb.getObjectsByIds(JpClassInstance, classInstanceIDs.toList)
+		val classInstances: List[JpClassInstance] = rc.getObjectsByIds(JpClassInstance, classInstanceIDs.toList)
 		classInstances.foreach(i => {
 			val typeId = i.values.typeId.get
 			val typeInstance = jpClassTypes.find(_.values.typeId.get == typeId)
@@ -26,7 +26,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 		classInstances
 	}
 
-	lazy val jpClassSessions: List[JpClassSession] = pb.getObjectsByFilters(
+	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
 		List(JpClassSession.fields.instanceId.inList(classInstanceIDs.toList)),
 		100

@@ -2,24 +2,9 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object PublicUserType extends NonMemberUserType {
-	val uniqueUserName = "PUBLIC"
-
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
-		Some(uniqueUserName)
-
-	// Anyone can downgrade from anything to public
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
-		requiredUserName: Option[String]
-	): Option[String] = Some(uniqueUserName)
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
-
+class PublicUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[PublicUserType] = PublicUserType
 	/*
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
 	  case ApClassFormat => EntityVisibility(entityVisible=true, None, Some(Set(
@@ -73,4 +58,20 @@ object PublicUserType extends NonMemberUserType {
 	  case _ => EntityVisibility.ZERO_VISIBILITY
 	}
 	*/
+}
+
+object PublicUserType extends UserTypeObject[PublicUserType] {
+	val uniqueUserName = "PUBLIC"
+
+	override def create(userName: String): PublicUserType = new PublicUserType(userName)
+	def create: PublicUserType = create(uniqueUserName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
+		Some(uniqueUserName)
+
+	// Anyone can downgrade from anything to public
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
+		requiredUserName: Option[String]
+	): Option[String] = Some(uniqueUserName)
 }

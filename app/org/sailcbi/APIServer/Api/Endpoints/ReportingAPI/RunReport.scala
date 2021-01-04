@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.Report
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
 import play.api.http.{HeaderNames, HttpEntity}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._
@@ -31,15 +31,15 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
-		PA.withRequestCache(StaffUserType, None, req, rc => {
+		PA.withRequestCache(StaffUserType)(None, req, rc => {
 			println(rc.auth.userName)
-			if (rc.auth.userType != StaffUserType) {
+			if (!rc.auth.isInstanceOf[StaffUserType]) {
 				Future {
 					Ok("Access Denied")
 				}
 			} else {
 				try {
-					val pb: PersistenceBroker = rc.pb
+					val pb = rc.pb
 					val cb: CacheBroker = rc.cb
 					// TODO: assert expected post params
 					if (req.postParams.isEmpty) Future {
@@ -103,7 +103,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 		LocalDateTime.now.plusSeconds(5)
 	}
 
-	def getJSONResultFuture(rc: RequestCache, params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: RequestCache[_], params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
 		lazy val report: Report = Report.getReport(rc, params.baseEntityString, params.filterSpec, params.fieldSpec)
 		params.outputType match {
 			case OUTPUT_TYPE.JSCON => report.formatJSCON

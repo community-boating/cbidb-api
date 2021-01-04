@@ -17,7 +17,7 @@ class ApSelectPurchaseDamageWaiver @Inject()(implicit exec: ExecutionContext) ex
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
 			val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
@@ -50,7 +50,7 @@ class ApSelectPurchaseDamageWaiver @Inject()(implicit exec: ExecutionContext) ex
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSelectPurchaseDamageWaiverShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val personId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 
 				PortalLogic.apSetDamageWaiver(pb, personId, orderId, parsed.wantIt)

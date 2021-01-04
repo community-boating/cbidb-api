@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services
 
-import java.sql.Connection
-
 import com.zaxxer.hikari.HikariDataSource
+
+import java.sql.Connection
 
 class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 	def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {

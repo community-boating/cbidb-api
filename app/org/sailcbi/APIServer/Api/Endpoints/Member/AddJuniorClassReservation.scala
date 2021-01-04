@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -15,7 +15,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(request.body.asJson, AddJuniorClassReservationShape.apply)(parsed => {
 				doPost(rc, parsed) match {
 					case Left(err) => Future(Ok(err.toResultError.asJsObject()))
@@ -27,14 +27,14 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		})
 	}
 
-	private def doPost(rc: RequestCache, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
+	private def doPost(rc: RequestCache[ProtoPersonUserType], body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
 		if (body.juniorFirstName == null || body.juniorFirstName.length() == 0) {
 			Left(ValidationResult.from("Please specify junior name."))
 		} else {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 
 			// Create protoparent if it doenst exist
-			val protoParentPersonId = ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val protoParentPersonId = rc.auth.getAuthedPersonId(pb)
 			val parentPersonId = {
 				if (protoParentPersonId.isDefined) {
 					val ret = protoParentPersonId.get

@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.PDFBox
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.{PDDocument, PDPage, PDPageContentStream}
+
+import java.awt.Color
 
 abstract class PDFReport[T <: ReportModel](data: T) {
 	val defaultFont: PDFont

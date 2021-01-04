@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters
 
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 import org.sailcbi.APIServer.Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
-	pb: PersistenceBroker,
+	rc: RequestCache[_],
 	filterMap: Map[String, ReportingFilterFactory[T]],
-	getAllFilter: (PersistenceBroker => ReportingFilter[T])
+	getAllFilter: (RequestCache[_] => ReportingFilter[T])
 ) {
 
 	case class Token(c: Char) {
@@ -48,7 +48,7 @@ class ReportingFilterSpecParser[T <: StorableClass](
 	case object CLOSED_EXPR extends Mode
 
 	def parse(spec: String): ReportingFilter[T] = {
-		if (spec.length == 0) getAllFilter(pb)
+		if (spec.length == 0) getAllFilter(rc)
 		else parseNotEmpty(spec)
 	}
 
@@ -135,7 +135,7 @@ class ReportingFilterSpecParser[T <: StorableClass](
 		else throw new BadReportingFilterSpecException("No filters could be created")
 	}
 
-	private def getFilter(filterName: String, filterArgs: String): ReportingFilter[T] = filterMap(filterName).getFilter(pb, filterArgs)
+	private def getFilter(filterName: String, filterArgs: String): ReportingFilter[T] = filterMap(filterName).getFilter(rc, filterArgs)
 
 	class BadReportingFilterSpecException(
 		private val message: String = "",

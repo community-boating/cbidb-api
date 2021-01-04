@@ -20,7 +20,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
 			val pb = rc.pb
 			profiler.lap("about to do first query")
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(pb)
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)

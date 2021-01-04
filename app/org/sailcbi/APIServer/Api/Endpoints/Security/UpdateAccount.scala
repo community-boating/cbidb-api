@@ -16,7 +16,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, UpdateAccountShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType, None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
 				validate(pb, parsed.oldEmail, parsed.newEmail) match {
@@ -46,7 +46,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validate(pb: PersistenceBroker, oldEmail: String, newEmail: String): ValidationResult = {
+	def validate(pb: PersistenceBroker[_], oldEmail: String, newEmail: String): ValidationResult = {
 		val emailNotBlank = {
 			if (newEmail == null || newEmail.length == 0) ValidationResult.from("Email may not be blank")
 			else ValidationOk

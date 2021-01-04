@@ -37,7 +37,7 @@ object Users {
   def get(userID: Option[Int]): Action[AnyContent] = Action.async {request =>
   //  try {
       val rc: RequestCache = PermissionsAuthority.getRequestCache(request.headers, request.cookies)
-      val pb: PersistenceBroker = rc.pb
+      val pb = rc.pb
       val cb: CacheBroker = rc.cb
 
   /*    var startDate: LocalDate = LocalDate.now.minusYears(7)
@@ -56,7 +56,7 @@ object Users {
     }*/
   }
 
-  class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends CacheableRequest {
+  class UsersRequest(pb: PersistenceBroker[_], cb: CacheBroker, userID: Option[Int]) extends CacheableRequest {
     def getCacheBrokerKey: CacheKey = "users" + (userID match {
       case None => ""
       case Some(id) => id

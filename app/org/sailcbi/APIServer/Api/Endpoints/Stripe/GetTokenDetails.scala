@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 class GetTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
-		PA.withRequestCache(ApexUserType, None, ParsedRequest(req), rc => {
+		PA.withRequestCache(ApexUserType)(None, ParsedRequest(req), rc => {
 			val pb = rc.pb
 			val stripeIOController = rc.getStripeIOController(ws)
 

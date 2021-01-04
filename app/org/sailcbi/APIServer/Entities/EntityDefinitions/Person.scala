@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import org.sailcbi.APIServer.Storable._
@@ -42,8 +42,8 @@ class Person extends StorableClass {
 		values.state,
 		values.zip
 	)
-	def setPersonRatings(pb: PersistenceBroker): Unit = {
-		references.personRatings set pb.getObjectsByFilters(
+	def setPersonRatings(rc: RequestCache[_]): Unit = {
+		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
 		).toSet

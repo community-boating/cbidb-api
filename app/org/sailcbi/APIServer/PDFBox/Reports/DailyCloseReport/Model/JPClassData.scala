@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model
 
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.PDFBox.Abstract.RowData
+
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class JPClassData(
 						 val lastName: String,

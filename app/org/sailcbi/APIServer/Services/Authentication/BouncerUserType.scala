@@ -1,14 +1,19 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-object BouncerUserType extends NonMemberUserType {
+class BouncerUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[BouncerUserType] = BouncerUserType
+}
+
+object BouncerUserType extends UserTypeObject[BouncerUserType] {
 	val uniqueUserName = "BOUNCER"
 
-	def getAuthenticatedUsernameInRequest(
+	override def create(userName: String): BouncerUserType = new BouncerUserType(userName)
+	def create: BouncerUserType = create(uniqueUserName)
+
+	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,
 		rootCB: CacheBroker,
 		apexToken: String,
@@ -20,18 +25,8 @@ object BouncerUserType extends NonMemberUserType {
 		) Some(uniqueUserName)
 		else None
 
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
-		case User => EntityVisibility(true, None, Some(Set(
-			User.fields.userId,
-			User.fields.pwHash
-		)))
-		case _ => EntityVisibility.ZERO_VISIBILITY
-	}
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
 }

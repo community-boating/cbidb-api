@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer
 
 import org.junit.runner.RunWith
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult, JpTeam}
-import org.sailcbi.APIServer.Services.Authentication.AuthenticationInstance
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
+import org.sailcbi.APIServer.Services.Authentication.RootUserType
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.Filter
@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 class QueryBuilderTest extends FunSuite {
 	test("1 table, no filters (jp class types, typeID and typeName)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -38,7 +38,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, no filters (jp instances and types)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -68,7 +68,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, filters") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -117,7 +117,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("outer join") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)

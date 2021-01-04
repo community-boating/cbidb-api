@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class FlagColor @Inject()(implicit val exec: ExecutionContext)
 		extends CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(PublicUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache(PublicUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 			getFuture(cb, pb, new FlagColorParamsObject, new GetFlagColor).map(s => {

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services.Shell
 
-import java.io.IOException
-
 import org.sailcbi.APIServer.CbiUtil.Initializable
+
+import java.io.IOException
 
 class ProcessWrapper private[Shell](command: String, maxWaitMillis: Option[Integer], stdintext: Option[String]) {
 	val p = new Initializable[Process]

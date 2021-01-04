@@ -18,7 +18,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		PA.withParsedPostBodyJSON(request.body.asJson, AcceptTOSShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId, rc => {
 				val pb = rc.pb
-				val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val parentId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, parentId)
 
 				doAccept(pb, orderId, parsed.personId)
@@ -31,14 +31,14 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(pb)
 			val orderId = PortalLogic.getOrderId(pb, personId)
 
 			doAccept(pb, orderId, personId)
 		})
 	}
 
-	private def doAccept(pb: PersistenceBroker, orderId: Int, personId: Int): Future[Result] = {
+	private def doAccept(pb: PersistenceBroker[_], orderId: Int, personId: Int): Future[Result] = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(personId.toString, orderId.toString)
 

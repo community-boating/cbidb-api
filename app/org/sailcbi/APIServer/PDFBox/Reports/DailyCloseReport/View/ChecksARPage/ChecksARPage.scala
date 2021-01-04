@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.ChecksARPage
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.Drawable
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.{AR, DailyCloseReportModel}
+
+import java.awt.Color
 
 class ChecksARPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float) extends Drawable {
 	val arTable = new ARTable(

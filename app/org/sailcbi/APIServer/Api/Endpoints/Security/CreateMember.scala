@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, CreateMemberShape.apply)(cms => {
 				val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonUserType.COOKIE_NAME).map(_.value)
 				createMember(
@@ -49,7 +49,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMemberValidations(
-		pb: PersistenceBroker,
+		pb: PersistenceBroker[_],
 		firstName: String,
 		lastName: String,
 		username: String,
@@ -86,7 +86,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMember(
-			pb: PersistenceBroker,
+			pb: PersistenceBroker[_],
 			firstName: String,
 			lastName: String,
 			username: String,
@@ -157,7 +157,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	private def getProtoPersonID(pb: PersistenceBroker, protoPersonValue: Option[String]): Option[Int] = {
+	private def getProtoPersonID(pb: PersistenceBroker[_], protoPersonValue: Option[String]): Option[Int] = {
 		protoPersonValue match {
 			case None => None
 			case Some(v) => {

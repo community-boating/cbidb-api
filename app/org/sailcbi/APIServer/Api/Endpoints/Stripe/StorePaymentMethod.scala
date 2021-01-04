@@ -4,7 +4,6 @@ import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -20,7 +19,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 				val pb = rc.pb
 				val stripe = rc.getStripeIOController(ws)
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val personId = rc.auth.getAuthedPersonId(pb)
 				val orderId = PortalLogic.getOrderId(pb, personId)
 				val totalInCents = PortalLogic.getOrderTotalCents(pb, orderId)
 				val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)

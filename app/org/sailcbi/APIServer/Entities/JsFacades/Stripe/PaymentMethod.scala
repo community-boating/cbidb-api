@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, UserTypeObject}
 import play.api.libs.json.{JsValue, Json}
 
 case class PaymentMethod(
@@ -24,7 +24,7 @@ object PaymentMethod extends StripeCastableToStorableObject[PaymentMethod] {
 	implicit val paymentMethodFormat = Json.format[PaymentMethod]
 	def apply(v: JsValue): PaymentMethod = v.as[PaymentMethod]
 
-	override val allowedUserTypes: Set[UserType] = Set(ApexUserType, MemberUserType)
+	override val allowedUserTypes: Set[UserTypeObject[_]] = Set(ApexUserType, MemberUserType)
 
 	val apexTableName = "STRIPE_PAYMENT_METHODS"
 	val persistenceFieldsMap: Map[String, PaymentMethod => PreparedValue] = Map(

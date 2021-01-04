@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -15,7 +15,7 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Inj
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupDeletePostShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
-				val pb: PersistenceBroker = rc.pb
+				val pb = rc.pb
 				println(parsed)
 
 				PortalLogic.attemptDeleteSignup(pb, parsed.juniorId, parsed.instanceId) match {

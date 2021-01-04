@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserType}
+import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserTypeObject}
 
 import java.sql.CallableStatement
 
 abstract class PreparedProcedureCall[T](
-	override val allowedUserTypes: Set[UserType],
+	override val allowedUserTypes: Set[UserTypeObject[_]],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
 	/**

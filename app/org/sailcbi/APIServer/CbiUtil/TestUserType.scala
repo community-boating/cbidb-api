@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.CbiUtil
 
-import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserType}
+import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserTypeObject}
 
 object TestUserType {
-	def apply(allowed: Set[UserType], test: UserType): Boolean =
-		test == RootUserType || allowed.contains(test)
+	def apply(allowed: Set[UserTypeObject[_]], test: UserTypeObject[_]): Boolean =
+		test.isInstanceOf[RootUserType] || allowed.contains(test)
 }

@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckProtoPersonCookie @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
-		PA.withRequestCache(BouncerUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache(BouncerUserType)(None, ParsedRequest(request), rc => {
 			val hasCookie = request.cookies.toSet.map((c: Cookie) => c.name).contains(ProtoPersonUserType.COOKIE_NAME)
 			if (hasCookie) {
 				// the request has a cookie...

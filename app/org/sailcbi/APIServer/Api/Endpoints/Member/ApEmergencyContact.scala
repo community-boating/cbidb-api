@@ -15,8 +15,8 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val pb = rc.pb
+			val personId = rc.auth.getAuthedPersonId(pb)
 
 			val select = new PreparedQueryForSelect[ApEmergencyContactShape](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApEmergencyContactShape =
@@ -67,8 +67,8 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ApEmergencyContactShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(pb)
 
 				runValidations(parsed, pb) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
@@ -122,7 +122,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		})
 	}
 
-	def runValidations(parsed: ApEmergencyContactShape, pb: PersistenceBroker): ValidationResult = {
+	def runValidations(parsed: ApEmergencyContactShape, pb: PersistenceBroker[MemberUserType]): ValidationResult = {
 		val unconditionalValidations = List(
 			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
 			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),

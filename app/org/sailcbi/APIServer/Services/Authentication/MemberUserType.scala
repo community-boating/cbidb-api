@@ -5,16 +5,11 @@ import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
 
-object MemberUserType extends UserType {
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
-		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
 
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
-		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
+class MemberUserType(override val userName: String) extends UserType(userName) {
+	override def companion: UserTypeObject[MemberUserType] = MemberUserType
 
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = {
+	override def getPwHashForUser(rootPB: PersistenceBroker[RootUserType]): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
@@ -32,8 +27,8 @@ object MemberUserType extends UserType {
 
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 
-	def getAuthedPersonId(userName: String, pb: PersistenceBroker): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+	def getAuthedPersonId(pb: PersistenceBroker[_]): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, RootUserType)) {
 			override def getQuery: String =
 				"""
 				  |select p.person_id from persons p, (
@@ -47,4 +42,16 @@ object MemberUserType extends UserType {
 		// TODO: critical error if this list has >1 element
 		ids.head
 	}
+}
+
+object MemberUserType extends UserTypeObject[MemberUserType] {
+	override def create(userName: String): MemberUserType = new MemberUserType(userName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
+		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
+
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
+		requiredUserName: Option[String]
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
 }

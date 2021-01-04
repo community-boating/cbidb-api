@@ -14,7 +14,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[SwimProofShape](Set(MemberUserType)) {
@@ -45,7 +45,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 		val parsedRequest = ParsedRequest(request)
 		val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, SwimProofShape.apply)(parsed => {

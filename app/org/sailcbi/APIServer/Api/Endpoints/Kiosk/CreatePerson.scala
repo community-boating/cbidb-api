@@ -29,7 +29,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(KioskUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 

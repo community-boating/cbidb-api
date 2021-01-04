@@ -25,7 +25,7 @@ class RunDailyCloseReport @Inject() (implicit val exec: ExecutionContext) extend
 		.addHeader("pas", pas)
 		.addHeader("pas-procName", "DAILY_CLOSE_REPORT")
 		.addHeader("pas-argString", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)*/
-		PA.withRequestCache(ApexUserType, None, pr, rc => {
+		PA.withRequestCache(ApexUserType)(None, pr, rc => {
 			val pb = rc.pb
 			/* val verifyPas: Boolean =
 			   pb.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head

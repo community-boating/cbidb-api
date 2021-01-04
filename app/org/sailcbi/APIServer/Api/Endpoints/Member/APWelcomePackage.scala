@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.CbiUtil.{BitVector, NetFailure, NetSuccess, ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
@@ -22,7 +22,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(pb)
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderId(pb, personId)
 			PortalLogic.assessDiscounts(pb, orderId)

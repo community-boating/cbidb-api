@@ -16,7 +16,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ResetPasswordShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType, None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
 				validateHash(pb, parsed.email, parsed.hash) match {
@@ -31,7 +31,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validateHash(pb: PersistenceBroker, email: String, hash: String): ValidationResult = {
+	def validateHash(pb: PersistenceBroker[_], email: String, hash: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[String](Set(BouncerUserType)) {
 			override val params: List[String] = List(email)
 
@@ -55,7 +55,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 			  |""".stripMargin)
 	}
 
-	def markHashesUsed(pb: PersistenceBroker, email: String): Unit = {
+	def markHashesUsed(pb: PersistenceBroker[_], email: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
 			override val params: List[String] = List(email)
 
@@ -71,7 +71,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def setNewPassword(pb: PersistenceBroker, email: String, pwHash: String): Unit = {
+	def setNewPassword(pb: PersistenceBroker[_], email: String, pwHash: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
 			override val params: List[String] = List(pwHash, email)
 

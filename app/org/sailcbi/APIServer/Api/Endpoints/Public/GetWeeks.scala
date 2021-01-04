@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetWeeks @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async (req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCache(PublicUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
 			val pb = rc.pb
 
 			val q = new PreparedQueryForSelect[GetWeeksResult](Set(PublicUserType)) {

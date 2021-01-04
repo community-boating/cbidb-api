@@ -1,13 +1,19 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-object ApexUserType extends NonMemberUserType {
+class ApexUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[ApexUserType] = ApexUserType
+}
+
+object ApexUserType extends UserTypeObject[ApexUserType] {
 	val uniqueUserName = "APEX"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+	override def create(userName: String): ApexUserType = new ApexUserType(userName)
+	def create: ApexUserType = create(uniqueUserName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val headers = request.headers.toMap
 		val headerKey = "apex-token"
 		if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
@@ -21,12 +27,8 @@ object ApexUserType extends NonMemberUserType {
 		}
 	}
 
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
 }

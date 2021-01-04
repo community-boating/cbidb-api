@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PortalLogic {
-	def persistProtoParent(pb: PersistenceBroker, cookieValue: String): Int = {
+	def persistProtoParent(pb: PersistenceBroker[_], cookieValue: String): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(cookieValue)
 			override val pkName: Option[String] = Some("PERSON_ID")
@@ -33,7 +33,7 @@ object PortalLogic {
 		getOrderId(pb, parentId)
 		parentId
 	}
-	def persistProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
+	def persistProtoJunior(pb: PersistenceBroker[_], parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
 		val createJunior = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(firstName)
 			override val pkName: Option[String] = Some("PERSON_ID")
@@ -124,7 +124,7 @@ object PortalLogic {
 		(juniorPersonId, rollback)
 	}
 
-	def deleteProtoJunior(pb: PersistenceBroker, parentPersonId: Int, firstName: String): Either[String, String] = {
+	def deleteProtoJunior(pb: PersistenceBroker[_], parentPersonId: Int, firstName: String): Either[String, String] = {
 		val matchingIdsQuery = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(parentPersonId.toString, firstName)
 
@@ -184,7 +184,7 @@ object PortalLogic {
 		}
 	}
 
-	def getMinSignupTimeForParent(pb: PersistenceBroker, parentPersonId: Int): Option[LocalDateTime] = {
+	def getMinSignupTimeForParent(pb: PersistenceBroker[_], parentPersonId: Int): Option[LocalDateTime] = {
 		val q = new PreparedQueryForSelect[Option[LocalDateTime]](Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(parentPersonId.toString)
 
@@ -201,7 +201,7 @@ object PortalLogic {
 		list.headOption.flatten
 	}
 
-	def spotsLeft(pb: PersistenceBroker, instanceId: Int): Int = {
+	def spotsLeft(pb: PersistenceBroker[_], instanceId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(instanceId.toString)
 
@@ -215,12 +215,12 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
-	def hasSpotsLeft(pb: PersistenceBroker, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
+	def hasSpotsLeft(pb: PersistenceBroker[_], instanceId: Int, messageOverride: Option[String]): ValidationResult = {
 		if (spotsLeft(pb, instanceId) > 0) ValidationOk
 		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
 	}
 
-	def alreadyStarted(pb: PersistenceBroker, instanceId: Int): Either[String, Unit] = {
+	def alreadyStarted(pb: PersistenceBroker[_], instanceId: Int): Either[String, Unit] = {
 		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(instanceId.toString)
 
@@ -236,14 +236,14 @@ object PortalLogic {
 		if (pb.executePreparedQueryForSelect(q).nonEmpty) Right() else Left("That class has already started.")
 	}
 
-	def alreadyStartedAsValidationResult(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
+	def alreadyStartedAsValidationResult(pb: PersistenceBroker[_], instanceId: Int): ValidationResult = {
 		alreadyStarted(pb, instanceId) match {
 			case Left(s) => ValidationResult.from(s)
 			case Right(_) => ValidationOk
 		}
 	}
 
-	def seeTypeFromInstanceId(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+	def seeTypeFromInstanceId(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -260,12 +260,12 @@ object PortalLogic {
 		ret
 	}
 
-	def seeTypeFromInstanceIdAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+	def seeTypeFromInstanceIdAsValidationResult(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): ValidationResult = {
 		if (seeTypeFromInstanceId(pb, juniorId, instanceId)) ValidationOk
 		else ValidationResult.from("You are not eligible for this class type.")
 	}
 
-	def seeInstance(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+	def seeInstance(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -282,12 +282,12 @@ object PortalLogic {
 		ret
 	}
 
-	def seeInstanceAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+	def seeInstanceAsValidationResult(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): ValidationResult = {
 		if (seeInstance(pb, juniorId, instanceId)) ValidationOk
 		else ValidationResult.from("You are not eligible for this class.")
 	}
 
-	def allowEnroll(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Option[String] = {
+	def allowEnroll(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): Option[String] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -303,7 +303,7 @@ object PortalLogic {
 		ret
 	}
 
-	def allowEnrollAsValidationResult(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+	def allowEnrollAsValidationResult(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): ValidationResult = {
 		allowEnroll(pb, juniorId, instanceId) match {
 			case None => ValidationOk
 			case Some(s) => ValidationResult.from(s)
@@ -312,7 +312,7 @@ object PortalLogic {
 
 	// either an error message or a rollback function
 	def attemptSingleClassSignupReservation(
-		pb: PersistenceBroker,
+		pb: PersistenceBroker[_],
 		juniorPersonId: Int,
 		instanceId: Int,
 		signupDatetime: Option[LocalDateTime],
@@ -363,7 +363,7 @@ object PortalLogic {
 	}
 
 	def actuallyEnroll(
-		pb: PersistenceBroker,
+		pb: PersistenceBroker[_],
 		instanceId: Int,
 		juniorPersonId: Int,
 		signupDatetime: Option[LocalDateTime],
@@ -418,7 +418,7 @@ object PortalLogic {
 
 	// Return Some(error message) on fail, None on success
 	def attemptSignupReservation(
-		pb: PersistenceBroker,
+		pb: PersistenceBroker[_],
 		juniorPersonId: Int,
 		beginnerInstanceId: Option[Int],
 		intermediateInstanceId: Option[Int],
@@ -455,7 +455,7 @@ object PortalLogic {
 		} else None
 	}
 
-	def pruneOldReservations(pb: PersistenceBroker): Int = {
+	def pruneOldReservations(pb: PersistenceBroker[_]): Int = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType, MemberUserType)) {
 			override val params: List[String] = List.empty
 
@@ -469,7 +469,7 @@ object PortalLogic {
 		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def getOrderId(pb: PersistenceBroker, personId: Int): Int = {
+	def getOrderId(pb: PersistenceBroker[_], personId: Int): Int = {
 		val pc = new PreparedProcedureCall[Int](Set(MemberUserType, ProtoPersonUserType)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
@@ -492,7 +492,7 @@ object PortalLogic {
 		pb.executeProcedure(pc)
 	}
 
-	def getCardData(pb: PersistenceBroker, orderId: Int): Option[StripeTokenSavedShape] = {
+	def getCardData(pb: PersistenceBroker[_], orderId: Int): Option[StripeTokenSavedShape] = {
 		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
@@ -514,7 +514,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(cardDataQ).headOption
 	}
 
-	def getOrderTotalDollars(pb: PersistenceBroker, orderId: Int): Double = {
+	def getOrderTotalDollars(pb: PersistenceBroker[_], orderId: Int): Double = {
 
 		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberUserType, ApexUserType)) {
 			override val params: List[String] = List(orderId.toString)
@@ -526,10 +526,10 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(orderTotalQ).head
 	}
 
-	def getOrderTotalCents(pb: PersistenceBroker, orderId: Int): Int =
+	def getOrderTotalCents(pb: PersistenceBroker[_], orderId: Int): Int =
 		Currency.toCents(getOrderTotalDollars(pb, orderId))
 
-	def waitListExists(pb: PersistenceBroker, instanceId: Int): ValidationResult = {
+	def waitListExists(pb: PersistenceBroker[_], instanceId: Int): ValidationResult = {
 		val wlExists = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -547,7 +547,7 @@ object PortalLogic {
 		}
 	}
 
-	def canWaitListJoin(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Boolean = {
+	def canWaitListJoin(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): Boolean = {
 		pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
@@ -570,7 +570,7 @@ object PortalLogic {
 		}).nonEmpty
 	}
 
-	def attemptDeleteSignup(pb: PersistenceBroker, juniorId: Int, instanceId: Int): ValidationResult = {
+	def attemptDeleteSignup(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): ValidationResult = {
 		val proc = new PreparedProcedureCall[Option[String]](Set(MemberUserType)) {
 //			procedure attempt_delete_signup(
 //					i_person_id in number,
@@ -609,7 +609,7 @@ object PortalLogic {
 		def apply(v: JsValue): SignupForReport = v.as[SignupForReport]
 	}
 
-	def getSignupsForReport(pb: PersistenceBroker, juniorId: Int): List[SignupForReport] = {
+	def getSignupsForReport(pb: PersistenceBroker[_], juniorId: Int): List[SignupForReport] = {
 		val q = new PreparedQueryForSelect[SignupForReport](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -665,7 +665,7 @@ object PortalLogic {
 		def apply(v: JsValue): WaitListTopForReport = v.as[WaitListTopForReport]
 	}
 
-	def getWaitListTopsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListTopForReport] = {
+	def getWaitListTopsForReport(pb: PersistenceBroker[_], juniorId: Int): List[WaitListTopForReport] = {
 		val q = new PreparedQueryForSelect[WaitListTopForReport](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -719,7 +719,7 @@ object PortalLogic {
 		def apply(v: JsValue): WaitListForReport = v.as[WaitListForReport]
 	}
 
-	def getWaitListsForReport(pb: PersistenceBroker, juniorId: Int): List[WaitListForReport] = {
+	def getWaitListsForReport(pb: PersistenceBroker[_], juniorId: Int): List[WaitListForReport] = {
 		val q = new PreparedQueryForSelect[WaitListForReport](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -760,7 +760,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	def addSCMIfNotMember(pb: PersistenceBroker, parentPersonId: Int, juniorId: Int): Unit = {
+	def addSCMIfNotMember(pb: PersistenceBroker[_], parentPersonId: Int, juniorId: Int): Unit = {
 		val orderId = getOrderId(pb, parentPersonId)
 		val getCurrentMembership = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
@@ -818,7 +818,7 @@ object PortalLogic {
 		}
 	}
 
-	def deleteRegistration(pb: PersistenceBroker, parentPersonId: Int, juniorId: Int): ValidationResult = {
+	def deleteRegistration(pb: PersistenceBroker[_], parentPersonId: Int, juniorId: Int): ValidationResult = {
 		val orderId = getOrderId(pb, parentPersonId)
 		val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, orderId.toString)
@@ -843,7 +843,7 @@ object PortalLogic {
 		ValidationOk
 	}
 
-	def apDeleteReservation(pb: PersistenceBroker, memberID: Int): ValidationResult = {
+	def apDeleteReservation(pb: PersistenceBroker[_], memberID: Int): ValidationResult = {
 		val orderId = getOrderId(pb, memberID)
 		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(orderId.toString)
@@ -905,7 +905,7 @@ object PortalLogic {
 		ValidationOk
 	}
 
-	def canCheckout(pb: PersistenceBroker, parentPersonId: Int, orderId: Int): Boolean = {
+	def canCheckout(pb: PersistenceBroker[_], parentPersonId: Int, orderId: Int): Boolean = {
 		val incompleteItemsQuery = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override val params: List[String] = List(parentPersonId.toString, parentPersonId.toString)
 
@@ -974,7 +974,7 @@ object PortalLogic {
 		hasCompleteItems && !hasIncompleteItems
 	}
 
-	def getSignupNote(pb: PersistenceBroker, juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
+	def getSignupNote(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -991,7 +991,7 @@ object PortalLogic {
 		else Left(ValidationResult.from("Unable to locate signup for this class."))
 	}
 
-	def saveSignupNote(pb: PersistenceBroker, juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
+	def saveSignupNote(pb: PersistenceBroker[_], juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ProtoPersonUserType)) {
 			override val params: List[String] = List(
 				signupNote.orNull,
@@ -1012,7 +1012,7 @@ object PortalLogic {
 		else ValidationResult.from("Unable to update signup note.")
 	}
 
-	def assessDiscounts(pb: PersistenceBroker, orderId: Int): Unit = {
+	def assessDiscounts(pb: PersistenceBroker[_], orderId: Int): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(MemberUserType)) {
 //			procedure assess_discounts(
 //				p_order_id in number
@@ -1033,7 +1033,7 @@ object PortalLogic {
 		pb.executeProcedure(ppc)
 	}
 
-	def removeOffseasonWaitlist(pb: PersistenceBroker, juniorId: Int): Unit = {
+	def removeOffseasonWaitlist(pb: PersistenceBroker[_], juniorId: Int): Unit = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1076,7 +1076,7 @@ object PortalLogic {
 		}
 	}
 
-	def getDiscountsWithAmounts(pb: PersistenceBroker): List[DiscountWithAmount] = {
+	def getDiscountsWithAmounts(pb: PersistenceBroker[_]): List[DiscountWithAmount] = {
 		val q = new PreparedQueryForSelect[DiscountWithAmount](Set(MemberUserType)) {
 			override val params: List[String] = List()
 
@@ -1112,7 +1112,7 @@ object PortalLogic {
 		discountAmount: Double
 	)
 
-	def getFYExpirationDate(pb: PersistenceBroker, personId: Int): (Int, LocalDate) = {
+	def getFYExpirationDate(pb: PersistenceBroker[_], personId: Int): (Int, LocalDate) = {
 		val q = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberUserType)) {
 			override val params: List[String] = List(personId.toString)
 
@@ -1130,7 +1130,7 @@ object PortalLogic {
 		result.head
 	}
 
-	def getAPDiscountEligibilities(pb: PersistenceBroker, personId: Int): (Boolean, Boolean, Boolean, Boolean) = {
+	def getAPDiscountEligibilities(pb: PersistenceBroker[_], personId: Int): (Boolean, Boolean, Boolean, Boolean) = {
 		val q = new PreparedQueryForSelect[(Boolean, Boolean, Boolean, Boolean)](Set(MemberUserType)) {
 			override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString)
 
@@ -1151,7 +1151,7 @@ object PortalLogic {
 		result.head
 	}
 
-	def getDiscountActiveInstanceForDiscount(pb: PersistenceBroker, discountId: Int): Int = {
+	def getDiscountActiveInstanceForDiscount(pb: PersistenceBroker[_], discountId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1167,7 +1167,7 @@ object PortalLogic {
 	}
 
 	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
-	def apSelectMemForPurchase(pb: PersistenceBroker, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
+	def apSelectMemForPurchase(pb: PersistenceBroker[_], personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1250,7 +1250,7 @@ object PortalLogic {
 		(paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto)
 	}
 
-	def apSetGuestPrivs(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+	def apSetGuestPrivs(pb: PersistenceBroker[_], personId: Int, orderId: Int, wantIt: Boolean): Unit = {
 		val countQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1353,7 +1353,7 @@ object PortalLogic {
 		}
 	}
 
-	def apSetDamageWaiver(pb: PersistenceBroker, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+	def apSetDamageWaiver(pb: PersistenceBroker[_], personId: Int, orderId: Int, wantIt: Boolean): Unit = {
 		val countQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1410,7 +1410,7 @@ object PortalLogic {
 		}
 	}
 
-	def addDonationToOrder(pb: PersistenceBroker, orderId: Int, fundId: Int, amount: Double): ValidationResult = {
+	def addDonationToOrder(pb: PersistenceBroker[_], orderId: Int, fundId: Int, amount: Double): ValidationResult = {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
@@ -1471,7 +1471,7 @@ object PortalLogic {
 
 	}
 
-	def deleteDonationFromOrder(pb: PersistenceBroker, orderId: Int, fundId: Int): Unit = {
+	def deleteDonationFromOrder(pb: PersistenceBroker[_], orderId: Int, fundId: Int): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(orderId.toString, fundId.toString)
 			override def getQuery: String =
@@ -1485,7 +1485,7 @@ object PortalLogic {
 		updateFirstStaggeredPaymentWithOneTimes(pb, orderId)
 	}
 
-	def attemptAddPromoCode(pb: PersistenceBroker, orderId: Int, code: String): Unit = {
+	def attemptAddPromoCode(pb: PersistenceBroker[_], orderId: Int, code: String): Unit = {
 		val getDiscountQ = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1538,7 +1538,7 @@ object PortalLogic {
 		}
 	}
 
-	def addGiftCertificateToOrder(pb: PersistenceBroker, gcNumber: Int, gcCode: String, orderId: Int, now: LocalDate): ValidationResult = {
+	def addGiftCertificateToOrder(pb: PersistenceBroker[_], gcNumber: Int, gcCode: String, orderId: Int, now: LocalDate): ValidationResult = {
 		val validQ = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, LocalDate) =
 				(rsw.getInt(1), rsw.getLocalDate(2))
@@ -1591,7 +1591,7 @@ object PortalLogic {
 		}
 	}
 
-	def unapplyGCFromOrder(pb: PersistenceBroker, orderId: Int, certId: Int): Unit = {
+	def unapplyGCFromOrder(pb: PersistenceBroker[_], orderId: Int, certId: Int): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(certId.toString, orderId.toString)
 
@@ -1603,7 +1603,7 @@ object PortalLogic {
 		pb.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def apCanClaim(pb: PersistenceBroker, email: String): Either[String, Int] = {
+	def apCanClaim(pb: PersistenceBroker[_], email: String): Either[String, Int] = {
 		val proc = new PreparedProcedureCall[Either[String, Int]](Set(PublicUserType, BouncerUserType)) {
 			//					procedure ap_claim_by_email_proc(
 			//							i_email in varchar2,
@@ -1634,7 +1634,7 @@ object PortalLogic {
 		pb.executeProcedure(proc)
 	}
 
-	def apDoClaim(pb: PersistenceBroker, personId: Int): Unit = {
+	def apDoClaim(pb: PersistenceBroker[_], personId: Int): Unit = {
 		val proc = new PreparedProcedureCall[Unit](Set(BouncerUserType)) {
 //			procedure ap_verify_access(
 //					p_person_id in number,
@@ -1655,7 +1655,7 @@ object PortalLogic {
 		pb.executeProcedure(proc)
 	}
 
-	def validateClaimAcctHash(pb: PersistenceBroker, email: String, personId: Int, hash: String): ValidationResult = {
+	def validateClaimAcctHash(pb: PersistenceBroker[_], email: String, personId: Int, hash: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1676,7 +1676,7 @@ object PortalLogic {
 		else ValidationResult.from("An internal error occurred; if this message persists please contact CBI at 617-523-1038")
 	}
 
-	def getAllMembershipPrices(pb: PersistenceBroker): List[(Int, Double)] = {
+	def getAllMembershipPrices(pb: PersistenceBroker[_]): List[(Int, Double)] = {
 		val q = new PreparedQueryForSelect[(Int, Double)](Set(PublicUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Double) =
 				(rsw.getInt(1), rsw.getDouble(2))
@@ -1692,7 +1692,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	def getDwGpPrices(pb: PersistenceBroker): (Double, Double) = {
+	def getDwGpPrices(pb: PersistenceBroker[_]): (Double, Double) = {
 		val q = new PreparedQueryForSelect[(Double, Double)](Set(PublicUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Double) =
 				(rsw.getDouble(1), rsw.getDouble(2))
@@ -1708,7 +1708,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def getAllDiscounts(pb: PersistenceBroker): List[(Int, Int, Double)] = {
+	def getAllDiscounts(pb: PersistenceBroker[_]): List[(Int, Int, Double)] = {
 		val q = new PreparedQueryForSelect[(Int, Int, Double)](Set(PublicUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Int, Double) =
 				(rsw.getInt(1), rsw.getInt(2), rsw.getDouble(3))
@@ -1727,7 +1727,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q)
 	}
 
-	def getApClassTypeAvailabilities(pb: PersistenceBroker, personId: Int): List[ApClassAvailability] = {
+	def getApClassTypeAvailabilities(pb: PersistenceBroker[_], personId: Int): List[ApClassAvailability] = {
 		val q = new PreparedQueryForSelect[ApClassAvailability](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassAvailability = ApClassAvailability(
 				typeName=rsw.getString(2),
@@ -1773,7 +1773,7 @@ object PortalLogic {
 		def apply(v: JsValue): ApClassAvailability = v.as[ApClassAvailability]
 	}
 
-	def getApClassesForCalendar(pb: PersistenceBroker, personId: Int): List[ApClassInstanceForCalendar] = {
+	def getApClassesForCalendar(pb: PersistenceBroker[_], personId: Int): List[ApClassInstanceForCalendar] = {
 		val instancesQ: PreparedQueryForSelect[ApClassInstanceForCalendar] = new PreparedQueryForSelect[ApClassInstanceForCalendar](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassInstanceForCalendar = ApClassInstanceForCalendar(
 				instanceId = rsw.getInt(2),
@@ -1882,7 +1882,7 @@ object PortalLogic {
 		def apply(v: JsValue): ApClassInstanceForCalendar = v.as[ApClassInstanceForCalendar]
 	}
 
-	def apClassSignup(pb: PersistenceBroker, personId: Int, instanceId: Int, isWaitlist: Boolean): Option[String] = {
+	def apClassSignup(pb: PersistenceBroker[_], personId: Int, instanceId: Int, isWaitlist: Boolean): Option[String] = {
 		val ppc = new PreparedProcedureCall[String](Set(MemberUserType)) {
 //			procedure do_signup(
 //					i_person_id in number,
@@ -1923,7 +1923,7 @@ object PortalLogic {
 		}
 	}
 
-	def apClassUnenroll(pb: PersistenceBroker, personId: Int, instanceId: Int): Unit = {
+	def apClassUnenroll(pb: PersistenceBroker[_], personId: Int, instanceId: Int): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(MemberUserType)) {
 //			procedure cancel_signup(
 //					p_person_id in number,
@@ -1952,7 +1952,7 @@ object PortalLogic {
 		pb.executeProcedure(ppc)
 	}
 
-	def getStripeCustomerId(pb: PersistenceBroker, personId: Int): Option[String] = {
+	def getStripeCustomerId(pb: PersistenceBroker[_], personId: Int): Option[String] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
 
@@ -1965,7 +1965,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def getAllMembershipTypesWithPrices(pb: PersistenceBroker): List[(Int, Option[Currency])]  = {
+	def getAllMembershipTypesWithPrices(pb: PersistenceBroker[_]): List[(Int, Option[Currency])]  = {
 		val q = new PreparedQueryForSelect[(Int, Option[Currency])](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Option[Currency]) =
 				(rsw.getInt(1), rsw.getOptionDouble(2).map(Currency.dollars))
@@ -1979,7 +1979,7 @@ object PortalLogic {
 	}
 
 	/** @return List[(Date, (canRenew, guestPrivsAuto))] */
-	def canRenewOnEachDate(pb: PersistenceBroker, personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
+	def canRenewOnEachDate(pb: PersistenceBroker[_], personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
 		type CanRenewOnDate = (LocalDate, (Boolean, Boolean))
 		val q = new PreparedQueryForSelect[CanRenewOnDate](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): CanRenewOnDate =
@@ -1999,7 +1999,7 @@ object PortalLogic {
 	}
 
 	/** @return (Option[GPPrice], Option[DWPrice]) */
-	def getGPAndDwFromCart(pb: PersistenceBroker, personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
+	def getGPAndDwFromCart(pb: PersistenceBroker[_], personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
 		type GpAndDwPrice = (Option[Currency], Option[Currency])
 		val ITEM_TYPE_DW = "Damage Waiver"
 		val ITEM_TYPE_GP = "Guest Privileges"
@@ -2027,7 +2027,7 @@ object PortalLogic {
 		})
 	}
 
-	def getSingleAPSCM(pb: PersistenceBroker, personId: Int, orderId: Int): Option[SCMRecord] = {
+	def getSingleAPSCM(pb: PersistenceBroker[_], personId: Int, orderId: Int): Option[SCMRecord] = {
 		val q = new PreparedQueryForSelect[SCMRecord](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCMRecord =
 				SCMRecord(
@@ -2053,7 +2053,7 @@ object PortalLogic {
 		else Some(scms.head)
 	}
 
-	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker, personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
+	def getPaymentPlansForMembershipInCart(pb: PersistenceBroker[_], personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
 		val scm = PortalLogic.getSingleAPSCM(pb, personId, orderId)
 
 		scm match {
@@ -2108,7 +2108,7 @@ object PortalLogic {
 		def apply(v: JsValue): SCMRecord = v.as[SCMRecord]
 	}
 
-	def getPaymentAdditionalMonths(pb: PersistenceBroker, orderId: Int): Int = {
+	def getPaymentAdditionalMonths(pb: PersistenceBroker[_], orderId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -2120,7 +2120,7 @@ object PortalLogic {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def clearStripeTokensFromOrder(pb: PersistenceBroker, orderId: Int): Unit = {
+	def clearStripeTokensFromOrder(pb: PersistenceBroker[_], orderId: Int): Unit = {
 		val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
@@ -2135,7 +2135,7 @@ object PortalLogic {
 	 * @param orderId
 	 * @return paymentIntentRowID from the deleted rows (if any)
 	 */
-	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker, orderId: Int): Option[Int] = {
+	def deleteStaggeredPaymentsWithEmptyAssertion(pb: PersistenceBroker[_], orderId: Int): Option[Int] = {
 		val getintentRowID = new PreparedQueryForSelect[Option[Int]](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Int] = rsw.getOptionInt(1)
 
@@ -2170,7 +2170,7 @@ object PortalLogic {
 		piRowId
 	}
 
-	def writeOrderStaggeredPayments(pb: PersistenceBroker, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
+	def writeOrderStaggeredPayments(pb: PersistenceBroker[_], now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
 		// Clear existing records.  Throw if there are paid records
 		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(pb, orderId)
 
@@ -2240,7 +2240,7 @@ object PortalLogic {
 		}
 	}
 
-	def updateFirstStaggeredPaymentWithOneTimes(pb: PersistenceBroker, orderId: Int): Currency = {
+	def updateFirstStaggeredPaymentWithOneTimes(pb: PersistenceBroker[_], orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
 		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
@@ -2268,7 +2268,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+	def getOrCreatePaymentIntent(pb: PersistenceBroker[_], stripe: StripeIOController[_], personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
 		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberUserType, ApexUserType)) {
@@ -2315,7 +2315,7 @@ object PortalLogic {
 		}
 	}
 
-	private def createPaymentIntent(pb: PersistenceBroker, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
+	private def createPaymentIntent(pb: PersistenceBroker[_], stripe: StripeIOController[_], personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberUserType, ApexUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),

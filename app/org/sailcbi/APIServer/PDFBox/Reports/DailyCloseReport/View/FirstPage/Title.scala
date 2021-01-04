@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FirstPage
 
-import java.time.format.DateTimeFormatter
-
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, Drawable, DrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.DailyCloseReportModel
+
+import java.time.format.DateTimeFormatter
 
 class Title(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {
 	val titleTable = DrawableTable(

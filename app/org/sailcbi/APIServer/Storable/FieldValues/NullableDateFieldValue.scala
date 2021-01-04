@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Storable.FieldValues
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import org.sailcbi.APIServer.Storable.Fields.NullableDateDatabaseField
 import org.sailcbi.APIServer.Storable.StorableClass
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabaseField)(implicit PA: PermissionsAuthority) extends FieldValue[Option[LocalDate]](instance, field) {
 	def getPersistenceLiteral: (String, List[String]) = {

@@ -47,7 +47,7 @@ trait CastableToStorableClass {
       """.stripMargin
 	}
 
-	def insertIntoLocalDB(pb: PersistenceBroker): Unit =
+	def insertIntoLocalDB(pb: PersistenceBroker[_]): Unit =
 		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
 
 }

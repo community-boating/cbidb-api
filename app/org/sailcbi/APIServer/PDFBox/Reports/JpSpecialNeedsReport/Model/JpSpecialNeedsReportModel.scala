@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model
 
-import java.time.ZonedDateTime
-
 import org.sailcbi.APIServer.PDFBox.ReportModel
+
+import java.time.ZonedDateTime
 
 case class JpSpecialNeedsReportModel(
 	rosterData: List[JpSpecialNeedsData],

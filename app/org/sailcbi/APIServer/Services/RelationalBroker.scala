@@ -1,20 +1,20 @@
 package org.sailcbi.APIServer.Services
 
-import java.security.MessageDigest
-import java.sql._
-import java.time.{LocalDate, LocalDateTime, ZoneId}
-
 import org.sailcbi.APIServer.CbiUtil.Profiler
 import org.sailcbi.APIServer.IO.PreparedQueries._
+import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Storable.FieldValues.FieldValue
 import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import org.sailcbi.APIServer.Storable.StorableQuery._
 import org.sailcbi.APIServer.Storable._
 
+import java.security.MessageDigest
+import java.sql._
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends PersistenceBroker(dbConnection, rc, preparedQueriesOnly, readOnly)
+abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache[T], preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker[T](dbConnection, rc, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
 
@@ -419,7 +419,10 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		sb.append(fieldValues.map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
 		sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
-		executeSQLForUpdateOrDelete(sb.toString(), false, params)
+		val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
+		if (updated != 1) {
+			throw new Exception("Attempted to update storable " + i.getCompanion.entityName + ":" + i.getID + ", updated " + updated + " records")
+		}
 	}
 
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {

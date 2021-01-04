@@ -2,61 +2,57 @@ package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.TestUserType
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
+import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import org.sailcbi.APIServer.Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean) {
+abstract class PersistenceBroker[T <: UserType] private[Services](dbConnection: DatabaseHighLevelConnection, val rc: RequestCache[T], preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
-	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+	final private[Services] def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (entityVisible(obj)) getObjectByIdImplementation(obj, id)
-		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
+		else getObjectByIdImplementation(obj, id)
 	}
 
-	final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+	final private[Services] def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (entityVisible(obj)) getObjectsByIdsImplementation(obj, ids)
-		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
+		else getObjectsByIdsImplementation(obj, ids)
 	}
 
-	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
+	final private[Services] def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (entityVisible(obj)) getObjectsByFiltersImplementation(obj, filters)
-		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
+		else getObjectsByFiltersImplementation(obj, filters)
 	}
 
-	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	final private[Services] def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (entityVisible(obj)) getAllObjectsOfClassImplementation(obj, fields)
-		else throw new UnauthorizedAccessException("Access to entity " + obj.entityName + " blocked for userType " + rc.auth.userType)
+		else getAllObjectsOfClassImplementation(obj, fields)
 	}
 
-	final def commitObjectToDatabase(i: StorableClass): Unit = {
+	final private[Services] def commitObjectToDatabase(i: StorableClass): Unit = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else if (i.valuesList.isEmpty) throw new Exception("Refusing to commit object with empty valuesList: " + i.getCompanion.entityName)
-		else if (entityVisible(i.getCompanion)) commitObjectToDatabaseImplementation(i)
-		else throw new UnauthorizedAccessException("commitObjectToDatabase request denied due to entity security")
+		else commitObjectToDatabaseImplementation(i)
 	}
 
 	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
-		if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForSelectImplementation(pq, fetchSize)
-		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.userType)
+		if (TestUserType(pq.allowedUserTypes, rc.auth.companion)) executePreparedQueryForSelectImplementation(pq, fetchSize)
+		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.getClass.getName)
 	}
 
 	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
-		else if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForInsertImplementation(pq)
-		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
+		else if (TestUserType(pq.allowedUserTypes, rc.auth.companion)) executePreparedQueryForInsertImplementation(pq)
+		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.name)
 	}
 
 	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
-		else if (TestUserType(pq.allowedUserTypes, rc.auth.userType)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
-		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.userType)
+		else if (TestUserType(pq.allowedUserTypes, rc.auth.companion)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
+		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.name)
 	}
 
 	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
@@ -65,8 +61,8 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
-		if (TestUserType(pc.allowedUserTypes, rc.auth.userType)) executeProcedureImpl(pc)
-		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.userType)
+		if (TestUserType(pc.allowedUserTypes, rc.auth.companion)) executeProcedureImpl(pc)
+		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.name)
 	}
 
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
@@ -89,9 +85,6 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
-
-	// TODO: implement some IDs
-	private def entityVisible[T <: StorableClass](obj: StorableObject[T]): Boolean = obj.getVisiblity(rc.auth.userType).entityVisible
 
 	def testDB
 }

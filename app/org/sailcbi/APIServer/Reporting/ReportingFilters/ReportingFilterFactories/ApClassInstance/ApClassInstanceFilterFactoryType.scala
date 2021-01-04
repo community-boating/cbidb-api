@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassType}
 import org.sailcbi.APIServer.Reporting.Report.BadReportingFilterArgumentsException
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 
 class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] with ReportingFilterFactoryDropdown {
 	val displayName: String = "By Class Type"
@@ -11,11 +11,11 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 		(ARG_DROPDOWN, "1")
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
 		val typeId: Int = arg.toInt
-		implicit val pb: PersistenceBroker = _pb
+		implicit val rc: RequestCache[_] = _rc
 		val typeID: Int = {
-			val ts: List[ApClassType] = pb.getObjectsByFilters(
+			val ts: List[ApClassType] = rc.getObjectsByFilters(
 				ApClassType,
 				List(ApClassType.fields.typeId.equalsConstant(typeId)),
 				5
@@ -25,7 +25,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 		}
 
 		val formatIDs: List[Int] = {
-			val fs: List[ApClassFormat] = pb.getObjectsByFilters(
+			val fs: List[ApClassFormat] = rc.getObjectsByFilters(
 				ApClassFormat,
 				List(ApClassFormat.fields.typeId.equalsConstant(typeID)),
 				5
@@ -33,15 +33,15 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 			fs.map(f => f.values.formatId.get)
 		}
 
-		pb.getObjectsByFilters(
+		rc.getObjectsByFilters(
 			ApClassInstance,
 			List(ApClassInstance.fields.formatId.inList(formatIDs)),
 			500
 		).toSet
 	})
 
-	def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
-		val types: List[ApClassType] = pb.getAllObjectsOfClass(ApClassType)
+	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+		val types: List[ApClassType] = rc.getAllObjectsOfClass(ApClassType)
 		List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
 	}
 }
