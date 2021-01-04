@@ -24,22 +24,6 @@ class StaffUserType(override val userName: String) extends NonMemberUserType(use
 		if (users.length == 1) Some(1, users.head.pwHash)
 		else None
 	}
-
-	// Staff have unrestricted access
-	override def getObjectById[T <: StorableClass, U <: UserType](userName: String, pb: PersistenceBroker[U])(obj: StorableObject[T], id: Int): Option[T] =
-		pb.getObjectById(obj, id)
-
-	override def getObjectsByIds[T <: StorableClass, U <: UserType](userName: String, pb: PersistenceBroker[U])(obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		pb.getObjectsByIds(obj, ids, fetchSize)
-
-	override def getObjectsByFilters[T <: StorableClass, U <: UserType](userName: String, pb: PersistenceBroker[U])(obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
-		pb.getObjectsByFilters(obj, filters, fetchSize)
-
-	override def getAllObjectsOfClass[T <: StorableClass, U <: UserType](userName: String, pb: PersistenceBroker[U])(obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		pb.getAllObjectsOfClass(obj, fields)
-
-	override def commitObjectToDatabase[U <: UserType](userName: String, pb: PersistenceBroker[U])(i: StorableClass): Unit =
-		pb.commitObjectToDatabase(i)
 }
 
 object StaffUserType extends UserTypeObject[StaffUserType] {

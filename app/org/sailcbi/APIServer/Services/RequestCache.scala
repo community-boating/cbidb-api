@@ -5,11 +5,12 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, Members
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.Services.Authentication.{UserType, _}
 import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
+import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 import play.api.libs.ws.WSClient
 
@@ -36,19 +37,22 @@ class RequestCache[T <: UserType] private[Services](
 	val cb: CacheBroker = new RedisBroker
 
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
-		auth.getObjectById(auth.userName, pb)(obj, id)
+		pb.getObjectById(obj, id)
 
 	final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		auth.getObjectsByIds(auth.userName, pb)(obj, ids, fetchSize)
+		pb.getObjectsByIds(obj, ids, fetchSize)
 
 	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
-		auth.getObjectsByFilters(auth.userName, pb)(obj, filters, fetchSize)
+		pb.getObjectsByFilters(obj, filters, fetchSize)
 
 	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		auth.getAllObjectsOfClass(auth.userName, pb)(obj, fields)
+		pb.getAllObjectsOfClass(obj, fields)
 
 	final def commitObjectToDatabase(i: StorableClass): Unit =
-		auth.commitObjectToDatabase(auth.userName, pb)(i)
+		pb.commitObjectToDatabase(i)
+
+	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] =
+		pb.executeQueryBuilder(qb)
 
 	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
 		PermissionsAuthority.stripeURL,

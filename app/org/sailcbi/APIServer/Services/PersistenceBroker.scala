@@ -38,6 +38,10 @@ abstract class PersistenceBroker[T <: UserType] private[Services](dbConnection: 
 		else commitObjectToDatabaseImplementation(i)
 	}
 
+	final private[Services] def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+		executeQueryBuilderImplementation(qb)
+	}
+
 	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		if (TestUserType(pq.allowedUserTypes, rc.auth.companion)) executePreparedQueryForSelectImplementation(pq, fetchSize)
 		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.getClass.getName)
@@ -53,11 +57,6 @@ abstract class PersistenceBroker[T <: UserType] private[Services](dbConnection: 
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else if (TestUserType(pq.allowedUserTypes, rc.auth.companion)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
 		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.name)
-	}
-
-	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		// TODO: security
-		executeQueryBuilderImplementation(qb)
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
@@ -76,13 +75,13 @@ abstract class PersistenceBroker[T <: UserType] private[Services](dbConnection: 
 
 	protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
 
+	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
+
 	protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T]
 
 	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String]
 
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int
-
-	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
 

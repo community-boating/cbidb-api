@@ -1,8 +1,10 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, Person, PersonRelationship}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
 
 
@@ -11,7 +13,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 
 	override def getPwHashForUser(rootPB: PersistenceBroker[RootUserType]): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
-		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
+		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType, RootUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select email, pw_hash from persons where pw_hash is not null and lower(email) = ?"
@@ -41,6 +43,29 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 		val ids = pb.executePreparedQueryForSelect(q)
 		// TODO: critical error if this list has >1 element
 		ids.head
+	}
+
+	def getChildrenPersons(rc: RequestCache[MemberUserType], parentPersonId: Int): List[Person] = {
+		val persons = TableAlias.wrapForInnerJoin(Person)
+		val personRelationship = TableAlias.wrapForInnerJoin(PersonRelationship)
+		object cols {
+			val pr_a = PersonRelationship.fields.a.alias(personRelationship)
+			val pr_b = PersonRelationship.fields.b.alias(personRelationship)
+			val personId = Person.fields.personId.alias(persons)
+		}
+
+		val personFields = List(
+			Person.fields.nameFirst,
+			Person.fields.nameLast
+		).map(_.alias(persons))
+
+		val qb = QueryBuilder
+			.from(persons)
+			.innerJoin(personRelationship, cols.pr_b.wrapFilter(_.equalsField(cols.personId)))
+			.where(cols.pr_a.wrapFilter(_.equalsConstant(parentPersonId)))
+			.select(cols.personId :: personFields)
+
+		rc.executeQueryBuilder(qb).map(r => Person.construct(r.ps, rc))
 	}
 }
 
