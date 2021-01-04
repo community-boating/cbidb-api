@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Reporting
 
-import java.time.{LocalDateTime, ZoneId}
-
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
 import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
+
+import java.time.{LocalDateTime, ZoneId}
 
 abstract class ReportFactory[T <: StorableClass] {
 	private val rcWrapper = new Initializable[RequestCache[_]]

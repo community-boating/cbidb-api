@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Reporting
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
 import org.sailcbi.APIServer.Storable.StorableClass
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ReportingField[T <: StorableClass](
 	val valueFunction: T => String,

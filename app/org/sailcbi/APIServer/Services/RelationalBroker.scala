@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.Profiler
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Storable.FieldValues.FieldValue
 import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
 import org.sailcbi.APIServer.Storable.StorableQuery._

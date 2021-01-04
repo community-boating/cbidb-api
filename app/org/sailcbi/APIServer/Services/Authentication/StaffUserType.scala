@@ -3,8 +3,6 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
-import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 
 class StaffUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[StaffUserType] = StaffUserType

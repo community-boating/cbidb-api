@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.Services.StripeDatabaseIO
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund, Payout}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Services.PersistenceBroker
 
 class StripeDatabaseIOMechanism private[Services] (pb: PersistenceBroker) {
