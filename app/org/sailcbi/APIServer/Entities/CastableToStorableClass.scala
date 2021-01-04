@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedValue}
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 
 trait CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_]
@@ -47,7 +47,7 @@ trait CastableToStorableClass {
       """.stripMargin
 	}
 
-	def insertIntoLocalDB(pb: PersistenceBroker): Unit =
-		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+	def insertIntoLocalDB(rc: RequestCache[_]): Unit =
+		rc.executePreparedQueryForInsert(this.getInsertPreparedQuery)
 
 }

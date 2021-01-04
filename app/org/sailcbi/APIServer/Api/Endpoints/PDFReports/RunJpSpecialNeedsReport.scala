@@ -31,14 +31,14 @@ class RunJpSpecialNeedsReport @Inject() (implicit exec: ExecutionContext) extend
 		PA.withRequestCache(ApexUserType)(None, pr, rc => {
 			val pb = rc.pb
 			/* val verifyPas: Boolean =
-			   pb.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
+			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 
 			 if (!verifyPas) throw new BadPasException
 		 */
 			val output = new ByteArrayOutputStream()
 			val document: PDDocument = new PDDocument()
 
-			val model = JpSpecialNeedsReportLiveLoader(JpSpecialNeedsReportLiveParameter(fromZDT, toZDT), pb)
+			val model = JpSpecialNeedsReportLiveLoader(JpSpecialNeedsReportLiveParameter(fromZDT, toZDT), rc)
 			val report = new JpSpecialNeedsReport(model)
 			report.appendToDocument(document)
 

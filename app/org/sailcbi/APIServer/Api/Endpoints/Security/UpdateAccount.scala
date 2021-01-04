@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -19,7 +19,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
-				validate(pb, parsed.oldEmail, parsed.newEmail) match {
+				validate(rc, parsed.oldEmail, parsed.newEmail) match {
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => {
 						val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
@@ -37,7 +37,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 								  |  and pw_hash is not null)
 								  |""".stripMargin
 						}
-						pb.executePreparedQueryForUpdateOrDelete(q)
+						rc.executePreparedQueryForUpdateOrDelete(q)
 
 						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					}
@@ -46,7 +46,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validate(pb: PersistenceBroker, oldEmail: String, newEmail: String): ValidationResult = {
+	def validate(rc: RequestCache[_], oldEmail: String, newEmail: String): ValidationResult = {
 		val emailNotBlank = {
 			if (newEmail == null || newEmail.length == 0) ValidationResult.from("Email may not be blank")
 			else ValidationOk
@@ -69,7 +69,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 					  |""".stripMargin
 
 			}
-			if (pb.executePreparedQueryForSelect(q).nonEmpty) ValidationResult.from("There is already another account with that email address.")
+			if (rc.executePreparedQueryForSelect(q).nonEmpty) ValidationResult.from("There is already another account with that email address.")
 			else ValidationOk
 		}
 

@@ -20,7 +20,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val pb = rc.pb
 
-			PortalLogic.getSignupNote(pb, juniorId, instanceId) match {
+			PortalLogic.getSignupNote(rc, juniorId, instanceId) match {
 				case Right(os) => os match {
 					case Some(s) => Future(Ok(new JsObject(Map(
 						"juniorId" -> JsNumber(juniorId),
@@ -48,7 +48,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				val pb = rc.pb
 				implicit val format = SignupNoteShape.format
 
-				PortalLogic.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
+				PortalLogic.saveSignupNote(rc, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 				}
@@ -64,7 +64,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				val username = rc.auth.userName
 				println("protoperson username is " + username)
 				val pb = rc.pb
-				val parentPersonId = rc.auth.getAuthedPersonId(pb).get
+				val parentPersonId = rc.auth.getAuthedPersonId(rc).get
 				println("parent personId is " + parentPersonId)
 
 				val juniorMatchesParent = {
@@ -82,7 +82,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 							   |and type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
 							   |""".stripMargin
 					}
-					pb.executePreparedQueryForSelect(q).nonEmpty
+					rc.executePreparedQueryForSelect(q).nonEmpty
 				}
 
 				if (!juniorMatchesParent) {
@@ -90,7 +90,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 					Future(Ok(ve.toResultError.asJsObject()))
 				} else {
 					implicit val format = SignupNoteShape.format
-					PortalLogic.saveSignupNote(pb, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
+					PortalLogic.saveSignupNote(rc, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 						case ValidationOk => Future(Ok(Json.toJson(parsed)))
 						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					}

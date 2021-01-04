@@ -34,7 +34,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 				override val params: List[String] = List(juniorId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
 		})
@@ -63,7 +63,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 					)
 				}
 
-				pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+				rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 				Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 			})

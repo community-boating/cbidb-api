@@ -17,7 +17,7 @@ class DeleteOffseasonWaitlist @Inject()(implicit exec: ExecutionContext) extends
 				val pb = rc.pb
 				println(parsed)
 
-				PortalLogic.removeOffseasonWaitlist(pb, parsed.juniorId)
+				PortalLogic.removeOffseasonWaitlist(rc, parsed.juniorId)
 				Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
 			})
 		})

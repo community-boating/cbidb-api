@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelations
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 
 class MemberUserType(override val userName: String) extends UserType(userName) {
@@ -27,9 +27,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 		else None
 	}
 
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
-
-	def getAuthedPersonId(pb: PersistenceBroker): Int = {
+	def getAuthedPersonId(rc: RequestCache[_]): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, RootUserType)) {
 			override def getQuery: String =
 				"""
@@ -40,7 +38,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 			override val params: List[String] = List(userName)
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
-		val ids = pb.executePreparedQueryForSelect(q)
+		val ids = rc.executePreparedQueryForSelect(q)
 		// TODO: critical error if this list has >1 element
 		ids.head
 	}

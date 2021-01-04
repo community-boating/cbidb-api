@@ -193,7 +193,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		else throw new UnauthorizedAccessException("syncBalanceTransactions denied to userType " + rc.auth.companion)
 	}
 
-	def createStripeCustomerFromPerson(pb: PersistenceBroker, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
+	def createStripeCustomerFromPerson(rc: RequestCache[_], personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
 		val (optionEmail, optionStripeCustomerId) = {
 			type ValidationResult = (Option[String], Option[String]) // email, existing stripe customerID
 			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberUserType)) {
@@ -207,7 +207,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 					  |select email, stripe_customer_id from persons where person_id = ?
 					  |""".stripMargin
 			}
-			pb.executePreparedQueryForSelect(q).head
+			rc.executePreparedQueryForSelect(q).head
 		}
 
 		if (optionEmail.isEmpty){
@@ -217,7 +217,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 			println("stripe create customer: exists")
 			Future(ValidationError(StripeError("validation", "Stripe customer record already exists.")))
 		} else {
-			if (TestUserType(Set(MemberUserType), rc.auth.companion)) {
+			if (TestUserType(Set(MemberUserType), rc.auth.asInstanceOf[UserType].companion)) {
 				apiIO.getOrPostStripeSingleton(
 					"customers",
 					Customer.apply,
@@ -235,11 +235,11 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 								  |update persons set stripe_customer_id = ? where person_id = ?
 								  |""".stripMargin
 						}
-						pb.executePreparedQueryForUpdateOrDelete(update)
+						rc.executePreparedQueryForUpdateOrDelete(update)
 					})
 				)
 			}
-			else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.companion)
+			else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.asInstanceOf[UserType].companion)
 		}
 	}
 

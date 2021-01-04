@@ -27,7 +27,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
 			val pb = rc.pb
 			val params = new GetReportRunOptionsParamsObject
-			getFuture(rc.cb, pb, params, getJSONResultFuture(rc)).map(s => {
+			getFuture(rc.cb, rc, params, getJSONResultFuture(rc)).map(s => {
 				Ok(s).as("application/json")
 			})
 		})

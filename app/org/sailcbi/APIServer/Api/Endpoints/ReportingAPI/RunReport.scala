@@ -57,7 +57,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 						println("filter spec: " + params.filterSpec)
 						println("field spec: " + params.fieldSpec)
 						println("output type: " + params.outputType)
-						getFuture(cb, pb, params, getJSONResultFuture(rc, params)).map(s => {
+						getFuture(cb, rc, params, getJSONResultFuture(rc, params)).map(s => {
 							println(s)
 							params.outputType match {
 								case OUTPUT_TYPE.JSCON => Ok(s).as("application/json")

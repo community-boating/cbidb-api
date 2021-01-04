@@ -17,11 +17,11 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 			val pb = rc.pb
 			val stripeIOController = rc.getStripeIOController(ws)
 
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
-			val stripeCustomerId = PortalLogic.getStripeCustomerId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
+			val stripeCustomerId = PortalLogic.getStripeCustomerId(rc, personId)
 
-			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(pb, orderId) > 0
+			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 
 			if (orderHasStaggeredPayments) {
 				stripeIOController.getCustomerDefaultPaymentMethod(stripeCustomerId.get).flatMap({
@@ -32,7 +32,7 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 					case f: NetFailure[_, _] => Future(Ok("error"))
 				})
 			} else {
-				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
+				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
 				Future(Ok("done"))
 			}
 		})

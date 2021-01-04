@@ -20,9 +20,9 @@ class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) e
 			implicit val format = AllSignupsResponse.format
 			val signups: AllSignupsResponse = AllSignupsResponse(
 				juniorId,
-				PortalLogic.getSignupsForReport(pb, juniorId),
-				PortalLogic.getWaitListTopsForReport(pb, juniorId),
-				PortalLogic.getWaitListsForReport(pb, juniorId)
+				PortalLogic.getSignupsForReport(rc, juniorId),
+				PortalLogic.getWaitListTopsForReport(rc, juniorId),
+				PortalLogic.getWaitListsForReport(rc, juniorId)
 			)
 
 

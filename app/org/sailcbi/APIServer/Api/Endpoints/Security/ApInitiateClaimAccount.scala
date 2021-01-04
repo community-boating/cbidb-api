@@ -18,10 +18,10 @@ class ApInitiateClaimAccount @Inject()(implicit exec: ExecutionContext) extends 
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
-				PortalLogic.apCanClaim(pb, parsed.email) match {
+				PortalLogic.apCanClaim(rc, parsed.email) match {
 					case Left(e) => Future(Ok(ValidationResult.from(e).toResultError.asJsObject()))
 					case Right(personId) => {
-						PortalLogic.apDoClaim(pb, personId)
+						PortalLogic.apDoClaim(rc, personId)
 						Future(Ok(new JsObject(Map(
 							"success" -> JsBoolean(true)
 						))))

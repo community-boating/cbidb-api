@@ -28,7 +28,7 @@ class RunApClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 		PA.withRequestCache(ApexUserType)(None, pr, rc => {
 			val pb = rc.pb
 			/* val verifyPas: Boolean =
-			   pb.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
+			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 
 			 if (!verifyPas) throw new BadPasException
 		 */
@@ -38,7 +38,7 @@ class RunApClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 			val pdfFont = PDType1Font.HELVETICA
 			val fontSize = 13
 
-			val model = ApClassRosterLiveLoader(ApClassRosterLiveParameter(instanceId), pb)
+			val model = ApClassRosterLiveLoader(ApClassRosterLiveParameter(instanceId), rc)
 
 			val report = new ApClassRoster(model)
 

@@ -18,7 +18,7 @@ class FlagColor @Inject()(implicit val exec: ExecutionContext)
 		PA.withRequestCache(PublicUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
-			getFuture(cb, pb, new FlagColorParamsObject, new GetFlagColor).map(s => {
+			getFuture(cb, rc, new FlagColorParamsObject, new GetFlagColor).map(s => {
 				val r = ".*\\[\\[\"([A-Z])\"\\]\\].*".r
 				val f = s.toString match {
 					case r(flag: String) => flag

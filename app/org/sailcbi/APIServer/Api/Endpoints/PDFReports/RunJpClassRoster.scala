@@ -27,7 +27,7 @@ class RunJpClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 		PA.withRequestCache(ApexUserType)(None, pr, rc => {
 			val pb = rc.pb
 			/* val verifyPas: Boolean =
-			   pb.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
+			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 
 			 if (!verifyPas) throw new BadPasException
 		 */
@@ -36,7 +36,7 @@ class RunJpClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 
 			val instanceIdsInts = instanceIds.split(",").map(_.toInt)
 			instanceIdsInts.foreach(id => {
-				val model = JpClassRosterLiveLoader(JpClassRosterLiveParameter(id), pb)
+				val model = JpClassRosterLiveLoader(JpClassRosterLiveParameter(id), rc)
 				val report = new JpClassRoster(model)
 				report.appendToDocument(document)
 			})

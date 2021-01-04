@@ -16,13 +16,13 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSetMembershipPaymentCount.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
 				val now = PA.now().toLocalDate
 
-				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, parsed.additionalPayments)
-				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
+				PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, parsed.additionalPayments)
+				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
 
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)

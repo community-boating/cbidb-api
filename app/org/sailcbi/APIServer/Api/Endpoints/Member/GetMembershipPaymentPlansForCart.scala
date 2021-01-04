@@ -18,12 +18,12 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
 			val now = PA.now()
 
-			val plansResult = PortalLogic.getPaymentPlansForMembershipInCart(pb, personId, orderId, now.toLocalDate)
+			val plansResult = PortalLogic.getPaymentPlansForMembershipInCart(rc, personId, orderId, now.toLocalDate)
 
 			val scm = plansResult._1.get
 

@@ -12,8 +12,8 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache[_], preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends PersistenceBroker(dbConnection, rc, preparedQueriesOnly, readOnly)
+abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker(dbConnection, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
 

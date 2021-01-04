@@ -41,7 +41,7 @@ class GetWeeks @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 					  |""".stripMargin
 			}
 
-			val weeks = pb.executePreparedQueryForSelect(q).toArray
+			val weeks = rc.executePreparedQueryForSelect(q).toArray
 			implicit val format = GetWeeksResult.format
 			Future(Ok(Json.toJson(weeks)))
 		})

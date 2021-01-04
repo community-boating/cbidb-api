@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderR
 import org.sailcbi.APIServer.Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache[_], preparedQueriesOnly: Boolean, readOnly: Boolean) {
+abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
 	final private[Services] def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -42,26 +42,23 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 		executeQueryBuilderImplementation(qb)
 	}
 
-	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
-		if (TestUserType(pq.allowedUserTypes, rc.auth.asInstanceOf[UserType].companion)) executePreparedQueryForSelectImplementation(pq, fetchSize)
-		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.asInstanceOf[UserType].getClass.getName)
+	final private[Services] def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+		executePreparedQueryForSelectImplementation(pq, fetchSize)
 	}
 
-	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
+	final private[Services] def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
-		else if (TestUserType(pq.allowedUserTypes, rc.auth.asInstanceOf[UserType].companion)) executePreparedQueryForInsertImplementation(pq)
-		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.asInstanceOf[UserType].name)
+		else executePreparedQueryForInsertImplementation(pq)
 	}
 
-	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
+	final private[Services] def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
-		else if (TestUserType(pq.allowedUserTypes, rc.auth.asInstanceOf[UserType].companion)) executePreparedQueryForUpdateOrDeleteImplementation(pq)
-		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + rc.auth.asInstanceOf[UserType].name)
+		else executePreparedQueryForUpdateOrDeleteImplementation(pq)
 	}
 
-	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
-		if (TestUserType(pc.allowedUserTypes, rc.auth.asInstanceOf[UserType].companion)) executeProcedureImpl(pc)
-		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + rc.auth.asInstanceOf[UserType].name)
+	final private[Services] def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
+		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
+		else executeProcedureImpl(pc)
 	}
 
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these

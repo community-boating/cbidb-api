@@ -31,7 +31,7 @@ class PreparedValueTest extends FunSuite {
 					  |""".stripMargin
 			}
 
-			pb.executePreparedQueryForInsert(ins)
+			rc.executePreparedQueryForInsert(ins)
 		})
 	}
 //	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
@@ -50,7 +50,7 @@ class PreparedValueTest extends FunSuite {
 //				  |""".stripMargin
 //		}
 //
-//		val pk = pb.executePreparedQueryForInsert(q)
+//		val pk = rc.executePreparedQueryForInsert(q)
 //
 //		val sel = new PreparedQueryForSelect[T](Set(RootUserType)) {
 //			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): T = getFromRSW(rsw)
@@ -63,14 +63,14 @@ class PreparedValueTest extends FunSuite {
 //				  |""".stripMargin
 //		}
 //
-//		val dSelected: T = pb.executePreparedQueryForSelect(sel).head
+//		val dSelected: T = rc.executePreparedQueryForSelect(sel).head
 //
 //		val del = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
 //			override def getQuery: String = "delete from promotions where promo_id = ?"
 //			override val preparedParams = List(pk.get)
 //		}
 //
-//		pb.executePreparedQueryForUpdateOrDelete(del)
+//		rc.executePreparedQueryForUpdateOrDelete(del)
 //		println(d)
 //		println(dSelected)
 //		assert(d.equals(dSelected))

@@ -2,13 +2,13 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 
 class ProtoPersonUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[ProtoPersonUserType] = ProtoPersonUserType
 
-	def getAuthedPersonId(pb: PersistenceBroker): Option[Int] = {
-		val ids = pb.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
+	def getAuthedPersonId(rc: RequestCache[_]): Option[Int] = {
+		val ids = rc.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 		// TODO: critical error if this list has >1 element
 		ids.headOption
 	}

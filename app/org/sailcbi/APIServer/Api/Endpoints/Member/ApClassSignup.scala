@@ -15,9 +15,9 @@ class ApClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassSignupShape.apply)(parsed => {
-				PortalLogic.apClassSignup(pb, personId, parsed.instanceId, parsed.doWaitlist) match {
+				PortalLogic.apClassSignup(rc, personId, parsed.instanceId, parsed.doWaitlist) match {
 					case None => Future(Ok(new JsObject(Map(
 						"success" -> JsBoolean(true)
 					))))

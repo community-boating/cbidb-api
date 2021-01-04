@@ -16,10 +16,10 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.addDonationToOrder(pb, orderId, parsed.fundId, parsed.amount) match{
+				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 				}
@@ -32,10 +32,10 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.deleteDonationFromOrder(pb, orderId, parsed.fundId)
+				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
 				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 			})

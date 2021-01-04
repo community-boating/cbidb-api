@@ -16,7 +16,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 
 			val select = new PreparedQueryForSelect[ApEmergencyContactShape](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApEmergencyContactShape =
@@ -56,7 +56,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 				override val params: List[String] = List(personId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			implicit val format = ApEmergencyContactShape.format
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
@@ -68,7 +68,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		PA.withParsedPostBodyJSON(request.body.asJson, ApEmergencyContactShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
+				val personId = rc.auth.getAuthedPersonId(rc)
 
 				runValidations(parsed, pb) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
@@ -111,7 +111,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 							)
 						}
 
-						pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+						rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 						Future(Ok(new JsObject(Map(
 							"personId" -> JsNumber(personId)

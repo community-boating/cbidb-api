@@ -18,9 +18,9 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends I
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val pb = rc.pb
 
-			PortalLogic.pruneOldReservations(pb)
+			PortalLogic.pruneOldReservations(rc)
 
-			val instances = pb.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray
+			val instances = rc.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray
 			val classInfoQuery = new PreparedQueryForSelect[ClassTypeInfo](Set(MemberUserType)) {
 				override val params: List[String] = List(typeId.toString)
 
@@ -37,7 +37,7 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends I
 					  |select type_name, session_length, session_ct from jp_class_types where type_id = ?
 					  |""".stripMargin
 			}
-			val classInfo = pb.executePreparedQueryForSelect(classInfoQuery).head
+			val classInfo = rc.executePreparedQueryForSelect(classInfoQuery).head
 			implicit val format = ClassTypeInfo.format
 			Future(Ok(Json.toJson(classInfo)))
 		})

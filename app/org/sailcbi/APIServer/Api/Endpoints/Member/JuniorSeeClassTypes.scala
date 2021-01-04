@@ -38,7 +38,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Inj
 			}
 
 			val arr = JsArray(
-				pb.executePreparedQueryForSelect(select)
+				rc.executePreparedQueryForSelect(select)
 						.map(t => JsObject(Map(
 							"typeId" -> JsNumber(t.typeId),
 							"canSee" -> JsBoolean(t.canSee)

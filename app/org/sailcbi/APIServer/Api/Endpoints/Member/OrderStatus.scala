@@ -19,23 +19,23 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
-			val orderTotal = PortalLogic.getOrderTotalDollars(pb, orderId)
+			val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)
 			val orderTotalInCents = Currency.toCents(orderTotal)
 
-			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
+			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
 
 			val now = PA.now().toLocalDate
 
 			implicit val format = OrderStatusResult.format
 
 			if (staggeredPaymentAdditionalMonths > 0) {
-				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
+				val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
 
 				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, orderTotalInCents).map(pi => {
+					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).map(pi => {
 						Ok(Json.toJson(OrderStatusResult(
 							orderId = orderId,
 							total = orderTotal,
@@ -46,7 +46,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								expYear = pm.card.exp_year,
 								zip = pm.billing_details.address.postal_code
 							)),
-							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
+							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
 								(ld, amt) => StaggeredPayment(ld, amt.cents)
 							)),
 							paymentIntentId = Some(pi.id)
@@ -55,7 +55,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
 				})
 			} else {
-				val cardData = PortalLogic.getCardData(pb, orderId)
+				val cardData = PortalLogic.getCardData(rc, orderId)
 				Future(Ok(Json.toJson(OrderStatusResult(
 					orderId = orderId,
 					total = orderTotal,

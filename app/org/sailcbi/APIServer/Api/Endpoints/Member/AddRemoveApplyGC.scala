@@ -16,13 +16,13 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
 					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject()))
 				} else {
-					PortalLogic.addGiftCertificateToOrder(pb, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
+					PortalLogic.addGiftCertificateToOrder(rc, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
 						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 						case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 					}
@@ -36,10 +36,10 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.unapplyGCFromOrder(pb, orderId, parsed.certId)
+				PortalLogic.unapplyGCFromOrder(rc, orderId, parsed.certId)
 
 				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 			})

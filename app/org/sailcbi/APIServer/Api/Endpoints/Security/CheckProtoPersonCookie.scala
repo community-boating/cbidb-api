@@ -32,7 +32,7 @@ class CheckProtoPersonCookie @Inject()(implicit exec: ExecutionContext) extends 
 								   | and protoperson_cookie = ?
 								   |""".stripMargin
 						}
-						val existingPersons = pb.executePreparedQueryForSelect(q)
+						val existingPersons = rc.executePreparedQueryForSelect(q)
 						if (existingPersons.isEmpty) {
 							// ... and the cookie is not attached to a non-proto user.  OK to keep using
 							Future(Ok("Detected existing cookie"))

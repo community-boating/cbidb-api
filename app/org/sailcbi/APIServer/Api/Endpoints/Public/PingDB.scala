@@ -26,7 +26,7 @@ class PingDB @Inject()(implicit exec: ExecutionContext) extends InjectedControll
 				override val params: List[String] = List.empty
 			}
 
-			val ct = pb.executePreparedQueryForSelect(q).head
+			val ct = rc.executePreparedQueryForSelect(q).head
 			Future(Ok(ct.toString))
 		})
 

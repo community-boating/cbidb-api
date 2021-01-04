@@ -34,33 +34,33 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 			val pb = rc.pb
 
 			// Create protoparent if it doenst exist
-			val protoParentPersonId = rc.auth.getAuthedPersonId(pb)
+			val protoParentPersonId = rc.auth.getAuthedPersonId(rc)
 			val parentPersonId = {
 				if (protoParentPersonId.isDefined) {
 					val ret = protoParentPersonId.get
 					println("reusing existing protoparent record for this cookie val " + ret)
 					ret
 				} else {
-					val ret = PortalLogic.persistProtoParent(pb, rc.auth.userName)
+					val ret = PortalLogic.persistProtoParent(rc, rc.auth.userName)
 					println("created new protoparent: " + ret)
 					ret
 				}
 			}
 
-			val orderId = PortalLogic.getOrderId(pb, parentPersonId)
+			val orderId = PortalLogic.getOrderId(rc, parentPersonId)
 
 			// Create new protojunior
 			val (juniorPersonId, rollbackCreateJunior) = PortalLogic.persistProtoJunior(
-				pb,
+				rc,
 				parentPersonId,
 				body.juniorFirstName,
 				body.beginnerInstanceId.isDefined || body.intermediateInstanceId.isDefined
 			)
 
 			// create new signup with the min(signup_time) of all this protoparent's other signups
-			val minSignupTime = PortalLogic.getMinSignupTimeForParent(pb, parentPersonId)
+			val minSignupTime = PortalLogic.getMinSignupTimeForParent(rc, parentPersonId)
 			println("min signup is " + minSignupTime)
-			val signupResult = PortalLogic.attemptSignupReservation(pb, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
+			val signupResult = PortalLogic.attemptSignupReservation(rc, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
 			println(" result is:" + signupResult)
 			if (signupResult.isDefined) {
 				rollbackCreateJunior()

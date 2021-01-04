@@ -19,7 +19,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				println(parsed)
 
 				val doEnroll = parsed.doEnroll
-				val wlJoin = doEnroll && PortalLogic.canWaitListJoin(pb, parsed.juniorId, parsed.instanceId)
+				val wlJoin = doEnroll && PortalLogic.canWaitListJoin(rc, parsed.juniorId, parsed.instanceId)
 
 				//any:            see_type
 				//any:            see_instance
@@ -28,19 +28,19 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				//enroll:         spots_left
 				//wljoin:         wl record exists
 				//enroll/wljoin:  allow_enroll
-				lazy val seeType = PortalLogic.seeTypeFromInstanceIdAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
-				lazy val seeInstance = PortalLogic.seeInstanceAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
-				lazy val alreadyStarted = PortalLogic.alreadyStartedAsValidationResult(pb, parsed.instanceId)
+				lazy val seeType = PortalLogic.seeTypeFromInstanceIdAsValidationResult(rc, parsed.juniorId, parsed.instanceId)
+				lazy val seeInstance = PortalLogic.seeInstanceAsValidationResult(rc, parsed.juniorId, parsed.instanceId)
+				lazy val alreadyStarted = PortalLogic.alreadyStartedAsValidationResult(rc, parsed.instanceId)
 				lazy val wlExistsOnClass = {
 					if (doEnroll) ValidationOk
-					else PortalLogic.waitListExists(pb, parsed.instanceId)
+					else PortalLogic.waitListExists(rc, parsed.instanceId)
 				}
 				lazy val hasSeats = {
-					if (doEnroll && !wlJoin) PortalLogic.hasSpotsLeft(pb, parsed.instanceId, Some("The class is full."))
+					if (doEnroll && !wlJoin) PortalLogic.hasSpotsLeft(rc, parsed.instanceId, Some("The class is full."))
 					else ValidationOk
 				}
 				lazy val allowEnroll = {
-					if (doEnroll) PortalLogic.allowEnrollAsValidationResult(pb, parsed.juniorId, parsed.instanceId)
+					if (doEnroll) PortalLogic.allowEnrollAsValidationResult(rc, parsed.juniorId, parsed.instanceId)
 					else ValidationOk
 				}
 
@@ -55,7 +55,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 
 				finalResult match {
 					case ValidationOk => {
-						val signupId = PortalLogic.actuallyEnroll(pb, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true, None).orNull
+						val signupId = PortalLogic.actuallyEnroll(rc, parsed.instanceId, parsed.juniorId, None, doEnroll=doEnroll, fullEnroll = true, None).orNull
 						Future(Ok(new JsObject(Map("signupId" -> JsNumber(signupId.toInt)))))
 					}
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))

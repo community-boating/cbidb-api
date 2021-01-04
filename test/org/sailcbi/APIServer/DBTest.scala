@@ -32,7 +32,7 @@ class DBTest extends FunSuite {
 			val pb = rc.pb
 
 			assertThrows[AnyRef]({
-				pb.executePreparedQueryForInsert(new PreparedQueryForInsert(Set(RootUserType)) {
+				rc.executePreparedQueryForInsert(new PreparedQueryForInsert(Set(RootUserType)) {
 					override val params: List[String] = List("Blah")
 					override val pkName: Option[String] = Some("TYPE_ID")
 
@@ -48,7 +48,7 @@ class DBTest extends FunSuite {
 
 			val typeName = "Blah333"
 
-			pb.executePreparedQueryForInsert(new PreparedQueryForInsert(Set(RootUserType)) {
+			rc.executePreparedQueryForInsert(new PreparedQueryForInsert(Set(RootUserType)) {
 				override val params: List[String] = List(typeName)
 				override val pkName: Option[String] = Some("TYPE_ID")
 
@@ -57,7 +57,7 @@ class DBTest extends FunSuite {
 			val types = rc.getAllObjectsOfClass(JpClassType)
 			println(types.size)
 
-			pb.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
+			rc.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
 				override val params: List[String] = List(typeName)
 
 				override def getQuery: String = "DELETE FROM JP_CLASS_TYPES WHERE TYPE_NAME = ?"
@@ -82,7 +82,7 @@ class DBTest extends FunSuite {
 					  |""".stripMargin
 			}
 
-			pb.executePreparedQueryForInsert(q)
+			rc.executePreparedQueryForInsert(q)
 		})
 	}
 	test("just get some fields") {

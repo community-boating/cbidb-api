@@ -13,7 +13,7 @@ class GetUserHasRole @Inject()(implicit val exec: ExecutionContext) extends Inje
 	def get(userName: String, role: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		PA.withRequestCache(StaffUserType)(None, ParsedRequest(req), rc => {
 			val pb = rc.pb
-			val result = pb.executePreparedQueryForSelect(new GetUserHasRoleQuery(userName, role)).head
+			val result = rc.executePreparedQueryForSelect(new GetUserHasRoleQuery(userName, role)).head
 			if (result) {
 				Future(Ok("{\"result\": true}"))
 			} else {

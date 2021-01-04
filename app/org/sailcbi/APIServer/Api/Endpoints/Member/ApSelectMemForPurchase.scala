@@ -14,17 +14,17 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSelectMemForPurchaseShape.apply)(parsed => {
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 				// TODO: check mem type is valid
 
-				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(pb, _))
-				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(pb, personId, orderId, parsed.memTypeId, discountInstanceId)
+				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(rc, _))
+				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(rc, personId, orderId, parsed.memTypeId, discountInstanceId)
 				val now = PA.now().toLocalDate
 
-				PortalLogic.assessDiscounts(pb, orderId)
-				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, 0)
+				PortalLogic.assessDiscounts(rc, orderId)
+				PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, 0)
 
 
 				Future(Ok(new JsObject(Map(

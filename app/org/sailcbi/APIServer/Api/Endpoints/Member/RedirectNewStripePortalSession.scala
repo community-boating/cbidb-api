@@ -17,8 +17,8 @@ class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionConte
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 
 			customerIdOption match {
 				case None => Future(Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject()))

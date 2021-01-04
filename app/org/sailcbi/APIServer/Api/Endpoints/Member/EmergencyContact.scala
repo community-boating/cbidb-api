@@ -57,7 +57,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 				override val params: List[String] = List(juniorId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
 		})
@@ -111,7 +111,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 							)
 						}
 
-						pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+						rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 						Future(Ok(new JsObject(Map(
 							"personId" -> JsNumber(parsed.personId)

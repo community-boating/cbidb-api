@@ -16,12 +16,12 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
 			val fullCartItemsQuery = new FullCart(orderId)
 
-			val resultObj = pb.executePreparedQueryForSelect(fullCartItemsQuery)
+			val resultObj = rc.executePreparedQueryForSelect(fullCartItemsQuery)
 			Future(Ok(Json.toJson(resultObj)))
 		})
 	}

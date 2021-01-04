@@ -74,7 +74,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				override val params: List[String] = List(juniorId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
 		})
@@ -90,10 +90,10 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					println(s"its an update: $juniorId")
 					PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 						val pb = rc.pb
-						runValidations(parsed, pb, Some(id.toString().toInt)) match {
+						runValidations(parsed, rc, Some(id.toString().toInt)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								doUpdate(pb, parsed, rc.auth.getAuthedPersonId(pb))
+								doUpdate(rc, parsed, rc.auth.getAuthedPersonId(rc))
 								Future(Ok(new JsObject(Map(
 									"personId" -> JsNumber(juniorId)
 								))))
@@ -106,10 +106,10 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					println(s"its a create")
 					PA.withRequestCacheMember(None, parsedRequest, rc => {
 						val pb = rc.pb
-						runValidations(parsed, pb, None) match {
+						runValidations(parsed, rc, None) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								val newJuniorId = doCreate(pb, parsed, rc.auth.getAuthedPersonId(pb))
+								val newJuniorId = doCreate(rc, parsed, rc.auth.getAuthedPersonId(rc))
 								Future(Ok(new JsObject(Map(
 									"personId" -> JsNumber(newJuniorId)
 								))))
@@ -122,13 +122,13 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		})
 	}
 
-	def runValidations(parsed: RequiredInfoShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
+	def runValidations(parsed: RequiredInfoShape, rc: RequestCache[_], juniorId: Option[Int]): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
 		val unconditionalValidations = List(
-			tooOld(pb, dob),
-			tooYoung(pb, dob, juniorId),
-			cannotAlterDOB(pb, dob, juniorId),
+			tooOld(rc, dob),
+			tooYoung(rc, dob, juniorId),
+			cannotAlterDOB(rc, dob, juniorId),
 			ValidationResult.checkBlank(parsed.firstName, "First Name"),
 			ValidationResult.checkBlank(parsed.lastName, "Last Name"),
 			ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
@@ -164,11 +164,11 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 	}
 
-	def cannotAlterDOB(pb: PersistenceBroker, dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
+	def cannotAlterDOB(rc: RequestCache[_], dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
 		case None => ValidationOk
 		case Some(id) => {
 			val (existingDOB, currentSeason, firstMembershipYear) =
-				pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(String, Int, Option[Int])](Set(MemberUserType)) {
+				rc.executePreparedQueryForSelect(new PreparedQueryForSelect[(String, Int, Option[Int])](Set(MemberUserType)) {
 					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int, Option[Int]) = (rsw.getString(1), rsw.getInt(2), rsw.getOptionInt(3))
 
 					override def getQuery: String =
@@ -185,8 +185,8 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def tooOld(pb: PersistenceBroker, dob: String): ValidationResult = {
-		val notTooOld = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+	def tooOld(rc: RequestCache[_], dob: String): ValidationResult = {
+		val notTooOld = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
@@ -203,8 +203,8 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def tooYoung(pb: PersistenceBroker, dob: String, juniorId: Option[Int]): ValidationResult = {
-		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+	def tooYoung(rc: RequestCache[_], dob: String, juniorId: Option[Int]): ValidationResult = {
+		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
@@ -224,7 +224,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def doCreate(pb: PersistenceBroker, data: RequiredInfoShape, parentPersonId: Int): Int = {
+	def doCreate(rc: RequestCache[_], data: RequiredInfoShape, parentPersonId: Int): Int = {
 		val createPersonQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
 			override val params: List[String] = List(
 				data.firstName.orNull,
@@ -277,7 +277,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				  |)
 				  |""".stripMargin
 		}
-		val juniorPersonId = pb.executePreparedQueryForInsert(createPersonQuery).get.toInt
+		val juniorPersonId = rc.executePreparedQueryForInsert(createPersonQuery).get.toInt
 
 		val createRelationshipQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
 			override val params: List[String] = List(
@@ -293,16 +293,16 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				  |""".stripMargin
 		}
 
-		pb.executePreparedQueryForInsert(createRelationshipQuery)
+		rc.executePreparedQueryForInsert(createRelationshipQuery)
 
 		if (!data.editOnly.getOrElse(false)) {
-			PortalLogic.addSCMIfNotMember(pb, parentPersonId, juniorPersonId)
+			PortalLogic.addSCMIfNotMember(rc, parentPersonId, juniorPersonId)
 		}
 
 		juniorPersonId
 	}
 
-	def doUpdate(pb: PersistenceBroker, data: RequiredInfoShape, parentPersonId: Int): Unit = {
+	def doUpdate(rc: RequestCache[_], data: RequiredInfoShape, parentPersonId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
@@ -354,9 +354,9 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 			)
 		}
 
-		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+		rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 		if (!data.editOnly.getOrElse(false)) {
-			PortalLogic.addSCMIfNotMember(pb, parentPersonId, data.personId.get)
+			PortalLogic.addSCMIfNotMember(rc, parentPersonId, data.personId.get)
 		}
 	}
 }

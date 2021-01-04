@@ -49,7 +49,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 									  |""".stripMargin
 							}
 
-							pb.executePreparedQueryForInsert(insertQ)
+							rc.executePreparedQueryForInsert(insertQ)
 
 							val response: StripeTokenSavedShape = StripeTokenSavedShape(
 								parsedBody.token,

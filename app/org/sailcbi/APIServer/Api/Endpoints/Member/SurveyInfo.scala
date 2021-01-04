@@ -40,7 +40,7 @@ class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				override val params: List[String] = List(juniorId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
 		})
@@ -82,7 +82,7 @@ class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 					)
 				}
 
-				pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+				rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 				Future(Ok("done"))
 			})

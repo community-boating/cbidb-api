@@ -31,7 +31,7 @@ class GetDonationFunds @Inject()(implicit val exec: ExecutionContext) extends In
 					  |order by display_order
 					  |""".stripMargin
 			}
-			val funds = pb.executePreparedQueryForSelect(q)
+			val funds = rc.executePreparedQueryForSelect(q)
 			implicit val format = DonationFund.format
 			Future(Ok(Json.toJson(funds)))
 		})

@@ -22,10 +22,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			profiler.lap("got person id")
-			val orderId = PortalLogic.getOrderId(pb, personId)
-			PortalLogic.assessDiscounts(pb, orderId)
+			val orderId = PortalLogic.getOrderId(rc, personId)
+			PortalLogic.assessDiscounts(rc, orderId)
 			type ResultUntyped = (
 				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]
 			)
@@ -99,17 +99,17 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				seniorAvailable,
 				youthAvailable,
 				stripeCustomerIdOption
-			) = pb.executePreparedQueryForSelect(nameQ).head
+			) = rc.executePreparedQueryForSelect(nameQ).head
 
 			// do this async, user doesnt need to wait for it.
 			if (stripeCustomerIdOption.isEmpty) {
-				stripe.createStripeCustomerFromPerson(pb, personId).map({
+				stripe.createStripeCustomerFromPerson(rc, personId).map({
 					case f: NetFailure[_, _] => logger.error("Failed to create stripe customerId for person " + personId)
 					case s: NetSuccess[_, _] =>
 				})
 			}
 
-			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(pb)
+			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(rc)
 			val fullYearDiscounts = discountsWithAmounts.filter(_.membershipTypeId == MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID)
 			val renewalDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID ).get.discountAmount
 			val seniorDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.SENIOR_DISCOUNT_ID ).get.discountAmount
@@ -121,14 +121,14 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 
 			val expirationDate = {
 				if (BitVector.testBit(actions, 4) || BitVector.testBit(actions, 7)) {
-					val (_, expirationDate) = PortalLogic.getFYExpirationDate(pb, personId)
+					val (_, expirationDate) = PortalLogic.getFYExpirationDate(rc, personId)
 					Some(expirationDate)
 				} else {
 					None
 				}
 			}
 
-			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
+			val canCheckout = PortalLogic.canCheckout(rc, personId, orderId)
 
 			val discountsResult = DiscountsResult(
 				eligibleForSeniorOnline = eligibleForSeniorOnline,

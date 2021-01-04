@@ -19,14 +19,14 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
-				val canClaim = PortalLogic.apCanClaim(pb, parsed.email) match {
+				val canClaim = PortalLogic.apCanClaim(rc, parsed.email) match {
 					case Right(_) => ValidationOk
 					case Left(s) => ValidationResult.from(s)
 				}
 
 				(for {
 					_ <- canClaim
-					e <- PortalLogic.validateClaimAcctHash(pb, parsed.email, parsed.personId, parsed.hash)
+					e <- PortalLogic.validateClaimAcctHash(rc, parsed.email, parsed.personId, parsed.hash)
 				} yield e) match {
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => {
@@ -43,7 +43,7 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 								  |""".stripMargin
 						}
 
-						pb.executePreparedQueryForUpdateOrDelete(update)
+						rc.executePreparedQueryForUpdateOrDelete(update)
 
 						Future(Ok(new JsObject(Map(
 							"success" -> JsBoolean(true)

@@ -15,17 +15,17 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 			val now = PA.now().toLocalDate
 			PA.withParsedPostBodyJSON(request.body.asJson, AddPromoCodeShape.apply)(parsed => {
 				parsed.promoCode match {
 					case None =>Future(Ok(ValidationResult.from("Promo code must be speficied.").toResultError.asJsObject()))
 					case Some(promoCode) => {
-						PortalLogic.attemptAddPromoCode(pb, orderId, promoCode)
-						val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
-						PortalLogic.assessDiscounts(pb, orderId)
-						PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, staggeredPaymentAdditionalMonths)
+						PortalLogic.attemptAddPromoCode(rc, orderId, promoCode)
+						val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
+						PortalLogic.assessDiscounts(rc, orderId)
+						PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths)
 
 						Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 					}

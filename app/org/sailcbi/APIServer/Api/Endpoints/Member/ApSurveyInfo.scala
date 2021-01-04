@@ -15,7 +15,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 
 			val select = new PreparedQueryForSelect[ApSurveyInfoShape](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApSurveyInfoShape =
@@ -53,7 +53,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				override val params: List[String] = List(personId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			println(resultObj)
 			implicit val format = ApSurveyInfoShape.format
 			val resultJson: JsValue = Json.toJson(resultObj)
@@ -66,7 +66,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSurveyInfoShape.apply)(parsed => {
 				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 					override def getQuery: String =
@@ -102,7 +102,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					)
 				}
 
-				pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+				rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 				Future(Ok("done"))
 			})

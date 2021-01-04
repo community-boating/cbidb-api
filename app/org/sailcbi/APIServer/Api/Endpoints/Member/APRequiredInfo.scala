@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,7 +16,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 
 			val select = new PreparedQueryForSelect[APRequiredInfoShape](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): APRequiredInfoShape =
@@ -72,7 +72,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 				override val params: List[String] = List(personId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			implicit val format = APRequiredInfoShape.format
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
@@ -84,11 +84,11 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, APRequiredInfoShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = rc.auth.getAuthedPersonId(pb)
-				runValidations(parsed, pb, personId) match {
+				val personId = rc.auth.getAuthedPersonId(rc)
+				runValidations(parsed, rc, personId) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 					case ValidationOk => {
-						doUpdate(pb, parsed, personId)
+						doUpdate(rc, parsed, personId)
 						Future(Ok(new JsObject(Map(
 							"personId" -> JsNumber(personId)
 						))))
@@ -98,11 +98,11 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		})
 	}
 
-	def runValidations(parsed: APRequiredInfoShape, pb: PersistenceBroker, personId: Int): ValidationResult = {
+	def runValidations(parsed: APRequiredInfoShape, rc: RequestCache[_], personId: Int): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
 		val unconditionalValidations = List(
-			tooYoung(pb, dob),
+			tooYoung(rc, dob),
 			ValidationResult.checkBlank(parsed.firstName, "First Name"),
 			ValidationResult.checkBlank(parsed.lastName, "Last Name"),
 			ValidationResult.checkBlank(parsed.dob, "Date of Birth"),
@@ -135,8 +135,8 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	}
 
 
-	def tooYoung(pb: PersistenceBroker, dob: String): ValidationResult = {
-		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+	def tooYoung(rc: RequestCache[_], dob: String): ValidationResult = {
+		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
@@ -155,7 +155,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		}
 	}
 
-	def doUpdate(pb: PersistenceBroker, data: APRequiredInfoShape, personId: Int): Unit = {
+	def doUpdate(rc: RequestCache[_], data: APRequiredInfoShape, personId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
@@ -208,7 +208,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 			)
 		}
 
-		pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+		rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 	}
 
 	case class APRequiredInfoShape(

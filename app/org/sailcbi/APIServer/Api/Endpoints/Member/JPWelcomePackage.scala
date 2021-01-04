@@ -20,12 +20,12 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
 			val pb = rc.pb
 			profiler.lap("about to do first query")
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			profiler.lap("got person id")
 			val kids = rc.auth.getChildrenPersons(rc, personId)
 			println(kids.mkString("\n"))
-			val orderId = PortalLogic.getOrderId(pb, personId)
-			PortalLogic.assessDiscounts(pb, orderId)
+			val orderId = PortalLogic.getOrderId(rc, personId)
+			PortalLogic.assessDiscounts(rc, orderId)
 			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 
@@ -39,8 +39,8 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase) = pb.executePreparedQueryForSelect(nameQ).head
-			val pricesMaybe = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
+			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase) = rc.executePreparedQueryForSelect(nameQ).head
+			val pricesMaybe = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
 				override def getQuery: String = """
 												  |select
 												  | person_pkg.get_computed_jp_price(person_id),
@@ -55,10 +55,10 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					(rsw.getDouble(1), rsw.getDouble(2))
 
 			}).headOption
-			val childData = pb.executePreparedQueryForSelect(new GetChildDataQuery(personId))
+			val childData = rc.executePreparedQueryForSelect(new GetChildDataQuery(personId))
 			profiler.lap("got child data")
 
-			val canCheckout = PortalLogic.canCheckout(pb, personId, orderId)
+			val canCheckout = PortalLogic.canCheckout(rc, personId, orderId)
 
 			val result = JPWelcomePackageResult(
 				personId,

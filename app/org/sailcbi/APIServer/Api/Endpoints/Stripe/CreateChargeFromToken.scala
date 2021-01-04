@@ -25,15 +25,15 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 			val orderId: Int = params("orderId").toInt
 
 			Failover({
-				PortalLogic.getOrderTotalCents(pb, orderId)
+				PortalLogic.getOrderTotalCents(rc, orderId)
 			}, (e: Throwable) => logger.error("Unknown order id " + orderId, e))
 					.andThenWithCatch(orderDetails => {
-						val tokenRecord: ValidateTokenInOrderResult = pb.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
+						val tokenRecord: ValidateTokenInOrderResult = rc.executePreparedQueryForSelect(new ValidateTokenInOrder(orderId, token)).head
 						val nextPacket = (orderDetails, tokenRecord)
 						nextPacket
 					}, (e: Throwable) => logger.error("Mismatched token " + token + " and orderID " + orderId, e))
 					.andThenWithCatch(packet => {
-						val close: GetCurrentOnlineCloseResult = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head
+						val close: GetCurrentOnlineCloseResult = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head
 						val nextPacket = (packet._1, packet._2, close)
 						nextPacket
 					}, (e: Throwable) => logger.error("Unable to get current online close", e))

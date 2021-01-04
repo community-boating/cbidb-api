@@ -33,7 +33,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						  |""".stripMargin
 				}
 
-				val matchingRecords = pb.executePreparedQueryForSelect(q)
+				val matchingRecords = rc.executePreparedQueryForSelect(q)
 
 				val appID: Int = parsed.program match {
 					case "JP" => -1
@@ -66,7 +66,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						override def getQuery: String = "email_pkg.public_reset_pw(?, ?)"
 					}
 
-					pb.executeProcedure(ppc)
+					rc.executeProcedure(ppc)
 
 
 					Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))

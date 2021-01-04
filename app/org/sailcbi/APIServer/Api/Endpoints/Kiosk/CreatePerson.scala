@@ -73,7 +73,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						)
 						override val pkName: Option[String] = Some("person_id")
 					}
-					val id = pb.executePreparedQueryForInsert(q)
+					val id = rc.executePreparedQueryForInsert(q)
 
 					Future {
 						Ok(JsObject(Map("personID" -> JsNumber(id.getOrElse("-1").toInt))))

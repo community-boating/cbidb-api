@@ -14,9 +14,9 @@ class GetApClassesForCalendar @Inject()(implicit val exec: ExecutionContext) ext
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 
-			val instances = PortalLogic.getApClassesForCalendar(pb, personId)
+			val instances = PortalLogic.getApClassesForCalendar(rc, personId)
 
 			Future(Ok(Json.toJson(instances)))
 		})

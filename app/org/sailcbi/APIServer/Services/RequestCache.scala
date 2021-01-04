@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.Services
 
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, TestUserType}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
+import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication.{UserType, _}
-import org.sailcbi.APIServer.Services.Exception.CORSException
+import org.sailcbi.APIServer.Services.Exception.{CORSException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
@@ -30,8 +31,8 @@ class RequestCache[T <: UserType] private[Services](
 	val pb: PersistenceBroker = {
 		println("In RC:  " + PA.toString)
 		val pbReadOnly = PA.readOnlyDatabase
-		if (auth.isInstanceOf[RootUserType]) new OracleBroker(secrets.dbConnection, this, false, pbReadOnly)
-		else new OracleBroker(secrets.dbConnection, this, PA.preparedQueriesOnly, pbReadOnly)
+		if (auth.isInstanceOf[RootUserType]) new OracleBroker(secrets.dbConnection, false, pbReadOnly)
+		else new OracleBroker(secrets.dbConnection, PA.preparedQueriesOnly, pbReadOnly)
 	}
 
 	val cb: CacheBroker = new RedisBroker
@@ -53,6 +54,26 @@ class RequestCache[T <: UserType] private[Services](
 
 	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] =
 		pb.executeQueryBuilder(qb)
+
+	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+		if (TestUserType(pq.allowedUserTypes, auth.companion)) pb.executePreparedQueryForSelect(pq, fetchSize)
+		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + auth.getClass.getName)
+	}
+
+	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
+		if (TestUserType(pq.allowedUserTypes, auth.companion)) pb.executePreparedQueryForInsert(pq)
+		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + auth.name)
+	}
+
+	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
+		if (TestUserType(pq.allowedUserTypes, auth.companion)) pb.executePreparedQueryForUpdateOrDelete(pq)
+		else throw new UnauthorizedAccessException("executePreparedQueryForInsert denied to userType " + auth.name)
+	}
+
+	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
+		if (TestUserType(pc.allowedUserTypes, auth.companion)) pb.executeProcedure(pc)
+		else throw new UnauthorizedAccessException("executePreparedQueryforSelect denied to userType " + auth.name)
+	}
 
 	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
 		PermissionsAuthority.stripeURL,

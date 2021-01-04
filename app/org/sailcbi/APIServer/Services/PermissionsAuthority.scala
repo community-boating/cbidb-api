@@ -193,7 +193,7 @@ class PermissionsAuthority private[Services] (
 				if (ret.auth.isInstanceOf[MemberUserType]) {
 					// auth was successful
 					//... but does the request juniorId match the auth'd parent id?
-					val authedPersonId = ret.auth.getAuthedPersonId(rootPB)
+					val authedPersonId = ret.auth.getAuthedPersonId(ret)
 					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
 						override def getQuery: String =
 							s"""
@@ -236,7 +236,7 @@ class PermissionsAuthority private[Services] (
 				if (ret.auth.isInstanceOf[MemberUserType]) {
 					// auth was successful
 					//... but does the request parentId match the auth'd parent id?
-					val authedPersonId = ret.auth.getAuthedPersonId(rootPB)
+					val authedPersonId = ret.auth.getAuthedPersonId(ret)
 					if (authedPersonId == parentId) {
 						Some(ret)
 					} else {

@@ -14,9 +14,9 @@ class ApClassUnenroll  @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = rc.auth.getAuthedPersonId(pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassUnenrollShape.apply)(parsed => {
-				PortalLogic.apClassUnenroll(pb, personId, parsed.instanceId)
+				PortalLogic.apClassUnenroll(rc, personId, parsed.instanceId)
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)
 				))))

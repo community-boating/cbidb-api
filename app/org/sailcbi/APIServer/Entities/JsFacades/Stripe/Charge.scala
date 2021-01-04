@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserTypeObject}
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -33,9 +33,9 @@ case class Charge(
 		}
 	}
 
-	override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
-		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
-		this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
+	override def insertIntoLocalDB(rc: RequestCache[_]): Unit = {
+		rc.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+		this.refunds.foreach(r => rc.executePreparedQueryForInsert(r.getInsertPreparedQuery))
 	}
 }
 
