@@ -49,7 +49,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMemberValidations(
-		pb: PersistenceBroker[_],
+		pb: PersistenceBroker,
 		firstName: String,
 		lastName: String,
 		username: String,
@@ -86,7 +86,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMember(
-			pb: PersistenceBroker[_],
+			pb: PersistenceBroker,
 			firstName: String,
 			lastName: String,
 			username: String,
@@ -157,7 +157,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	private def getProtoPersonID(pb: PersistenceBroker[_], protoPersonValue: Option[String]): Option[Int] = {
+	private def getProtoPersonID(pb: PersistenceBroker, protoPersonValue: Option[String]): Option[Int] = {
 		protoPersonValue match {
 			case None => None
 			case Some(v) => {

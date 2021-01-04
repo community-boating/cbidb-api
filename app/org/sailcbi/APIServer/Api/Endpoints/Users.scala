@@ -56,7 +56,7 @@ object Users {
     }*/
   }
 
-  class UsersRequest(pb: PersistenceBroker[_], cb: CacheBroker, userID: Option[Int]) extends CacheableRequest {
+  class UsersRequest(pb: PersistenceBroker, cb: CacheBroker, userID: Option[Int]) extends CacheableRequest {
     def getCacheBrokerKey: CacheKey = "users" + (userID match {
       case None => ""
       case Some(id) => id

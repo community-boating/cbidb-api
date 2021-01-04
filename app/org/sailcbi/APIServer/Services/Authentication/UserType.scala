@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 
 abstract class UserType(val userName: String) {
 	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
-	def getPwHashForUser(rootPB: PersistenceBroker[RootUserType]): Option[(Int, String)] = None
+	def getPwHashForUser(rootPB: PersistenceBroker): Option[(Int, String)] = None
 
 	def name: String = this.getClass.getName
 

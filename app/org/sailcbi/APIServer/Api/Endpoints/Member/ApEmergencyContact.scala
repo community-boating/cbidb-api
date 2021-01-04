@@ -122,7 +122,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		})
 	}
 
-	def runValidations(parsed: ApEmergencyContactShape, pb: PersistenceBroker[MemberUserType]): ValidationResult = {
+	def runValidations(parsed: ApEmergencyContactShape, pb: PersistenceBroker): ValidationResult = {
 		val unconditionalValidations = List(
 			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
 			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),

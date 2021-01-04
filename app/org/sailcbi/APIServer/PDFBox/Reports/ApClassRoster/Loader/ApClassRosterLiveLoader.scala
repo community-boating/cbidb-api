@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Model.{ApClassInstance
 import org.sailcbi.APIServer.Services.PersistenceBroker
 
 object ApClassRosterLiveLoader extends ReportLoader[ApClassRosterLiveParameter, ApClassRosterModel] {
-	override def apply(param: ApClassRosterLiveParameter, pb: PersistenceBroker[_]): ApClassRosterModel = {
+	override def apply(param: ApClassRosterLiveParameter, pb: PersistenceBroker): ApClassRosterModel = {
 		val instanceData = pb.executePreparedQueryForSelect(new GetApClassInstanceData(param.instanceId)).head
 		val rosterData = pb.executePreparedQueryForSelect(new GetApClassSignups(param.instanceId))
 		rosterData.foreach(_.numberSessions.set(instanceData.numberSessions))

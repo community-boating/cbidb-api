@@ -33,7 +33,7 @@ case class Charge(
 		}
 	}
 
-	override def insertIntoLocalDB(pb: PersistenceBroker[_]): Unit = {
+	override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
 		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
 		this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
 	}

@@ -46,7 +46,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validate(pb: PersistenceBroker[_], oldEmail: String, newEmail: String): ValidationResult = {
+	def validate(pb: PersistenceBroker, oldEmail: String, newEmail: String): ValidationResult = {
 		val emailNotBlank = {
 			if (newEmail == null || newEmail.length == 0) ValidationResult.from("Email may not be blank")
 			else ValidationOk

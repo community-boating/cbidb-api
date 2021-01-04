@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, Storable
 class MemberUserType(override val userName: String) extends UserType(userName) {
 	override def companion: UserTypeObject[MemberUserType] = MemberUserType
 
-	override def getPwHashForUser(rootPB: PersistenceBroker[RootUserType]): Option[(Int, String)] = {
+	override def getPwHashForUser(rootPB: PersistenceBroker): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType, RootUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
@@ -29,7 +29,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 
-	def getAuthedPersonId(pb: PersistenceBroker[_]): Int = {
+	def getAuthedPersonId(pb: PersistenceBroker): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, RootUserType)) {
 			override def getQuery: String =
 				"""
@@ -65,7 +65,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 			.where(cols.pr_a.wrapFilter(_.equalsConstant(parentPersonId)))
 			.select(cols.personId :: personFields)
 
-		rc.executeQueryBuilder(qb).map(r => Person.construct(r.ps, rc))
+		rc.executeQueryBuilder(qb).map(r => Person.construct(r.ps))
 	}
 }
 

@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecial
 import org.sailcbi.APIServer.Services.PersistenceBroker
 
 object JpSpecialNeedsReportLiveLoader extends ReportLoader[JpSpecialNeedsReportLiveParameter, JpSpecialNeedsReportModel] {
-	override def apply(param: JpSpecialNeedsReportLiveParameter, pb: PersistenceBroker[_]): JpSpecialNeedsReportModel = {
+	override def apply(param: JpSpecialNeedsReportLiveParameter, pb: PersistenceBroker): JpSpecialNeedsReportModel = {
 		val specNeedsData = pb.executePreparedQueryForSelect(new GetSpecialNeedsData(param.from, param.to))
 
 		JpSpecialNeedsReportModel(

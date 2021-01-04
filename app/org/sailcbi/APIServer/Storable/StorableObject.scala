@@ -138,10 +138,10 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		valuesList equals valuesListReflection
 	}
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache[_]): T =
-		construct(ps, rc, None)
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]]): T =
+		construct(ps, None)
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache[_], tableAlias: Option[String]): T = {
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]], tableAlias: Option[String]): T = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])

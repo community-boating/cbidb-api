@@ -121,7 +121,7 @@ case class Kids(infants: Int, preschoolers: Int, schoolagers: Int, teenagers: In
 
 
 object Scholarship {
-	def getBaseJpPrice(pb: PersistenceBroker[MemberUserType]): Double = {
+	def getBaseJpPrice(pb: PersistenceBroker): Double = {
 		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
 			def getQuery: String =
 				s"""
@@ -144,7 +144,7 @@ object Scholarship {
 		} else kids
 	}
 
-	def getMyJpPrice(pb: PersistenceBroker[_], eii: Double, income: Double, totalKids: Int): Double = {
+	def getMyJpPrice(pb: PersistenceBroker, eii: Double, income: Double, totalKids: Int): Double = {
 		println(s"calling get jp price with eii $eii, income $income, kids $totalKids")
 		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
 			def getQuery: String =
@@ -157,7 +157,7 @@ object Scholarship {
 		pb.executePreparedQueryForSelect(q).head
 	}
 
-	def setOthersNonCurrent(pb: PersistenceBroker[_], personId: Int): Unit = {
+	def setOthersNonCurrent(pb: PersistenceBroker, personId: Int): Unit = {
 		val q = new HardcodedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""

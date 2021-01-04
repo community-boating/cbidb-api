@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 abstract class ReportFactory[T <: StorableClass] {
 	private val rcWrapper = new Initializable[RequestCache[_]]
-	private val pbWrapper = new Initializable[PersistenceBroker[_]]
+	private val pbWrapper = new Initializable[PersistenceBroker]
 	private val filterSpecWrapper = new Initializable[String]
 	private val fieldSpecWrapper = new Initializable[String]
 
@@ -22,7 +22,7 @@ abstract class ReportFactory[T <: StorableClass] {
 
 	def rc: RequestCache[_] = rcWrapper.get
 
-	def pb: PersistenceBroker[_] = pbWrapper.get
+	def pb: PersistenceBroker = pbWrapper.get
 
 	def filterSpec: String = filterSpecWrapper.get
 

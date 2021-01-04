@@ -10,7 +10,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import scala.concurrent.Future
 
 trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableResult[T, U] with InjectedController {
-	private def getFuture(cb: CacheBroker, pb: PersistenceBroker[_], params: T, ws: WSClient, url: String): Future[String] = {
+	private def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, ws: WSClient, url: String): Future[String] = {
 		val calculateValue: (() => Future[JsObject]) = () => {
 			val request: WSRequest = ws.url(url)
 			println("*** Making remote web request!")

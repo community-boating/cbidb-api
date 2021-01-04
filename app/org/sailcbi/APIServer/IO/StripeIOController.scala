@@ -17,7 +17,7 @@ import play.api.libs.json.{JsObject, JsString, JsValue}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism[T], logger: Logger)(implicit PA: PermissionsAuthority) {
+class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
 		if (TestUserType(Set(ApexUserType, PublicUserType, MemberUserType), rc.auth.companion)) {
 			apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
@@ -151,7 +151,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 				Charge,
 				List.empty,
 				Some((c: Charge) => c.status == "succeeded"),
-				(dbMech: StripeDatabaseIOMechanism[T]) => dbMech.getObjects(Charge, new GetLocalStripeCharges),
+				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Charge, new GetLocalStripeCharges),
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_ASSERT_NO_ACTION
@@ -160,7 +160,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 					Payout,
 					List.empty,
 					None,
-					(dbMech: StripeDatabaseIOMechanism[T]) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
+					(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
 					COMMIT_TYPE_DO,
 					COMMIT_TYPE_DO,
 					COMMIT_TYPE_ASSERT_NO_ACTION
@@ -174,7 +174,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 							BalanceTransaction,
 							List("payout=" + po.id),
 							Some((bt: BalanceTransaction) => bt.`type` != "payout"),
-							(dbMech: StripeDatabaseIOMechanism[T]) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
+							(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
 							COMMIT_TYPE_DO,
 							COMMIT_TYPE_DO,
 							COMMIT_TYPE_ASSERT_NO_ACTION,
@@ -193,7 +193,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		else throw new UnauthorizedAccessException("syncBalanceTransactions denied to userType " + rc.auth.companion)
 	}
 
-	def createStripeCustomerFromPerson(pb: PersistenceBroker[T], personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
+	def createStripeCustomerFromPerson(pb: PersistenceBroker, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
 		val (optionEmail, optionStripeCustomerId) = {
 			type ValidationResult = (Option[String], Option[String]) // email, existing stripe customerID
 			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberUserType)) {
@@ -347,7 +347,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		castableObj: StripeCastableToStorableObject[T_Stor],
 		getReqParameters: List[String],
 		filterGetReqResults: Option[T_Stor => Boolean],
-		getLocalObjectsQuery: StripeDatabaseIOMechanism[T] => List[T_Stor],
+		getLocalObjectsQuery: StripeDatabaseIOMechanism => List[T_Stor],
 		insertCommitType: CommitType,
 		updateCommitType: CommitType,
 		deleteCommitType: CommitType,

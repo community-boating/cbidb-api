@@ -98,7 +98,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		})
 	}
 
-	def runValidations(parsed: APRequiredInfoShape, pb: PersistenceBroker[_], personId: Int): ValidationResult = {
+	def runValidations(parsed: APRequiredInfoShape, pb: PersistenceBroker, personId: Int): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
 		val unconditionalValidations = List(
@@ -135,7 +135,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	}
 
 
-	def tooYoung(pb: PersistenceBroker[_], dob: String): ValidationResult = {
+	def tooYoung(pb: PersistenceBroker, dob: String): ValidationResult = {
 		val notTooYoung = pb.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -155,7 +155,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		}
 	}
 
-	def doUpdate(pb: PersistenceBroker[_], data: APRequiredInfoShape, personId: Int): Unit = {
+	def doUpdate(pb: PersistenceBroker, data: APRequiredInfoShape, personId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""

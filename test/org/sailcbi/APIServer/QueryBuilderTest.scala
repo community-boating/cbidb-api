@@ -28,7 +28,7 @@ class QueryBuilderTest extends FunSuite {
 				.from(types)
 				.select(List(columns.typeId, columns.typeName))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.typeId)
 				println( typeId + ":  " + row.getValue(columns.typeName))
@@ -56,7 +56,7 @@ class QueryBuilderTest extends FunSuite {
 				.innerJoin(types, columns.instances_typeId.wrapFilter(_.equalsField(columns.types_typeId)))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 				val typeName = row.getValue(columns.typeName)
@@ -100,14 +100,14 @@ class QueryBuilderTest extends FunSuite {
 				))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 			//	val typeName = row.getValue(columns.typeName)
 				val instanceId = row.getValue(columns.instanceId)
 		//		val teamId = row.getValue(columns.teamId)
 				println( instanceId + ":  " + typeId /*+ "(" + typeName + ")  - "*/ /*+ teamId*/)
-				val classType = JpClassType.construct(row.ps, rc)
+				val classType = JpClassType.construct(row.ps)
 				println("typeId: " + classType.values.typeId)
 				println("typeName: " + classType.values.typeName)
 				println("displayOrder: " + classType.values.displayOrder)
@@ -157,13 +157,13 @@ class QueryBuilderTest extends FunSuite {
 				))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 				val typeName = row.getValue(columns.typeName)
 				val instanceId = row.getValue(columns.instances_instanceId)
 				println( instanceId + ":  " + typeId /*+ "(" + typeName + ")  - "*/ /*+ teamId*/)
-				val classType = JpClassType.construct(row.ps, rc)
+				val classType = JpClassType.construct(row.ps)
 				println("typeId: " + classType.values.typeId)
 				println("typeName: " + classType.values.typeName)
 				println("displayOrder: " + classType.values.displayOrder)

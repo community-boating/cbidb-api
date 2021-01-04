@@ -13,8 +13,8 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache[T], preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends PersistenceBroker[T](dbConnection, rc, preparedQueriesOnly, readOnly)
+abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache[_], preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker(dbConnection, rc, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
 
@@ -92,7 +92,7 @@ abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: D
 		sb.append(" FROM " + obj.entityName)
 		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
 		val p = new Profiler
-		val ret = rows.map(r => obj.construct(r, rc))
+		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")
 		ret
 	}
@@ -104,7 +104,7 @@ abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: D
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
 		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
-		if (rows.length == 1) Some(obj.construct(rows.head, rc))
+		if (rows.length == 1) Some(obj.construct(rows.head))
 		else None
 	}
 
@@ -122,7 +122,7 @@ abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: D
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
-			rows.map(r => obj.construct(r, rc))
+			rows.map(r => obj.construct(r))
 		} else {
 			// Too many IDs; make a filter table
 			getObjectsByIdsWithFilterTable(obj, ids, fetchSize)
@@ -147,7 +147,7 @@ abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: D
 			}
 			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 			val p = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc))
+			val ret = rows.map(r => obj.construct(r))
 			p.lap("finished construction")
 			ret
 		}
@@ -200,7 +200,7 @@ abstract class RelationalBroker[T <: UserType] private[Services](dbConnection: D
 
 			println(" =======   cleaned up filter table   =======")
 			val p2 = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc))
+			val ret = rows.map(r => obj.construct(r))
 			p2.lap("finished construction")
 			ret
 		})

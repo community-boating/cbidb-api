@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, Persis
 class ProtoPersonUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[ProtoPersonUserType] = ProtoPersonUserType
 
-	def getAuthedPersonId(pb: PersistenceBroker[ProtoPersonUserType]): Option[Int] = {
+	def getAuthedPersonId(pb: PersistenceBroker): Option[Int] = {
 		val ids = pb.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 		// TODO: critical error if this list has >1 element
 		ids.headOption

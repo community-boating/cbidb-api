@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.UserType
 import org.sailcbi.APIServer.Services.PersistenceBroker
 
-class StripeDatabaseIOMechanism[T <: UserType] private[Services] (pb: PersistenceBroker[T]) {
+class StripeDatabaseIOMechanism private[Services] (pb: PersistenceBroker) {
 	val self = this
 	val whitelistedClasses: Set[CastableToStorableObject[_]] = Set(
 		Charge,

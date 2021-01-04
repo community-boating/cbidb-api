@@ -27,7 +27,7 @@ class RequestCache[T <: UserType] private[Services](
 	private val self = this
 	// All public requests need to go through user type-based security
 
-	val pb: PersistenceBroker[T] = {
+	val pb: PersistenceBroker = {
 		println("In RC:  " + PA.toString)
 		val pbReadOnly = PA.readOnlyDatabase
 		if (auth.isInstanceOf[RootUserType]) new OracleBroker(secrets.dbConnection, this, false, pbReadOnly)

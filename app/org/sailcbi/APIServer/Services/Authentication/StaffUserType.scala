@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 class StaffUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[StaffUserType] = StaffUserType
 
-	override def getPwHashForUser(rootPB: PersistenceBroker[RootUserType]): Option[(Int, String)] = {
+	override def getPwHashForUser(rootPB: PersistenceBroker): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))

@@ -122,7 +122,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 		})
 	}
 
-	def runValidations(parsed: EmergencyContactShape, pb: PersistenceBroker[_], juniorId: Option[Int]): ValidationResult = {
+	def runValidations(parsed: EmergencyContactShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
 		val unconditionalValidations = List(
 			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
 			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),
