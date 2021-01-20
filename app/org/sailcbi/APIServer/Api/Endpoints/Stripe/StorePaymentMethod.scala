@@ -4,7 +4,6 @@ import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -20,10 +19,10 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 				val pb = rc.pb
 				val stripe = rc.getStripeIOController(ws)
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
-				val totalInCents = PortalLogic.getOrderTotalCents(pb, orderId)
-				val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
+				val totalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
+				val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 				customerIdOption match {
 					case None => Future(Ok("fail"))
 					case Some(customerId) => {
@@ -36,7 +35,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 								}
 							}
 							case e: CriticalError[_, StripeError] => throw e.e
-							case _: NetSuccess[_, StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, totalInCents).flatMap(pi => {
+							case _: NetSuccess[_, StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, totalInCents).flatMap(pi => {
 								stripe.updatePaymentIntentWithPaymentMethod(pi.id, parsed.paymentMethodId).map({
 									case ve: ValidationError[_, StripeError] =>  {
 										println(ve.errorObject)

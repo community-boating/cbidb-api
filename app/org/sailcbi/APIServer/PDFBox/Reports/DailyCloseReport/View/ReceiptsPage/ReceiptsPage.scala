@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.ReceiptsPage
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, Drawable, DrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.{DailyCloseReportModel, Denoms}
+
+import java.awt.Color
 
 class ReceiptsPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float) extends Drawable {
 	val leftWidth = 55f

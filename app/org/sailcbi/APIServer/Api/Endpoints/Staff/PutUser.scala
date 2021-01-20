@@ -22,7 +22,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					val userId: Int = id.toString().toInt
 					println(s"its an update: $userId")
 
-					PA.withRequestCache(StaffUserType, None, parsedRequest, rc => {
+					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
 						val pb = rc.pb
 
 						println(parsed)
@@ -30,10 +30,10 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
 								// do update
-								val user = pb.getObjectById(User, userId).get
+								val user = rc.getObjectById(User, userId).get
 								setValues(user, parsed)
 
-								pb.commitObjectToDatabase(user)
+								rc.commitObjectToDatabase(user)
 
 								Future(Ok(new JsObject(Map(
 									"userId" -> JsNumber(userId)
@@ -45,7 +45,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 				}
 				case None => {
 					println(s"its a create")
-					PA.withRequestCache(StaffUserType, None, parsedRequest, rc => {
+					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
 						val pb = rc.pb
 						runValidations(parsed, pb, None).combine(checkUsernameUnique(pb, parsed.username.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
@@ -54,7 +54,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 								setValues(user, parsed)
 								user.update(_.userName, parsed.username.get)
 
-								pb.commitObjectToDatabase(user)
+								rc.commitObjectToDatabase(user)
 								Future(Ok(new JsObject(Map(
 									"userId" -> JsNumber(user.getID)
 								))))

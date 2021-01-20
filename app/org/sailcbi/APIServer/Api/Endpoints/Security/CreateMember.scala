@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -15,11 +15,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, CreateMemberShape.apply)(cms => {
 				val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonUserType.COOKIE_NAME).map(_.value)
 				createMember(
-					rc.pb,
+					rc,
 					firstName = cms.firstName,
 					lastName = cms.lastName,
 					username = cms.username,
@@ -49,7 +49,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMemberValidations(
-		pb: PersistenceBroker,
+		rc: RequestCache[_],
 		firstName: String,
 		lastName: String,
 		username: String,
@@ -67,7 +67,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					  |select person_id from persons where pw_hash is not null and lower(email) = ?
 					  |""".stripMargin
 			}
-			pb.executePreparedQueryForSelect(q).isEmpty
+			rc.executePreparedQueryForSelect(q).isEmpty
 		}, "There is already an account for that email address.")
 
 		ValidationResult.combine(List(
@@ -86,16 +86,16 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def createMember(
-			pb: PersistenceBroker,
+			rc: RequestCache[_],
 			firstName: String,
 			lastName: String,
 			username: String,
 			pwHash: String,
 			protoPersonValue: Option[String]
 	): Either[ValidationError, Int] = {
-		createMemberValidations(pb, firstName, lastName, username, pwHash, protoPersonValue) match {
+		createMemberValidations(rc, firstName, lastName, username, pwHash, protoPersonValue) match {
 			case ve: ValidationError => Left(ve)
-			case ValidationOk => getProtoPersonID(pb, protoPersonValue) match {
+			case ValidationOk => getProtoPersonID(rc, protoPersonValue) match {
 				case None => {
 					val insertQ = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 						override val params: List[String] = List(
@@ -125,7 +125,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							  |  )
 							  |""".stripMargin
 					}
-					val newPersonId = pb.executePreparedQueryForInsert(insertQ).get.toInt
+					val newPersonId = rc.executePreparedQueryForInsert(insertQ).get.toInt
 					Right(newPersonId)
 				}
 				case Some(protoId: Int) => {
@@ -150,14 +150,14 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							  |and person_id = ?
 							  |""".stripMargin
 					}
-					pb.executePreparedQueryForUpdateOrDelete(updateQ)
+					rc.executePreparedQueryForUpdateOrDelete(updateQ)
 					Right(protoId)
 				}
 			}
 		}
 	}
 
-	private def getProtoPersonID(pb: PersistenceBroker, protoPersonValue: Option[String]): Option[Int] = {
+	private def getProtoPersonID(rc: RequestCache[_], protoPersonValue: Option[String]): Option[Int] = {
 		protoPersonValue match {
 			case None => None
 			case Some(v) => {
@@ -171,7 +171,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						  |select person_id from persons where PROTO_STATE = '${MagicIds.PERSONS_PROTO_STATE.IS_PROTO}' and PROTOPERSON_COOKIE = ?
 						  |""".stripMargin
 				}
-				val results = pb.executePreparedQueryForSelect(q)
+				val results = rc.executePreparedQueryForSelect(q)
 				if (results.length == 1) Some(results.head)
 				else None
 			}

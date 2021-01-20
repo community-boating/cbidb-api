@@ -18,12 +18,12 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			val data = request.body.asJson
-			Scholarship.setOthersNonCurrent(pb, personId)
-			val jpPrice = Scholarship.getBaseJpPrice(pb)
+			Scholarship.setOthersNonCurrent(rc, personId)
+			val jpPrice = Scholarship.getBaseJpPrice(rc)
 			val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
 				override val pkName: Option[String] = None
@@ -36,7 +36,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 						 """.stripMargin
 			}
 
-			pb.executePreparedQueryForInsert(insertQuery)
+			rc.executePreparedQueryForInsert(insertQuery)
 			Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 		})
 	})
@@ -44,12 +44,12 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, ScholarshipYesShape.apply)(parsed => {
-				Scholarship.setOthersNonCurrent(pb, personId)
+				Scholarship.setOthersNonCurrent(rc, personId)
 				val adults = {
 					if (parsed.numberWorkers < 1) 1
 					else if (parsed.numberWorkers > 2) 2
@@ -76,9 +76,9 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 
 					override val params: List[String] = List(adults.toString, children.toString)
 				}
-				val eiis = pb.executePreparedQueryForSelect(eiiQ)
+				val eiis = rc.executePreparedQueryForSelect(eiiQ)
 				if (eiis.length == 1) {
-					val myJpPrice = Scholarship.getMyJpPrice(pb, eiis.head, parsed.income, children)
+					val myJpPrice = Scholarship.getMyJpPrice(rc, eiis.head, parsed.income, children)
 					val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
 						override val params: List[String] = List(personId.toString)
 						override val pkName: Option[String] = None
@@ -109,7 +109,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 					 """.stripMargin
 					}
 
-					pb.executePreparedQueryForInsert(insertQuery)
+					rc.executePreparedQueryForInsert(insertQuery)
 				} else logger.error("Unable to find eii for response: " + parsed.toString)
 				Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 			})
@@ -121,7 +121,7 @@ case class Kids(infants: Int, preschoolers: Int, schoolagers: Int, teenagers: In
 
 
 object Scholarship {
-	def getBaseJpPrice(pb: PersistenceBroker): Double = {
+	def getBaseJpPrice(rc: RequestCache[_]): Double = {
 		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
 			def getQuery: String =
 				s"""
@@ -130,7 +130,7 @@ object Scholarship {
 
 			def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 		}
-		pb.executePreparedQueryForSelect(q).head
+		rc.executePreparedQueryForSelect(q).head
 	}
 
 	def reduceKids(kids: Kids): Kids = {
@@ -144,7 +144,7 @@ object Scholarship {
 		} else kids
 	}
 
-	def getMyJpPrice(pb: PersistenceBroker, eii: Double, income: Double, totalKids: Int): Double = {
+	def getMyJpPrice(rc: RequestCache[_], eii: Double, income: Double, totalKids: Int): Double = {
 		println(s"calling get jp price with eii $eii, income $income, kids $totalKids")
 		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
 			def getQuery: String =
@@ -154,10 +154,10 @@ object Scholarship {
 
 			def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 		}
-		pb.executePreparedQueryForSelect(q).head
+		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def setOthersNonCurrent(pb: PersistenceBroker, personId: Int): Unit = {
+	def setOthersNonCurrent(rc: RequestCache[_], personId: Int): Unit = {
 		val q = new HardcodedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override def getQuery: String =
 				s"""
@@ -166,6 +166,6 @@ object Scholarship {
 				  |    and season = util_pkg.get_current_season
 				""".stripMargin
 		}
-		pb.executePreparedQueryForUpdateOrDelete(q)
+		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 }

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.UserType
+import org.sailcbi.APIServer.Services.Authentication.UserTypeObject
 
 abstract class PreparedQueryForSelect[T](
-	override val allowedUserTypes: Set[UserType],
+	override val allowedUserTypes: Set[UserTypeObject[_]],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQueryForSelect[T](allowedUserTypes, useTempSchema) {
 	val params: List[String] = List.empty

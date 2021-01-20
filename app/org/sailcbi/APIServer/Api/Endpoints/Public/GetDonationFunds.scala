@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetDonationFunds @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCache(PublicUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
 			val pb = rc.pb
 
 			val q = new PreparedQueryForSelect[DonationFund](Set(PublicUserType)) {
@@ -31,7 +31,7 @@ class GetDonationFunds @Inject()(implicit val exec: ExecutionContext) extends In
 					  |order by display_order
 					  |""".stripMargin
 			}
-			val funds = pb.executePreparedQueryForSelect(q)
+			val funds = rc.executePreparedQueryForSelect(q)
 			implicit val format = DonationFund.format
 			Future(Ok(Json.toJson(funds)))
 		})

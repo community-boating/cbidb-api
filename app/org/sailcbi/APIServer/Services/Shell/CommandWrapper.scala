@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services.Shell
 
-import java.io.{BufferedReader, IOException, InputStreamReader, StringReader}
-
 import org.sailcbi.APIServer.CbiUtil.Initializable
+
+import java.io.{BufferedReader, IOException, InputStreamReader, StringReader}
 
 class CommandWrapper private[Shell](
 	command: String,

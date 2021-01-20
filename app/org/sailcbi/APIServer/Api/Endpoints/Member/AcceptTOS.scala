@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
@@ -18,10 +18,10 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		PA.withParsedPostBodyJSON(request.body.asJson, AcceptTOSShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.personId, rc => {
 				val pb = rc.pb
-				val parentId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, parentId)
+				val parentId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, parentId)
 
-				doAccept(pb, orderId, parsed.personId)
+				doAccept(rc, orderId, parsed.personId)
 			})
 		})
 	}
@@ -31,14 +31,14 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
-			doAccept(pb, orderId, personId)
+			doAccept(rc, orderId, personId)
 		})
 	}
 
-	private def doAccept(pb: PersistenceBroker, orderId: Int, personId: Int): Future[Result] = {
+	private def doAccept(rc: RequestCache[_], orderId: Int, personId: Int): Future[Result] = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(personId.toString, orderId.toString)
 
@@ -51,7 +51,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				  |  and order_id = ?
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForUpdateOrDelete(q)
+		rc.executePreparedQueryForUpdateOrDelete(q)
 		Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 	}
 

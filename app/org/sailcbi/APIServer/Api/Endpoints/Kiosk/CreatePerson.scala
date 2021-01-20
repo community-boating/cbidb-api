@@ -29,7 +29,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(KioskUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 
@@ -73,7 +73,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						)
 						override val pkName: Option[String] = Some("person_id")
 					}
-					val id = pb.executePreparedQueryForInsert(q)
+					val id = rc.executePreparedQueryForInsert(q)
 
 					Future {
 						Ok(JsObject(Map("personID" -> JsNumber(id.getOrElse("-1").toInt))))

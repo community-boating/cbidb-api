@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -15,9 +14,9 @@ class GetApClassesForCalendar @Inject()(implicit val exec: ExecutionContext) ext
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
+			val personId = rc.auth.getAuthedPersonId(rc)
 
-			val instances = PortalLogic.getApClassesForCalendar(pb, personId)
+			val instances = PortalLogic.getApClassesForCalendar(rc, personId)
 
 			Future(Ok(Json.toJson(instances)))
 		})

@@ -4,8 +4,7 @@ import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,10 +15,10 @@ class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionConte
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val customerIdOption = PortalLogic.getStripeCustomerId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 
 			customerIdOption match {
 				case None => Future(Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject()))

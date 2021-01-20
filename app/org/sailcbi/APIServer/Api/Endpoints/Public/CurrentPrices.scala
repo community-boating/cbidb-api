@@ -13,12 +13,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCache(PublicUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val membershipPrices = PortalLogic.getAllMembershipPrices(pb)
-			val (dwPrice, gpPrice) = PortalLogic.getDwGpPrices(pb)
-			val discounts = PortalLogic.getAllDiscounts(pb)
+			val membershipPrices = PortalLogic.getAllMembershipPrices(rc)
+			val (dwPrice, gpPrice) = PortalLogic.getDwGpPrices(rc)
+			val discounts = PortalLogic.getAllDiscounts(rc)
 
 			val memberships: List[MembershipsShape] = membershipPrices.map(mp => {
 				val (membershipId, membershipBasePrice) = mp

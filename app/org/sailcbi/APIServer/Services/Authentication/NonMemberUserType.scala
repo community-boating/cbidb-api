@@ -1,5 +1,3 @@
 package org.sailcbi.APIServer.Services.Authentication
 
-trait NonMemberUserType extends UserType {
-
-}
+abstract class NonMemberUserType(override val userName: String) extends UserType(userName)

@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.NonMemberUserType
+import org.sailcbi.APIServer.Services.Authentication.{NonMemberUserType, UserTypeObject}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -13,24 +13,24 @@ import scala.concurrent.Future
 trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableResult[T, U] with InjectedController {
 	type PQ = HardcodedQueryForSelectCastableToJSObject[U]
 
-	protected def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, pq: PQ): Future[String] = {
+	protected def getFuture(cb: CacheBroker, rc: RequestCache[_], params: T, pq: PQ): Future[String] = {
 		val calculateValue: (() => Future[JsObject]) = () => Future {
-			val queryResults = pb.executePreparedQueryForSelect(pq)
+			val queryResults = rc.executePreparedQueryForSelect(pq)
 
 			JsObject(Map(
 				"rows" -> JsArray(queryResults.map(r => pq.mapCaseObjectToJsArray(r))),
 				"metaData" -> pq.getColumnsNamesAsJSObject
 			))
 		}
-		getFuture(cb, pb, params, calculateValue)
+		getFuture(cb, rc, params, calculateValue)
 	}
 
-	protected def evaluate(ut: NonMemberUserType, params: T, pq: PQ)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	protected def evaluate[T_User <: NonMemberUserType](ut: UserTypeObject[T_User], params: T, pq: PQ)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			PA.withRequestCache(ut, None, ParsedRequest(request), rc => {
+			PA.withRequestCache[T_User](ut)(None, ParsedRequest(request), rc => {
 				val cb: CacheBroker = rc.cb
 				val pb = rc.pb
-				getFuture(cb, pb, params, pq).map(s => {
+				getFuture(cb, rc, params, pq).map(s => {
 					Ok(s).as("application/json")
 				})
 			})

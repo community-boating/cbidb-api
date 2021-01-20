@@ -2,35 +2,13 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, ResultSetWrapper}
 
+class ProtoPersonUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[ProtoPersonUserType] = ProtoPersonUserType
 
-object ProtoPersonUserType extends NonMemberUserType {
-	val COOKIE_NAME = "CBIDB_PROTO"
-	val COOKIE_VALUE_PREFIX = "PROTO_"
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
-		val cookies = request.cookies.filter(_.name == COOKIE_NAME)
-		if (cookies.isEmpty) None
-		else if (cookies.size > 1) None
-		else {
-			val value = cookies.toList.head.value
-			if (value.startsWith(COOKIE_VALUE_PREFIX)) Some(value)
-			else None
-		}
-	}
-
-	def getAuthenticatedUsernameFromSuperiorAuth(
-			currentAuthentication: AuthenticationInstance,
-			requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
-
-	def getAuthedPersonId(cookieValue: String, pb: PersistenceBroker): Option[Int] = {
-		val ids = pb.executePreparedQueryForSelect(getMatchingPersonIDsQuery(cookieValue))
+	def getAuthedPersonId(rc: RequestCache[_]): Option[Int] = {
+		val ids = rc.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 		// TODO: critical error if this list has >1 element
 		ids.headOption
 	}
@@ -45,4 +23,27 @@ object ProtoPersonUserType extends NonMemberUserType {
 		override val params: List[String] = List(cookieValue)
 		override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 	}
+}
+
+object ProtoPersonUserType extends UserTypeObject[ProtoPersonUserType] {
+	val COOKIE_NAME = "CBIDB_PROTO"
+	val COOKIE_VALUE_PREFIX = "PROTO_"
+
+	override def create(userName: String): ProtoPersonUserType = new ProtoPersonUserType(userName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+		val cookies = request.cookies.filter(_.name == COOKIE_NAME)
+		if (cookies.isEmpty) None
+		else if (cookies.size > 1) None
+		else {
+			val value = cookies.toList.head.value
+			if (value.startsWith(COOKIE_VALUE_PREFIX)) Some(value)
+			else None
+		}
+	}
+
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
+		requiredUserName: Option[String]
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
 }

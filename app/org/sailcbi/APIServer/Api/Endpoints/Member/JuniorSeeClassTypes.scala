@@ -16,7 +16,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Inj
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[SeeTypeResult](Set(MemberUserType)) {
@@ -38,7 +38,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Inj
 			}
 
 			val arr = JsArray(
-				pb.executePreparedQueryForSelect(select)
+				rc.executePreparedQueryForSelect(select)
 						.map(t => JsObject(Map(
 							"typeId" -> JsNumber(t.typeId),
 							"canSee" -> JsBoolean(t.canSee)

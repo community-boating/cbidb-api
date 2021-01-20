@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,14 +15,14 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
 					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject()))
 				} else {
-					PortalLogic.addGiftCertificateToOrder(pb, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
+					PortalLogic.addGiftCertificateToOrder(rc, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
 						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 						case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 					}
@@ -36,11 +35,11 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.unapplyGCFromOrder(pb, orderId, parsed.certId)
+				PortalLogic.unapplyGCFromOrder(rc, orderId, parsed.certId)
 
 				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 			})

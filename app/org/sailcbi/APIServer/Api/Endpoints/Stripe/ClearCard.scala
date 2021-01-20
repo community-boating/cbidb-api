@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.PaymentMethod
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -15,14 +14,14 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val stripeIOController = rc.getStripeIOController(ws)
 
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
-			val stripeCustomerId = PortalLogic.getStripeCustomerId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
+			val stripeCustomerId = PortalLogic.getStripeCustomerId(rc, personId)
 
-			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(pb, orderId) > 0
+			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 
 			if (orderHasStaggeredPayments) {
 				stripeIOController.getCustomerDefaultPaymentMethod(stripeCustomerId.get).flatMap({
@@ -33,7 +32,7 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 					case f: NetFailure[_, _] => Future(Ok("error"))
 				})
 			} else {
-				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
+				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
 				Future(Ok("done"))
 			}
 		})

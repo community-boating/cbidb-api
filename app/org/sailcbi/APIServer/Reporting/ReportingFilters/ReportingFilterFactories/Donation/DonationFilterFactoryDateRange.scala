@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.Donation
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Donation
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
 	val displayName: String = "Within Date Range"
@@ -15,12 +15,12 @@ class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
 		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Donation] = new ReportingFilterFunction(pb, (pb: PersistenceBroker) => {
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Donation] = new ReportingFilterFunction(rc, (rc: RequestCache[_]) => {
 		val split = arg.split(",")
 		val start: LocalDate = LocalDate.parse(split(0), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 		val end: LocalDate = LocalDate.parse(split(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
-		pb.getObjectsByFilters(
+		rc.getObjectsByFilters(
 			Donation,
 			List(
 				Donation.fields.donationDate.greaterEqualConstant(start),

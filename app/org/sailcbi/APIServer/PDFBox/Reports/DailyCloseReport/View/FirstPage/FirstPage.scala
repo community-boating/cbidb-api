@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FirstPage
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.Drawable.Drawable
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.DailyCloseReportModel
 import org.sailcbi.APIServer.PDFBox.{ContentStreamDecorator, PDFReport}
+
+import java.awt.Color
 
 class FirstPage(data: DailyCloseReportModel, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, defaultColor: Color, left: Float, top: Float, document: PDDocument, newPage: (PDDocument, PDRectangle) => ContentStreamDecorator) extends Drawable {
 	def draw(contentStreamDecorator: ContentStreamDecorator): Unit =

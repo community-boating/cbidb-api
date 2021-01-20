@@ -16,7 +16,7 @@ class PostSymonRun @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		val logger = PA.logger
 
-		PA.withRequestCache(SymonUserType, None, req, rc => {
+		PA.withRequestCache(SymonUserType)(None, req, rc => {
 			val pb = rc.pb
 
 			if (
@@ -28,7 +28,7 @@ class PostSymonRun @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 					Ok("alarm raised.")
 				}
 			} else {
-				pb.executePreparedQueryForInsert(new StoreSymonRun(
+				rc.executePreparedQueryForInsert(new StoreSymonRun(
 					req.postParams("symon-host"),
 					req.postParams("symon-program"),
 					req.postParams("symon-argString"),

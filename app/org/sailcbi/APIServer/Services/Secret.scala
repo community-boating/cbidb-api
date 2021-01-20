@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 
-class Secret[T](auth: (RequestCache => Boolean)) {
+class Secret[T](auth: (RequestCache[_] => Boolean)) {
 	val secret = new Initializable[T]
 
-	def get(rc: RequestCache): T = {
+	def get(rc: RequestCache[_]): T = {
 		if (auth(rc)) secret.get
 		else throw new Exception("Unauthorized access to secret")
 	}

@@ -14,8 +14,8 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	private def get(userId: Option[Int], theRC: RequestCache): List[UserShape] = {
-		implicit val rc: RequestCache = theRC
+	private def get(userId: Option[Int], theRC: RequestCache[_]): List[UserShape] = {
+		implicit val rc: RequestCache[_] = theRC
 		val pb = rc.pb
 		val users = {
 			val users = TableAlias(User)
@@ -54,7 +54,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	def getOne(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val logger = PA.logger
-		PA.withRequestCache(StaffUserType, None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffUserType)(None, ParsedRequest(req), rc => {
 			get(Some(userId), rc) match {
 				case l :: _ => {
 					implicit val format = UserShape.format
@@ -68,7 +68,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val logger = PA.logger
-		PA.withRequestCache(StaffUserType, None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffUserType)(None, ParsedRequest(req), rc => {
 			val users = get(None, rc)
 			implicit val format = UserShape.format
 			Future(Ok(Json.toJson(users)))

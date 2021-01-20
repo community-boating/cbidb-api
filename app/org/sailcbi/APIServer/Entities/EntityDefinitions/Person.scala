@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
-import org.sailcbi.APIServer.Services.PersistenceBroker
-import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
+import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
 import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import org.sailcbi.APIServer.Storable._
 
@@ -43,10 +43,8 @@ class Person extends StorableClass {
 		values.zip
 	)
 
-	override def toString: String = this.valuesList.filter(_.getPersistenceFieldName != "PW_HASH").toString()
-
-	def setPersonRatings(pb: PersistenceBroker): Unit = {
-		references.personRatings set pb.getObjectsByFilters(
+	def setPersonRatings(rc: RequestCache[_]): Unit = {
+		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
 		).toSet
@@ -67,6 +65,17 @@ class Person extends StorableClass {
 			val subRatings: Set[Rating] = ratings.filter(_.values.overriddenBy.get == Some(ratingId))
 			subRatings.map(_.values.ratingId.get).foldLeft(false)((agg, r) => agg || hasRatingSomehow(ratings, r, programId))
 		}
+	}
+
+	override def toString(): String = {
+		def showValue(v: FieldValue[_]): String = {
+			if (v.getPersistenceLiteral._2.nonEmpty) {
+				v.getPersistenceLiteral._2.head
+			} else {
+				v.getPersistenceLiteral._1
+			}
+		}
+		s"(PERSON ${this.valuesList.filter(_.isSet).map(v => s"[${v.getPersistenceFieldName}:${showValue(v)}]")})"
 	}
 }
 

@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.View
 
-import java.time.format.DateTimeFormatter
-
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_CENTER, Drawable, DrawableTable}
 import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpClassRosterModel
+
+import java.time.format.DateTimeFormatter
 
 class JpRosterTitle(data: JpClassRosterModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {
 	val title: String = List(

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.JsonUtil
-import org.sailcbi.APIServer.Services.{CacheBroker, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, RequestCache}
 import play.api.libs.json._
 
 import java.time.format.DateTimeFormatter
@@ -28,7 +28,7 @@ trait CacheableResult[T <: ParamsObject, U] {
 
 	//def getJSONResultFuture(pb: PersistenceBroker, params: T): Future[JsObject]
 
-	def getFuture(cb: CacheBroker, pb: PersistenceBroker, params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
+	def getFuture(cb: CacheBroker, rc: RequestCache[_], params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
 		val finalResult: Future[String] = tryCache(cb, params) match {
 			case Some(s) => {
 				Future {
@@ -37,7 +37,7 @@ trait CacheableResult[T <: ParamsObject, U] {
 			}
 			case None => {
 				println("cache miss")
-				tryGet(cb, pb, params, calculateValue)
+				tryGet(cb, rc, params, calculateValue)
 			}
 		}
 		finalResult
@@ -67,7 +67,7 @@ trait CacheableResult[T <: ParamsObject, U] {
 	// basically works.  Not convinced its 100% threadsafe under heavy parallel load
 	// TODO: confirm crash recovery works, especially when there are queued waiters
 	// TODO: if waiters are waiting and a crash happens, they should all try themselves?
-	private def tryGet(cb: CacheBroker, pb: PersistenceBroker, params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
+	private def tryGet(cb: CacheBroker, rc: RequestCache[_], params: T, calculateValue: (() => Future[JsObject])): Future[String] = {
 		val cacheKey = getCacheBrokerKey(params)
 		println("here we go")
 		synchronized {

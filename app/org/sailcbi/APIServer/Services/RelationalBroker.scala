@@ -1,9 +1,5 @@
 package org.sailcbi.APIServer.Services
 
-import java.security.MessageDigest
-import java.sql._
-import java.time.{LocalDate, LocalDateTime, ZoneId}
-
 import org.sailcbi.APIServer.CbiUtil.Profiler
 import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.Storable.FieldValues.FieldValue
@@ -11,10 +7,13 @@ import org.sailcbi.APIServer.Storable.Fields.{NullableDateDatabaseField, Nullabl
 import org.sailcbi.APIServer.Storable.StorableQuery._
 import org.sailcbi.APIServer.Storable._
 
+import java.security.MessageDigest
+import java.sql._
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, rc: RequestCache, preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends PersistenceBroker(dbConnection, rc, preparedQueriesOnly, readOnly)
+abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker(dbConnection, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
 
@@ -92,7 +91,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		sb.append(" FROM " + obj.entityName)
 		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
 		val p = new Profiler
-		val ret = rows.map(r => obj.construct(r, rc))
+		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")
 		ret
 	}
@@ -104,7 +103,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
 		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
-		if (rows.length == 1) Some(obj.construct(rows.head, rc))
+		if (rows.length == 1) Some(obj.construct(rows.head))
 		else None
 	}
 
@@ -122,7 +121,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
-			rows.map(r => obj.construct(r, rc))
+			rows.map(r => obj.construct(r))
 		} else {
 			// Too many IDs; make a filter table
 			getObjectsByIdsWithFilterTable(obj, ids, fetchSize)
@@ -147,7 +146,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 			}
 			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 			val p = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc))
+			val ret = rows.map(r => obj.construct(r))
 			p.lap("finished construction")
 			ret
 		}
@@ -229,7 +228,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 
 			println(" =======   cleaned up filter table   =======")
 			val p2 = new Profiler
-			val ret = rows.map(r => obj.construct(r, rc))
+			val ret = rows.map(r => obj.construct(r))
 			p2.lap("finished construction")
 			ret
 		})
@@ -448,7 +447,10 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		sb.append(fieldValues.map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
 		sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
-		executeSQLForUpdateOrDelete(sb.toString(), false, params)
+		val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
+		if (updated != 1) {
+			throw new Exception("Attempted to update storable " + i.getCompanion.entityName + ":" + i.getID + ", updated " + updated + " records")
+		}
 	}
 
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {

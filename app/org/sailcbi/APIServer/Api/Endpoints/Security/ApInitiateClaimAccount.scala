@@ -15,13 +15,13 @@ class ApInitiateClaimAccount @Inject()(implicit exec: ExecutionContext) extends 
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApInitiateClaimAccountShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType, None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
-				PortalLogic.apCanClaim(pb, parsed.email) match {
+				PortalLogic.apCanClaim(rc, parsed.email) match {
 					case Left(e) => Future(Ok(ValidationResult.from(e).toResultError.asJsObject()))
 					case Right(personId) => {
-						PortalLogic.apDoClaim(pb, personId)
+						PortalLogic.apDoClaim(rc, personId)
 						Future(Ok(new JsObject(Map(
 							"success" -> JsBoolean(true)
 						))))

@@ -1,19 +1,19 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.ApClassInstance.{ApClassInstanceFilterFactoryType, ApClassInstanceFilterFactoryYear}
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactory
 import org.sailcbi.APIServer.Reporting.{ReportFactory, ReportingField}
 import org.sailcbi.APIServer.Storable.StorableObject
 
+import java.time.format.DateTimeFormatter
+
 class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
-	lazy val apClassFormats: List[ApClassFormat] = pb.getObjectsByFilters(ApClassFormat, List(), 20)
+	lazy val apClassFormats: List[ApClassFormat] = rc.getObjectsByFilters(ApClassFormat, List(), 20)
 
-	lazy val apClassTypes: List[ApClassType] = pb.getObjectsByFilters(ApClassType, List(), 20)
+	lazy val apClassTypes: List[ApClassType] = rc.getObjectsByFilters(ApClassType, List(), 20)
 
-	lazy val apClassSessions: List[ApClassSession] = pb.getObjectsByFilters(
+	lazy val apClassSessions: List[ApClassSession] = rc.getObjectsByFilters(
 		ApClassSession,
 		List(ApClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
 		1000

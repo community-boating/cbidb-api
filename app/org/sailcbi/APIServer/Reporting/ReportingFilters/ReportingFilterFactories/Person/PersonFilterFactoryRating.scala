@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Has Rating"
@@ -11,29 +11,29 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 		(ARG_DROPDOWN, Rating.specialIDs.RATING_ID_MERC_GREEN.toString),
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
-		implicit val pb: PersistenceBroker = _pb
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+		implicit val rc: RequestCache[_] = _rc
 
 		type PersonID = Int
 
 		val ratingId: Int = arg.toInt
 
-		val allRatings = pb.getAllObjectsOfClass(Rating)
+		val allRatings = rc.getAllObjectsOfClass(Rating)
 
 		val ratingsToHave: List[Int] = Rating.getAllHigherRatingsThanRating(allRatings, ratingId).map(_.values.ratingId.get)
 
-		val personIDs: List[Int] = pb.getObjectsByFilters(
+		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.ratingId.inList(ratingsToHave)),
 			10000
 		).map(_.values.personId.get)
 
-		pb.getObjectsByIds(Person, personIDs, 10000).toSet
+		rc.getObjectsByIds(Person, personIDs, 10000).toSet
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
-	def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
-		val ratings: List[Rating] = pb.getAllObjectsOfClass(Rating)
+	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+		val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating)
 		List(ratings.sortWith((a, b) => a.values.ratingName.get < b.values.ratingName.get).map(r =>
 			(r.values.ratingId.get.toString, r.values.ratingName.get.toString)
 		))

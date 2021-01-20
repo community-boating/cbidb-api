@@ -4,7 +4,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 
 class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "JP Parent in Season"
@@ -12,14 +12,14 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		(ARG_DROPDOWN, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
-		implicit val pb: PersistenceBroker = _pb
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+		implicit val rc: RequestCache[_] = _rc
 
 		type PersonID = Int
 
 		val season = arg.toInt
 
-		val juniorsThatYear = pb.getObjectsByFilters(
+		val juniorsThatYear = rc.getObjectsByFilters(
 			PersonMembership,
 			List(
 				PersonMembership.fields.membershipTypeId.equalsConstant(MembershipType.specialIDs.MEM_TYPE_ID_JUNIOR_SUMMER),
@@ -27,7 +27,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 			)
 		).map(_.values.personId.get)
 
-		val parentIds = pb.getObjectsByFilters(
+		val parentIds = rc.getObjectsByFilters(
 			PersonRelationship,
 			List(
 				PersonRelationship.fields.typeId.equalsConstant(PersonRelationship.specialIDs.TYPE_ID_PARENT_CHILD_ACCT_LINKED),
@@ -35,10 +35,10 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 			)
 		).map(_.values.a.get)
 
-		pb.getObjectsByIds(Person, parentIds).toSet
+		rc.getObjectsByIds(Person, parentIds).toSet
 	})
 
-	def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
 		val GO_BACK = 5
 		val currentSeason = DateLogic.currentSeason()
 		val start = currentSeason - GO_BACK

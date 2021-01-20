@@ -1,22 +1,24 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-object KioskUserType extends NonMemberUserType {
+class KioskUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[KioskUserType] = KioskUserType
+}
+
+object KioskUserType extends UserTypeObject[KioskUserType] {
 	val uniqueUserName = "KIOSK"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
+	override def create(userName: String): KioskUserType = new KioskUserType(userName)
+	def create: KioskUserType = create(uniqueUserName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
 		else None
 
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
 		requiredUserName: Option[String]
 	): Option[String] = None
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
 }

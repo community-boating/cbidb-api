@@ -17,8 +17,8 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
 			val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -37,7 +37,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 					  |""".stripMargin
 			}
 
-			val exists = pb.executePreparedQueryForSelect(q).head > 0
+			val exists = rc.executePreparedQueryForSelect(q).head > 0
 
 			Future(Ok(new JsObject(Map(
 				"wantIt" -> JsBoolean(exists)
@@ -50,10 +50,10 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSelectPurchaseGuestPrivsShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.apSetGuestPrivs(pb, personId, orderId, parsed.wantIt)
+				PortalLogic.apSetGuestPrivs(rc, personId, orderId, parsed.wantIt)
 
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)

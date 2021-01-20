@@ -1,26 +1,26 @@
 package org.sailcbi.APIServer.Reporting
 
-import java.time.{LocalDateTime, ZoneId}
-
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
 import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
+import java.time.{LocalDateTime, ZoneId}
+
 abstract class ReportFactory[T <: StorableClass] {
-	private val rcWrapper = new Initializable[RequestCache]
+	private val rcWrapper = new Initializable[RequestCache[_]]
 	private val pbWrapper = new Initializable[PersistenceBroker]
 	private val filterSpecWrapper = new Initializable[String]
 	private val fieldSpecWrapper = new Initializable[String]
 
-	def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
+	def setParameters(rc: RequestCache[_], filterSpec: String, fieldSpec: String): Unit = {
 		rcWrapper.set(rc)
 		pbWrapper.set(rc.pb)
 		filterSpecWrapper.set(filterSpec)
 		fieldSpecWrapper.set(fieldSpec)
 	}
 
-	def rc: RequestCache = rcWrapper.get
+	def rc: RequestCache[_] = rcWrapper.get
 
 	def pb: PersistenceBroker = pbWrapper.get
 
@@ -35,9 +35,9 @@ abstract class ReportFactory[T <: StorableClass] {
 
 	val entityCompanion: StorableObject[T]
 	// TODO: some sanity check that this can't be more than like 100 things or something
-	val getAllFilter: (PersistenceBroker => ReportingFilter[T]) = pb =>
-		new ReportingFilterFunction[T](pb, pb => {
-			pb.getAllObjectsOfClass(
+	val getAllFilter: (RequestCache[_] => ReportingFilter[T]) = rc =>
+		new ReportingFilterFunction[T](rc, rc => {
+			rc.getAllObjectsOfClass(
 				entityCompanion
 			).toSet
 		})
@@ -49,7 +49,7 @@ abstract class ReportFactory[T <: StorableClass] {
 	lazy val fieldMap: Map[String, ReportingField[T]] = fieldList.toMap
 
 	lazy private val getCombinedFilter: ReportingFilter[T] = {
-		val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](pb, filterMap, getAllFilter)
+		val parser: ReportingFilterSpecParser[T] = new ReportingFilterSpecParser[T](rc, filterMap, getAllFilter)
 		parser.parse(filterSpec)
 	}
 

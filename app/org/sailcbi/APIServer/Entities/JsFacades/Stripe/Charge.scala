@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserType}
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.RequestCache
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(
@@ -33,16 +33,16 @@ case class Charge(
 		}
 	}
 
-	override def insertIntoLocalDB(pb: PersistenceBroker): Unit = {
-		pb.executePreparedQueryForInsert(this.getInsertPreparedQuery)
-		this.refunds.foreach(r => pb.executePreparedQueryForInsert(r.getInsertPreparedQuery))
+	override def insertIntoLocalDB(rc: RequestCache[_]): Unit = {
+		rc.executePreparedQueryForInsert(this.getInsertPreparedQuery)
+		this.refunds.foreach(r => rc.executePreparedQueryForInsert(r.getInsertPreparedQuery))
 	}
 }
 
 object Charge extends StripeCastableToStorableObject[Charge] {
 	implicit val chargeJSONFormat = Json.format[Charge]
 
-	override val allowedUserTypes: Set[UserType] = Set(ApexUserType, MemberUserType, PublicUserType)
+	override val allowedUserTypes: Set[UserTypeObject[_]] = Set(ApexUserType, MemberUserType, PublicUserType)
 
 	def apply(v: JsValue): Charge = v.as[Charge]
 

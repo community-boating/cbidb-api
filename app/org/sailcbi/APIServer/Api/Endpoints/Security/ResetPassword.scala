@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -16,13 +16,13 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ResetPasswordShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType, None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
 				val pb = rc.pb
 
-				validateHash(pb, parsed.email, parsed.hash) match {
+				validateHash(rc, parsed.email, parsed.hash) match {
 					case ValidationOk => {
-						markHashesUsed(pb, parsed.email)
-						setNewPassword(pb, parsed.email, parsed.pwHash)
+						markHashesUsed(rc, parsed.email)
+						setNewPassword(rc, parsed.email, parsed.pwHash)
 						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					}
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
@@ -31,7 +31,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validateHash(pb: PersistenceBroker, email: String, hash: String): ValidationResult = {
+	def validateHash(rc: RequestCache[_], email: String, hash: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[String](Set(BouncerUserType)) {
 			override val params: List[String] = List(email)
 
@@ -44,7 +44,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 
 		}
 
-		val dbHashResults = pb.executePreparedQueryForSelect(q)
+		val dbHashResults = rc.executePreparedQueryForSelect(q)
 
 		if (dbHashResults.size == 1 && dbHashResults.head == hash) ValidationOk
 		else ValidationResult.from(
@@ -55,7 +55,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 			  |""".stripMargin)
 	}
 
-	def markHashesUsed(pb: PersistenceBroker, email: String): Unit = {
+	def markHashesUsed(rc: RequestCache[_], email: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
 			override val params: List[String] = List(email)
 
@@ -68,10 +68,10 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				  |		and used = 'N'
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForUpdateOrDelete(q)
+		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def setNewPassword(pb: PersistenceBroker, email: String, pwHash: String): Unit = {
+	def setNewPassword(rc: RequestCache[_], email: String, pwHash: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
 			override val params: List[String] = List(pwHash, email)
 
@@ -86,7 +86,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 				  |  and pw_hash is not null)
 				  |""".stripMargin
 		}
-		pb.executePreparedQueryForUpdateOrDelete(q)
+		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
 	case class ResetPasswordShape(email: String, hash: String, pwHash: String)

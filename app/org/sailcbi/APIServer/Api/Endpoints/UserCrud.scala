@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject
@@ -12,8 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UserCrud @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
-		PA.withRequestCache(StaffUserType, None, ParsedRequest(request), rc => {
-			val pb: PersistenceBroker = rc.pb
+		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asFormUrlEncoded
 			data match {

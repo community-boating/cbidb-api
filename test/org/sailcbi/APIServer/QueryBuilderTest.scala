@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer
 
 import org.junit.runner.RunWith
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult, JpTeam}
-import org.sailcbi.APIServer.Services.Authentication.AuthenticationInstance
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
+import org.sailcbi.APIServer.Services.Authentication.RootUserType
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.Filter
@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 class QueryBuilderTest extends FunSuite {
 	test("1 table, no filters (jp class types, typeID and typeName)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -28,7 +28,7 @@ class QueryBuilderTest extends FunSuite {
 				.from(types)
 				.select(List(columns.typeId, columns.typeName))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.typeId)
 				println( typeId + ":  " + row.getValue(columns.typeName))
@@ -38,7 +38,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, no filters (jp instances and types)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -56,7 +56,7 @@ class QueryBuilderTest extends FunSuite {
 				.innerJoin(types, columns.instances_typeId.wrapFilter(_.equalsField(columns.types_typeId)))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 				val typeName = row.getValue(columns.typeName)
@@ -68,7 +68,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, filters") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -100,14 +100,14 @@ class QueryBuilderTest extends FunSuite {
 				))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 			//	val typeName = row.getValue(columns.typeName)
 				val instanceId = row.getValue(columns.instanceId)
 		//		val teamId = row.getValue(columns.teamId)
 				println( instanceId + ":  " + typeId /*+ "(" + typeName + ")  - "*/ /*+ teamId*/)
-				val classType = JpClassType.construct(row.ps, rc)
+				val classType = JpClassType.construct(row.ps)
 				println("typeId: " + classType.values.typeId)
 				println("typeName: " + classType.values.typeName)
 				println("displayOrder: " + classType.values.displayOrder)
@@ -117,7 +117,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("outer join") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+			val rc = pa.assertRC(RootUserType.create)
 			val pb = rc.pb
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -157,13 +157,13 @@ class QueryBuilderTest extends FunSuite {
 				))
 				.select(QueryBuilder.colsAsList(columns))
 
-			val results = pb.executeQueryBuilder(q)
+			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
 				val typeId = row.getValue(columns.types_typeId)
 				val typeName = row.getValue(columns.typeName)
 				val instanceId = row.getValue(columns.instances_instanceId)
 				println( instanceId + ":  " + typeId /*+ "(" + typeName + ")  - "*/ /*+ teamId*/)
-				val classType = JpClassType.construct(row.ps, rc)
+				val classType = JpClassType.construct(row.ps)
 				println("typeId: " + classType.values.typeId)
 				println("typeName: " + classType.values.typeName)
 				println("displayOrder: " + classType.values.displayOrder)

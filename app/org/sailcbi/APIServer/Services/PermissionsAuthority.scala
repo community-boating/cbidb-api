@@ -1,10 +1,5 @@
 package org.sailcbi.APIServer.Services
 
-import java.math.BigInteger
-import java.security.MessageDigest
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
-
 import io.sentry.Sentry
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
@@ -19,6 +14,10 @@ import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.io.Directory
 import scala.reflect.runtime.universe
@@ -30,7 +29,7 @@ class PermissionsAuthority private[Services] (
 	val isTestMode: Boolean,
 	val isDebugMode: Boolean,
 	val readOnlyDatabase: Boolean,
-	val allowableUserTypes: List[UserType],
+	val allowableUserTypes: List[UserTypeObject[_]],
 	val preparedQueriesOnly: Boolean,
 	val persistenceSystem: PersistenceSystem,
 	secrets: PermissionsAuthoritySecrets
@@ -71,13 +70,13 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RequestCache = new RequestCache(AuthenticationInstance.ROOT, AuthenticationInstance.ROOT, secrets)
+	private lazy val rootRC: RequestCache[RootUserType] = RequestCache.from(RootUserType.create, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: RequestCache = new RequestCache(AuthenticationInstance.BOUNCER, AuthenticationInstance.BOUNCER, secrets)
+	private lazy val bouncerRC: RequestCache[BouncerUserType] = RequestCache.from(BouncerUserType.create, secrets)
 	private lazy val bouncerPB = bouncerRC.pb
 
 	def now(): LocalDateTime = {
@@ -138,9 +137,9 @@ class PermissionsAuthority private[Services] (
 		}
 	}
 
-	private def withRCWrapper(
-		get: () => Option[RequestCache],
-		block: RequestCache => Future[Result]
+	private def withRCWrapper[T <: UserType](
+		get: () => Option[RequestCache[T]],
+		block: RequestCache[T] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
 			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
@@ -148,11 +147,11 @@ class PermissionsAuthority private[Services] (
 		})
 	}
 
-	private def getRequestCache(
-		requiredUserType: NonMemberUserType,
+	private def getRequestCache[T <: NonMemberUserType](
+		requiredUserType: UserTypeObject[T],
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache] =
+	): Option[RequestCache[T]] =
 		RequestCache(
 			requiredUserType,
 			requiredUserName,
@@ -161,24 +160,24 @@ class PermissionsAuthority private[Services] (
 			secrets
 		)
 
-	def withRequestCache(
-		requiredUserType: NonMemberUserType,
+	def withRequestCache[T <: NonMemberUserType](
+		requiredUserType: UserTypeObject[T])(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache => Future[Result]
+		block: RequestCache[T] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
 	private def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache] =
+	): Option[RequestCache[MemberUserType]] =
 		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
 
 	def withRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache => Future[Result]
+		block: RequestCache[MemberUserType] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
 
@@ -186,15 +185,15 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int
-	): Option[RequestCache] = {
+	): Option[RequestCache[MemberUserType]] = {
 		println("about to validate junior id in request....")
 		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
 			case Some(ret) => {
-				if (ret.auth.userType == MemberUserType) {
+				if (ret.auth.isInstanceOf[MemberUserType]) {
 					// auth was successful
 					//... but does the request juniorId match the auth'd parent id?
-					val authedPersonId = MemberUserType.getAuthedPersonId(ret.auth.userName, rootPB)
+					val authedPersonId = ret.auth.getAuthedPersonId(ret)
 					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
 						override def getQuery: String =
 							s"""
@@ -222,7 +221,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int,
-		block: RequestCache => Future[Result]
+		block: RequestCache[MemberUserType] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
 
@@ -230,14 +229,14 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int
-	): Option[RequestCache] = {
+	): Option[RequestCache[MemberUserType]] = {
 		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
 			case Some(ret) => {
-				if (ret.auth.userType == MemberUserType) {
+				if (ret.auth.isInstanceOf[MemberUserType]) {
 					// auth was successful
 					//... but does the request parentId match the auth'd parent id?
-					val authedPersonId = MemberUserType.getAuthedPersonId(ret.auth.userName, rootPB)
+					val authedPersonId = ret.auth.getAuthedPersonId(ret)
 					if (authedPersonId == parentId) {
 						Some(ret)
 					} else {
@@ -255,16 +254,17 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int,
-		block: RequestCache => Future[Result]
+		block: RequestCache[MemberUserType] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithParentId(requiredUserName, parsedRequest, parentId), block)
 
-	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserType): Option[(Int, String)] = {
+	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserTypeObject[_]): Option[(Int, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
-					authenticate(request).userType == BouncerUserType
-		) userType.getPwHashForUser(userName, bouncerPB)
-		else None
+			authenticate(request, BouncerUserType).isDefined
+		) {
+			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootPB)
+		} else None
 	}
 
 	def validateSymonHash(
@@ -288,34 +288,44 @@ class PermissionsAuthority private[Services] (
 
 	def validateApexSignet(candidate: Option[String]): Boolean = secrets.apexDebugSignet == candidate
 
-	def authenticate(parsedRequest: ParsedRequest): AuthenticationInstance = {
-		val ret: Option[AuthenticationInstance] = allowableUserTypes
-				.filter(_ != PublicUserType)
-				.foldLeft(None: Option[AuthenticationInstance])((retInner: Option[AuthenticationInstance], ut: UserType) => retInner match {
-					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
-					case Some(x) => Some(x)
-					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
-						case None => None
-						case Some(x: String) => {
-							println("AUTHENTICATION:  Request is authenticated as " + ut)
-							Some(AuthenticationInstance(ut, x))
-						}
-					}
-				})
-
-		// If after looping through all auth mechs we still didnt find a match, this request is Public
-		ret match {
-			case Some(x) => x
-			case None => {
-				println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
-				AuthenticationInstance(PublicUserType, PublicUserType.uniqueUserName)
+	def authenticate[T <: UserType](parsedRequest: ParsedRequest, uto: UserTypeObject[T]): Option[T] = {
+		uto.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
+			case None => None
+			case Some(x: String) => {
+				println("AUTHENTICATION:  Request is authenticated as " + uto.getClass.getName)
+				Some(uto.create(x))
 			}
 		}
 	}
 
-	def assertRC(auth: AuthenticationInstance): RequestCache = {
+//	def authenticate(parsedRequest: ParsedRequest): UserType = {
+//		val ret: Option[UserType] = allowableUserTypes
+//				.filter(_ != PublicUserType)
+//				.foldLeft(None: Option[UserType])((retInner: Option[UserType], ut: UserTypeObject[_ <: UserType]) => retInner match {
+//					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
+//					case Some(x) => Some(x)
+//					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
+//						case None => None
+//						case Some(x: String) => {
+//							println("AUTHENTICATION:  Request is authenticated as " + ut)
+//							Some(ut.create(x))
+//						}
+//					}
+//				})
+//
+//		// If after looping through all auth mechs we still didnt find a match, this request is Public
+//		ret match {
+//			case Some(x) => x
+//			case None => {
+//				println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
+//				AuthenticationInstance(PublicUserType, PublicUserType.uniqueUserName)
+//			}
+//		}
+//	}
+
+	def assertRC[T <: UserType](auth: T): RequestCache[T] = {
 		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
-		else new RequestCache(auth, auth, secrets)
+		else new RequestCache(auth, secrets)
 	}
 
 	def closeDB(): Unit = secrets.dbConnection.close()

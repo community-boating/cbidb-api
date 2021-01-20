@@ -21,7 +21,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
-		PA.withRequestCache(KioskUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			val pb = rc.pb
 
@@ -42,7 +42,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 						override def getQuery: String = "select GUEST_CARD_SEQ.nextval from dual"
 					}
 
-					val cardNumber = pb.executePreparedQueryForSelect(getCardNumber).head
+					val cardNumber = rc.executePreparedQueryForSelect(getCardNumber).head
 
 					val getClose = new HardcodedQueryForSelect[Int](Set(KioskUserType)) {
 						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
@@ -50,7 +50,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 						override def getQuery: String = "select c.close_id from fo_closes c, current_closes cur where close_id = inperson_close"
 					}
 
-					val closeId = pb.executePreparedQueryForSelect(getClose).head
+					val closeId = rc.executePreparedQueryForSelect(getClose).head
 
 					val createCard = new PreparedQueryForInsert(Set(KioskUserType)) {
 						override def getQuery: String =
@@ -68,7 +68,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 						override val pkName: Option[String] = Some("assign_id")
 					}
 
-					val assignID = pb.executePreparedQueryForInsert(createCard)
+					val assignID = rc.executePreparedQueryForInsert(createCard)
 
 					Future {
 						Ok(JsObject(Map(

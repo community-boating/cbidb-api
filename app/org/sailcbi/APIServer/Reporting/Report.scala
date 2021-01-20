@@ -29,7 +29,7 @@ object Report {
 		"Donation" -> ("Donation", classOf[ReportFactoryDonation])
 	)
 
-	def getReport(rc: RequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
+	def getReport(rc: RequestCache[_], baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
 		val c: Class[_ <: ReportFactory[_]] = reportFactoryMap(baseEntityName)._2
 		val factory: ReportFactory[_ <: StorableClass] =
 			Class.forName(c.getCanonicalName).newInstance.asInstanceOf[ReportFactory[_ <: StorableClass]]

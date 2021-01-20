@@ -1,7 +1,5 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
@@ -12,6 +10,8 @@ import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FirstPage.Firs
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FullWidthTables.FullWidthTables
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.ReceiptsPage.ReceiptsPage
 import org.sailcbi.APIServer.PDFBox.{ContentStreamDecorator, PDFReport}
+
+import java.awt.Color
 
 class DailyCloseReport(data: DailyCloseReportModel) extends PDFReport(data) {
 	val defaultFont: PDFont = PDType1Font.HELVETICA

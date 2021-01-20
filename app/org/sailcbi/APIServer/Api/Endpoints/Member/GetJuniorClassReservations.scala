@@ -16,10 +16,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 			val pb = rc.pb
 
-			val deleted = PortalLogic.pruneOldReservations(pb)
+			val deleted = PortalLogic.pruneOldReservations(rc)
 			println(s"deleted $deleted old reservations...")
 
 			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {
@@ -53,7 +53,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 					  |and par.PROTOPERSON_COOKIE = ?
 					  |""".stripMargin
 			}
-			val signups = pb.executePreparedQueryForSelect(signupsQ)
+			val signups = rc.executePreparedQueryForSelect(signupsQ)
 
 			val noSignupJuniors = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
 				override val params: List[String] = List(rc.auth.userName)
@@ -79,7 +79,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 
 			implicit val classInfoFormat = ClassInfo.format
 			val results: JsValue = Json.toJson(signups.map(o => Json.toJson(o)))
-			val noSignups: JsArray = JsArray(pb.executePreparedQueryForSelect(noSignupJuniors).toArray.map(JsString))
+			val noSignups: JsArray = JsArray(rc.executePreparedQueryForSelect(noSignupJuniors).toArray.map(JsString))
 			Future{Ok(JsObject(Map(
 				"instances" -> results,
 				"noSignups" -> noSignups

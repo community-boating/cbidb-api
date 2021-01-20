@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess, ParsedRequest}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -17,26 +16,26 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
-			val orderTotal = PortalLogic.getOrderTotalDollars(pb, orderId)
+			val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)
 			val orderTotalInCents = Currency.toCents(orderTotal)
 
-			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(pb, orderId)
+			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
 
 			val now = PA.now().toLocalDate
 
 			implicit val format = OrderStatusResult.format
 
 			if (staggeredPaymentAdditionalMonths > 0) {
-				val customerId = PortalLogic.getStripeCustomerId(pb, personId).get
+				val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
 
 				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, orderTotalInCents).map(pi => {
+					case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).map(pi => {
 						Ok(Json.toJson(OrderStatusResult(
 							orderId = orderId,
 							total = orderTotal,
@@ -47,7 +46,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								expYear = pm.card.exp_year,
 								zip = pm.billing_details.address.postal_code
 							)),
-							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
+							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
 								(ld, amt) => StaggeredPayment(ld, amt.cents)
 							)),
 							paymentIntentId = Some(pi.id)
@@ -56,7 +55,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
 				})
 			} else {
-				val cardData = PortalLogic.getCardData(pb, orderId)
+				val cardData = PortalLogic.getCardData(rc, orderId)
 				Future(Ok(Json.toJson(OrderStatusResult(
 					orderId = orderId,
 					total = orderTotal,

@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -17,13 +16,13 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSetMembershipPaymentCount.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
 				val now = PA.now().toLocalDate
 
-				PortalLogic.writeOrderStaggeredPayments(pb, now, personId, orderId, parsed.additionalPayments)
-				PortalLogic.clearStripeTokensFromOrder(pb, orderId)
+				PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, parsed.additionalPayments)
+				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
 
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)

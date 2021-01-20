@@ -14,7 +14,7 @@ class GetOffseasonClassInstances @Inject()(implicit val exec: ExecutionContext) 
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val pb = rc.pb
-			val result = pb.executePreparedQueryForSelect(new JpOffseasonClasses(juniorId)).head
+			val result = rc.executePreparedQueryForSelect(new JpOffseasonClasses(juniorId)).head
 
 			Future(Ok(Json.toJson(result)))
 		})

@@ -1,13 +1,19 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.{EntityVisibility, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-object SymonUserType extends NonMemberUserType {
+class SymonUserType(override val userName: String) extends NonMemberUserType(userName) {
+	override def companion: UserTypeObject[SymonUserType] = SymonUserType
+}
+
+object SymonUserType extends UserTypeObject[SymonUserType] {
 	val uniqueUserName = "SYMON"
 
-	def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+	override def create(userName: String): SymonUserType = new SymonUserType(userName)
+	def create: SymonUserType = create(uniqueUserName)
+
+	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		try {
 			println("here we go")
 			val host: String = request.postParams("symon-host")
@@ -36,12 +42,8 @@ object SymonUserType extends NonMemberUserType {
 		}
 	}
 
-	def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: AuthenticationInstance,
+	override def getAuthenticatedUsernameFromSuperiorAuth(
+		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.userType == RootUserType) Some(RootUserType.uniqueUserName) else None
-
-	def getPwHashForUser(userName: String, rootPB: PersistenceBroker): Option[(Int, String)] = None
-
-	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = EntityVisibility.ZERO_VISIBILITY
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
 }

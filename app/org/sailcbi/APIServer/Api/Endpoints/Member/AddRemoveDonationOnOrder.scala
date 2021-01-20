@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,11 +15,11 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.addDonationToOrder(pb, orderId, parsed.fundId, parsed.amount) match{
+				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 				}
@@ -32,11 +31,11 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
-				val pb: PersistenceBroker = rc.pb
-				val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-				val orderId = PortalLogic.getOrderId(pb, personId)
+				val pb = rc.pb
+				val personId = rc.auth.getAuthedPersonId(rc)
+				val orderId = PortalLogic.getOrderId(rc, personId)
 
-				PortalLogic.deleteDonationFromOrder(pb, orderId, parsed.fundId)
+				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
 				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 			})

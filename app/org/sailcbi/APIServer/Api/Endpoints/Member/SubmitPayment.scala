@@ -7,10 +7,10 @@ import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType}
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, InjectedController, Result}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.sql.CallableStatement
 import javax.inject.Inject
@@ -20,10 +20,10 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 
-			val personId = MemberUserType.getAuthedPersonId(rc.auth.userName, pb)
-			val orderId = PortalLogic.getOrderId(pb, personId)
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderId(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok(new JsObject(Map(
@@ -36,8 +36,8 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 	def postApex()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ApexUserType, None, parsedRequest, rc => {
-			val pb: PersistenceBroker = rc.pb
+		PA.withRequestCache(ApexUserType)(None, parsedRequest, rc => {
+			val pb = rc.pb
 
 			val params = parsedRequest.postParams
 			val personId = params("personId").toInt
@@ -50,17 +50,17 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		})
 	}
 
-	private def startChargeProcess(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def startChargeProcess(rc: RequestCache[_], personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val pb = rc.pb
 
-		val closeId = pb.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
-		val orderTotalInCents = PortalLogic.getOrderTotalCents(pb, orderId)
-		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc.pb, orderId) > 0
+		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
+		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
+		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 
 		val stripe = rc.getStripeIOController(ws)
 
 		if (isStaggered) {
-			PortalLogic.getOrCreatePaymentIntent(pb, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
+			PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripe.updatePaymentIntentWithTotal(pi.id, orderTotalInCents, closeId).flatMap(_ => {
 					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
 						override def getQuery: String =
@@ -72,7 +72,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 							   |and nvl(paid, 'N') <> 'Y'
 							   |""".stripMargin
 					}
-					pb.executePreparedQueryForUpdateOrDelete(updateQ)
+					rc.executePreparedQueryForUpdateOrDelete(updateQ)
 
 					postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
 				})
@@ -82,7 +82,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		}
 	}
 
-	private def postPaymentIntent(rc: RequestCache, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def postPaymentIntent(rc: RequestCache[_], personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val pb = rc.pb
 		val logger = PA.logger
 
@@ -113,7 +113,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			override def getQuery: String = "api_pkg.start_stripe_trans_preflight(?, ?, ?)"
 		}
 
-		val preflightResult = pb.executeProcedure(preflight)
+		val preflightResult = rc.executeProcedure(preflight)
 
 		type ErrorCode = String
 		type ErrorMessage = String
@@ -179,7 +179,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				)
 
 				override def setInParametersDouble: Map[String, Double] = Map(
-					"i_total" -> PortalLogic.getOrderTotalDollars(pb, orderId)
+					"i_total" -> PortalLogic.getOrderTotalDollars(rc, orderId)
 				)
 
 				override def setInParametersVarchar: Map[String, String] = Map(
@@ -202,19 +202,19 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				override def getQuery: String = "api_pkg.start_stripe_transaction_parse(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			}
 
-			val parseError = pb.executeProcedure(parseQ)
+			val parseError = rc.executeProcedure(parseQ)
 			println("Final submit payment result:  " + parseError)
 
 			parseError
 		})
 	}
 
-	private def doCharge(rc: RequestCache, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
-		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc.pb, orderId) > 0
+	private def doCharge(rc: RequestCache[_], personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
+		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 		val stripeController = rc.getStripeIOController(ws)
 
 		if (isStaggered) {
-			Failover(PortalLogic.getOrCreatePaymentIntent(rc.pb, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
+			Failover(PortalLogic.getOrCreatePaymentIntent(rc, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripeController.confirmPaymentIntent(pi.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => {
 						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
@@ -226,14 +226,14 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 								  |where PAYMENT_INTENT_ID = ?
 								  |""".stripMargin
 						}
-						rc.pb.executePreparedQueryForUpdateOrDelete(updatePIQ)
+						rc.executePreparedQueryForUpdateOrDelete(updatePIQ)
 						s.map(pi => pi.charges.data.head)
 					}
 					case v: ValidationError[_, StripeError] => v.asInstanceOf[ServiceRequestResult[Charge, StripeError]]
 				})
 			}))
 		} else {
-			val cardData = PortalLogic.getCardData(rc.pb, orderId).get
+			val cardData = PortalLogic.getCardData(rc, orderId).get
 			Failover(stripeController.createCharge(orderTotalInCents, cardData.token, orderId, closeId))
 		}
 	}

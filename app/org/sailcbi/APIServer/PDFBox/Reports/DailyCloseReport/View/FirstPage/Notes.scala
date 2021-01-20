@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.View.FirstPage
 
-import java.awt.Color
-
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.PDFBox.ContentStreamDecorator
 import org.sailcbi.APIServer.PDFBox.Drawable.{ALIGN_LEFT, Drawable}
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.DailyCloseReportModel
+
+import java.awt.Color
 
 class Notes(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float, document: PDDocument, newPage: (PDDocument, PDRectangle) => ContentStreamDecorator) extends Drawable {
 	val notes = data.closeProps.notes.getOrElse("")

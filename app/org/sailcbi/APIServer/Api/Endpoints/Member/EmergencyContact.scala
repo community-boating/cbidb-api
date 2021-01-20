@@ -15,7 +15,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb: PersistenceBroker = rc.pb
+			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[EmergencyContactShape](Set(MemberUserType)) {
@@ -57,7 +57,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 				override val params: List[String] = List(juniorId.toString)
 			}
 
-			val resultObj = pb.executePreparedQueryForSelect(select).head
+			val resultObj = rc.executePreparedQueryForSelect(select).head
 			val resultJson: JsValue = Json.toJson(resultObj)
 			Future(Ok(resultJson))
 		})
@@ -68,7 +68,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withParsedPostBodyJSON(request.body.asJson, EmergencyContactShape.apply)(parsed => {
 			val juniorId = request.body.asJson.map(json => json("personId").toString().toInt).get
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-				val pb: PersistenceBroker = rc.pb
+				val pb = rc.pb
 				val cb: CacheBroker = rc.cb
 				runValidations(parsed, pb, None) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
@@ -111,7 +111,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 							)
 						}
 
-						pb.executePreparedQueryForUpdateOrDelete(updateQuery)
+						rc.executePreparedQueryForUpdateOrDelete(updateQuery)
 
 						Future(Ok(new JsObject(Map(
 							"personId" -> JsNumber(parsed.personId)

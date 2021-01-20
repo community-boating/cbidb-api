@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
 
 // First arg is program
 // second arg is year
@@ -14,8 +14,8 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
-		implicit val pb: PersistenceBroker = _pb
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+		implicit val rc: RequestCache[_] = _rc
 
 		type PersonID = Int
 
@@ -24,13 +24,13 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		val year = twoArgs(1).toInt
 		println("programId is " + programId + " and year is " + year)
 
-		val membershipTypeIDs = pb.getObjectsByFilters(
+		val membershipTypeIDs = rc.getObjectsByFilters(
 			MembershipType,
 			List(MembershipType.fields.programId.equalsConstant(programId)),
 			15
 		).map(_.values.membershipTypeId.get)
 
-		val expiredInYear: Set[PersonID] = pb.getObjectsByFilters(
+		val expiredInYear: Set[PersonID] = rc.getObjectsByFilters(
 			PersonMembership,
 			List(
 				PersonMembership.fields.membershipTypeId.inList(membershipTypeIDs),
@@ -39,7 +39,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 			500
 		).map(_.values.personId.get).toSet
 
-		val startedInYear: Set[PersonID] = pb.getObjectsByFilters(
+		val startedInYear: Set[PersonID] = rc.getObjectsByFilters(
 			PersonMembership,
 			List(
 				PersonMembership.fields.membershipTypeId.inList(membershipTypeIDs),
@@ -50,15 +50,15 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 
 		val personIDs: Set[PersonID] = expiredInYear union startedInYear
 
-		pb.getObjectsByIds(
+		rc.getObjectsByIds(
 			Person,
 			personIDs.toList,
 			1000
 		).toSet
 	})
 
-	def getDropdownValues(pb: PersistenceBroker): List[List[(String, String)]] = {
-		val programs: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
+	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+		val programs: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType)
 		List(programs.map(p =>
 			(p.values.programId.get.toString, p.values.programName.get.toString)
 		))

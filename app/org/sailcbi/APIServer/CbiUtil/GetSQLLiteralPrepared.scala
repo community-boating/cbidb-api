@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.CbiUtil
 
-import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
 
 /**
  * For use with Prepared Statements only. Do not inject these directly into SQL!

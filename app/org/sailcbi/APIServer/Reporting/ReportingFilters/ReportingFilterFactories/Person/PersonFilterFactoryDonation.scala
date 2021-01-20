@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.Person
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Donation, Person}
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.PersistenceBroker
+import org.sailcbi.APIServer.Services.RequestCache
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 	val displayName: String = "Donated at least $X since Y"
@@ -15,15 +15,15 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
 	)
 
-	def getFilter(pb: PersistenceBroker, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(pb, (_pb: PersistenceBroker) => {
-		implicit val pb: PersistenceBroker = _pb
+	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+		implicit val rc: RequestCache[_] = _rc
 
 		type PersonID = Int
 
 		val amount: Double = arg.split(",")(0).toDouble
 		val sinceDate: LocalDate = LocalDate.parse(arg.split(",")(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 
-		val donationsSinceDate: List[Donation] = pb.getObjectsByFilters(
+		val donationsSinceDate: List[Donation] = rc.getObjectsByFilters(
 			Donation,
 			List(
 				Donation.fields.donationDate.greaterEqualConstant(sinceDate)
@@ -44,7 +44,7 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 			}) >= amount
 		}).keys.toList
 
-		pb.getObjectsByIds(Person, personIDs).toSet
+		rc.getObjectsByIds(Person, personIDs).toSet
 	})
 
 }

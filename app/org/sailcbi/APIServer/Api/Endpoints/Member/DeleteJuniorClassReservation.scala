@@ -13,7 +13,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType, None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 			val pb = rc.pb
 			parsedRequest.postParams.get("name") match {
 				case None => {
@@ -23,7 +23,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 				case Some(name: String) => {
 					println(name)
 
-					PortalLogic.deleteProtoJunior(pb, ProtoPersonUserType.getAuthedPersonId(rc.auth.userName, pb).get, name)
+					PortalLogic.deleteProtoJunior(rc, rc.auth.getAuthedPersonId(rc).get, name)
 					Future(Ok("deleted"))
 				}
 			}

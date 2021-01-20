@@ -28,7 +28,7 @@ class JpClassSession extends StorableClass {
 	)
 
 	object calculatedValues extends CalculatedValuesObject {
-		val jpWeekAlias = new DefinedInitializable[RequestCache, Option[String]]((rc: RequestCache) => {
+		val jpWeekAlias = new DefinedInitializable[RequestCache[_], Option[String]]((rc: RequestCache[_]) => {
 			rc.logic.dateLogic.getJpWeekAlias(myself.values.sessionDateTime.get.toLocalDate)
 		})
 	}

@@ -1,24 +1,22 @@
 package org.sailcbi.APIServer
 
-import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-
 import org.junit.runner.RunWith
-import org.sailcbi.APIServer.CbiUtil.{CurrencyFormat, DateUtil}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassType, MembershipType}
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, PreparedInt, PreparedLocalDate, PreparedLocalDateTime, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedString, PreparedValue, PreparedZonedDateTime}
-import org.sailcbi.APIServer.Services.Authentication.{AuthenticationInstance, RootUserType}
+import org.sailcbi.APIServer.CbiUtil.DateUtil
+import org.sailcbi.APIServer.IO.PreparedQueries._
+import org.sailcbi.APIServer.Services.Authentication.RootUserType
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import org.scalatest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import java.time.temporal.ChronoUnit
+import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
+
 @RunWith(classOf[JUnitRunner])
 class Temp extends FunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
-		val rc = pa.assertRC(AuthenticationInstance.ROOT)
+		val rc = pa.assertRC(RootUserType.create)
 		val pb = rc.pb
 
 
@@ -33,7 +31,7 @@ class Temp extends FunSuite {
 				  |""".stripMargin
 		}
 
-		val pk = pb.executePreparedQueryForInsert(q)
+		val pk = rc.executePreparedQueryForInsert(q)
 
 		val sel = new PreparedQueryForSelect[T](Set(RootUserType)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): T = getFromRSW(rsw)
@@ -46,14 +44,14 @@ class Temp extends FunSuite {
 				  |""".stripMargin
 		}
 
-		val dSelected: T = pb.executePreparedQueryForSelect(sel).head
+		val dSelected: T = rc.executePreparedQueryForSelect(sel).head
 
 		val del = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
 			override def getQuery: String = "delete from promotions where promo_id = ?"
 			override val preparedParams = List(pk.get)
 		}
 
-		pb.executePreparedQueryForUpdateOrDelete(del)
+		rc.executePreparedQueryForUpdateOrDelete(del)
 		println(d)
 		println(dSelected)
 		assert(d.equals(dSelected))

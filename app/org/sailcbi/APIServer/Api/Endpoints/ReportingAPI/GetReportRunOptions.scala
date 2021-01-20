@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
 import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
@@ -24,16 +24,16 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 	}
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(StaffUserType, None, ParsedRequest(request), rc => {
+		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
 			val pb = rc.pb
 			val params = new GetReportRunOptionsParamsObject
-			getFuture(rc.cb, pb, params, getJSONResultFuture(pb)).map(s => {
+			getFuture(rc.cb, rc, params, getJSONResultFuture(rc)).map(s => {
 				Ok(s).as("application/json")
 			})
 		})
 	}
 
-	def getJSONResultFuture(pb: PersistenceBroker): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: RequestCache[_]): (() => Future[JsObject]) = () => Future {
 		case class FilterDataForJSON(
 			filterName: String,
 			displayName: String,
@@ -63,7 +63,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 					}).mkString(","),
 					f._2.argDefinitions.map(_._2).mkString(","),
 					f._2 match {
-						case d: ReportingFilterFactoryDropdown => Some(d.getDropdownValues(pb))
+						case d: ReportingFilterFactoryDropdown => Some(d.getDropdownValues(rc))
 						case _ => None
 					}
 				)).toList

@@ -29,13 +29,11 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	val entityName: String
 	val fields: FieldsObject
 
-	final def getVisiblity(userType: UserType): EntityVisibility = userType.getEntityVisibility(self)
-
 	def primaryKey: IntDatabaseField
 
-	def peekInstanceForID(id: Int, pb: PersistenceBroker): Option[T] = pb.getObjectById(this, id)
+	def peekInstanceForID(id: Int, rc: RequestCache[_]): Option[T] = rc.getObjectById(this, id)
 
-	def getInstanceForID(id: Int, pb: PersistenceBroker): T = peekInstanceForID(id, pb).get
+	def getInstanceForID(id: Int, rc: RequestCache[_]): T = peekInstanceForID(id, rc).get
 
 	// Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
 	private lazy val fieldMaps = {
@@ -142,12 +140,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		valuesList equals valuesListReflection
 	}
 
-	def construct(qbrr: QueryBuilderResultRow)(implicit rc: RequestCache): T = construct(qbrr.ps, rc)
+	def construct(qbrr: QueryBuilderResultRow): T = construct(qbrr.ps)
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache): T =
-		construct(ps, rc, None)
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]]): T =
+		construct(ps, None)
 
-	def construct(ps: ProtoStorable[ColumnAlias[_, _]], rc: RequestCache, tableAlias: Option[String]): T = {
+	def construct(ps: ProtoStorable[ColumnAlias[_, _]], tableAlias: Option[String]): T = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])
@@ -157,17 +155,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			case None => ColumnAlias.wrapForInnerJoin(f).asInstanceOf[ColumnAliasInnerJoined[_, _]]
 		}
 
-		val filterFunction: (FieldDefinition => Boolean) = {
-			val visibility = rc.auth.userType.getEntityVisibility(self)
-			if (!visibility.entityVisible) (t: FieldDefinition) => {
-				println("whole entity not visible for " + t._2.getPersistenceFieldName)
-				false
-			}
-			else visibility.fieldList match {
-				case None => (fd: FieldDefinition) => true
-				case Some(s) => (fd: FieldDefinition) => s.contains(fd._2)
-			}
-		}
+		val filterFunction: (FieldDefinition => Boolean) = (fd: FieldDefinition) => true
 
 		intFieldMap.filter(t => {
 			t._2 == self.primaryKey || filterFunction(t)
