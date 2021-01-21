@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.Check
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class CloseChecks(closeId: Int) extends HardcodedQueryForSelect[Check](Set(ApexUserType)) {
+class CloseChecks(closeId: Int) extends HardcodedQueryForSelect[Check](Set(StaffUserType, ApexUserType)) {
 	val getQuery: String =
 		s"""
 		   |select check_num, check_name, check_date, value * 100,

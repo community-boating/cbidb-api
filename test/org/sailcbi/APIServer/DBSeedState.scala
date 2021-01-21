@@ -1,14 +1,11 @@
 package org.sailcbi.APIServer
 
 import org.junit.runner.RunWith
-import org.sailcbi.APIServer.CbiUtil.Profiler
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, JpClassInstance, MembershipType, User}
-import org.sailcbi.APIServer.Services.Authentication.AuthenticationInstance
+import org.sailcbi.APIServer.Entities.EntityDefinitions.User
+import org.sailcbi.APIServer.Services.Authentication.RootUserType
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-import scala.reflect.runtime.universe
 
 @RunWith(classOf[JUnitRunner])
 class DBSeedState extends FunSuite {

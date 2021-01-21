@@ -1,7 +1,8 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
+import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, ResultSetWrapper}
 
 class ApexUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[ApexUserType] = ApexUserType
@@ -25,6 +26,17 @@ object ApexUserType extends UserTypeObject[ApexUserType] {
 			) Some(uniqueUserName)
 			else None
 		}
+	}
+
+	def validateApexSessionKey(rc: RequestCache[_], userName: String, apexSession: String, apexSessionKey: String): Boolean = {
+		val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = 1
+
+			override val params: List[String] = List(userName.toLowerCase(), apexSession, apexSessionKey)
+
+			override def getQuery: String = "select 1 from session_keys where lower(username) = ? and apex_session = ? and remote_key = ?"
+		}
+		rc.executePreparedQueryForSelect(q).length == 1
 	}
 
 	override def getAuthenticatedUsernameFromSuperiorAuth(

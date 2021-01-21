@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.GCSalesData
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GCSalesQuery(closeId: Int) extends HardcodedQueryForSelect[GCSalesData](Set(ApexUserType)) {
+class GCSalesQuery(closeId: Int) extends HardcodedQueryForSelect[GCSalesData](Set(StaffUserType, ApexUserType)) {
 	val getQuery: String =
 		s"""
 		   |select

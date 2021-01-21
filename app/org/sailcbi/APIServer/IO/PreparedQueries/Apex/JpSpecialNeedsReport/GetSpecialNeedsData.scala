@@ -3,12 +3,12 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpSpecialNeedsReport
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, NAStrings}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 import java.time.ZonedDateTime
 
-class GetSpecialNeedsData(from: ZonedDateTime, to: ZonedDateTime) extends HardcodedQueryForSelect[JpSpecialNeedsData](Set(ApexUserType)) {
+class GetSpecialNeedsData(from: ZonedDateTime, to: ZonedDateTime) extends HardcodedQueryForSelect[JpSpecialNeedsData](Set(StaffUserType, ApexUserType)) {
 	val fromLiteral: String = GetSQLLiteral(from, true)
 	val toLiteral: String = GetSQLLiteral(to, true)
 	val getQuery: String =

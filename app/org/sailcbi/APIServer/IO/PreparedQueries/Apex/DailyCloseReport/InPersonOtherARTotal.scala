@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class InPersonOtherARTotal(closeId: Int) extends HardcodedQueryForSelect[InPersonOtherARTotalResult](Set(ApexUserType)) {
+class InPersonOtherARTotal(closeId: Int) extends HardcodedQueryForSelect[InPersonOtherARTotalResult](Set(StaffUserType, ApexUserType)) {
 	val sourceIDs: String = MagicIds.FO_INPERSON_CC_SOURCE_IDs.mkString(", ")
 	val sageSourceID: String = MagicIds.FO_AR_SOURCE_SAGE.toString
 	val getQuery: String =

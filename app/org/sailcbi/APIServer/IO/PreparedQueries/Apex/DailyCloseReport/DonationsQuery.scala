@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.Donation
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set(ApexUserType)) {
+class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set(StaffUserType, ApexUserType)) {
 	val getQuery: String =
 		s"""
 		   |select

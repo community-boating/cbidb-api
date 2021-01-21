@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class CloseCash(closeId: Int) extends HardcodedQueryForSelect[CloseCashResult](Set(ApexUserType)) {
+class CloseCash(closeId: Int) extends HardcodedQueryForSelect[CloseCashResult](Set(StaffUserType, ApexUserType)) {
 	val getQuery: String =
 		s"""
 		   |select

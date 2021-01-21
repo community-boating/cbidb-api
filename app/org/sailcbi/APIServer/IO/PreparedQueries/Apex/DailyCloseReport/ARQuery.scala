@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.AR
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class ARQuery(closeId: Int) extends HardcodedQueryForSelect[AR](Set(ApexUserType)) {
+class ARQuery(closeId: Int) extends HardcodedQueryForSelect[AR](Set(StaffUserType, ApexUserType)) {
 	val getQuery: String =
 		s"""
 		   |select

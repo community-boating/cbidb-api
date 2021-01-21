@@ -4,10 +4,10 @@ import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.MembershipSale
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[MembershipSale](Set(ApexUserType)) {
+class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[MembershipSale](Set(StaffUserType, ApexUserType)) {
 	val taxDiscrepanciesId: String = MagicIds.FO_ITEM_TAX_DISCREPANCIES.toString
 	val getQuery: String =
 		s"""
