@@ -16,8 +16,6 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		}
 	}
 
-	def booleanFieldMethod = "hi"
-
 	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Boolean] = {
 		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(true)
