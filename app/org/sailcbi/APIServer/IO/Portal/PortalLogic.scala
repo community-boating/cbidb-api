@@ -469,10 +469,11 @@ object PortalLogic {
 		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def getOrderId(rc: RequestCache[_], personId: Int): Int = {
+	def getOrderId(rc: RequestCache[_], personId: Int, appAlias: String = "Shared"): Int = {
 		val pc = new PreparedProcedureCall[Int](Set(MemberUserType, ProtoPersonUserType)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
+//					i_app_alias in varchar2,
 //					o_order_id out number
 //			) ;
 			override def registerOutParameters: Map[String, Int] = Map(
@@ -484,10 +485,12 @@ object PortalLogic {
 			)
 
 
-			override def setInParametersVarchar: Map[String, String] = Map.empty
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"i_app_alias" -> appAlias
+			)
 			override def setInParametersDouble: Map[String, Double] = Map.empty
 			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_order_id")
-			override def getQuery: String = "cc_pkg.get_or_create_order_id(?, ?)"
+			override def getQuery: String = "cc_pkg.get_or_create_order_id(?, ?, ?)"
 		}
 		rc.executeProcedure(pc)
 	}
