@@ -11,14 +11,17 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = post("AP")
+	def postJP()(implicit PA: PermissionsAuthority): Action[AnyContent] = post("JP")
+
+	private def post(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 			val stripeIOController = rc.getStripeIOController(ws)
 
 			val personId = rc.auth.getAuthedPersonId(rc)
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderId(rc, personId, program)
 			val stripeCustomerId = PortalLogic.getStripeCustomerId(rc, personId)
 
 			val orderHasStaggeredPayments = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0

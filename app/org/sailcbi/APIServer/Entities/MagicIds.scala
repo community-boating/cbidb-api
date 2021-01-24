@@ -29,6 +29,12 @@ object MagicIds {
 	object PROGRAM_TYPES {
 		val ADULT_PROGRAM_ID = 1
 	}
+
+	object ORDER_NUMBER_APP_ALIAS {
+		val AP = "AP"
+		val JP = "JP"
+		val SHARED = "Shared"
+	}
 	val MIN_AGE_FOR_SENIOR = 65
 	val MAX_AGE_FOR_YOUTH = 20
 }

@@ -18,7 +18,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 			val personId = rc.auth.getAuthedPersonId(rc)
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -51,7 +51,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 				PortalLogic.apSetGuestPrivs(rc, personId, orderId, parsed.wantIt)
 

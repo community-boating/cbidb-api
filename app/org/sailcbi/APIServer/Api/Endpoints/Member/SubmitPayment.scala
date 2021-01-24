@@ -17,13 +17,30 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 
 			val personId = rc.auth.getAuthedPersonId(rc)
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderIdAP(rc, personId)
+
+			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+				case None => Ok(new JsObject(Map(
+					"successAttemptId" -> JsNumber(parseError._1.get)
+				)))
+				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+			})
+		})
+	}
+
+	def postJP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCacheMember(None, parsedRequest, rc => {
+			val pb = rc.pb
+
+			val personId = rc.auth.getAuthedPersonId(rc)
+			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok(new JsObject(Map(

@@ -17,7 +17,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
@@ -33,7 +33,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
@@ -44,7 +44,8 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 
 	case class AddRemoveDonationShape(
 		fundId: Int,
-		amount: Double
+		amount: Double,
+		program: String
 	)
 
 	object AddRemoveDonationShape {

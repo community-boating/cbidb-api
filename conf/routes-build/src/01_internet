@@ -10,14 +10,19 @@ GET     /efuse/cbidb-public-web             org.sailcbi.APIServer.Api.Endpoints.
 GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.get()
 
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
-POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
-POST     /stripe/submit-payment               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.post()
+POST     /stripe/clear-card-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.postAP()
+POST     /stripe/clear-card-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.postJP()
+
+POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAP()
+POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
 POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
 
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()
 
-POST     /stripe/store-payment-method               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.post()
+POST     /stripe/store-payment-method-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAP()
+POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP()
+
 GET     /stripe/get-recurring-info               org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationInfo.get()
 
 POST 	/symon				org.sailcbi.APIServer.Api.Endpoints.Symon.PostSymonRun.post()
@@ -30,7 +35,7 @@ GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /donation-funds                 org.sailcbi.APIServer.Api.Endpoints.Public.GetDonationFunds.get()
 
-GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.get()
+GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.get(program: String)
 
 GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
 
@@ -123,7 +128,7 @@ GET     /member/payment-plan-options        org.sailcbi.APIServer.Api.Endpoints.
 
 POST     /member/set-payment-plan            org.sailcbi.APIServer.Api.Endpoints.Member.ApSetMembershipPaymentCount.post()
 
-GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get()
+GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get(program: String)
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
 

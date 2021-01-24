@@ -17,7 +17,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
 					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject()))
@@ -37,7 +37,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 			PA.withRequestCacheMember(None, parsedRequest, rc => {
 				val pb = rc.pb
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.unapplyGCFromOrder(rc, orderId, parsed.certId)
 
@@ -48,7 +48,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 
 	case class ApplyGCShape(
 		gcNumber: Option[Int],
-		gcCode: Option[String]
+		gcCode: Option[String],
+		program: String
 	)
 
 	object ApplyGCShape {
@@ -58,7 +59,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	}
 
 	case class UnapplyGCShape(
-		certId: Int
+		certId: Int,
+		program: String
 	)
 
 	object UnapplyGCShape{

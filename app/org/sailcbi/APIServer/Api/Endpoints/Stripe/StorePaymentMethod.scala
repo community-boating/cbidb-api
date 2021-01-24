@@ -13,14 +13,17 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
+	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = post("AP")
+	def postJP()(implicit PA: PermissionsAuthority): Action[AnyContent] = post("JP")
+
+	private def post(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 				val pb = rc.pb
 				val stripe = rc.getStripeIOController(ws)
 				val personId = rc.auth.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderId(rc, personId)
+				val orderId = PortalLogic.getOrderId(rc, personId, program)
 				val totalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 				val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 				customerIdOption match {

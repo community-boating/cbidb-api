@@ -16,11 +16,11 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 			val personId = rc.auth.getAuthedPersonId(rc)
-			val orderId = PortalLogic.getOrderId(rc, personId)
 			val now = PA.now().toLocalDate
 			PA.withParsedPostBodyJSON(request.body.asJson, AddPromoCodeShape.apply)(parsed => {
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 				parsed.promoCode match {
-					case None =>Future(Ok(ValidationResult.from("Promo code must be speficied.").toResultError.asJsObject()))
+					case None =>Future(Ok(ValidationResult.from("Promo code must be specified.").toResultError.asJsObject()))
 					case Some(promoCode) => {
 						PortalLogic.attemptAddPromoCode(rc, orderId, promoCode)
 						val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
@@ -36,6 +36,7 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	case class AddPromoCodeShape(
+		program: String,
 		promoCode: Option[String]
 	)
 

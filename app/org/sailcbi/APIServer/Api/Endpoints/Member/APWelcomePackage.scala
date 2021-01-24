@@ -24,7 +24,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			profiler.lap("about to do first query")
 			val personId = rc.auth.getAuthedPersonId(rc)
 			profiler.lap("got person id")
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
 			type ResultUntyped = (
 				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]

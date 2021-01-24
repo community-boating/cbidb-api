@@ -13,14 +13,14 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
-	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 
 			val personId = rc.auth.getAuthedPersonId(rc)
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderId(rc, personId, program)
 
 			val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)
 			val orderTotalInCents = Currency.toCents(orderTotal)

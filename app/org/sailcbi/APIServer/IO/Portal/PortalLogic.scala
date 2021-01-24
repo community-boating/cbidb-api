@@ -30,7 +30,7 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		val parentId = rc.executePreparedQueryForInsert(pq).get.toInt
-		getOrderId(rc, parentId)
+		getOrderIdJP(rc, parentId)
 		parentId
 	}
 	def persistProtoJunior(rc: RequestCache[_], parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
@@ -60,7 +60,7 @@ object PortalLogic {
 		}
 		rc.executePreparedQueryForInsert(createAcctLink)
 
-		val orderId = getOrderId(rc, parentPersonId)
+		val orderId = getOrderIdJP(rc, parentPersonId)
 
 		val createSCM = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
 			override val params: List[String] = List(
@@ -469,7 +469,14 @@ object PortalLogic {
 		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def getOrderId(rc: RequestCache[_], personId: Int, appAlias: String = "Shared"): Int = {
+	def getOrderIdAP(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AP)
+
+	def getOrderIdJP(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.JP)
+
+	@deprecated
+	def getOrderId(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.SHARED)
+
+	def getOrderId(rc: RequestCache[_], personId: Int, appAlias: String): Int = {
 		val pc = new PreparedProcedureCall[Int](Set(MemberUserType, ProtoPersonUserType)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
@@ -492,7 +499,9 @@ object PortalLogic {
 			override def getOutResults(cs: CallableStatement): Int = cs.getInt("o_order_id")
 			override def getQuery: String = "cc_pkg.get_or_create_order_id(?, ?, ?)"
 		}
-		rc.executeProcedure(pc)
+		val ret = rc.executeProcedure(pc)
+		if (ret == 0) throw new Exception("No order ID created")
+		else ret
 	}
 
 	def getCardData(rc: RequestCache[_], orderId: Int): Option[StripeTokenSavedShape] = {
@@ -764,7 +773,7 @@ object PortalLogic {
 	}
 
 	def addSCMIfNotMember(rc: RequestCache[_], parentPersonId: Int, juniorId: Int): Unit = {
-		val orderId = getOrderId(rc, parentPersonId)
+		val orderId = getOrderIdJP(rc, parentPersonId)
 		val getCurrentMembership = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -822,7 +831,7 @@ object PortalLogic {
 	}
 
 	def deleteRegistration(rc: RequestCache[_], parentPersonId: Int, juniorId: Int): ValidationResult = {
-		val orderId = getOrderId(rc, parentPersonId)
+		val orderId = getOrderIdJP(rc, parentPersonId)
 		val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(juniorId.toString, orderId.toString)
 
@@ -847,7 +856,7 @@ object PortalLogic {
 	}
 
 	def apDeleteReservation(rc: RequestCache[_], memberID: Int): ValidationResult = {
-		val orderId = getOrderId(rc, memberID)
+		val orderId = getOrderIdAP(rc, memberID)
 		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
 			override val params: List[String] = List(orderId.toString)
 
@@ -1905,7 +1914,7 @@ object PortalLogic {
 			override def setInParametersInt: Map[String, Int] = Map(
 				"i_person_id" -> personId,
 				"i_instance_id" -> instanceId,
-				"i_order_id" -> getOrderId(rc, personId),
+				"i_order_id" -> getOrderIdAP(rc, personId),
 			)
 
 

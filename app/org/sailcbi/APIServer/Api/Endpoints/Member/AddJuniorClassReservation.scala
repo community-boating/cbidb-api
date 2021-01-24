@@ -47,7 +47,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 				}
 			}
 
-			val orderId = PortalLogic.getOrderId(rc, parentPersonId)
+			val orderId = PortalLogic.getOrderIdJP(rc, parentPersonId)
 
 			// Create new protojunior
 			val (juniorPersonId, rollbackCreateJunior) = PortalLogic.persistProtoJunior(

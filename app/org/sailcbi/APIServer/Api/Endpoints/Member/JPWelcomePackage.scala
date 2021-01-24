@@ -24,7 +24,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("got person id")
 			val kids = rc.auth.getChildrenPersons(rc, personId)
 			println(kids.mkString("\n"))
-			val orderId = PortalLogic.getOrderId(rc, personId)
+			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
 			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberUserType)) {
 				override val params: List[String] = List(personId.toString)
