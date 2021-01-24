@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -23,10 +23,10 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					println(s"its an update: $userId")
 
 					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
-						val pb = rc.pb
+
 
 						println(parsed)
-						runValidations(parsed, pb, Some(userId)) match {
+						runValidations(parsed, Some(userId)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
 								// do update
@@ -46,8 +46,8 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 				case None => {
 					println(s"its a create")
 					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
-						val pb = rc.pb
-						runValidations(parsed, pb, None).combine(checkUsernameUnique(pb, parsed.username.get)) match {
+
+						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.username.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
 								val user = new User
@@ -78,7 +78,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		if (parsed.pwHash.isDefined) user.update(_.pwHash, parsed.pwHash)
 	}
 
-	private def runValidations(parsed: PutUserShape, pb: PersistenceBroker, userId: Option[Int]): ValidationResult = {
+	private def runValidations(parsed: PutUserShape, userId: Option[Int]): ValidationResult = {
 		ValidationResult.combine(List(
 			ValidationResult.checkBlank(parsed.username, "Username"),
 			ValidationResult.checkBlank(parsed.email, "Email"),
@@ -87,8 +87,8 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		))
 	}
 
-	private def checkUsernameUnique(pb: PersistenceBroker, candidate: String): ValidationResult = {
-		val existingUsers = pb.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
+	private def checkUsernameUnique(rc: RequestCache[_], candidate: String): ValidationResult = {
+		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
 
 		if (existingUsers > 0) ValidationResult.from("That username is already in use")
 		else ValidationOk

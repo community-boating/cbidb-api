@@ -25,7 +25,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
-			val pb = rc.pb
+
 			val params = new GetReportRunOptionsParamsObject
 			getFuture(rc.cb, rc, params, getJSONResultFuture(rc)).map(s => {
 				Ok(s).as("application/json")

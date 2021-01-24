@@ -13,7 +13,6 @@ class GetApClassesForCalendar @Inject()(implicit val exec: ExecutionContext) ext
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val personId = rc.auth.getAuthedPersonId(rc)
 
 			val instances = PortalLogic.getApClassesForCalendar(rc, personId)

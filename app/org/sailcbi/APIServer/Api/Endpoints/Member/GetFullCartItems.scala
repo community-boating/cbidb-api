@@ -14,7 +14,6 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = rc.auth.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderId(rc, personId, program)

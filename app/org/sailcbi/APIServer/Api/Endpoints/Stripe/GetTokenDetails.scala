@@ -15,7 +15,7 @@ class GetTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionContex
 	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		PA.withRequestCache(ApexUserType)(None, ParsedRequest(req), rc => {
-			val pb = rc.pb
+
 			val stripeIOController = rc.getStripeIOController(ws)
 
 			stripeIOController.getTokenDetails(token).map({

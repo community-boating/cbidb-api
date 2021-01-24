@@ -15,7 +15,6 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[EmergencyContactShape](Set(MemberUserType)) {
@@ -68,9 +67,9 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withParsedPostBodyJSON(request.body.asJson, EmergencyContactShape.apply)(parsed => {
 			val juniorId = request.body.asJson.map(json => json("personId").toString().toInt).get
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-				val pb = rc.pb
+
 				val cb: CacheBroker = rc.cb
-				runValidations(parsed, pb, None) match {
+				runValidations(parsed, None) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 					case ValidationOk => {
 						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
@@ -122,7 +121,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 		})
 	}
 
-	def runValidations(parsed: EmergencyContactShape, pb: PersistenceBroker, juniorId: Option[Int]): ValidationResult = {
+	def runValidations(parsed: EmergencyContactShape, juniorId: Option[Int]): ValidationResult = {
 		val unconditionalValidations = List(
 			ValidationResult.checkBlank(parsed.emerg1Name, "First Contact Name"),
 			ValidationResult.checkBlank(parsed.emerg1Relation, "First Contact Relation"),

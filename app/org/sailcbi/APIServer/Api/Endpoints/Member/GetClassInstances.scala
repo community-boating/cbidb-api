@@ -16,8 +16,6 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends I
 	def junior(typeId: Int, juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
-
 			PortalLogic.pruneOldReservations(rc)
 
 			val instances = rc.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray

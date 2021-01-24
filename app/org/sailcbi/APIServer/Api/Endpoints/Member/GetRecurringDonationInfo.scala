@@ -15,7 +15,6 @@ class GetRecurringDonationInfo @Inject()(implicit exec: ExecutionContext, ws: WS
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val personId = rc.auth.getAuthedPersonId(rc)
 
 			PortalLogic.getStripeCustomerId(rc, personId) match {

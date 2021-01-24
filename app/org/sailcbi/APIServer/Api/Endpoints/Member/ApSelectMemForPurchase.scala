@@ -13,7 +13,6 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSelectMemForPurchaseShape.apply)(parsed => {
 				val orderId = PortalLogic.getOrderIdAP(rc, personId)

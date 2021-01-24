@@ -17,8 +17,6 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 	def get()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
-
 			val deleted = PortalLogic.pruneOldReservations(rc)
 			println(s"deleted $deleted old reservations...")
 

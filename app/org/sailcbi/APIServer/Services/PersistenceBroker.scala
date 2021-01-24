@@ -19,7 +19,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 		else getObjectsByIdsImplementation(obj, ids)
 	}
 
-	final def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	final private[Services] def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		countObjectsByFiltersImplementation(obj, filters)
 	}
@@ -55,7 +55,7 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 		else executePreparedQueryForUpdateOrDeleteImplementation(pq)
 	}
 
-	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+	final private[Services] def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
 		// TODO: security
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else executeQueryBuilderImplementation(qb)
@@ -89,5 +89,5 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
 
-	def testDB
+	private[Services] def testDB
 }

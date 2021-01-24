@@ -18,8 +18,6 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
-
 			PortalLogic.getSignupNote(rc, juniorId, instanceId) match {
 				case Right(os) => os match {
 					case Some(s) => Future(Ok(new JsObject(Map(
@@ -45,7 +43,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val data = request.body.asJson
 		PA.withParsedPostBodyJSON(request.body.asJson, SignupNoteShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
-				val pb = rc.pb
+
 				implicit val format = SignupNoteShape.format
 
 				PortalLogic.saveSignupNote(rc, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
@@ -63,7 +61,6 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
 				val username = rc.auth.userName
 				println("protoperson username is " + username)
-				val pb = rc.pb
 				val parentPersonId = rc.auth.getAuthedPersonId(rc).get
 				println("parent personId is " + parentPersonId)
 

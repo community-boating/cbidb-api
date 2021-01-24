@@ -18,7 +18,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		val logger = PA.logger
 		PA.withRequestCache(ApexUserType)(None, req, rc => {
-			val pb = rc.pb
+
 			val stripeIOController = rc.getStripeIOController(ws)
 			val params = req.postParams
 			val token: String = params("token")

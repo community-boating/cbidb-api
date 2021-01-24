@@ -13,7 +13,7 @@ class DBTest extends FunSuite {
 	test("dbaccess") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 			val types = rc.getAllObjectsOfClass(JpClassType)
 			println(types)
 		})
@@ -21,7 +21,7 @@ class DBTest extends FunSuite {
 	test("dbaccess2") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 			val types = rc.getAllObjectsOfClass(MembershipType)
 			println(types)
 		})
@@ -29,7 +29,7 @@ class DBTest extends FunSuite {
 	test("Writes should fail in test mode...") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			assertThrows[AnyRef]({
 				rc.executePreparedQueryForInsert(new PreparedQueryForInsert(Set(RootUserType)) {
@@ -44,7 +44,7 @@ class DBTest extends FunSuite {
 	test("... unless we use a writeable PA") {
 		ServerBootLoaderTest.withPAWriteable(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val typeName = "Blah333"
 
@@ -70,7 +70,7 @@ class DBTest extends FunSuite {
 	test("sdfgnjkdgfjk") {
 		ServerBootLoaderTest.withPAWriteable(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val q = new PreparedQueryForInsert(Set(RootUserType)) {
 				override val params: List[String] = List(null)
@@ -88,7 +88,7 @@ class DBTest extends FunSuite {
 	test("just get some fields") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 			val types = rc.getAllObjectsOfClass(JpClassType, Some(List(JpClassType.fields.typeName)))
 			val aType = types.head
 			println(aType.values.typeName.get)

@@ -16,7 +16,6 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 
 			val personId = rc.auth.getAuthedPersonId(rc)

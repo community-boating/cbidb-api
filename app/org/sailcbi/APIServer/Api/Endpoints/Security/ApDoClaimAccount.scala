@@ -17,7 +17,7 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApInitiateClaimAccountShape.apply)(parsed => {
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
-				val pb = rc.pb
+
 
 				val canClaim = PortalLogic.apCanClaim(rc, parsed.email) match {
 					case Right(_) => ValidationOk

@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services._
 class StaffUserType(override val userName: String) extends NonMemberUserType(userName) {
 	override def companion: UserTypeObject[StaffUserType] = StaffUserType
 
-	override def getPwHashForUser(rootPB: PersistenceBroker): Option[(Int, String)] = {
+	override def getPwHashForUser(rootRC: RequestCache[_]): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
@@ -17,7 +17,7 @@ class StaffUserType(override val userName: String) extends NonMemberUserType(use
 			override val params: List[String] = List(userName.toLowerCase)
 		}
 
-		val users = rootPB.executePreparedQueryForSelect(hq)
+		val users = rootRC.executePreparedQueryForSelect(hq)
 
 		if (users.length == 1) Some(1, users.head.pwHash)
 		else None

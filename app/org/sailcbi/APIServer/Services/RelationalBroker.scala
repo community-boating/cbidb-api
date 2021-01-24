@@ -565,7 +565,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		d.toInstant.atZone(ZoneId.systemDefault).toLocalDateTime
 
 	// test query
-	def testDB {
+	private[Services] def testDB {
 		dbConnection.mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.execute("select count(*) from users")

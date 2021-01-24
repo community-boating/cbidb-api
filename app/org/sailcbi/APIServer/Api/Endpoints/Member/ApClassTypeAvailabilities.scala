@@ -13,7 +13,6 @@ class ApClassTypeAvailabilities @Inject()(implicit exec: ExecutionContext) exten
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 			val personId = rc.auth.getAuthedPersonId(rc)
 

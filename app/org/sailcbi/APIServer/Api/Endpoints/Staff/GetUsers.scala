@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	private def get(userId: Option[Int], theRC: RequestCache[_]): List[UserShape] = {
 		implicit val rc: RequestCache[_] = theRC
-		val pb = rc.pb
+
 		val users = {
 			val users = TableAlias(User)
 			val filter = userId match {
@@ -37,7 +37,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 					User.fields.active,
 					User.fields.hideFromClose
 				).map(_.alias(users)))
-			pb.executeQueryBuilder(qb).map(User.construct)
+			rc.executeQueryBuilder(qb).map(User.construct)
 		}
 		users.map(u => UserShape(
 			userId = u.values.userId.get,

@@ -29,7 +29,6 @@ trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableRe
 		try {
 			PA.withRequestCache[T_User](ut)(None, ParsedRequest(request), rc => {
 				val cb: CacheBroker = rc.cb
-				val pb = rc.pb
 				getFuture(cb, rc, params, pq).map(s => {
 					Ok(s).as("application/json")
 				})

@@ -22,7 +22,7 @@ class DBSeedState extends FunSuite {
 //	test("reflection") {
 //		ServerBootLoaderTest.withPA(pa => {
 //			val rc = pa.assertRC(AuthenticationInstance.ROOT)
-//			val pb = rc.pb
+//
 //			val instances = pb.getAllObjectsOfClass(JpClassInstance)
 //			instances.foreach(_.booleanValueMap)
 //		})
@@ -40,7 +40,7 @@ class DBSeedState extends FunSuite {
 					.withPK(9998)
 			)
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 			pa.withSeedState(seedState, () => {
 				val users = rc.getAllObjectsOfClass(User, Some(List(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active)))
 				val user = users.head

@@ -14,7 +14,7 @@ class GetDonationFunds @Inject()(implicit val exec: ExecutionContext) extends In
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val q = new PreparedQueryForSelect[DonationFund](Set(PublicUserType)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DonationFund = DonationFund(

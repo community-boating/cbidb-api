@@ -17,7 +17,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ResetPasswordShape.apply)(parsed => {
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
-				val pb = rc.pb
+
 
 				validateHash(rc, parsed.email, parsed.hash) match {
 					case ValidationOk => {

@@ -28,7 +28,6 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableRe
 	protected def evaluate[T_User <: NonMemberUserType](ut: UserTypeObject[T_User], params: T, ws: WSClient, url: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		PA.withRequestCache[T_User](ut)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
-			val pb = rc.pb
 			getFuture(cb, rc, params, ws, url).map(s => {
 				Ok(s).as("application/json")
 			})

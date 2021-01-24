@@ -18,7 +18,6 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		val profiler = new Profiler
 		val logger = PA.logger
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
-			val pb = rc.pb
 			profiler.lap("about to do first query")
 			val personId = rc.auth.getAuthedPersonId(rc)
 			profiler.lap("got person id")

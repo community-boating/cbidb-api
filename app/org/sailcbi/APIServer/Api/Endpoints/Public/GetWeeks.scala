@@ -15,7 +15,7 @@ class GetWeeks @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async (req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val q = new PreparedQueryForSelect[GetWeeksResult](Set(PublicUserType)) {
 				override val params: List[String] = List.empty

@@ -15,7 +15,6 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupPostShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
-				val pb = rc.pb
 				println(parsed)
 
 				val doEnroll = parsed.doEnroll

@@ -17,7 +17,7 @@ class PostSymonRun @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 		val logger = PA.logger
 
 		PA.withRequestCache(SymonUserType)(None, req, rc => {
-			val pb = rc.pb
+
 
 			if (
 				req.postParams("symon-program") == "can-email" &&

@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserCrud @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
-			val pb = rc.pb
+
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asFormUrlEncoded
 			data match {

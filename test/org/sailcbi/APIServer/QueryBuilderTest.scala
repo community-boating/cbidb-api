@@ -15,7 +15,7 @@ class QueryBuilderTest extends FunSuite {
 	test("1 table, no filters (jp class types, typeID and typeName)") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
 
@@ -39,7 +39,7 @@ class QueryBuilderTest extends FunSuite {
 	test("2 tables, no filters (jp instances and types)") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
 			val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
@@ -69,7 +69,7 @@ class QueryBuilderTest extends FunSuite {
 	test("2 tables, filters") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
 			val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
@@ -118,7 +118,7 @@ class QueryBuilderTest extends FunSuite {
 	test("outer join") {
 		ServerBootLoaderTest.withPA(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
 			val instances = TableAlias.wrapForInnerJoin(JpClassInstance)

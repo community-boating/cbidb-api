@@ -19,7 +19,6 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		val profiler = new Profiler
 		val logger = PA.logger
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
-			val pb = rc.pb
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
 			val personId = rc.auth.getAuthedPersonId(rc)

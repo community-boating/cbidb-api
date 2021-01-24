@@ -73,11 +73,9 @@ class PermissionsAuthority private[Services] (
 	private lazy val rootRC: RequestCache[RootUserType] = RequestCache.from(RootUserType.create, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
-	private lazy val rootPB = rootRC.pb
 	private lazy val rootCB = new RedisBroker
 
 	private lazy val bouncerRC: RequestCache[BouncerUserType] = RequestCache.from(BouncerUserType.create, secrets)
-	private lazy val bouncerPB = bouncerRC.pb
 
 	def now(): LocalDateTime = {
 		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootUserType)) {
@@ -87,14 +85,14 @@ class PermissionsAuthority private[Services] (
 
 			override def getQuery: String = "select util_pkg.get_sysdate from dual"
 		}
-		rootPB.executePreparedQueryForSelect(q).head
+		rootRC.executePreparedQueryForSelect(q).head
 	}
 
-	def testDB = rootPB.testDB
+	def testDB = rootRC.testDB
 
 	def procedureTest() = {
 		println("starting executeProcedure...")
-		val ret = rootPB.executeProcedure(PreparedProcedureCall.test)
+		val ret = rootRC.executeProcedure(PreparedProcedureCall.test)
 		println("finished executeProcedure")
 
 		println("procedure call complete with named params.....")
@@ -203,7 +201,7 @@ class PermissionsAuthority private[Services] (
 					""".stripMargin
 						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 					}
-					val juniorIds = rootPB.executePreparedQueryForSelect(getAuthedJuniorIDs)
+					val juniorIds = rootRC.executePreparedQueryForSelect(getAuthedJuniorIDs)
 					if (juniorIds.contains(juniorId)) {
 						Some(ret)
 					} else {
@@ -263,7 +261,7 @@ class PermissionsAuthority private[Services] (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
 			authenticate(request, BouncerUserType).isDefined
 		) {
-			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootPB)
+			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootRC)
 		} else None
 	}
 
@@ -378,7 +376,7 @@ class PermissionsAuthority private[Services] (
 				val q = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
 					override def getQuery: String = "delete from " + e.entityName
 				}
-				val result = rootPB.executePreparedQueryForUpdateOrDelete(q)
+				val result = rootRC.executePreparedQueryForUpdateOrDelete(q)
 				println(s"deleted $result rows from ${e.entityName}")
 			})
 		}
@@ -389,7 +387,7 @@ class PermissionsAuthority private[Services] (
 		else {
 			this.nukeDB()
 			try {
-				entities.foreach(e => rootPB.commitObjectToDatabase(e))
+				entities.foreach(e => rootRC.commitObjectToDatabase(e))
 				block()
 			} finally {
 				this.nukeDB()

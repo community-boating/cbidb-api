@@ -13,7 +13,6 @@ class GetOffseasonClassInstances @Inject()(implicit val exec: ExecutionContext) 
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
 			val result = rc.executePreparedQueryForSelect(new JpOffseasonClasses(juniorId)).head
 
 			Future(Ok(Json.toJson(result)))

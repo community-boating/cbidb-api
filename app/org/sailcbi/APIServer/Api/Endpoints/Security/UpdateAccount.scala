@@ -17,7 +17,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, UpdateAccountShape.apply)(parsed => {
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
-				val pb = rc.pb
+
 
 				validate(rc, parsed.oldEmail, parsed.newEmail) match {
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))

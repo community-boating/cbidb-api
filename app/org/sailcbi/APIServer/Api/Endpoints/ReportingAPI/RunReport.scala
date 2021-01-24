@@ -39,7 +39,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 				}
 			} else {
 				try {
-					val pb = rc.pb
+
 					val cb: CacheBroker = rc.cb
 					// TODO: assert expected post params
 					if (req.postParams.isEmpty) Future {

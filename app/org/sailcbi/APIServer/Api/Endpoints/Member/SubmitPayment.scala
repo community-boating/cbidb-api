@@ -20,8 +20,6 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
-
 			val personId = rc.auth.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
@@ -37,7 +35,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postJP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val personId = rc.auth.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
@@ -54,8 +52,6 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postApex()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ApexUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
-
 			val params = parsedRequest.postParams
 			val personId = params("personId").toInt
 			val orderId: Int = params("orderId").toInt
@@ -68,7 +64,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	}
 
 	private def startChargeProcess(rc: RequestCache[_], personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
-		val pb = rc.pb
+
 
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
@@ -100,7 +96,6 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	}
 
 	private def postPaymentIntent(rc: RequestCache[_], personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
-		val pb = rc.pb
 		val logger = PA.logger
 
 		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberUserType, ApexUserType)) {

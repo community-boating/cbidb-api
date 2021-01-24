@@ -23,7 +23,6 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
-			val pb = rc.pb
 
 			val params = request.body.asJson
 

@@ -13,7 +13,7 @@ class PingDB @Inject()(implicit exec: ExecutionContext) extends InjectedControll
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val q = new PreparedQueryForSelect[Int](Set(PublicUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)

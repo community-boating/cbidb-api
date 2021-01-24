@@ -14,7 +14,7 @@ class ApAbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) e
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val memberId = rc.auth.getAuthedPersonId(rc)
 

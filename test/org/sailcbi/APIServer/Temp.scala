@@ -17,7 +17,7 @@ import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
 class Temp extends FunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
 		val rc = pa.assertRC(RootUserType.create)
-		val pb = rc.pb
+
 
 
 

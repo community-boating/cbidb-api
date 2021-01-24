@@ -14,7 +14,7 @@ class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends Injec
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
+
 
 			val membershipPrices = PortalLogic.getAllMembershipPrices(rc)
 			val (dwPrice, gpPrice) = PortalLogic.getDwGpPrices(rc)

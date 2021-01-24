@@ -15,7 +15,6 @@ class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) ext
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AbortMembershipRegistrationShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
-				val pb = rc.pb
 
 				val parentPersonId = rc.auth.getAuthedPersonId(rc)
 

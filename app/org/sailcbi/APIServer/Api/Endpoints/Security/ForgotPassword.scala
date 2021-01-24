@@ -18,7 +18,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ForgotPasswordShape.apply)(parsed => {
 			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
-				val pb = rc.pb
+
 
 				val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
 					override val params: List[String] = List(parsed.email)

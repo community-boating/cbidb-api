@@ -16,9 +16,6 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Inj
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
-			val cb: CacheBroker = rc.cb
-
 			val select = new PreparedQueryForSelect[SeeTypeResult](Set(MemberUserType)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SeeTypeResult =
 					SeeTypeResult(rs.getInt(1), rs.getBooleanFromChar(2))

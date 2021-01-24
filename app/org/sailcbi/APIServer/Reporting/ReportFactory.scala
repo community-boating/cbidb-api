@@ -9,20 +9,16 @@ import java.time.{LocalDateTime, ZoneId}
 
 abstract class ReportFactory[T <: StorableClass] {
 	private val rcWrapper = new Initializable[RequestCache[_]]
-	private val pbWrapper = new Initializable[PersistenceBroker]
 	private val filterSpecWrapper = new Initializable[String]
 	private val fieldSpecWrapper = new Initializable[String]
 
 	def setParameters(rc: RequestCache[_], filterSpec: String, fieldSpec: String): Unit = {
 		rcWrapper.set(rc)
-		pbWrapper.set(rc.pb)
 		filterSpecWrapper.set(filterSpec)
 		fieldSpecWrapper.set(fieldSpec)
 	}
 
 	def rc: RequestCache[_] = rcWrapper.get
-
-	def pb: PersistenceBroker = pbWrapper.get
 
 	def filterSpec: String = filterSpecWrapper.get
 

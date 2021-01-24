@@ -14,7 +14,6 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
-			val pb = rc.pb
 			parsedRequest.postParams.get("name") match {
 				case None => {
 					println("no body")

@@ -20,7 +20,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
-				val pb = rc.pb
+
 				val stripe = rc.getStripeIOController(ws)
 				val personId = rc.auth.getAuthedPersonId(rc)
 				val orderId = PortalLogic.getOrderId(rc, personId, program)

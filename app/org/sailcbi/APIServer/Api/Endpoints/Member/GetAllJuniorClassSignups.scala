@@ -14,7 +14,6 @@ class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) e
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			implicit val format = AllSignupsResponse.format

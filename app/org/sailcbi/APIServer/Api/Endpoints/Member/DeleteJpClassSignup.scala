@@ -15,7 +15,6 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Inj
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupDeletePostShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
-				val pb = rc.pb
 				println(parsed)
 
 				PortalLogic.attemptDeleteSignup(rc, parsed.juniorId, parsed.instanceId) match {

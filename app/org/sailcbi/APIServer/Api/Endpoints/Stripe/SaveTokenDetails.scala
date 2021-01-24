@@ -19,7 +19,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		val logger = PA.logger
 		val pr = ParsedRequest(req)
 		PA.withRequestCache(PublicUserType)(None, pr, rc => {
-			val pb = rc.pb
+
 			val stripeIOController = rc.getStripeIOController(ws)
 
 			pr.postJSON match {

@@ -13,7 +13,7 @@ class SyncLocalDBWithStripe @Inject()(ws: WSClient)(implicit exec: ExecutionCont
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		PA.withRequestCache(ApexUserType)(None, ParsedRequest(req), rc => {
-			val pb = rc.pb
+
 			val stripeIOController = rc.getStripeIOController(ws)
 			stripeIOController.syncBalanceTransactions.map({
 				case CriticalError(e) => {

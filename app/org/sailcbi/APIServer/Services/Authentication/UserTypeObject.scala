@@ -1,10 +1,15 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
 abstract class UserTypeObject[T <: UserType] {
 	def create(userName: String): T
+
+	def test(allowed: Set[UserTypeObject[_]]): Unit = {
+		if (!allowed.contains(this)) throw new UserTypeMismatchException()
+	}
 
 	// Given a request (and an unrestricted CacheBroker), determine if the request is authenticated against this mechanism.
 	// Return Some(authenticated username) if so, None otherwise

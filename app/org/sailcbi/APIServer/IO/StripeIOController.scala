@@ -19,178 +19,165 @@ import scala.concurrent.Future
 
 class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
-		if (TestUserType(Set(ApexUserType, PublicUserType, MemberUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
-		}
-		else throw new UnauthorizedAccessException("getTokenDetails denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(ApexUserType, PublicUserType, MemberUserType))
+
+		apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
 	}
 
 	def createCharge(amountInCents: Int, source: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
-		if (TestUserType(Set(ApexUserType, MemberUserType, PublicUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"charges",
-				Charge.apply,
-				POST,
-				Some(Map(
-					"amount" -> amountInCents.toString,
-					"currency" -> "usd",
-					"source" -> source,
-					"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
-					"metadata[closeId]" -> closeId.toString,
-					"metadata[orderId]" -> orderId.toString,
-					"metadata[source]" -> source,
-					"metadata[cbiInstance]" -> PA.instanceName
-				)),
-				Some((c: Charge) => dbIO.createObject(c))
-			)
-		}
-		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(ApexUserType, MemberUserType, PublicUserType))
+
+		apiIO.getOrPostStripeSingleton(
+			"charges",
+			Charge.apply,
+			POST,
+			Some(Map(
+				"amount" -> amountInCents.toString,
+				"currency" -> "usd",
+				"source" -> source,
+				"description" -> ("Charge for orderId " + orderId + " time " + PA.serverParameters.nowDateTimeString),
+				"metadata[closeId]" -> closeId.toString,
+				"metadata[orderId]" -> orderId.toString,
+				"metadata[source]" -> source,
+				"metadata[cbiInstance]" -> PA.instanceName
+			)),
+			Some((c: Charge) => dbIO.createObject(c))
+		)
 	}
 
 	/** If you call this, you must put the PI ID on the order */
 	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String, closeId: Int): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			val sourceBody = source match {
-				case None => Map.empty
-				case Some(s) => Map("payment_method" -> s)
-			}
-			apiIO.getOrPostStripeSingleton(
-				"payment_intents",
-				PaymentIntent.apply,
-				POST,
-				Some(Map(
-					"amount" -> totalInCents.toString,
-					"currency" -> "usd",
-					"customer" -> customerId,
-					"capture_method" -> "automatic",
-					"description" -> ("Charge for orderId " + orderId),
-					"metadata[orderId]" -> orderId.toString,
-					"metadata[closeId]" -> closeId.toString,
-					"metadata[cbiInstance]" -> PA.instanceName
-				) ++ sourceBody),
-				None
-			)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+
+		val sourceBody = source match {
+			case None => Map.empty
+			case Some(s) => Map("payment_method" -> s)
 		}
-		else throw new UnauthorizedAccessException("createPaymentIntent denied to userType " + rc.auth.companion)
+		apiIO.getOrPostStripeSingleton(
+			"payment_intents",
+			PaymentIntent.apply,
+			POST,
+			Some(Map(
+				"amount" -> totalInCents.toString,
+				"currency" -> "usd",
+				"customer" -> customerId,
+				"capture_method" -> "automatic",
+				"description" -> ("Charge for orderId " + orderId),
+				"metadata[orderId]" -> orderId.toString,
+				"metadata[closeId]" -> closeId.toString,
+				"metadata[cbiInstance]" -> PA.instanceName
+			) ++ sourceBody),
+			None
+		)
 	}
 
 	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int, closeId: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"payment_intents/" + intentId,
-				_ => Unit,
-				POST,
-				Some(Map(
-					"amount" -> totalInCents.toString,
-					"metadata[closeId]" -> closeId.toString,
-				)),
-				None
-			)
-		}
-		else throw new UnauthorizedAccessException("updatePaymentIntentWithTotal denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+
+		apiIO.getOrPostStripeSingleton(
+			"payment_intents/" + intentId,
+			_ => Unit,
+			POST,
+			Some(Map(
+				"amount" -> totalInCents.toString,
+				"metadata[closeId]" -> closeId.toString,
+			)),
+			None
+		)
 	}
 
 	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"payment_intents/" + intentId,
-				PaymentIntent.apply,
-				POST,
-				Some(Map(
-					"payment_method" -> methodId,
-				)),
-				None
-			)
-		}
-		else throw new UnauthorizedAccessException("updatePaymentIntentWithPaymentMethod denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+		apiIO.getOrPostStripeSingleton(
+			"payment_intents/" + intentId,
+			PaymentIntent.apply,
+			POST,
+			Some(Map(
+				"payment_method" -> methodId,
+			)),
+			None
+		)
 	}
 
 	def getPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"payment_intents/" + paymentIntentId,
-				PaymentIntent.apply,
-				GET,
-				None,
-				None
-			)
-		}
-		else throw new UnauthorizedAccessException("getPaymentIntent denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+		apiIO.getOrPostStripeSingleton(
+			"payment_intents/" + paymentIntentId,
+			PaymentIntent.apply,
+			GET,
+			None,
+			None
+		)
 	}
 
 	def confirmPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"payment_intents/" + paymentIntentId + "/confirm",
-				PaymentIntent.apply,
-				POST,
-				Some(Map.empty),
-				Some((pi: PaymentIntent) => pi.charges.data.filter(c => c.paid).map(dbIO.createObject))
-			)
-		}
-		else throw new UnauthorizedAccessException("confirmPaymentIntent denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+		apiIO.getOrPostStripeSingleton(
+			"payment_intents/" + paymentIntentId + "/confirm",
+			PaymentIntent.apply,
+			POST,
+			Some(Map.empty),
+			Some((pi: PaymentIntent) => pi.charges.data.filter(c => c.paid).map(dbIO.createObject))
+		)
 	}
 
 	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
-		if (TestUserType(Set( MemberUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				s"payment_methods/${paymentMethodId}/detach",
-				null,
-				POST,
-				Some(Map.empty),
-				None
-			)
-		}
-		else throw new UnauthorizedAccessException("detachPaymentMethod denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType))
+
+		apiIO.getOrPostStripeSingleton(
+			s"payment_methods/${paymentMethodId}/detach",
+			null,
+			POST,
+			Some(Map.empty),
+			None
+		)
 	}
 
 	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
-		if (TestUserType(Set(ApexUserType), rc.auth.companion)) {
-			// Update DB with all payouts
+		rc.auth.companion.test(Set(ApexUserType))
+		// Update DB with all payouts
+		updateLocalDBFromStripeForStorable(
+			Charge,
+			List.empty,
+			Some((c: Charge) => c.status == "succeeded"),
+			(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Charge, new GetLocalStripeCharges),
+			COMMIT_TYPE_DO,
+			COMMIT_TYPE_DO,
+			COMMIT_TYPE_ASSERT_NO_ACTION
+		).flatMap(_ =>
 			updateLocalDBFromStripeForStorable(
-				Charge,
+				Payout,
 				List.empty,
-				Some((c: Charge) => c.status == "succeeded"),
-				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Charge, new GetLocalStripeCharges),
+				None,
+				(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_DO,
 				COMMIT_TYPE_ASSERT_NO_ACTION
-			).flatMap(_ =>
-				updateLocalDBFromStripeForStorable(
-					Payout,
-					List.empty,
-					None,
-					(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(Payout, new GetLocalStripePayouts),
-					COMMIT_TYPE_DO,
-					COMMIT_TYPE_DO,
-					COMMIT_TYPE_ASSERT_NO_ACTION
-				).flatMap(_ => {
-					val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
-					// For each payout, update DB with all associated BTs
-					Future.sequence(payouts.map(po => {
-						Thread.sleep(400)
-						val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
-						updateLocalDBFromStripeForStorable(
-							BalanceTransaction,
-							List("payout=" + po.id),
-							Some((bt: BalanceTransaction) => bt.`type` != "payout"),
-							(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
-							COMMIT_TYPE_DO,
-							COMMIT_TYPE_DO,
-							COMMIT_TYPE_ASSERT_NO_ACTION,
-							Some(constructor)
-						)
-					})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
-						case Succeeded((c, u, d)) => {
-							val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
-							Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
-						}
-						case x => x
-					}))
-				})
-			)
-		}
-		else throw new UnauthorizedAccessException("syncBalanceTransactions denied to userType " + rc.auth.companion)
+			).flatMap(_ => {
+				val payouts: List[Payout] = dbIO.getObjects(Payout, new GetLocalStripePayouts)
+				// For each payout, update DB with all associated BTs
+				Future.sequence(payouts.map(po => {
+					Thread.sleep(400)
+					val constructor: (JsValue => BalanceTransaction) = BalanceTransaction.apply(_, po)
+					updateLocalDBFromStripeForStorable(
+						BalanceTransaction,
+						List("payout=" + po.id),
+						Some((bt: BalanceTransaction) => bt.`type` != "payout"),
+						(dbMech: StripeDatabaseIOMechanism) => dbMech.getObjects(BalanceTransaction, new GetLocalStripeBalanceTransactions(po)),
+						COMMIT_TYPE_DO,
+						COMMIT_TYPE_DO,
+						COMMIT_TYPE_ASSERT_NO_ACTION,
+						Some(constructor)
+					)
+				})).map(serviceResultList => serviceResultList.foldLeft(Succeeded((0, 0, 0)): ServiceRequestResult[(Int, Int, Int), Unit])((result, e) => result match {
+					case Succeeded((c, u, d)) => {
+						val runningTotals = e.asInstanceOf[Succeeded[(Int, Int, Int), Unit]].successObject
+						Succeeded(runningTotals._1 + c, runningTotals._2 + u, runningTotals._3 + d)
+					}
+					case x => x
+				}))
+			})
+		)
 	}
 
 	def createStripeCustomerFromPerson(rc: RequestCache[_], personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
@@ -217,79 +204,71 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 			println("stripe create customer: exists")
 			Future(ValidationError(StripeError("validation", "Stripe customer record already exists.")))
 		} else {
-			if (TestUserType(Set(MemberUserType), rc.auth.asInstanceOf[UserType].companion)) {
-				apiIO.getOrPostStripeSingleton(
-					"customers",
-					Customer.apply,
-					POST,
-					Some(Map(
-						"email" -> optionEmail.get,
-						"metadata[personId]" -> personId.toString,
-						"metadata[cbiInstance]" -> PA.instanceName
-					)),
-					Some((c: Customer) => {
-						val update = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
-							override val params: List[String] = List(c.id, personId.toString)
-							override def getQuery: String =
-								"""
-								  |update persons set stripe_customer_id = ? where person_id = ?
-								  |""".stripMargin
-						}
-						rc.executePreparedQueryForUpdateOrDelete(update)
-					})
-				)
-			}
-			else throw new UnauthorizedAccessException("createStripeCustomerFromPerson denied to userType " + rc.auth.asInstanceOf[UserType].companion)
+			rc.auth.asInstanceOf[UserType].companion.test(Set(MemberUserType))
+			apiIO.getOrPostStripeSingleton(
+				"customers",
+				Customer.apply,
+				POST,
+				Some(Map(
+					"email" -> optionEmail.get,
+					"metadata[personId]" -> personId.toString,
+					"metadata[cbiInstance]" -> PA.instanceName
+				)),
+				Some((c: Customer) => {
+					val update = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+						override val params: List[String] = List(c.id, personId.toString)
+						override def getQuery: String =
+							"""
+							  |update persons set stripe_customer_id = ? where person_id = ?
+							  |""".stripMargin
+					}
+					rc.executePreparedQueryForUpdateOrDelete(update)
+				})
+			)
 		}
 	}
 
 	def getCustomerPortalURL(customerId: String): Future[ServiceRequestResult[String, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				"billing_portal/sessions",
-				(jsv: JsValue) => jsv.asInstanceOf[JsObject]("url").asInstanceOf[JsString].value,
-				POST,
-				Some(Map(
-					"customer" -> customerId
-				)),
-				None
-			)
-		}
-		else throw new UnauthorizedAccessException("getCustomerPortalURL denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType))
+		apiIO.getOrPostStripeSingleton(
+			"billing_portal/sessions",
+			(jsv: JsValue) => jsv.asInstanceOf[JsObject]("url").asInstanceOf[JsString].value,
+			POST,
+			Some(Map(
+				"customer" -> customerId
+			)),
+			None
+		)
 	}
 
 	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[_, StripeError]] = {
-		if (TestUserType(Set(MemberUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton(
-				s"payment_methods/$paymentMethodId/attach",
-				PaymentMethod.apply,
-				POST,
-				Some(Map(
-					"customer" -> customerId
-				)),
-				None
-			).flatMap({
-				case f: NetFailure[PaymentMethod, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[PaymentMethod, StripeError]])
-				case _: NetSuccess[PaymentMethod, StripeError] =>
-					apiIO.getOrPostStripeSingleton(
-						"customers/" + customerId,
-						Customer.apply,
-						POST,
-						Some(Map(
-							"invoice_settings[default_payment_method]" -> paymentMethodId
-						)),
-						None
-					)
-			})
-		}
-		else throw new UnauthorizedAccessException("storePaymentMethod denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType))
+		apiIO.getOrPostStripeSingleton(
+			s"payment_methods/$paymentMethodId/attach",
+			PaymentMethod.apply,
+			POST,
+			Some(Map(
+				"customer" -> customerId
+			)),
+			None
+		).flatMap({
+			case f: NetFailure[PaymentMethod, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[PaymentMethod, StripeError]])
+			case _: NetSuccess[PaymentMethod, StripeError] =>
+				apiIO.getOrPostStripeSingleton(
+					"customers/" + customerId,
+					Customer.apply,
+					POST,
+					Some(Map(
+						"invoice_settings[default_payment_method]" -> paymentMethodId
+					)),
+					None
+				)
+		})
 	}
 
 	def getCustomerObject(customerId: String): Future[ServiceRequestResult[Customer, StripeError]] = {
-		if (TestUserType(Set(MemberUserType, ApexUserType), rc.auth.companion)) {
-			apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
-		}
-		else throw new UnauthorizedAccessException("getCustomerObject denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(MemberUserType, ApexUserType))
+		apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
 	}
 
 	def getCustomerDefaultPaymentMethod(customerId: String): Future[ServiceRequestResult[Option[PaymentMethod], StripeError]] = {
@@ -315,32 +294,30 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		orderId: Int,
 		closeId: Int
 	): Future[ServiceRequestResult[Charge, StripeError]] = {
-		if (TestUserType(Set(ApexUserType, MemberUserType), rc.auth.companion)) {
-			getCustomerObject(customerId).flatMap({
-				case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Charge, StripeError]])
-				case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {
-					case None => throw new Exception("No default payment method for customer " + customerId)
-					case Some(paymentMethod) => apiIO.getOrPostStripeSingleton(
-						"charges",
-						Charge.apply,
-						POST,
-						Some(Map(
-							"amount" -> amountInCents.toString,
-							"customer" -> customerId,
-							"currency" -> "usd",
-							"source" -> paymentMethod,
-							"description" -> ("Charge for paymentStaggerId " + paymentStaggerId + " time " + PA.serverParameters.nowDateTimeString),
-							"metadata[closeId]" -> closeId.toString,
-							"metadata[orderId]" -> orderId.toString,
-							"metadata[paymentStaggerId]" -> paymentStaggerId.toString,
-							"metadata[cbiInstance]" -> PA.instanceName
-						)),
-						Some((c: Charge) => dbIO.createObject(c))
-					)
-				}
-			})
-		}
-		else throw new UnauthorizedAccessException("createCharge denied to userType " + rc.auth.companion)
+		rc.auth.companion.test(Set(ApexUserType, MemberUserType))
+		getCustomerObject(customerId).flatMap({
+			case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Charge, StripeError]])
+			case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {
+				case None => throw new Exception("No default payment method for customer " + customerId)
+				case Some(paymentMethod) => apiIO.getOrPostStripeSingleton(
+					"charges",
+					Charge.apply,
+					POST,
+					Some(Map(
+						"amount" -> amountInCents.toString,
+						"customer" -> customerId,
+						"currency" -> "usd",
+						"source" -> paymentMethod,
+						"description" -> ("Charge for paymentStaggerId " + paymentStaggerId + " time " + PA.serverParameters.nowDateTimeString),
+						"metadata[closeId]" -> closeId.toString,
+						"metadata[orderId]" -> orderId.toString,
+						"metadata[paymentStaggerId]" -> paymentStaggerId.toString,
+						"metadata[cbiInstance]" -> PA.instanceName
+					)),
+					Some((c: Charge) => dbIO.createObject(c))
+				)
+			}
+		})
 	}
 
 	private def updateLocalDBFromStripeForStorable[T_Stor <: CastableToStorableClass](

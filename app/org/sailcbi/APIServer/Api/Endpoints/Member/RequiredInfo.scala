@@ -17,7 +17,6 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val pb = rc.pb
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[RequiredInfoShape](Set(MemberUserType)) {
@@ -89,7 +88,6 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					val juniorId: Int = id.toString().toInt
 					println(s"its an update: $juniorId")
 					PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-						val pb = rc.pb
 						runValidations(parsed, rc, Some(id.toString().toInt)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
@@ -105,7 +103,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				case None => {
 					println(s"its a create")
 					PA.withRequestCacheMember(None, parsedRequest, rc => {
-						val pb = rc.pb
+
 						runValidations(parsed, rc, None) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {

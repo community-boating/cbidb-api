@@ -15,7 +15,7 @@ class PreparedValueTest extends FunSuite {
 	test("dfgh") {
 		ServerBootLoaderTest.withPAWriteable(pa => {
 			val rc = pa.assertRC(RootUserType.create)
-			val pb = rc.pb
+
 
 			val ins = new PreparedQueryForInsert(Set(RootUserType)) {
 				override val pkName: Option[String] = Some("PK")
@@ -36,7 +36,7 @@ class PreparedValueTest extends FunSuite {
 	}
 //	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
 //		val rc = pa.assertRC(RootUserType.create)
-//		val pb = rc.pb
+//
 //
 //
 //
