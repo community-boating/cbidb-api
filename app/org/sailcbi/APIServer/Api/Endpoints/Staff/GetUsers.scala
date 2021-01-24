@@ -1,16 +1,16 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, User}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.Storable.Filter
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedController {

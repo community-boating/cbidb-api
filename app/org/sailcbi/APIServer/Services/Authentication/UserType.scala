@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Services.Authentication
 
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 
 abstract class UserType(val userName: String) {
 	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user

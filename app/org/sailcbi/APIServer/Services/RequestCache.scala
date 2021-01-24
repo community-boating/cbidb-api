@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, Hardco
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication.{UserType, _}
-import org.sailcbi.APIServer.Services.Exception.{CORSException, UnauthorizedAccessException}
+import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField

@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.Storable.Fields
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 import java.time.LocalDate

@@ -1,14 +1,14 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
-import javax.inject.Inject
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffUserType
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedController {

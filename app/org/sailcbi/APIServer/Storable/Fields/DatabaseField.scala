@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Storable.Fields
 
-import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, ColumnAliasOuterJoined, TableAliasInnerJoined, TableAliasOuterJoined}
+import org.sailcbi.APIServer.Storable.StorableQuery._
 import org.sailcbi.APIServer.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {

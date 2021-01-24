@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Reporting
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
-import org.sailcbi.APIServer.Services.{PersistenceBroker, RequestCache}
+import org.sailcbi.APIServer.Services.RequestCache
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 import java.time.{LocalDateTime, ZoneId}

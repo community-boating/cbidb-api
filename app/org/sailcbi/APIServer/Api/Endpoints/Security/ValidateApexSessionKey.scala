@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, BouncerUserType, MemberUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, BouncerUserType}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

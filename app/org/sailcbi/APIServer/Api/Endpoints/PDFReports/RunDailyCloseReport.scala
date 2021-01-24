@@ -7,7 +7,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.DailyCloseReport
 import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Loader.{DailyCloseReportLiveLoader, DailyCloseReportLiveParameter}
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.StaffUserType
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.http.HttpEntity
 import play.api.mvc._
