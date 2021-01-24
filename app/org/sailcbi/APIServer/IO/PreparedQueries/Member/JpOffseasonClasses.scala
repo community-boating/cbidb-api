@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.Json
 
-class JpOffseasonClasses(juniorId: Int) extends PreparedQueryForSelect[JpOffseasonClassesResult](Set(MemberUserType)) {
+class JpOffseasonClasses(juniorId: Int) extends PreparedQueryForSelect[JpOffseasonClassesResult](Set(MemberRequestCache)) {
 	override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): JpOffseasonClassesResult = JpOffseasonClassesResult(
 		className=rsw.getString(1),
 		typeId = rsw.getInt(2),

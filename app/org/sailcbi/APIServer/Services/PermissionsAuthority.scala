@@ -29,7 +29,7 @@ class PermissionsAuthority private[Services] (
 	val isTestMode: Boolean,
 	val isDebugMode: Boolean,
 	val readOnlyDatabase: Boolean,
-	val allowableUserTypes: List[UserTypeObject[_]],
+	val allowableUserTypes: List[RequestCacheObject[_]],
 	val preparedQueriesOnly: Boolean,
 	val persistenceSystem: PersistenceSystem,
 	secrets: PermissionsAuthoritySecrets
@@ -70,15 +70,15 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RequestCache[RootUserType] = RequestCache.from(RootUserType.create, secrets)
+	private lazy val rootRC: RequestCache[RootRequestCache] = RequestCache.from(RootRequestCache.create, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: RequestCache[BouncerUserType] = RequestCache.from(BouncerUserType.create, secrets)
+	private lazy val bouncerRC: RequestCache[BouncerRequestCache] = RequestCache.from(BouncerRequestCache.create, secrets)
 
 	def now(): LocalDateTime = {
-		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootUserType)) {
+		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootRequestCache)) {
 			override val params: List[String] = List()
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): LocalDateTime = rsw.getLocalDateTime(1)
@@ -145,8 +145,8 @@ class PermissionsAuthority private[Services] (
 		})
 	}
 
-	private def getRequestCache[T <: NonMemberUserType](
-		requiredUserType: UserTypeObject[T],
+	private def getRequestCache[T <: NonMemberRequestCache](
+		requiredUserType: RequestCacheObject[T],
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): Option[RequestCache[T]] =
@@ -158,8 +158,8 @@ class PermissionsAuthority private[Services] (
 			secrets
 		)
 
-	def withRequestCache[T <: NonMemberUserType](
-		requiredUserType: UserTypeObject[T])(
+	def withRequestCache[T <: NonMemberRequestCache](
+		requiredUserType: RequestCacheObject[T])(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		block: RequestCache[T] => Future[Result]
@@ -169,13 +169,13 @@ class PermissionsAuthority private[Services] (
 	private def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache[MemberUserType]] =
-		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets)
+	): Option[RequestCache[MemberRequestCache]] =
+		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets)
 
 	def withRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache[MemberUserType] => Future[Result]
+		block: RequestCache[MemberRequestCache] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
 
@@ -183,16 +183,16 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int
-	): Option[RequestCache[MemberUserType]] = {
+	): Option[RequestCache[MemberRequestCache]] = {
 		println("about to validate junior id in request....")
-		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
+		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
 			case Some(ret) => {
-				if (ret.auth.isInstanceOf[MemberUserType]) {
+				if (ret.auth.isInstanceOf[MemberRequestCache]) {
 					// auth was successful
 					//... but does the request juniorId match the auth'd parent id?
 					val authedPersonId = ret.auth.getAuthedPersonId(ret)
-					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootUserType)) {
+					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootRequestCache)) {
 						override def getQuery: String =
 							s"""
 							   |select b from person_relationships rl
@@ -219,7 +219,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int,
-		block: RequestCache[MemberUserType] => Future[Result]
+		block: RequestCache[MemberRequestCache] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
 
@@ -227,11 +227,11 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int
-	): Option[RequestCache[MemberUserType]] = {
-		RequestCache(MemberUserType, requiredUserName, parsedRequest, rootCB, secrets) match {
+	): Option[RequestCache[MemberRequestCache]] = {
+		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
 			case Some(ret) => {
-				if (ret.auth.isInstanceOf[MemberUserType]) {
+				if (ret.auth.isInstanceOf[MemberRequestCache]) {
 					// auth was successful
 					//... but does the request parentId match the auth'd parent id?
 					val authedPersonId = ret.auth.getAuthedPersonId(ret)
@@ -252,14 +252,14 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int,
-		block: RequestCache[MemberUserType] => Future[Result]
+		block: RequestCache[MemberRequestCache] => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithParentId(requiredUserName, parsedRequest, parentId), block)
 
-	def getPwHashForUser(request: ParsedRequest, userName: String, userType: UserTypeObject[_]): Option[(Int, String)] = {
+	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(Int, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
-			authenticate(request, BouncerUserType).isDefined
+			authenticate(request, BouncerRequestCache).isDefined
 		) {
 			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootRC)
 		} else None
@@ -286,7 +286,7 @@ class PermissionsAuthority private[Services] (
 
 	def validateApexSignet(candidate: Option[String]): Boolean = secrets.apexDebugSignet == candidate
 
-	def authenticate[T <: UserType](parsedRequest: ParsedRequest, uto: UserTypeObject[T]): Option[T] = {
+	def authenticate[T <: UserType](parsedRequest: ParsedRequest, uto: RequestCacheObject[T]): Option[T] = {
 		uto.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
 			case None => None
 			case Some(x: String) => {
@@ -299,7 +299,7 @@ class PermissionsAuthority private[Services] (
 //	def authenticate(parsedRequest: ParsedRequest): UserType = {
 //		val ret: Option[UserType] = allowableUserTypes
 //				.filter(_ != PublicUserType)
-//				.foldLeft(None: Option[UserType])((retInner: Option[UserType], ut: UserTypeObject[_ <: UserType]) => retInner match {
+//				.foldLeft(None: Option[UserType])((retInner: Option[UserType], ut: RequestCacheObject[_ <: UserType]) => retInner match {
 //					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
 //					case Some(x) => Some(x)
 //					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
@@ -373,7 +373,7 @@ class PermissionsAuthority private[Services] (
 		else {
 			this.instantiateAllEntityCompanions()
 			StorableObject.getEntities.foreach(e => {
-				val q = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
+				val q = new PreparedQueryForUpdateOrDelete(Set(RootRequestCache)) {
 					override def getQuery: String = "delete from " + e.entityName
 				}
 				val result = rootRC.executePreparedQueryForUpdateOrDelete(q)

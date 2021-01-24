@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect}
-import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
+import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -17,10 +17,10 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ForgotPasswordShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 
 
-				val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
+				val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 					override val params: List[String] = List(parsed.email)
 
 					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -51,7 +51,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						  |Otherwise you may return to the previous page to purchase a membership.
 						  |""".stripMargin).toResultError.asJsObject()))
 				} else {
-					val ppc = new PreparedProcedureCall[Unit](Set(BouncerUserType)) {
+					val ppc = new PreparedProcedureCall[Unit](Set(BouncerRequestCache)) {
 						override def setInParametersVarchar: Map[String, String] = Map(
 							"p_email" -> parsed.email
 						)

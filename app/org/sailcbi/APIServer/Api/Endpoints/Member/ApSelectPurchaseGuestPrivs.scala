@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -19,7 +19,7 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 			val personId = rc.auth.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
-			val q = new PreparedQueryForSelect[Int](Set(MemberUserType)) {
+			val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 				override val params: List[String] = List(

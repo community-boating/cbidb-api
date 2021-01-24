@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 class GetTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(token: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
-		PA.withRequestCache(ApexUserType)(None, ParsedRequest(req), rc => {
+		PA.withRequestCache(ApexRequestCache)(None, ParsedRequest(req), rc => {
 
 			val stripeIOController = rc.getStripeIOController(ws)
 

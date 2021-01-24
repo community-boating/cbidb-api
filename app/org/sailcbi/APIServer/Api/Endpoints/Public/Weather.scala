@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.CacheableResultFromRemoteRequest
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpTeamsResult
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 
@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext
 class Weather @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		extends CacheableResultFromRemoteRequest[JpTeamsParamsObject, GetJpTeamsResult] {
 	def get: Action[AnyContent] = {
-		evaluate(PublicUserType, new JpTeamsParamsObject, ws, Weather.url)
+		evaluate(PublicRequestCache, new JpTeamsParamsObject, ws, Weather.url)
 	}
 
 	def getCacheBrokerKey(params: JpTeamsParamsObject): CacheKey = "weather"

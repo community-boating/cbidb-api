@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteralPrepared, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,7 +16,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val personId = rc.auth.getAuthedPersonId(rc)
 
-			val select = new PreparedQueryForSelect[ApSurveyInfoShape](Set(MemberUserType)) {
+			val select = new PreparedQueryForSelect[ApSurveyInfoShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApSurveyInfoShape =
 					ApSurveyInfoShape(
 						genderID = rs.getOptionString(1),
@@ -66,7 +66,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val personId = rc.auth.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSurveyInfoShape.apply)(parsed => {
-				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 					override def getQuery: String =
 						s"""
 						   |update persons set

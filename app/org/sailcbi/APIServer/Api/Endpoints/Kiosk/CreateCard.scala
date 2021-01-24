@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
-import org.sailcbi.APIServer.Services.Authentication.KioskUserType
+import org.sailcbi.APIServer.Services.Authentication.KioskRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -21,7 +21,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
-		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
+		PA.withRequestCache[KioskRequestCache](KioskRequestCache)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 
 			val params = request.body.asJson
@@ -35,7 +35,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				try {
 					val parsed = CreateCardParams.apply(params.get)
 					println(parsed)
-					val getCardNumber = new HardcodedQueryForSelect[Int](Set(KioskUserType)) {
+					val getCardNumber = new HardcodedQueryForSelect[Int](Set(KioskRequestCache)) {
 						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
 						override def getQuery: String = "select GUEST_CARD_SEQ.nextval from dual"
@@ -43,7 +43,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 
 					val cardNumber = rc.executePreparedQueryForSelect(getCardNumber).head
 
-					val getClose = new HardcodedQueryForSelect[Int](Set(KioskUserType)) {
+					val getClose = new HardcodedQueryForSelect[Int](Set(KioskRequestCache)) {
 						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
 						override def getQuery: String = "select c.close_id from fo_closes c, current_closes cur where close_id = inperson_close"
@@ -51,7 +51,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 
 					val closeId = rc.executePreparedQueryForSelect(getClose).head
 
-					val createCard = new PreparedQueryForInsert(Set(KioskUserType)) {
+					val createCard = new PreparedQueryForInsert(Set(KioskRequestCache)) {
 						override def getQuery: String =
 							"""
 							  |insert into persons_cards

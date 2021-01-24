@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, S
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -51,7 +51,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 	def postApex()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ApexUserType)(None, parsedRequest, rc => {
+		PA.withRequestCache(ApexRequestCache)(None, parsedRequest, rc => {
 			val params = parsedRequest.postParams
 			val personId = params("personId").toInt
 			val orderId: Int = params("orderId").toInt
@@ -75,7 +75,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		if (isStaggered) {
 			PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripe.updatePaymentIntentWithTotal(pi.id, orderTotalInCents, closeId).flatMap(_ => {
-					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
+					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
 						override def getQuery: String =
 							s"""
 							   |update ORDERS_STRIPE_PAYMENT_INTENTS set
@@ -98,7 +98,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	private def postPaymentIntent(rc: RequestCache[_], personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val logger = PA.logger
 
-		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberUserType, ApexUserType)) {
+		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberRequestCache, ApexRequestCache)) {
 			//				procedure start_stripe_trans_preflight(
 			//						i_order_id in number,
 			//						o_attempt_id out number,
@@ -166,7 +166,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		}
 
 		stripeResult.map(result => {
-			val parseQ = new PreparedProcedureCall[(Option[Int], Option[String])](Set(MemberUserType, ApexUserType)) {
+			val parseQ = new PreparedProcedureCall[(Option[Int], Option[String])](Set(MemberRequestCache, ApexRequestCache)) {
 				//						procedure start_stripe_transaction_parse(
 				//								i_order_id in number,
 				//								i_total in number,
@@ -229,7 +229,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			Failover(PortalLogic.getOrCreatePaymentIntent(rc, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripeController.confirmPaymentIntent(pi.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => {
-						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberUserType, ApexUserType)) {
+						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
 							override val params: List[String] = List(pi.id)
 							override def getQuery: String =
 								s"""

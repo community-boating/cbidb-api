@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, MemberUserType, PublicUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, PublicRequestCache, RequestCacheObject}
 import org.sailcbi.APIServer.Services.RequestCache
 import play.api.libs.json.{JsValue, Json}
 
@@ -42,7 +42,7 @@ case class Charge(
 object Charge extends StripeCastableToStorableObject[Charge] {
 	implicit val chargeJSONFormat = Json.format[Charge]
 
-	override val allowedUserTypes: Set[UserTypeObject[_]] = Set(ApexUserType, MemberUserType, PublicUserType)
+	override val allowedUserTypes: Set[RequestCacheObject[_]] = Set(ApexRequestCache, MemberRequestCache, PublicRequestCache)
 
 	def apply(v: JsValue): Charge = v.as[Charge]
 

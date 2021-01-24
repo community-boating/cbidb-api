@@ -3,7 +3,7 @@ package org.sailcbi.APIServer
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.Services.Authentication.RootUserType
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import org.scalatest
@@ -16,12 +16,12 @@ import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
 @RunWith(classOf[JUnitRunner])
 class Temp extends FunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
-		val rc = pa.assertRC(RootUserType.create)
+		val rc = pa.assertRC(RootRequestCache.create)
 
 
 
 
-		val q = new PreparedQueryForInsert(Set(RootUserType)) {
+		val q = new PreparedQueryForInsert(Set(RootRequestCache)) {
 			override val preparedParams: List[PreparedValue] = List(prepare(d))
 			override val pkName: Option[String] = Some("PROMO_ID")
 
@@ -33,7 +33,7 @@ class Temp extends FunSuite {
 
 		val pk = rc.executePreparedQueryForInsert(q)
 
-		val sel = new PreparedQueryForSelect[T](Set(RootUserType)) {
+		val sel = new PreparedQueryForSelect[T](Set(RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): T = getFromRSW(rsw)
 
 			override val preparedParams: List[PreparedValue] = List(pk.get)
@@ -46,7 +46,7 @@ class Temp extends FunSuite {
 
 		val dSelected: T = rc.executePreparedQueryForSelect(sel).head
 
-		val del = new PreparedQueryForUpdateOrDelete(Set(RootUserType)) {
+		val del = new PreparedQueryForUpdateOrDelete(Set(RootRequestCache)) {
 			override def getQuery: String = "delete from promotions where promo_id = ?"
 			override val preparedParams = List(pk.get)
 		}

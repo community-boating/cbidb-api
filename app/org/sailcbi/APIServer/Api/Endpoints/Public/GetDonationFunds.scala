@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -13,10 +13,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetDonationFunds @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCache(PublicUserType)(None, parsedRequest, rc => {
+		PA.withRequestCache(PublicRequestCache)(None, parsedRequest, rc => {
 
 
-			val q = new PreparedQueryForSelect[DonationFund](Set(PublicUserType)) {
+			val q = new PreparedQueryForSelect[DonationFund](Set(PublicRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DonationFund = DonationFund(
 					fundId = rsw.getInt(2),
 					fundName = rsw.getString(1),

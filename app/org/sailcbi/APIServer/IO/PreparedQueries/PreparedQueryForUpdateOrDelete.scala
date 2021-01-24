@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.UserTypeObject
+import org.sailcbi.APIServer.Services.Authentication.RequestCacheObject
 
 abstract class PreparedQueryForUpdateOrDelete(
-	override val allowedUserTypes: Set[UserTypeObject[_]],
+	override val allowedUserTypes: Set[RequestCacheObject[_]],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQueryForUpdateOrDelete(allowedUserTypes, useTempSchema) {
 	val params: List[String] = List.empty

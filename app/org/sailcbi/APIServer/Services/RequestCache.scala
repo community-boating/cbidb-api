@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.Authentication.{UserType, _}
+import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
@@ -21,17 +21,18 @@ import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-class RequestCache[T_User <: UserType] private[Services](
-	val auth: T_User,
+abstract class RequestCache private[Services](
+	val userName: String,
 	secrets: PermissionsAuthoritySecrets
 )(implicit val PA: PermissionsAuthority) {
 	private val self = this
-	// All public requests need to go through user type-based security
+
+	def companion: RequestCacheObject[_]
 
 	private val pb: PersistenceBroker = {
 		println("In RC:  " + PA.toString)
 		val pbReadOnly = PA.readOnlyDatabase
-		if (auth.isInstanceOf[RootUserType]) new OracleBroker(secrets.dbConnection, false, pbReadOnly)
+		if (this.isInstanceOf[RootRequestCache]) new OracleBroker(secrets.dbConnection, false, pbReadOnly)
 		else new OracleBroker(secrets.dbConnection, PA.preparedQueriesOnly, pbReadOnly)
 	}
 
@@ -57,17 +58,17 @@ class RequestCache[T_User <: UserType] private[Services](
 		pb.commitObjectToDatabase(i)
 
 	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
-		auth.companion.test(pq.allowedUserTypes)
+		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForSelect(pq, fetchSize)
 	}
 
 	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
-		auth.companion.test(pq.allowedUserTypes)
+		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForInsert(pq)
 	}
 
 	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
-		auth.companion.test(pq.allowedUserTypes)
+		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForUpdateOrDelete(pq)
 	}
 
@@ -76,7 +77,7 @@ class RequestCache[T_User <: UserType] private[Services](
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
-		auth.companion.test(pc.allowedUserTypes)
+		this.companion.test(pc.allowedUserTypes)
 		pb.executeProcedure(pc)
 	}
 
@@ -131,7 +132,7 @@ object RequestCache {
 	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
 	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
 	def apply[T <: UserType](
-		requiredUserType: UserTypeObject[T],
+		requiredUserType: RequestCacheObject[T],
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		rootCB: CacheBroker,
@@ -151,7 +152,7 @@ object RequestCache {
 		// For now, non-public requests may not be cross site
 		// auth'd GETs are ok if the CORS status is Unknown
 		val corsOK = {
-			if (requiredUserType == StaffUserType || requiredUserType == MemberUserType) {
+			if (requiredUserType == StaffRequestCache || requiredUserType == MemberRequestCache) {
 				CORS.getCORSStatus(parsedRequest.headers) match {
 					case Some(UNKNOWN) => parsedRequest.method == ParsedRequest.methods.GET
 					case Some(CROSS_SITE) | None => false

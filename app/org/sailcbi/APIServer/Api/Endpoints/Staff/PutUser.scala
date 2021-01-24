@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -22,7 +22,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					val userId: Int = id.toString().toInt
 					println(s"its an update: $userId")
 
-					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
+					PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 
 
 						println(parsed)
@@ -45,7 +45,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 				}
 				case None => {
 					println(s"its a create")
-					PA.withRequestCache(StaffUserType)(None, parsedRequest, rc => {
+					PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 
 						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.username.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))

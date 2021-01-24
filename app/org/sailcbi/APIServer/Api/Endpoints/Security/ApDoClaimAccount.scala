@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
-import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
+import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -16,7 +16,7 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApInitiateClaimAccountShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 
 
 				val canClaim = PortalLogic.apCanClaim(rc, parsed.email) match {
@@ -30,7 +30,7 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 				} yield e) match {
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => {
-						val update = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
+						val update = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 							override val params: List[String] = List(
 								parsed.passwordHash,
 								parsed.personId.toString,

@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -19,7 +19,7 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends I
 			PortalLogic.pruneOldReservations(rc)
 
 			val instances = rc.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray
-			val classInfoQuery = new PreparedQueryForSelect[ClassTypeInfo](Set(MemberUserType)) {
+			val classInfoQuery = new PreparedQueryForSelect[ClassTypeInfo](Set(MemberRequestCache)) {
 				override val params: List[String] = List(typeId.toString)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassTypeInfo = ClassTypeInfo(

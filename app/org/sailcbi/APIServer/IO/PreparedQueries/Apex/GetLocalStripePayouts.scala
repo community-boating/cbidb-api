@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.Payout
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexUserType), true) {
+class GetLocalStripePayouts extends HardcodedQueryForSelect[Payout](Set(ApexRequestCache), true) {
 	val getQuery: String =
 		s"""
 		   |select PAYOUT_ID, AMOUNT_IN_CENTS, ARRIVAL_DATETIME, BALANCE_TRANSACTION_ID, STATUS

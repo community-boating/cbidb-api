@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
+import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -16,7 +16,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ResetPasswordShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 
 
 				validateHash(rc, parsed.email, parsed.hash) match {
@@ -32,7 +32,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 	}
 
 	def validateHash(rc: RequestCache[_], email: String, hash: String): ValidationResult = {
-		val q = new PreparedQueryForSelect[String](Set(BouncerUserType)) {
+		val q = new PreparedQueryForSelect[String](Set(BouncerRequestCache)) {
 			override val params: List[String] = List(email)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
@@ -56,7 +56,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 	}
 
 	def markHashesUsed(rc: RequestCache[_], email: String): Unit = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 			override val params: List[String] = List(email)
 
 			override def getQuery: String =
@@ -72,7 +72,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 	}
 
 	def setNewPassword(rc: RequestCache[_], email: String, pwHash: String): Unit = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 			override val params: List[String] = List(pwHash, email)
 
 			override def getQuery: String =

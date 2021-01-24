@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Payout}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryForSelect[BalanceTransaction](Set(ApexUserType), true) {
+class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryForSelect[BalanceTransaction](Set(ApexRequestCache), true) {
 	val getQuery: String =
 		s"""
 		   |select TRANSACTION_ID, AMOUNT_IN_CENTS, DESCRIPTION, FEE_IN_CENTS, NET_IN_CENTS, SOURCE, STATUS, TYPE, CREATED

@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -25,7 +25,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			println(kids.mkString("\n"))
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberRequestCache)) {
 				override val params: List[String] = List(personId.toString)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, Double, Double) =
@@ -39,7 +39,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 					  |""".stripMargin
 			}
 			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase) = rc.executePreparedQueryForSelect(nameQ).head
-			val pricesMaybe = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberUserType)) {
+			val pricesMaybe = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberRequestCache)) {
 				override def getQuery: String = """
 												  |select
 												  | person_pkg.get_computed_jp_price(person_id),

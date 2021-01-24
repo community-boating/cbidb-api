@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -17,7 +17,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val personId = rc.auth.getAuthedPersonId(rc)
 
-			val select = new PreparedQueryForSelect[APRequiredInfoShape](Set(MemberUserType)) {
+			val select = new PreparedQueryForSelect[APRequiredInfoShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): APRequiredInfoShape =
 					APRequiredInfoShape(
 						namePrefix = rsw.getOptionString(1),
@@ -134,7 +134,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 
 
 	def tooYoung(rc: RequestCache[_], dob: String): ValidationResult = {
-		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberUserType)) {
+		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
 			override def getQuery: String =
@@ -154,7 +154,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	}
 
 	def doUpdate(rc: RequestCache[_], data: APRequiredInfoShape, personId: Int): Unit = {
-		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
 				s"""
 				   |update persons set

@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Symon
 
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.IO.PreparedQueries.Symon.StoreSymonRun
-import org.sailcbi.APIServer.Services.Authentication.SymonUserType
+import org.sailcbi.APIServer.Services.Authentication.SymonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -16,7 +16,7 @@ class PostSymonRun @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		val logger = PA.logger
 
-		PA.withRequestCache(SymonUserType)(None, req, rc => {
+		PA.withRequestCache(SymonRequestCache)(None, req, rc => {
 
 
 			if (

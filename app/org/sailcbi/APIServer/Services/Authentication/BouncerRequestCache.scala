@@ -3,15 +3,15 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-class BouncerUserType(override val userName: String) extends NonMemberUserType(userName) {
-	override def companion: UserTypeObject[BouncerUserType] = BouncerUserType
+class BouncerRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
 }
 
-object BouncerUserType extends UserTypeObject[BouncerUserType] {
+object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 	val uniqueUserName = "BOUNCER"
 
-	override def create(userName: String): BouncerUserType = new BouncerUserType(userName)
-	def create: BouncerUserType = create(uniqueUserName)
+	override def create(userName: String): BouncerRequestCache = new BouncerRequestCache(userName)
+	def create: BouncerRequestCache = create(uniqueUserName)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,
@@ -28,5 +28,5 @@ object BouncerUserType extends UserTypeObject[BouncerUserType] {
 	override def getAuthenticatedUsernameFromSuperiorAuth(
 		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

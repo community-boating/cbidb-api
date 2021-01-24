@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.Storable.Filter
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
@@ -54,7 +54,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	def getOne(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val logger = PA.logger
-		PA.withRequestCache(StaffUserType)(None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			get(Some(userId), rc) match {
 				case l :: _ => {
 					implicit val format = UserShape.format
@@ -68,7 +68,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val logger = PA.logger
-		PA.withRequestCache(StaffUserType)(None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val users = get(None, rc)
 			implicit val format = UserShape.format
 			Future(Ok(Json.toJson(users)))

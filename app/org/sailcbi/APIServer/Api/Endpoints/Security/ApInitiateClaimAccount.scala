@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
+import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -15,7 +15,7 @@ class ApInitiateClaimAccount @Inject()(implicit exec: ExecutionContext) extends 
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApInitiateClaimAccountShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 
 
 				PortalLogic.apCanClaim(rc, parsed.email) match {

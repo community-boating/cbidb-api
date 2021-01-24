@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 
-class GetLocalStripeCharges (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexUserType), true) {
+class GetLocalStripeCharges (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexRequestCache), true) {
 	val getQuery: String =
 		s"""
 		   |select CHARGE_ID, AMOUNT_IN_CENTS, CLOSE_ID, ORDER_ID, token, CREATED_EPOCH, PAID, status, refunds, description

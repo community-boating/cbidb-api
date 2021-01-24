@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral}
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, RequestCacheObject}
 import play.api.libs.json.{JsValue, Json}
 
 import java.time.{Instant, ZonedDateTime}
@@ -25,7 +25,7 @@ case class Payout(
 object Payout extends StripeCastableToStorableObject[Payout] {
 	implicit val balanceTransactionJSONFormat = Json.format[Payout]
 
-	override val allowedUserTypes: Set[UserTypeObject[_]] = Set(ApexUserType)
+	override val allowedUserTypes: Set[RequestCacheObject[_]] = Set(ApexRequestCache)
 
 	def apply(v: JsValue): Payout = v.as[Payout]
 

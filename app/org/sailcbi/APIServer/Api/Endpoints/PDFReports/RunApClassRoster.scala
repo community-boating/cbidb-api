@@ -7,7 +7,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.ApClassRoster
 import org.sailcbi.APIServer.PDFBox.Reports.ApClassRoster.Loader.{ApClassRosterLiveLoader, ApClassRosterLiveParameter}
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.http.HttpEntity
 import play.api.mvc._
@@ -25,7 +25,7 @@ class RunApClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 //				.addHeader("pas", pas)
 //				.addHeader("pas-procName", "DAILY_CLOSE_REPORT")
 //				.addHeader("pas-argString", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)
-		PA.withRequestCache(ApexUserType)(None, pr, rc => {
+		PA.withRequestCache(ApexRequestCache)(None, pr, rc => {
 			/* val verifyPas: Boolean =
 			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 

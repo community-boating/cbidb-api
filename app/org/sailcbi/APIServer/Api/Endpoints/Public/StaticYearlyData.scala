@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 import org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.StaticYearlyDataParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetStaticYearlyData, GetStaticYearlyDataResult}
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
@@ -16,7 +16,7 @@ class StaticYearlyData @Inject()(implicit val exec: ExecutionContext)
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = {
 		val params = StaticYearlyDataParamsObject()
 		val pq = new GetStaticYearlyData
-		evaluate(PublicUserType, params, pq)
+		evaluate(PublicRequestCache, params, pq)
 	}
 
 	def getCacheBrokerKey(params: StaticYearlyDataParamsObject): CacheKey = "static-yearly-data"

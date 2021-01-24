@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class TaxRevenue(closeId: Int) extends HardcodedQueryForSelect[TaxRevenueResult](Set(StaffUserType, ApexUserType)) {
+class TaxRevenue(closeId: Int) extends HardcodedQueryForSelect[TaxRevenueResult](Set(StaffRequestCache, ApexRequestCache)) {
 	val taxDiscrepanciesId = MagicIds.FO_ITEM_TAX_DISCREPANCIES
 	val getQuery: String =
 		s"""

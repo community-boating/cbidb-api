@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class VerifyPas(userName: String, pas: String, procName: String, argString: String) extends PreparedQueryForSelect[Boolean](Set(ApexUserType)) {
+class VerifyPas(userName: String, pas: String, procName: String, argString: String) extends PreparedQueryForSelect[Boolean](Set(ApexRequestCache)) {
 	val getQuery: String =
 		s"""
 		   |select verify_pas(?, ?, ?, ?) from dual

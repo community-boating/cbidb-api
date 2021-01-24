@@ -1,14 +1,14 @@
 package org.sailcbi.APIServer.Entities
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.UserTypeObject
+import org.sailcbi.APIServer.Services.Authentication.RequestCacheObject
 
 trait CastableToStorableObject[T <: CastableToStorableClass] {
 	val apexTableName: String
 	protected val persistenceFieldsMap: Map[String, T => PreparedValue]
 	val pkColumnName: String
 
-	val allowedUserTypes: Set[UserTypeObject[_]]
+	val allowedUserTypes: Set[RequestCacheObject[_]]
 
 	lazy val persistenceFields: List[String] = persistenceFieldsMap.toList.map(t => t._1)
 

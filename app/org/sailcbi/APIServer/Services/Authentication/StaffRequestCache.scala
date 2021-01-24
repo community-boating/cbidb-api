@@ -4,12 +4,12 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 
-class StaffUserType(override val userName: String) extends NonMemberUserType(userName) {
-	override def companion: UserTypeObject[StaffUserType] = StaffUserType
+class StaffRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 
 	override def getPwHashForUser(rootRC: RequestCache[_]): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
-		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType)) {
+		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select user_name, pw_hash from users where lower(user_name) = ?"
@@ -24,8 +24,8 @@ class StaffUserType(override val userName: String) extends NonMemberUserType(use
 	}
 }
 
-object StaffUserType extends UserTypeObject[StaffUserType] {
-	override def create(userName: String): StaffUserType = new StaffUserType(userName)
+object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
+	override def create(userName: String): StaffRequestCache = new StaffRequestCache(userName)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
@@ -33,5 +33,5 @@ object StaffUserType extends UserTypeObject[StaffUserType] {
 	override def getAuthenticatedUsernameFromSuperiorAuth(
 		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

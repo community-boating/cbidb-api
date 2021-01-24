@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class StripeRevenue(closeId: Int) extends HardcodedQueryForSelect[StripeRevenueResult](Set(StaffUserType, ApexUserType), true) {
+class StripeRevenue(closeId: Int) extends HardcodedQueryForSelect[StripeRevenueResult](Set(StaffRequestCache, ApexRequestCache), true) {
 	val getQuery: String =
 		s"""
 		   |select

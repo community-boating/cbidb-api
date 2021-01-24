@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.{RootUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.Authentication.{RootRequestCache, RequestCacheObject}
 
 import java.sql.CallableStatement
 
 abstract class PreparedProcedureCall[T](
-	override val allowedUserTypes: Set[UserTypeObject[_]],
+	override val allowedUserTypes: Set[RequestCacheObject[_]],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
 	/**
@@ -37,7 +37,7 @@ abstract class PreparedProcedureCall[T](
 }
 
 object PreparedProcedureCall {
-	val test = new PreparedProcedureCall[(Int, Int, String, Int)](Set(RootUserType)) {
+	val test = new PreparedProcedureCall[(Int, Int, String, Int)](Set(RootRequestCache)) {
 		val i_a = "i_a"
 		val o_b = "o_b"
 		val io_c = "io_c"

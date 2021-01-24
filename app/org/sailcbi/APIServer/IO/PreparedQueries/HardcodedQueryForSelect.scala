@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.UserTypeObject
-import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.Services.{RequestCacheObject, ResultSetWrapper}
 
 abstract class HardcodedQueryForSelect[T](
-	override val allowedUserTypes: Set[UserTypeObject[_]],
+	override val allowedUserTypes: Set[RequestCacheObject[_]],
 	override val useTempSchema: Boolean = false
 ) extends HardcodedQuery(allowedUserTypes, useTempSchema) {
 	def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): T

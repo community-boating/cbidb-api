@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.JpClassInstancesWithAvailParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
@@ -16,7 +16,7 @@ class JpClassInstancesWithAvail @Inject()(implicit val exec: ExecutionContext)
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = {
 		val params = new JpClassInstancesWithAvailParamsObject()
 		val pq = GetClassInstancesQuery.public()
-		evaluate(PublicUserType, params, pq)
+		evaluate(PublicRequestCache, params, pq)
 	}
 
 	def getCacheBrokerKey(params: JpClassInstancesWithAvailParamsObject): CacheKey = "jp-class-instances-avail"

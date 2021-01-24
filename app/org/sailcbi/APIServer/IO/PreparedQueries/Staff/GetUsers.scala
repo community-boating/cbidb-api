@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsString}
 
-class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult](Set(StaffUserType)) {
+class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult](Set(StaffRequestCache)) {
 	val getQuery: String =
 		"""
 		  |select user_id, user_name, name_first, name_last, email, active, hide_from_close from users

@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json._
 import play.api.mvc.InjectedController
@@ -58,14 +58,14 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		val data = request.body.asJson
 		PA.withParsedPostBodyJSON(request.body.asJson, SignupNoteShape.apply)(parsed => {
-			PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				val username = rc.auth.userName
 				println("protoperson username is " + username)
 				val parentPersonId = rc.auth.getAuthedPersonId(rc).get
 				println("parent personId is " + parentPersonId)
 
 				val juniorMatchesParent = {
-					val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+					val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 						override val params: List[String] = List(
 							parentPersonId.toString,
 							parsed.juniorId.toString

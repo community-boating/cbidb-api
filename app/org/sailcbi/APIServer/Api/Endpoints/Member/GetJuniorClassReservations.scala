@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json._
 import play.api.mvc.InjectedController
@@ -16,11 +16,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 			val deleted = PortalLogic.pruneOldReservations(rc)
 			println(s"deleted $deleted old reservations...")
 
-			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonUserType)) {
+			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonRequestCache)) {
 				override val params: List[String] = List(rc.auth.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = {
@@ -53,7 +53,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			}
 			val signups = rc.executePreparedQueryForSelect(signupsQ)
 
-			val noSignupJuniors = new PreparedQueryForSelect[String](Set(ProtoPersonUserType)) {
+			val noSignupJuniors = new PreparedQueryForSelect[String](Set(ProtoPersonRequestCache)) {
 				override val params: List[String] = List(rc.auth.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)

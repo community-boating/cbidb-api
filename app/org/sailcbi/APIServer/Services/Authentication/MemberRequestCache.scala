@@ -7,12 +7,12 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 
 
-class MemberUserType(override val userName: String) extends UserType(userName) {
-	override def companion: UserTypeObject[MemberUserType] = MemberUserType
+class MemberRequestCache(override val userName: String) extends UserType(userName) {
+	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
 	override def getPwHashForUser(rootRC: RequestCache[_]): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
-		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerUserType, RootUserType)) {
+		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select email, pw_hash from persons where pw_hash is not null and lower(email) = ?"
@@ -27,7 +27,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 	}
 
 	def getAuthedPersonId(rc: RequestCache[_]): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberUserType, RootUserType)) {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
 			override def getQuery: String =
 				"""
 				  |select p.person_id from persons p, (
@@ -42,7 +42,7 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 		ids.head
 	}
 
-	def getChildrenPersons(rc: RequestCache[MemberUserType], parentPersonId: Int): List[Person] = {
+	def getChildrenPersons(rc: RequestCache[MemberRequestCache], parentPersonId: Int): List[Person] = {
 		val persons = TableAlias.wrapForInnerJoin(Person)
 		val personRelationship = TableAlias.wrapForInnerJoin(PersonRelationship)
 		object cols {
@@ -66,8 +66,8 @@ class MemberUserType(override val userName: String) extends UserType(userName) {
 	}
 }
 
-object MemberUserType extends UserTypeObject[MemberUserType] {
-	override def create(userName: String): MemberUserType = new MemberUserType(userName)
+object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
+	override def create(userName: String): MemberRequestCache = new MemberRequestCache(userName)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
@@ -75,5 +75,5 @@ object MemberUserType extends UserTypeObject[MemberUserType] {
 	override def getAuthenticatedUsernameFromSuperiorAuth(
 		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

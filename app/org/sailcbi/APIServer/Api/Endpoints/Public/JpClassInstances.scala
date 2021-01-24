@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstances.JpClassInstan
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
@@ -18,7 +18,7 @@ class JpClassInstances @Inject()(implicit val exec: ExecutionContext)
 	def get(startDate: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = {
 		val params = JpClassInstancesParamsObject(DateUtil.parseWithDefault(startDate))
 		val pq = new GetJpClassInstances(params.startDate)
-		evaluate(PublicUserType, params, pq)
+		evaluate(PublicRequestCache, params, pq)
 	}
 
 	def getCacheBrokerKey(params: JpClassInstancesParamsObject): CacheKey =

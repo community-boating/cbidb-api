@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, StaffUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.Authentication.{MemberRequestCache, StaffRequestCache, RequestCacheObject}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -13,14 +13,14 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Inject
 		Future {
 			println("userType is " + userType)
 			println("username is " + userName)
-			val userTypeObj: Option[UserTypeObject[_]] = userType match {
+			val userTypeObj: Option[RequestCacheObject[_]] = userType match {
 				case "staff" => {
 					println("looking up staff")
-					Some(StaffUserType)
+					Some(StaffRequestCache)
 				}
 				case "member" => {
 					println("looking up member")
-					Some(MemberUserType)
+					Some(MemberRequestCache)
 				}
 				case _ => None
 			}

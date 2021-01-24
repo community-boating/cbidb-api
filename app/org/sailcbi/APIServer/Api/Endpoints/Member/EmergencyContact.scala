@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -17,7 +17,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
-			val select = new PreparedQueryForSelect[EmergencyContactShape](Set(MemberUserType)) {
+			val select = new PreparedQueryForSelect[EmergencyContactShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): EmergencyContactShape =
 					EmergencyContactShape(
 						juniorId,
@@ -72,7 +72,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 				runValidations(parsed, None) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 					case ValidationOk => {
-						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 							override def getQuery: String =
 								s"""
 								   |update persons set

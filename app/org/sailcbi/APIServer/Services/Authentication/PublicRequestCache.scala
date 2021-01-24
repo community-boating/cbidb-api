@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services._
 
-class PublicUserType(override val userName: String) extends NonMemberUserType(userName) {
-	override def companion: UserTypeObject[PublicUserType] = PublicUserType
+class PublicRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+	override def companion: RequestCacheObject[PublicRequestCache] = PublicRequestCache
 	/*
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
 	  case ApClassFormat => EntityVisibility(entityVisible=true, None, Some(Set(
@@ -60,11 +60,11 @@ class PublicUserType(override val userName: String) extends NonMemberUserType(us
 	*/
 }
 
-object PublicUserType extends UserTypeObject[PublicUserType] {
+object PublicRequestCache extends RequestCacheObject[PublicRequestCache] {
 	val uniqueUserName = "PUBLIC"
 
-	override def create(userName: String): PublicUserType = new PublicUserType(userName)
-	def create: PublicUserType = create(uniqueUserName)
+	override def create(userName: String): PublicRequestCache = new PublicRequestCache(userName)
+	def create: PublicRequestCache = create(uniqueUserName)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		Some(uniqueUserName)

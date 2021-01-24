@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
-import org.sailcbi.APIServer.Services.Authentication.KioskUserType
+import org.sailcbi.APIServer.Services.Authentication.KioskRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -29,7 +29,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache[KioskUserType](KioskUserType)(None, ParsedRequest(request), rc => {
+		PA.withRequestCache[KioskRequestCache](KioskRequestCache)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 
 			val params = request.body.asJson
@@ -44,7 +44,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					val parsed = CreatePersonParams.apply(params.get)
 					val parsedDOB = DateUtil.parse(parsed.dob)
 					println(parsed)
-					val q = new PreparedQueryForInsert(Set(KioskUserType)) {
+					val q = new PreparedQueryForInsert(Set(KioskRequestCache)) {
 						override def getQuery: String =
 							s"""
 							   |insert into persons (

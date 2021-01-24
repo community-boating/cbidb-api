@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
-import org.sailcbi.APIServer.Services.Authentication.{MemberUserType, PublicUserType}
+import org.sailcbi.APIServer.Services.Authentication.{MemberRequestCache, PublicRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
 object GetClassInstancesQuery {
 	def byJunior(week: Option[Int], typeId: Int, juniorId: Int): HardcodedQueryForSelect[GetClassInstancesQueryResult] = {
-		new HardcodedQueryForSelect[GetClassInstancesQueryResult](Set(MemberUserType)) {
+		new HardcodedQueryForSelect[GetClassInstancesQueryResult](Set(MemberRequestCache)) {
 			override def getQuery: String = query(week, Some(typeId), Some(juniorId))
 
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
@@ -15,7 +15,7 @@ object GetClassInstancesQuery {
 	}
 
 	def public(): HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult] = {
-		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(PublicUserType)) {
+		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(PublicRequestCache)) {
 			override def getQuery: String = query(None, None, None)
 
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)

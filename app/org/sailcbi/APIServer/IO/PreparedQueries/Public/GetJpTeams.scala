@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
-class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicUserType)) {
+class GetJpTeams extends HardcodedQueryForSelectCastableToJSObject[GetJpTeamsResult](Set(PublicRequestCache)) {
 	val getQuery: String =
 		"""
 		  |select t.team_id, t.team_name, nvl(sum(points),0)

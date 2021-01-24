@@ -2,7 +2,7 @@ package org.sailcbi.APIServer
 
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Services.Authentication.RootUserType
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -39,7 +39,7 @@ class DBSeedState extends FunSuite {
 					.update(_.email, "bsmith@sdfg.com")
 					.withPK(9998)
 			)
-			val rc = pa.assertRC(RootUserType.create)
+			val rc = pa.assertRC(RootRequestCache.create)
 
 			pa.withSeedState(seedState, () => {
 				val users = rc.getAllObjectsOfClass(User, Some(List(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active)))

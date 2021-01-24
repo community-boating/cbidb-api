@@ -4,8 +4,8 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, ResultSetWrapper}
 
-class ProtoPersonUserType(override val userName: String) extends NonMemberUserType(userName) {
-	override def companion: UserTypeObject[ProtoPersonUserType] = ProtoPersonUserType
+class ProtoPersonRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
 	def getAuthedPersonId(rc: RequestCache[_]): Option[Int] = {
 		val ids = rc.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
@@ -13,7 +13,7 @@ class ProtoPersonUserType(override val userName: String) extends NonMemberUserTy
 		ids.headOption
 	}
 
-	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 		override def getQuery: String =
 			"""
 			  |select p.person_id from persons p, (
@@ -25,11 +25,11 @@ class ProtoPersonUserType(override val userName: String) extends NonMemberUserTy
 	}
 }
 
-object ProtoPersonUserType extends UserTypeObject[ProtoPersonUserType] {
+object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCache] {
 	val COOKIE_NAME = "CBIDB_PROTO"
 	val COOKIE_VALUE_PREFIX = "PROTO_"
 
-	override def create(userName: String): ProtoPersonUserType = new ProtoPersonUserType(userName)
+	override def create(userName: String): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val cookies = request.cookies.filter(_.name == COOKIE_NAME)
@@ -45,5 +45,5 @@ object ProtoPersonUserType extends UserTypeObject[ProtoPersonUserType] {
 	override def getAuthenticatedUsernameFromSuperiorAuth(
 		currentAuthentication: UserType,
 		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.isInstanceOf[RootUserType]) Some(RootUserType.uniqueUserName) else None
+	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

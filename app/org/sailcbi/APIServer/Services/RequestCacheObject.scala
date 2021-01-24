@@ -1,13 +1,16 @@
-package org.sailcbi.APIServer.Services.Authentication
+package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 
-abstract class UserTypeObject[T <: UserType] {
+abstract class RequestCacheObject[T <: RequestCache] {
+	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
+	def getPwHashForUser(rootRC: RootRequestCache): Option[(Int, String)] = None
+
 	def create(userName: String): T
 
-	def test(allowed: Set[UserTypeObject[_]]): Unit = {
+	def test(allowed: Set[RequestCacheObject[_]]): Unit = {
 		if (!allowed.contains(this)) throw new UserTypeMismatchException()
 	}
 
@@ -21,16 +24,16 @@ abstract class UserTypeObject[T <: UserType] {
 	)(implicit PA: PermissionsAuthority): Option[String]
 
 	protected def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String]
 
 	// If the request actually came from e.g. a Staff request, but we want to access a Member or Public endpoint,
 	// use this to downgrade the request authentication
 	final def getAuthFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
-	): Option[UserType] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(this.create)
+	): Option[RequestCache] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(this.create)
 
 	// TODO: this is not a good way to separate members from staff
 	def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {

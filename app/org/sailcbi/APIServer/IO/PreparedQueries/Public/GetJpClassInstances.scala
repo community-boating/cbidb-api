@@ -1,14 +1,14 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, Json}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassInstancesResult](Set(PublicUserType)) {
+class GetJpClassInstances(startDate: LocalDate) extends HardcodedQueryForSelectCastableToJSObject[GetJpClassInstancesResult](Set(PublicRequestCache)) {
 	val startDateString: String = startDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 	val getQuery: String =
 		s"""

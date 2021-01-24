@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -15,9 +15,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, CreateMemberShape.apply)(cms => {
-				val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonUserType.COOKIE_NAME).map(_.value)
+				val protoPersonCookieValMaybe = parsedRequest.cookies.find(_.name == ProtoPersonRequestCache.COOKIE_NAME).map(_.value)
 				createMember(
 					rc,
 					firstName = cms.firstName,
@@ -57,7 +57,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		protoPersonValue: Option[String]
 	): ValidationResult = {
 		val inUse = () => ValidationResult.inline(username)(email => {
-			val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+			val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 				override val params: List[String] = List(email.toLowerCase)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -97,7 +97,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 			case ve: ValidationError => Left(ve)
 			case ValidationOk => getProtoPersonID(rc, protoPersonValue) match {
 				case None => {
-					val insertQ = new PreparedQueryForInsert(Set(ProtoPersonUserType)) {
+					val insertQ = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
 						override val params: List[String] = List(
 							firstName,
 							lastName,
@@ -129,7 +129,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					Right(newPersonId)
 				}
 				case Some(protoId: Int) => {
-					val updateQ = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonUserType)) {
+					val updateQ = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
 						override val params: List[String] = List(
 							firstName,
 							lastName,
@@ -161,7 +161,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		protoPersonValue match {
 			case None => None
 			case Some(v) => {
-				val q = new PreparedQueryForSelect[Int](Set(ProtoPersonUserType)) {
+				val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 					override val params: List[String] = List(v)
 
 					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)

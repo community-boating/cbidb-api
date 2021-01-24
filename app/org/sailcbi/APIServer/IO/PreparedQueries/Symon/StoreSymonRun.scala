@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Symon
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
-import org.sailcbi.APIServer.Services.Authentication.SymonUserType
+import org.sailcbi.APIServer.Services.Authentication.SymonRequestCache
 
 class StoreSymonRun(
 						   host: String,
@@ -10,7 +10,7 @@ class StoreSymonRun(
 						   status: Int,
 						   mac: String,
 						   symonVersion: Option[String]
-				   ) extends PreparedQueryForInsert(Set(SymonUserType), true) {
+				   ) extends PreparedQueryForInsert(Set(SymonRequestCache), true) {
 
 	val getQuery: String =
 		s"""

@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -38,7 +38,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	}
 
 	private def doAccept(rc: RequestCache[_], orderId: Int, personId: Int): Future[Result] = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(personId.toString, orderId.toString)
 
 			override def getQuery: String =

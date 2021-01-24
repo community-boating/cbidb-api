@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,7 +16,7 @@ class JuniorSeeClassTypes @Inject()(implicit exec: ExecutionContext) extends Inj
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
-			val select = new PreparedQueryForSelect[SeeTypeResult](Set(MemberUserType)) {
+			val select = new PreparedQueryForSelect[SeeTypeResult](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SeeTypeResult =
 					SeeTypeResult(rs.getInt(1), rs.getBooleanFromChar(2))
 

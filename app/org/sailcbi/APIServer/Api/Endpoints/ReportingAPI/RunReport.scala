@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.RunReportParam
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.Report
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
 import play.api.http.{HeaderNames, HttpEntity}
@@ -31,9 +31,9 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 	def post(): Action[AnyContent] = Action.async { r => doPost(ParsedRequest(r)) }
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
-		PA.withRequestCache(StaffUserType)(None, req, rc => {
+		PA.withRequestCache(StaffRequestCache)(None, req, rc => {
 			println(rc.auth.userName)
-			if (!rc.auth.isInstanceOf[StaffUserType]) {
+			if (!rc.auth.isInstanceOf[StaffRequestCache]) {
 				Future {
 					Ok("Access Denied")
 				}

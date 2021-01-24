@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, ProtoPersonUserType}
+import org.sailcbi.APIServer.Services.Authentication.{BouncerRequestCache, ProtoPersonRequestCache}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.mvc._
 
@@ -12,15 +12,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckProtoPersonCookie @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
-		PA.withRequestCache(BouncerUserType)(None, ParsedRequest(request), rc => {
-			val hasCookie = request.cookies.toSet.map((c: Cookie) => c.name).contains(ProtoPersonUserType.COOKIE_NAME)
+		PA.withRequestCache(BouncerRequestCache)(None, ParsedRequest(request), rc => {
+			val hasCookie = request.cookies.toSet.map((c: Cookie) => c.name).contains(ProtoPersonRequestCache.COOKIE_NAME)
 			if (hasCookie) {
 				// the request has a cookie...
-				val cookie = request.cookies.get(ProtoPersonUserType.COOKIE_NAME).get.value
+				val cookie = request.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).get.value
 					try {
 						PA.sleep()
 
-						val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
+						val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 							override val params: List[String] = List(cookie)
 
 							override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -59,8 +59,8 @@ class CheckProtoPersonCookie @Inject()(implicit exec: ExecutionContext) extends 
 			headers.get("Outside-Connection-HTTPS").map(_ != "false").getOrElse(true)
 		)
 		val cookie = Cookie(
-			name = ProtoPersonUserType.COOKIE_NAME,
-			value = ProtoPersonUserType.COOKIE_VALUE_PREFIX + scala.util.Random.alphanumeric.take(30).mkString,
+			name = ProtoPersonRequestCache.COOKIE_NAME,
+			value = ProtoPersonRequestCache.COOKIE_VALUE_PREFIX + scala.util.Random.alphanumeric.take(30).mkString,
 			maxAge = Some(60 * 60 * 24 * 3), // 3 days
 			secure = secure,
 			httpOnly = true,

@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.InjectedController
@@ -23,7 +23,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 			val data = request.body.asJson
 			Scholarship.setOthersNonCurrent(rc, personId)
 			val jpPrice = Scholarship.getBaseJpPrice(rc)
-			val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
+			val insertQuery = new PreparedQueryForInsert(Set(MemberRequestCache)) {
 				override val params: List[String] = List(personId.toString)
 				override val pkName: Option[String] = None
 
@@ -59,7 +59,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 					else parsed.childCount
 				}
 
-				val eiiQ = new PreparedQueryForSelect[Double](Set(MemberUserType)) {
+				val eiiQ = new PreparedQueryForSelect[Double](Set(MemberRequestCache)) {
 					def getQuery: String =
 						s"""
 						   |select eii
@@ -76,7 +76,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 				val eiis = rc.executePreparedQueryForSelect(eiiQ)
 				if (eiis.length == 1) {
 					val myJpPrice = Scholarship.getMyJpPrice(rc, eiis.head, parsed.income, children)
-					val insertQuery = new PreparedQueryForInsert(Set(MemberUserType)) {
+					val insertQuery = new PreparedQueryForInsert(Set(MemberRequestCache)) {
 						override val params: List[String] = List(personId.toString)
 						override val pkName: Option[String] = None
 
@@ -119,7 +119,7 @@ case class Kids(infants: Int, preschoolers: Int, schoolagers: Int, teenagers: In
 
 object Scholarship {
 	def getBaseJpPrice(rc: RequestCache[_]): Double = {
-		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
+		val q = new HardcodedQueryForSelect[Double](Set(MemberRequestCache)) {
 			def getQuery: String =
 				s"""
 				   |select price from membership_types where membership_type_id = ${MagicIds.JUNIOR_SUMMER_MEMBERSHIP_TYPE_ID}
@@ -143,7 +143,7 @@ object Scholarship {
 
 	def getMyJpPrice(rc: RequestCache[_], eii: Double, income: Double, totalKids: Int): Double = {
 		println(s"calling get jp price with eii $eii, income $income, kids $totalKids")
-		val q = new HardcodedQueryForSelect[Double](Set(MemberUserType)) {
+		val q = new HardcodedQueryForSelect[Double](Set(MemberRequestCache)) {
 			def getQuery: String =
 				s"""
 				   |select person_pkg.jp_price($eii, $income, $totalKids) from dual
@@ -155,7 +155,7 @@ object Scholarship {
 	}
 
 	def setOthersNonCurrent(rc: RequestCache[_], personId: Int): Unit = {
-		val q = new HardcodedQueryForUpdateOrDelete(Set(MemberUserType)) {
+		val q = new HardcodedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
 				s"""
 				  |  update eii_responses set is_current = 'N'

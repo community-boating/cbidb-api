@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsString}
 
-class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColorResult](Set(PublicUserType)) {
+class GetFlagColor extends HardcodedQueryForSelectCastableToJSObject[GetFlagColorResult](Set(PublicRequestCache)) {
 	val getQuery: String =
 		"""
 		  |select flag from flag_changes where change_datetime = (select max(change_datetime) from flag_changes)

@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 import java.time.LocalDateTime
 
-class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryForSelect[ValidateTokenInOrderResult](Set(ApexUserType)) {
+class ValidateTokenInOrder(orderId: Int, token: String) extends PreparedQueryForSelect[ValidateTokenInOrderResult](Set(ApexRequestCache)) {
 	val getQuery: String =
 		s"""
 		   |select order_id, token, created_datetime

@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonUserType
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
 
@@ -13,7 +13,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(ProtoPersonUserType)(None, parsedRequest, rc => {
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 			parsedRequest.postParams.get("name") match {
 				case None => {
 					println("no body")

@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObjec
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.{Action, AnyContent}
 
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class FlagColor @Inject()(implicit val exec: ExecutionContext)
 		extends CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(PublicUserType)(None, ParsedRequest(request), rc => {
+		PA.withRequestCache(PublicRequestCache)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 
 			getFuture(cb, rc, new FlagColorParamsObject, new GetFlagColor).map(s => {

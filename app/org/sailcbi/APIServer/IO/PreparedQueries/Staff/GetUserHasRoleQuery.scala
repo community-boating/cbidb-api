@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GetUserHasRoleQuery(userName: String, roleAlias: String) extends PreparedQueryForSelect[Boolean](Set(StaffUserType)) {
+class GetUserHasRoleQuery(userName: String, roleAlias: String) extends PreparedQueryForSelect[Boolean](Set(StaffRequestCache)) {
 
 	val getQuery: String =
 		s"""

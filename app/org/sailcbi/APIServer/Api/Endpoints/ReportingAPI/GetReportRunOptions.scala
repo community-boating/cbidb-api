@@ -5,7 +5,7 @@ import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
 import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
@@ -24,7 +24,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 	}
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-		PA.withRequestCache(StaffUserType)(None, ParsedRequest(request), rc => {
+		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(request), rc => {
 
 			val params = new GetReportRunOptionsParamsObject
 			getFuture(rc.cb, rc, params, getJSONResultFuture(rc)).map(s => {

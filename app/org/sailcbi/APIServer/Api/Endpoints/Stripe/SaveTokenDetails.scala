@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, 
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -18,7 +18,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val logger = PA.logger
 		val pr = ParsedRequest(req)
-		PA.withRequestCache(PublicUserType)(None, pr, rc => {
+		PA.withRequestCache(PublicRequestCache)(None, pr, rc => {
 
 			val stripeIOController = rc.getStripeIOController(ws)
 
@@ -28,7 +28,7 @@ class SaveTokenDetails @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					stripeIOController.getTokenDetails(parsedBody.token).map({
 						case s: NetSuccess[Token, StripeError] => {
 							println("Get token details success " + s.successObject)
-							val insertQ = new PreparedQueryForInsert(Set(PublicUserType)) {
+							val insertQ = new PreparedQueryForInsert(Set(PublicRequestCache)) {
 								override val params: List[String] = List(
 									parsedBody.token,
 									parsedBody.orderId.toString,

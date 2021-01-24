@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,7 +16,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
-			val select = new PreparedQueryForSelect[SwimProofShape](Set(MemberUserType)) {
+			val select = new PreparedQueryForSelect[SwimProofShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): SwimProofShape =
 					SwimProofShape(
 						juniorId,
@@ -47,7 +47,7 @@ class SwimProof @Inject()(implicit exec: ExecutionContext) extends InjectedContr
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, SwimProofShape.apply)(parsed => {
-				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberUserType)) {
+				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 					override def getQuery: String =
 						s"""
 						   |update persons set

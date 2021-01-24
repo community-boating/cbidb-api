@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Test.IO.PreparedQueries
 
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.Services.Authentication.RootUserType
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -14,10 +14,10 @@ import java.time.LocalDateTime
 class PreparedValueTest extends FunSuite {
 	test("dfgh") {
 		ServerBootLoaderTest.withPAWriteable(pa => {
-			val rc = pa.assertRC(RootUserType.create)
+			val rc = pa.assertRC(RootRequestCache.create)
 
 
-			val ins = new PreparedQueryForInsert(Set(RootUserType)) {
+			val ins = new PreparedQueryForInsert(Set(RootRequestCache)) {
 				override val pkName: Option[String] = Some("PK")
 
 				override val preparedParams: List[PreparedValue] = List(

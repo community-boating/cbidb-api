@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex._
-import org.sailcbi.APIServer.Services.Authentication.ApexUserType
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -17,7 +17,7 @@ class CreateChargeFromToken @Inject()(ws: WSClient)(implicit val exec: Execution
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		val logger = PA.logger
-		PA.withRequestCache(ApexUserType)(None, req, rc => {
+		PA.withRequestCache(ApexRequestCache)(None, req, rc => {
 
 			val stripeIOController = rc.getStripeIOController(ws)
 			val params = req.postParams

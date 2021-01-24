@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.{BouncerUserType, RootUserType}
+import org.sailcbi.APIServer.Services.Authentication.{BouncerRequestCache, RootRequestCache}
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -15,15 +15,15 @@ class TestAuth @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 
 	private def get(role: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val ut = role match {
-			case "root" => RootUserType
-			case "bouncer" => BouncerUserType
+			case "root" => RootRequestCache
+			case "bouncer" => BouncerRequestCache
 		}
 		val pr = ParsedRequest(req)
 		PA.withRequestCache(ut)(None, pr, rc => {
 			Future {
 				Ok(if (
-					(rc.auth.isInstanceOf[RootUserType] && role == "root") ||
-						(rc.auth.isInstanceOf[BouncerUserType] && role == "bouncer")
+					(rc.auth.isInstanceOf[RootRequestCache] && role == "root") ||
+						(rc.auth.isInstanceOf[BouncerRequestCache] && role == "bouncer")
 				) "true" else "false")
 			}
 		})

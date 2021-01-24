@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.BouncerUserType
+import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -16,13 +16,13 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, UpdateAccountShape.apply)(parsed => {
-			PA.withRequestCache(BouncerUserType)(None, parsedRequest, rc => {
+			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 
 
 				validate(rc, parsed.oldEmail, parsed.newEmail) match {
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => {
-						val q = new PreparedQueryForUpdateOrDelete(Set(BouncerUserType)) {
+						val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 							override val params: List[String] = List(parsed.pwHash, parsed.newEmail, parsed.oldEmail)
 
 							override def getQuery: String =
@@ -58,7 +58,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		}
 
 		lazy val emailInUse = {
-			val q = new PreparedQueryForSelect[Int](Set(BouncerUserType)) {
+			val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 				override val params: List[String] = List(newEmail)

@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class InPersonCCTotal(closeId: Int) extends HardcodedQueryForSelect[InPersonCCTotalResult](Set(StaffUserType, ApexUserType)) {
+class InPersonCCTotal(closeId: Int) extends HardcodedQueryForSelect[InPersonCCTotalResult](Set(StaffRequestCache, ApexRequestCache)) {
 	val sourceIDs: String = MagicIds.FO_INPERSON_CC_SOURCE_IDs.mkString(", ")
 	val getQuery: String =
 		s"""

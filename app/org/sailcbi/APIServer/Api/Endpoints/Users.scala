@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints
 import org.sailcbi.APIServer.Api.Endpoints.Users.UsersParamsObject
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
-import org.sailcbi.APIServer.Services.Authentication.StaffUserType
+import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import play.api.mvc.{Action, AnyContent}
 
 import java.time.LocalDateTime
@@ -15,7 +15,7 @@ class Users @Inject()(implicit val exec: ExecutionContext)
 	def get(): Action[AnyContent] = {
 		val params = new UsersParamsObject()
 		val pq = new GetUsers
-		evaluate(StaffUserType, params, pq)
+		evaluate(StaffRequestCache, params, pq)
 	}
 
 	def getCacheBrokerKey(params: UsersParamsObject): CacheKey =

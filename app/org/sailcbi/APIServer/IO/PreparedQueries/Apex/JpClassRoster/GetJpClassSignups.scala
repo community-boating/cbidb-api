@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster
 import org.sailcbi.APIServer.CbiUtil.{Initializable, NAStrings}
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Model.JpRosterData
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRosterData](Set(StaffUserType, ApexUserType)) {
+class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRosterData](Set(StaffRequestCache, ApexRequestCache)) {
 	val getQuery: String =
 		s"""
 		   |select

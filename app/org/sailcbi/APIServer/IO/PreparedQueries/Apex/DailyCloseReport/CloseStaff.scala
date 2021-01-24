@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.{ApexUserType, StaffUserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
-class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult](Set(StaffUserType, ApexUserType)) {
+class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult](Set(StaffRequestCache, ApexRequestCache)) {
 	val getQuery: String =
 		s"""
 		   |select

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.UserTypeObject
+import org.sailcbi.APIServer.Services.RequestCacheObject
 
 abstract class HardcodedQuery(
-	val allowedUserTypes: Set[UserTypeObject[_]],
+	val allowedUserTypes: Set[RequestCacheObject[_]],
 	val useTempSchema: Boolean = false
 ) {
 	def getQuery: String

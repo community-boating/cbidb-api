@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.{NonMemberUserType, UserTypeObject}
+import org.sailcbi.APIServer.Services.Authentication.{NonMemberRequestCache, RequestCacheObject}
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
@@ -25,7 +25,7 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableRe
 		getFuture(cb, rc, params, calculateValue)
 	}
 
-	protected def evaluate[T_User <: NonMemberUserType](ut: UserTypeObject[T_User], params: T, ws: WSClient, url: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
+	protected def evaluate[T_User <: NonMemberRequestCache](ut: RequestCacheObject[T_User], params: T, ws: WSClient, url: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		PA.withRequestCache[T_User](ut)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 			getFuture(cb, rc, params, ws, url).map(s => {

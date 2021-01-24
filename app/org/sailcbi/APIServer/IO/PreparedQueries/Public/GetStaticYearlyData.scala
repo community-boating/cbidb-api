@@ -2,11 +2,11 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.PublicUserType
+import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsNumber}
 
-class GetStaticYearlyData extends HardcodedQueryForSelectCastableToJSObject[GetStaticYearlyDataResult](Set(PublicUserType)) {
+class GetStaticYearlyData extends HardcodedQueryForSelectCastableToJSObject[GetStaticYearlyDataResult](Set(PublicRequestCache)) {
 	val getQuery: String =
 		s"""
 		  |select price, util_pkg.get_current_season from membership_types where membership_type_id = ${MagicIds.JUNIOR_SUMMER_MEMBERSHIP_TYPE_ID}

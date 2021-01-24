@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberUserType
+import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -28,7 +28,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			type ResultUntyped = (
 				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]
 			)
-			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberUserType)) {
+			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberRequestCache)) {
 				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ResultUntyped = (
