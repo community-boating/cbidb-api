@@ -56,9 +56,6 @@ class RequestCache[T_User <: UserType] private[Services](
 	final def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)
 
-	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] =
-		pb.executeQueryBuilder(qb)
-
 	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		auth.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForSelect(pq, fetchSize)
@@ -72,6 +69,10 @@ class RequestCache[T_User <: UserType] private[Services](
 	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		auth.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForUpdateOrDelete(pq)
+	}
+
+	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+		pb.executeQueryBuilder(qb)
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
