@@ -21,8 +21,8 @@ import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-class RequestCache[T <: UserType] private[Services](
-	val auth: T,
+class RequestCache[T_User <: UserType] private[Services](
+	val auth: T_User,
 	secrets: PermissionsAuthoritySecrets
 )(implicit val PA: PermissionsAuthority) {
 	private val self = this
@@ -89,7 +89,7 @@ class RequestCache[T <: UserType] private[Services](
 
 	private lazy val stripeDatabaseIOMechanism = new StripeDatabaseIOMechanism(pb)
 
-	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController[T] = new StripeIOController(
+	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController[T_User] = new StripeIOController(
 		this,
 		getStripeAPIIOMechanism(ws),
 		stripeDatabaseIOMechanism,
