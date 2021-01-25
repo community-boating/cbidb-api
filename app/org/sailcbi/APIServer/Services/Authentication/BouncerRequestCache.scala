@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCacheObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCache, RequestCacheObject}
 
 class BouncerRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
@@ -26,7 +26,7 @@ object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 		else None
 
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

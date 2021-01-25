@@ -3,7 +3,8 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, RequestCacheObject}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache}
+import org.sailcbi.APIServer.Services.RequestCacheObject
 import play.api.libs.json.{JsValue, Json}
 
 case class PaymentMethod(

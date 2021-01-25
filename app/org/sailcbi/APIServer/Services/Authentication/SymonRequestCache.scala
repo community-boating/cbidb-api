@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCacheObject}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCache, RequestCacheObject}
 
 class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
@@ -43,7 +43,7 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 	}
 
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

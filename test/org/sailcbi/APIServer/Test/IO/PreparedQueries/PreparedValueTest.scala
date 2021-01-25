@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class PreparedValueTest extends FunSuite {
 	test("dfgh") {
 		ServerBootLoaderTest.withPAWriteable(pa => {
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val ins = new PreparedQueryForInsert(Set(RootRequestCache)) {

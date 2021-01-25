@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 class QueryBuilderTest extends FunSuite {
 	test("1 table, no filters (jp class types, typeID and typeName)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -38,7 +38,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, no filters (jp instances and types)") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -68,7 +68,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("2 tables, filters") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -117,7 +117,7 @@ class QueryBuilderTest extends FunSuite {
 
 	test("outer join") {
 		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)

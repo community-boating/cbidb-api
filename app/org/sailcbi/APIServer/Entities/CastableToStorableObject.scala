@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.RequestCacheObject
+import org.sailcbi.APIServer.Services.RequestCacheObject
 
 trait CastableToStorableObject[T <: CastableToStorableClass] {
 	val apexTableName: String

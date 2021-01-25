@@ -2280,7 +2280,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController[_], personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberRequestCache, ApexRequestCache)) {
@@ -2327,7 +2327,7 @@ object PortalLogic {
 		}
 	}
 
-	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController[_], personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
+	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),

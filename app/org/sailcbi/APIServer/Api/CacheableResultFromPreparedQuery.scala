@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Api
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.{NonMemberRequestCache, RequestCacheObject}
+import org.sailcbi.APIServer.Services.Authentication.NonMemberRequestCache
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

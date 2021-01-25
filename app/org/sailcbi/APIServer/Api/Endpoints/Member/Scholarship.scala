@@ -19,7 +19,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			val data = request.body.asJson
 			Scholarship.setOthersNonCurrent(rc, personId)
 			val jpPrice = Scholarship.getBaseJpPrice(rc)
@@ -43,7 +43,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, ScholarshipYesShape.apply)(parsed => {
 				Scholarship.setOthersNonCurrent(rc, personId)

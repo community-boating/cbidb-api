@@ -91,7 +91,7 @@ abstract class RequestCache private[Services](
 
 	private lazy val stripeDatabaseIOMechanism = new StripeDatabaseIOMechanism(pb)
 
-	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController[T_User] = new StripeIOController(
+	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController = new StripeIOController(
 		this,
 		getStripeAPIIOMechanism(ws),
 		stripeDatabaseIOMechanism,

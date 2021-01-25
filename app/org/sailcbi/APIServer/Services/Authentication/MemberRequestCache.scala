@@ -10,21 +10,7 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 class MemberRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends RequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
-	override def getPwHashForUser(rootRC: RequestCache): Option[(Int, String)] = {
-		case class Result(userName: String, pwHash: String)
-		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
-			override def getQuery: String = "select email, pw_hash from persons where pw_hash is not null and lower(email) = ?"
-
-			override val params: List[String] = List(userName.toLowerCase)
-		}
-
-		val users = rootRC.executePreparedQueryForSelect(hq)
-
-		if (users.length == 1) Some(1, users.head.pwHash)
-		else None
-	}
 
 	def getAuthedPersonId(rc: RequestCache): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
@@ -72,8 +58,24 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
 
+	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(Int, String)] = {
+		case class Result(userName: String, pwHash: String)
+		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
+
+			override def getQuery: String = "select email, pw_hash from persons where pw_hash is not null and lower(email) = ?"
+
+			override val params: List[String] = List(userName.toLowerCase)
+		}
+
+		val users = rootRC.executePreparedQueryForSelect(hq)
+
+		if (users.length == 1) Some(1, users.head.pwHash)
+		else None
+	}
+
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

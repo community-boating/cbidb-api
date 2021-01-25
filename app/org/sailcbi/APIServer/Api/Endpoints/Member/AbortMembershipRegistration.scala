@@ -16,7 +16,7 @@ class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) ext
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AbortMembershipRegistrationShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
 
-				val parentPersonId = rc.auth.getAuthedPersonId(rc)
+				val parentPersonId = rc.getAuthedPersonId(rc)
 
 				PortalLogic.deleteRegistration(rc, parentPersonId, parsed.juniorId) match {
 					case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))

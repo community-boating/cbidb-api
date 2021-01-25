@@ -39,7 +39,7 @@ class DBSeedState extends FunSuite {
 					.update(_.email, "bsmith@sdfg.com")
 					.withPK(9998)
 			)
-			val rc = pa.assertRC(RootRequestCache.create)
+			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 			pa.withSeedState(seedState, () => {
 				val users = rc.getAllObjectsOfClass(User, Some(List(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active)))

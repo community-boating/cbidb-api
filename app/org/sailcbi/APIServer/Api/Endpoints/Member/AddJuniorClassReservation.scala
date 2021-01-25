@@ -27,19 +27,19 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		})
 	}
 
-	private def doPost(rc: RequestCache[ProtoPersonRequestCache], body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
+	private def doPost(rc: ProtoPersonRequestCache, body: AddJuniorClassReservationShape): Either[ValidationError, Int] = {
 		if (body.juniorFirstName == null || body.juniorFirstName.length() == 0) {
 			Left(ValidationResult.from("Please specify junior name."))
 		} else {
 			// Create protoparent if it doenst exist
-			val protoParentPersonId = rc.auth.getAuthedPersonId(rc)
+			val protoParentPersonId = rc.getAuthedPersonId(rc)
 			val parentPersonId = {
 				if (protoParentPersonId.isDefined) {
 					val ret = protoParentPersonId.get
 					println("reusing existing protoparent record for this cookie val " + ret)
 					ret
 				} else {
-					val ret = PortalLogic.persistProtoParent(rc, rc.auth.userName)
+					val ret = PortalLogic.persistProtoParent(rc, rc.userName)
 					println("created new protoparent: " + ret)
 					ret
 				}

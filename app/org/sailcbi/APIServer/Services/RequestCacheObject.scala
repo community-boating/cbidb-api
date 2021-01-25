@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
-	def getPwHashForUser(rootRC: RootRequestCache): Option[(Int, String)] = None
+	def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(Int, String)] = None
 
 	def create(userName: String)(secrets: PermissionsAuthoritySecrets): T
 
@@ -33,10 +33,10 @@ abstract class RequestCacheObject[T <: RequestCache] {
 
 	// If the request actually came from e.g. a Staff request, but we want to access a Member or Public endpoint,
 	// use this to downgrade the request authentication
-	final def getAuthFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[RequestCache] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(u => this.create(u, secrets))
+//	final def getAuthFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[RequestCache] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(u => this.create(u, secrets))
 
 	// TODO: this is not a good way to separate members from staff
 	def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {

@@ -22,8 +22,8 @@ class TestAuth @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 		PA.withRequestCache(ut)(None, pr, rc => {
 			Future {
 				Ok(if (
-					(rc.auth.isInstanceOf[RootRequestCache] && role == "root") ||
-						(rc.auth.isInstanceOf[BouncerRequestCache] && role == "bouncer")
+					(rc.isInstanceOf[RootRequestCache] && role == "root") ||
+						(rc.isInstanceOf[BouncerRequestCache] && role == "bouncer")
 				) "true" else "false")
 			}
 		})

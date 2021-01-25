@@ -15,7 +15,7 @@ class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends Inje
 		try {
 			PA.withRequestCacheMember(None, ParsedRequest(request), rc => {
 				Future {
-					Ok(JsObject(Map("value" -> JsString(rc.auth.userName))))
+					Ok(JsObject(Map("value" -> JsString(rc.userName))))
 				}
 			})
 		} catch {

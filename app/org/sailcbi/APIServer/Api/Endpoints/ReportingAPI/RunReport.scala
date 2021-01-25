@@ -32,8 +32,8 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 
 	def doPost(req: ParsedRequest)(implicit PA: PermissionsAuthority): Future[Result] = {
 		PA.withRequestCache(StaffRequestCache)(None, req, rc => {
-			println(rc.auth.userName)
-			if (!rc.auth.isInstanceOf[StaffRequestCache]) {
+			println(rc.userName)
+			if (!rc.isInstanceOf[StaffRequestCache]) {
 				Future {
 					Ok("Access Denied")
 				}

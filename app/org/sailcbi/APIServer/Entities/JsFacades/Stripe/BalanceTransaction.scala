@@ -3,7 +3,8 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, RequestCacheObject}
+import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
+import org.sailcbi.APIServer.Services.RequestCacheObject
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 case class BalanceTransaction(

@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.RequestCacheObject
+import org.sailcbi.APIServer.Services.RequestCacheObject
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
 abstract class HardcodedQueryForSelectCastableToJSObject[T](

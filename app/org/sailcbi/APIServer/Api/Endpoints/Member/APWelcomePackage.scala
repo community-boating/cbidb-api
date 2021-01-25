@@ -21,7 +21,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
@@ -152,7 +152,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				orderId = orderId,
 				firstName = nameFirst,
 				lastName = nameLast,
-				userName = rc.auth.userName,
+				userName = rc.userName,
 				serverTime = sysdate,
 				season = season,
 				status = status,

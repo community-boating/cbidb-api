@@ -59,9 +59,9 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val data = request.body.asJson
 		PA.withParsedPostBodyJSON(request.body.asJson, SignupNoteShape.apply)(parsed => {
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				val username = rc.auth.userName
+				val username = rc.userName
 				println("protoperson username is " + username)
-				val parentPersonId = rc.auth.getAuthedPersonId(rc).get
+				val parentPersonId = rc.getAuthedPersonId(rc).get
 				println("parent personId is " + parentPersonId)
 
 				val juniorMatchesParent = {

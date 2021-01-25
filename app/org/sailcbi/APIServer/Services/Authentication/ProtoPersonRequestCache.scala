@@ -29,7 +29,7 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 	val COOKIE_NAME = "CBIDB_PROTO"
 	val COOKIE_VALUE_PREFIX = "PROTO_"
 
-	override def create(userName: String, secrets: PermissionsAuthoritySecrets): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName, secrets)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName, secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val cookies = request.cookies.filter(_.name == COOKIE_NAME)
@@ -43,7 +43,7 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 	}
 
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

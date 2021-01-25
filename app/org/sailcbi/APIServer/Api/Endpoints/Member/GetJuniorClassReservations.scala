@@ -21,7 +21,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			println(s"deleted $deleted old reservations...")
 
 			val signupsQ = new PreparedQueryForSelect[ClassInfo](Set(ProtoPersonRequestCache)) {
-				override val params: List[String] = List(rc.auth.userName)
+				override val params: List[String] = List(rc.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ClassInfo = {
 					val signupDatetime = rsw.getLocalDateTime(4)
@@ -54,7 +54,7 @@ class GetJuniorClassReservations @Inject()(implicit exec: ExecutionContext) exte
 			val signups = rc.executePreparedQueryForSelect(signupsQ)
 
 			val noSignupJuniors = new PreparedQueryForSelect[String](Set(ProtoPersonRequestCache)) {
-				override val params: List[String] = List(rc.auth.userName)
+				override val params: List[String] = List(rc.userName)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
 

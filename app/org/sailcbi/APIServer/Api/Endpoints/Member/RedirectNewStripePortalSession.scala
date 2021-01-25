@@ -15,7 +15,7 @@ class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionConte
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 
 			customerIdOption match {

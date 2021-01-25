@@ -18,7 +18,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
 			val stripe = rc.getStripeIOController(ws)
 
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderId(rc, personId, program)
 
 			val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)

@@ -19,9 +19,9 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 		val logger = PA.logger
 		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
 			profiler.lap("about to do first query")
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			profiler.lap("got person id")
-			val kids = rc.auth.getChildrenPersons(rc, personId)
+			val kids = rc.getChildrenPersons(rc, personId)
 			println(kids.mkString("\n"))
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
@@ -64,7 +64,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 				orderId,
 				nameFirst,
 				nameLast,
-				rc.auth.userName,
+				rc.userName,
 				jpPriceBase,
 				jpOffseasonPriceBase,
 				pricesMaybe.map(_._1),

@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.RequestCacheObject
+import org.sailcbi.APIServer.Services.RequestCacheObject
+
 
 abstract class PreparedQueryForSelect[T](
 	override val allowedUserTypes: Set[RequestCacheObject[_]],

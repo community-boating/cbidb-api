@@ -14,7 +14,7 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(None, parsedRequest, rc => {
-			val personId = rc.auth.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId(rc)
 			val now = PA.now().toLocalDate
 			PA.withParsedPostBodyJSON(request.body.asJson, AddPromoCodeShape.apply)(parsed => {
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)

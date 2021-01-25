@@ -16,7 +16,7 @@ import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
 @RunWith(classOf[JUnitRunner])
 class Temp extends FunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
-		val rc = pa.assertRC(RootRequestCache.create)
+		val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 

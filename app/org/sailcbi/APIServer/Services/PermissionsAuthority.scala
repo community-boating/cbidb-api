@@ -135,9 +135,9 @@ class PermissionsAuthority private[Services] (
 		}
 	}
 
-	private def withRCWrapper(
-		get: () => Option[RequestCache],
-		block: RequestCache => Future[Result]
+	private def withRCWrapper[T <: RequestCache](
+		get: () => Option[T],
+		block: T => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
 			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
@@ -145,24 +145,25 @@ class PermissionsAuthority private[Services] (
 		})
 	}
 
-	private def getRequestCache[T <: NonMemberRequestCache](
+	private def getRequestCache[T <: RequestCache](
 		requiredUserType: RequestCacheObject[T],
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache] =
-		RequestCache(
-			requiredUserType,
+	): Option[T] =
+		authenticate(
+			requiredUserType
+		)(
 			requiredUserName,
 			parsedRequest,
 			rootCB,
 			secrets
 		)
 
-	def withRequestCache[T <: NonMemberRequestCache](
+	def withRequestCache[T <: RequestCache](
 		requiredUserType: RequestCacheObject[T])(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache => Future[Result]
+		block: T => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
@@ -170,7 +171,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
 	): Option[MemberRequestCache] =
-		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets)
+		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets)
 
 	def withRequestCacheMember(
 		requiredUserName: Option[String],
@@ -185,31 +186,26 @@ class PermissionsAuthority private[Services] (
 		juniorId: Int
 	): Option[MemberRequestCache] = {
 		println("about to validate junior id in request....")
-		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
+		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
-			case Some(ret) => {
-				if (ret.auth.isInstanceOf[MemberRequestCache]) {
-					// auth was successful
-					//... but does the request juniorId match the auth'd parent id?
-					val authedPersonId = ret.auth.getAuthedPersonId(ret)
-					val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootRequestCache)) {
-						override def getQuery: String =
-							s"""
-							   |select b from person_relationships rl
-							   |where a = ${authedPersonId}
-							   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
-					""".stripMargin
-						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
-					}
-					val juniorIds = rootRC.executePreparedQueryForSelect(getAuthedJuniorIDs)
-					if (juniorIds.contains(juniorId)) {
-						Some(ret)
-					} else {
-						throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
-					}
-				} else {
-					// auth wasn't successful anyway
+			case Some(ret: MemberRequestCache) => {
+				// auth was successful
+				//... but does the request juniorId match the auth'd parent id?
+				val authedPersonId = ret.asInstanceOf[MemberRequestCache].getAuthedPersonId(ret)
+				val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootRequestCache)) {
+					override def getQuery: String =
+						s"""
+						   |select b from person_relationships rl
+						   |where a = ${authedPersonId}
+						   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
+				""".stripMargin
+					override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+				}
+				val juniorIds = rootRC.executePreparedQueryForSelect(getAuthedJuniorIDs)
+				if (juniorIds.contains(juniorId)) {
 					Some(ret)
+				} else {
+					throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
 				}
 			}
 		}
@@ -228,21 +224,16 @@ class PermissionsAuthority private[Services] (
 		parsedRequest: ParsedRequest,
 		parentId: Int
 	): Option[MemberRequestCache] = {
-		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
+		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
-			case Some(ret) => {
-				if (ret.auth.isInstanceOf[MemberRequestCache]) {
-					// auth was successful
-					//... but does the request parentId match the auth'd parent id?
-					val authedPersonId = ret.auth.getAuthedPersonId(ret)
-					if (authedPersonId == parentId) {
-						Some(ret)
-					} else {
-						throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
-					}
-				} else {
-					// auth wasn't successful anyway
+			case Some(ret: MemberRequestCache) => {
+				// auth was successful
+				//... but does the request parentId match the auth'd parent id?
+				val authedPersonId = ret.getAuthedPersonId(ret)
+				if (authedPersonId == parentId) {
 					Some(ret)
+				} else {
+					throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
 				}
 			}
 		}
@@ -259,9 +250,9 @@ class PermissionsAuthority private[Services] (
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(Int, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
-			authenticate(request, BouncerRequestCache).isDefined
+			userType.getAuthenticatedUsernameInRequest(request, rootCB, secrets.apexToken, secrets.kioskToken).isDefined
 		) {
-			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootRC)
+			userType.getPwHashForUser(rootRC, userName)
 		} else None
 	}
 
@@ -270,14 +261,14 @@ class PermissionsAuthority private[Services] (
 
 	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
 	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
-	def apply[T <: RequestCache](
+	def authenticate[T <: RequestCache](
 		requiredUserType: RequestCacheObject[T]
 	)(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		rootCB: CacheBroker,
 		secrets: PermissionsAuthoritySecrets
-	): Option[RequestCache] = synchronized {
+	): Option[T] = synchronized {
 		println("\n\n====================================================")
 		println("====================================================")
 		println("====================================================")
@@ -285,7 +276,13 @@ class PermissionsAuthority private[Services] (
 		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 		println("Headers: " + parsedRequest.headers)
 		// For all the enabled user types (besides public), see if the request is authenticated against any of them.
-		val authentication: Option[T] = PA.authenticate(parsedRequest, requiredUserType)
+		val authentication: Option[T] = requiredUserType.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
+			case None => None
+			case Some(x: String) => {
+				println("AUTHENTICATION:  Request is authenticated as " + requiredUserType.getClass.getName)
+				Some(requiredUserType.create(x)(secrets))
+			}
+		}
 
 		// Cross-site request?
 		// Someday I'll flesh this out more
@@ -312,10 +309,7 @@ class PermissionsAuthority private[Services] (
 			// attempt to downgrade to the desired auth
 			// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
 			// so this architecture will make that request behave exactly as if the member requested it themselves
-			authentication.map(auth => {
-				println("Authenticated as " + auth.name)
-				new RequestCache(auth, secrets)
-			})
+			authentication
 			//			if (authentication.isDefined) {
 			//				Some()
 			//			} else {
@@ -358,15 +352,6 @@ class PermissionsAuthority private[Services] (
 
 	def validateApexSignet(candidate: Option[String]): Boolean = secrets.apexDebugSignet == candidate
 
-	def authenticate[T <: UserType](parsedRequest: ParsedRequest, uto: RequestCacheObject[T]): Option[T] = {
-		uto.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
-			case None => None
-			case Some(x: String) => {
-				println("AUTHENTICATION:  Request is authenticated as " + uto.getClass.getName)
-				Some(uto.create(x))
-			}
-		}
-	}
 
 //	def authenticate(parsedRequest: ParsedRequest): UserType = {
 //		val ret: Option[UserType] = allowableUserTypes
@@ -393,9 +378,9 @@ class PermissionsAuthority private[Services] (
 //		}
 //	}
 
-	def assertRC[T <: UserType](auth: T): RequestCache = {
+	def assertRC[T <: RequestCache](rco: RequestCacheObject[T], userName: String): T = {
 		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
-		else new RequestCache(auth, secrets)
+		else rco.create(userName)(secrets)
 	}
 
 	def closeDB(): Unit = secrets.dbConnection.close()

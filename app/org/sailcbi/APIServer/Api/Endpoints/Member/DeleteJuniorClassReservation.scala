@@ -22,7 +22,7 @@ class DeleteJuniorClassReservation @Inject()(implicit exec: ExecutionContext) ex
 				case Some(name: String) => {
 					println(name)
 
-					PortalLogic.deleteProtoJunior(rc, rc.auth.getAuthedPersonId(rc).get, name)
+					PortalLogic.deleteProtoJunior(rc, rc.getAuthedPersonId(rc).get, name)
 					Future(Ok("deleted"))
 				}
 			}
