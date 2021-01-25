@@ -70,12 +70,12 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RootRequestCache = RequestCache.from(RootRequestCache.create, secrets)
+	private lazy val rootRC: RootRequestCache = RootRequestCache.create(secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: BouncerRequestCache = RequestCache.from(BouncerRequestCache.create, secrets)
+	private lazy val bouncerRC: BouncerRequestCache = BouncerRequestCache.create(secrets)
 
 	def now(): LocalDateTime = {
 		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootRequestCache)) {

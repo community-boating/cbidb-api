@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCache, RequestCacheObject, ResultSetWrapper}
 
-class ProtoPersonRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class ProtoPersonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
 	def getAuthedPersonId(rc: RequestCache): Option[Int] = {
@@ -29,7 +29,7 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 	val COOKIE_NAME = "CBIDB_PROTO"
 	val COOKIE_VALUE_PREFIX = "PROTO_"
 
-	override def create(userName: String): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName)
+	override def create(userName: String, secrets: PermissionsAuthoritySecrets): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName, secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val cookies = request.cookies.filter(_.name == COOKIE_NAME)

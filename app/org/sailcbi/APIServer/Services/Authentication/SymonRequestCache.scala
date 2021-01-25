@@ -1,17 +1,17 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCacheObject}
 
-class SymonRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
 }
 
 object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 	val uniqueUserName = "SYMON"
 
-	override def create(userName: String): SymonRequestCache = new SymonRequestCache(userName)
-	def create: SymonRequestCache = create(uniqueUserName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): SymonRequestCache = new SymonRequestCache(userName, secrets)
+	def create(secrets: PermissionsAuthoritySecrets): SymonRequestCache = create(uniqueUserName)(secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		try {

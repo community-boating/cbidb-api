@@ -2,17 +2,17 @@ package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCache, RequestCacheObject, ResultSetWrapper}
 
-class ApexRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class ApexRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
 
 object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 	val uniqueUserName = "APEX"
 
-	override def create(userName: String): ApexRequestCache = new ApexRequestCache(userName)
-	def create: ApexRequestCache = create(uniqueUserName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): ApexRequestCache = new ApexRequestCache(userName, secrets)
+	def create(secrets: PermissionsAuthoritySecrets): ApexRequestCache = create(uniqueUserName)(secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		val headers = request.headers.toMap
@@ -40,7 +40,7 @@ object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 	}
 
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

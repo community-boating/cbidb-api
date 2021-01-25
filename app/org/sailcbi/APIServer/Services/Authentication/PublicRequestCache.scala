@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services._
 
-class PublicRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class PublicRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[PublicRequestCache] = PublicRequestCache
 	/*
 	def getEntityVisibility(obj: StorableObject[_ <: StorableClass]): EntityVisibility = obj match {
@@ -63,15 +63,15 @@ class PublicRequestCache(override val userName: String) extends NonMemberRequest
 object PublicRequestCache extends RequestCacheObject[PublicRequestCache] {
 	val uniqueUserName = "PUBLIC"
 
-	override def create(userName: String): PublicRequestCache = new PublicRequestCache(userName)
-	def create: PublicRequestCache = create(uniqueUserName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): PublicRequestCache = new PublicRequestCache(userName, secrets)
+	def create(secrets: PermissionsAuthoritySecrets): PublicRequestCache = create(uniqueUserName)(secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		Some(uniqueUserName)
 
 	// Anyone can downgrade from anything to public
 	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: UserType,
+		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
 	): Option[String] = Some(uniqueUserName)
 }

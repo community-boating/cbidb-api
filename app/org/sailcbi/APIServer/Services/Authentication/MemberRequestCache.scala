@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 
 
-class MemberRequestCache(override val userName: String) extends UserType(userName) {
+class MemberRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends RequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
 	override def getPwHashForUser(rootRC: RequestCache): Option[(Int, String)] = {
@@ -67,7 +67,7 @@ class MemberRequestCache(override val userName: String) extends UserType(userNam
 }
 
 object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
-	override def create(userName: String): MemberRequestCache = new MemberRequestCache(userName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): MemberRequestCache = new MemberRequestCache(userName, secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))

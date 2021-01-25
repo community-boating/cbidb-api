@@ -1,17 +1,17 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, PermissionsAuthoritySecrets, RequestCacheObject}
 
-class BouncerRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class BouncerRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
 }
 
 object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 	val uniqueUserName = "BOUNCER"
 
-	override def create(userName: String): BouncerRequestCache = new BouncerRequestCache(userName)
-	def create: BouncerRequestCache = create(uniqueUserName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): BouncerRequestCache = new BouncerRequestCache(userName, secrets)
+	def create(secrets: PermissionsAuthoritySecrets): BouncerRequestCache = create(uniqueUserName)(secrets)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

@@ -11,7 +11,7 @@ abstract class RequestCacheObject[T <: RequestCache] {
 	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
 	def getPwHashForUser(rootRC: RootRequestCache): Option[(Int, String)] = None
 
-	def create(userName: String): T
+	def create(userName: String)(secrets: PermissionsAuthoritySecrets): T
 
 	def test(allowed: Set[RequestCacheObject[_]]): Unit = {
 		if (!allowed.contains(this)) throw new UserTypeMismatchException()
@@ -36,7 +36,7 @@ abstract class RequestCacheObject[T <: RequestCache] {
 	final def getAuthFromSuperiorAuth(
 		currentAuthentication: RequestCache,
 		requiredUserName: Option[String]
-	): Option[RequestCache] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(this.create)
+	): Option[RequestCache] = getAuthenticatedUsernameFromSuperiorAuth(currentAuthentication, requiredUserName).map(u => this.create(u, secrets))
 
 	// TODO: this is not a good way to separate members from staff
 	def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, apexToken: String): Option[String] = {

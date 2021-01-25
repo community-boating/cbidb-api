@@ -10,8 +10,8 @@ class RootRequestCache(override val userName: String, secrets: PermissionsAuthor
 object RootRequestCache extends RequestCacheObject[RootRequestCache] {
 	val uniqueUserName = "ROOT"
 
-	override def create(userName: String): RootRequestCache = new RootRequestCache(userName)
-	def create: RootRequestCache = create(uniqueUserName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): RootRequestCache = new RootRequestCache(userName, secrets)
+	def create(secrets: PermissionsAuthoritySecrets): RootRequestCache = create(uniqueUserName)(secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
 		if (

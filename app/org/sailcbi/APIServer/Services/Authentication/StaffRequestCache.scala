@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 
-class StaffRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
+class StaffRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 
 	override def getPwHashForUser(rootRC: RequestCache): Option[(Int, String)] = {
@@ -25,7 +25,7 @@ class StaffRequestCache(override val userName: String) extends NonMemberRequestC
 }
 
 object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
-	override def create(userName: String): StaffRequestCache = new StaffRequestCache(userName)
+	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): StaffRequestCache = new StaffRequestCache(userName, secrets)
 
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
