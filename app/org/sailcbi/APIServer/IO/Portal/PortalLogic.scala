@@ -857,7 +857,7 @@ object PortalLogic {
 
 	def apDeleteReservation(rc: RequestCache, memberID: Int): ValidationResult = {
 		val orderId = getOrderIdAP(rc, memberID)
-		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(ApexRequestCache)) {
+		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
 
 			override def getQuery: String =

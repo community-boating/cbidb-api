@@ -250,7 +250,7 @@ class PermissionsAuthority private[Services] (
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(Int, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
-			userType.getAuthenticatedUsernameInRequest(request, rootCB, secrets.apexToken, secrets.kioskToken).isDefined
+			BouncerRequestCache.getAuthenticatedUsernameInRequest(request, rootCB, secrets.apexToken, secrets.kioskToken).isDefined
 		) {
 			userType.getPwHashForUser(rootRC, userName)
 		} else None
