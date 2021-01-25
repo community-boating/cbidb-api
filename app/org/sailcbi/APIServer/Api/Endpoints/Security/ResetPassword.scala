@@ -31,7 +31,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		})
 	}
 
-	def validateHash(rc: RequestCache[_], email: String, hash: String): ValidationResult = {
+	def validateHash(rc: RequestCache, email: String, hash: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[String](Set(BouncerRequestCache)) {
 			override val params: List[String] = List(email)
 
@@ -55,7 +55,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 			  |""".stripMargin)
 	}
 
-	def markHashesUsed(rc: RequestCache[_], email: String): Unit = {
+	def markHashesUsed(rc: RequestCache, email: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 			override val params: List[String] = List(email)
 
@@ -71,7 +71,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def setNewPassword(rc: RequestCache[_], email: String, pwHash: String): Unit = {
+	def setNewPassword(rc: RequestCache, email: String, pwHash: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 			override val params: List[String] = List(pwHash, email)
 

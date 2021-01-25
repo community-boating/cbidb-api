@@ -87,7 +87,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		))
 	}
 
-	private def checkUsernameUnique(rc: RequestCache[_], candidate: String): ValidationResult = {
+	private def checkUsernameUnique(rc: RequestCache, candidate: String): ValidationResult = {
 		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
 
 		if (existingUsers > 0) ValidationResult.from("That username is already in use")

@@ -10,8 +10,8 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 		(ARG_DROPDOWN, Tag.specialIDs.TAG_ID_CORPORATION.toString),
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
-		implicit val rc: RequestCache[_] = _rc
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+		implicit val rc: RequestCache = _rc
 
 		type PersonID = Int
 
@@ -27,7 +27,7 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
-	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
 		val allTags = rc.getAllObjectsOfClass(Tag)
 		List(allTags.sortWith((a, b) => a.values.tagName.get < b.values.tagName.get).map(r =>
 			(r.values.tagId.get.toString, r.values.tagName.get.toString)

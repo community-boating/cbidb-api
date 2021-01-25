@@ -14,8 +14,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	private def get(userId: Option[Int], theRC: RequestCache[_]): List[UserShape] = {
-		implicit val rc: RequestCache[_] = theRC
+	private def get(userId: Option[Int], theRC: RequestCache): List[UserShape] = {
+		implicit val rc: RequestCache = theRC
 
 		val users = {
 			val users = TableAlias(User)

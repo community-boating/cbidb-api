@@ -96,7 +96,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		})
 	}
 
-	def runValidations(parsed: APRequiredInfoShape, rc: RequestCache[_], personId: Int): ValidationResult = {
+	def runValidations(parsed: APRequiredInfoShape, rc: RequestCache, personId: Int): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
 		val unconditionalValidations = List(
@@ -133,7 +133,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	}
 
 
-	def tooYoung(rc: RequestCache[_], dob: String): ValidationResult = {
+	def tooYoung(rc: RequestCache, dob: String): ValidationResult = {
 		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -153,7 +153,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		}
 	}
 
-	def doUpdate(rc: RequestCache[_], data: APRequiredInfoShape, personId: Int): Unit = {
+	def doUpdate(rc: RequestCache, data: APRequiredInfoShape, personId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
 				s"""

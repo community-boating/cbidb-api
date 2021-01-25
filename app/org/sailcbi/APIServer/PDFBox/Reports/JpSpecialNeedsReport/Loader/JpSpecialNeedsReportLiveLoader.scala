@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Model.JpSpecial
 import org.sailcbi.APIServer.Services.RequestCache
 
 object JpSpecialNeedsReportLiveLoader extends ReportLoader[JpSpecialNeedsReportLiveParameter, JpSpecialNeedsReportModel] {
-	override def apply(param: JpSpecialNeedsReportLiveParameter, rc: RequestCache[_]): JpSpecialNeedsReportModel = {
+	override def apply(param: JpSpecialNeedsReportLiveParameter, rc: RequestCache): JpSpecialNeedsReportModel = {
 		val specNeedsData = rc.executePreparedQueryForSelect(new GetSpecialNeedsData(param.from, param.to))
 
 		JpSpecialNeedsReportModel(

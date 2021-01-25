@@ -13,7 +13,7 @@ import scala.concurrent.Future
 trait CacheableResultFromPreparedQuery[T <: ParamsObject, U] extends CacheableResult[T, U] with InjectedController {
 	type PQ = HardcodedQueryForSelectCastableToJSObject[U]
 
-	protected def getFuture(cb: CacheBroker, rc: RequestCache[_], params: T, pq: PQ): Future[String] = {
+	protected def getFuture(cb: CacheBroker, rc: RequestCache, params: T, pq: PQ): Future[String] = {
 		val calculateValue: (() => Future[JsObject]) = () => Future {
 			val queryResults = rc.executePreparedQueryForSelect(pq)
 

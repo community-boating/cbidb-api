@@ -118,7 +118,7 @@ case class Kids(infants: Int, preschoolers: Int, schoolagers: Int, teenagers: In
 
 
 object Scholarship {
-	def getBaseJpPrice(rc: RequestCache[_]): Double = {
+	def getBaseJpPrice(rc: RequestCache): Double = {
 		val q = new HardcodedQueryForSelect[Double](Set(MemberRequestCache)) {
 			def getQuery: String =
 				s"""
@@ -141,7 +141,7 @@ object Scholarship {
 		} else kids
 	}
 
-	def getMyJpPrice(rc: RequestCache[_], eii: Double, income: Double, totalKids: Int): Double = {
+	def getMyJpPrice(rc: RequestCache, eii: Double, income: Double, totalKids: Int): Double = {
 		println(s"calling get jp price with eii $eii, income $income, kids $totalKids")
 		val q = new HardcodedQueryForSelect[Double](Set(MemberRequestCache)) {
 			def getQuery: String =
@@ -154,7 +154,7 @@ object Scholarship {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def setOthersNonCurrent(rc: RequestCache[_], personId: Int): Unit = {
+	def setOthersNonCurrent(rc: RequestCache, personId: Int): Unit = {
 		val q = new HardcodedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
 				s"""

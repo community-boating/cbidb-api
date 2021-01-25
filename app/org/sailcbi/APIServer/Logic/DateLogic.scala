@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime, Month}
 
-class DateLogic(rc: RequestCache[_]) {
+class DateLogic(rc: RequestCache) {
 	// TODO: also hardcoded in apex.  Need a data solution for spring/fall, and # of regular weeks
 	lazy val getJpWeekAlias: (LocalDate => Option[String]) = {
 		def isFall(d: LocalDate): Boolean =

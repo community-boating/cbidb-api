@@ -33,7 +33,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 		})
 	}
 
-	def getJSONResultFuture(rc: RequestCache[_]): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: RequestCache): (() => Future[JsObject]) = () => Future {
 		case class FilterDataForJSON(
 			filterName: String,
 			displayName: String,

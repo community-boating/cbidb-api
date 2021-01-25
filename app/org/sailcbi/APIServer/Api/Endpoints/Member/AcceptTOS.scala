@@ -37,7 +37,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		})
 	}
 
-	private def doAccept(rc: RequestCache[_], orderId: Int, personId: Int): Future[Result] = {
+	private def doAccept(rc: RequestCache, orderId: Int, personId: Int): Future[Result] = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(personId.toString, orderId.toString)
 

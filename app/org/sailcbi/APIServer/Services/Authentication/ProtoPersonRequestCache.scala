@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, Reques
 class ProtoPersonRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
-	def getAuthedPersonId(rc: RequestCache[_]): Option[Int] = {
+	def getAuthedPersonId(rc: RequestCache): Option[Int] = {
 		val ids = rc.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 		// TODO: critical error if this list has >1 element
 		ids.headOption

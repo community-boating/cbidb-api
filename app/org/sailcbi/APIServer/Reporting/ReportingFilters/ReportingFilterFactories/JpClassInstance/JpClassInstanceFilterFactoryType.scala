@@ -10,9 +10,9 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 		(ARG_DROPDOWN, "1")
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[JpClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[JpClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
 		val typeId = arg.toInt
-		implicit val rc: RequestCache[_] = _rc
+		implicit val rc: RequestCache = _rc
 		rc.getObjectsByFilters(
 			JpClassInstance,
 			List(JpClassInstance.fields.typeId.equalsConstant(typeId)),
@@ -20,7 +20,7 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 		).toSet
 	})
 
-	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
 		val types: List[JpClassType] = rc.getAllObjectsOfClass(JpClassType)
 		List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
 	}

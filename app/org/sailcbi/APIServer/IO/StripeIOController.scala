@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, PublicRequestCache, UserType}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, PublicRequestCache}
 import org.sailcbi.APIServer.Services.Logger.Logger
 import org.sailcbi.APIServer.Services.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
@@ -16,15 +16,15 @@ import play.api.libs.json.{JsObject, JsString, JsValue}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
+class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
-		rc.auth.companion.test(Set(ApexRequestCache, PublicRequestCache, MemberRequestCache))
+		rc.companion.test(Set(ApexRequestCache, PublicRequestCache, MemberRequestCache))
 
 		apiIO.getOrPostStripeSingleton("tokens/" + token, Token.apply, GET, None, None)
 	}
 
 	def createCharge(amountInCents: Int, source: String, orderId: Number, closeId: Number): Future[ServiceRequestResult[Charge, StripeError]] = {
-		rc.auth.companion.test(Set(ApexRequestCache, MemberRequestCache, PublicRequestCache))
+		rc.companion.test(Set(ApexRequestCache, MemberRequestCache, PublicRequestCache))
 
 		apiIO.getOrPostStripeSingleton(
 			"charges",
@@ -46,7 +46,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 
 	/** If you call this, you must put the PI ID on the order */
 	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String, closeId: Int): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 
 		val sourceBody = source match {
 			case None => Map.empty
@@ -71,7 +71,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int, closeId: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + intentId,
@@ -86,7 +86,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + intentId,
 			PaymentIntent.apply,
@@ -99,7 +99,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def getPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + paymentIntentId,
 			PaymentIntent.apply,
@@ -110,7 +110,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def confirmPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + paymentIntentId + "/confirm",
 			PaymentIntent.apply,
@@ -121,7 +121,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache))
+		rc.companion.test(Set(MemberRequestCache))
 
 		apiIO.getOrPostStripeSingleton(
 			s"payment_methods/${paymentMethodId}/detach",
@@ -133,7 +133,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
-		rc.auth.companion.test(Set(ApexRequestCache))
+		rc.companion.test(Set(ApexRequestCache))
 		// Update DB with all payouts
 		updateLocalDBFromStripeForStorable(
 			Charge,
@@ -179,7 +179,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		)
 	}
 
-	def createStripeCustomerFromPerson(rc: RequestCache[_], personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
+	def createStripeCustomerFromPerson(rc: RequestCache, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
 		val (optionEmail, optionStripeCustomerId) = {
 			type ValidationResult = (Option[String], Option[String]) // email, existing stripe customerID
 			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberRequestCache)) {
@@ -196,14 +196,14 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 			rc.executePreparedQueryForSelect(q).head
 		}
 
-		if (optionEmail.isEmpty){
+		if (optionEmail.isEmpty) {
 			println("stripe create customer: email is blank")
 			Future(ValidationError(StripeError("validation", "Email address cannot be blank.")))
 		} else if (optionStripeCustomerId.nonEmpty) {
 			println("stripe create customer: exists")
 			Future(ValidationError(StripeError("validation", "Stripe customer record already exists.")))
 		} else {
-			rc.auth.asInstanceOf[UserType].companion.test(Set(MemberRequestCache))
+			rc.companion.test(Set(MemberRequestCache))
 			apiIO.getOrPostStripeSingleton(
 				"customers",
 				Customer.apply,
@@ -216,6 +216,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 				Some((c: Customer) => {
 					val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 						override val params: List[String] = List(c.id, personId.toString)
+
 						override def getQuery: String =
 							"""
 							  |update persons set stripe_customer_id = ? where person_id = ?
@@ -228,7 +229,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def getCustomerPortalURL(customerId: String): Future[ServiceRequestResult[String, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache))
+		rc.companion.test(Set(MemberRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"billing_portal/sessions",
 			(jsv: JsValue) => jsv.asInstanceOf[JsObject]("url").asInstanceOf[JsString].value,
@@ -241,7 +242,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[_, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache))
+		rc.companion.test(Set(MemberRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			s"payment_methods/$paymentMethodId/attach",
 			PaymentMethod.apply,
@@ -266,7 +267,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 	}
 
 	def getCustomerObject(customerId: String): Future[ServiceRequestResult[Customer, StripeError]] = {
-		rc.auth.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
 		apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
 	}
 
@@ -293,7 +294,7 @@ class StripeIOController[T <: UserType](rc: RequestCache[T], apiIO: StripeAPIIOM
 		orderId: Int,
 		closeId: Int
 	): Future[ServiceRequestResult[Charge, StripeError]] = {
-		rc.auth.companion.test(Set(ApexRequestCache, MemberRequestCache))
+		rc.companion.test(Set(ApexRequestCache, MemberRequestCache))
 		getCustomerObject(customerId).flatMap({
 			case f: NetFailure[_, StripeError] => Future(f.asInstanceOf[ServiceRequestResult[Charge, StripeError]])
 			case c: NetSuccess[Customer, StripeError] => c.successObject.invoice_settings.default_payment_method match {

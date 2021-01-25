@@ -12,8 +12,8 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		(ARG_DROPDOWN, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
-		implicit val rc: RequestCache[_] = _rc
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+		implicit val rc: RequestCache = _rc
 
 		type PersonID = Int
 
@@ -38,7 +38,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		rc.getObjectsByIds(Person, parentIds).toSet
 	})
 
-	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
 		val GO_BACK = 5
 		val currentSeason = DateLogic.currentSeason()
 		val start = currentSeason - GO_BACK

@@ -15,7 +15,7 @@ class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
 		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Donation] = new ReportingFilterFunction(rc, (rc: RequestCache[_]) => {
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Donation] = new ReportingFilterFunction(rc, (rc: RequestCache) => {
 		val split = arg.split(",")
 		val start: LocalDate = LocalDate.parse(split(0), DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 		val end: LocalDate = LocalDate.parse(split(1), DateTimeFormatter.ofPattern("MM/dd/yyyy"))

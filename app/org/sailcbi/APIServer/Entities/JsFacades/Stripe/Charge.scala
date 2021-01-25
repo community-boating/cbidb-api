@@ -33,7 +33,7 @@ case class Charge(
 		}
 	}
 
-	override def insertIntoLocalDB(rc: RequestCache[_]): Unit = {
+	override def insertIntoLocalDB(rc: RequestCache): Unit = {
 		rc.executePreparedQueryForInsert(this.getInsertPreparedQuery)
 		this.refunds.foreach(r => rc.executePreparedQueryForInsert(r.getInsertPreparedQuery))
 	}

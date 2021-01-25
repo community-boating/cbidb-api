@@ -11,9 +11,9 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
 		val year: Int = arg.toInt
-		implicit val rc: RequestCache[_] = _rc
+		implicit val rc: RequestCache = _rc
 		val ss: List[ApClassSession] = rc.getObjectsByFilters(
 			ApClassSession,
 			List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),

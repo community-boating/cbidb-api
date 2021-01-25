@@ -11,9 +11,9 @@ class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignu
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[JpClassSignup] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[JpClassSignup] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
 		val year = arg.toInt
-		implicit val rc: RequestCache[_] = _rc
+		implicit val rc: RequestCache = _rc
 		val sessions = rc.getObjectsByFilters(
 			JpClassSession,
 			List(JpClassSession.fields.sessionDateTime.isYearConstant(year)),

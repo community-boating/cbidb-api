@@ -7,5 +7,5 @@ import org.sailcbi.APIServer.Services.RequestCache
 // but potentially multiple loaders.  The live loader generates a model from a close id
 // a test loader might return one of a premade set of test models from a case object test parameter, e.g.
 abstract class ReportLoader[T <: ReportParameter, U <: ReportModel] {
-	def apply(param: T, rc: RequestCache[_]): U
+	def apply(param: T, rc: RequestCache): U
 }

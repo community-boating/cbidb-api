@@ -103,7 +103,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 		LocalDateTime.now.plusSeconds(5)
 	}
 
-	def getJSONResultFuture(rc: RequestCache[_], params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: RequestCache, params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
 		lazy val report: Report = Report.getReport(rc, params.baseEntityString, params.filterSpec, params.fieldSpec)
 		params.outputType match {
 			case OUTPUT_TYPE.JSCON => report.formatJSCON

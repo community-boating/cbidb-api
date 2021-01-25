@@ -14,8 +14,8 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
-		implicit val rc: RequestCache[_] = _rc
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+		implicit val rc: RequestCache = _rc
 
 		type PersonID = Int
 
@@ -57,7 +57,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		).toSet
 	})
 
-	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
 		val programs: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType)
 		List(programs.map(p =>
 			(p.values.programId.get.toString, p.values.programName.get.toString)

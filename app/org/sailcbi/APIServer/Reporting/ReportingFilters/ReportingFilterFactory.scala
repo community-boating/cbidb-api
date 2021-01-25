@@ -7,7 +7,7 @@ abstract class ReportingFilterFactory[T <: StorableClass] {
 	type ArgDefinition = (ReportingFilterArgType, String) // type and default value
 	val displayName: String
 
-	def getFilter(rc: RequestCache[_], args: String): ReportingFilter[T]
+	def getFilter(rc: RequestCache, args: String): ReportingFilter[T]
 
 	val argDefinitions: List[ArgDefinition]
 }

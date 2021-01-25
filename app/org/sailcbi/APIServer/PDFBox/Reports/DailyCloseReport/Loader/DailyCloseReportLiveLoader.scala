@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.PDFBox.Reports.DailyCloseReport.Model.{DailyCloseRe
 import org.sailcbi.APIServer.Services.RequestCache
 
 object DailyCloseReportLiveLoader extends ReportLoader[DailyCloseReportLiveParameter, DailyCloseReportModel] {
-	override def apply(param: DailyCloseReportLiveParameter, rc: RequestCache[_]): DailyCloseReportModel = {
+	override def apply(param: DailyCloseReportLiveParameter, rc: RequestCache): DailyCloseReportModel = {
 		val closeId = param.closeId
 		val closeProps = rc.executePreparedQueryForSelect(new CloseProps(closeId)).head
 		DailyCloseReportModel(

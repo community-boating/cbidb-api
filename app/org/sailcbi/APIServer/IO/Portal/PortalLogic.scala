@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PortalLogic {
-	def persistProtoParent(rc: RequestCache[_], cookieValue: String): Int = {
+	def persistProtoParent(rc: RequestCache, cookieValue: String): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
 			override val params: List[String] = List(cookieValue)
 			override val pkName: Option[String] = Some("PERSON_ID")
@@ -33,7 +33,7 @@ object PortalLogic {
 		getOrderIdJP(rc, parentId)
 		parentId
 	}
-	def persistProtoJunior(rc: RequestCache[_], parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
+	def persistProtoJunior(rc: RequestCache, parentPersonId: Int, firstName: String, hasClassReservations: Boolean): (Int, () => Unit) = {
 		val createJunior = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
 			override val params: List[String] = List(firstName)
 			override val pkName: Option[String] = Some("PERSON_ID")
@@ -124,7 +124,7 @@ object PortalLogic {
 		(juniorPersonId, rollback)
 	}
 
-	def deleteProtoJunior(rc: RequestCache[_], parentPersonId: Int, firstName: String): Either[String, String] = {
+	def deleteProtoJunior(rc: RequestCache, parentPersonId: Int, firstName: String): Either[String, String] = {
 		val matchingIdsQuery = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 			override val params: List[String] = List(parentPersonId.toString, firstName)
 
@@ -184,7 +184,7 @@ object PortalLogic {
 		}
 	}
 
-	def getMinSignupTimeForParent(rc: RequestCache[_], parentPersonId: Int): Option[LocalDateTime] = {
+	def getMinSignupTimeForParent(rc: RequestCache, parentPersonId: Int): Option[LocalDateTime] = {
 		val q = new PreparedQueryForSelect[Option[LocalDateTime]](Set(ProtoPersonRequestCache)) {
 			override val params: List[String] = List(parentPersonId.toString)
 
@@ -201,7 +201,7 @@ object PortalLogic {
 		list.headOption.flatten
 	}
 
-	def spotsLeft(rc: RequestCache[_], instanceId: Int): Int = {
+	def spotsLeft(rc: RequestCache, instanceId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List(instanceId.toString)
 
@@ -215,12 +215,12 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
-	def hasSpotsLeft(rc: RequestCache[_], instanceId: Int, messageOverride: Option[String]): ValidationResult = {
+	def hasSpotsLeft(rc: RequestCache, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
 		if (spotsLeft(rc, instanceId) > 0) ValidationOk
 		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
 	}
 
-	def alreadyStarted(rc: RequestCache[_], instanceId: Int): Either[String, Unit] = {
+	def alreadyStarted(rc: RequestCache, instanceId: Int): Either[String, Unit] = {
 		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List(instanceId.toString)
 
@@ -236,14 +236,14 @@ object PortalLogic {
 		if (rc.executePreparedQueryForSelect(q).nonEmpty) Right() else Left("That class has already started.")
 	}
 
-	def alreadyStartedAsValidationResult(rc: RequestCache[_], instanceId: Int): ValidationResult = {
+	def alreadyStartedAsValidationResult(rc: RequestCache, instanceId: Int): ValidationResult = {
 		alreadyStarted(rc, instanceId) match {
 			case Left(s) => ValidationResult.from(s)
 			case Right(_) => ValidationOk
 		}
 	}
 
-	def seeTypeFromInstanceId(rc: RequestCache[_], juniorId: Int, instanceId: Int): Boolean = {
+	def seeTypeFromInstanceId(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -260,12 +260,12 @@ object PortalLogic {
 		ret
 	}
 
-	def seeTypeFromInstanceIdAsValidationResult(rc: RequestCache[_], juniorId: Int, instanceId: Int): ValidationResult = {
+	def seeTypeFromInstanceIdAsValidationResult(rc: RequestCache, juniorId: Int, instanceId: Int): ValidationResult = {
 		if (seeTypeFromInstanceId(rc, juniorId, instanceId)) ValidationOk
 		else ValidationResult.from("You are not eligible for this class type.")
 	}
 
-	def seeInstance(rc: RequestCache[_], juniorId: Int, instanceId: Int): Boolean = {
+	def seeInstance(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
 		val q = new PreparedQueryForSelect[String](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -282,12 +282,12 @@ object PortalLogic {
 		ret
 	}
 
-	def seeInstanceAsValidationResult(rc: RequestCache[_], juniorId: Int, instanceId: Int): ValidationResult = {
+	def seeInstanceAsValidationResult(rc: RequestCache, juniorId: Int, instanceId: Int): ValidationResult = {
 		if (seeInstance(rc, juniorId, instanceId)) ValidationOk
 		else ValidationResult.from("You are not eligible for this class.")
 	}
 
-	def allowEnroll(rc: RequestCache[_], juniorId: Int, instanceId: Int): Option[String] = {
+	def allowEnroll(rc: RequestCache, juniorId: Int, instanceId: Int): Option[String] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -303,7 +303,7 @@ object PortalLogic {
 		ret
 	}
 
-	def allowEnrollAsValidationResult(rc: RequestCache[_], juniorId: Int, instanceId: Int): ValidationResult = {
+	def allowEnrollAsValidationResult(rc: RequestCache, juniorId: Int, instanceId: Int): ValidationResult = {
 		allowEnroll(rc, juniorId, instanceId) match {
 			case None => ValidationOk
 			case Some(s) => ValidationResult.from(s)
@@ -312,7 +312,7 @@ object PortalLogic {
 
 	// either an error message or a rollback function
 	def attemptSingleClassSignupReservation(
-		rc: RequestCache[_],
+		rc: RequestCache,
 		juniorPersonId: Int,
 		instanceId: Int,
 		signupDatetime: Option[LocalDateTime],
@@ -363,7 +363,7 @@ object PortalLogic {
 	}
 
 	def actuallyEnroll(
-		rc: RequestCache[_],
+		rc: RequestCache,
 		instanceId: Int,
 		juniorPersonId: Int,
 		signupDatetime: Option[LocalDateTime],
@@ -418,7 +418,7 @@ object PortalLogic {
 
 	// Return Some(error message) on fail, None on success
 	def attemptSignupReservation(
-		rc: RequestCache[_],
+		rc: RequestCache,
 		juniorPersonId: Int,
 		beginnerInstanceId: Option[Int],
 		intermediateInstanceId: Option[Int],
@@ -455,7 +455,7 @@ object PortalLogic {
 		} else None
 	}
 
-	def pruneOldReservations(rc: RequestCache[_]): Int = {
+	def pruneOldReservations(rc: RequestCache): Int = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override val params: List[String] = List.empty
 
@@ -469,14 +469,14 @@ object PortalLogic {
 		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def getOrderIdAP(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AP)
+	def getOrderIdAP(rc: RequestCache, personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AP)
 
-	def getOrderIdJP(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.JP)
+	def getOrderIdJP(rc: RequestCache, personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.JP)
 
 	@deprecated
-	def getOrderId(rc: RequestCache[_], personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.SHARED)
+	def getOrderId(rc: RequestCache, personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.SHARED)
 
-	def getOrderId(rc: RequestCache[_], personId: Int, appAlias: String): Int = {
+	def getOrderId(rc: RequestCache, personId: Int, appAlias: String): Int = {
 		val pc = new PreparedProcedureCall[Int](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
@@ -504,7 +504,7 @@ object PortalLogic {
 		else ret
 	}
 
-	def getCardData(rc: RequestCache[_], orderId: Int): Option[StripeTokenSavedShape] = {
+	def getCardData(rc: RequestCache, orderId: Int): Option[StripeTokenSavedShape] = {
 		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberRequestCache, ApexRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
 
@@ -526,7 +526,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(cardDataQ).headOption
 	}
 
-	def getOrderTotalDollars(rc: RequestCache[_], orderId: Int): Double = {
+	def getOrderTotalDollars(rc: RequestCache, orderId: Int): Double = {
 
 		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberRequestCache, ApexRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
@@ -538,10 +538,10 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(orderTotalQ).head
 	}
 
-	def getOrderTotalCents(rc: RequestCache[_], orderId: Int): Int =
+	def getOrderTotalCents(rc: RequestCache, orderId: Int): Int =
 		Currency.toCents(getOrderTotalDollars(rc, orderId))
 
-	def waitListExists(rc: RequestCache[_], instanceId: Int): ValidationResult = {
+	def waitListExists(rc: RequestCache, instanceId: Int): ValidationResult = {
 		val wlExists = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -559,7 +559,7 @@ object PortalLogic {
 		}
 	}
 
-	def canWaitListJoin(rc: RequestCache[_], juniorId: Int, instanceId: Int): Boolean = {
+	def canWaitListJoin(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
 		rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
@@ -582,7 +582,7 @@ object PortalLogic {
 		}).nonEmpty
 	}
 
-	def attemptDeleteSignup(rc: RequestCache[_], juniorId: Int, instanceId: Int): ValidationResult = {
+	def attemptDeleteSignup(rc: RequestCache, juniorId: Int, instanceId: Int): ValidationResult = {
 		val proc = new PreparedProcedureCall[Option[String]](Set(MemberRequestCache)) {
 //			procedure attempt_delete_signup(
 //					i_person_id in number,
@@ -621,7 +621,7 @@ object PortalLogic {
 		def apply(v: JsValue): SignupForReport = v.as[SignupForReport]
 	}
 
-	def getSignupsForReport(rc: RequestCache[_], juniorId: Int): List[SignupForReport] = {
+	def getSignupsForReport(rc: RequestCache, juniorId: Int): List[SignupForReport] = {
 		val q = new PreparedQueryForSelect[SignupForReport](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -677,7 +677,7 @@ object PortalLogic {
 		def apply(v: JsValue): WaitListTopForReport = v.as[WaitListTopForReport]
 	}
 
-	def getWaitListTopsForReport(rc: RequestCache[_], juniorId: Int): List[WaitListTopForReport] = {
+	def getWaitListTopsForReport(rc: RequestCache, juniorId: Int): List[WaitListTopForReport] = {
 		val q = new PreparedQueryForSelect[WaitListTopForReport](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -731,7 +731,7 @@ object PortalLogic {
 		def apply(v: JsValue): WaitListForReport = v.as[WaitListForReport]
 	}
 
-	def getWaitListsForReport(rc: RequestCache[_], juniorId: Int): List[WaitListForReport] = {
+	def getWaitListsForReport(rc: RequestCache, juniorId: Int): List[WaitListForReport] = {
 		val q = new PreparedQueryForSelect[WaitListForReport](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString)
 
@@ -772,7 +772,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def addSCMIfNotMember(rc: RequestCache[_], parentPersonId: Int, juniorId: Int): Unit = {
+	def addSCMIfNotMember(rc: RequestCache, parentPersonId: Int, juniorId: Int): Unit = {
 		val orderId = getOrderIdJP(rc, parentPersonId)
 		val getCurrentMembership = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString)
@@ -830,7 +830,7 @@ object PortalLogic {
 		}
 	}
 
-	def deleteRegistration(rc: RequestCache[_], parentPersonId: Int, juniorId: Int): ValidationResult = {
+	def deleteRegistration(rc: RequestCache, parentPersonId: Int, juniorId: Int): ValidationResult = {
 		val orderId = getOrderIdJP(rc, parentPersonId)
 		val deleteSCM = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, orderId.toString)
@@ -855,7 +855,7 @@ object PortalLogic {
 		ValidationOk
 	}
 
-	def apDeleteReservation(rc: RequestCache[_], memberID: Int): ValidationResult = {
+	def apDeleteReservation(rc: RequestCache, memberID: Int): ValidationResult = {
 		val orderId = getOrderIdAP(rc, memberID)
 		val deleteSCGP = new PreparedQueryForUpdateOrDelete(Set(ApexRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
@@ -917,7 +917,7 @@ object PortalLogic {
 		ValidationOk
 	}
 
-	def canCheckout(rc: RequestCache[_], parentPersonId: Int, orderId: Int): Boolean = {
+	def canCheckout(rc: RequestCache, parentPersonId: Int, orderId: Int): Boolean = {
 		val incompleteItemsQuery = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override val params: List[String] = List(parentPersonId.toString, parentPersonId.toString)
 
@@ -986,7 +986,7 @@ object PortalLogic {
 		hasCompleteItems && !hasIncompleteItems
 	}
 
-	def getSignupNote(rc: RequestCache[_], juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
+	def getSignupNote(rc: RequestCache, juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
@@ -1003,7 +1003,7 @@ object PortalLogic {
 		else Left(ValidationResult.from("Unable to locate signup for this class."))
 	}
 
-	def saveSignupNote(rc: RequestCache[_], juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
+	def saveSignupNote(rc: RequestCache, juniorId: Int, instanceId: Int, signupNote: Option[String]): ValidationResult = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override val params: List[String] = List(
 				signupNote.orNull,
@@ -1024,7 +1024,7 @@ object PortalLogic {
 		else ValidationResult.from("Unable to update signup note.")
 	}
 
-	def assessDiscounts(rc: RequestCache[_], orderId: Int): Unit = {
+	def assessDiscounts(rc: RequestCache, orderId: Int): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(MemberRequestCache)) {
 //			procedure assess_discounts(
 //				p_order_id in number
@@ -1045,7 +1045,7 @@ object PortalLogic {
 		rc.executeProcedure(ppc)
 	}
 
-	def removeOffseasonWaitlist(rc: RequestCache[_], juniorId: Int): Unit = {
+	def removeOffseasonWaitlist(rc: RequestCache, juniorId: Int): Unit = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1088,7 +1088,7 @@ object PortalLogic {
 		}
 	}
 
-	def getDiscountsWithAmounts(rc: RequestCache[_]): List[DiscountWithAmount] = {
+	def getDiscountsWithAmounts(rc: RequestCache): List[DiscountWithAmount] = {
 		val q = new PreparedQueryForSelect[DiscountWithAmount](Set(MemberRequestCache)) {
 			override val params: List[String] = List()
 
@@ -1124,7 +1124,7 @@ object PortalLogic {
 		discountAmount: Double
 	)
 
-	def getFYExpirationDate(rc: RequestCache[_], personId: Int): (Int, LocalDate) = {
+	def getFYExpirationDate(rc: RequestCache, personId: Int): (Int, LocalDate) = {
 		val q = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberRequestCache)) {
 			override val params: List[String] = List(personId.toString)
 
@@ -1142,7 +1142,7 @@ object PortalLogic {
 		result.head
 	}
 
-	def getAPDiscountEligibilities(rc: RequestCache[_], personId: Int): (Boolean, Boolean, Boolean, Boolean) = {
+	def getAPDiscountEligibilities(rc: RequestCache, personId: Int): (Boolean, Boolean, Boolean, Boolean) = {
 		val q = new PreparedQueryForSelect[(Boolean, Boolean, Boolean, Boolean)](Set(MemberRequestCache)) {
 			override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString)
 
@@ -1163,7 +1163,7 @@ object PortalLogic {
 		result.head
 	}
 
-	def getDiscountActiveInstanceForDiscount(rc: RequestCache[_], discountId: Int): Int = {
+	def getDiscountActiveInstanceForDiscount(rc: RequestCache, discountId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1179,7 +1179,7 @@ object PortalLogic {
 	}
 
 	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
-	def apSelectMemForPurchase(rc: RequestCache[_], personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
+	def apSelectMemForPurchase(rc: RequestCache, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1262,7 +1262,7 @@ object PortalLogic {
 		(paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto)
 	}
 
-	def apSetGuestPrivs(rc: RequestCache[_], personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+	def apSetGuestPrivs(rc: RequestCache, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
 		val countQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1365,7 +1365,7 @@ object PortalLogic {
 		}
 	}
 
-	def apSetDamageWaiver(rc: RequestCache[_], personId: Int, orderId: Int, wantIt: Boolean): Unit = {
+	def apSetDamageWaiver(rc: RequestCache, personId: Int, orderId: Int, wantIt: Boolean): Unit = {
 		val countQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1422,7 +1422,7 @@ object PortalLogic {
 		}
 	}
 
-	def addDonationToOrder(rc: RequestCache[_], orderId: Int, fundId: Int, amount: Double): ValidationResult = {
+	def addDonationToOrder(rc: RequestCache, orderId: Int, fundId: Int, amount: Double): ValidationResult = {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
@@ -1483,7 +1483,7 @@ object PortalLogic {
 
 	}
 
-	def deleteDonationFromOrder(rc: RequestCache[_], orderId: Int, fundId: Int): Unit = {
+	def deleteDonationFromOrder(rc: RequestCache, orderId: Int, fundId: Int): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(orderId.toString, fundId.toString)
 			override def getQuery: String =
@@ -1497,7 +1497,7 @@ object PortalLogic {
 		updateFirstStaggeredPaymentWithOneTimes(rc, orderId)
 	}
 
-	def attemptAddPromoCode(rc: RequestCache[_], orderId: Int, code: String): Unit = {
+	def attemptAddPromoCode(rc: RequestCache, orderId: Int, code: String): Unit = {
 		val getDiscountQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1550,7 +1550,7 @@ object PortalLogic {
 		}
 	}
 
-	def addGiftCertificateToOrder(rc: RequestCache[_], gcNumber: Int, gcCode: String, orderId: Int, now: LocalDate): ValidationResult = {
+	def addGiftCertificateToOrder(rc: RequestCache, gcNumber: Int, gcCode: String, orderId: Int, now: LocalDate): ValidationResult = {
 		val validQ = new PreparedQueryForSelect[(Int, LocalDate)](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, LocalDate) =
 				(rsw.getInt(1), rsw.getLocalDate(2))
@@ -1603,7 +1603,7 @@ object PortalLogic {
 		}
 	}
 
-	def unapplyGCFromOrder(rc: RequestCache[_], orderId: Int, certId: Int): Unit = {
+	def unapplyGCFromOrder(rc: RequestCache, orderId: Int, certId: Int): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(certId.toString, orderId.toString)
 
@@ -1615,7 +1615,7 @@ object PortalLogic {
 		rc.executePreparedQueryForUpdateOrDelete(q)
 	}
 
-	def apCanClaim(rc: RequestCache[_], email: String): Either[String, Int] = {
+	def apCanClaim(rc: RequestCache, email: String): Either[String, Int] = {
 		val proc = new PreparedProcedureCall[Either[String, Int]](Set(PublicRequestCache, BouncerRequestCache)) {
 			//					procedure ap_claim_by_email_proc(
 			//							i_email in varchar2,
@@ -1646,7 +1646,7 @@ object PortalLogic {
 		rc.executeProcedure(proc)
 	}
 
-	def apDoClaim(rc: RequestCache[_], personId: Int): Unit = {
+	def apDoClaim(rc: RequestCache, personId: Int): Unit = {
 		val proc = new PreparedProcedureCall[Unit](Set(BouncerRequestCache)) {
 //			procedure ap_verify_access(
 //					p_person_id in number,
@@ -1667,7 +1667,7 @@ object PortalLogic {
 		rc.executeProcedure(proc)
 	}
 
-	def validateClaimAcctHash(rc: RequestCache[_], email: String, personId: Int, hash: String): ValidationResult = {
+	def validateClaimAcctHash(rc: RequestCache, email: String, personId: Int, hash: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -1688,7 +1688,7 @@ object PortalLogic {
 		else ValidationResult.from("An internal error occurred; if this message persists please contact CBI at 617-523-1038")
 	}
 
-	def getAllMembershipPrices(rc: RequestCache[_]): List[(Int, Double)] = {
+	def getAllMembershipPrices(rc: RequestCache): List[(Int, Double)] = {
 		val q = new PreparedQueryForSelect[(Int, Double)](Set(PublicRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Double) =
 				(rsw.getInt(1), rsw.getDouble(2))
@@ -1704,7 +1704,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def getDwGpPrices(rc: RequestCache[_]): (Double, Double) = {
+	def getDwGpPrices(rc: RequestCache): (Double, Double) = {
 		val q = new PreparedQueryForSelect[(Double, Double)](Set(PublicRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Double) =
 				(rsw.getDouble(1), rsw.getDouble(2))
@@ -1720,7 +1720,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def getAllDiscounts(rc: RequestCache[_]): List[(Int, Int, Double)] = {
+	def getAllDiscounts(rc: RequestCache): List[(Int, Int, Double)] = {
 		val q = new PreparedQueryForSelect[(Int, Int, Double)](Set(PublicRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Int, Double) =
 				(rsw.getInt(1), rsw.getInt(2), rsw.getDouble(3))
@@ -1739,7 +1739,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def getApClassTypeAvailabilities(rc: RequestCache[_], personId: Int): List[ApClassAvailability] = {
+	def getApClassTypeAvailabilities(rc: RequestCache, personId: Int): List[ApClassAvailability] = {
 		val q = new PreparedQueryForSelect[ApClassAvailability](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassAvailability = ApClassAvailability(
 				typeName=rsw.getString(2),
@@ -1785,7 +1785,7 @@ object PortalLogic {
 		def apply(v: JsValue): ApClassAvailability = v.as[ApClassAvailability]
 	}
 
-	def getApClassesForCalendar(rc: RequestCache[_], personId: Int): List[ApClassInstanceForCalendar] = {
+	def getApClassesForCalendar(rc: RequestCache, personId: Int): List[ApClassInstanceForCalendar] = {
 		val instancesQ: PreparedQueryForSelect[ApClassInstanceForCalendar] = new PreparedQueryForSelect[ApClassInstanceForCalendar](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ApClassInstanceForCalendar = ApClassInstanceForCalendar(
 				instanceId = rsw.getInt(2),
@@ -1894,7 +1894,7 @@ object PortalLogic {
 		def apply(v: JsValue): ApClassInstanceForCalendar = v.as[ApClassInstanceForCalendar]
 	}
 
-	def apClassSignup(rc: RequestCache[_], personId: Int, instanceId: Int, isWaitlist: Boolean): Option[String] = {
+	def apClassSignup(rc: RequestCache, personId: Int, instanceId: Int, isWaitlist: Boolean): Option[String] = {
 		val ppc = new PreparedProcedureCall[String](Set(MemberRequestCache)) {
 //			procedure do_signup(
 //					i_person_id in number,
@@ -1935,7 +1935,7 @@ object PortalLogic {
 		}
 	}
 
-	def apClassUnenroll(rc: RequestCache[_], personId: Int, instanceId: Int): Unit = {
+	def apClassUnenroll(rc: RequestCache, personId: Int, instanceId: Int): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(MemberRequestCache)) {
 //			procedure cancel_signup(
 //					p_person_id in number,
@@ -1964,7 +1964,7 @@ object PortalLogic {
 		rc.executeProcedure(ppc)
 	}
 
-	def getStripeCustomerId(rc: RequestCache[_], personId: Int): Option[String] = {
+	def getStripeCustomerId(rc: RequestCache, personId: Int): Option[String] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
 
@@ -1977,7 +1977,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def getAllMembershipTypesWithPrices(rc: RequestCache[_]): List[(Int, Option[Currency])]  = {
+	def getAllMembershipTypesWithPrices(rc: RequestCache): List[(Int, Option[Currency])]  = {
 		val q = new PreparedQueryForSelect[(Int, Option[Currency])](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Option[Currency]) =
 				(rsw.getInt(1), rsw.getOptionDouble(2).map(Currency.dollars))
@@ -1991,7 +1991,7 @@ object PortalLogic {
 	}
 
 	/** @return List[(Date, (canRenew, guestPrivsAuto))] */
-	def canRenewOnEachDate(rc: RequestCache[_], personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
+	def canRenewOnEachDate(rc: RequestCache, personId: Int, membershipTypeId: Int, dates: List[LocalDate]): List[(LocalDate, (Boolean, Boolean))] = {
 		type CanRenewOnDate = (LocalDate, (Boolean, Boolean))
 		val q = new PreparedQueryForSelect[CanRenewOnDate](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): CanRenewOnDate =
@@ -2011,7 +2011,7 @@ object PortalLogic {
 	}
 
 	/** @return (Option[GPPrice], Option[DWPrice]) */
-	def getGPAndDwFromCart(rc: RequestCache[_], personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
+	def getGPAndDwFromCart(rc: RequestCache, personId: Int, orderId: Int): (Option[Currency], Option[Currency]) = {
 		type GpAndDwPrice = (Option[Currency], Option[Currency])
 		val ITEM_TYPE_DW = "Damage Waiver"
 		val ITEM_TYPE_GP = "Guest Privileges"
@@ -2039,7 +2039,7 @@ object PortalLogic {
 		})
 	}
 
-	def getSingleAPSCM(rc: RequestCache[_], personId: Int, orderId: Int): Option[SCMRecord] = {
+	def getSingleAPSCM(rc: RequestCache, personId: Int, orderId: Int): Option[SCMRecord] = {
 		val q = new PreparedQueryForSelect[SCMRecord](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCMRecord =
 				SCMRecord(
@@ -2065,7 +2065,7 @@ object PortalLogic {
 		else Some(scms.head)
 	}
 
-	def getPaymentPlansForMembershipInCart(rc: RequestCache[_], personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
+	def getPaymentPlansForMembershipInCart(rc: RequestCache, personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
 		val scm = PortalLogic.getSingleAPSCM(rc, personId, orderId)
 
 		scm match {
@@ -2120,7 +2120,7 @@ object PortalLogic {
 		def apply(v: JsValue): SCMRecord = v.as[SCMRecord]
 	}
 
-	def getPaymentAdditionalMonths(rc: RequestCache[_], orderId: Int): Int = {
+	def getPaymentAdditionalMonths(rc: RequestCache, orderId: Int): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
@@ -2132,7 +2132,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def clearStripeTokensFromOrder(rc: RequestCache[_], orderId: Int): Unit = {
+	def clearStripeTokensFromOrder(rc: RequestCache, orderId: Int): Unit = {
 		val clearQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
 
@@ -2147,7 +2147,7 @@ object PortalLogic {
 	 * @param orderId
 	 * @return paymentIntentRowID from the deleted rows (if any)
 	 */
-	def deleteStaggeredPaymentsWithEmptyAssertion(rc: RequestCache[_], orderId: Int): Option[Int] = {
+	def deleteStaggeredPaymentsWithEmptyAssertion(rc: RequestCache, orderId: Int): Option[Int] = {
 		val getintentRowID = new PreparedQueryForSelect[Option[Int]](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Int] = rsw.getOptionInt(1)
 
@@ -2182,7 +2182,7 @@ object PortalLogic {
 		piRowId
 	}
 
-	def writeOrderStaggeredPayments(rc: RequestCache[_], now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
+	def writeOrderStaggeredPayments(rc: RequestCache, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
 		// Clear existing records.  Throw if there are paid records
 		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(rc, orderId)
 
@@ -2252,7 +2252,7 @@ object PortalLogic {
 		}
 	}
 
-	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache[_], orderId: Int): Currency = {
+	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
 		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
@@ -2280,7 +2280,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(rc: RequestCache[_], stripe: StripeIOController[_], personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController[_], personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberRequestCache, ApexRequestCache)) {
@@ -2327,7 +2327,7 @@ object PortalLogic {
 		}
 	}
 
-	private def createPaymentIntent(rc: RequestCache[_], stripe: StripeIOController[_], personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
+	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController[_], personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),

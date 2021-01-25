@@ -11,8 +11,8 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 		(ARG_DROPDOWN, Rating.specialIDs.RATING_ID_MERC_GREEN.toString),
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
-		implicit val rc: RequestCache[_] = _rc
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+		implicit val rc: RequestCache = _rc
 
 		type PersonID = Int
 
@@ -32,7 +32,7 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
-	def getDropdownValues(rc: RequestCache[_]): List[List[(String, String)]] = {
+	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
 		val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating)
 		List(ratings.sortWith((a, b) => a.values.ratingName.get < b.values.ratingName.get).map(r =>
 			(r.values.ratingId.get.toString, r.values.ratingName.get.toString)

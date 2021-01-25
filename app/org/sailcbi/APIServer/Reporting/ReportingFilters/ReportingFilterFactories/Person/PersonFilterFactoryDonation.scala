@@ -15,8 +15,8 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
 	)
 
-	def getFilter(rc: RequestCache[_], arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache[_]) => {
-		implicit val rc: RequestCache[_] = _rc
+	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+		implicit val rc: RequestCache = _rc
 
 		type PersonID = Int
 

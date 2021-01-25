@@ -70,12 +70,12 @@ class PermissionsAuthority private[Services] (
 //		Thread.sleep(4000)
 	}
 
-	private lazy val rootRC: RequestCache[RootRequestCache] = RequestCache.from(RootRequestCache.create, secrets)
+	private lazy val rootRC: RootRequestCache = RequestCache.from(RootRequestCache.create, secrets)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: RequestCache[BouncerRequestCache] = RequestCache.from(BouncerRequestCache.create, secrets)
+	private lazy val bouncerRC: BouncerRequestCache = RequestCache.from(BouncerRequestCache.create, secrets)
 
 	def now(): LocalDateTime = {
 		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootRequestCache)) {
@@ -135,9 +135,9 @@ class PermissionsAuthority private[Services] (
 		}
 	}
 
-	private def withRCWrapper[T <: UserType](
-		get: () => Option[RequestCache[T]],
-		block: RequestCache[T] => Future[Result]
+	private def withRCWrapper(
+		get: () => Option[RequestCache],
+		block: RequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
 			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
@@ -149,7 +149,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserType: RequestCacheObject[T],
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache[T]] =
+	): Option[RequestCache] =
 		RequestCache(
 			requiredUserType,
 			requiredUserName,
@@ -162,20 +162,20 @@ class PermissionsAuthority private[Services] (
 		requiredUserType: RequestCacheObject[T])(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache[T] => Future[Result]
+		block: RequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
 	private def getRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest
-	): Option[RequestCache[MemberRequestCache]] =
+	): Option[MemberRequestCache] =
 		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets)
 
 	def withRequestCacheMember(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		block: RequestCache[MemberRequestCache] => Future[Result]
+		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
 
@@ -183,7 +183,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int
-	): Option[RequestCache[MemberRequestCache]] = {
+	): Option[MemberRequestCache] = {
 		println("about to validate junior id in request....")
 		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
@@ -219,7 +219,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int,
-		block: RequestCache[MemberRequestCache] => Future[Result]
+		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
 
@@ -227,7 +227,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int
-	): Option[RequestCache[MemberRequestCache]] = {
+	): Option[MemberRequestCache] = {
 		RequestCache(MemberRequestCache, requiredUserName, parsedRequest, rootCB, secrets) match {
 			case None => None
 			case Some(ret) => {
@@ -252,7 +252,7 @@ class PermissionsAuthority private[Services] (
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int,
-		block: RequestCache[MemberRequestCache] => Future[Result]
+		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithParentId(requiredUserName, parsedRequest, parentId), block)
 
@@ -263,6 +263,78 @@ class PermissionsAuthority private[Services] (
 		) {
 			userType.create(userName).asInstanceOf[UserType].getPwHashForUser(rootRC)
 		} else None
+	}
+
+	// TODO: better way to handle requests authenticated against multiple mechanisms?
+	// TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things
+
+	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
+	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
+	def apply[T <: RequestCache](
+		requiredUserType: RequestCacheObject[T]
+	)(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		rootCB: CacheBroker,
+		secrets: PermissionsAuthoritySecrets
+	): Option[RequestCache] = synchronized {
+		println("\n\n====================================================")
+		println("====================================================")
+		println("====================================================")
+		println("Path: " + parsedRequest.path)
+		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+		println("Headers: " + parsedRequest.headers)
+		// For all the enabled user types (besides public), see if the request is authenticated against any of them.
+		val authentication: Option[T] = PA.authenticate(parsedRequest, requiredUserType)
+
+		// Cross-site request?
+		// Someday I'll flesh this out more
+		// For now, non-public requests may not be cross site
+		// auth'd GETs are ok if the CORS status is Unknown
+		val corsOK = {
+			if (requiredUserType == StaffRequestCache || requiredUserType == MemberRequestCache) {
+				CORS.getCORSStatus(parsedRequest.headers) match {
+					case Some(UNKNOWN) => parsedRequest.method == ParsedRequest.methods.GET
+					case Some(CROSS_SITE) | None => false
+					case _ => true
+				}
+			} else true
+		}
+
+		if (!corsOK) {
+			println("@@@  Nuking RC due to potential CSRF")
+			throw new CORSException
+		} else {
+			println("@@@  CSRF check passed")
+
+			// requiredUserType says what this request endpoint requires
+			// If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
+			// attempt to downgrade to the desired auth
+			// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
+			// so this architecture will make that request behave exactly as if the member requested it themselves
+			authentication.map(auth => {
+				println("Authenticated as " + auth.name)
+				new RequestCache(auth, secrets)
+			})
+			//			if (authentication.isDefined) {
+			//				Some()
+			//			} else {
+			//				requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
+			//					case Some(lowerAuth: AuthenticationInstance) => {
+			//						println("@@@ Successfully downgraded to " + lowerAuth.userType)
+			//						Some(new RequestCache(
+			//							trueAuth = authentication,
+			//							auth = lowerAuth,
+			//							secrets
+			//						))
+			//					}
+			//					case None => {
+			//						println("@@@ Unable to downgrade auth to " + requiredUserType)
+			//						None
+			//					}
+			//				}
+			//			}
+		}
 	}
 
 	def validateSymonHash(
@@ -321,7 +393,7 @@ class PermissionsAuthority private[Services] (
 //		}
 //	}
 
-	def assertRC[T <: UserType](auth: T): RequestCache[T] = {
+	def assertRC[T <: UserType](auth: T): RequestCache = {
 		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
 		else new RequestCache(auth, secrets)
 	}

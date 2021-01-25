@@ -29,9 +29,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	def primaryKey: IntDatabaseField
 
-	def peekInstanceForID(id: Int, rc: RequestCache[_]): Option[T] = rc.getObjectById(this, id)
+	def peekInstanceForID(id: Int, rc: RequestCache): Option[T] = rc.getObjectById(this, id)
 
-	def getInstanceForID(id: Int, rc: RequestCache[_]): T = peekInstanceForID(id, rc).get
+	def getInstanceForID(id: Int, rc: RequestCache): T = peekInstanceForID(id, rc).get
 
 	// Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
 	private lazy val fieldMaps = {

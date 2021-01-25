@@ -28,7 +28,7 @@ object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 		}
 	}
 
-	def validateApexSessionKey(rc: RequestCache[_], userName: String, apexSession: String, apexSessionKey: String): Boolean = {
+	def validateApexSessionKey(rc: RequestCache, userName: String, apexSession: String, apexSessionKey: String): Boolean = {
 		val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = 1
 

@@ -120,7 +120,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		})
 	}
 
-	def runValidations(parsed: RequiredInfoShape, rc: RequestCache[_], juniorId: Option[Int]): ValidationResult = {
+	def runValidations(parsed: RequiredInfoShape, rc: RequestCache, juniorId: Option[Int]): ValidationResult = {
 		val dob = parsed.dob.getOrElse("")
 
 		val unconditionalValidations = List(
@@ -162,7 +162,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		ValidationResult.combine(unconditionalValidations ::: conditionalValidations)
 	}
 
-	def cannotAlterDOB(rc: RequestCache[_], dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
+	def cannotAlterDOB(rc: RequestCache, dob: String, juniorId: Option[Int]): ValidationResult = juniorId match {
 		case None => ValidationOk
 		case Some(id) => {
 			val (existingDOB, currentSeason, firstMembershipYear) =
@@ -183,7 +183,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def tooOld(rc: RequestCache[_], dob: String): ValidationResult = {
+	def tooOld(rc: RequestCache, dob: String): ValidationResult = {
 		val notTooOld = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -201,7 +201,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def tooYoung(rc: RequestCache[_], dob: String, juniorId: Option[Int]): ValidationResult = {
+	def tooYoung(rc: RequestCache, dob: String, juniorId: Option[Int]): ValidationResult = {
 		val notTooYoung = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Boolean](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Boolean = rs.getString(1).equals("Y")
 
@@ -222,7 +222,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	def doCreate(rc: RequestCache[_], data: RequiredInfoShape, parentPersonId: Int): Int = {
+	def doCreate(rc: RequestCache, data: RequiredInfoShape, parentPersonId: Int): Int = {
 		val createPersonQuery = new PreparedQueryForInsert(Set(MemberRequestCache)) {
 			override val params: List[String] = List(
 				data.firstName.orNull,
@@ -300,7 +300,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		juniorPersonId
 	}
 
-	def doUpdate(rc: RequestCache[_], data: RequiredInfoShape, parentPersonId: Int): Unit = {
+	def doUpdate(rc: RequestCache, data: RequiredInfoShape, parentPersonId: Int): Unit = {
 		val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
 				s"""

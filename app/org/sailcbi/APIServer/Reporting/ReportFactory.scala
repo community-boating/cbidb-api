@@ -8,17 +8,17 @@ import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 import java.time.{LocalDateTime, ZoneId}
 
 abstract class ReportFactory[T <: StorableClass] {
-	private val rcWrapper = new Initializable[RequestCache[_]]
+	private val rcWrapper = new Initializable[RequestCache]
 	private val filterSpecWrapper = new Initializable[String]
 	private val fieldSpecWrapper = new Initializable[String]
 
-	def setParameters(rc: RequestCache[_], filterSpec: String, fieldSpec: String): Unit = {
+	def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
 		rcWrapper.set(rc)
 		filterSpecWrapper.set(filterSpec)
 		fieldSpecWrapper.set(fieldSpec)
 	}
 
-	def rc: RequestCache[_] = rcWrapper.get
+	def rc: RequestCache = rcWrapper.get
 
 	def filterSpec: String = filterSpecWrapper.get
 
@@ -31,7 +31,7 @@ abstract class ReportFactory[T <: StorableClass] {
 
 	val entityCompanion: StorableObject[T]
 	// TODO: some sanity check that this can't be more than like 100 things or something
-	val getAllFilter: (RequestCache[_] => ReportingFilter[T]) = rc =>
+	val getAllFilter: (RequestCache => ReportingFilter[T]) = rc =>
 		new ReportingFilterFunction[T](rc, rc => {
 			rc.getAllObjectsOfClass(
 				entityCompanion

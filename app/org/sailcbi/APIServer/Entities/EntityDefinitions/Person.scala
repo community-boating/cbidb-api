@@ -43,7 +43,7 @@ class Person extends StorableClass {
 		values.zip
 	)
 
-	def setPersonRatings(rc: RequestCache[_]): Unit = {
+	def setPersonRatings(rc: RequestCache): Unit = {
 		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))

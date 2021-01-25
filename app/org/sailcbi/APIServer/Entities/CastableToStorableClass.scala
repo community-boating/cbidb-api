@@ -47,7 +47,7 @@ trait CastableToStorableClass {
       """.stripMargin
 	}
 
-	def insertIntoLocalDB(rc: RequestCache[_]): Unit =
+	def insertIntoLocalDB(rc: RequestCache): Unit =
 		rc.executePreparedQueryForInsert(this.getInsertPreparedQuery)
 
 }

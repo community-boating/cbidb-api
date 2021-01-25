@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Services._
 class StaffRequestCache(override val userName: String) extends NonMemberRequestCache(userName) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 
-	override def getPwHashForUser(rootRC: RequestCache[_]): Option[(Int, String)] = {
+	override def getPwHashForUser(rootRC: RequestCache): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))

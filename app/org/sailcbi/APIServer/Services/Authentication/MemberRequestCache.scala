@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 class MemberRequestCache(override val userName: String) extends UserType(userName) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
-	override def getPwHashForUser(rootRC: RequestCache[_]): Option[(Int, String)] = {
+	override def getPwHashForUser(rootRC: RequestCache): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
@@ -26,7 +26,7 @@ class MemberRequestCache(override val userName: String) extends UserType(userNam
 		else None
 	}
 
-	def getAuthedPersonId(rc: RequestCache[_]): Int = {
+	def getAuthedPersonId(rc: RequestCache): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
 			override def getQuery: String =
 				"""
@@ -42,7 +42,7 @@ class MemberRequestCache(override val userName: String) extends UserType(userNam
 		ids.head
 	}
 
-	def getChildrenPersons(rc: RequestCache[MemberRequestCache], parentPersonId: Int): List[Person] = {
+	def getChildrenPersons(rc: MemberRequestCache, parentPersonId: Int): List[Person] = {
 		val persons = TableAlias.wrapForInnerJoin(Person)
 		val personRelationship = TableAlias.wrapForInnerJoin(PersonRelationship)
 		object cols {

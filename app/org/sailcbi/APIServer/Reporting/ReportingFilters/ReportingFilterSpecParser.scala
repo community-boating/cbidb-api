@@ -5,9 +5,9 @@ import org.sailcbi.APIServer.Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
-	rc: RequestCache[_],
+	rc: RequestCache,
 	filterMap: Map[String, ReportingFilterFactory[T]],
-	getAllFilter: (RequestCache[_] => ReportingFilter[T])
+	getAllFilter: (RequestCache => ReportingFilter[T])
 ) {
 
 	case class Token(c: Char) {
