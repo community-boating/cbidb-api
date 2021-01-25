@@ -1,13 +1,11 @@
 package org.sailcbi.APIServer.Services
 
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Services.Authentication._
-import org.sailcbi.APIServer.Services.Exception.CORSException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
@@ -15,8 +13,6 @@ import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderR
 import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 import play.api.libs.ws.WSClient
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens

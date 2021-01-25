@@ -1,11 +1,8 @@
 package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.{MemberRequestCache, RootRequestCache, StaffRequestCache}
-import org.sailcbi.APIServer.Services.Exception.{CORSException, UserTypeMismatchException}
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
+import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user

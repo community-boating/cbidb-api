@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, OracleBroker, PermissionsAuthority, PermissionsAuthoritySecrets, PersistenceBroker, RequestCache, RequestCacheObject}
+import org.sailcbi.APIServer.Services._
 
 class RootRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets)(implicit PA: PermissionsAuthority) extends NonMemberRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[RootRequestCache] = RootRequestCache

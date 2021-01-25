@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.Authentication.{RootRequestCache}
+import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.RequestCacheObject
 
 import java.sql.CallableStatement
