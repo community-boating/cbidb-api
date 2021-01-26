@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
 			implicit val format = AllSignupsResponse.format

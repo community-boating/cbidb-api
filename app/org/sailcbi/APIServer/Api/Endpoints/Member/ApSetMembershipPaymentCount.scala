@@ -14,7 +14,7 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSetMembershipPaymentCount.apply)(parsed => {
-			PA.withRequestCacheMember(None, parsedRequest, rc => {
+			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId(rc)
 				val orderId = PortalLogic.getOrderIdAP(rc, personId)
 

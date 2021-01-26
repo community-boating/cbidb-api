@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 			val now = PA.now().toLocalDate
 			PA.withParsedPostBodyJSON(request.body.asJson, AddPromoCodeShape.apply)(parsed => {

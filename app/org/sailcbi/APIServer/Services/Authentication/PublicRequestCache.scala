@@ -70,8 +70,8 @@ object PublicRequestCache extends RequestCacheObject[PublicRequestCache] {
 		Some(uniqueUserName)
 
 	// Anyone can downgrade from anything to public
-	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[String] = Some(uniqueUserName)
+//	override def getAuthenticatedUsernameFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[String] = Some(uniqueUserName)
 }

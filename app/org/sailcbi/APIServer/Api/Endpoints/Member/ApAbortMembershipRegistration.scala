@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApAbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 
 
 			val memberId = rc.getAuthedPersonId(rc)

@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
 			val personId = rc.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderId(rc, personId, program)

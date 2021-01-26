@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassUnenroll  @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassUnenrollShape.apply)(parsed => {
 				PortalLogic.apClassUnenroll(rc, personId, parsed.instanceId)

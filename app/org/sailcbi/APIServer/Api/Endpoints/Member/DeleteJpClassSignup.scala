@@ -14,7 +14,7 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Inj
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupDeletePostShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
+			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 				println(parsed)
 
 				PortalLogic.attemptDeleteSignup(rc, parsed.juniorId, parsed.instanceId) match {

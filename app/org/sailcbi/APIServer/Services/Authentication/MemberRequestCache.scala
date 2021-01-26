@@ -74,8 +74,8 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 		else None
 	}
 
-	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
+//	override def getAuthenticatedUsernameFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

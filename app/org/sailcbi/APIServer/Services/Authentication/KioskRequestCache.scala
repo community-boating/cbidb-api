@@ -17,8 +17,8 @@ object KioskRequestCache extends RequestCacheObject[KioskRequestCache] {
 		if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
 		else None
 
-	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[String] = None
+//	override def getAuthenticatedUsernameFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[String] = None
 }

@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[RequiredInfoShape](Set(MemberRequestCache)) {
@@ -87,7 +87,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				case Some(id: JsValue) => {
 					val juniorId: Int = id.toString().toInt
 					println(s"its an update: $juniorId")
-					PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+					PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 						runValidations(parsed, rc, Some(id.toString().toInt)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
@@ -102,7 +102,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				}
 				case None => {
 					println(s"its a create")
-					PA.withRequestCacheMember(None, parsedRequest, rc => {
+					PA.withRequestCacheMember(parsedRequest, rc => {
 
 						runValidations(parsed, rc, None) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))

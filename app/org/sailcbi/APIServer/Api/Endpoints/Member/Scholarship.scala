@@ -17,7 +17,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 	def postNo()(implicit PA: PermissionsAuthority) = Action.async(request => {
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
 			val personId = rc.getAuthedPersonId(rc)
 			val data = request.body.asJson
@@ -42,7 +42,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 	def postYes()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, ScholarshipYesShape.apply)(parsed => {

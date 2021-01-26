@@ -23,10 +23,10 @@ abstract class RequestCacheObject[T <: RequestCache] {
 		kioskToken: String
 	)(implicit PA: PermissionsAuthority): Option[String]
 
-	protected def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[String]
+//	protected def getAuthenticatedUsernameFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[String]
 
 	// If the request actually came from e.g. a Staff request, but we want to access a Member or Public endpoint,
 	// use this to downgrade the request authentication

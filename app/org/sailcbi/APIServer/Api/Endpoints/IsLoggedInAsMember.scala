@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			PA.withRequestCacheMember(None, ParsedRequest(request), rc => {
+			PA.withRequestCacheMember(ParsedRequest(request), rc => {
 				Future {
 					Ok(JsObject(Map("value" -> JsString(rc.userName))))
 				}

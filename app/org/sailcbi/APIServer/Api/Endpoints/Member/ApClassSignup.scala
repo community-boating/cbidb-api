@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassSignupShape.apply)(parsed => {
 				PortalLogic.apClassSignup(rc, personId, parsed.instanceId, parsed.doWaitlist) match {

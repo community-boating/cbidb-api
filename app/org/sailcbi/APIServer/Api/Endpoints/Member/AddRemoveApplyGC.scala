@@ -14,7 +14,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	def add()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
-			PA.withRequestCacheMember(None, parsedRequest, rc => {
+			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId(rc)
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
@@ -33,7 +33,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	def delete()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
-			PA.withRequestCacheMember(None, parsedRequest, rc => {
+			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId(rc)
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 

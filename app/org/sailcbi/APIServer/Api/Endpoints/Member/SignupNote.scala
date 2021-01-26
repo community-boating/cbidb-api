@@ -17,7 +17,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	def get(juniorId: Int, instanceId: Int)(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			PortalLogic.getSignupNote(rc, juniorId, instanceId) match {
 				case Right(os) => os match {
 					case Some(s) => Future(Ok(new JsObject(Map(
@@ -42,7 +42,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		val data = request.body.asJson
 		PA.withParsedPostBodyJSON(request.body.asJson, SignupNoteShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
+			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 
 				implicit val format = SignupNoteShape.format
 

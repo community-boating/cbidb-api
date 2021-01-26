@@ -15,7 +15,7 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 

@@ -18,7 +18,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 
 	private def post(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 
 				val stripe = rc.getStripeIOController(ws)

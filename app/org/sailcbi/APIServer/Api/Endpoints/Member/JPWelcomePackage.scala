@@ -17,7 +17,7 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PA.logger
-		PA.withRequestCacheMember(None, ParsedRequest(req), rc => {
+		PA.withRequestCacheMember(ParsedRequest(req), rc => {
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId(rc)
 			profiler.lap("got person id")

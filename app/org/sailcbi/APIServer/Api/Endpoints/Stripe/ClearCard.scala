@@ -16,7 +16,7 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 
 	private def post(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 
 			val stripeIOController = rc.getStripeIOController(ws)
 

@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 
 			val select = new PreparedQueryForSelect[APRequiredInfoShape](Set(MemberRequestCache)) {
@@ -81,7 +81,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, APRequiredInfoShape.apply)(parsed => {
-			PA.withRequestCacheMember(None, parsedRequest, rc => {
+			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId(rc)
 				runValidations(parsed, rc, personId) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))

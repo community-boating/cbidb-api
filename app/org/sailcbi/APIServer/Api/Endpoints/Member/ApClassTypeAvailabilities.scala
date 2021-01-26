@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassTypeAvailabilities @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
 			val personId = rc.getAuthedPersonId(rc)
 

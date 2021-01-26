@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val stripe = rc.getStripeIOController(ws)
 
 			val personId = rc.getAuthedPersonId(rc)

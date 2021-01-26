@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetApClassesForCalendar @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMember(None, parsedRequest, rc => {
+		PA.withRequestCacheMember(parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId(rc)
 
 			val instances = PortalLogic.getApClassesForCalendar(rc, personId)

@@ -21,8 +21,8 @@ object RootRequestCache extends RequestCacheObject[RootRequestCache] {
 		else None
 	}
 
-	override def getAuthenticatedUsernameFromSuperiorAuth(
-		currentAuthentication: RequestCache,
-		requiredUserName: Option[String]
-	): Option[String] = None
+//	override def getAuthenticatedUsernameFromSuperiorAuth(
+//		currentAuthentication: RequestCache,
+//		requiredUserName: Option[String]
+//	): Option[String] = None
 }

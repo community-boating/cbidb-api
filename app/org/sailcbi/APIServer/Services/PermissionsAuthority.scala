@@ -160,7 +160,8 @@ class PermissionsAuthority private[Services] (
 		)
 
 	def withRequestCache[T <: RequestCache](
-		requiredUserType: RequestCacheObject[T])(
+		requiredUserType: RequestCacheObject[T]
+	)(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		block: T => Future[Result]
@@ -174,11 +175,10 @@ class PermissionsAuthority private[Services] (
 		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets)
 
 	def withRequestCacheMember(
-		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMember(requiredUserName, parsedRequest), block)
+		withRCWrapper(() => getRequestCacheMember(None, parsedRequest), block)
 
 	private def getRequestCacheMemberWithJuniorId(
 		requiredUserName: Option[String],
@@ -212,12 +212,11 @@ class PermissionsAuthority private[Services] (
 	}
 
 	def withRequestCacheMemberWithJuniorId(
-		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		juniorId: Int,
 		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMemberWithJuniorId(requiredUserName, parsedRequest, juniorId), block)
+		withRCWrapper(() => getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId), block)
 
 	private def getRequestCacheMemberWithParentId(
 		requiredUserName: Option[String],
@@ -240,12 +239,11 @@ class PermissionsAuthority private[Services] (
 	}
 
 	def withRequestCacheMemberWithParentId(
-		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
 		parentId: Int,
 		block: MemberRequestCache => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMemberWithParentId(requiredUserName, parsedRequest, parentId), block)
+		withRCWrapper(() => getRequestCacheMemberWithParentId(None, parsedRequest, parentId), block)
 
 	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(Int, String)] = {
 		if (
@@ -275,7 +273,7 @@ class PermissionsAuthority private[Services] (
 		println("Path: " + parsedRequest.path)
 		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 		println("Headers: " + parsedRequest.headers)
-		// For all the enabled user types (besides public), see if the request is authenticated against any of them.
+
 		val authentication: Option[T] = requiredUserType.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
 			case None => None
 			case Some(x: String) => {
@@ -304,12 +302,13 @@ class PermissionsAuthority private[Services] (
 		} else {
 			println("@@@  CSRF check passed")
 
+			authentication
+
 			// requiredUserType says what this request endpoint requires
 			// If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
 			// attempt to downgrade to the desired auth
 			// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
 			// so this architecture will make that request behave exactly as if the member requested it themselves
-			authentication
 			//			if (authentication.isDefined) {
 			//				Some()
 			//			} else {

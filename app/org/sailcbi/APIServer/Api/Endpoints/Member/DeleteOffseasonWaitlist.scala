@@ -13,7 +13,7 @@ class DeleteOffseasonWaitlist @Inject()(implicit exec: ExecutionContext) extends
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, DeleteOffseasonWaitlistShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
+			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 				println(parsed)
 
 				PortalLogic.removeOffseasonWaitlist(rc, parsed.juniorId)

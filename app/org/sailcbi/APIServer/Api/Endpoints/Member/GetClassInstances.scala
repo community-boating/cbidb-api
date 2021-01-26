@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def junior(typeId: Int, juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId, rc => {
+		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			PortalLogic.pruneOldReservations(rc)
 
 			val instances = rc.executePreparedQueryForSelect(GetClassInstancesQuery.byJunior(None, typeId, juniorId)).toArray

@@ -14,7 +14,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupPostShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(None, parsedRequest, parsed.juniorId, rc => {
+			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 				println(parsed)
 
 				val doEnroll = parsed.doEnroll
