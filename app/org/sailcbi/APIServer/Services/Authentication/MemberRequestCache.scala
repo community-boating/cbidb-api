@@ -3,14 +3,34 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelationship}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.Storable.Fields.DatabaseField
+import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, TableAlias}
 
 
 class MemberRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends RequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
+	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
+		throw new UserTypeMismatchException()
 
+	override def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
+		throw new UserTypeMismatchException()
+
+	override def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+		throw new UserTypeMismatchException()
+	}
+
+	override def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
+		throw new UserTypeMismatchException()
+
+	override def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
+		throw new UserTypeMismatchException()
+
+	override def commitObjectToDatabase(i: StorableClass): Unit =
+		throw new UserTypeMismatchException()
 
 	def getAuthedPersonId(rc: RequestCache): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {

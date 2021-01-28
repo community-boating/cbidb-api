@@ -25,7 +25,7 @@ abstract class RequestCache private[Services](
 
 	def companion: RequestCacheObject[_]
 
-	private val pb: PersistenceBroker = {
+	protected val pb: PersistenceBroker = {
 		println("In RC:  " + PA.toString)
 		val pbReadOnly = PA.readOnlyDatabase
 		if (this.isInstanceOf[RootRequestCache]) new OracleBroker(secrets.dbConnection, false, pbReadOnly)
@@ -34,50 +34,50 @@ abstract class RequestCache private[Services](
 
 	val cb: CacheBroker = new RedisBroker
 
-	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
+	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
 		pb.getObjectById(obj, id)
 
-	final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
+	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByIds(obj, ids, fetchSize)
 
-	final def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
 		pb.countObjectsByFilters(obj, filters)
 	}
 
-	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
+	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByFilters(obj, filters, fetchSize)
 
-	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
+	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
 		pb.getAllObjectsOfClass(obj, fields)
 
-	final def commitObjectToDatabase(i: StorableClass): Unit =
+	def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)
 
-	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+	def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForSelect(pq, fetchSize)
 	}
 
-	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
+	def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
 		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForInsert(pq)
 	}
 
-	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
+	def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForUpdateOrDelete(pq)
 	}
 
-	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+	def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
 		pb.executeQueryBuilder(qb)
 	}
 
-	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
+	def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
 		this.companion.test(pc.allowedUserTypes)
 		pb.executeProcedure(pc)
 	}
 
-	final def testDB(): Unit = pb.testDB
+	def testDB(): Unit = pb.testDB
 
 	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
 		PermissionsAuthority.stripeURL,
