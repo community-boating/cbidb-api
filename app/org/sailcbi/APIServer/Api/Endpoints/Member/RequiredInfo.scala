@@ -218,7 +218,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		if (notTooYoung) {
 			ValidationOk
 		} else {
-			ValidationResult.from("Prospective junior members must be at least 10 years old by August 31st to participate in the Junior Program.")
+			ValidationResult.from("Prospective junior members must be at least 11 years old by August 31st to participate in the Junior Program.")
 		}
 	}
 
