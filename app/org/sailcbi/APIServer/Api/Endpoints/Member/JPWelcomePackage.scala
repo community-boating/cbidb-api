@@ -21,8 +21,6 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId(rc)
 			profiler.lap("got person id")
-			val kids = rc.getChildrenPersons(rc, personId)
-			println(kids.mkString("\n"))
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
 			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberRequestCache)) {
