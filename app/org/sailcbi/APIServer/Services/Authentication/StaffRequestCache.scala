@@ -16,7 +16,7 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 
 	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(Int, String)] = {
 		case class Result(userName: String, pwHash: String)
-		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache)) {
+		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
 
 			override def getQuery: String = "select user_name, pw_hash from users where lower(user_name) = ?"
