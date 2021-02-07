@@ -66,7 +66,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 						   |from eii_mit
 						   |where adults = ?
 						   |and children = ?
-						   |and generation = 1
+						   |and generation = 2
 					 """.stripMargin
 
 					def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
