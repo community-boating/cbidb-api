@@ -14,6 +14,7 @@ import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, Resul
 import play.api.libs.json.{JsValue, Json}
 
 import java.sql.CallableStatement
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -2065,6 +2066,30 @@ object PortalLogic {
 		else Some(scms.head)
 	}
 
+	def getAllJPSCMs(rc: RequestCache, orderId: Int): List[SCMRecord] = {
+		val q = new PreparedQueryForSelect[SCMRecord](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): SCMRecord =
+				SCMRecord(
+					membershipTypeId = rsw.getInt(1),
+					basePriceDollars = rsw.getDouble(2),
+					discountId = rsw.getOptionInt(3),
+					discountAmtDollars = rsw.getOptionDouble(4),
+					addlStaggeredPayments = rsw.getOptionInt(5).getOrElse(0)
+				)
+
+			override def getQuery: String =
+				s"""
+				   |select membership_type_id, price, di.discount_id, discount_amt, o.ADDL_STAGGERED_PAYMENTS
+				   |from shopping_cart_memberships scm
+				   |inner join order_numbers o on scm.order_id = o.order_id
+				   |left outer join discount_instances di
+				   |on scm.discount_instance_id = di.instance_id
+				   |where scm.order_id = $orderId and scm.membership_type_id = 10
+				   |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q)
+	}
+
 	def getPaymentPlansForMembershipInCart(rc: RequestCache, personId: Int, orderId: Int, now: LocalDate): (Option[SCMRecord], List[List[(LocalDate, Currency)]]) = {
 		val scm = PortalLogic.getSingleAPSCM(rc, personId, orderId)
 
@@ -2387,6 +2412,21 @@ object PortalLogic {
 			}
 			case _ => throw new Exception("Failed to create PaymentIntent")
 		})
+	}
+
+	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate): List[(LocalDate, Currency)] = {
+		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
+		if (month >= 5 && month <= 10) List.empty
+		else {
+			val addlMonths = if (month > 10) {
+				4 + (13 - month)
+			} else {
+				5-month
+			}
+			val jpscms = getAllJPSCMs(rc, orderId)
+			val total = jpscms.foldLeft(0d)((agg, scm) => agg + scm.basePriceDollars - scm.discountAmtDollars.getOrElse(0d))
+			MembershipLogic.calculatePaymentSchedule(now, _ => Currency.dollars(total), addlMonths)
+		}
 	}
 }
 

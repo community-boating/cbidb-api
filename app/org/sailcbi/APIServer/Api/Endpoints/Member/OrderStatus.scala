@@ -30,6 +30,10 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 			implicit val format = OrderStatusResult.format
 
+			val destructurePaymentPlan = Function.tupled(
+				(ld: LocalDate, amt: Currency) => StaggeredPayment(ld, amt.cents)
+			)
+
 			if (staggeredPaymentAdditionalMonths > 0) {
 				val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
 
@@ -45,10 +49,9 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								expYear = pm.card.exp_year,
 								zip = pm.billing_details.address.postal_code
 							)),
-							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(Function.tupled(
-								(ld, amt) => StaggeredPayment(ld, amt.cents)
-							)),
-							paymentIntentId = Some(pi.id)
+							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(destructurePaymentPlan),
+							paymentIntentId = Some(pi.id),
+							jpAvailablePaymentSchedule = PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now).map(destructurePaymentPlan),
 						)))
 					})
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
@@ -66,7 +69,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 						zip = cd.zip
 					)),
 					staggeredPayments = List.empty,
-					paymentIntentId = None
+					paymentIntentId = None,
+					jpAvailablePaymentSchedule = PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now).map(destructurePaymentPlan),
 				))))
 			}
 		})
@@ -88,7 +92,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		paymentMethodRequired: Boolean,
 		cardData: Option[SavedCardOrPaymentMethodData],
 		staggeredPayments: List[StaggeredPayment],
-		paymentIntentId: Option[String]
+		paymentIntentId: Option[String],
+		jpAvailablePaymentSchedule: List[StaggeredPayment]
 	)
 
 	object OrderStatusResult {
