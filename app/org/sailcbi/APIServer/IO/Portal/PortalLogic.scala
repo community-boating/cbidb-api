@@ -2277,7 +2277,7 @@ object PortalLogic {
 		}
 	}
 
-	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache, orderId: Int): Currency = {
+	def calculateFirstStaggeredPaymentOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
 		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
@@ -2289,7 +2289,12 @@ object PortalLogic {
 				   |and item_type not in ('Membership', 'Damage Waiver', 'Discount', 'Gift Certificate Redeemed', 'Guest Privileges')
 				   |""".stripMargin
 		}
-		val oneTimePrice = rc.executePreparedQueryForSelect(cartQ).head
+		rc.executePreparedQueryForSelect(cartQ).head
+	}
+
+
+	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache, orderId: Int): Currency = {
+		val oneTimePrice = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
 		
 		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override def getQuery: String =
@@ -2425,7 +2430,11 @@ object PortalLogic {
 			}
 			val jpscms = getAllJPSCMs(rc, orderId)
 			val total = jpscms.foldLeft(0d)((agg, scm) => agg + scm.basePriceDollars - scm.discountAmtDollars.getOrElse(0d))
-			MembershipLogic.calculatePaymentSchedule(now, _ => Currency.dollars(total), addlMonths)
+			val rawSchedule = MembershipLogic.calculatePaymentSchedule(now, _ => Currency.dollars(total), addlMonths)
+
+			// Add onetimes to the first payment
+			val onetimes = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
+			(rawSchedule.head._1, rawSchedule.head._2 + onetimes) :: rawSchedule.tail
 		}
 	}
 }
