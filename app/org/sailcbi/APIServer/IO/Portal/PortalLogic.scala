@@ -2421,15 +2421,19 @@ object PortalLogic {
 
 	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate): List[(LocalDate, Currency)] = {
 		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
+
+		val jpscms = getAllJPSCMs(rc, orderId)
+		val total = jpscms.foldLeft(0d)((agg, scm) => agg + scm.basePriceDollars - scm.discountAmtDollars.getOrElse(0d))
+
 		if (month >= 5 && month <= 10) List.empty
+		else if (total < 100) List.empty // per niko/fiona, dont offer under $100 carts
 		else {
 			val addlMonths = if (month > 10) {
 				4 + (13 - month)
 			} else {
 				5-month
 			}
-			val jpscms = getAllJPSCMs(rc, orderId)
-			val total = jpscms.foldLeft(0d)((agg, scm) => agg + scm.basePriceDollars - scm.discountAmtDollars.getOrElse(0d))
+
 			val rawSchedule = MembershipLogic.calculatePaymentSchedule(now, _ => Currency.dollars(total), addlMonths)
 
 			// Add onetimes to the first payment
