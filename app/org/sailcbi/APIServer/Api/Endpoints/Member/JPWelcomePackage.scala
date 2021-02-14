@@ -1,42 +1,45 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.CbiUtil.{ParsedRequest, Profiler}
+import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest, Profiler}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
+class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PA.logger
 		PA.withRequestCacheMember(ParsedRequest(req), rc => {
+			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId(rc)
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
-			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double)](Set(MemberRequestCache)) {
+			val nameQ = new PreparedQueryForSelect[(String, String, LocalDateTime, Int, Double, Double, Option[String])](Set(MemberRequestCache)) {
 				override val params: List[String] = List(personId.toString)
 
-				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, Double, Double) =
-					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getDouble(5), rsw.getDouble(6))
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, String, LocalDateTime, Int, Double, Double, Option[String]) =
+					(rsw.getString(1), rsw.getString(2), rsw.getLocalDateTime(3), rsw.getInt(4), rsw.getDouble(5), rsw.getDouble(6), rsw.getOptionString(7))
 
 				override def getQuery: String =
 					"""
 					  |select name_first, name_last, util_pkg.get_sysdate, util_pkg.get_current_season,
-					  |person_pkg.get_computed_jp_price(null), person_pkg.get_jp_offseason_price(null)
+					  |person_pkg.get_computed_jp_price(null), person_pkg.get_jp_offseason_price(null),
+					  |stripe_customer_id
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
-			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase) = rc.executePreparedQueryForSelect(nameQ).head
+			val (nameFirst, nameLast, sysdate, season, jpPriceBase, jpOffseasonPriceBase, stripeCustomerIdOption) = rc.executePreparedQueryForSelect(nameQ).head
 			val pricesMaybe = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[(Double, Double)](Set(MemberRequestCache)) {
 				override def getQuery: String = """
 												  |select
@@ -56,6 +59,14 @@ class JPWelcomePackage @Inject()(implicit val exec: ExecutionContext) extends In
 			profiler.lap("got child data")
 
 			val canCheckout = PortalLogic.canCheckout(rc, personId, orderId)
+
+			// do this async, user doesnt need to wait for it.
+			if (stripeCustomerIdOption.isEmpty) {
+				stripe.createStripeCustomerFromPerson(rc, personId).map({
+					case f: NetFailure[_, _] => logger.error("Failed to create stripe customerId for person " + personId)
+					case s: NetSuccess[_, _] =>
+				})
+			}
 
 			val result = JPWelcomePackageResult(
 				personId,

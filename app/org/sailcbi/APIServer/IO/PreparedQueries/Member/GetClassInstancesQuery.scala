@@ -148,6 +148,7 @@ object GetClassInstancesQuery {
 		   |w.week
 		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w
 		   |where i.type_id = t.type_id
+		   |and (select count(*) from jp_class_staggers where instance_id = i.instance_id) > 0
 		   |and bk.instance_id = i.instance_id and s1.session_id = bk.first_session and s2.session_id = bk.last_session
 		   |and s1.session_datetime between w.monday and w.sunday
 		   |and (nvl($weekString, '%nu'||'ll%') = '%nu' || 'll%' or (
