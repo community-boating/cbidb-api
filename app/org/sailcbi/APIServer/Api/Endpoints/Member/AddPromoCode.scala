@@ -24,7 +24,7 @@ class AddPromoCode @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						PortalLogic.attemptAddPromoCode(rc, orderId, promoCode)
 						val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
 						PortalLogic.assessDiscounts(rc, orderId)
-						PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths)
+						PortalLogic.writeOrderStaggeredPaymentsAP(rc, now, personId, orderId, staggeredPaymentAdditionalMonths)
 
 						Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 					}

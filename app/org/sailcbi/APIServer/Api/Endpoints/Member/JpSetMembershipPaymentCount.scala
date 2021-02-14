@@ -9,18 +9,18 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) extends InjectedController {
+class JpSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withParsedPostBodyJSON(request.body.asJson, ApSetMembershipPaymentCount.apply)(parsed => {
+		PA.withParsedPostBodyJSON(request.body.asJson, JpSetMembershipPaymentCount.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId(rc)
-				val orderId = PortalLogic.getOrderIdAP(rc, personId)
+				val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
 				val now = PA.now().toLocalDate
 
-				PortalLogic.writeOrderStaggeredPaymentsAP(rc, now, personId, orderId, parsed.additionalPayments)
+				PortalLogic.writeOrderStaggeredPaymentsJP(rc, now, orderId, parsed.doStaggeredPayments)
 				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
 
 				Future(Ok(new JsObject(Map(
@@ -30,13 +30,13 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 		})
 	}
 
-	case class ApSetMembershipPaymentCount (
-		additionalPayments: Int
+	case class JpSetMembershipPaymentCount (
+		doStaggeredPayments: Boolean
 	)
 
-	object ApSetMembershipPaymentCount {
-		implicit val format = Json.format[ApSetMembershipPaymentCount]
+	object JpSetMembershipPaymentCount {
+		implicit val format = Json.format[JpSetMembershipPaymentCount]
 
-		def apply(v: JsValue): ApSetMembershipPaymentCount = v.as[ApSetMembershipPaymentCount]
+		def apply(v: JsValue): JpSetMembershipPaymentCount = v.as[JpSetMembershipPaymentCount]
 	}
 }

@@ -23,7 +23,7 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 				val now = PA.now().toLocalDate
 
 				PortalLogic.assessDiscounts(rc, orderId)
-				PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, 0)
+				PortalLogic.writeOrderStaggeredPaymentsAP(rc, now, personId, orderId, 0)
 
 
 				Future(Ok(new JsObject(Map(

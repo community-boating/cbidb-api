@@ -2207,7 +2207,7 @@ object PortalLogic {
 		piRowId
 	}
 
-	def writeOrderStaggeredPayments(rc: RequestCache, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
+	def writeOrderStaggeredPaymentsAP(rc: RequestCache, now: LocalDate, personId: Int, orderId: Int, numberAdditionalPayments: Int): List[(LocalDate, Currency)] = {
 		// Clear existing records.  Throw if there are paid records
 		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(rc, orderId)
 
@@ -2275,6 +2275,59 @@ object PortalLogic {
 			rc.executePreparedQueryForUpdateOrDelete(updateQ)
 			List.empty
 		}
+	}
+
+	def writeOrderStaggeredPaymentsJP(rc: RequestCache, now: LocalDate, orderId: Int, doingStaggered: Boolean): List[(LocalDate, Currency)] = {
+		// Clear existing records.  Throw if there are paid records
+		val piRowIdMaybe = deleteStaggeredPaymentsWithEmptyAssertion(rc, orderId)
+
+		val schedule =
+			if(doingStaggered) getJPAvailablePaymentSchedule(rc, orderId, now, false)
+			else List.empty
+
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				   |update order_numbers
+				   |set ADDL_STAGGERED_PAYMENTS = ${schedule.length}
+				   |where order_id = $orderId
+				   |""".stripMargin
+		}
+
+		rc.executePreparedQueryForUpdateOrDelete(updateQ)
+
+		PortalLogic.assessDiscounts(rc, orderId)
+
+		if (schedule.length > 0) {
+			val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
+				override val pkName: Option[String] = None
+
+				override val preparedParamsBatch: List[List[PreparedValue]] = schedule.zipWithIndex.map(t => {
+					val ((payDate, payAmt), index) = t
+					val piRowId: String = if(index == 0) piRowIdMaybe.map(_.toString).orNull else null
+					val values: List[PreparedValue] = List(
+						orderId,
+						(index + 1).toString,
+						payDate,
+						payAmt.cents.toString,
+						GetSQLLiteralPrepared("N"),
+						piRowId
+					)
+					values
+				})
+
+				override def getQuery: String =
+					s"""
+					   |insert into ORDER_STAGGERED_PAYMENTS (order_id, seq, expected_payment_date, raw_amount_in_cents, paid, addl_amount_in_cents, PAYMENT_INTENT_ROW_ID)
+					   |values (?, ?, ?, ?, ?, 0, ?)
+					   |""".stripMargin
+			}
+			rc.executePreparedQueryForInsert(insertQ)
+
+			val toAdd = updateFirstStaggeredPaymentWithOneTimes(rc, orderId)
+			val newFirstPayment = (schedule.head._1, schedule.head._2 + toAdd)
+			newFirstPayment :: schedule.tail
+		} else List.empty
 	}
 
 	def calculateFirstStaggeredPaymentOneTimes(rc: RequestCache, orderId: Int): Currency = {
@@ -2419,7 +2472,7 @@ object PortalLogic {
 		})
 	}
 
-	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate): List[(LocalDate, Currency)] = {
+	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate, addOneTimes: Boolean): List[(LocalDate, Currency)] = {
 		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
 
 		val jpscms = getAllJPSCMs(rc, orderId)
@@ -2437,8 +2490,12 @@ object PortalLogic {
 			val rawSchedule = MembershipLogic.calculatePaymentSchedule(now, _ => Currency.dollars(total), addlMonths)
 
 			// Add onetimes to the first payment
-			val onetimes = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
-			(rawSchedule.head._1, rawSchedule.head._2 + onetimes) :: rawSchedule.tail
+			if (addOneTimes) {
+				val onetimes = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
+				(rawSchedule.head._1, rawSchedule.head._2 + onetimes) :: rawSchedule.tail
+			} else {
+				rawSchedule
+			}
 		}
 	}
 }

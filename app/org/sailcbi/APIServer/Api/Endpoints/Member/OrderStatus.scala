@@ -26,13 +26,25 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 			val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
 
-			val now = PA.now().toLocalDate
-
-			implicit val format = OrderStatusResult.format
-
 			val destructurePaymentPlan = Function.tupled(
 				(ld: LocalDate, amt: Currency) => StaggeredPayment(ld, amt.cents)
 			)
+
+			val now = PA.now().toLocalDate
+
+			val staggeredPayments = if (staggeredPaymentAdditionalMonths == 0) {
+				List.empty
+			} else if (program == "JP") {
+				PortalLogic.writeOrderStaggeredPaymentsJP(rc, now, orderId, staggeredPaymentAdditionalMonths > 0).map(destructurePaymentPlan)
+			} else if (program == "AP") {
+				PortalLogic.writeOrderStaggeredPaymentsAP(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(destructurePaymentPlan)
+			} else throw new Exception("Unrecognized program " + program)
+
+			val jpPotentialStaggeredPayments =
+				if (program == "JP") PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now, true).map(destructurePaymentPlan)
+				else List.empty
+
+			implicit val format = OrderStatusResult.format
 
 			if (staggeredPaymentAdditionalMonths > 0) {
 				val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
@@ -49,9 +61,9 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								expYear = pm.card.exp_year,
 								zip = pm.billing_details.address.postal_code
 							)),
-							staggeredPayments = PortalLogic.writeOrderStaggeredPayments(rc, now, personId, orderId, staggeredPaymentAdditionalMonths).map(destructurePaymentPlan),
+							staggeredPayments = staggeredPayments,
 							paymentIntentId = Some(pi.id),
-							jpAvailablePaymentSchedule = PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now).map(destructurePaymentPlan),
+							jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
 						)))
 					})
 					case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
@@ -70,7 +82,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 					)),
 					staggeredPayments = List.empty,
 					paymentIntentId = None,
-					jpAvailablePaymentSchedule = PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now).map(destructurePaymentPlan),
+					jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
 				))))
 			}
 		})
