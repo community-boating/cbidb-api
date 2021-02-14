@@ -2366,12 +2366,12 @@ object PortalLogic {
 	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
-		val q = new PreparedQueryForSelect[(String, Int)](Set(MemberRequestCache, ApexRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int) = (rsw.getString(1), rsw.getInt(2))
+		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int, Int) = (rsw.getString(1), rsw.getInt(2), rsw.getInt(3))
 
 			override def getQuery: String =
 				s"""
-				  |select PAYMENT_INTENT_ID, paid_close_id from ORDERS_STRIPE_PAYMENT_INTENTS where order_id = $orderId and nvl(paid, 'N') <> 'Y'
+				  |select PAYMENT_INTENT_ID, paid_close_id, row_id from ORDERS_STRIPE_PAYMENT_INTENTS where order_id = $orderId and nvl(paid, 'N') <> 'Y'
 				  |""".stripMargin
 		}
 
@@ -2380,9 +2380,18 @@ object PortalLogic {
 		if (intentIdsAndCloseIDs.isEmpty) {
 			createPaymentIntent(rc, stripe, personId, orderId, closeId)
 		} else if (intentIdsAndCloseIDs.length == 1) {
-			val (intentId, closeId) = intentIdsAndCloseIDs.head
+			val (intentId, closeId, rowId) = intentIdsAndCloseIDs.head
 			stripe.getPaymentIntent(intentId).flatMap({
 				case s: NetSuccess[PaymentIntent, _] => {
+					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+						override def getQuery: String =
+							s"""
+							   |update order_staggered_payments set
+							   |PAYMENT_INTENT_ROW_ID = $rowId
+							   |where stagger_id in (select stagger_id from staggered_payments_ready where order_id = $orderId)
+							   |""".stripMargin
+					}
+					rc.executePreparedQueryForUpdateOrDelete(updateQ)
 					val pi = s.successObject
 					if (pi.amount != totalInCents || pi.metadata.closeId.get.toInt != closeId) {
 						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents, closeId).map(_ => {
