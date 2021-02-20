@@ -15,7 +15,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
@@ -34,7 +34,7 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.unapplyGCFromOrder(rc, orderId, parsed.certId)

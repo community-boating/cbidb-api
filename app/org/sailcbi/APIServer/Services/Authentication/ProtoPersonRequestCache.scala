@@ -29,8 +29,8 @@ class ProtoPersonRequestCache(override val userName: String, secrets: Permission
 	override def commitObjectToDatabase(i: StorableClass): Unit =
 		throw new UserTypeMismatchException()
 
-	def getAuthedPersonId(rc: RequestCache): Option[Int] = {
-		val ids = rc.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
+	def getAuthedPersonId(): Option[Int] = {
+		val ids = this.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 		// TODO: critical error if this list has >1 element
 		ids.headOption
 	}

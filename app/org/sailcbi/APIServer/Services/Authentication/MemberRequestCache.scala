@@ -32,7 +32,7 @@ class MemberRequestCache(override val userName: String, secrets: PermissionsAuth
 	override def commitObjectToDatabase(i: StorableClass): Unit =
 		throw new UserTypeMismatchException()
 
-	def getAuthedPersonId(rc: RequestCache): Int = {
+	def getAuthedPersonId(): Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
 			override def getQuery: String =
 				"""
@@ -43,7 +43,7 @@ class MemberRequestCache(override val userName: String, secrets: PermissionsAuth
 			override val params: List[String] = List(userName)
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
-		val ids = rc.executePreparedQueryForSelect(q)
+		val ids = this.executePreparedQueryForSelect(q)
 		// TODO: critical error if this list has >1 element
 		ids.head
 	}

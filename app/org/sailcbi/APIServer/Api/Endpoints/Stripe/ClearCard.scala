@@ -20,7 +20,7 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 
 			val stripeIOController = rc.getStripeIOController(ws)
 
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			val orderId = PortalLogic.getOrderId(rc, personId, program)
 			val stripeCustomerId = PortalLogic.getStripeCustomerId(rc, personId)
 

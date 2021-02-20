@@ -22,7 +22,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		PA.withRequestCacheMember(ParsedRequest(req), rc => {
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
@@ -162,7 +162,8 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				canCheckout = canCheckout,
 				expirationDate = expirationDate,
 				show4thLink = show4thLink,
-				discountsResult = discountsResult
+				discountsResult = discountsResult,
+				openStaggeredOrderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, personId)
 			)
 			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
@@ -185,7 +186,8 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		canCheckout: Boolean,
 		expirationDate: Option[LocalDate],
 		show4thLink: Boolean,
-		discountsResult: DiscountsResult
+		discountsResult: DiscountsResult,
+		openStaggeredOrderId: Option[Int]
 	)
 
 	object APWelcomePackageResult {

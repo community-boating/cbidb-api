@@ -191,7 +191,7 @@ class PermissionsAuthority private[Services] (
 			case Some(ret: MemberRequestCache) => {
 				// auth was successful
 				//... but does the request juniorId match the auth'd parent id?
-				val authedPersonId = ret.asInstanceOf[MemberRequestCache].getAuthedPersonId(ret)
+				val authedPersonId = ret.asInstanceOf[MemberRequestCache].getAuthedPersonId()
 				val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootRequestCache)) {
 					override def getQuery: String =
 						s"""
@@ -228,7 +228,7 @@ class PermissionsAuthority private[Services] (
 			case Some(ret: MemberRequestCache) => {
 				// auth was successful
 				//... but does the request parentId match the auth'd parent id?
-				val authedPersonId = ret.getAuthedPersonId(ret)
+				val authedPersonId = ret.getAuthedPersonId()
 				if (authedPersonId == parentId) {
 					Some(ret)
 				} else {

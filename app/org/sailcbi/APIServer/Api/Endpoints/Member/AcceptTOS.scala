@@ -17,7 +17,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, AcceptTOSShape.apply)(parsed => {
 			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.personId, rc => {
-				val parentId = rc.getAuthedPersonId(rc)
+				val parentId = rc.getAuthedPersonId()
 				val orderId = PortalLogic.getOrderIdJP(rc, parentId)
 
 				doAccept(rc, orderId, parsed.personId)
@@ -30,7 +30,7 @@ class AcceptTOS  @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
 
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			doAccept(rc, orderId, personId)

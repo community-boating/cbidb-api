@@ -15,7 +15,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 
 			val select = new PreparedQueryForSelect[APRequiredInfoShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): APRequiredInfoShape =
@@ -82,7 +82,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, APRequiredInfoShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 				runValidations(parsed, rc, personId) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 					case ValidationOk => {

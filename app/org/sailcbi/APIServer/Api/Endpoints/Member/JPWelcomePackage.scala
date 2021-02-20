@@ -21,7 +21,7 @@ class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		PA.withRequestCacheMember(ParsedRequest(req), rc => {
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)

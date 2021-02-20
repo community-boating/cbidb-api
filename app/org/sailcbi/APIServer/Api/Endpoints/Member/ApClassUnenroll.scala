@@ -13,7 +13,7 @@ class ApClassUnenroll  @Inject()(implicit exec: ExecutionContext) extends Inject
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassUnenrollShape.apply)(parsed => {
 				PortalLogic.apClassUnenroll(rc, personId, parsed.instanceId)
 				Future(Ok(new JsObject(Map(

@@ -15,7 +15,7 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			val orderId = PortalLogic.getOrderId(rc, personId, program)
 
 			val fullCartItemsQuery = new FullCart(orderId)

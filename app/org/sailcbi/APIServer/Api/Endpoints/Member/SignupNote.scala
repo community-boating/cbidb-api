@@ -61,7 +61,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				val username = rc.userName
 				println("protoperson username is " + username)
-				val parentPersonId = rc.getAuthedPersonId(rc).get
+				val parentPersonId = rc.getAuthedPersonId().get
 				println("parent personId is " + parentPersonId)
 
 				val juniorMatchesParent = {

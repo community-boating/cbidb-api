@@ -15,7 +15,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
@@ -30,7 +30,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)

@@ -14,7 +14,7 @@ class ApClassTypeAvailabilities @Inject()(implicit exec: ExecutionContext) exten
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 
 			val resultObj = PortalLogic.getApClassTypeAvailabilities(rc, personId)
 			Future(Ok(Json.toJson(resultObj)))

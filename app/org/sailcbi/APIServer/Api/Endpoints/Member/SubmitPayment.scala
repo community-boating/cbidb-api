@@ -20,7 +20,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
@@ -37,7 +37,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		PA.withRequestCacheMember(parsedRequest, rc => {
 
 
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {

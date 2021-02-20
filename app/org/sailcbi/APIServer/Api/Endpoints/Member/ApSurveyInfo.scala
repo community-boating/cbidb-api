@@ -14,7 +14,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 
 			val select = new PreparedQueryForSelect[ApSurveyInfoShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApSurveyInfoShape =
@@ -64,7 +64,7 @@ class ApSurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 			PA.withParsedPostBodyJSON(request.body.asJson, ApSurveyInfoShape.apply)(parsed => {
 				val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 					override def getQuery: String =

@@ -16,7 +16,7 @@ class ApAbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) e
 		PA.withRequestCacheMember(parsedRequest, rc => {
 
 
-			val memberId = rc.getAuthedPersonId(rc)
+			val memberId = rc.getAuthedPersonId()
 
 			PortalLogic.apDeleteReservation(rc, memberId) match {
 				case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))

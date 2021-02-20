@@ -32,7 +32,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 			Left(ValidationResult.from("Please specify junior name."))
 		} else {
 			// Create protoparent if it doenst exist
-			val protoParentPersonId = rc.getAuthedPersonId(rc)
+			val protoParentPersonId = rc.getAuthedPersonId()
 			val parentPersonId = {
 				if (protoParentPersonId.isDefined) {
 					val ret = protoParentPersonId.get

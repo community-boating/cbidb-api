@@ -2507,5 +2507,24 @@ object PortalLogic {
 			}
 		}
 	}
+
+	def getOpenStaggeredOrderForPerson(rc: RequestCache, personId: Int)(implicit PA: PermissionsAuthority): Option[Int] = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select order_id
+				  |from pending_memberships
+				  |where person_id = $personId
+				  |""".stripMargin
+		}
+
+		val openOrders = rc.executePreparedQueryForSelect(q)
+		if (openOrders.size > 1) {
+			PA.logger.error("Found " + openOrders.size + " open orders for personID " + personId)
+			Some(openOrders.max)
+		} else openOrders.headOption
+	}
 }
 

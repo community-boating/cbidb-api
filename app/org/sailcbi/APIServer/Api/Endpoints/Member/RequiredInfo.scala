@@ -91,7 +91,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						runValidations(parsed, rc, Some(id.toString().toInt)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								doUpdate(rc, parsed, rc.getAuthedPersonId(rc))
+								doUpdate(rc, parsed, rc.getAuthedPersonId())
 								Future(Ok(new JsObject(Map(
 									"personId" -> JsNumber(juniorId)
 								))))
@@ -107,7 +107,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						runValidations(parsed, rc, None) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								val newJuniorId = doCreate(rc, parsed, rc.getAuthedPersonId(rc))
+								val newJuniorId = doCreate(rc, parsed, rc.getAuthedPersonId())
 								Future(Ok(new JsObject(Map(
 									"personId" -> JsNumber(newJuniorId)
 								))))

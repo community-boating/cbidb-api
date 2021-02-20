@@ -15,7 +15,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId(rc)
+			val personId = rc.getAuthedPersonId()
 
 			val select = new PreparedQueryForSelect[ApEmergencyContactShape](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): ApEmergencyContactShape =
@@ -66,7 +66,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ApEmergencyContactShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId(rc)
+				val personId = rc.getAuthedPersonId()
 
 				runValidations(parsed) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
