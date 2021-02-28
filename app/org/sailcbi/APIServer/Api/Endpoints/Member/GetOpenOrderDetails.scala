@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -18,7 +19,12 @@ class GetOpenOrderDetails @Inject()(implicit val exec: ExecutionContext) extends
 	})
 	private def get(rc: RequestCache, personId: Int): Future[Result] = {
 		implicit val format = OpenOrderDetailsResult.format
-		Future(Ok(Json.toJson(OpenOrderDetailsResult(1234))))
+
+		PortalLogic.getOpenStaggeredOrderForPerson(rc, personId) match {
+			case None => Future(Ok(Json.toJson(List.empty)))
+			case Some(orderId) => Future(Ok(Json.toJson(PortalLogic.getStaggeredOrderStatus(rc, orderId))))
+		}
+
 	}
 
 	case class OpenOrderDetailsResult(orderId: Int)

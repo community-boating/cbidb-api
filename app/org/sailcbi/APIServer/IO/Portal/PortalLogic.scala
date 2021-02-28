@@ -2526,5 +2526,72 @@ object PortalLogic {
 			Some(openOrders.max)
 		} else openOrders.headOption
 	}
+
+	case class StaggeredOrderPayment(orderId: Int, staggerId: Int, amountCents: Int, expectedDate: LocalDate, paid: Boolean)
+	object StaggeredOrderPayment{
+		implicit val format = Json.format[StaggeredOrderPayment]
+		def apply(v: JsValue): StaggeredOrderPayment = v.as[StaggeredOrderPayment]
+	}
+
+	def getStaggeredOrderStatus(rc: RequestCache, orderId: Int): List[StaggeredOrderPayment] = {
+		val q = new PreparedQueryForSelect[StaggeredOrderPayment](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StaggeredOrderPayment =
+				StaggeredOrderPayment(rsw.getInt(1), rsw.getInt(2), rsw.getInt(3) + rsw.getOptionInt(4).getOrElse(0),
+					rsw.getLocalDate(5), rsw.getBooleanFromChar(6))
+
+			override def getQuery: String =
+				s"""
+				  |select order_id, stagger_id, raw_amount_in_Cents, addl_amount_in_cents, expected_payment_date, paid
+				  |from order_staggered_payments where order_id = $orderId
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForSelect(q)
+	}
+
+	def finishOpenOrder(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): ValidationResult = {
+		// set all staggered payments to ready
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				  |update order_staggered_payments
+				  |set expected_payment_date = util_pkg.get_sysdate
+				  |where order_id = $orderId and paid = 'N'
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForUpdateOrDelete(updateQ)
+
+		// execute ready payments
+		val ppc = new PreparedProcedureCall[(Boolean, String)](Set(MemberRequestCache)) {
+			//procedure do_staggered_payment_cron(
+			//  i_person_id in number,
+			//  i_order_id in number,
+			//  o_success out char,
+			//  o_error_msg out varchar2
+			//)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> personId,
+				"i_order_id" -> orderId,
+			)
+
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_success" -> java.sql.Types.CHAR,
+				"o_error_msg" -> java.sql.Types.VARCHAR,
+			)
+
+			override def getOutResults(cs: CallableStatement): (Boolean, String) =
+				(cs.getString("o_success") == "Y", cs.getString("o_error_msg"))
+
+			override def getQuery: String = "api_pkg.do_staggered_payment_cron(?,?,?,?)"
+		}
+
+		val (wasSuccess, errorMessage) = rc.executeProcedure(ppc)
+		if (wasSuccess) ValidationOk
+		else {
+			PA.logger.error(errorMessage)
+			ValidationResult.from("An internal error has occurred. Tech support has been notified and the issue will be resolved within 24 hours.  Please do not resubmit payment.")
+		}
+	}
 }
 

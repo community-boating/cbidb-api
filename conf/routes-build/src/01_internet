@@ -132,6 +132,8 @@ POST    /member/set-payment-plan-jp         org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /member/open-order-details-ap          org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getSelf()
 
+POST    /member/finish-open-order-ap            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postSelf()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get(program: String)
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
