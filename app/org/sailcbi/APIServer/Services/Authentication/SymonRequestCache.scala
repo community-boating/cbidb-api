@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 
-class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
+class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
 
 	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =

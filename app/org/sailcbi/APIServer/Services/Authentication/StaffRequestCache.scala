@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 
-class StaffRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
+class StaffRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends UnlockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 }
 

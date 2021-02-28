@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 
-class KioskRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends NonMemberRequestCache(userName, secrets) {
+class KioskRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[KioskRequestCache] = KioskRequestCache
 
 	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
