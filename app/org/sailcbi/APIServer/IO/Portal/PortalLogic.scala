@@ -2363,7 +2363,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[PaymentIntent] = {
+	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache)) {
@@ -2406,10 +2406,10 @@ object PortalLogic {
 									   |""".stripMargin
 							}
 							rc.executePreparedQueryForUpdateOrDelete(updateQ)
-							pi
+							Some(pi)
 						})
 					} else {
-						Future(pi)
+						Future(Some(pi))
 					}
 				}
 				case _ => throw new Exception("Failed to get PaymentIntent")
@@ -2419,7 +2419,7 @@ object PortalLogic {
 		}
 	}
 
-	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[PaymentIntent] = {
+	private def getStaggeredPaymentsReady(rc: RequestCache, orderId: Int): List[(Int, Currency)] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Int, Currency) = (
 				rsw.getInt(1),
@@ -2428,57 +2428,64 @@ object PortalLogic {
 
 			override def getQuery: String =
 				s"""
-				  |select STAGGER_ID, RAW_AMOUNT_IN_CENTS, ADDL_AMOUNT_IN_CENTS
-				  |from STAGGERED_PAYMENTS_READY where order_id = $orderId
-				  |""".stripMargin
+				   |select STAGGER_ID, RAW_AMOUNT_IN_CENTS, ADDL_AMOUNT_IN_CENTS
+				   |from STAGGERED_PAYMENTS_READY where order_id = $orderId
+				   |""".stripMargin
 		}
-		val staggeredPayments = rc.executePreparedQueryForSelect(getStaggeredPaymentsQ)
+		rc.executePreparedQueryForSelect(getStaggeredPaymentsQ)
+	}
+
+	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
+		val staggeredPayments =getStaggeredPaymentsReady(rc, orderId)
 		val totalInCents = staggeredPayments.foldLeft(0)((amt, payment) => amt + payment._2.cents)
 
-		stripe.createPaymentIntent(orderId, None, totalInCents, PortalLogic.getStripeCustomerId(rc, personId).get, closeId).flatMap({
-			case intentSuccess: NetSuccess[PaymentIntent, _] => {
-				val pi = intentSuccess.successObject
+		if (totalInCents == 0) Future(None)
+		else {
+			stripe.createPaymentIntent(orderId, None, totalInCents, PortalLogic.getStripeCustomerId(rc, personId).get, closeId).flatMap({
+				case intentSuccess: NetSuccess[PaymentIntent, _] => {
+					val pi = intentSuccess.successObject
 
-				val createPI = new PreparedQueryForInsert(Set(MemberRequestCache, ApexRequestCache)) {
-					override val pkName: Option[String] = Some("ROW_ID")
+					val createPI = new PreparedQueryForInsert(Set(MemberRequestCache, ApexRequestCache)) {
+						override val pkName: Option[String] = Some("ROW_ID")
 
-					override val params: List[String] = List(pi.id)
+						override val params: List[String] = List(pi.id)
 
-					override def getQuery: String =
-						s"""
-						  |insert into ORDERS_STRIPE_PAYMENT_INTENTS (order_id, payment_intent_id, amount_in_cents, paid, PAID_CLOSE_ID)
-						  |values ($orderId, ?, $totalInCents, 'N', $closeId)
-						  |""".stripMargin
-				}
-
-				val rowId = rc.executePreparedQueryForInsert(createPI).get
-
-				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
-					override def getQuery: String =
-						s"""
-						   |update order_staggered_payments set
-						   |PAYMENT_INTENT_ROW_ID = $rowId
-						   |where order_id = $orderId
-						   |and stagger_id in (${staggeredPayments.map(_._1).mkString(", ")})
-						   |""".stripMargin
-				}
-				rc.executePreparedQueryForUpdateOrDelete(updateQ)
-
-				val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
-
-				// If there is already a payment method on the customer, stick it on this payment intent
-				stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-					case paymentMethodSuccess: NetSuccess[Option[PaymentMethod], _] => paymentMethodSuccess.successObject match {
-						case Some(pm: PaymentMethod) => {
-							stripe.updatePaymentIntentWithPaymentMethod(pi.id, pm.id).map(_ => pi)
-						}
-						case None => Future(pi)
+						override def getQuery: String =
+							s"""
+							   |insert into ORDERS_STRIPE_PAYMENT_INTENTS (order_id, payment_intent_id, amount_in_cents, paid, PAID_CLOSE_ID)
+							   |values ($orderId, ?, $totalInCents, 'N', $closeId)
+							   |""".stripMargin
 					}
-					case _ => throw new Exception("Failed to get payment method")
-				})
-			}
-			case _ => throw new Exception("Failed to create PaymentIntent")
-		})
+
+					val rowId = rc.executePreparedQueryForInsert(createPI).get
+
+					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+						override def getQuery: String =
+							s"""
+							   |update order_staggered_payments set
+							   |PAYMENT_INTENT_ROW_ID = $rowId
+							   |where order_id = $orderId
+							   |and stagger_id in (${staggeredPayments.map(_._1).mkString(", ")})
+							   |""".stripMargin
+					}
+					rc.executePreparedQueryForUpdateOrDelete(updateQ)
+
+					val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
+
+					// If there is already a payment method on the customer, stick it on this payment intent
+					stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
+						case paymentMethodSuccess: NetSuccess[Option[PaymentMethod], _] => paymentMethodSuccess.successObject match {
+							case Some(pm: PaymentMethod) => {
+								stripe.updatePaymentIntentWithPaymentMethod(pi.id, pm.id).map(_ => Some(pi))
+							}
+							case None => Future(Some(pi))
+						}
+						case _ => throw new Exception("Failed to get payment method")
+					})
+				}
+				case _ => throw new Exception("Failed to create PaymentIntent")
+			})
+		}
 	}
 
 	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate, addOneTimes: Boolean): List[(LocalDate, Currency)] = {
@@ -2549,18 +2556,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def finishOpenOrder(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): ValidationResult = {
-		// set all staggered payments to ready
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String =
-				s"""
-				  |update order_staggered_payments
-				  |set expected_payment_date = util_pkg.get_sysdate
-				  |where order_id = $orderId and paid = 'N'
-				  |""".stripMargin
-		}
-		rc.executePreparedQueryForUpdateOrDelete(updateQ)
-
+	def callDoStaggeredPaymentCron(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): ValidationResult = {
 		// execute ready payments
 		val ppc = new PreparedProcedureCall[(Boolean, String)](Set(MemberRequestCache)) {
 			//procedure do_staggered_payment_cron(
@@ -2592,6 +2588,45 @@ object PortalLogic {
 			PA.logger.error(errorMessage)
 			ValidationResult.from("An internal error has occurred. Tech support has been notified and the issue will be resolved within 24 hours.  Please do not resubmit payment.")
 		}
+	}
+
+	def finishOpenOrder(rc: RequestCache, personId: Int, orderId: Int): ValidationResult = {
+		// set all staggered payments to ready
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				  |update order_staggered_payments
+				  |set expected_payment_date = util_pkg.get_sysdate
+				  |where order_id = $orderId and paid = 'N'
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForUpdateOrDelete(updateQ)
+
+		callDoStaggeredPaymentCron(rc, personId, orderId)
+	}
+
+	def retryFailedPayments(rc: RequestCache, personId: Int, orderId: Int): Unit = {
+		if (getStaggeredPaymentsReady(rc, orderId).length > 0) {
+			callDoStaggeredPaymentCron(rc, personId, orderId)
+		}
+	}
+
+	def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
+		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
+
+			override def getQuery: String =
+				s"""
+				  |select pi.payment_intent_id
+				  |from order_numbers o, open_staggered_orders oso, order_staggered_payments osp, ORDERS_STRIPE_PAYMENT_INTENTS pi
+				  |where o.order_id = oso.order_id and oso.order_id = osp.order_id and osp.PAYMENT_INTENT_ROW_ID = pi.ROW_ID
+				  |and osp.paid = 'N'  and o.person_id = $personId
+				  |""".stripMargin
+		}
+		val intents = rc.executePreparedQueryForSelect(q)
+		Future.sequence(intents.map(i => {
+			stripe.updatePaymentIntentWithPaymentMethod(i, methodId)
+		}))
 	}
 }
 

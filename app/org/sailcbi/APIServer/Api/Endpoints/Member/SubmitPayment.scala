@@ -74,7 +74,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 		if (isStaggered) {
 			PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
-				stripe.updatePaymentIntentWithTotal(pi.id, orderTotalInCents, closeId).flatMap(_ => {
+				stripe.updatePaymentIntentWithTotal(pi.get.id, orderTotalInCents, closeId).flatMap(_ => {
 					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
 						override def getQuery: String =
 							s"""
@@ -227,10 +227,10 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 		if (isStaggered) {
 			Failover(PortalLogic.getOrCreatePaymentIntent(rc, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
-				stripeController.confirmPaymentIntent(pi.id).map({
+				stripeController.confirmPaymentIntent(pi.get.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => {
 						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
-							override val params: List[String] = List(pi.id)
+							override val params: List[String] = List(pi.get.id)
 							override def getQuery: String =
 								s"""
 								  |update ORDERS_STRIPE_PAYMENT_INTENTS

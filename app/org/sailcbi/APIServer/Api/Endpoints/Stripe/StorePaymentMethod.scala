@@ -38,14 +38,9 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 								}
 							}
 							case e: CriticalError[_, StripeError] => throw e.e
-							case _: NetSuccess[_, StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, totalInCents).flatMap(pi => {
-								stripe.updatePaymentIntentWithPaymentMethod(pi.id, parsed.paymentMethodId).map({
-									case ve: ValidationError[_, StripeError] =>  {
-										println(ve.errorObject)
-										Ok(JsObject(Map("success" -> JsBoolean(true))))
-									}
-									case s: NetSuccess[_, _] => Ok(JsObject(Map("success" -> JsBoolean(true))))
-								})
+							case _: NetSuccess[_, StripeError] => PortalLogic.updateAllPaymentIntentsWithNewMethod(rc, personId, parsed.paymentMethodId, stripe).map(_ => {
+								// TODO: this is a list of SRRs; we should confirm they all worked
+								Ok(JsObject(Map("success" -> JsBoolean(true))))
 							})
 						})
 					}
@@ -54,7 +49,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 		})
 	}
 
-	case class StorePaymentMethodShape(paymentMethodId: String)
+	case class StorePaymentMethodShape(paymentMethodId: String, retryLatePayments: Boolean)
 
 	object StorePaymentMethodShape {
 		implicit val format = Json.format[StorePaymentMethodShape]

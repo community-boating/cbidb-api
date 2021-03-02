@@ -62,7 +62,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 								zip = pm.billing_details.address.postal_code
 							)),
 							staggeredPayments = staggeredPayments,
-							paymentIntentId = Some(pi.id),
+							paymentIntentId = pi.map(_.id),
 							jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
 						)))
 					})
