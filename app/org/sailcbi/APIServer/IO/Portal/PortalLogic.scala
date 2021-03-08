@@ -2534,7 +2534,7 @@ object PortalLogic {
 		} else openOrders.headOption
 	}
 
-	case class StaggeredOrderPayment(orderId: Int, staggerId: Int, amountCents: Int, expectedDate: LocalDate, paid: Boolean)
+	case class StaggeredOrderPayment(orderId: Int, staggerId: Int, amountCents: Int, expectedDate: LocalDate, paid: Boolean, failedCron: Boolean)
 	object StaggeredOrderPayment{
 		implicit val format = Json.format[StaggeredOrderPayment]
 		def apply(v: JsValue): StaggeredOrderPayment = v.as[StaggeredOrderPayment]
@@ -2544,11 +2544,11 @@ object PortalLogic {
 		val q = new PreparedQueryForSelect[StaggeredOrderPayment](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StaggeredOrderPayment =
 				StaggeredOrderPayment(rsw.getInt(1), rsw.getInt(2), rsw.getInt(3) + rsw.getOptionInt(4).getOrElse(0),
-					rsw.getLocalDate(5), rsw.getBooleanFromChar(6))
+					rsw.getLocalDate(5), rsw.getBooleanFromChar(6), rsw.getOptionBooleanFromChar(7).getOrElse(false))
 
 			override def getQuery: String =
 				s"""
-				  |select order_id, stagger_id, raw_amount_in_Cents, addl_amount_in_cents, expected_payment_date, paid
+				  |select order_id, stagger_id, raw_amount_in_Cents, addl_amount_in_cents, expected_payment_date, paid, failed_cron
 				  |from order_staggered_payments where order_id = $orderId
 				  |""".stripMargin
 		}
@@ -2576,18 +2576,21 @@ object PortalLogic {
 				"o_error_msg" -> java.sql.Types.VARCHAR,
 			)
 
-			override def getOutResults(cs: CallableStatement): (Boolean, String) =
-				(cs.getString("o_success") == "Y", cs.getString("o_error_msg"))
+			override def getOutResults(cs: CallableStatement): (Boolean, String) = {
+				val success = cs.getString("o_success").substring(0, 1)
+				println("success was '" + success + "'")
+				println("success len " + success.length)
+				println("equals Y ?  " + (success == "Y"))
+				(success == "Y", cs.getString("o_error_msg"))
+			}
 
 			override def getQuery: String = "api_pkg.do_staggered_payment_cron(?,?,?,?)"
 		}
 
 		val (wasSuccess, errorMessage) = rc.executeProcedure(ppc)
+		print("finished ppc call: " + wasSuccess + ":  " + errorMessage)
 		if (wasSuccess) ValidationOk
-		else {
-			PA.logger.error(errorMessage)
-			ValidationResult.from("An internal error has occurred. Tech support has been notified and the issue will be resolved within 24 hours.  Please do not resubmit payment.")
-		}
+		else ValidationResult.from(errorMessage)
 	}
 
 	def finishOpenOrder(rc: RequestCache, personId: Int, orderId: Int): ValidationResult = {
@@ -2605,10 +2608,12 @@ object PortalLogic {
 		callDoStaggeredPaymentCron(rc, personId, orderId)
 	}
 
-	def retryFailedPayments(rc: RequestCache, personId: Int, orderId: Int): Unit = {
-		if (getStaggeredPaymentsReady(rc, orderId).length > 0) {
+	def retryFailedPayments(rc: RequestCache, personId: Int, orderId: Int): ValidationResult = {
+		println("about to retry...")
+		if (getStaggeredPaymentsReady(rc, orderId).nonEmpty) {
+			println("calling the cron ppc")
 			callDoStaggeredPaymentCron(rc, personId, orderId)
-		}
+		} else ValidationOk
 	}
 
 	def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {

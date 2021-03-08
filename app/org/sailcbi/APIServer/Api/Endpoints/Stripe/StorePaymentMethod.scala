@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import org.sailcbi.APIServer.Api.ResultError
+import org.sailcbi.APIServer.Api.{ResultError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -23,8 +23,6 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 
 				val stripe = rc.getStripeIOController(ws)
 				val personId = rc.getAuthedPersonId()
-				val orderId = PortalLogic.getOrderId(rc, personId, program)
-				val totalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 				val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 				customerIdOption match {
 					case None => Future(Ok("fail"))
@@ -40,7 +38,17 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 							case e: CriticalError[_, StripeError] => throw e.e
 							case _: NetSuccess[_, StripeError] => PortalLogic.updateAllPaymentIntentsWithNewMethod(rc, personId, parsed.paymentMethodId, stripe).map(_ => {
 								// TODO: this is a list of SRRs; we should confirm they all worked
-								Ok(JsObject(Map("success" -> JsBoolean(true))))
+								println("called update all intents with new method")
+								val orderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, personId)
+								if (parsed.retryLatePayments && orderId.isDefined) {
+									println("... and let's retry failed payments")
+									PortalLogic.retryFailedPayments(rc, personId, orderId.get) match {
+										case ValidationOk => Ok(JsObject(Map("success" -> JsBoolean(true))))
+										case ve: org.sailcbi.APIServer.Api.ValidationError => Ok(ve.toResultError.asJsObject())
+									}
+								} else {
+									Ok(JsObject(Map("success" -> JsBoolean(true))))
+								}
 							})
 						})
 					}
