@@ -2623,9 +2623,9 @@ object PortalLogic {
 			override def getQuery: String =
 				s"""
 				  |select pi.payment_intent_id
-				  |from order_numbers o, open_staggered_orders oso, order_staggered_payments osp, ORDERS_STRIPE_PAYMENT_INTENTS pi
-				  |where o.order_id = oso.order_id and oso.order_id = osp.order_id and osp.PAYMENT_INTENT_ROW_ID = pi.ROW_ID
-				  |and osp.paid = 'N'  and o.person_id = $personId
+				  |from order_numbers o, order_staggered_payments osp, ORDERS_STRIPE_PAYMENT_INTENTS pi
+				  |where o.order_id = osp.order_id and osp.PAYMENT_INTENT_ROW_ID = pi.ROW_ID
+				  |and osp.paid = 'N' and o.person_id = $personId
 				  |""".stripMargin
 		}
 		val intents = rc.executePreparedQueryForSelect(q)

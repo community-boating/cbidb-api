@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, StripeError}
+import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
@@ -73,23 +73,56 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val stripe = rc.getStripeIOController(ws)
 
 		if (isStaggered) {
-			PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
-				stripe.updatePaymentIntentWithTotal(pi.get.id, orderTotalInCents, closeId).flatMap(_ => {
-					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
-						override def getQuery: String =
-							s"""
-							   |update ORDERS_STRIPE_PAYMENT_INTENTS set
-							   |AMOUNT_IN_CENTS = $orderTotalInCents,
-							   |paid_close_id = $closeId
-							   |where order_id = $orderId
-							   |and nvl(paid, 'N') <> 'Y'
-							   |""".stripMargin
-					}
-					rc.executePreparedQueryForUpdateOrDelete(updateQ)
+			for (
+				pi <- PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents);
+				_ <- stripe.updatePaymentIntentWithTotal(pi.get.id, orderTotalInCents, closeId);
+				customerId <- Future(PortalLogic.getStripeCustomerId(rc, personId));
+				pm <- stripe.getCustomerDefaultPaymentMethod(customerId.get);
+				_ <- stripe.updatePaymentIntentWithPaymentMethod(pi.get.id, pm.asInstanceOf[NetSuccess[Option[PaymentMethod], _]].successObject.get.id)
+			) yield pm
 
-					postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
-				})
-			})
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+				override def getQuery: String =
+					s"""
+					   |update ORDERS_STRIPE_PAYMENT_INTENTS set
+					   |AMOUNT_IN_CENTS = $orderTotalInCents,
+					   |paid_close_id = $closeId
+					   |where order_id = $orderId
+					   |and nvl(paid, 'N') <> 'Y'
+					   |""".stripMargin
+			}
+			rc.executePreparedQueryForUpdateOrDelete(updateQ)
+
+			postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
+
+//			PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).flatMap(pi => {
+//				stripe.updatePaymentIntentWithTotal(pi.get.id, orderTotalInCents, closeId).flatMap(_ => {
+//					stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
+//						case paymentMethodSuccess: NetSuccess[Option[PaymentMethod], _] => paymentMethodSuccess.successObject match {
+//							case Some(pm: PaymentMethod) => {
+//								stripe.updatePaymentIntentWithPaymentMethod(pi.id, pm.id).map(_ => Some(pi)).flatMap(_ => {
+//									val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+//										override def getQuery: String =
+//											s"""
+//											   |update ORDERS_STRIPE_PAYMENT_INTENTS set
+//											   |AMOUNT_IN_CENTS = $orderTotalInCents,
+//											   |paid_close_id = $closeId
+//											   |where order_id = $orderId
+//											   |and nvl(paid, 'N') <> 'Y'
+//											   |""".stripMargin
+//									}
+//									rc.executePreparedQueryForUpdateOrDelete(updateQ)
+//
+//									postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
+//								})
+//							}
+//							case None => Future(Some(pi))
+//						}
+//						case _ => throw new Exception("Failed to get payment method")
+//					})
+//
+//				})
+//			})
 		} else {
 			postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
 		}
