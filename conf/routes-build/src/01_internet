@@ -21,7 +21,7 @@ POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.End
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()
 
 POST     /stripe/store-payment-method-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAP()
-POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP()
+POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP(juniorId: Option[Int])
 
 GET     /stripe/get-recurring-info               org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationInfo.get()
 
