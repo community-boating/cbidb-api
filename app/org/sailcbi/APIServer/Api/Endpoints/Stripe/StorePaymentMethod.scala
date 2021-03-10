@@ -62,7 +62,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 						val orderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, memberPersonId)
 						if (retryLatePayments && orderId.isDefined) {
 							println("... and let's retry failed payments")
-							PortalLogic.retryFailedPayments(rc, memberPersonId, orderId.get) match {
+							PortalLogic.retryFailedPayments(rc, adultPersonId, orderId.get) match {
 								case ValidationOk => Ok(JsObject(Map("success" -> JsBoolean(true))))
 								case ve: org.sailcbi.APIServer.Api.ValidationError => Ok(ve.toResultError.asJsObject())
 							}
