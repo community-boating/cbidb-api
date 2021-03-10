@@ -55,7 +55,7 @@ class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					(rsw.getDouble(1), rsw.getDouble(2))
 
 			}).headOption
-			val childData = rc.executePreparedQueryForSelect(new GetChildDataQuery(personId))
+			val childData = rc.executePreparedQueryForSelect(new GetChildDataQuery(rc, personId))
 			profiler.lap("got child data")
 
 			val canCheckout = PortalLogic.canCheckout(rc, personId, orderId)

@@ -131,8 +131,10 @@ POST     /member/set-payment-plan            org.sailcbi.APIServer.Api.Endpoints
 POST    /member/set-payment-plan-jp         org.sailcbi.APIServer.Api.Endpoints.Member.JpSetMembershipPaymentCount.post()
 
 GET     /member/open-order-details-ap          org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getSelf()
+GET     /member/open-order-details-jp          org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getJunior(juniorId: Int)
 
 POST    /member/finish-open-order-ap            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postSelf()
+POST    /member/finish-open-order-jp            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postJP(juniorId: Int)
 
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get(program: String)
 

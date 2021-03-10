@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
-import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.Services.{RequestCache, ResultSetWrapper}
 import play.api.libs.json.Json
 
 // TODO: replace with entity-based arch
-class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDataQueryResult](allowedUserTypes = Set(MemberRequestCache)) {
+class GetChildDataQuery(rc: RequestCache, parentId: Int) extends PreparedQueryForSelect[GetChildDataQueryResult](allowedUserTypes = Set(MemberRequestCache)) {
 	override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetChildDataQueryResult =
 		GetChildDataQueryResult(
 			rs.getInt(1),
@@ -14,7 +15,8 @@ class GetChildDataQuery(parentId: Int) extends PreparedQueryForSelect[GetChildDa
 			rs.getString(3),
 			rs.getString(4),
 			rs.getString(5),
-			rs.getString(6)
+			rs.getString(6),
+			PortalLogic.getOpenStaggeredOrderForPerson(rc, rs.getInt(1))
 		)
 
 	override def getQuery: String =
@@ -43,7 +45,8 @@ case class GetChildDataQueryResult(
 	nameLast: String,
 	status: String,
 	actions: String,
-	ratings: String
+	ratings: String,
+	openStaggeredOrderId: Option[Int]
 )
 
 object GetChildDataQueryResult {

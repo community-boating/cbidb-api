@@ -16,12 +16,19 @@ class FinishOpenOrder @Inject()(implicit val exec: ExecutionContext) extends Inj
 			post(rc, personId)
 		})
 	})
+	def postJP(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
+		val parsedRequest = ParsedRequest(req)
+		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
+			val parentPersonId = rc.getAuthedPersonId()
+			post(rc, juniorId, Some(parentPersonId))
+		})
+	})
 
-	private def post(rc: RequestCache, personId: Int): Future[Result] = {
+	private def post(rc: RequestCache, personId: Int, parentPersonId: Option[Int] = None): Future[Result] = {
 		PortalLogic.getOpenStaggeredOrderForPerson(rc, personId) match {
 			case None => Future(Ok("success"))
 			case Some(orderId) => {
-				PortalLogic.finishOpenOrder(rc, personId, orderId)
+				PortalLogic.finishOpenOrder(rc, parentPersonId.getOrElse(personId), orderId)
 				Future(Ok("success"))
 			}
 		}
