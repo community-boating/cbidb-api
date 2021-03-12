@@ -2,7 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,7 +18,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId()
-				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
@@ -31,7 +33,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId()
-				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
+				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
 
 				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
@@ -40,10 +42,29 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		})
 	}
 
+	def addStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
+			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId() match {
+					case Some(id) => id
+					case None => PortalLogic.persistDonator(rc, rc.userName)
+				}
+
+				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
+
+				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+				}
+			})
+		})
+	}
+
 	case class AddRemoveDonationShape(
 		fundId: Int,
 		amount: Double,
-		program: String
+		program: Option[String]
 	)
 
 	object AddRemoveDonationShape {

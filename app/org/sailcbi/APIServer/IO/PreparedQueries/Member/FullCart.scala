@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
+import org.sailcbi.APIServer.Services.Authentication.{MemberRequestCache, ProtoPersonRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.Json
 
-class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](allowedUserTypes = Set(MemberRequestCache)) {
+class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](allowedUserTypes = Set(MemberRequestCache, ProtoPersonRequestCache)) {
 	override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): FullCartItemResult =
 		FullCartItemResult(
 			itemNameHTML = rsw.getString(1),

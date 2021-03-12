@@ -36,6 +36,7 @@ GET     /jp-teams                           org.sailcbi.APIServer.Api.Endpoints.
 GET     /donation-funds                 org.sailcbi.APIServer.Api.Endpoints.Public.GetDonationFunds.get()
 
 GET     /get-cart-items                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.get(program: String)
+GET     /get-cart-items-donate                     org.sailcbi.APIServer.Api.Endpoints.Member.GetFullCartItems.getDonate()
 
 GET     /weeks                              org.sailcbi.APIServer.Api.Endpoints.Public.GetWeeks.get()
 
@@ -112,6 +113,8 @@ POST    /member/add-donation                    org.sailcbi.APIServer.Api.Endpoi
 POST    /member/delete-donation                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.delete()
 
 POST    /member/add-promo-code                    org.sailcbi.APIServer.Api.Endpoints.Member.AddPromoCode.post()
+
+POST    /add-donation-standalone                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.addStandalone()
 
 POST    /member/apply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.add()
 POST    /member/unapply-gc                    org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveApplyGC.delete()

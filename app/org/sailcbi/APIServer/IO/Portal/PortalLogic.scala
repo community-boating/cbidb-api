@@ -4,6 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries._
@@ -20,6 +21,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PortalLogic {
+	def persistDonator(rc: RequestCache, cookieValue: String): Int = {
+		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
+			override val params: List[String] = List(cookieValue)
+			override val pkName: Option[String] = Some("PERSON_ID")
+
+			override def getQuery: String =
+				s"""
+				   |insert into persons (temp, protoperson_cookie, proto_state) values ('P', ?, 'I')
+				   |""".stripMargin
+		}
+		val personId = rc.executePreparedQueryForInsert(pq).get.toInt
+		//getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
+		personId
+	}
 	def persistProtoParent(rc: RequestCache, cookieValue: String): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
 			override val params: List[String] = List(cookieValue)
@@ -1427,7 +1442,7 @@ object PortalLogic {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
-			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 				override val params: List[String] = List(orderId.toString, fundId.toString)
@@ -1439,7 +1454,7 @@ object PortalLogic {
 			}
 			val exists = rc.executePreparedQueryForSelect(existsQ).nonEmpty
 			if (exists) {
-				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 					override val params: List[String] = List(amount.toString, orderId.toString, fundId.toString)
 					override def getQuery: String =
 						"""
@@ -1450,7 +1465,7 @@ object PortalLogic {
 				}
 				rc.executePreparedQueryForUpdateOrDelete(updateQ)
 			} else {
-				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
+				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 					override val pkName: Option[String] = Some("ITEM_ID")
 
 					override val params: List[String] = List(
@@ -2332,7 +2347,7 @@ object PortalLogic {
 
 	def calculateFirstStaggeredPaymentOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
-		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache)) {
+		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
 
 			override def getQuery: String =
@@ -2349,7 +2364,7 @@ object PortalLogic {
 	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		val oneTimePrice = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
 		
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def getQuery: String =
 				s"""
 				   |update ORDER_STAGGERED_PAYMENTS
