@@ -1500,7 +1500,7 @@ object PortalLogic {
 	}
 
 	def deleteDonationFromOrder(rc: RequestCache, orderId: Int, fundId: Int): Unit = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override val params: List[String] = List(orderId.toString, fundId.toString)
 			override def getQuery: String =
 				"""

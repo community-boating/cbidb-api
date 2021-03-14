@@ -31,14 +31,25 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 	def delete()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
-			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId()
-				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
+			if (parsed.program.contains("Common")) {
+				PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+					val personId = rc.getAuthedPersonId().get
+					val orderId = PortalLogic.getOrderId(rc, personId, "Donate")
 
-				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
+					PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
-				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
-			})
+					Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+				})
+			} else {
+				PA.withRequestCacheMember(parsedRequest, rc => {
+					val personId = rc.getAuthedPersonId()
+					val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
+
+					PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
+
+					Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+				})
+			}
 		})
 	}
 
