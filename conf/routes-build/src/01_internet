@@ -10,8 +10,7 @@ GET     /efuse/cbidb-public-web             org.sailcbi.APIServer.Api.Endpoints.
 GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.get()
 
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
-POST     /stripe/clear-card-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.postAP()
-POST     /stripe/clear-card-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.postJP()
+POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
 
 POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAP()
 POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
