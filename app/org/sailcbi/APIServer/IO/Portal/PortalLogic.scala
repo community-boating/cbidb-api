@@ -521,7 +521,7 @@ object PortalLogic {
 	}
 
 	def getCardData(rc: RequestCache, orderId: Int): Option[StripeTokenSavedShape] = {
-		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberRequestCache, ApexRequestCache)) {
+		val cardDataQ = new PreparedQueryForSelect[StripeTokenSavedShape](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StripeTokenSavedShape = new StripeTokenSavedShape(
@@ -544,7 +544,7 @@ object PortalLogic {
 
 	def getOrderTotalDollars(rc: RequestCache, orderId: Int): Double = {
 
-		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberRequestCache, ApexRequestCache)) {
+		val orderTotalQ = new PreparedQueryForSelect[Double](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			override val params: List[String] = List(orderId.toString)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Double = rsw.getOptionDouble(1).getOrElse(0)
@@ -2164,7 +2164,7 @@ object PortalLogic {
 	}
 
 	def getPaymentAdditionalMonths(rc: RequestCache, orderId: Int): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ApexRequestCache)) {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
