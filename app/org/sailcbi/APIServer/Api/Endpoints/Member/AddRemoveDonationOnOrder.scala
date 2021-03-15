@@ -64,7 +64,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 
 				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
-				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
+				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 				}
@@ -75,7 +75,8 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 	case class AddRemoveDonationShape(
 		fundId: Int,
 		amount: Double,
-		program: Option[String]
+		program: Option[String],
+		inMemoryOf: Option[String]
 	)
 
 	object AddRemoveDonationShape {

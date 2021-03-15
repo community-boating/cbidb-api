@@ -16,7 +16,8 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 			price = rsw.getDouble(6),
 			displayOrder = rsw.getDouble(7),
 			orderId = rsw.getInt(8),
-			fundId = rsw.getOptionInt(9)
+			fundId = rsw.getOptionInt(9),
+			inMemoryOf = rsw.getOptionString(10),
 		)
 
 	override def getQuery: String =
@@ -30,6 +31,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |c.price as price,
 		  |2 as display_order,
 		  |c.order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_memberships c, membership_types m, persons p
 		  |where c.person_id = p.person_id
@@ -48,6 +50,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |scj.price,
 		  |3,
 		  |scj.order_id,
+		  |null,
 		  |null
 		  |from jp_class_types t, jp_class_instances i, shopping_cart_jpc scj, persons p
 		  |where t.type_id = i.type_id and i.instance_id = scj.instance_id and scj.person_id = p.person_id
@@ -65,7 +68,8 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |amount,
 		  |1,
 		  |d.order_id,
-		  |d.fund_id
+		  |d.fund_id,
+		  |d.in_memory_of
 		  |from shopping_cart_donations d, donation_funds f
 		  |where d.fund_id = f.fund_id
 		  |and d.order_id = ?
@@ -82,6 +86,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |price,
 		  |4,
 		  |w.order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_waivers w
 		  |where w.order_id = ?
@@ -97,6 +102,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |(-1)*scm.discount_amt,
 		  |2,
 		  |scm.order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_memberships scm, discounts d, discount_instances di
 		  |where scm.discount_instance_id = di.instance_id and di.discount_id = d.discount_id
@@ -115,6 +121,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |(-1)*scj.discount_amt,
 		  |3,
 		  |scj.order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_jpc scj, discounts d, discount_instances di
 		  |where scj.discount_instance_id = di.instance_id and di.discount_id = d.discount_id
@@ -132,6 +139,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |purchase_price,
 		  |5,
 		  |order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_gcs scgc
 		  |where order_id = ?
@@ -148,6 +156,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |-1 * amount,
 		  |6,
 		  |order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_appl_gc
 		  |where order_id is not null
@@ -165,6 +174,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |scg.price,
 		  |4.5,
 		  |scg.order_id,
+		  |null,
 		  |null
 		  |from shopping_cart_guest_privs scg
 		  |where scg.order_id = ?
@@ -181,6 +191,7 @@ class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](
 		  |si.price,
 		  |7,
 		  |si.order_id,
+		  |null,
 		  |null
 		  |from ap_class_signups si, ap_class_bookends bk, ap_class_sessions fs, ap_class_instances i, ap_class_formats f, ap_class_types t
 		  |where si.instance_id= bk.instance_id and bk.first_session = fs.session_id
@@ -214,7 +225,8 @@ case class FullCartItemResult(
 	price: Double,
 	displayOrder: Double,
 	orderId: Int,
-	fundId: Option[Int]
+	fundId: Option[Int],
+	inMemoryOf: Option[String]
 )
 
 object FullCartItemResult {

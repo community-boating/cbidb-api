@@ -1438,7 +1438,7 @@ object PortalLogic {
 		}
 	}
 
-	def addDonationToOrder(rc: RequestCache, orderId: Int, fundId: Int, amount: Double): ValidationResult = {
+	def addDonationToOrder(rc: RequestCache, orderId: Int, fundId: Int, amount: Double, inMemoryOf: Option[String] = None): ValidationResult = {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
@@ -1471,7 +1471,8 @@ object PortalLogic {
 					override val params: List[String] = List(
 						orderId.toString,
 						amount.toString,
-						fundId.toString
+						fundId.toString,
+						inMemoryOf.orNull,
 					)
 
 					override def getQuery: String =
@@ -1480,12 +1481,14 @@ object PortalLogic {
 						  |      order_id,
 						  |      amount,
 						  |      fund_id,
-						  |      initiative_id
+						  |      initiative_id,
+						  |      in_memory_of
 						  |    ) values (
 						  |      ?,
 						  |      round(?, 2),
 						  |      ?,
-						  |      16
+						  |      16,
+						  |      ?
 						  |    )
 						  |""".stripMargin
 				}
