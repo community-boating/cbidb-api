@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsNull, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result, Results}
 
@@ -17,15 +17,24 @@ import scala.concurrent.{ExecutionContext, Future}
 class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
+		implicit val format = OrderStatusResult.format
 		program match {
 			case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP => PA.withRequestCacheMember(parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId()
 				getInner(rc, program, personId)
 			})
-			case _ => PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId().get
-				getInner(rc, program, personId)
-			})
+			case _ => {
+				if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
+					PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+						rc.getAuthedPersonId() match {
+							case Some(personId) => getInner(rc, program, personId)
+							case None => Future(Ok(Json.toJson(orderStatusEmpty)))
+						}
+					})
+				} else {
+					Future(Ok(Json.toJson(orderStatusEmpty)))
+				}
+			}
 		}
 
 	}
@@ -120,6 +129,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		paymentIntentId: Option[String],
 		jpAvailablePaymentSchedule: List[StaggeredPayment]
 	)
+
+	val orderStatusEmpty = OrderStatusResult(-1, 0, false, None, List.empty, None, List.empty)
 
 	object OrderStatusResult {
 		implicit val PaymentMethodForBrowserFormat = SavedCardOrPaymentMethodData.format
