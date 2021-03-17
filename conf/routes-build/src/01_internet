@@ -142,7 +142,8 @@ GET     /order-status                           org.sailcbi.APIServer.Api.Endpoi
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
 
-POST    /member/set-gc-purchase             org.sailcbi.APIServer.Api.Endpoints.Member.PurchaseGiftCertificate.set()
+POST    /member/gc-purchase             org.sailcbi.APIServer.Api.Endpoints.Member.PurchaseGiftCertificate.set()
+GET    /member/gc-purchase             org.sailcbi.APIServer.Api.Endpoints.Member.PurchaseGiftCertificate.get()
 
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()

@@ -4,8 +4,9 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.{PurchaseGiftCertShape, dummyEmptyPurchaseGC}
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -15,34 +16,50 @@ import scala.concurrent.{ExecutionContext, Future}
 class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def set()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
+		println("here we go")
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PurchaseGiftCertShape.apply)(parsed => {
+			println("successfully parsed post body")
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId().get
-				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)
-
+				println("got RC")
 				runValidations(parsed) match {
-					case ValidationOk => Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ValidationOk => {
+						val personId = rc.getAuthedPersonId() match {
+							case Some(id) => id
+							case None => PortalLogic.persistStandalonePurchaser(rc, rc.userName, parsed.purchaserNameFirst, parsed.purchaserNameLast, parsed.purchaserEmail)
+						}
+						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)
+
+						println(personId)
+						println(orderId)
+						println(parsed)
+
+						PortalLogic.setGiftCertPurchase(rc, personId, orderId, parsed)
+
+						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+					}
 				}
-
-
 			})
 		})
 	}
 
-//	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
-//		val parsedRequest = ParsedRequest(request)
-//		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PurchaseGiftCertShape.apply)(parsed => {
-//			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-//				val personId = rc.getAuthedPersonId().get
-//				val orderId = PortalLogic.getOrderId(rc, personId, "Donate")
-//
-//				PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
-//
-//				Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
-//			})
-//		})
-//	}
+	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
+			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+				rc.getAuthedPersonId() match {
+					case None => Future(Ok(Json.toJson(dummyEmptyPurchaseGC)))
+					case Some(personId) => {
+						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)
+
+						Future(Ok(Json.toJson(PortalLogic.getGiftCertPurchase(rc, orderId))))
+					}
+				}
+			})
+		} else {
+			Future(Ok(Json.toJson(dummyEmptyPurchaseGC)))
+		}
+	}
 
 	private def runValidations(parsed: PurchaseGiftCertShape): ValidationResult = {
 		val unconditionals = List(
@@ -52,7 +69,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 			ValidationResult.checkBlank(parsed.recipientNameFirst, "Recipient First Name"),
 			ValidationResult.checkBlank(parsed.recipientNameLast, "Recipient Last Name"),
 			ValidationResult.inline(parsed.deliveryMethod)(
-				deliveryMethod => List("Email", "Mail", "Pickup").contains(deliveryMethod),
+				deliveryMethod => List("E", "M", "P").contains(deliveryMethod),
 				"An internal error occurred."
 			),
 			ValidationResult.inline(parsed.purchaserEmail)(
@@ -68,10 +85,10 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 				"Please specify where to email the certificate."
 			)
 		), (
-			parsed.whoseEmail.getOrElse("") == "Recipient",
+			parsed.whoseEmail.getOrElse("") == "R",
 			ValidationResult.checkBlank(parsed.recipientEmail, "Recipient Email"),
 		), (
-			parsed.whoseEmail.getOrElse("") == "Recipient",
+			parsed.whoseEmail.getOrElse("") == "R",
 			ValidationResult.inline(parsed.recipientEmail)(
 				recipientEmail => recipientEmail.getOrElse("").isEmpty || EmailUtil.regex.findFirstIn(recipientEmail.getOrElse("")).isDefined,
 				"Recipient email is not valid."
@@ -88,36 +105,13 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 		)
 
 		val conditionals = parsed.deliveryMethod match {
-			case "Email" => ifEmail.filter(_._1).map(_._2)
-			case "Mail" => ifMail
+			case "E" => ifEmail.filter(_._1).map(_._2)
+			case "M" => ifMail
 			case _ => List.empty
 		}
 
 		ValidationResult.combine(unconditionals ::: conditionals)
 	}
 
-	case class PurchaseGiftCertShape(
-		valueInCents: Int,
-		purchasePriceCents: Int,
-		purchaserNameFirst: Option[String],
-		purchaserNameLast: Option[String],
-		purchaserEmail: Option[String],
-		recipientNameFirst: Option[String],
-		recipientNameLast: Option[String],
-		recipientEmail: Option[String],
-		addr1: Option[String],
-		addr2: Option[String],
-		city: Option[String],
-		state: Option[String],
-		zip: Option[String],
-		deliveryMethod: String,
-		whoseAddress: Option[String],
-		whoseEmail: Option[String]
-	)
 
-	object PurchaseGiftCertShape {
-		implicit val format = Json.format[PurchaseGiftCertShape]
-
-		def apply(v: JsValue): PurchaseGiftCertShape = v.as[PurchaseGiftCertShape]
-	}
 }

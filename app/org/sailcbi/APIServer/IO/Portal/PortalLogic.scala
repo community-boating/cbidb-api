@@ -21,18 +21,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PortalLogic {
-	def persistDonator(rc: RequestCache, cookieValue: String): Int = {
+	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
-			override val params: List[String] = List(cookieValue)
+			override val params: List[String] = List(
+				cookieValue,
+				nameFirst.orNull,
+				nameLast.orNull,
+				email.orNull
+			)
 			override val pkName: Option[String] = Some("PERSON_ID")
 
 			override def getQuery: String =
 				s"""
-				   |insert into persons (temp, protoperson_cookie, proto_state) values ('P', ?, 'I')
+				   |insert into persons (temp, protoperson_cookie, proto_state, name_first, name_last, email)
+				   |values ('P', ?, 'I', ?, ?, ?)
 				   |""".stripMargin
 		}
 		val personId = rc.executePreparedQueryForInsert(pq).get.toInt
-		//getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 		personId
 	}
 	def persistProtoParent(rc: RequestCache, cookieValue: String): Int = {
@@ -2650,6 +2655,180 @@ object PortalLogic {
 		Future.sequence(intents.map(i => {
 			stripe.updatePaymentIntentWithPaymentMethod(i, methodId)
 		}))
+	}
+
+	case class PurchaseGiftCertShape(
+		valueInCents: Int,
+		purchasePriceCents: Int,
+		purchaserNameFirst: Option[String],
+		purchaserNameLast: Option[String],
+		purchaserEmail: Option[String],
+		recipientNameFirst: Option[String],
+		recipientNameLast: Option[String],
+		recipientEmail: Option[String],
+		addr1: Option[String],
+		addr2: Option[String],
+		city: Option[String],
+		state: Option[String],
+		zip: Option[String],
+		deliveryMethod: String,
+		whoseAddress: Option[String],
+		whoseEmail: Option[String]
+	)
+
+	object PurchaseGiftCertShape {
+		implicit val format = Json.format[PurchaseGiftCertShape]
+
+		def apply(v: JsValue): PurchaseGiftCertShape = v.as[PurchaseGiftCertShape]
+	}
+
+	val dummyEmptyPurchaseGC = PurchaseGiftCertShape(
+		valueInCents = 0,
+		purchasePriceCents = 0,
+		recipientEmail = None,
+		recipientNameFirst = None,
+		recipientNameLast = None,
+		addr1 = None,
+		addr2 = None,
+		city = None,
+		state = None,
+		zip = None,
+		deliveryMethod = "X",
+		whoseAddress = None,
+		whoseEmail = None,
+		purchaserNameFirst = None,
+		purchaserNameLast = None,
+		purchaserEmail = None,
+	)
+
+	def setGiftCertPurchase(rc: RequestCache, personId: Int, orderId: Int, gc: PurchaseGiftCertShape): Unit = {
+		val countQ = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				  |select 1 from shopping_cart_gcs where order_id = $orderId
+				  |""".stripMargin
+		}
+
+		val ct = rc.executePreparedQueryForSelect(countQ).size
+
+		if (ct > 1) {
+			throw new Exception("Order had " + ct + " shopping cart GCs on it")
+		} else if (ct == 1) {
+			val deleteQ = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
+				override def getQuery: String = s"delete from shopping_cart_gcs where order_id = $orderId"
+			}
+			rc.executePreparedQueryForUpdateOrDelete(deleteQ)
+		}
+
+		val insertQ = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
+			override val pkName: Option[String] = None
+
+			override val params: List[String] = List(
+				gc.recipientEmail.orNull,
+				gc.recipientNameFirst.orNull,
+				gc.recipientNameLast.orNull,
+				gc.addr1.orNull,
+				gc.addr2.orNull,
+				gc.city.orNull,
+				gc.state.orNull,
+				gc.zip.orNull,
+				gc.deliveryMethod,
+				gc.whoseAddress.orNull,
+				gc.whoseEmail.orNull,
+			)
+
+			override def getQuery: String =
+				s"""
+				  |insert into shopping_cart_gcs(
+				  |    value,
+				  |    purchase_price,
+				  |    order_id,
+				  |    recipient_email,
+				  |    ready_to_buy,
+				  |    recipient_name_first,
+				  |    recipient_name_last,
+				  |    recipient_addr_1,
+				  |    recipient_addr_2,
+				  |    recipient_city,
+				  |    recipient_state,
+				  |    recipient_zip,
+				  |    delivery_method,
+				  |    whose_addr,
+				  |    whose_email
+				  |  ) values (
+				  |    ${gc.purchasePriceCents / 100},
+				  |    ${gc.purchasePriceCents / 100},
+				  |    $orderId,
+				  |    ?,
+				  |    'Y',
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?,
+				  |    ?
+				  |  )
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForInsert(insertQ)
+	}
+
+	def getGiftCertPurchase(rc: RequestCache, orderId: Int): PurchaseGiftCertShape = {
+		val q = new PreparedQueryForSelect[PurchaseGiftCertShape](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): PurchaseGiftCertShape = PurchaseGiftCertShape(
+				valueInCents = (rsw.getDouble(1) * 100).toInt,
+				purchasePriceCents = (rsw.getDouble(2) * 100).toInt,
+				recipientEmail = rsw.getOptionString(3),
+				recipientNameFirst = rsw.getOptionString(4),
+				recipientNameLast = rsw.getOptionString(5),
+				addr1 = rsw.getOptionString(6),
+				addr2 = rsw.getOptionString(7),
+				city = rsw.getOptionString(8),
+				state = rsw.getOptionString(9),
+				zip = rsw.getOptionString(10),
+				deliveryMethod = rsw.getString(11),
+				whoseAddress = rsw.getOptionString(12),
+				whoseEmail = rsw.getOptionString(13),
+				purchaserNameFirst = rsw.getOptionString(14),
+				purchaserNameLast = rsw.getOptionString(15),
+				purchaserEmail = rsw.getOptionString(16),
+			)
+
+			override def getQuery: String =
+				s"""
+				  |select
+				  |    value,
+				  |    purchase_price,
+				  |    recipient_email,
+				  |    recipient_name_first,
+				  |    recipient_name_last,
+				  |    recipient_addr_1,
+				  |    recipient_addr_2,
+				  |    recipient_city,
+				  |    recipient_state,
+				  |    recipient_zip,
+				  |    delivery_method,
+				  |    whose_addr,
+				  |    whose_email,
+				  |    p.name_first,
+				  |    p.name_last,
+				  |    p.email
+				  |    from shopping_Cart_gcs scgc, order_numbers o, persons p
+				  |    where scgc.order_id = o.order_id and o.person_id = p.person_id
+				  |    and o.order_id = $orderId
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q).headOption match {
+			case Some(x) => x
+			case None => dummyEmptyPurchaseGC
+		}
 	}
 }
 
