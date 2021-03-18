@@ -60,7 +60,26 @@ class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 				})
 			})
 		})
+	}
 
+	def detach()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+			rc.getAuthedPersonId() match {
+				case Some(personId) => {
+					val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
+						override def getQuery: String =
+							s"""
+							  |update persons set has_authed_as = null
+							  |where person_id = $personId
+							  |""".stripMargin
+					}
+					rc.executePreparedQueryForUpdateOrDelete(q)
+				}
+				case None =>
+			}
+			Future(Ok("success"))
+		})
 	}
 
 	case class ProveMemberPostShape(username: String)

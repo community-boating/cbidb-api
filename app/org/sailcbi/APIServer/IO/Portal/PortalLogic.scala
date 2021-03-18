@@ -2830,5 +2830,23 @@ object PortalLogic {
 			case None => dummyEmptyPurchaseGC
 		}
 	}
+
+	def getAuthedPersonInfo(rc: RequestCache, protoPersonId: Int): (Option[String], Option[String], Option[String], Boolean) = {
+		val q = new PreparedQueryForSelect[(Option[String], Option[String], Option[String], Boolean)](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Option[String], Option[String], Option[String], Boolean) =
+				(rsw.getOptionString(1), rsw.getOptionString(2), rsw.getOptionString(3), rsw.getOptionInt(4).isDefined)
+
+			override def getQuery: String =
+				s"""
+				  |select name_first, name_last, email, has_authed_as
+				  |from persons
+				  |where person_id = $protoPersonId
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q).headOption match {
+			case Some(ret) => ret
+			case None => (None, None, None, false)
+		}
+	}
 }
 

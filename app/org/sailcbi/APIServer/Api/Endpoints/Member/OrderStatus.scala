@@ -87,12 +87,17 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 						staggeredPayments = staggeredPayments,
 						paymentIntentId = pi.map(_.id),
 						jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
+						nameFirst = None,
+						nameLast = None,
+						email = None,
+						authedAsRealPerson = false,
 					)))
 				})
 				case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
 			})
 		} else {
 			val cardData = PortalLogic.getCardData(rc, orderId)
+			val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
 			Future(Ok(Json.toJson(OrderStatusResult(
 				orderId = orderId,
 				total = orderTotal,
@@ -106,6 +111,10 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 				staggeredPayments = List.empty,
 				paymentIntentId = None,
 				jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
+				nameFirst = nameFirst,
+				nameLast = nameLast,
+				email = email,
+				authedAsRealPerson = authedAsRealPerson
 			))))
 		}
 	}
@@ -127,10 +136,14 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		cardData: Option[SavedCardOrPaymentMethodData],
 		staggeredPayments: List[StaggeredPayment],
 		paymentIntentId: Option[String],
-		jpAvailablePaymentSchedule: List[StaggeredPayment]
+		jpAvailablePaymentSchedule: List[StaggeredPayment],
+		nameFirst: Option[String],
+		nameLast: Option[String],
+		email: Option[String],
+		authedAsRealPerson: Boolean,
 	)
 
-	val orderStatusEmpty = OrderStatusResult(-1, 0, false, None, List.empty, None, List.empty)
+	val orderStatusEmpty = OrderStatusResult(-1, 0, false, None, List.empty, None, List.empty, None, None, None, false)
 
 	object OrderStatusResult {
 		implicit val PaymentMethodForBrowserFormat = SavedCardOrPaymentMethodData.format
