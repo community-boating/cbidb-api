@@ -15,6 +15,7 @@ POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.St
 POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAP()
 POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
 POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
+POST     /stripe/submit-payment-standalone               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postStandalone()
 
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()

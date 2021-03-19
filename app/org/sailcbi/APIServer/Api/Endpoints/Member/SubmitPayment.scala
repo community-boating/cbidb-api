@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.Api.ResultError
+import org.sailcbi.APIServer.Api.{ResultError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
+import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache}
+import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -63,9 +64,63 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		})
 	}
 
+	def postStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId().get
+			val program = parsedRequest.postParams("program")
+			program match {
+				case ORDER_NUMBER_APP_ALIAS.DONATE | ORDER_NUMBER_APP_ALIAS.GC => {
+					val orderId = PortalLogic.getOrderId(rc, personId, program)
+					val result = startStandaloneChargeProcess(rc, orderId)
+					result._2 match {
+						case None => Future(Ok(new JsObject(Map(
+							"successAttemptId" -> JsNumber(result._1.get)
+						))))
+						case Some(err: String) => Future(Ok(ResultError("process_err", err).asJsObject()))
+					}
+//					Future(Ok(ValidationResult.from("err " + program + "  " + orderId).toResultError.asJsObject()))
+				}
+				case _ => Future(Ok(ValidationResult.from("An internal error has occurred.").toResultError.asJsObject()))
+			}
+		})
+	}
+
+	private def startStandaloneChargeProcess(rc: RequestCache, orderId: Int): (Option[Int], Option[String]) = {
+		val ppc = new PreparedProcedureCall[(Option[Int], Option[String])](Set(ProtoPersonRequestCache)) {
+//			procedure start_stripe_transaction(
+//				i_order_id in number,
+//				o_success_attempt_id out number,
+//				o_error_msg out varchar2
+//			) as
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_order_id" -> orderId
+			)
+
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_success_attempt_id" -> java.sql.Types.INTEGER,
+				"o_error_msg" -> java.sql.Types.VARCHAR
+			)
+
+			override def getOutResults(cs: CallableStatement): (Option[Int], Option[String]) = {
+				val err = {
+					val s = cs.getString("o_error_msg")
+					if (cs.wasNull()) None else Some(s)
+				}
+				val successAttemptId = {
+					val ret = cs.getInt("o_success_attempt_id")
+					if (cs.wasNull()) None else Some(ret)
+				}
+				(successAttemptId, err)
+			}
+
+			override def getQuery: String = "api_pkg.start_stripe_transaction(?, ?, ?)"
+		}
+		rc.executeProcedure(ppc)
+	}
+
 	private def startChargeProcess(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
-
-
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
