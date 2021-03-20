@@ -24,10 +24,15 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 				runValidations(parsed) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 					case ValidationOk => {
-						val personId = rc.getAuthedPersonId() match {
-							case Some(id) => id
-							case None => PortalLogic.persistStandalonePurchaser(rc, rc.userName, parsed.purchaserNameFirst, parsed.purchaserNameLast, parsed.purchaserEmail)
-						}
+						val personId = PortalLogic.persistStandalonePurchaser(
+							rc,
+							rc.userName,
+							rc.getAuthedPersonId(),
+							parsed.purchaserNameFirst,
+							parsed.purchaserNameLast,
+							parsed.purchaserEmail
+						)
+
 						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)
 
 						println(personId)

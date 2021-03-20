@@ -57,10 +57,7 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId() match {
-					case Some(id) => id
-					case None => PortalLogic.persistStandalonePurchaser(rc, rc.userName, None, None, None)
-				}
+				val personId = PortalLogic.persistStandalonePurchaser(rc, rc.userName, rc.getAuthedPersonId(), None, None, None)
 
 				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 

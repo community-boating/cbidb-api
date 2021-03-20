@@ -31,10 +31,7 @@ class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 							  |""".stripMargin
 					}
 					val (nameFirst, nameLast, existingPersonId) = bouncerRC.executePreparedQueryForSelect(personQ).head
-					val protoPersonId = protoRC.getAuthedPersonId() match {
-						case Some(id) => id
-						case None => PortalLogic.persistStandalonePurchaser(protoRC, protoRC.userName, None, None, None)
-					}
+					val protoPersonId = PortalLogic.persistStandalonePurchaser(protoRC, protoRC.userName, protoRC.getAuthedPersonId(), None, None, None)
 
 					val updateProtoQ = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 						override val params: List[String] = List(

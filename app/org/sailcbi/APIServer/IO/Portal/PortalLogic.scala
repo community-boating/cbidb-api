@@ -21,24 +21,50 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PortalLogic {
-	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
-		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
-			override val params: List[String] = List(
-				cookieValue,
-				nameFirst.orNull,
-				nameLast.orNull,
-				email.orNull
-			)
-			override val pkName: Option[String] = Some("PERSON_ID")
+	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
+		maybePersonId match {
+			case Some(personId) => {
+				val pq = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
+					override val params: List[String] = List(
+						nameFirst.orNull,
+						nameLast.orNull,
+						email.orNull
+					)
 
-			override def getQuery: String =
-				s"""
-				   |insert into persons (temp, protoperson_cookie, proto_state, name_first, name_last, email)
-				   |values ('P', ?, 'I', ?, ?, ?)
-				   |""".stripMargin
+					override def getQuery: String =
+						s"""
+						  |update persons set
+						  |name_first = ?,
+						  |name_last = ?,
+						  |email = ?
+						  |where person_id = $personId
+						  |
+						  |""".stripMargin
+				}
+				rc.executePreparedQueryForUpdateOrDelete(pq)
+				personId
+			}
+			case None => {
+				val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
+					override val params: List[String] = List(
+						cookieValue,
+						nameFirst.orNull,
+						nameLast.orNull,
+						email.orNull
+					)
+					override val pkName: Option[String] = Some("PERSON_ID")
+
+					override def getQuery: String =
+						s"""
+						   |insert into persons (temp, protoperson_cookie, proto_state, name_first, name_last, email)
+						   |values ('P', ?, 'I', ?, ?, ?)
+						   |""".stripMargin
+				}
+				val personId = rc.executePreparedQueryForInsert(pq).get.toInt
+				personId
+			}
 		}
-		val personId = rc.executePreparedQueryForInsert(pq).get.toInt
-		personId
+
 	}
 	def persistProtoParent(rc: RequestCache, cookieValue: String): Int = {
 		val pq = new PreparedQueryForInsert(Set(ProtoPersonRequestCache)) {
