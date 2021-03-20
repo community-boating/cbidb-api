@@ -31,10 +31,10 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 	def delete()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
-			if (parsed.program.contains("Common")) {
+			if (parsed.program.contains(ORDER_NUMBER_APP_ALIAS.DONATE)) {
 				PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 					val personId = rc.getAuthedPersonId().get
-					val orderId = PortalLogic.getOrderId(rc, personId, "Donate")
+					val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
 					PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
