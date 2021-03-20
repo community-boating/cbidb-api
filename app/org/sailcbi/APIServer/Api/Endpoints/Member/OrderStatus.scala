@@ -114,7 +114,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 				nameFirst = nameFirst,
 				nameLast = nameLast,
 				email = email,
-				authedAsRealPerson = authedAsRealPerson
+				authedAsRealPerson = authedAsRealPerson.isDefined
 			))))
 		}
 	}

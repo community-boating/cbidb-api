@@ -74,9 +74,16 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					val orderId = PortalLogic.getOrderId(rc, personId, program)
 					val result = startStandaloneChargeProcess(rc, orderId)
 					result._2 match {
-						case None => Future(Ok(new JsObject(Map(
-							"successAttemptId" -> JsNumber(result._1.get)
-						))))
+						case None => {
+							val (_, _, _, realPersonId) = PortalLogic.getAuthedPersonInfo(rc, personId)
+							realPersonId match {
+								case Some(mergeInto) => PortalLogic.mergeRecords(rc, mergeInto = mergeInto, mergeFrom = personId)
+								case None =>
+							}
+							Future(Ok(new JsObject(Map(
+								"successAttemptId" -> JsNumber(result._1.get)
+							))))
+						}
 						case Some(err: String) => Future(Ok(ResultError("process_err", err).asJsObject()))
 					}
 //					Future(Ok(ValidationResult.from("err " + program + "  " + orderId).toResultError.asJsObject()))

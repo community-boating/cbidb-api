@@ -2831,10 +2831,10 @@ object PortalLogic {
 		}
 	}
 
-	def getAuthedPersonInfo(rc: RequestCache, protoPersonId: Int): (Option[String], Option[String], Option[String], Boolean) = {
-		val q = new PreparedQueryForSelect[(Option[String], Option[String], Option[String], Boolean)](Set(ProtoPersonRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Option[String], Option[String], Option[String], Boolean) =
-				(rsw.getOptionString(1), rsw.getOptionString(2), rsw.getOptionString(3), rsw.getOptionInt(4).isDefined)
+	def getAuthedPersonInfo(rc: RequestCache, protoPersonId: Int): (Option[String], Option[String], Option[String], Option[Int]) = {
+		val q = new PreparedQueryForSelect[(Option[String], Option[String], Option[String], Option[Int])](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Option[String], Option[String], Option[String], Option[Int]) =
+				(rsw.getOptionString(1), rsw.getOptionString(2), rsw.getOptionString(3), rsw.getOptionInt(4))
 
 			override def getQuery: String =
 				s"""
@@ -2845,8 +2845,27 @@ object PortalLogic {
 		}
 		rc.executePreparedQueryForSelect(q).headOption match {
 			case Some(ret) => ret
-			case None => (None, None, None, false)
+			case None => (None, None, None, None)
 		}
+	}
+
+	def mergeRecords(rc: RequestCache, mergeInto: Int, mergeFrom: Int): Unit = {
+		val ppc = new PreparedProcedureCall[Unit](Set(ProtoPersonRequestCache)) {
+//			create or replace PROCEDURE "MERGE_RECORDS"
+//			(   p_merge_into IN NUMBER,
+//				p_merge_from IN NUMBER   )
+			override def setInParametersInt: Map[String, Int] = Map(
+				"p_merge_into"-> mergeInto,
+				"p_merge_from"-> mergeFrom,
+			)
+			override def registerOutParameters: Map[String, Int] = Map.empty
+
+			override def getOutResults(cs: CallableStatement): Unit = Unit
+
+			override def getQuery: String = "merge_records(?, ?)"
+		}
+
+		rc.executeProcedure(ppc)
 	}
 }
 
