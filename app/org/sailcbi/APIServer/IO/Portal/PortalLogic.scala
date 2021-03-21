@@ -2892,5 +2892,16 @@ object PortalLogic {
 
 		rc.executeProcedure(ppc)
 	}
+
+	def promoteProtoPerson(rc: RequestCache, personId: Int): Unit = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
+			override def getQuery: String =
+				s"""
+				  |update persons set proto_state = ${MagicIds.PERSONS_PROTO_STATE.WAS_PROTO}
+				  |where person_id = $personId
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForUpdateOrDelete(q)
+	}
 }
 
