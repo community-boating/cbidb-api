@@ -2857,7 +2857,7 @@ object PortalLogic {
 	}
 
 	def getAuthedPersonInfo(rc: RequestCache, protoPersonId: Int): (Option[String], Option[String], Option[String], Option[Int]) = {
-		val q = new PreparedQueryForSelect[(Option[String], Option[String], Option[String], Option[Int])](Set(ProtoPersonRequestCache)) {
+		val q = new PreparedQueryForSelect[(Option[String], Option[String], Option[String], Option[Int])](Set(ProtoPersonRequestCache, MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Option[String], Option[String], Option[String], Option[Int]) =
 				(rsw.getOptionString(1), rsw.getOptionString(2), rsw.getOptionString(3), rsw.getOptionInt(4))
 
