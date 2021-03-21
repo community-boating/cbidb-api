@@ -2897,7 +2897,7 @@ object PortalLogic {
 		val q = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
 			override def getQuery: String =
 				s"""
-				  |update persons set proto_state = ${MagicIds.PERSONS_PROTO_STATE.WAS_PROTO}
+				  |update persons set proto_state = '${MagicIds.PERSONS_PROTO_STATE.WAS_PROTO}'
 				  |where person_id = $personId
 				  |""".stripMargin
 		}
