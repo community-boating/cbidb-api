@@ -146,6 +146,8 @@ GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.
 POST    /member/gc-purchase             org.sailcbi.APIServer.Api.Endpoints.Member.PurchaseGiftCertificate.set()
 GET    /member/gc-purchase             org.sailcbi.APIServer.Api.Endpoints.Member.PurchaseGiftCertificate.get()
 
+POST    /member/donate-set-person           org.sailcbi.APIServer.Api.Endpoints.Member.AddRemoveDonationOnOrder.setStandalonePersonInfo()
+
 POST    /proto-detach-member        org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.detach()
 
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()

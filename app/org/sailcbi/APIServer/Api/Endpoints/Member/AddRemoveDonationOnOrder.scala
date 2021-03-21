@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk}
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
+import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.PurchaseGiftCertShape
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
@@ -67,6 +68,50 @@ class AddRemoveDonationOnOrder @Inject()(implicit exec: ExecutionContext) extend
 				}
 			})
 		})
+	}
+
+	def setStandalonePersonInfo()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, SetStandalonePersonShape.apply)(parsed => {
+			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+				runValidationstandalonePersonInfo(parsed) match {
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ValidationOk => {
+						PortalLogic.persistStandalonePurchaser(rc, rc.userName, rc.getAuthedPersonId(), parsed.nameFirst, parsed.nameLast, parsed.email)
+
+						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+					}
+				}
+
+
+			})
+		})
+	}
+
+	private def runValidationstandalonePersonInfo(parsed: SetStandalonePersonShape): ValidationResult = {
+		val unconditionals = List(
+			ValidationResult.checkBlank(parsed.nameFirst, "First Name"),
+			ValidationResult.checkBlank(parsed.nameLast, "Last Name"),
+			ValidationResult.checkBlank(parsed.email, "Email"),
+			ValidationResult.inline(parsed.email)(
+				email => email.getOrElse("").isEmpty || EmailUtil.regex.findFirstIn(email.getOrElse("")).isDefined,
+				"Email is not valid."
+			),
+		)
+
+		ValidationResult.combine(unconditionals)
+	}
+
+	case class SetStandalonePersonShape(
+		nameFirst: Option[String],
+		nameLast: Option[String],
+		email: Option[String]
+	)
+
+	object SetStandalonePersonShape{
+		implicit val format = Json.format[SetStandalonePersonShape]
+
+		def apply(v: JsValue): SetStandalonePersonShape = v.as[SetStandalonePersonShape]
 	}
 
 	case class AddRemoveDonationShape(
