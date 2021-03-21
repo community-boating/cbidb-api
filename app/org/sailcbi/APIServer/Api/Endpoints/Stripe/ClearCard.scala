@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, InjectedController, Request, Result}
+import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

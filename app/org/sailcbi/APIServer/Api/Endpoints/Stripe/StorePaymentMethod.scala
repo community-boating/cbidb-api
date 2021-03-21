@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import org.sailcbi.APIServer.Api.{ResultError, ValidationOk, ValidationResult}
+import org.sailcbi.APIServer.Api.{ResultError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic

@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.FullCart
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
-import play.api.libs.json.{JsArray, JsBoolean, JsObject, Json}
+import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject

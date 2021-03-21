@@ -6,9 +6,9 @@ import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
-import play.api.libs.json.{JsBoolean, JsNull, JsObject, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, InjectedController, Result, Results}
+import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
 import java.time.LocalDate
 import javax.inject.Inject
