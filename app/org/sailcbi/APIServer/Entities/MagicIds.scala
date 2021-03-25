@@ -39,4 +39,10 @@ object MagicIds {
 	}
 	val MIN_AGE_FOR_SENIOR = 65
 	val MAX_AGE_FOR_YOUTH = 20
+	object PW_HASH_SCHEME {
+		val MEMBER_1 = "member_01"
+		val MEMBER_2 = "member_02"
+		val staff_1 = "staff_01"
+		val staff_2 = "staff_02"
+	}
 }

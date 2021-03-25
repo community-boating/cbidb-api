@@ -14,19 +14,19 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
 
-	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(Int, String)] = {
-		case class Result(userName: String, pwHash: String)
+	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String)] = {
+		case class Result(userName: String, pwHashScheme: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
-			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2))
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2), rs.getString(3))
 
-			override def getQuery: String = "select user_name, pw_hash from users where lower(user_name) = ?"
+			override def getQuery: String = "select user_name, pw_hash_scheme, pw_hash from users where lower(user_name) = ?"
 
 			override val params: List[String] = List(userName.toLowerCase)
 		}
 
 		val users = rootRC.executePreparedQueryForSelect(hq)
 
-		if (users.length == 1) Some(1, users.head.pwHash)
+		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash)
 		else None
 	}
 

@@ -102,7 +102,8 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							firstName,
 							lastName,
 							username.toLowerCase(),
-							pwHash
+							pwHash,
+							MagicIds.PW_HASH_SCHEME.MEMBER_2
 						)
 						override val pkName: Option[String] = Some("PERSON_ID")
 
@@ -114,13 +115,15 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							  |    email,
 							  |    temp,
 							  |    person_type,
-							  |    pw_hash
+							  |    pw_hash,
+							  |    pw_hash_scheme
 							  |  ) values (
 							  |    ?,
 							  |    ?,
 							  |    ?,
 							  |    'P',
 							  |    '${MagicIds.PERSON_TYPE.JP_PARENT}',
+							  |    ?,
 							  |    ?
 							  |  )
 							  |""".stripMargin
@@ -135,6 +138,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							lastName,
 							username.toLowerCase(),
 							pwHash,
+							MagicIds.PW_HASH_SCHEME.MEMBER_2,
 							protoId.toString
 						)
 
@@ -145,7 +149,8 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 							  |name_first = ?,
 							  |name_last = ?,
 							  |email = ?,
-							  |pw_hash = ?
+							  |pw_hash = ?,
+							  |pw_hash_scheme = ?
 							  |where proto_state = '${MagicIds.PERSONS_PROTO_STATE.IS_PROTO}'
 							  |and person_id = ?
 							  |""".stripMargin

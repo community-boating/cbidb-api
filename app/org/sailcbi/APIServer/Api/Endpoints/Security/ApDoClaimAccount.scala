@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
@@ -33,12 +34,15 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 						val update = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 							override val params: List[String] = List(
 								parsed.passwordHash,
+								MagicIds.PW_HASH_SCHEME.MEMBER_2,
 								parsed.personId.toString,
 								parsed.email
 							)
 							override def getQuery: String =
 								"""
-								  |update persons set pw_hash = ?
+								  |update persons set
+								  |pw_hash = ?,
+								  |pw_hash_scheme = ?
 								  |where person_id = ? and lower(email) = ? and pw_hash is null
 								  |""".stripMargin
 						}

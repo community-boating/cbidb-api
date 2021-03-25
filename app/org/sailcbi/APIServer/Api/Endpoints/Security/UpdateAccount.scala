@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
@@ -23,12 +24,13 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 					case ValidationOk => {
 						val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
-							override val params: List[String] = List(parsed.pwHash, parsed.newEmail, parsed.oldEmail)
+							override val params: List[String] = List(parsed.pwHash, MagicIds.PW_HASH_SCHEME.MEMBER_2, parsed.newEmail, parsed.oldEmail)
 
 							override def getQuery: String =
 								"""
 								  |  update persons p2
 								  |  set p2.pw_hash = ?,
+								  |  p2.pw_hash_scheme = ?,
 								  |  p2.email = lower(utl_url.unescape(?))
 								  |  where p2.person_id = (select max(p.person_id) from persons p, (
 								  |    select p1.person_id from persons p1 minus select ptd.person_id from persons_to_delete ptd

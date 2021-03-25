@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
@@ -73,12 +74,13 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 
 	def setNewPassword(rc: RequestCache, email: String, pwHash: String): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
-			override val params: List[String] = List(pwHash, email)
+			override val params: List[String] = List(pwHash, MagicIds.PW_HASH_SCHEME.MEMBER_2, email)
 
 			override def getQuery: String =
 				"""
 				  |  update persons p2
-				  |  set p2.pw_hash = ?
+				  |  set p2.pw_hash = ?,
+				  |  p2.pw_hash_scheme = ?
 				  |  where p2.person_id = (select max(p.person_id) from persons p, (
 				  |    select p1.person_id from persons p1 minus select ptd.person_id from persons_to_delete ptd
 				  |  ) ilv
