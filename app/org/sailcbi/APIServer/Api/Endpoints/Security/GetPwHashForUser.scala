@@ -31,7 +31,7 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Inject
 					PA.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
 						case None => Ok("NO DATA")
 						// Int is the hashing scheme ID, string is the hash itself
-						case Some(t: (String, String)) => Ok(t._1 + "," + t._2)
+						case Some(t: (String, String, String)) => Ok(t._1 + "," + t._2 + "," + t._3)
 					}
 				} catch {
 					case e: Exception => {

@@ -58,7 +58,7 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
 
-	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String)] = {
+	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String, String)] = {
 		case class Result(userName: String, pwHashScheme: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2), rs.getString(3))
@@ -70,7 +70,7 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 
 		val users = rootRC.executePreparedQueryForSelect(hq)
 
-		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash)
+		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash, EMPTY_NONCE)
 		else None
 	}
 

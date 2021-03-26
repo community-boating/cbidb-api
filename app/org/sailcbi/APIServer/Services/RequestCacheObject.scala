@@ -5,8 +5,9 @@ import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 
 abstract class RequestCacheObject[T <: RequestCache] {
-	// Given a username (and an unrestricted PersistenceBroker), get the (hashingGeneration, psHash) that is active for the user
-	def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String)] = None
+	val EMPTY_NONCE = "$EMPTY_AUTH_NONCE$"
+	// Given a username (and an unrestricted PersistenceBroker), get the (scheme, pwHash, nonce) that is active for the user
+	def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String, String)] = None
 
 	def create(userName: String)(secrets: PermissionsAuthoritySecrets): T
 

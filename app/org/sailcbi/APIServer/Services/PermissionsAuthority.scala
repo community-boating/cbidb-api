@@ -245,7 +245,7 @@ class PermissionsAuthority private[Services] (
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCacheMemberWithParentId(None, parsedRequest, parentId), block)
 
-	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(String, String)] = {
+	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(String, String, String)] = {
 		if (
 			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
 			BouncerRequestCache.getAuthenticatedUsernameInRequest(request, rootCB, secrets.apexToken, secrets.kioskToken).isDefined
