@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Services.Authentication
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services._
 import org.sailcbi.APIServer.Storable.Fields.DatabaseField
@@ -8,6 +9,13 @@ import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
 
 class BouncerRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
+
+	def getUserByUsername(username: String): Option[User] = pb.getObjectsByFilters(User, List(User.fields.userName.equalsConstantLowercase(username.toLowerCase))) match {
+		case u :: Nil => Some(u)
+		case _ => None
+	}
+
+	def updateUser(user: User): Unit = pb.commitObjectToDatabase(user)
 
 	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
 		throw new UserTypeMismatchException()

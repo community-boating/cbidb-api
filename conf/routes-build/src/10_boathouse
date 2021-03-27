@@ -14,5 +14,6 @@ POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Ki
 GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getAll()
 GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOne(userId: Int)
 POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.PutUser.post()
+POST     /staff/update-user-password                   org.sailcbi.APIServer.Api.Endpoints.Staff.UpdateUserPassword.post()
 
 POST    /auth/validate-apex-session-key      org.sailcbi.APIServer.Api.Endpoints.Security.ValidateApexSessionKey.post()

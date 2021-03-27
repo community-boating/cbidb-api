@@ -20,6 +20,7 @@ class User extends StorableClass {
 		val pwHash = new NullableStringFieldValue(self, User.fields.pwHash)
 		val locked = new BooleanFieldValue(self, User.fields.locked)
 		val pwChangeRequired = new BooleanFieldValue(self, User.fields.pwChangeRequired)
+		val pwHashScheme = new NullableStringFieldValue(self, User.fields.pwHashScheme)
 	}
 
 	override val valuesList = List(
@@ -32,7 +33,8 @@ class User extends StorableClass {
 		values.hideFromClose,
 		values.pwHash,
 		values.locked,
-		values.pwChangeRequired 
+		values.pwChangeRequired ,
+		values.pwHashScheme
 	)
 
 	override def toString: String = this.valuesList.filter(_.getPersistenceFieldName != "PW_HASH").toString()
@@ -52,6 +54,7 @@ object User extends StorableObject[User] {
 		val pwHash = new NullableStringDatabaseField(self, "PW_HASH", 100)
 		val locked = new BooleanDatabaseField(self, "LOCKED", nullImpliesFalse = true)
 		val pwChangeRequired = new BooleanDatabaseField(self, "PW_CHANGE_REQD", nullImpliesFalse = true)
+		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
 	}
 
 	def primaryKey: IntDatabaseField = fields.userId

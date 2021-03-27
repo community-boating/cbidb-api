@@ -42,7 +42,7 @@ object MagicIds {
 	object PW_HASH_SCHEME {
 		val MEMBER_1 = "member_01"
 		val MEMBER_2 = "member_02"
-		val staff_1 = "staff_01"
-		val staff_2 = "staff_02"
+		val STAFF_1 = "staff_01"
+		val STAFF_2 = "staff_02"
 	}
 }
