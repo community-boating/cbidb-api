@@ -108,8 +108,17 @@ object ContentStreamDecorator {
 
 	def getFontStringWidth(font: PDFont, fontSize: Float, text: String): Float = fontSize * font.getStringWidth(text) / 1000
 
-	// Yes, this is what my life has come to.
-	private def isNotPeanutEmoji(c: Char): Boolean = c.toInt != 55358 && c.toInt != 56668
+	private def replaceBadChars(text: String, font: PDFont): String = {
+		text.toCharArray.map(c => {
+			val s = c.toString
+			try {
+				font.getStringWidth(s)
+				s
+			} catch {
+				case _: Throwable => " "
+			}
+		}).mkString("")
+	}
 
 	// Given a chunk of text, horizontal max width, and font/fontSize, parititon the text into the largest substrings that will fit
 	def wrapText(text: String, font: PDFont, fontSize: Float, width: Float): List[String] = {
@@ -118,7 +127,7 @@ object ContentStreamDecorator {
 				if (text == "") ("", "")
 				else {
 					// e.g. List("This", "is", "a", "test")
-					val words = text.filter(isNotPeanutEmoji).split(splitOn)
+					val words = text.split(splitOn)
 					// List(List(), List("This"), List("This", "is"), List("This", "is", "a"), List("This", "is", "a", "test"))
 					val firstPart = words.scanLeft(List(): List[String])((wordList, word) => wordList :+ word).map(l => l.mkString(splitOn.toString))
 					// List(List("This", "is", "a", "test"), List("is", "a", "test"), List("a", "test"), List("test"), List())
@@ -150,7 +159,7 @@ object ContentStreamDecorator {
 		}
 
 		if (text == "") List("")
-		else recurse(text, font, fontSize, width)
+		else recurse(replaceBadChars(text, font), font, fontSize, width)
 	}
 
 	def truncateLine(text: String, font: PDFont, width: Int): String = ???
