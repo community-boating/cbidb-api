@@ -4,8 +4,8 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.JpClassRoster
-import org.sailcbi.APIServer.PDFBox.Reports.JpClassRoster.Loader.{JpClassRosterLiveLoader, JpClassRosterLiveParameter}
+import org.sailcbi.APIServer.Reports.JpClassRoster.JpClassRoster
+import org.sailcbi.APIServer.Reports.JpClassRoster.Loader.{JpClassRosterLiveLoader, JpClassRosterLiveParameter}
 import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.http.HttpEntity

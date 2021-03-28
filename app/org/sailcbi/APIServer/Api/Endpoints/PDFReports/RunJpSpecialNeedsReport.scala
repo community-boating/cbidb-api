@@ -4,8 +4,8 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, ParsedRequest}
-import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.JpSpecialNeedsReport
-import org.sailcbi.APIServer.PDFBox.Reports.JpSpecialNeedsReport.Loader.{JpSpecialNeedsReportLiveLoader, JpSpecialNeedsReportLiveParameter}
+import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.JpSpecialNeedsReport
+import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Loader.{JpSpecialNeedsReportLiveLoader, JpSpecialNeedsReportLiveParameter}
 import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.http.HttpEntity

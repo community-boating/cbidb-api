@@ -1,11 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.ReportingAPI
 
+import com.coleji.framework.Export.{ARG_DATE, ARG_DOUBLE, ARG_DROPDOWN, ARG_INT, Report, ReportFactory, ReportingFilterFactoryDropdown}
 import com.coleji.framework.Storable.StorableClass
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
 import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}

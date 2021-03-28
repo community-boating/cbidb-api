@@ -1,9 +1,0 @@
-package org.sailcbi.APIServer.Reporting.ReportingFilters
-
-import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
-
-trait ReportingFilterFactoryDropdown {
-	// outer list is per dropdown (e.g. a filter that renders two dropdowns)
-	// inner list is values within that dropdown
-	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]]
-}

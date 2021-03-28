@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
+import com.coleji.framework.Export.{ReportFactory, ReportingField, ReportingFilterFactory}
 import com.coleji.framework.Storable.StorableObject
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
-import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.Person._
-import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactory
-import org.sailcbi.APIServer.Reporting.{ReportFactory, ReportingField}
+import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person._
 
 class ReportFactoryPerson extends ReportFactory[Person] {
 	val entityCompanion: StorableObject[Person] = Person
