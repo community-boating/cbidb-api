@@ -2,7 +2,6 @@ package com.coleji.framework.Export
 
 import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.StorableClass
-import org.sailcbi.APIServer.Reporting.ReportFactories._
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
 case class Report(headers: List[String], rows: List[List[String]]) {
@@ -21,15 +20,9 @@ case class Report(headers: List[String], rows: List[List[String]]) {
 }
 
 object Report {
-	val reportFactoryMap: Map[String, (String, Class[_ <: ReportFactory[_]])] = Map(
-		"ApClassInstance" -> ("AP Class Instance", classOf[ReportFactoryApClassInstance]),
-		"JpClassInstance" -> ("JP Class Instance", classOf[ReportFactoryJpClassInstance]),
-		"JpClassSignup" -> ("JP Class Signup", classOf[ReportFactoryJpClassSignup]),
-		"Person" -> ("Person", classOf[ReportFactoryPerson]),
-		"Donation" -> ("Donation", classOf[ReportFactoryDonation])
-	)
+	type ReportFactoryMap = Map[String, (String, Class[_ <: ReportFactory[_]])]
 
-	def getReport(rc: UnlockedRequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
+	def getReport(reportFactoryMap: ReportFactoryMap)(rc: UnlockedRequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
 		throw new Exception("Many changes have been made to the core system since reporting was last tested; should be exhaustively tested again before use")
 
 		val c: Class[_ <: ReportFactory[_]] = reportFactoryMap(baseEntityName)._2

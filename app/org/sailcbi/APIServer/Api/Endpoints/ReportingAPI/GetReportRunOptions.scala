@@ -5,6 +5,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedR
 import com.coleji.framework.Export._
 import com.coleji.framework.Storable.StorableClass
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
+import org.sailcbi.APIServer.Reporting.CBIReportFactoryMap
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
@@ -39,7 +40,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 			defaultValue: String,
 			dropdownValues: Option[List[List[(String, String)]]]
 		)
-		val resultData: JsArray = Report.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
+		val resultData: JsArray = CBIReportFactoryMap.reportFactoryMap.foldLeft(new JsArray)((arr, e) => {
 			val entityName: String = e._1
 			val entityDisplayName: String = e._2._1
 

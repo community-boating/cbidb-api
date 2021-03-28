@@ -8,6 +8,7 @@ import com.coleji.framework.Exception.UnauthorizedAccessException
 import com.coleji.framework.Export.Report
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
+import org.sailcbi.APIServer.Reporting.CBIReportFactoryMap
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.http.{HeaderNames, HttpEntity}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
@@ -103,7 +104,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 	}
 
 	def getJSONResultFuture(rc: UnlockedRequestCache, params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
-		lazy val report: Report = Report.getReport(rc, params.baseEntityString, params.filterSpec, params.fieldSpec)
+		lazy val report: Report = Report.getReport(CBIReportFactoryMap.reportFactoryMap)(rc, params.baseEntityString, params.filterSpec, params.fieldSpec)
 		params.outputType match {
 			case OUTPUT_TYPE.JSCON => report.formatJSCON
 			case OUTPUT_TYPE.TSV => JsObject(Map(
