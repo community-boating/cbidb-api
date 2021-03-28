@@ -10,59 +10,59 @@ import com.coleji.framework.Storable._
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
 abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
-	final private[Services] def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else getObjectByIdImplementation(obj, id)
 	}
 
-	final private[Services] def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+	final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else getObjectsByIdsImplementation(obj, ids)
 	}
 
-	final private[Services] def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	final def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		countObjectsByFiltersImplementation(obj, filters)
 	}
 
-	final private[Services] def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
+	final def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else getObjectsByFiltersImplementation(obj, filters)
 	}
 
-	final private[Services] def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else getAllObjectsOfClassImplementation(obj, fields)
 	}
 
-	final private[Services] def commitObjectToDatabase(i: StorableClass): Unit = {
+	final def commitObjectToDatabase(i: StorableClass): Unit = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else if (i.valuesList.isEmpty) throw new Exception("Refusing to commit object with empty valuesList: " + i.getCompanion.entityName)
 		else commitObjectToDatabaseImplementation(i)
 	}
 
-	final private[Services] def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+	final def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		executePreparedQueryForSelectImplementation(pq, fetchSize)
 	}
 
-	final private[Services] def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
+	final def executePreparedQueryForInsert(pq: HardcodedQueryForInsert): Option[String] = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else executePreparedQueryForInsertImplementation(pq)
 	}
 
-	final private[Services] def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
+	final def executePreparedQueryForUpdateOrDelete(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else executePreparedQueryForUpdateOrDeleteImplementation(pq)
 	}
 
-	final private[Services] def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
 		// TODO: security
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
 		else executeQueryBuilderImplementation(qb)
 	}
 
-	final private[Services] def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
+	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else executeProcedureImpl(pc)
 	}

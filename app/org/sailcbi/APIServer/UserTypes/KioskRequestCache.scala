@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.Authentication
+package org.sailcbi.APIServer.UserTypes
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException

@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.Authentication
+package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest

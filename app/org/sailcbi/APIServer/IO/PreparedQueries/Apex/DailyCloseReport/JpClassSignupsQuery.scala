@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.JPClassData
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class JpClassSignupsQuery(closeId: Int) extends HardcodedQueryForSelect[JPClassData](Set(StaffRequestCache, ApexRequestCache)) {

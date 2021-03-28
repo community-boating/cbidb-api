@@ -5,7 +5,7 @@ import com.coleji.framework.IO.HTTP.FromWSClient
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.UserTypes._
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
@@ -101,14 +101,14 @@ sealed abstract class RequestCache private[Services](
 	}
 }
 
-abstract class LockedRequestCache private[Services](
+abstract class LockedRequestCache(
 	override val userName: String,
 	secrets: PermissionsAuthoritySecrets
 ) extends RequestCache(userName, secrets) {
 
 }
 
-abstract class UnlockedRequestCache private[Services](
+abstract class UnlockedRequestCache(
 	override val userName: String,
 	secrets: PermissionsAuthoritySecrets
 ) extends RequestCache(userName, secrets) {

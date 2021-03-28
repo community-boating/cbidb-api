@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}

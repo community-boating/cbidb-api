@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.JpClassInstanceData
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class GetJpClassInstanceData(instanceId: Int) extends HardcodedQueryForSelect[JpClassInstanceData](Set(StaffRequestCache, ApexRequestCache)) {

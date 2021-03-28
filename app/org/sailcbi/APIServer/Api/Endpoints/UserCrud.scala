@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.InjectedController
 

@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.GetUserHasRoleQuery
-import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.UserTypes._
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

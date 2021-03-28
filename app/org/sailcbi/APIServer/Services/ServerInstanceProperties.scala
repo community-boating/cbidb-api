@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
-import org.sailcbi.APIServer.Services.Authentication._
+import org.sailcbi.APIServer.UserTypes._
 
 class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation, ServerInstanceProperties.requiredProperties) {
 	// 3rd member is a function that returns true if the user type is permitted, false if we need to force-disable it even if conf says enable

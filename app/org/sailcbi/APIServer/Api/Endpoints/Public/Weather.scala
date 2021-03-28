@@ -4,7 +4,7 @@ import com.coleji.framework.API.CacheableResultFromRemoteRequest
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpTeamsResult
-import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
+import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent}
 

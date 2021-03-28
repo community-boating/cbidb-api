@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
+import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
 

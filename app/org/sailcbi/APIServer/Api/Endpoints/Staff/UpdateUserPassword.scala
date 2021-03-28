@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
+import org.sailcbi.APIServer.UserTypes.BouncerRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.InjectedController

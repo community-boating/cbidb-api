@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Public
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
+import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsNumber, JsString}
 

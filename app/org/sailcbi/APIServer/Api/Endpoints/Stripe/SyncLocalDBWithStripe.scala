@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, ParsedRequest, Succeeded}
-import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
+import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}

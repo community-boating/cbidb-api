@@ -6,7 +6,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reports.JpClassRoster.JpClassRoster
 import org.sailcbi.APIServer.Reports.JpClassRoster.Loader.{JpClassRosterLiveLoader, JpClassRosterLiveParameter}
-import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
+import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.http.HttpEntity
 import play.api.mvc._

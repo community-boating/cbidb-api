@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
+import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 class VerifyPas(userName: String, pas: String, procName: String, argString: String) extends PreparedQueryForSelect[Boolean](Set(ApexRequestCache)) {

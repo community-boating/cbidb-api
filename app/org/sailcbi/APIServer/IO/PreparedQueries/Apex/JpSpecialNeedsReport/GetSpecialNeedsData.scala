@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpSpecialNeedsReport
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteral, NAStrings}
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
-import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 import java.time.ZonedDateTime

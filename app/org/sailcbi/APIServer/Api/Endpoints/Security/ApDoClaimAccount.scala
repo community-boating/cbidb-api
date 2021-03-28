@@ -5,7 +5,7 @@ import com.coleji.framework.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache
+import org.sailcbi.APIServer.UserTypes.BouncerRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController

@@ -5,7 +5,7 @@ import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, Prepared
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.MemberRequestCache
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import org.sailcbi.APIServer.Services._
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

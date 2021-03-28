@@ -4,7 +4,7 @@ import com.coleji.framework.IO.PreparedQueries.{PreparedLocalDate, PreparedLocal
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
+import org.sailcbi.APIServer.UserTypes.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, ResultSetWrapper}
 import org.scalatest

@@ -4,7 +4,7 @@ import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
-import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
+import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.{Action, AnyContent}
 

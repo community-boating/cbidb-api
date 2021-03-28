@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
+import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
 

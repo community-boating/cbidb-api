@@ -7,7 +7,7 @@ import com.coleji.framework.Export.Report
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import play.api.http.{HeaderNames, HttpEntity}

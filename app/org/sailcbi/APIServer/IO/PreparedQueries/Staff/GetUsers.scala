@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsArray, JsString}
 

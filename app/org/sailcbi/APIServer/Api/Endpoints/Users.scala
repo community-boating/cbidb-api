@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints
 import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.Api.Endpoints.Users.UsersParamsObject
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.{GetUsers, GetUsersResult}
-import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.mvc.{Action, AnyContent}
 
 import java.time.LocalDateTime

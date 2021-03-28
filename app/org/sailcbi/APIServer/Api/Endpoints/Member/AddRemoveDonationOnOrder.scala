@@ -4,7 +4,7 @@ import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.Authentication.ProtoPersonRequestCache
+import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
+import org.sailcbi.APIServer.UserTypes.RootRequestCache
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 
 abstract class RequestCacheObject[T <: RequestCache] {
