@@ -1,14 +1,15 @@
-package org.sailcbi.APIServer.IO.PreparedQueries
+package com.coleji.framework.IO.PreparedQueries
 
 import org.sailcbi.APIServer.Services.RequestCacheObject
 
 
-abstract class PreparedQueryForUpdateOrDelete(
+abstract class PreparedQueryForInsert(
 	override val allowedUserTypes: Set[RequestCacheObject[_]],
 	override val useTempSchema: Boolean = false
-) extends HardcodedQueryForUpdateOrDelete(allowedUserTypes, useTempSchema) {
+) extends HardcodedQueryForInsert(allowedUserTypes, useTempSchema) {
 	val params: List[String] = List.empty
 	val preparedParams: List[PreparedValue] = List.empty
+	val preparedParamsBatch: List[List[PreparedValue]] = List.empty
 
 	def getParams: List[PreparedValue] = {
 		if (params.nonEmpty && preparedParams.isEmpty) {

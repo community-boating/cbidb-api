@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Services
 
-import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
+import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}

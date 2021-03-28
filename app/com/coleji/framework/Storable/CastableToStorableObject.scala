@@ -1,6 +1,6 @@
 package com.coleji.framework.Storable
 
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
+import com.coleji.framework.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.RequestCacheObject
 
 trait CastableToStorableObject[T <: CastableToStorableClass] {

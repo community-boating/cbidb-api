@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
+import com.coleji.framework.IO.PreparedQueries.PreparedValue
 import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral}
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.RequestCacheObject
 import play.api.libs.json.{JsValue, Json}

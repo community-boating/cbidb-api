@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
+import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Payout}
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.ApexRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

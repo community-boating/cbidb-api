@@ -1,7 +1,7 @@
 package com.coleji.framework.API
 
+import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
 import play.api.libs.json.{JsArray, JsObject}

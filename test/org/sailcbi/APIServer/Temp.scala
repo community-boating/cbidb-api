@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer
 
+import com.coleji.framework.IO.PreparedQueries.{PreparedLocalDate, PreparedLocalDateTime, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue, PreparedZonedDateTime}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries._

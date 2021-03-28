@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
+import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache
 import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}

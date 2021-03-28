@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
-import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

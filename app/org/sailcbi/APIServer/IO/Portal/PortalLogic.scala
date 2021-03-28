@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.IO.Portal
 
 import com.coleji.framework.API
 import com.coleji.framework.API.{ValidationOk, ValidationResult}
+import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds

@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.{ResultError, ValidationResult}
+import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}

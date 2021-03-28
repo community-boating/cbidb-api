@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
 

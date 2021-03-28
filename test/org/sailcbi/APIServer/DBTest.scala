@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer
 
+import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, MembershipType}
-import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
 import org.scalatest.FunSuite

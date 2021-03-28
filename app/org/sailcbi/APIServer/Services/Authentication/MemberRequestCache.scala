@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services.Authentication
 
+import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelationship}
-import org.sailcbi.APIServer.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.Services._
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, TableAlias}
 

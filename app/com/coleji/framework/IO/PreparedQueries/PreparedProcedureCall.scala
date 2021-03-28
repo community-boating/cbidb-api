@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.IO.PreparedQueries
+package com.coleji.framework.IO.PreparedQueries
 
 import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.RequestCacheObject
