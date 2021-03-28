@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 class JpClassSignup extends StorableClass {
 	this.setCompanion(JpClassSignup)

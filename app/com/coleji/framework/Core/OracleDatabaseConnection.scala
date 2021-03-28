@@ -1,7 +1,7 @@
 package com.coleji.framework.Core
 
+import com.coleji.framework.Util.PropertiesWrapper
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 
 object OracleDatabaseConnection {
 	def apply(confFileLocation: String): DatabaseHighLevelConnection = {

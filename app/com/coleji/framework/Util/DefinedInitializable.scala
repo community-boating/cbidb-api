@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class DefinedInitializable[U, T](initializer: (U => T)) extends Initializable[T] {
 	def initialize(input: U): T = set(initializer(input))

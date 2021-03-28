@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 // Cheap imitation of javascript promise architecture for chaining promises in a try-catch use case (vs async use case)
 // Key difference is once a thing fails, its a `Rejected` forever.  `andCatch` does not ever redeem a failed thing

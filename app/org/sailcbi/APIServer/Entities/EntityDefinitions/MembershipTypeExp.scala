@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{DateFieldValue, IntFieldValue}
 import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField}
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.CbiUtil.InitializableFromCollectionElement
+import com.coleji.framework.Util.InitializableFromCollectionElement
 
 class MembershipTypeExp extends StorableClass {
 	val myself = this

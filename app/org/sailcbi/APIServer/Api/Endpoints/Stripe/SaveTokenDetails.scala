@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ValidationError}
+import com.coleji.framework.Util.{CriticalError, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{StripeError, Token}
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache

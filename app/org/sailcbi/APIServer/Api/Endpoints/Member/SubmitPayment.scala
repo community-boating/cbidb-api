@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.{ResultError, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
-import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
+import com.coleji.framework.Util._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic

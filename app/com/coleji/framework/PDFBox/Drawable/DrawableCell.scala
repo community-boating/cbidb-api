@@ -2,8 +2,8 @@ package com.coleji.framework.PDFBox.Drawable
 
 import com.coleji.framework.PDFBox.ContentStreamDecorator
 import com.coleji.framework.PDFBox.ContentStreamDecorator._
+import com.coleji.framework.Util.Initializable
 import org.apache.pdfbox.pdmodel.font.PDFont
-import org.sailcbi.APIServer.CbiUtil.Initializable
 
 import java.awt.Color
 

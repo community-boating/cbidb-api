@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Storable
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}

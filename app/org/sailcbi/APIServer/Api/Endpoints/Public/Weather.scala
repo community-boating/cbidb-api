@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import com.coleji.framework.API.CacheableResultFromRemoteRequest
+import com.coleji.framework.Util.PropertiesWrapper
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
-import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpTeamsResult
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import play.api.libs.ws.WSClient

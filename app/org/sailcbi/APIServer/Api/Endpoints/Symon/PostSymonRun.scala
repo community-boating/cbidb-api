@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Symon
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.IO.PreparedQueries.Symon.StoreSymonRun
 import org.sailcbi.APIServer.UserTypes.SymonRequestCache
 import play.api.libs.ws.WSClient

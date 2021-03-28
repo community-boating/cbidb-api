@@ -14,7 +14,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutUserShape.apply)(parsed => {
-			import org.sailcbi.APIServer.CbiUtil.JsValueWrapper.wrapJsValue
+			import com.coleji.framework.Util.JsValueWrapper.wrapJsValue
 			request.body.asJson.map(json => json.getNonNull("userId")).get match {
 				case Some(id: JsValue) => {
 

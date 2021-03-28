@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
@@ -19,9 +19,9 @@ object DateUtil {
 		if (end.isBefore(start)) throw new Exception("Call to DateUtil.betweenInclusive with start after end")
 
 		test.isEqual(start) ||
-				test.isEqual(end) || (
-				test.isAfter(start) && test.isBefore(end)
-				)
+			test.isEqual(end) || (
+			test.isAfter(start) && test.isBefore(end)
+			)
 	}
 
 	def parseWithDefault(literal: Option[String], default: LocalDate = LocalDate.now): LocalDate = {

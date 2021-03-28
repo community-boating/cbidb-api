@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import com.coleji.framework.API
 import com.coleji.framework.API.{ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries._
-import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil._
+import com.coleji.framework.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
+import com.coleji.framework.Util._
+import com.coleji.framework.{API, Storable}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
@@ -2052,8 +2052,8 @@ object PortalLogic {
 				s"""
 				   |select
 				   |${GetSQLLiteral(d)},
-				   |person_pkg.can_renew($personId, ${GetSQLLiteral(d)}),
-				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${GetSQLLiteral(d)})
+				   |person_pkg.can_renew($personId, ${Storable.GetSQLLiteral(d)}),
+				   |cc_pkg.guest_privs_auto($personId, $membershipTypeId, ${Storable.GetSQLLiteral(d)})
 				   |from dual
 				   |""".stripMargin
 			}).mkString(" UNION ALL ")

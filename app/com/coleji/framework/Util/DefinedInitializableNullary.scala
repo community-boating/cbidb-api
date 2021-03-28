@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class DefinedInitializableNullary[T](initializer: () => T) extends Initializable[T] {
 	def initialize(): T = set(initializer())

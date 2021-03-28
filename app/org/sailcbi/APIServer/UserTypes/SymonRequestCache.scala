@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core.{CacheBroker, LockedRequestCache, ParsedRequest, PermissionsAuthority, RequestCacheObject}
+import com.coleji.framework.Core._
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {

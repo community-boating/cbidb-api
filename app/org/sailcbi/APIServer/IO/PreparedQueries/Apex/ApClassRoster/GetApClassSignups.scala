@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.ApClassRoster
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.{Initializable, NAStrings}
+import com.coleji.framework.Util.{Initializable, NAStrings}
 import org.sailcbi.APIServer.Reports.ApClassRoster.Model.ApRosterData
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 

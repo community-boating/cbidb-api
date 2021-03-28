@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Model
 
 import com.coleji.framework.PDFBox.Abstract.RowData
-import org.sailcbi.APIServer.CbiUtil.Currency
+import com.coleji.framework.Util.Currency
 
 class WaiverPrivData(
 							val identifier: String,

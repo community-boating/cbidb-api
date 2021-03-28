@@ -1,6 +1,6 @@
 package com.coleji.framework.Core
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 class Secret[T](auth: (RequestCache => Boolean)) {
 	val secret = new Initializable[T]

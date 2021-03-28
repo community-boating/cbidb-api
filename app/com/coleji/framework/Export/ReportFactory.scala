@@ -2,7 +2,7 @@ package com.coleji.framework.Export
 
 import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.{StorableClass, StorableObject}
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 import java.time.{LocalDateTime, ZoneId}
 

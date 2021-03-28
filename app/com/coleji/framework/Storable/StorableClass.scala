@@ -2,7 +2,7 @@ package com.coleji.framework.Storable
 
 import com.coleji.framework.Storable.FieldValues.{FieldValue, _}
 import com.coleji.framework.Storable.Fields.IntDatabaseField
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 
 abstract class StorableClass {

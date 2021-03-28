@@ -1,6 +1,6 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
-import org.sailcbi.APIServer.CbiUtil.Currency.currencyAsNumeric
+import com.coleji.framework.Util.Currency.currencyAsNumeric
 
 class Currency(val cents: Int) {
 	override def equals(obj: Any): Boolean = obj match {

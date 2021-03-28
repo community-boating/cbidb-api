@@ -1,12 +1,12 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 object GenerateSetDelta {
 	// return (toCreate, toUpdate, toDestroy)
 	def apply[T](
-						authoritative: Set[T],
-						slave: Set[T],
-						getID: (T => String),
-						getHash: (T => String) = (t: T) => t.hashCode().toString
+					authoritative: Set[T],
+					slave: Set[T],
+					getID: (T => String),
+					getHash: (T => String) = (t: T) => t.hashCode().toString
 				): SetDelta[T] = {
 		def toMap(ts: Set[T]): Map[String, (String, T)] = ts.foldLeft(Map.empty: Map[String, (String, T)])((map, t) => map + (getID(t) -> (getHash(t), t)))
 

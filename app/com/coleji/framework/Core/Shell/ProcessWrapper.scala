@@ -1,6 +1,6 @@
 package com.coleji.framework.Core.Shell
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 import java.io.IOException
 

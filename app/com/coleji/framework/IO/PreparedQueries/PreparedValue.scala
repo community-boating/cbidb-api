@@ -1,6 +1,6 @@
 package com.coleji.framework.IO.PreparedQueries
 
-import org.sailcbi.APIServer.CbiUtil.DateUtil
+import com.coleji.framework.Util.DateUtil
 
 import java.sql.PreparedStatement
 import java.time.{LocalDate, LocalDateTime, ZonedDateTime}

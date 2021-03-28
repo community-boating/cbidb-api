@@ -4,7 +4,7 @@ import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult
 import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, PhoneUtil}
+import com.coleji.framework.Util.PhoneUtil
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
@@ -83,7 +83,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, RequiredInfoShape.apply)(parsed => {
-			import JsValueWrapper.wrapJsValue
+			import com.coleji.framework.Util.JsValueWrapper.wrapJsValue
 			request.body.asJson.map(json => json.getNonNull("personId")).get match {
 				case Some(id: JsValue) => {
 					val juniorId: Int = id.toString().toInt

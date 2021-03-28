@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class Initializable[T] {
 	protected var value: Option[T] = None

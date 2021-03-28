@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Model
 
 import com.coleji.framework.PDFBox.ReportModel
-import org.sailcbi.APIServer.CbiUtil.Currency
+import com.coleji.framework.Util.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport._
 
 case class DailyCloseReportModel(

@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 import com.coleji.framework.API
 import com.coleji.framework.API.{ResultError, ValidationOk}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ValidationError}
+import com.coleji.framework.Util.{CriticalError, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache

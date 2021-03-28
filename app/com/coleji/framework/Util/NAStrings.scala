@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 object NAStrings {
 	def nullifyNAString(os: Option[String]): Option[String] = os match {

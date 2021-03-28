@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Model
 
 import com.coleji.framework.PDFBox.Abstract.RowData
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
+import com.coleji.framework.Util.{Currency, DateUtil}
 
 import java.time.LocalDate
 

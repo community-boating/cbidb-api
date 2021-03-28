@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport
 
 import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
+import com.coleji.framework.Util.Currency
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
-import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.DailyCloseReportModel
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.ChecksARPage.ChecksARPage
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage.FirstPage

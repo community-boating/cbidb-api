@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 class ApClassFormat extends StorableClass {
 	this.setCompanion(ApClassFormat)

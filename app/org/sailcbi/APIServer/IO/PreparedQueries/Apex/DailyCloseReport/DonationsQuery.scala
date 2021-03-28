@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
+import com.coleji.framework.Util.{Currency, DateUtil}
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.Donation
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.CbiUtil._
+import com.coleji.framework.Util.{CriticalError, NetFailure, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Customer, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import play.api.libs.json.{JsValue, Json}

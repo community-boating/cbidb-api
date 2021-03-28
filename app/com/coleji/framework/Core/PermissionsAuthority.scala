@@ -7,8 +7,8 @@ import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.{ResultSetWrapper, StorableClass, StorableObject}
+import com.coleji.framework.Util.Initializable
 import io.sentry.Sentry
-import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Server.{PermissionsAuthoritySecrets, ServerParameters}
 import org.sailcbi.APIServer.UserTypes._

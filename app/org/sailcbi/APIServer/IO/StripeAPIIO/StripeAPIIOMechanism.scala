@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.StripeAPIIO
 
 import com.coleji.framework.IO.HTTP.{GET, HTTPMethod}
-import org.sailcbi.APIServer.CbiUtil.ServiceRequestResult
+import com.coleji.framework.Util.ServiceRequestResult
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import play.api.libs.json.JsValue
 

@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 object FlatZip {
 	def apply[T, U, V](l: List[((T, U), V)]): List[(T, U, V)] =

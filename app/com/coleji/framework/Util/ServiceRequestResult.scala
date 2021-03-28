@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 sealed abstract class ServiceRequestResult[T, U]
 

@@ -4,7 +4,7 @@ import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.EmailUtil
+import com.coleji.framework.Util.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.BouncerRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}

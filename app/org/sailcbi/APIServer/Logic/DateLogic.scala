@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
-import org.sailcbi.APIServer.CbiUtil.DateUtil
+import com.coleji.framework.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.MembershipType
 
 import java.time.temporal.ChronoUnit

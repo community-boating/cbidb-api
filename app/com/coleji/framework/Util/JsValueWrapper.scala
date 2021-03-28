@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 import play.api.libs.json.{JsNull, JsValue}
 

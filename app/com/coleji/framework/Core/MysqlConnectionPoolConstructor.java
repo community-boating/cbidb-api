@@ -1,7 +1,7 @@
 package com.coleji.framework.Core;
 
+import com.coleji.framework.Util.PropertiesWrapper;
 import com.zaxxer.hikari.HikariDataSource;
-import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper;
 
 public class MysqlConnectionPoolConstructor implements ConnectionPoolConstructor {
 	private PropertiesWrapper pw = null;

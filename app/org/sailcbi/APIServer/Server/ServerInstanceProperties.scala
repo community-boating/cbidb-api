@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Server
 
 import com.coleji.framework.Core.RequestCacheObject
-import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
+import com.coleji.framework.Util.PropertiesWrapper
 import org.sailcbi.APIServer.UserTypes._
 
 class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(fileLocation, ServerInstanceProperties.requiredProperties) {

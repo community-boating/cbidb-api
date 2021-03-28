@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class InitializableFromCollectionSubset[U <: Traversable[T], T](filter: (T => Boolean)) extends Initializable[U] {
 	def findAllInCollection(collection: U): U = value match {

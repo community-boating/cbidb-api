@@ -1,7 +1,7 @@
 package com.coleji.framework.API
 
 import com.coleji.framework.Core.{CacheBroker, RequestCache}
-import org.sailcbi.APIServer.CbiUtil.JsonUtil
+import com.coleji.framework.Util.JsonUtil
 import play.api.libs.json._
 
 import java.time.format.DateTimeFormatter

@@ -6,7 +6,7 @@ import com.coleji.framework.IO.HTTP.{GET, POST}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.IO.{COMMIT_TYPE_ASSERT_NO_ACTION, COMMIT_TYPE_DO, COMMIT_TYPE_SKIP, CommitType}
 import com.coleji.framework.Storable.{CastableToStorableClass, ResultSetWrapper}
-import org.sailcbi.APIServer.CbiUtil._
+import com.coleji.framework.Util._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
 import org.sailcbi.APIServer.IO.StripeAPIIO.StripeAPIIOMechanism

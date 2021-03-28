@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class InitializableFromCollectionElement[T](find: (T => Boolean)) extends Initializable[T] {
 	def findOneInCollection(collection: Traversable[T]): T = value match {

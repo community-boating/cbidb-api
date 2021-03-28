@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 import play.api.mvc.{AnyContent, Request}
 
@@ -16,8 +16,8 @@ object ValidateRequest {
 
 				val usableParams: Map[String, String] =
 					data
-							.filter(t => allowedParamNames contains t._1)
-							.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
+						.filter(t => allowedParamNames contains t._1)
+						.map(Function.tupled((s: String, ss: Seq[String]) => (s, ss.mkString(""))))
 
 				val requiredParams = allowedParams.filter(_._2).map(_._1)
 

@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class InitializableWithDefault[T](default: T) extends Initializable[T] {
 	override def get: T = value match {

@@ -1,6 +1,6 @@
 package com.coleji.framework.API
 
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache, RequestCacheObject}
+import com.coleji.framework.Core._
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, InjectedController}

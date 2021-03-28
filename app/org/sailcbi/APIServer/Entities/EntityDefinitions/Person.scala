@@ -4,7 +4,7 @@ import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
 class Person extends StorableClass {

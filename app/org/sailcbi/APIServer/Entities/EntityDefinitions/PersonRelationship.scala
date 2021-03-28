@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.IntFieldValue
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.CbiUtil.Initializable
+import com.coleji.framework.Util.Initializable
 
 class PersonRelationship extends StorableClass {
 	this.setCompanion(PersonRelationship)

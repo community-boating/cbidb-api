@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.CbiUtil
+package com.coleji.framework.Util
 
 class Profiler {
 	private var stamp: Long = System.currentTimeMillis()
