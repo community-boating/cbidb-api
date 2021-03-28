@@ -1,8 +1,8 @@
 package com.coleji.framework.PDFBox.Drawable
 
+import com.coleji.framework.PDFBox.ContentStreamDecorator
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.CbiUtil.FlatZip
-import com.coleji.framework.PDFBox.ContentStreamDecorator
 
 class DrawableTable(val rows: List[DrawableRow], thickness: Int) extends Drawable {
 	def height: Float = rows.foldLeft(0f)((h, r) => h + r.height)

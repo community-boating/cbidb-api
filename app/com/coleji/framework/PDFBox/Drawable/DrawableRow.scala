@@ -1,7 +1,7 @@
 package com.coleji.framework.PDFBox.Drawable
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.ContentStreamDecorator
+import org.apache.pdfbox.pdmodel.font.PDFont
 
 class DrawableRow(val cells: List[DrawableCell], thickness: Int) {
 	def height: Float = cells.map(_.getHeight).reduce((a, b) => if (b > a) b else a)

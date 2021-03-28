@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache}
 
 import java.time.LocalDate
 

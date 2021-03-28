@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.Json
 
 class JpOffseasonClasses(juniorId: Int) extends PreparedQueryForSelect[JpOffseasonClassesResult](Set(MemberRequestCache)) {

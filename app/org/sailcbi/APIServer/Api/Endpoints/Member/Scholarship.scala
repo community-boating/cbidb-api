@@ -4,8 +4,8 @@ import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCach
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.InjectedController
 

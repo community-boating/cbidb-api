@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.{Currency, DateUtil}
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.Donation
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class DonationsQuery(closeId: Int) extends HardcodedQueryForSelect[Donation](Set(StaffRequestCache, ApexRequestCache)) {
 	val getQuery: String =

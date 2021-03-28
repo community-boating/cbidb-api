@@ -4,8 +4,8 @@ import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

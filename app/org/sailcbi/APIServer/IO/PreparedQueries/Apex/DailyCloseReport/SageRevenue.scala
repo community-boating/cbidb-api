@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class SageRevenue(closeId: Int) extends HardcodedQueryForSelect[SageRevenueResult](Set(StaffRequestCache, ApexRequestCache)) {
 	val sageSourceID: String = MagicIds.FO_AR_SOURCE_SAGE.toString

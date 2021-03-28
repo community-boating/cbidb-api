@@ -1,7 +1,6 @@
 package com.coleji.framework.Core.Boot
 
 import com.coleji.framework.Core.PermissionsAuthority
-import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
 
 import javax.inject.Inject

@@ -1,7 +1,6 @@
 package com.coleji.framework.Storable.StorableQuery
 
 import com.coleji.framework.Storable.{StorableClass, StorableObject}
-import com.coleji.framework.Storable.StorableObject
 
 sealed abstract class TableAlias(val obj: StorableObject[_ <: StorableClass], val name: String) {
 	// TODO: throw if name has invalid characters.  for safety i think only [a-zA-Z]

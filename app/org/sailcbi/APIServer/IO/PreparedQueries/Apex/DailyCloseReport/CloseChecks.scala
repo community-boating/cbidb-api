@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.Check
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class CloseChecks(closeId: Int) extends HardcodedQueryForSelect[Check](Set(StaffRequestCache, ApexRequestCache)) {
 	val getQuery: String =

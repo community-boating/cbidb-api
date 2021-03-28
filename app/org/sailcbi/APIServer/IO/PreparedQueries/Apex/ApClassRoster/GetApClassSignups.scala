@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex.ApClassRoster
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.{Initializable, NAStrings}
 import org.sailcbi.APIServer.Reports.ApClassRoster.Model.ApRosterData
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class GetApClassSignups(instanceId: Int) extends HardcodedQueryForSelect[ApRosterData](Set(StaffRequestCache, ApexRequestCache)) {
 	val getQuery: String =

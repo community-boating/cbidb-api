@@ -1,8 +1,7 @@
 package com.coleji.framework.Storable.Fields
 
-import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.framework.Storable.StorableQuery._
-import com.coleji.framework.Storable.StorableObject
+import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
 	def getPersistenceFieldName: String = persistenceFieldName

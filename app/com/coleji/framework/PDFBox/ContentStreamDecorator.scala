@@ -1,8 +1,8 @@
 package com.coleji.framework.PDFBox
 
+import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Alignment}
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDFont
-import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Alignment}
 
 import java.awt.Color
 

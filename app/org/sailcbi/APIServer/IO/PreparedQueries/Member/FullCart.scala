@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.Json
 
 class FullCart(orderId: Int) extends PreparedQueryForSelect[FullCartItemResult](allowedUserTypes = Set(MemberRequestCache, ProtoPersonRequestCache)) {

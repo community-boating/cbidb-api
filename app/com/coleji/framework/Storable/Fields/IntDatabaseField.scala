@@ -1,10 +1,8 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
-import org.sailcbi.APIServer.Services._
-import com.coleji.framework.Storable.StorableObject
+import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Int](entity, persistenceFieldName) {
 	def getFieldType: String = PA.persistenceSystem match {

@@ -1,7 +1,7 @@
 package com.coleji.framework.Core.Logger
 
-import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.Core.Emailer.Emailer
+import com.coleji.framework.Core.PermissionsAuthority
 
 class ProductionLogger private[Core](emailer: Emailer)(implicit PA: PermissionsAuthority) extends Logger {
 	def trace(s: String): Unit = println(s)

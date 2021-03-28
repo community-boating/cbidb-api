@@ -4,8 +4,8 @@ import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.MembershipSale
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[MembershipSale](Set(StaffRequestCache, ApexRequestCache)) {
 	val taxDiscrepanciesId: String = MagicIds.FO_ITEM_TAX_DISCREPANCIES.toString

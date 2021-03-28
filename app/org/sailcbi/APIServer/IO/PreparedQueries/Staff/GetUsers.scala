@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsArray, JsString}
 
 class GetUsers extends HardcodedQueryForSelectCastableToJSObject[GetUsersResult](Set(StaffRequestCache)) {

@@ -4,8 +4,8 @@ import com.coleji.framework.API.ResultError
 import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.UserTypes.KioskRequestCache
 import org.sailcbi.APIServer.Services.ResultSetWrapper
+import org.sailcbi.APIServer.UserTypes.KioskRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

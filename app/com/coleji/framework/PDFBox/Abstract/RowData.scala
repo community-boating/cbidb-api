@@ -1,8 +1,8 @@
 package com.coleji.framework.PDFBox.Abstract
 
+import com.coleji.framework.PDFBox.Drawable.{Alignment, DrawableRow}
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.CbiUtil.FlatZip
-import com.coleji.framework.PDFBox.Drawable.{Alignment, DrawableRow}
 
 abstract class RowData {
 	def cellValues: List[String]
