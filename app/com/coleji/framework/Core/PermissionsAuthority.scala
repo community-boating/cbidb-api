@@ -1,17 +1,17 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
 import com.coleji.framework.API.ResultError
+import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.{StorableClass, StorableObject}
 import io.sentry.Sentry
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.UserTypes._
-import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
+import com.coleji.framework.Core.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
-import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
-import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
-import com.coleji.framework.Storable.StorableObject
+import com.coleji.framework.Core.Logger.{Logger, ProductionLogger, UnitTestLogger}
+import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
@@ -25,7 +25,7 @@ import scala.reflect.runtime.universe
 import scala.util.{Failure, Success}
 
 
-class PermissionsAuthority private[Services] (
+class PermissionsAuthority private[Core] (
 	val serverParameters: ServerParameters,
 	val isTestMode: Boolean,
 	val isDebugMode: Boolean,

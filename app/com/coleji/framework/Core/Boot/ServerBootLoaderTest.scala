@@ -1,6 +1,6 @@
-package org.sailcbi.APIServer.Services.Boot
+package com.coleji.framework.Core.Boot
 
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import com.coleji.framework.Core.PermissionsAuthority
 
 class ServerBootLoaderTest extends ServerBootLoader {
 	def pa(writeable: Boolean): PermissionsAuthority = this.load(None, true, !writeable)

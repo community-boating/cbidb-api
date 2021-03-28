@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable
 
+import com.coleji.framework.Core.RequestCache
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedValue}
-import org.sailcbi.APIServer.Services.RequestCache
 
 trait CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_]

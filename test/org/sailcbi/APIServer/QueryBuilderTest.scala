@@ -3,7 +3,7 @@ package org.sailcbi.APIServer
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
 import org.sailcbi.APIServer.UserTypes.RootRequestCache
-import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
+import com.coleji.framework.Core.Boot.ServerBootLoaderTest
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.Filter
 import com.coleji.framework.Storable.StorableQuery._

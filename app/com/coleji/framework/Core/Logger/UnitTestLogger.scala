@@ -1,6 +1,6 @@
-package org.sailcbi.APIServer.Services.Logger
+package com.coleji.framework.Core.Logger
 
-class UnitTestLogger private[Services] extends Logger {
+class UnitTestLogger private[Core] extends Logger {
 	def trace(s: String): Unit = println(s)
 
 	def trace(s: String, e: Throwable): Unit = println(s + "\n" + prettyPrintException(e))

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Customer, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}

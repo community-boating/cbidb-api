@@ -1,8 +1,8 @@
 package com.coleji.framework.Storable.Fields
 
+import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Services.PermissionsAuthority
-import org.sailcbi.APIServer.Services.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
 import com.coleji.framework.Storable.StorableObject
 
 class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false)(implicit PA: PermissionsAuthority) extends DatabaseField[Boolean](entity, persistenceFieldName) {

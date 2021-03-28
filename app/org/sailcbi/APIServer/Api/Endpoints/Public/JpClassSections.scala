@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassSections.JpClassSectionsParamsObject
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassSections, GetJpClassSectionsResult}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import java.time.format.DateTimeFormatter

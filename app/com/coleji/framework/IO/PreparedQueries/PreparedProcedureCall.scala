@@ -1,7 +1,7 @@
 package com.coleji.framework.IO.PreparedQueries
 
+import com.coleji.framework.Core.RequestCacheObject
 import org.sailcbi.APIServer.UserTypes.RootRequestCache
-import org.sailcbi.APIServer.Services.RequestCacheObject
 
 import java.sql.CallableStatement
 

@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.UserTypes
 
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCacheObject, UnlockedRequestCache}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services._
 

@@ -1,8 +1,8 @@
-package org.sailcbi.APIServer.Services.Emailer
+package com.coleji.framework.Core.Emailer
 
-import org.sailcbi.APIServer.Services.Shell.ShellManager
+import com.coleji.framework.Core.Shell.ShellManager
 
-class SSMTPEmailer private[Services](alwaysSendTo: Option[String]) extends Emailer {
+class SSMTPEmailer private[Core](alwaysSendTo: Option[String]) extends Emailer {
 	private def sanitize(s: String): String = s.replace("\"", "\\\"").replace("'", "\\'")
 
 	def send(subject: String, body: String, to: String = "jon@community-boating.org"): Unit = {

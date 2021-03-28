@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Symon
 
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.IO.PreparedQueries.Symon.StoreSymonRun
 import org.sailcbi.APIServer.UserTypes.SymonRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 

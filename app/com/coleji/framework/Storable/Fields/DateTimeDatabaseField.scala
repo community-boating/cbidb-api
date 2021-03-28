@@ -1,8 +1,8 @@
 package com.coleji.framework.Storable.Fields
 
+import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Services.PermissionsAuthority
-import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import com.coleji.framework.Storable.StorableObject
 
 import java.time.format.DateTimeFormatter

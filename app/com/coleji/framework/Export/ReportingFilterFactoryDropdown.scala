@@ -1,6 +1,6 @@
 package com.coleji.framework.Export
 
-import org.sailcbi.APIServer.Services.UnlockedRequestCache
+import com.coleji.framework.Core.UnlockedRequestCache
 
 trait ReportingFilterFactoryDropdown {
 	// outer list is per dropdown (e.g. a filter that renders two dropdowns)

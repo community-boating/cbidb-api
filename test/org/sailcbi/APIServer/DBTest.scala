@@ -4,7 +4,7 @@ import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, Prepared
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, MembershipType}
 import org.sailcbi.APIServer.UserTypes.RootRequestCache
-import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
+import com.coleji.framework.Core.Boot.ServerBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

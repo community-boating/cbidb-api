@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable
 
+import com.coleji.framework.Core.RequestCacheObject
 import com.coleji.framework.IO.PreparedQueries.PreparedValue
-import org.sailcbi.APIServer.Services.RequestCacheObject
 
 trait CastableToStorableObject[T <: CastableToStorableClass] {
 	val apexTableName: String

@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
 import com.coleji.framework.API.ResultError
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.CbiUtil.{DateUtil, GetSQLLiteral, ParsedRequest}
 import org.sailcbi.APIServer.UserTypes.KioskRequestCache
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

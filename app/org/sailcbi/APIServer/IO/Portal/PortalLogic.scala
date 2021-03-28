@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.IO.Portal
 
 import com.coleji.framework.API
 import com.coleji.framework.API.{ValidationOk, ValidationResult}
+import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
@@ -12,7 +13,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries._
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, ResultSetWrapper}
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsValue, Json}
 
 import java.sql.CallableStatement

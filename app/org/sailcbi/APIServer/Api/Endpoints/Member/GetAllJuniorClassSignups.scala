@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{SignupForReport, WaitListForReport, WaitListTopForReport}
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

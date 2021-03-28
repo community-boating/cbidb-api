@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.UserTypes
 
+import com.coleji.framework.Core.{CacheBroker, LockedRequestCache, PermissionsAuthority, RequestCacheObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services._

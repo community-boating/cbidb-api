@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.ApClassInstance
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Export.{ARG_INT, ReportingFilter, ReportingFilterFactory, ReportingFilterFunction}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassInstance, ApClassSession}
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassInstance] {
 	val displayName: String = "By Season"

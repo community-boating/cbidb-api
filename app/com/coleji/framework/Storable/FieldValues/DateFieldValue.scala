@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable.FieldValues
 
-import org.sailcbi.APIServer.Services.PermissionsAuthority
-import org.sailcbi.APIServer.Services.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import com.coleji.framework.Storable.Fields.DateDatabaseField
 import com.coleji.framework.Storable.StorableClass
 

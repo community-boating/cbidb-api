@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-case class ServerParameters private[Services](
+case class ServerParameters (
 	serverTimeOffsetSeconds: Long
 ) {
 	def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)

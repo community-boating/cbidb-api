@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.CbiUtil
 
+import com.coleji.framework.Core.PermissionsAuthority
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContent, Cookies, Headers, Request}
 

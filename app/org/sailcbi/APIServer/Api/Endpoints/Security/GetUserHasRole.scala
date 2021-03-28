@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.Staff.GetUserHasRoleQuery
 import org.sailcbi.APIServer.UserTypes._
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject

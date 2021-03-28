@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Export.{ARG_DROPDOWN, ARG_INT, ReportingFilter, ReportingFilterFactory, ReportingFilterFactoryDropdown, ReportingFilterFunction}
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 // First arg is program
 // second arg is year

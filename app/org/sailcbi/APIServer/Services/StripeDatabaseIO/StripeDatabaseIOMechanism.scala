@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Services.StripeDatabaseIO
 
+import com.coleji.framework.Core.PersistenceBroker
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund, Payout}
-import org.sailcbi.APIServer.Services.PersistenceBroker
 
-class StripeDatabaseIOMechanism private[Services] (pb: PersistenceBroker) {
+class StripeDatabaseIOMechanism (pb: PersistenceBroker) {
 	val self = this
 	val whitelistedClasses: Set[CastableToStorableObject[_]] = Set(
 		Charge,

@@ -1,8 +1,9 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.UserTypes.RootRequestCache
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
+import org.sailcbi.APIServer.Services.PermissionsAuthoritySecrets
+import org.sailcbi.APIServer.UserTypes.RootRequestCache
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	val EMPTY_NONCE = "$EMPTY_AUTH_NONCE$"

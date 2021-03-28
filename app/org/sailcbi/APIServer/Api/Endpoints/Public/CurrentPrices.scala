@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

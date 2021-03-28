@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
+import com.coleji.framework.Core.RequestCache
 import com.coleji.framework.Storable.{CalculatedValuesObject, FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import org.sailcbi.APIServer.CbiUtil.{DefinedInitializable, Initializable}
-import org.sailcbi.APIServer.Services.RequestCache
 import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import com.coleji.framework.Storable._

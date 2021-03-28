@@ -1,9 +1,9 @@
-package org.sailcbi.APIServer.Services.Logger
+package com.coleji.framework.Core.Logger
 
-import org.sailcbi.APIServer.Services.Emailer.Emailer
-import org.sailcbi.APIServer.Services.PermissionsAuthority
+import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.Emailer.Emailer
 
-class ProductionLogger private[Services](emailer: Emailer)(implicit PA: PermissionsAuthority) extends Logger {
+class ProductionLogger private[Core](emailer: Emailer)(implicit PA: PermissionsAuthority) extends Logger {
 	def trace(s: String): Unit = println(s)
 
 	def trace(s: String, e: Throwable): Unit = println(s + "\n" + prettyPrintException(e))

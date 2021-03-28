@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Services
 
+import com.coleji.framework.Core.DatabaseHighLevelConnection
+
 case class PermissionsAuthoritySecrets(
 											  dbConnection: DatabaseHighLevelConnection,
 											  apexToken: String,

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassInstance
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Export.{ARG_DROPDOWN, ReportingFilter, ReportingFilterFactory, ReportingFilterFactoryDropdown, ReportingFilterFunction}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassType}
-import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassInstance] with ReportingFilterFactoryDropdown {
 	val displayName: String = "By Class Type"

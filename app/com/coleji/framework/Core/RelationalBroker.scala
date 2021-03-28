@@ -1,20 +1,19 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
-import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedString, PreparedValue}
-import org.sailcbi.APIServer.CbiUtil.Profiler
-import org.sailcbi.APIServer.IO.PreparedQueries._
+import com.coleji.framework.IO.PreparedQueries._
 import com.coleji.framework.Storable.FieldValues.FieldValue
 import com.coleji.framework.Storable.Fields.{NullableDateDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, _}
-import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.framework.Storable.StorableQuery._
-import com.coleji.framework.Storable._
+import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import org.sailcbi.APIServer.CbiUtil.Profiler
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 import java.security.MessageDigest
 import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
+abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
 	extends PersistenceBroker(dbConnection, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
@@ -567,7 +566,7 @@ abstract class RelationalBroker private[Services](dbConnection: DatabaseHighLeve
 		d.toInstant.atZone(ZoneId.systemDefault).toLocalDateTime
 
 	// test query
-	private[Services] def testDB {
+	private[Core] def testDB {
 		dbConnection.mainPool.withConnection(c => {
 			val st: Statement = c.createStatement()
 			st.execute("select count(*) from users")

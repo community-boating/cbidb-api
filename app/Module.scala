@@ -1,5 +1,5 @@
 import com.google.inject.AbstractModule
-import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderLive
+import com.coleji.framework.Core.Boot.ServerBootLoaderLive
 
 /**
   * This class is a Guice module that tells Guice how to bind several

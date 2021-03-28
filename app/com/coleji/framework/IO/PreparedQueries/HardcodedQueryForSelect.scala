@@ -1,6 +1,7 @@
 package com.coleji.framework.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.{RequestCacheObject, ResultSetWrapper}
+import com.coleji.framework.Core.RequestCacheObject
+import org.sailcbi.APIServer.Services.ResultSetWrapper
 
 abstract class HardcodedQueryForSelect[T](
 	override val allowedUserTypes: Set[RequestCacheObject[_]],

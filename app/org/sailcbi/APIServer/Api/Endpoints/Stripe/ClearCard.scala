@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
+import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.PaymentMethod
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}

@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.CbiUtil.{JsValueWrapper, ParsedRequest, PhoneUtil}
 import org.sailcbi.APIServer.Entities.MagicIds

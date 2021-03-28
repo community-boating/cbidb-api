@@ -7,7 +7,7 @@ import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
-abstract class StripeAPIIOMechanism private[Services] {
+abstract class StripeAPIIOMechanism {
 	def getOrPostStripeSingleton[T](
 		url: String,
 		constructor: JsValue => T,

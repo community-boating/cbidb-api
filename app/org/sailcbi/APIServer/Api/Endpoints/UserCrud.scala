@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority}
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject

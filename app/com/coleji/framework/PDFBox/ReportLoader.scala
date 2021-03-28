@@ -1,6 +1,6 @@
 package com.coleji.framework.PDFBox
 
-import org.sailcbi.APIServer.Services.RequestCache
+import com.coleji.framework.Core.RequestCache
 
 // A loader is a function from parameter to model
 // a single report (e.g. close report) has a single class of model

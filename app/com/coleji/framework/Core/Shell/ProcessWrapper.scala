@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.Shell
+package com.coleji.framework.Core.Shell
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 

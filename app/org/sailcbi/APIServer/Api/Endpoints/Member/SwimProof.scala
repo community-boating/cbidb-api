@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache

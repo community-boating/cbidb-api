@@ -1,14 +1,13 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
-import com.coleji.framework.Storable._
+import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {
+abstract class PersistenceBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -90,5 +89,5 @@ abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLev
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
 
-	private[Services] def testDB
+	private[Core] def testDB
 }

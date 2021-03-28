@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.Logger
+package com.coleji.framework.Core.Logger
 
 import java.io.{PrintWriter, StringWriter}
 

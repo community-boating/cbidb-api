@@ -1,5 +1,6 @@
-package org.sailcbi.APIServer.Services.Boot
+package com.coleji.framework.Core.Boot
 
+import com.coleji.framework.Core.{DatabaseHighLevelConnection, OracleDatabaseConnection, PermissionsAuthority}
 import org.sailcbi.APIServer.Services._
 import play.api.inject.ApplicationLifecycle
 

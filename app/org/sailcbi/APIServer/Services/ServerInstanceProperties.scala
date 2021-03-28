@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.Services
 
+import com.coleji.framework.Core.RequestCacheObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.UserTypes._
 

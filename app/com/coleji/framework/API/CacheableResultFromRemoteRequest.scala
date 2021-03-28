@@ -1,7 +1,8 @@
 package com.coleji.framework.API
 
+import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
+import com.coleji.framework.Core.RequestCacheObject
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, AnyContent, InjectedController}

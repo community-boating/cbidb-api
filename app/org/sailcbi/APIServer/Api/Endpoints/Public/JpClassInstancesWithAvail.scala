@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstancesWithAvail.JpClassInstancesWithAvailParamsObject
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.{Action, AnyContent}
 
 import java.time.LocalDateTime

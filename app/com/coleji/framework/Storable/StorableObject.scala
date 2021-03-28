@@ -1,9 +1,9 @@
 package com.coleji.framework.Storable
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues._
 import com.coleji.framework.Storable.Fields._
 import com.coleji.framework.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, QueryBuilderResultRow, TableAliasInnerJoined}
-import org.sailcbi.APIServer.Services.UnlockedRequestCache
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled

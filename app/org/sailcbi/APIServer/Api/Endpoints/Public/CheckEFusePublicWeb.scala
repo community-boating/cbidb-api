@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
+import com.coleji.framework.Core.PermissionsAuthority
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import org.sailcbi.APIServer.Services.PermissionsAuthority
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject

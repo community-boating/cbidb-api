@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Export.{ARG_DATE, ARG_DOUBLE, ReportingFilter, ReportingFilterFactory, ReportingFilterFunction}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Donation, Person}
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

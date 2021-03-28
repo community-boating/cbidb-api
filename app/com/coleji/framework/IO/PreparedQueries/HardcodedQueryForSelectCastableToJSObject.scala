@@ -1,6 +1,6 @@
 package com.coleji.framework.IO.PreparedQueries
 
-import org.sailcbi.APIServer.Services.RequestCacheObject
+import com.coleji.framework.Core.RequestCacheObject
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
 abstract class HardcodedQueryForSelectCastableToJSObject[T](

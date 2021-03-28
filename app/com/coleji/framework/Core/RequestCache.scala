@@ -1,25 +1,24 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import com.coleji.framework.IO.HTTP.FromWSClient
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
+import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
+import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.UserTypes._
-import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
+import org.sailcbi.APIServer.Services.PermissionsAuthoritySecrets
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
-import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
-import com.coleji.framework.Storable.StorableObject
+import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
-sealed abstract class RequestCache private[Services](
+sealed abstract class RequestCache private[Core](
 	val userName: String,
 	secrets: PermissionsAuthoritySecrets
 )(implicit val PA: PermissionsAuthority) {

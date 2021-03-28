@@ -1,7 +1,7 @@
 package com.coleji.framework.Export
 
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.StorableClass
-import org.sailcbi.APIServer.Services.UnlockedRequestCache
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
