@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.JpClassRoster.View
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.Abstract.AbstractTable
 import com.coleji.framework.PDFBox.Drawable._
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.{JpClassRosterModel, JpRosterData}
 
 class JpClassRosterView(

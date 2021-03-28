@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.{CalculatedValuesObject, FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
-import org.sailcbi.APIServer.CbiUtil.{Initializable, InitializableFromCollectionSubset}
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.CbiUtil.{Initializable, InitializableFromCollectionSubset}
 
 class JpClassInstance extends StorableClass {
 	val myself = this

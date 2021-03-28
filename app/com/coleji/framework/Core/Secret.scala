@@ -1,6 +1,5 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
-import com.coleji.framework.Core.RequestCache
 import org.sailcbi.APIServer.CbiUtil.Initializable
 
 class Secret[T](auth: (RequestCache => Boolean)) {

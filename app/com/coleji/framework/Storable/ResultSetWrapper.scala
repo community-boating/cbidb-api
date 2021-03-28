@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Storable
 
 import java.sql.ResultSet
 import java.time.{LocalDate, LocalDateTime}

@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.BouncerRequestCache
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 

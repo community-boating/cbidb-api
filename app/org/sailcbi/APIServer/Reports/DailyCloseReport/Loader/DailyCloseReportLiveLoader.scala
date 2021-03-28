@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Loader
 
 import com.coleji.framework.Core.RequestCache
+import com.coleji.framework.PDFBox.ReportLoader
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport._
-import com.coleji.framework.PDFBox.ReportLoader
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.{DailyCloseReportModel, ParkingData}
 
 object DailyCloseReportLiveLoader extends ReportLoader[DailyCloseReportLiveParameter, DailyCloseReportModel] {

@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
 
 class Rating extends StorableClass {

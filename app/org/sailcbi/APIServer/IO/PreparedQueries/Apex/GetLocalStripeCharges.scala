@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, ChargeMetadata}
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 
 class GetLocalStripeCharges (implicit PA: PermissionsAuthority) extends HardcodedQueryForSelect[Charge](Set(ApexRequestCache), true) {

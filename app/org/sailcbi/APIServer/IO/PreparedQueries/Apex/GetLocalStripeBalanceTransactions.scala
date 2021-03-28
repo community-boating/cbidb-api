@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Payout}
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 
 class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryForSelect[BalanceTransaction](Set(ApexRequestCache), true) {

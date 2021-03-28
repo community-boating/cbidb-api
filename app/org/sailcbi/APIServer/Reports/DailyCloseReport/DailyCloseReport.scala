@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport
 
+import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
@@ -9,7 +10,6 @@ import org.sailcbi.APIServer.Reports.DailyCloseReport.View.ChecksARPage.ChecksAR
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage.FirstPage
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.FullWidthTables
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.ReceiptsPage.ReceiptsPage
-import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 
 import java.awt.Color
 

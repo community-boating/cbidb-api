@@ -1,11 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 import com.coleji.framework.Storable.FieldValues.IntFieldValue
 import com.coleji.framework.Storable.Fields.IntDatabaseField
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.CbiUtil.Initializable
+import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
 class PersonRating extends StorableClass {
 	this.setCompanion(PersonRating)

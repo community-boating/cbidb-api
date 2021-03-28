@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster.Loader
 
 import com.coleji.framework.Core.RequestCache
-import org.sailcbi.APIServer.IO.PreparedQueries.Apex.ApClassRoster.{GetApClassInstanceData, GetApClassSignups}
 import com.coleji.framework.PDFBox.ReportLoader
+import org.sailcbi.APIServer.IO.PreparedQueries.Apex.ApClassRoster.{GetApClassInstanceData, GetApClassSignups}
 import org.sailcbi.APIServer.Reports.ApClassRoster.Model.{ApClassInstanceData, ApClassRosterModel}
 
 object ApClassRosterLiveLoader extends ReportLoader[ApClassRosterLiveParameter, ApClassRosterModel] {

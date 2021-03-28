@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services
+package org.sailcbi.APIServer.Server
 
 import com.coleji.framework.Core.RequestCacheObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper

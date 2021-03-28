@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.WaiverPrivData
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class WaiversPrivsQuery(closeId: Int) extends HardcodedQueryForSelect[WaiverPrivData](Set(StaffRequestCache, ApexRequestCache)) {

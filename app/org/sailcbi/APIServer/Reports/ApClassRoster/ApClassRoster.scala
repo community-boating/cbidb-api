@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster
 
+import com.coleji.framework.PDFBox.Abstract.AbstractTable
+import com.coleji.framework.PDFBox.PDFReport
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
-import com.coleji.framework.PDFBox.Abstract.AbstractTable
-import com.coleji.framework.PDFBox.PDFReport
 import org.sailcbi.APIServer.Reports.ApClassRoster.Model.{ApClassRosterModel, ApRosterData, ApSignupNotesData, ApSpecialNeedsData}
 import org.sailcbi.APIServer.Reports.ApClassRoster.View.{ApClassRosterView, ApRosterTitle, ApSignupNotesView, ApSpecialNeedsView}
 

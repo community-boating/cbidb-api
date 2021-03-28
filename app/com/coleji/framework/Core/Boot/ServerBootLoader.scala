@@ -1,7 +1,7 @@
 package com.coleji.framework.Core.Boot
 
 import com.coleji.framework.Core.{DatabaseHighLevelConnection, OracleDatabaseConnection, PermissionsAuthority}
-import org.sailcbi.APIServer.Services._
+import org.sailcbi.APIServer.Server.{PermissionsAuthoritySecrets, ServerInstanceProperties, ServerParameters}
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future

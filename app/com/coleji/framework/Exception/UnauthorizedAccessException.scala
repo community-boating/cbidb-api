@@ -1,6 +1,6 @@
-package org.sailcbi.APIServer.Services.Exception
+package com.coleji.framework.Exception
 
-class UserTypeMismatchException (
+class UnauthorizedAccessException(
 	private val message: String = "Unauthorized Access Denied",
 	private val cause: Throwable = null
 ) extends Exception(message, cause)

@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import com.coleji.framework.Core.RequestCache
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.Json
 

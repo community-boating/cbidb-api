@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.ContentStreamDecorator
 import com.coleji.framework.PDFBox.Drawable._
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.DailyCloseReportModel
 
 class StaffTables(data: DailyCloseReportModel, maxWidth: Float, defaultFont: PDFont, defaultBoldFont: PDFont, defaultFontSize: Float, left: Float, top: Float) extends Drawable {

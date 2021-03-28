@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.ChecksARPage
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.ContentStreamDecorator
 import com.coleji.framework.PDFBox.Drawable.Drawable
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.{AR, DailyCloseReportModel}
 
 import java.awt.Color

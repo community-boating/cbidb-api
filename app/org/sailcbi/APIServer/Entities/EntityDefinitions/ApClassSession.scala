@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
 import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.CbiUtil.Initializable
 
 class ApClassSession extends StorableClass {
 	this.setCompanion(ApClassSession)

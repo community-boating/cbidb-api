@@ -1,8 +1,8 @@
-package org.sailcbi.APIServer.Services.StripeAPIIO
+package org.sailcbi.APIServer.IO.StripeAPIIO
 
+import com.coleji.framework.IO.HTTP.{GET, HTTPMechanism, HTTPMethod}
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
-import com.coleji.framework.IO.HTTP.{GET, HTTPMechanism, HTTPMethod}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}

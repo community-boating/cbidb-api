@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Reports.JpSpecialNeedsReport
 
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 import com.coleji.framework.PDFBox.Abstract.AbstractTable
 import com.coleji.framework.PDFBox.PDFReport
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Model.{JpSpecialNeedsData, JpSpecialNeedsReportModel}
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.View.JpSpecialNeedsView
 

@@ -1,10 +1,11 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables
 
+import com.coleji.framework.PDFBox.Abstract.AbstractTable
+import com.coleji.framework.PDFBox.Drawable.MultiPageDrawable
+import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
-import com.coleji.framework.PDFBox.Abstract.AbstractTable
-import com.coleji.framework.PDFBox.Drawable.MultiPageDrawable
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model._
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.APClasses.APClassTable
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.APVouchers.APVouchersTable
@@ -19,7 +20,6 @@ import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.Retai
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.Summary.SummaryTable
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.Taxables.TaxablesTable
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables.WaiversPrivsCards._
-import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 
 import java.awt.Color
 

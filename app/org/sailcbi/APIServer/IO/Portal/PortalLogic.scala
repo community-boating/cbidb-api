@@ -4,6 +4,7 @@ import com.coleji.framework.API
 import com.coleji.framework.API.{ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries._
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -11,7 +12,6 @@ import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.{JsValue, Json}
 

@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

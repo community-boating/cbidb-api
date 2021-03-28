@@ -6,11 +6,11 @@ import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
+import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
+import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
-import org.sailcbi.APIServer.Services.PermissionsAuthoritySecrets
-import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
-import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
+import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.ws.WSClient
 

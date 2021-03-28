@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.CbiUtil.Initializable
 
 class JpClassWlResult extends StorableClass {
 	this.setCompanion(JpClassWlResult)

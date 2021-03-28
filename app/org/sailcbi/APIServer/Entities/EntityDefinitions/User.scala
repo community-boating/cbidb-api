@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import com.coleji.framework.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
 
 class User extends StorableClass {

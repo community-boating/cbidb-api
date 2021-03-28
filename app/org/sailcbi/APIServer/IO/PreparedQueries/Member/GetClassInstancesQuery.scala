@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
-import org.sailcbi.APIServer.Services.ResultSetWrapper
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, PublicRequestCache}
 import play.api.libs.json.{JsArray, Json}
 

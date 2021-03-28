@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints
 
 import com.coleji.framework.API.ResultError
 import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

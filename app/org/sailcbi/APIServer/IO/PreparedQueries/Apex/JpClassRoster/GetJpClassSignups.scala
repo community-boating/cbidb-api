@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.{Initializable, NAStrings}
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.JpRosterData
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class GetJpClassSignups(instanceId: Int) extends HardcodedQueryForSelect[JpRosterData](Set(StaffRequestCache, ApexRequestCache)) {

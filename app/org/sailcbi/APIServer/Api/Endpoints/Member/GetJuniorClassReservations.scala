@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
 import play.api.libs.json._
 import play.api.mvc.InjectedController

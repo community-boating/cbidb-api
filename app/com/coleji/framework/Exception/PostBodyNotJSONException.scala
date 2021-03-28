@@ -1,3 +1,3 @@
-package org.sailcbi.APIServer.Services.Exception
+package com.coleji.framework.Exception
 
 class PostBodyNotJSONException extends Exception

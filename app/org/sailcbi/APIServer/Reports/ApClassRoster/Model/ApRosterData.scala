@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster.Model
 
-import org.sailcbi.APIServer.CbiUtil.Initializable
 import com.coleji.framework.PDFBox.Abstract.RowData
+import org.sailcbi.APIServer.CbiUtil.Initializable
 
 class ApRosterData(
 						  val personId: Int,

@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage
 
+import com.coleji.framework.PDFBox.Drawable.Drawable
+import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
-import com.coleji.framework.PDFBox.Drawable.Drawable
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.DailyCloseReportModel
-import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
 
 import java.awt.Color
 

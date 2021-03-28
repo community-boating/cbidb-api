@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster.View
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.Abstract.AbstractTable
 import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, DrawableTable, MultiDrawableTable}
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.ApClassRoster.Model.ApSignupNotesData
 
 class ApSignupNotesView(

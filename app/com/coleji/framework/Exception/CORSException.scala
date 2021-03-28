@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.Exception
+package com.coleji.framework.Exception
 
 class CORSException extends Exception(
 	"CORS check failed",

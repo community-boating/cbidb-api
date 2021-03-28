@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.MembershipSale
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class MembershipSalesQuery(closeId: Int) extends HardcodedQueryForSelect[MembershipSale](Set(StaffRequestCache, ApexRequestCache)) {

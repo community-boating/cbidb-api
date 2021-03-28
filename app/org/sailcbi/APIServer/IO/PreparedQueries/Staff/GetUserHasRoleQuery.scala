@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Staff
 
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import org.sailcbi.APIServer.Services.ResultSetWrapper
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 class GetUserHasRoleQuery(userName: String, roleAlias: String) extends PreparedQueryForSelect[Boolean](Set(StaffRequestCache)) {

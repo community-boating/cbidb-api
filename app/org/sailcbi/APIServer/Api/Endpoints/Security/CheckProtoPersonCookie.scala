@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.{BouncerRequestCache, ProtoPersonRequestCache}
-import org.sailcbi.APIServer.Services.ResultSetWrapper
 import play.api.mvc._
 
 import javax.inject.Inject

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.ReceiptsPage
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import com.coleji.framework.PDFBox.ContentStreamDecorator
 import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, Drawable, DrawableTable}
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.{DailyCloseReportModel, Denoms}
 
 import java.awt.Color

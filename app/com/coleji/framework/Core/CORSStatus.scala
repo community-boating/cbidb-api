@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services
+package com.coleji.framework.Core
 
 sealed abstract class CORSStatus(val status: String)
 

@@ -5,7 +5,6 @@ import com.coleji.framework.IO.PreparedQueries.PreparedValue
 import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, PublicRequestCache}
-import com.coleji.framework.Core.RequestCacheObject
 import play.api.libs.json.{JsValue, Json}
 
 case class Charge(

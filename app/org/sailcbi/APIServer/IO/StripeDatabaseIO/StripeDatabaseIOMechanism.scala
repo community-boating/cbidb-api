@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Services.StripeDatabaseIO
+package org.sailcbi.APIServer.IO.StripeDatabaseIO
 
 import com.coleji.framework.Core.PersistenceBroker
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect

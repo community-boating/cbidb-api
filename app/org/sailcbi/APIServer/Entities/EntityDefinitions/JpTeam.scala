@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import com.coleji.framework.Storable._
 
 class JpTeam extends StorableClass {

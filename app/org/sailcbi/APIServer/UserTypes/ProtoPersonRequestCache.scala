@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core.{CacheBroker, LockedRequestCache, PermissionsAuthority, RequestCacheObject}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
-import org.sailcbi.APIServer.Services._
+import com.coleji.framework.Exception.UserTypeMismatchException
 import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.StorableObject
+import com.coleji.framework.Storable.{ResultSetWrapper, StorableObject}
+import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class ProtoPersonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
