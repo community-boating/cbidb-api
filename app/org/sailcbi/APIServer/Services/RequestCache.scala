@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
-import org.sailcbi.APIServer.IO.HTTP.FromWSClient
+import com.coleji.framework.IO.HTTP.FromWSClient
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
@@ -9,9 +9,10 @@ import org.sailcbi.APIServer.Services.Authentication._
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.Services.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
-import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
-import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
+import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
+import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
+import com.coleji.framework.Storable.StorableObject
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext

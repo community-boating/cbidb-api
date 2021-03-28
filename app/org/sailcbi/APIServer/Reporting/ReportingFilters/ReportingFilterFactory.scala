@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters
 
+import com.coleji.framework.Storable.StorableClass
 import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
-import org.sailcbi.APIServer.Storable.StorableClass
 
 abstract class ReportingFilterFactory[T <: StorableClass] {
 	type ArgDefinition = (ReportingFilterArgType, String) // type and default value

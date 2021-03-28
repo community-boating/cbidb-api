@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.FieldValues.IntFieldValue
-import org.sailcbi.APIServer.Storable.Fields.IntDatabaseField
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.IntFieldValue
+import com.coleji.framework.Storable.Fields.IntDatabaseField
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class JpTeamEventPoints extends StorableClass {
 	this.setCompanion(JpTeamEventPoints)

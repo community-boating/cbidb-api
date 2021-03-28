@@ -1,9 +1,9 @@
 import java.io.File
-
 import org.sailcbi.APIServer.Entities._
 import org.sailcbi.APIServer.Services.{MysqlBroker, PersistenceBroker}
-import org.sailcbi.APIServer.Storable.FieldValues.FieldValue
-import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
+import com.coleji.framework.Storable.FieldValues.FieldValue
+import com.coleji.framework.Storable.{StorableClass, StorableObject}
+import org.sailcbi.APIServer.Storable.StorableObject
 
 ////////////////////////////////////
 implicit val pbClass: Class[_ <: PersistenceBroker] = classOf[MysqlBroker]

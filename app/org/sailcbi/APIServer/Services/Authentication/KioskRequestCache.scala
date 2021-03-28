@@ -3,8 +3,8 @@ package org.sailcbi.APIServer.Services.Authentication
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.Exception.UserTypeMismatchException
 import org.sailcbi.APIServer.Services._
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
-import org.sailcbi.APIServer.Storable.{Filter, StorableClass, StorableObject}
+import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.framework.Storable.StorableObject
 
 class KioskRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
 	override def companion: RequestCacheObject[KioskRequestCache] = KioskRequestCache

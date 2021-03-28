@@ -1,5 +1,6 @@
 package org.sailcbi.APIServer.Services
 
+import com.coleji.framework.Storable.{StorableClass, StorableObject}
 import io.sentry.Sentry
 import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
@@ -10,7 +11,7 @@ import org.sailcbi.APIServer.Services.Emailer.SSMTPEmailer
 import org.sailcbi.APIServer.Services.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
 import org.sailcbi.APIServer.Services.Logger.{Logger, ProductionLogger, UnitTestLogger}
 import org.sailcbi.APIServer.Services.PermissionsAuthority.PersistenceSystem
-import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
+import com.coleji.framework.Storable.StorableObject
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 

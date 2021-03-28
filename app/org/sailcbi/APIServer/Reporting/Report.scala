@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reporting
 
+import com.coleji.framework.Storable.StorableClass
 import org.sailcbi.APIServer.Reporting.ReportFactories._
 import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
-import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
 case class Report(headers: List[String], rows: List[List[String]]) {

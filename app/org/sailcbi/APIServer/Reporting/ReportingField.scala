@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reporting
 
-import org.sailcbi.APIServer.Storable.FieldValues._
-import org.sailcbi.APIServer.Storable.Fields._
-import org.sailcbi.APIServer.Storable.StorableClass
+import com.coleji.framework.Storable.FieldValues._
+import com.coleji.framework.Storable.Fields._
+import com.coleji.framework.Storable.StorableClass
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

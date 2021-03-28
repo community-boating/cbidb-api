@@ -3,9 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
-import org.sailcbi.APIServer.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
+import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class Person extends StorableClass {
 	val instance: Person = this

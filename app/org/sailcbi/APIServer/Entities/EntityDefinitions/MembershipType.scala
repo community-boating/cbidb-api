@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.InitializableFromCollectionElement
-import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
+import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class MembershipType extends StorableClass {
 	val myself = this

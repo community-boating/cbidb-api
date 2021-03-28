@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO
 
+import com.coleji.framework.Storable.CastableToStorableClass
 import org.sailcbi.APIServer.CbiUtil._
-import org.sailcbi.APIServer.Entities.CastableToStorableClass
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
-import org.sailcbi.APIServer.IO.HTTP.{GET, POST}
+import com.coleji.framework.IO.HTTP.{GET, POST}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, PublicRequestCache}

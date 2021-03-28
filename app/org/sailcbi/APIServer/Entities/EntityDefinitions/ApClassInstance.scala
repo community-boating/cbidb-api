@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
+import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class ApClassInstance extends StorableClass {
 	this.setCompanion(ApClassInstance)

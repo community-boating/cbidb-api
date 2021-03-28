@@ -2,9 +2,10 @@ package org.sailcbi.APIServer.Services
 
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
-import org.sailcbi.APIServer.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
+import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
+import com.coleji.framework.Storable._
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
 abstract class PersistenceBroker private[Services](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {

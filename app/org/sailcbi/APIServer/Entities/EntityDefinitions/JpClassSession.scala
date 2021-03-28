@@ -1,10 +1,11 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
+import com.coleji.framework.Storable.{CalculatedValuesObject, FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
 import org.sailcbi.APIServer.CbiUtil.{DefinedInitializable, Initializable}
 import org.sailcbi.APIServer.Services.RequestCache
-import org.sailcbi.APIServer.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
+import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
+import com.coleji.framework.Storable._
 
 
 class JpClassSession extends StorableClass {

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
+import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.CbiUtil.GetSQLLiteral
-import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.IO.PreparedQueries.PreparedValue
 import org.sailcbi.APIServer.Services.Authentication.{ApexRequestCache, MemberRequestCache, PublicRequestCache}
 import org.sailcbi.APIServer.Services.{RequestCache, RequestCacheObject}

@@ -4,9 +4,9 @@ import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
 import org.sailcbi.APIServer.Services.Authentication.RootRequestCache
 import org.sailcbi.APIServer.Services.Boot.ServerBootLoaderTest
-import org.sailcbi.APIServer.Storable.Fields.DatabaseField
-import org.sailcbi.APIServer.Storable.Filter
-import org.sailcbi.APIServer.Storable.StorableQuery._
+import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.framework.Storable.Filter
+import com.coleji.framework.Storable.StorableQuery._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

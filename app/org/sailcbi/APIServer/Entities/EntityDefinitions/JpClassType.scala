@@ -1,8 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import org.sailcbi.APIServer.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class JpClassType extends StorableClass {
 	this.setCompanion(JpClassType)

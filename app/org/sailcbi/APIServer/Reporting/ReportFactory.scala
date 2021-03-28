@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Reporting
 
+import com.coleji.framework.Storable.{StorableClass, StorableObject}
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
 import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
-import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
+import com.coleji.framework.Storable.StorableObject
 
 import java.time.{LocalDateTime, ZoneId}
 

@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
-import org.sailcbi.APIServer.Entities.{CastableToStorableClass, CastableToStorableObject}
+import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import play.api.libs.json.JsValue
 
 trait StripeCastableToStorableObject[T <: CastableToStorableClass] extends CastableToStorableObject[T] {

@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
+import com.coleji.framework.Storable.StorableObject
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
 import org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactory
 import org.sailcbi.APIServer.Reporting.{ReportFactory, ReportingField}
-import org.sailcbi.APIServer.Storable.StorableObject
 
 import java.time.format.DateTimeFormatter
 

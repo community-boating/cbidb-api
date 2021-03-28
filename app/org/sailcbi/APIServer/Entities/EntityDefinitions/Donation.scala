@@ -1,9 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
-import org.sailcbi.APIServer.Storable.FieldValues.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
-import org.sailcbi.APIServer.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
-import org.sailcbi.APIServer.Storable._
+import com.coleji.framework.Storable.FieldValues.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
+import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
+import com.coleji.framework.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.framework.Storable._
 
 class Donation extends StorableClass {
 	this.setCompanion(Donation)
