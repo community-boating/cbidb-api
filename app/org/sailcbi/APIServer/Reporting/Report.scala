@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting
 
 import org.sailcbi.APIServer.Reporting.ReportFactories._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsObject, JsString}
 
@@ -29,7 +29,9 @@ object Report {
 		"Donation" -> ("Donation", classOf[ReportFactoryDonation])
 	)
 
-	def getReport(rc: RequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
+	def getReport(rc: UnlockedRequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
+		throw new Exception("Many changes have been made to the core system since reporting was last tested; should be exhaustively tested again before use")
+
 		val c: Class[_ <: ReportFactory[_]] = reportFactoryMap(baseEntityName)._2
 		val factory: ReportFactory[_ <: StorableClass] =
 			Class.forName(c.getCanonicalName).newInstance.asInstanceOf[ReportFactory[_ <: StorableClass]]

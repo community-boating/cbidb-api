@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.Report
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
 import org.sailcbi.APIServer.Services.Exception.UnauthorizedAccessException
-import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import play.api.http.{HeaderNames, HttpEntity}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._
@@ -103,7 +103,7 @@ class RunReport @Inject()(implicit val exec: ExecutionContext)
 		LocalDateTime.now.plusSeconds(5)
 	}
 
-	def getJSONResultFuture(rc: RequestCache, params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: UnlockedRequestCache, params: RunReportParamsObject): (() => Future[JsObject]) = () => Future {
 		lazy val report: Report = Report.getReport(rc, params.baseEntityString, params.filterSpec, params.fieldSpec)
 		params.outputType match {
 			case OUTPUT_TYPE.JSCON => report.formatJSCON

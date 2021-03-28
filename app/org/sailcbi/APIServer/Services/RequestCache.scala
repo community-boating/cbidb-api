@@ -35,18 +35,6 @@ sealed abstract class RequestCache private[Services](
 
 	val cb: CacheBroker = new RedisBroker
 
-	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T]
-
-	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T]
-
-	def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int
-
-	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T]
-
-	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T]
-
-	def commitObjectToDatabase(i: StorableClass): Unit
-
 	def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForSelect(pq, fetchSize)
@@ -116,46 +104,29 @@ abstract class LockedRequestCache private[Services](
 	override val userName: String,
 	secrets: PermissionsAuthoritySecrets
 ) extends RequestCache(userName, secrets) {
-	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
-		throw new UserTypeMismatchException()
 
-	override def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
-		throw new UserTypeMismatchException()
-	}
-
-	override def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def commitObjectToDatabase(i: StorableClass): Unit =
-		throw new UserTypeMismatchException()
 }
 
 abstract class UnlockedRequestCache private[Services](
 	override val userName: String,
 	secrets: PermissionsAuthoritySecrets
 ) extends RequestCache(userName, secrets) {
-	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
+	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
 		pb.getObjectById(obj, id)
 
-	override def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
+	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByIds(obj, ids, fetchSize)
 
-	override def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
 		pb.countObjectsByFilters(obj, filters)
 	}
 
-	override def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
+	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByFilters(obj, filters, fetchSize)
 
-	override def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
+	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
 		pb.getAllObjectsOfClass(obj, fields)
 
-	override def commitObjectToDatabase(i: StorableClass): Unit =
+	def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)
 }

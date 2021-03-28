@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Has Rating"
@@ -11,8 +11,8 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 		(ARG_DROPDOWN, Rating.specialIDs.RATING_ID_MERC_GREEN.toString),
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
-		implicit val rc: RequestCache = _rc
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
+		implicit val rc: UnlockedRequestCache = _rc
 
 		type PersonID = Int
 
@@ -32,7 +32,7 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
-	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
+	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
 		val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating)
 		List(ratings.sortWith((a, b) => a.values.ratingName.get < b.values.ratingName.get).map(r =>
 			(r.values.ratingId.get.toString, r.values.ratingName.get.toString)

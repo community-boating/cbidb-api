@@ -4,7 +4,7 @@ import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResul
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -87,7 +87,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		))
 	}
 
-	private def checkUsernameUnique(rc: RequestCache, candidate: String): ValidationResult = {
+	private def checkUsernameUnique(rc: UnlockedRequestCache, candidate: String): ValidationResult = {
 		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
 
 		if (existingUsers > 0) ValidationResult.from("That username is already in use")

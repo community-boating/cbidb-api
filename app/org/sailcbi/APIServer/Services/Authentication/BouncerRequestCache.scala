@@ -16,25 +16,6 @@ class BouncerRequestCache(override val userName: String, secrets: PermissionsAut
 	}
 
 	def updateUser(user: User): Unit = pb.commitObjectToDatabase(user)
-
-	override def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
-		throw new UserTypeMismatchException()
-
-	override def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
-		throw new UserTypeMismatchException()
-	}
-
-	override def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		throw new UserTypeMismatchException()
-
-	override def commitObjectToDatabase(i: StorableClass): Unit =
-		throw new UserTypeMismatchException()
 }
 
 object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {

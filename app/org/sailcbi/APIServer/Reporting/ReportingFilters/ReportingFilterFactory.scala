@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters
 
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 
 abstract class ReportingFilterFactory[T <: StorableClass] {
 	type ArgDefinition = (ReportingFilterArgType, String) // type and default value
 	val displayName: String
 
-	def getFilter(rc: RequestCache, args: String): ReportingFilter[T]
+	def getFilter(rc: UnlockedRequestCache, args: String): ReportingFilter[T]
 
 	val argDefinitions: List[ArgDefinition]
 }

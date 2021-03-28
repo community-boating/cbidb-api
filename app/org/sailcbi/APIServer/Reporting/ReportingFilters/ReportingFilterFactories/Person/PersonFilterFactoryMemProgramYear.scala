@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 // First arg is program
 // second arg is year
@@ -14,8 +14,8 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
-		implicit val rc: RequestCache = _rc
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
+		implicit val rc: UnlockedRequestCache = _rc
 
 		type PersonID = Int
 
@@ -57,7 +57,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		).toSet
 	})
 
-	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
+	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
 		val programs: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType)
 		List(programs.map(p =>
 			(p.values.programId.get.toString, p.values.programName.get.toString)

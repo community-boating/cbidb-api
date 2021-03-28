@@ -2,23 +2,23 @@ package org.sailcbi.APIServer.Reporting
 
 import org.sailcbi.APIServer.CbiUtil.Initializable
 import org.sailcbi.APIServer.Reporting.ReportingFilters.{ReportingFilter, ReportingFilterFactory, ReportingFilterFunction, ReportingFilterSpecParser}
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.{StorableClass, StorableObject}
 
 import java.time.{LocalDateTime, ZoneId}
 
 abstract class ReportFactory[T <: StorableClass] {
-	private val rcWrapper = new Initializable[RequestCache]
+	private val rcWrapper = new Initializable[UnlockedRequestCache]
 	private val filterSpecWrapper = new Initializable[String]
 	private val fieldSpecWrapper = new Initializable[String]
 
-	def setParameters(rc: RequestCache, filterSpec: String, fieldSpec: String): Unit = {
+	def setParameters(rc: UnlockedRequestCache, filterSpec: String, fieldSpec: String): Unit = {
 		rcWrapper.set(rc)
 		filterSpecWrapper.set(filterSpec)
 		fieldSpecWrapper.set(fieldSpec)
 	}
 
-	def rc: RequestCache = rcWrapper.get
+	def rc: UnlockedRequestCache = rcWrapper.get
 
 	def filterSpec: String = filterSpecWrapper.get
 
@@ -31,7 +31,7 @@ abstract class ReportFactory[T <: StorableClass] {
 
 	val entityCompanion: StorableObject[T]
 	// TODO: some sanity check that this can't be more than like 100 things or something
-	val getAllFilter: (RequestCache => ReportingFilter[T]) = rc =>
+	val getAllFilter: (UnlockedRequestCache => ReportingFilter[T]) = rc =>
 		new ReportingFilterFunction[T](rc, rc => {
 			rc.getAllObjectsOfClass(
 				entityCompanion

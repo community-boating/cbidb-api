@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
 import org.sailcbi.APIServer.Reporting.{Report, ReportFactory}
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache
-import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.Services.{PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent}
@@ -33,7 +33,7 @@ class GetReportRunOptions @Inject()(implicit val exec: ExecutionContext)
 		})
 	}
 
-	def getJSONResultFuture(rc: RequestCache): (() => Future[JsObject]) = () => Future {
+	def getJSONResultFuture(rc: UnlockedRequestCache): (() => Future[JsObject]) = () => Future {
 		case class FilterDataForJSON(
 			filterName: String,
 			displayName: String,

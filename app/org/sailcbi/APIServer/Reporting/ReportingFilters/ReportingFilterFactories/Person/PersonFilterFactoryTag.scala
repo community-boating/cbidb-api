@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Has Tag"
@@ -10,8 +10,8 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 		(ARG_DROPDOWN, Tag.specialIDs.TAG_ID_CORPORATION.toString),
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
-		implicit val rc: RequestCache = _rc
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
+		implicit val rc: UnlockedRequestCache = _rc
 
 		type PersonID = Int
 
@@ -27,7 +27,7 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
-	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
+	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
 		val allTags = rc.getAllObjectsOfClass(Tag)
 		List(allTags.sortWith((a, b) => a.values.tagName.get < b.values.tagName.get).map(r =>
 			(r.values.tagId.get.toString, r.values.tagName.get.toString)

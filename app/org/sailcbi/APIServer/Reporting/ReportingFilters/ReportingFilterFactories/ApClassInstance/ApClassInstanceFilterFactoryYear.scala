@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassInstance, ApClassSession}
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassInstance] {
 	val displayName: String = "By Season"
@@ -11,9 +11,9 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[ApClassInstance] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
 		val year: Int = arg.toInt
-		implicit val rc: RequestCache = _rc
+		implicit val rc: UnlockedRequestCache = _rc
 		val ss: List[ApClassSession] = rc.getObjectsByFilters(
 			ApClassSession,
 			List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),

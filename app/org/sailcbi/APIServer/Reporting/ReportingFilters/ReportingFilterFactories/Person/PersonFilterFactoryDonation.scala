@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Donation, Person}
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -15,8 +15,8 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 		(ARG_DATE, DateLogic.now.toLocalDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")))
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
-		implicit val rc: RequestCache = _rc
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
+		implicit val rc: UnlockedRequestCache = _rc
 
 		type PersonID = Int
 

@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilters
 
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.StorableClass
 
 // SomeNoArgFilter:%(ApClassInstanceType:7|ApClassInstanceType:8)%ApClassInstanceYear:2017
 class ReportingFilterSpecParser[T <: StorableClass](
-	rc: RequestCache,
+	rc: UnlockedRequestCache,
 	filterMap: Map[String, ReportingFilterFactory[T]],
-	getAllFilter: (RequestCache => ReportingFilter[T])
+	getAllFilter: (UnlockedRequestCache => ReportingFilter[T])
 ) {
 
 	case class Token(c: Char) {

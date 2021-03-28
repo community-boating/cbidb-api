@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Storable
 
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 import org.sailcbi.APIServer.Storable.FieldValues._
 import org.sailcbi.APIServer.Storable.Fields._
 import org.sailcbi.APIServer.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, QueryBuilderResultRow, TableAliasInnerJoined}
@@ -29,9 +29,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	def primaryKey: IntDatabaseField
 
-	def peekInstanceForID(id: Int, rc: RequestCache): Option[T] = rc.getObjectById(this, id)
+	def peekInstanceForID(id: Int, rc: UnlockedRequestCache): Option[T] = rc.getObjectById(this, id)
 
-	def getInstanceForID(id: Int, rc: RequestCache): T = peekInstanceForID(id, rc).get
+	def getInstanceForID(id: Int, rc: UnlockedRequestCache): T = peekInstanceForID(id, rc).get
 
 	// Must be lazy so that it is not evaluated until field is set by the concrete object (or else the reflection shit NPE's)
 	private lazy val fieldMaps = {

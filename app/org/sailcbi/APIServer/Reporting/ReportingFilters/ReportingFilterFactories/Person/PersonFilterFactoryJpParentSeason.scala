@@ -4,7 +4,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilters.ReportingFilterFactorie
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilters._
-import org.sailcbi.APIServer.Services.RequestCache
+import org.sailcbi.APIServer.Services.{RequestCache, UnlockedRequestCache}
 
 class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "JP Parent in Season"
@@ -12,8 +12,8 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		(ARG_DROPDOWN, DateLogic.currentSeason().toString)
 	)
 
-	def getFilter(rc: RequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: RequestCache) => {
-		implicit val rc: RequestCache = _rc
+	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
+		implicit val rc: UnlockedRequestCache = _rc
 
 		type PersonID = Int
 
@@ -38,7 +38,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		rc.getObjectsByIds(Person, parentIds).toSet
 	})
 
-	def getDropdownValues(rc: RequestCache): List[List[(String, String)]] = {
+	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
 		val GO_BACK = 5
 		val currentSeason = DateLogic.currentSeason()
 		val start = currentSeason - GO_BACK
