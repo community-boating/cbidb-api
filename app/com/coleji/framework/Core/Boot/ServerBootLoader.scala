@@ -8,18 +8,6 @@ import scala.concurrent.Future
 
 abstract class ServerBootLoader {
 	protected def load(lifecycle: Option[ApplicationLifecycle], isTestMode: Boolean, readOnlyDatabase: Boolean): PermissionsAuthority = {
-		def getOptionalProperty(serverProps: ServerInstanceProperties, propname: String): Option[String] = {
-			try {
-				serverProps.getProperty(propname) match {
-					case null => None
-					case "" => None
-					case s: String => Some(s)
-				}
-			} catch {
-				case _: Throwable => None
-			}
-		}
-
 		def writeToTempFile(msg: String): Unit = {
 			// For testing that DB connection pools are closed when the application is shut down
 
@@ -70,9 +58,7 @@ abstract class ServerBootLoader {
 
 			val preparedQueriesOnly = {
 				try {
-					println("raw:" + serverProps.getProperty("PreparedQueriesOnly"))
-					println("case: " + serverProps.getProperty("PreparedQueriesOnly").toBoolean)
-					serverProps.getProperty("PreparedQueriesOnly").toBoolean
+					serverProps.getBoolean("PreparedQueriesOnly")
 				} catch {
 					case t: Throwable => {
 						println("error setting prepared queries only mode: " + t)
@@ -85,7 +71,7 @@ abstract class ServerBootLoader {
 				serverParameters = ServerParameters(
 					serverTimeOffsetSeconds = 0
 				),
-				isDebugMode = getOptionalProperty(serverProps, "PADebug").getOrElse("false").equals("true"),
+				isDebugMode = serverProps.getOptionalString("PADebug").getOrElse("false").equals("true"),
 				isTestMode = isTestMode,
 				readOnlyDatabase = readOnlyDatabase,
 				allowableUserTypes = serverProps.enabledAuthMechanisms,
@@ -93,12 +79,12 @@ abstract class ServerBootLoader {
 				persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
 				secrets = PermissionsAuthoritySecrets(
 					dbConnection = dbConnection,
-					apexToken = serverProps.getProperty("ApexToken"),
-					kioskToken = serverProps.getProperty("KioskToken"),
-					apexDebugSignet = getOptionalProperty(serverProps, "ApexDebugSignet"),
-					symonSalt = getOptionalProperty(serverProps, "SymonSalt"),
-					stripeSecretKey = serverProps.getProperty("StripeAPIKey"),
-					sentryDSN = getOptionalProperty(serverProps, "sentryDSN")
+					apexToken = serverProps.getString("ApexToken"),
+					kioskToken = serverProps.getString("KioskToken"),
+					apexDebugSignet = serverProps.getOptionalString("ApexDebugSignet"),
+					symonSalt = serverProps.getOptionalString("SymonSalt"),
+					stripeSecretKey = serverProps.getString("StripeAPIKey"),
+					sentryDSN = serverProps.getOptionalString("sentryDSN")
 				)
 //				stripeAPIIOMechanism = (new Secret(rc => rc.auth.userType == ApexUserType))
 //					.setImmediate(ws => new StripeAPIIOLiveService(PermissionsAuthority.stripeURL, , new FromWSClient(ws))),

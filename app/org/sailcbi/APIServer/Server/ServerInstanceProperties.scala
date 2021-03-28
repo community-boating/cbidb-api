@@ -12,7 +12,7 @@ class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(f
 		(BouncerRequestCache, "BouncerAuthEnabled", () => true),
 		(ApexRequestCache, "ApexAuthEnabled", () => true),
 		(KioskRequestCache, "KioskAuthEnabled", () => true),
-		(SymonRequestCache, "SymonAuthEnabled", () => getPropAsOption("SymonSalt").isDefined),
+		(SymonRequestCache, "SymonAuthEnabled", () => this.getOptionalString("SymonSalt").isDefined),
 		(StaffRequestCache, "StaffAuthEnabled", () => true),
 		(MemberRequestCache, "MemberAuthEnabled", () => true),
 		(ProtoPersonRequestCache, "ProtoPersonAuthEnabled", () => true)
@@ -20,29 +20,13 @@ class ServerInstanceProperties(fileLocation: String) extends PropertiesWrapper(f
 
 	val enabledAuthMechanisms: List[RequestCacheObject[_]] =
 		definedAuthMechanisms
-				.filter(t => getRequiredBoolean(t._2))
+				.filter(t => this.getBoolean(t._2))
 				.filter(t => t._3()) // check the nuke function
 				.map(t => t._1)
-
-	private def getRequiredBoolean(p: String): Boolean = getPropAsOption(p) match {
-		case Some("true") => true
-		case Some("false") => false
-		case _ => throw new Exception("Required server property " + p + " was not set or not valid.")
-	}
-
-	private def getPropAsOption(p: String): Option[String] = {
-		try {
-			val prop = this.getProperty(p)
-			if (prop == null) None
-			else Some(prop)
-		} catch {
-			case _ => None
-		}
-	}
 }
 
 object ServerInstanceProperties {
-	val requiredProperties: Array[String] = Array(
+	val requiredProperties = List(
 		"MemberAuthEnabled",
 		"KioskAuthEnabled",
 		"StaffAuthEnabled",

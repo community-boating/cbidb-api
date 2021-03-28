@@ -27,7 +27,7 @@ class Weather @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 }
 
 object Weather {
-	val props = new PropertiesWrapper("conf/private/weather-credentials", Array[String]("host", "path"))
+	val props = new PropertiesWrapper("conf/private/weather-credentials", List("host", "path"))
 	println("Making request to remote weather service")
-	val url = "https://" + props.getProperty("host") + props.getProperty("path")
+	val url = "https://" + props.getString("host") + props.getString("path")
 }

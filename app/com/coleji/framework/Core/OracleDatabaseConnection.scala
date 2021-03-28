@@ -5,20 +5,20 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
 object OracleDatabaseConnection {
 	def apply(confFileLocation: String): DatabaseHighLevelConnection = {
-		val pw = new PropertiesWrapper(confFileLocation, Array[String]("username", "password", "host", "port", "sid", "schema", "temptableschema"))
+		val pw = new PropertiesWrapper(confFileLocation, List("username", "password", "host", "port", "sid", "schema", "temptableschema"))
 
 		// TODO: unclear if this does anything
 		Class.forName("oracle.jdbc.driver.OracleDriver")
 
-		val mainSchemaName = pw.getProperty("schema")
-		val tempSchemaName = pw.getProperty("temptableschema")
-		val host = pw.getProperty("host")
-		val port = pw.getProperty("port")
-		val sid = pw.getProperty("sid")
-		val username = pw.getProperty("username")
-		val password = pw.getProperty("password")
-		val tempUsername = pw.getProperty("temptableusername")
-		val tempPassword = pw.getProperty("temptablepassword")
+		val mainSchemaName = pw.getString("schema")
+		val tempSchemaName = pw.getString("temptableschema")
+		val host = pw.getString("host")
+		val port = pw.getString("port")
+		val sid = pw.getString("sid")
+		val username = pw.getString("username")
+		val password = pw.getString("password")
+		val tempUsername = pw.getString("temptableusername")
+		val tempPassword = pw.getString("temptablepassword")
 
 		val mainConfig = getDataSourceConfig(host, port, sid, username, password)
 		val tempConfig = getDataSourceConfig(host, port, sid, tempUsername, tempPassword)
