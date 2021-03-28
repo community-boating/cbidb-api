@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Server
 
-import com.coleji.framework.Core.RequestCacheObject
+import com.coleji.framework.Core.{RequestCacheObject, RootRequestCache}
 import com.coleji.framework.Util.PropertiesWrapper
 import org.sailcbi.APIServer.UserTypes._
 

@@ -11,7 +11,6 @@ import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
-import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext

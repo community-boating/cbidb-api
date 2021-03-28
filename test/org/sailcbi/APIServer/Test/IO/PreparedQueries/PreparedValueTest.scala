@@ -4,8 +4,8 @@ package org.sailcbi.APIServer.Test.IO.PreparedQueries
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedValue}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.UserTypes.RootRequestCache
 import com.coleji.framework.Core.Boot.ServerBootLoaderTest
+import com.coleji.framework.Core.RootRequestCache
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

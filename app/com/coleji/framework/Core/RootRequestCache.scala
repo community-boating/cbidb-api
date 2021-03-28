@@ -1,6 +1,5 @@
-package org.sailcbi.APIServer.UserTypes
+package com.coleji.framework.Core
 
-import com.coleji.framework.Core._
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class RootRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets)(implicit PA: PermissionsAuthority) extends UnlockedRequestCache(userName, secrets) {

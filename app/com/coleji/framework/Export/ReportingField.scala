@@ -105,6 +105,6 @@ object ReportingField {
 				case None => ""
 			}
 		}, fieldDisplayName, isDefault)
-		case _ => throw new Exception("Unconfigured org.sailcbi.APIServer.Reporting field type " + fieldDisplayName)
+		case _ => throw new Exception("Unconfigured Reporting field type " + fieldDisplayName)
 	}
 }

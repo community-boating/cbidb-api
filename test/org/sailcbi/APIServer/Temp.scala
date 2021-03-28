@@ -3,9 +3,8 @@ package org.sailcbi.APIServer
 import com.coleji.framework.IO.PreparedQueries.{PreparedLocalDate, PreparedLocalDateTime, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue, PreparedZonedDateTime}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.IO.PreparedQueries._
-import org.sailcbi.APIServer.UserTypes.RootRequestCache
 import com.coleji.framework.Core.Boot.ServerBootLoaderTest
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{PermissionsAuthority, RootRequestCache}
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.DateUtil
 import org.scalatest
