@@ -5,11 +5,9 @@ import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, Hardcod
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.StripeIOController
-import org.sailcbi.APIServer.Logic.DateLogic
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 import play.api.libs.ws.WSClient
 
@@ -74,29 +72,6 @@ sealed abstract class RequestCache private[Core](
 		stripeDatabaseIOMechanism,
 		PA.logger
 	)
-
-	// TODO: some way to confirm that things like this have no security on them (regardless of if we pass or fail in this req)
-	// TODO: dont do this every request.
-	object cachedEntities {
-		lazy val programTypes: List[ProgramType] = pb.getAllObjectsOfClass(ProgramType)
-		lazy val membershipTypes: List[MembershipType] = {
-			pb.getAllObjectsOfClass(MembershipType).map(m => {
-				m.references.program.findOneInCollection(programTypes)
-				m
-			})
-		}
-		lazy val membershipTypeExps: List[MembershipTypeExp] = {
-			pb.getAllObjectsOfClass(MembershipTypeExp).map(me => {
-				me.references.membershipType.findOneInCollection(membershipTypes)
-				me
-			})
-		}
-		lazy val ratings: List[Rating] = pb.getAllObjectsOfClass(Rating)
-	}
-
-	object logic {
-		val dateLogic: DateLogic = new DateLogic(self)
-	}
 }
 
 abstract class LockedRequestCache(

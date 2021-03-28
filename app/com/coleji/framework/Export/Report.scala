@@ -23,7 +23,11 @@ object Report {
 	type ReportFactoryMap = Map[String, (String, Class[_ <: ReportFactory[_]])]
 
 	def getReport(reportFactoryMap: ReportFactoryMap)(rc: UnlockedRequestCache, baseEntityName: String, filterSpec: String, fieldSpec: String): Report = {
-		throw new Exception("Many changes have been made to the core system since reporting was last tested; should be exhaustively tested again before use")
+		throw new Exception(
+			"""
+			|Many changes have been made to the core system since reporting was last tested; should be exhaustively tested again before use.
+			|Especially the thing that references jp class week aliases
+			|""".stripMargin)
 
 		val c: Class[_ <: ReportFactory[_]] = reportFactoryMap(baseEntityName)._2
 		val factory: ReportFactory[_ <: StorableClass] =

@@ -1,10 +1,11 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Core.RequestCache
+import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.{DefinedInitializable, Initializable}
+import org.sailcbi.APIServer.IO.CachedData
 
 
 class JpClassSession extends StorableClass {
@@ -28,8 +29,9 @@ class JpClassSession extends StorableClass {
 	)
 
 	object calculatedValues extends CalculatedValuesObject {
-		val jpWeekAlias = new DefinedInitializable[RequestCache, Option[String]]((rc: RequestCache) => {
-			rc.logic.dateLogic.getJpWeekAlias(myself.values.sessionDateTime.get.toLocalDate)
+		val jpWeekAlias = new DefinedInitializable[UnlockedRequestCache, Option[String]]((rc: UnlockedRequestCache) => {
+			val cache = new CachedData(rc)
+			cache.getJpWeekAlias(myself.values.sessionDateTime.get.toLocalDate)
 		})
 	}
 }
