@@ -5,7 +5,7 @@ import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
-class ApexRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
+class ApexRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCacheWithStripeController(userName, secrets) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
 

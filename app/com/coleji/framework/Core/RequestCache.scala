@@ -1,17 +1,10 @@
 package com.coleji.framework.Core
 
-import com.coleji.framework.IO.HTTP.FromWSClient
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
-import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
-import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
-import play.api.libs.ws.WSClient
-
-import scala.concurrent.ExecutionContext
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
@@ -58,20 +51,6 @@ sealed abstract class RequestCache private[Core](
 
 	def testDB(): Unit = pb.testDB
 
-	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
-		PermissionsAuthority.stripeURL,
-		secrets.stripeSecretKey,
-		new FromWSClient(ws)
-	)
-
-	private lazy val stripeDatabaseIOMechanism = new StripeDatabaseIOMechanism(pb)
-
-	def getStripeIOController(ws: WSClient)(implicit exec: ExecutionContext): StripeIOController = new StripeIOController(
-		this,
-		getStripeAPIIOMechanism(ws),
-		stripeDatabaseIOMechanism,
-		PA.logger
-	)
 }
 
 abstract class LockedRequestCache(

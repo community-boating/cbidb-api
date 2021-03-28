@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, P
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -128,7 +128,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		rc.executeProcedure(ppc)
 	}
 
-	private def startChargeProcess(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def startChargeProcess(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
@@ -164,7 +164,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		}
 	}
 
-	private def postPaymentIntent(rc: RequestCache, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def postPaymentIntent(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
 		val logger = PA.logger
 
 		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberRequestCache, ApexRequestCache)) {
@@ -290,7 +290,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		})
 	}
 
-	private def doCharge(rc: RequestCache, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
+	private def doCharge(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 		val stripeController = rc.getStripeIOController(ws)
 
