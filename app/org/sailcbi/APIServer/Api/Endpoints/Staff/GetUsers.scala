@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
+import com.coleji.framework.API.ValidationResult
 import com.coleji.framework.Storable.Filter
-import org.sailcbi.APIServer.Api.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Services.Authentication.StaffRequestCache

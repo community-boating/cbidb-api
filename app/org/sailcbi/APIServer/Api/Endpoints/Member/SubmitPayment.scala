@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import org.sailcbi.APIServer.Api.{ResultError, ValidationResult}
+import com.coleji.framework.API.{ResultError, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS

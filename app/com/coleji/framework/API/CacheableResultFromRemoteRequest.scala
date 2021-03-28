@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api
+package com.coleji.framework.API
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Services.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
@@ -31,5 +31,6 @@ trait CacheableResultFromRemoteRequest[T <: ParamsObject, U] extends CacheableRe
 				Ok(s).as("application/json")
 			})
 		})
-	}}
+	}
+	}
 }

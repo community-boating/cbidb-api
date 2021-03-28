@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import org.sailcbi.APIServer.Api.CacheableResultFromRemoteRequest
+import com.coleji.framework.API.CacheableResultFromRemoteRequest
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.CbiUtil.PropertiesWrapper
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetJpTeamsResult

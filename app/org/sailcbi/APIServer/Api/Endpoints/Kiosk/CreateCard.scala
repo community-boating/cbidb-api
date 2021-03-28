@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
-import org.sailcbi.APIServer.Api.ResultError
+import com.coleji.framework.API.ResultError
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
 import org.sailcbi.APIServer.Services.Authentication.KioskRequestCache

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Services
 
+import com.coleji.framework.API.ResultError
 import com.coleji.framework.Storable.{StorableClass, StorableObject}
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Api.ResultError
 import org.sailcbi.APIServer.CbiUtil.{Initializable, ParsedRequest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}

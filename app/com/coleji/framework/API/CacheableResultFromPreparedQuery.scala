@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api
+package com.coleji.framework.API
 
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject

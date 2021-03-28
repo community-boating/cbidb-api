@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api
+package com.coleji.framework.API
 
 import org.sailcbi.APIServer.CbiUtil.JsonUtil
 import org.sailcbi.APIServer.Services.{CacheBroker, RequestCache}

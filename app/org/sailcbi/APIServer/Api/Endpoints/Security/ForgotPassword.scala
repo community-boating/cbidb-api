@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import org.sailcbi.APIServer.Api.ValidationResult
+import com.coleji.framework.API.ValidationResult
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect}
 import org.sailcbi.APIServer.Services.Authentication.BouncerRequestCache

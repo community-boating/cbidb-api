@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
+import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.Api.Endpoints.Public.ApClassInstances.ApClassInstancesParamsObject
-import org.sailcbi.APIServer.Api.{CacheableResultFromPreparedQuery, ParamsObject}
 import org.sailcbi.APIServer.CbiUtil.DateUtil
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetApClassInstances, GetApClassInstancesResult}
 import org.sailcbi.APIServer.Services.Authentication.PublicRequestCache

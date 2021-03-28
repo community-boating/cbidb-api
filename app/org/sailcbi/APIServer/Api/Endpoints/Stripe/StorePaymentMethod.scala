@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import org.sailcbi.APIServer.Api.{ResultError, ValidationOk}
+import com.coleji.framework.API
+import com.coleji.framework.API.{ResultError, ValidationOk}
 import org.sailcbi.APIServer.CbiUtil.{CriticalError, NetSuccess, ParsedRequest, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -64,7 +65,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 							println("... and let's retry failed payments")
 							PortalLogic.retryFailedPayments(rc, adultPersonId, orderId.get) match {
 								case ValidationOk => Ok(JsObject(Map("success" -> JsBoolean(true))))
-								case ve: org.sailcbi.APIServer.Api.ValidationError => Ok(ve.toResultError.asJsObject())
+								case ve: API.ValidationError => Ok(ve.toResultError.asJsObject())
 							}
 						} else {
 							Ok(JsObject(Map("success" -> JsBoolean(true))))

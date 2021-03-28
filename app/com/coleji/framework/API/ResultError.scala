@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api
+package com.coleji.framework.API
 
 import play.api.libs.json.{JsObject, Json}
 

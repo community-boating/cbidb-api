@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api
+package com.coleji.framework.API
 
 sealed abstract class ValidationResult {
 	def flatMap(f: ValidationResult => ValidationResult): ValidationResult

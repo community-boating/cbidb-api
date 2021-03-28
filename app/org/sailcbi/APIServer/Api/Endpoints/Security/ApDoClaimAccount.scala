@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic

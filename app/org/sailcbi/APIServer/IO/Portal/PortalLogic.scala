@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import org.sailcbi.APIServer.Api.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.framework.API
+import com.coleji.framework.API.{ValidationOk, ValidationResult}
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -1032,7 +1033,7 @@ object PortalLogic {
 		hasCompleteItems && !hasIncompleteItems
 	}
 
-	def getSignupNote(rc: RequestCache, juniorId: Int, instanceId: Int): Either[ValidationError, Option[String]] = {
+	def getSignupNote(rc: RequestCache, juniorId: Int, instanceId: Int): Either[API.ValidationError, Option[String]] = {
 		val q = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache)) {
 			override val params: List[String] = List(juniorId.toString, instanceId.toString)
 
