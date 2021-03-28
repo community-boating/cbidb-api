@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassInstance
 
 import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export.{ARG_DROPDOWN, ReportingFilter, ReportingFilterFactory, ReportingFilterFactoryDropdown, ReportingFilterFunction}
+import com.coleji.framework.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassType}
 
 class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassInstance] with ReportingFilterFactoryDropdown {

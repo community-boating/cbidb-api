@@ -2,9 +2,6 @@ package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core.{CacheBroker, LockedRequestCache, PermissionsAuthority, RequestCacheObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
-import com.coleji.framework.Exception.UserTypeMismatchException
-import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.StorableObject
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class PublicRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {

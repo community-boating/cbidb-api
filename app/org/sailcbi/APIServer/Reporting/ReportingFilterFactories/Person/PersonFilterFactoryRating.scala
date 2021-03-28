@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 
 
 import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export.{ARG_DROPDOWN, ReportingFilter, ReportingFilterFactory, ReportingFilterFactoryDropdown, ReportingFilterFunction}
+import com.coleji.framework.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {

@@ -3,9 +3,6 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core.{CacheBroker, LockedRequestCache, PermissionsAuthority, RequestCacheObject}
 import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import com.coleji.framework.Exception.UserTypeMismatchException
-import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.StorableObject
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class BouncerRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {

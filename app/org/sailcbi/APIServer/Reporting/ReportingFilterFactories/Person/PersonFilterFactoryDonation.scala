@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 
 import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export.{ARG_DATE, ARG_DOUBLE, ReportingFilter, ReportingFilterFactory, ReportingFilterFunction}
+import com.coleji.framework.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Donation, Person}
 import org.sailcbi.APIServer.Logic.DateLogic
 
