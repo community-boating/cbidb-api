@@ -1,18 +1,11 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
-import com.coleji.framework.IO.HTTP.FromWSClient
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, TableAlias}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelationship}
-import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
-import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
-import play.api.libs.ws.WSClient
-
-import scala.concurrent.ExecutionContext
 
 
 class MemberRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCacheWithStripeController(userName, secrets) {
