@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority}
+import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.{GetSQLLiteralPrepared, ParsedRequest}
+import org.sailcbi.APIServer.CbiUtil.GetSQLLiteralPrepared
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

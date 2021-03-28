@@ -2,10 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.PDFReports
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reports.DailyCloseReport.DailyCloseReport
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Loader.{DailyCloseReportLiveLoader, DailyCloseReportLiveParameter}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache

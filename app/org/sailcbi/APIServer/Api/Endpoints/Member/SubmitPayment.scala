@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.{ResultError, ValidationResult}
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import org.sailcbi.APIServer.CbiUtil.{ServiceRequestResult, _}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}

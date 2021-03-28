@@ -2,9 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.PDFReports
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Reports.JpClassRoster.JpClassRoster
 import org.sailcbi.APIServer.Reports.JpClassRoster.Loader.{JpClassRosterLiveLoader, JpClassRosterLiveParameter}
 import org.sailcbi.APIServer.UserTypes.ApexRequestCache

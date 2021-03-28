@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCacheObject}
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCacheObject}
 import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, StaffRequestCache}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

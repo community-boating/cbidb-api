@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import com.coleji.framework.API.ValidationResult
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForSelect}
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.UserTypes.BouncerRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController

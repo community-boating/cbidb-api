@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.framework.Core.PermissionsAuthority
-import org.sailcbi.APIServer.CbiUtil.{EmailUtil, ParsedRequest}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import org.sailcbi.APIServer.CbiUtil.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache

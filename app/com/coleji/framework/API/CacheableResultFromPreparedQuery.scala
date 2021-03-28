@@ -1,9 +1,8 @@
 package com.coleji.framework.API
 
-import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCache, RequestCacheObject}
+import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache, RequestCacheObject}
 import com.coleji.framework.Exception.UnauthorizedAccessException
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelectCastableToJSObject
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.CbiUtil._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic

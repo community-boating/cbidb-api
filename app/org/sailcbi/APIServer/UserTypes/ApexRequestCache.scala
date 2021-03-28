@@ -1,9 +1,8 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core._
+import com.coleji.framework.Core.{ParsedRequest, _}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class ApexRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {

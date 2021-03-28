@@ -1,9 +1,8 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core.{CacheBroker, PermissionsAuthority, RequestCacheObject, UnlockedRequestCache}
+import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCacheObject, UnlockedRequestCache}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
 class StaffRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends UnlockedRequestCache(userName, secrets) {

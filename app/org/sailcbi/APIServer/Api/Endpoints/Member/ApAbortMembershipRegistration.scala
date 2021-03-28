@@ -1,8 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.{ValidationError, ValidationOk}
-import com.coleji.framework.Core.PermissionsAuthority
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}

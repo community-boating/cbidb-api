@@ -1,8 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForUpdateOrDelete
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}

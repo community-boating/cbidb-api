@@ -1,8 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.framework.Core.{PermissionsAuthority, UnlockedRequestCache}
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}

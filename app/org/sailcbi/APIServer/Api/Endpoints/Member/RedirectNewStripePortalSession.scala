@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.API.ValidationResult
-import com.coleji.framework.Core.PermissionsAuthority
-import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess, ParsedRequest}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import org.sailcbi.APIServer.CbiUtil.{NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import play.api.libs.ws.WSClient

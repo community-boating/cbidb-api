@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}

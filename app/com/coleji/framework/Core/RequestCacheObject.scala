@@ -1,7 +1,6 @@
 package com.coleji.framework.Core
 
 import com.coleji.framework.Exception.UserTypeMismatchException
-import org.sailcbi.APIServer.CbiUtil.ParsedRequest
 import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 import org.sailcbi.APIServer.UserTypes.RootRequestCache
 

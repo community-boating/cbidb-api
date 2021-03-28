@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
-import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess, ParsedRequest}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
+import org.sailcbi.APIServer.CbiUtil.{Currency, NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
