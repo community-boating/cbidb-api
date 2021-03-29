@@ -13,7 +13,7 @@ class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabas
 		val d = super.get
 		d match {
 			case None => ("NULL", List.empty)
-			case Some(d) => PA.persistenceSystem match {
+			case Some(d) => PA.systemParams.persistenceSystem match {
 				case PERSISTENCE_SYSTEM_MYSQL => ("'" + d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'", List.empty)
 				case PERSISTENCE_SYSTEM_ORACLE => ("TO_DATE('" + d.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "', 'MM/DD/YYYY')", List.empty)
 			}

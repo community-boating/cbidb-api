@@ -1,5 +1,5 @@
 import com.google.inject.AbstractModule
-import org.sailcbi.APIServer.Server.CBILiveBootLoader
+import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -13,6 +13,6 @@ import org.sailcbi.APIServer.Server.CBILiveBootLoader
   */
 class Module extends AbstractModule {
 	override def configure(): Unit = {
-		bind(classOf[CBILiveBootLoader]).asEagerSingleton()
+		bind(classOf[CBIBootLoaderLive]).asEagerSingleton()
 	}
 }

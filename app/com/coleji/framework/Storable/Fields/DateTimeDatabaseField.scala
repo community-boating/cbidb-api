@@ -12,7 +12,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 
 	def isNullable: Boolean = false
 
-	def getFieldType: String = PA.persistenceSystem match {
+	def getFieldType: String = PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "datetime"
 		case PERSISTENCE_SYSTEM_ORACLE => "date"
 	}
@@ -25,7 +25,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	def isYearConstant(year: Int): String => Filter = t => PA.persistenceSystem match {
+	def isYearConstant(year: Int): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -35,7 +35,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
-	def isDateConstant(date: LocalDate): String => Filter = t => PA.persistenceSystem match {
+	def isDateConstant(date: LocalDate): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL =>
 			Filter(
 				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +

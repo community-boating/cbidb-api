@@ -19,10 +19,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		val logger = PA.logger
-		PA.withRequestCacheMember(ParsedRequest(req), rc => {
+		PA.withRequestCache(MemberRequestCache)(None, ParsedRequest(req), rc => {
 			val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
-			val personId = rc.getAuthedPersonId()
+			val personId = rc.getAuthedPersonId
 			profiler.lap("got person id")
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)

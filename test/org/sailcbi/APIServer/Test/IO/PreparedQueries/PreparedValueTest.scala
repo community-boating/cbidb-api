@@ -1,21 +1,21 @@
 package org.sailcbi.APIServer.Test.IO.PreparedQueries
 
 
+import com.coleji.framework.Core.RootRequestCache
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedValue}
 import org.junit.runner.RunWith
-import org.sailcbi.APIServer.IO.PreparedQueries._
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
-import com.coleji.framework.Core.RootRequestCache
+import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 @RunWith(classOf[JUnitRunner])
-class PreparedValueTest extends FunSuite {
+class PreparedValueTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 	test("dfgh") {
-		ServerBootLoaderTest.withPAWriteable(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPAWriteable(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val ins = new PreparedQueryForInsert(Set(RootRequestCache)) {
@@ -36,7 +36,7 @@ class PreparedValueTest extends FunSuite {
 		})
 	}
 //	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
-//		val rc = pa.assertRC(RootUserType.create)
+//		val rc = loader.assertRC(pa)(RootUserType.create)
 //
 //
 //

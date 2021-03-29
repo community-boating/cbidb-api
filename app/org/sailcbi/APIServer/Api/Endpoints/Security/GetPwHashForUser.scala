@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCacheObject}
-import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.{BouncerRequestCache, MemberRequestCache, StaffRequestCache}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
@@ -27,7 +27,7 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Inject
 			if (userTypeObj.isEmpty) Ok("BAD USER TYPE")
 			else {
 				try {
-					PA.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
+					BouncerRequestCache.getPwHashForUser(ParsedRequest(request), userName, userTypeObj.get) match {
 						case None => Ok("NO DATA")
 						// Int is the hashing scheme ID, string is the hash itself
 						case Some(t: (String, String, String)) => Ok(t._1 + "," + t._2 + "," + t._3)

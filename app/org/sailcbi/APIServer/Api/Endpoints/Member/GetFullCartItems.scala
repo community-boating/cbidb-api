@@ -4,7 +4,7 @@ import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthori
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.FullCart
-import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -14,9 +14,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(program: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val cb: CacheBroker = rc.cb
-			val personId = rc.getAuthedPersonId()
+			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderId(rc, personId, program)
 
 			val fullCartItemsQuery = new FullCart(orderId)
@@ -32,7 +32,7 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 		if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				val cb: CacheBroker = rc.cb
-				rc.getAuthedPersonId() match {
+				rc.getAuthedPersonId match {
 					case None => Future(Ok(JsArray()))
 					case Some(personId: Int) => {
 						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)

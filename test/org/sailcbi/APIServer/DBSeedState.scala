@@ -1,14 +1,16 @@
 package org.sailcbi.APIServer
 
+import com.coleji.framework.Core.RootRequestCache
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
-import com.coleji.framework.Core.RootRequestCache
+import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import javax.inject.Inject
+
 @RunWith(classOf[JUnitRunner])
-class DBSeedState extends FunSuite {
+class DBSeedState @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 //
 //
 //	test("nuke") {
@@ -21,7 +23,7 @@ class DBSeedState extends FunSuite {
 
 //	test("reflection") {
 //		ServerBootLoaderTest.withPA(pa => {
-//			val rc = pa.assertRC(AuthenticationInstance.ROOT)
+//			val rc = loader.assertRC(pa)(AuthenticationInstance.ROOT)
 //
 //			val instances = pb.getAllObjectsOfClass(JpClassInstance)
 //			instances.foreach(_.booleanValueMap)
@@ -29,7 +31,7 @@ class DBSeedState extends FunSuite {
 //	}
 
 	test("concurrent update") {
-		ServerBootLoaderTest.withPAWriteable(pa => {
+		loader.withPAWriteable(pa => {
 			val seedState = List(
 				new User()
 					.update(_.active, true)
@@ -39,9 +41,9 @@ class DBSeedState extends FunSuite {
 					.update(_.email, "bsmith@sdfg.com")
 					.withPK(9998)
 			)
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
-			pa.withSeedState(seedState, () => {
+			loader.withSeedState(pa)(seedState, () => {
 				val users = rc.getAllObjectsOfClass(User, Some(List(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active)))
 				val user = users.head
 				println("Seed user has id " + user.getID)
@@ -57,17 +59,17 @@ class DBSeedState extends FunSuite {
 		})
 	}
 
-	test("check all entities has valuesList") {
-		ServerBootLoaderTest.withPA(pa => {
-			pa.instantiateAllEntityCompanions()
-			assert(pa.checkAllEntitiesHaveValuesList.isEmpty)
-		})
-	}
-
-	test("check all valuesLists match reflection") {
-		ServerBootLoaderTest.withPA(pa => {
-			pa.instantiateAllEntityCompanions()
-			assert(pa.checkAllValueListsMatchReflection.isEmpty)
-		})
-	}
+//	test("check all entities has valuesList") {
+//		CBITestBootLoader.withPA(pa => {
+//			pa.instantiateAllEntityCompanions(CBILiveBootLoader.ENTITY_PACKAGE_PATH)
+//			assert(pa.checkAllEntitiesHaveValuesList.isEmpty)
+//		})
+//	}
+//
+//	test("check all valuesLists match reflection") {
+//		CBITestBootLoader.withPA(pa => {
+//			pa.instantiateAllEntityCompanions()
+//			assert(pa.checkAllValueListsMatchReflection.isEmpty)
+//		})
+//	}
 }

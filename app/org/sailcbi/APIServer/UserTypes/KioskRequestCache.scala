@@ -1,24 +1,29 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
+import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class KioskRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
+class KioskRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCache(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[KioskRequestCache] = KioskRequestCache
 }
 
 object KioskRequestCache extends RequestCacheObject[KioskRequestCache] {
 	val uniqueUserName = "KIOSK"
 
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): KioskRequestCache = new KioskRequestCache(userName, secrets)
-	def create(secrets: PermissionsAuthoritySecrets): KioskRequestCache = create(uniqueUserName)(secrets)
+	override val requireCORSPass: Boolean = false
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
-		if (request.headers.get("Am-CBI-Kiosk").contains(kioskToken)) Some(uniqueUserName)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): KioskRequestCache =
+		new KioskRequestCache(userName, serverParams, dbGateway)
+
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): KioskRequestCache = create(uniqueUserName, serverParams, dbGateway)
+
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] =
+		if (request.headers.get("Am-CBI-Kiosk").contains(customParams.getString(CBIBootLoaderLive.PROPERTY_NAMES.KIOSK_TOKEN))) Some(uniqueUserName)
 		else None
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = None
 }

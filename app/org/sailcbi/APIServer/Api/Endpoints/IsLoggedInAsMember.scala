@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints
 import com.coleji.framework.API.ResultError
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.Exception.UnauthorizedAccessException
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -12,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		try {
-			PA.withRequestCacheMember(ParsedRequest(request), rc => {
+			PA.withRequestCache(MemberRequestCache)(None, ParsedRequest(request), rc => {
 				Future {
 					Ok(JsObject(Map("value" -> JsString(rc.userName))))
 				}

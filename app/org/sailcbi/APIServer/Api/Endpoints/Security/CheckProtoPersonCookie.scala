@@ -18,8 +18,6 @@ class CheckProtoPersonCookie @Inject()(implicit exec: ExecutionContext) extends 
 				// the request has a cookie...
 				val cookie = request.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).get.value
 					try {
-						PA.sleep()
-
 						val q = new PreparedQueryForSelect[Int](Set(BouncerRequestCache)) {
 							override val params: List[String] = List(cookie)
 

@@ -3,15 +3,19 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
 
-class ProtoPersonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCacheWithStripeController(userName, secrets) {
+class ProtoPersonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
-	def getAuthedPersonId(): Option[Int] = {
+	def getAuthedPersonId: Option[Int] = {
 		val ids = this.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
-		// TODO: critical error if this list has >1 element
-		ids.headOption
+
+		ids match {
+			case id :: Nil => Some(id)
+			case _ => None
+		}
 	}
 
 	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
@@ -30,9 +34,16 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 	val COOKIE_NAME = "CBIDB_PROTO"
 	val COOKIE_VALUE_PREFIX = "PROTO_"
 
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): ProtoPersonRequestCache = new ProtoPersonRequestCache(userName, secrets)
+	override val requireCORSPass: Boolean = false
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ProtoPersonRequestCache =
+		new ProtoPersonRequestCache(userName, serverParams, dbGateway)
+
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] = {
 		val cookies = request.cookies.filter(_.name == COOKIE_NAME)
 		if (cookies.isEmpty) None
 		else if (cookies.size > 1) None
@@ -42,9 +53,4 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 			else None
 		}
 	}
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

@@ -4,23 +4,20 @@ import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForInsert, Hardcod
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
 sealed abstract class RequestCache private[Core](
 	val userName: String,
-	secrets: PermissionsAuthoritySecrets
+	serverParams: PropertiesWrapper,
+	dbGateway: DatabaseGateway
 )(implicit val PA: PermissionsAuthority) {
-	private val self = this
-
 	def companion: RequestCacheObject[_]
 
 	protected val pb: PersistenceBroker = {
-		println("In RC:  " + PA.toString)
-		val pbReadOnly = PA.readOnlyDatabase
-		if (this.isInstanceOf[RootRequestCache]) new OracleBroker(secrets.dbConnection, false, pbReadOnly)
-		else new OracleBroker(secrets.dbConnection, PA.preparedQueriesOnly, pbReadOnly)
+		if (this.isInstanceOf[RootRequestCache]) new OracleBroker(dbGateway, false, PA.systemParams.readOnlyDatabase)
+		else new OracleBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
 	}
 
 	val cb: CacheBroker = new RedisBroker
@@ -48,22 +45,21 @@ sealed abstract class RequestCache private[Core](
 		this.companion.test(pc.allowedUserTypes)
 		pb.executeProcedure(pc)
 	}
-
-	def testDB(): Unit = pb.testDB
-
 }
 
 abstract class LockedRequestCache(
 	override val userName: String,
-	secrets: PermissionsAuthoritySecrets
-) extends RequestCache(userName, secrets) {
+	serverParams: PropertiesWrapper,
+	dbGateway: DatabaseGateway
+) extends RequestCache(userName, serverParams, dbGateway) {
 
 }
 
 abstract class UnlockedRequestCache(
 	override val userName: String,
-	secrets: PermissionsAuthoritySecrets
-) extends RequestCache(userName, secrets) {
+	serverParams: PropertiesWrapper,
+	dbGateway: DatabaseGateway
+) extends RequestCache(userName, serverParams, dbGateway) {
 	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
 		pb.getObjectById(obj, id)
 

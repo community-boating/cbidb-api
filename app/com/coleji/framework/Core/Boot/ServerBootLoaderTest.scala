@@ -1,28 +1,32 @@
 package com.coleji.framework.Core.Boot
 
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.framework.Core.{PermissionsAuthority, RequestCache, RequestCacheObject}
+import com.coleji.framework.Storable.StorableClass
+import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class ServerBootLoaderTest extends ServerBootLoader {
-	def pa(writeable: Boolean): PermissionsAuthority = this.load(None, true, !writeable)
-}
+class ServerBootLoaderTest(writeableDatabases: Set[String]) {
+	def init(entityPackagePath: String, writeable: Boolean): PermissionsAuthority = ServerBootLoader.load(
+		lifecycle = None,
+		isTestMode = true,
+		readOnlyDatabase= !writeable,
+		entityPackagePath = entityPackagePath,
+		definedAuthMechanisms = List.empty,
+		requiredProperties = List.empty,
+		paPostBoot = _ => {}
+	)
 
-object ServerBootLoaderTest {
 	def withPA(block: PermissionsAuthority => Unit): Unit = {
-		val loader = new ServerBootLoaderTest()
-		val pa = loader.pa(false)
+		val pa = this.init(CBIBootLoaderLive.ENTITY_PACKAGE_PATH, false)
 		PermissionsAuthority.setPA(pa)
 		pa.bootChecks()
 		block(pa)
 		pa.closeDB()
 		PermissionsAuthority.clearPA()
 	}
+
 	def withPAWriteable(block: PermissionsAuthority => Unit): Unit = {
-		val acceptableWriteableDatabases = Set(
-			"CBI_DEV2"
-		)
-		val loader = new ServerBootLoaderTest()
-		val pa = loader.pa(true)
-		if (!acceptableWriteableDatabases.contains(pa.instanceName)) {
+		val pa = this.init(CBIBootLoaderLive.ENTITY_PACKAGE_PATH, true)
+		if (!writeableDatabases.contains(pa.instanceName)) {
 			pa.closeDB()
 			throw new Exception("Cowardly refusing to provide a writeable PB on an unregistered database: " + pa.instanceName)
 		} else {
@@ -33,4 +37,12 @@ object ServerBootLoaderTest {
 			PermissionsAuthority.clearPA()
 		}
 	}
+
+	def assertRC[T <: RequestCache](pa: PermissionsAuthority)(rco: RequestCacheObject[T], userName: String): T = pa.assertRC(rco, userName)
+
+	def nukeDB(pa: PermissionsAuthority): Unit = pa.nukeDB()
+
+	def closeDB(pa: PermissionsAuthority): Unit = pa.closeDB()
+
+	def withSeedState(pa: PermissionsAuthority)(entities: List[StorableClass], block: () => Unit): Unit = pa.withSeedState(entities, block)
 }

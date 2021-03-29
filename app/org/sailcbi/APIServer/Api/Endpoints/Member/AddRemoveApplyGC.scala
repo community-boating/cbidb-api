@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -13,8 +14,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	def add()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ApplyGCShape.apply)(parsed => {
-			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId()
+			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
@@ -32,8 +33,8 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 	def delete()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, UnapplyGCShape.apply)(parsed => {
-			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId()
+			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				PortalLogic.unapplyGCFromOrder(rc, orderId, parsed.certId)

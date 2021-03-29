@@ -1,19 +1,56 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
+import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class SymonRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZonedDateTime}
+
+class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCache(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
 }
 
 object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 	val uniqueUserName = "SYMON"
 
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): SymonRequestCache = new SymonRequestCache(userName, secrets)
-	def create(secrets: PermissionsAuthoritySecrets): SymonRequestCache = create(uniqueUserName)(secrets)
+	override val requireCORSPass: Boolean = false
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): SymonRequestCache =
+		new SymonRequestCache(userName, serverParams, dbGateway)
+
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): SymonRequestCache = create(uniqueUserName, serverParams, dbGateway)
+
+
+	private def validateSymonHash(
+		customParams: PropertiesWrapper,
+		host: String,
+		program: String,
+		argString: String,
+		status: Int,
+		mac: String,
+		candidateHash: String
+	): Boolean = {
+		println("here we go")
+		val symonSalt = customParams.getString(CBIBootLoaderLive.PROPERTY_NAMES.SYMON_SALT)
+		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
+		val input = symonSalt + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt
+		println(input)
+		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
+		val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
+		println("expectedHash: " + expectedHash)
+		println("candidateHash: " + candidateHash)
+		expectedHash == candidateHash
+	}
+
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] = {
 		try {
 			println("here we go")
 			val host: String = request.postParams("symon-host")
@@ -24,7 +61,8 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 			val mac = request.postParams("symon-mac")
 			val candidateHash = request.postParams("symon-hash")
 			println("All args were present")
-			val isValid = PA.validateSymonHash(
+			val isValid = validateSymonHash(
+				customParams = customParams,
 				host = host,
 				program = program,
 				argString = argString,
@@ -41,9 +79,4 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 			}
 		}
 	}
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

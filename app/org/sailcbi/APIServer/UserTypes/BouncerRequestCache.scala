@@ -1,13 +1,15 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
+import com.coleji.framework.Util.PropertiesWrapper
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
 
-class BouncerRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCache(userName, secrets) {
+class BouncerRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCache(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
 
-	def getUserByUsername(username: String): Option[User] = pb.getObjectsByFilters(User, List(User.fields.userName.equalsConstantLowercase(username.toLowerCase))) match {
+	def getUserByUsername(username: String): Option[User] =
+	pb.getObjectsByFilters(User, List(User.fields.userName.equalsConstantLowercase(username.toLowerCase))) match {
 		case u :: Nil => Some(u)
 		case _ => None
 	}
@@ -18,23 +20,35 @@ class BouncerRequestCache(override val userName: String, secrets: PermissionsAut
 object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 	val uniqueUserName = "BOUNCER"
 
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): BouncerRequestCache = new BouncerRequestCache(userName, secrets)
-	def create(secrets: PermissionsAuthoritySecrets): BouncerRequestCache = create(uniqueUserName)(secrets)
+	val BOUNCER_AUTH_HEADER = "origin-bouncer"
+
+	override val requireCORSPass: Boolean = false
+
+	def getPwHashForUser(parsedRequest: ParsedRequest, userName: String, userType: RequestCacheObject[_])(implicit PA: PermissionsAuthority): Option[(String, String, String)] = {
+		PA.withRequestCacheNoFuture(BouncerRequestCache)(None, parsedRequest, rc => {
+			if (PA.systemParams.allowableUserTypes.contains(userType)) {
+				userType match {
+					case MemberRequestCache => MemberRequestCache.getPwHashForUser(rc, userName)
+					case StaffRequestCache => StaffRequestCache.getPwHashForUser(rc, userName)
+					case _ => None
+				}
+			} else None
+		}).flatten
+	}
+
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): BouncerRequestCache =
+		new BouncerRequestCache(userName, serverParams, dbGateway)
+
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): BouncerRequestCache = create(uniqueUserName, serverParams, dbGateway)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,
 		rootCB: CacheBroker,
-		apexToken: String,
-		kioskToken: String
+		customParams: PropertiesWrapper,
 	)(implicit PA: PermissionsAuthority): Option[String] =
 		if (
-			request.headers.get(PermissionsAuthority.BOUNCER_AUTH_HEADER).contains("true") &&
+			request.headers.get(BOUNCER_AUTH_HEADER).contains("true") &&
 					PA.requestIsFromLocalHost(request)
 		) Some(uniqueUserName)
 		else None
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

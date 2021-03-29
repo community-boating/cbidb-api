@@ -13,7 +13,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 
 	def isNullable: Boolean = false
 
-	def getFieldType: String = PA.persistenceSystem match {
+	def getFieldType: String = PA.systemParams.persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
 	}
 
@@ -25,7 +25,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		}
 	}
 
-	def isYearConstant(year: Int): String => Filter = t => PA.persistenceSystem match {
+	def isYearConstant(year: Int): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -44,7 +44,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 
 	private def dateComparison(date: LocalDate, comp: DateComparison): String => Filter = t => {
 		val comparator: String = comp.comparator
-		PA.persistenceSystem match {
+		PA.systemParams.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
 				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
 			case PERSISTENCE_SYSTEM_ORACLE =>

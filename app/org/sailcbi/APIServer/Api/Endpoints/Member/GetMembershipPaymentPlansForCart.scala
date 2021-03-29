@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -14,8 +15,8 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			val now = PA.now()

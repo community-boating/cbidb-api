@@ -1,4 +1,4 @@
 package com.coleji.framework.Core
 
-class OracleBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends RelationalBroker(dbConnection, preparedQueriesOnly, readOnly)
+class OracleBroker private[Core](dbGateway: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends RelationalBroker(dbGateway, preparedQueriesOnly, readOnly)

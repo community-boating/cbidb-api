@@ -3,30 +3,36 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core.{ParsedRequest, _}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
+import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class ApexRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCacheWithStripeController(userName, secrets) {
+class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
 
 object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 	val uniqueUserName = "APEX"
 
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): ApexRequestCache = new ApexRequestCache(userName, secrets)
-	def create(secrets: PermissionsAuthoritySecrets): ApexRequestCache = create(uniqueUserName)(secrets)
+	override val requireCORSPass: Boolean = false
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] = {
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ApexRequestCache =
+		new ApexRequestCache(userName, serverParams, dbGateway)
+
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ApexRequestCache = create(uniqueUserName, serverParams, dbGateway)
+
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] = {
 		val headers = request.headers.toMap
 		val headerKey = "apex-token"
-		if (headers.contains(headerKey) && headers(headerKey).mkString("") == apexToken) Some(uniqueUserName)
-		else {
-			// signet?
-			val signetKey = "apex-signet"
-			if (
-				headers.contains(signetKey) && PA.validateApexSignet(Some(headers(signetKey).mkString("")))
-			) Some(uniqueUserName)
-			else None
-		}
+		if (
+			headers.contains(headerKey) &&
+			headers(headerKey).mkString("") == customParams.getString(CBIBootLoaderLive.PROPERTY_NAMES.APEX_TOKEN)
+		) Some(uniqueUserName)
+		else None
 	}
 
 	def validateApexSessionKey(rc: RequestCache, userName: String, apexSession: String, apexSessionKey: String): Boolean = {
@@ -39,9 +45,4 @@ object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 		}
 		rc.executePreparedQueryForSelect(q).length == 1
 	}
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

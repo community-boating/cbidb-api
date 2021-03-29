@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.ValidationResult
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -12,8 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 			PA.withParsedPostBodyJSON(request.body.asJson, ApClassSignupShape.apply)(parsed => {
 				PortalLogic.apClassSignup(rc, personId, parsed.instanceId, parsed.doWaitlist) match {
 					case None => Future(Ok(new JsObject(Map(

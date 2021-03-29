@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.{ValidationError, ValidationOk}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -12,10 +13,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApAbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 
 
-			val memberId = rc.getAuthedPersonId()
+			val memberId = rc.getAuthedPersonId
 
 			PortalLogic.apDeleteReservation(rc, memberId) match {
 				case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))

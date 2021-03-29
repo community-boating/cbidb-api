@@ -20,8 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
@@ -35,10 +35,10 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 	def postJP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 
 
-			val personId = rc.getAuthedPersonId()
+			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
 			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
@@ -67,7 +67,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId().get
+			val personId = rc.getAuthedPersonId.get
 			val program = parsedRequest.postParams("program")
 			program match {
 				case ORDER_NUMBER_APP_ALIAS.DONATE | ORDER_NUMBER_APP_ALIAS.GC => {

@@ -1,20 +1,22 @@
 package org.sailcbi.APIServer
 
-import org.junit.runner.RunWith
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
 import com.coleji.framework.Core.RootRequestCache
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.Filter
 import com.coleji.framework.Storable.StorableQuery._
+import org.junit.runner.RunWith
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
+import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import javax.inject.Inject
+
 @RunWith(classOf[JUnitRunner])
-class QueryBuilderTest extends FunSuite {
+class QueryBuilderTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 	test("1 table, no filters (jp class types, typeID and typeName)") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -37,8 +39,8 @@ class QueryBuilderTest extends FunSuite {
 	}
 
 	test("2 tables, no filters (jp instances and types)") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -67,8 +69,8 @@ class QueryBuilderTest extends FunSuite {
 	}
 
 	test("2 tables, filters") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)
@@ -116,8 +118,8 @@ class QueryBuilderTest extends FunSuite {
 	}
 
 	test("outer join") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val types = TableAlias.wrapForInnerJoin(JpClassType)

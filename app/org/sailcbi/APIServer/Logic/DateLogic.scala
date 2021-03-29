@@ -6,7 +6,7 @@ import java.time.{LocalDate, LocalDateTime, Month}
 
 object DateLogic {
 	implicit val PA: PermissionsAuthority = PermissionsAuthority.PA
-	def now: LocalDateTime = LocalDateTime.now.plusSeconds(PA.serverParameters.serverTimeOffsetSeconds)
+	def now: LocalDateTime = LocalDateTime.now.plusSeconds(PA.systemParams.serverTimeOffsetSeconds)
 
 	def currentSeason(asOf: LocalDate = now.toLocalDate): Int = {
 		val currentYear = asOf.getYear

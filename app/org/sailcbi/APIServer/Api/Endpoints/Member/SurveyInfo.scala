@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
+		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
 			val select = new PreparedQueryForSelect[SurveyInfoShape](Set(MemberRequestCache)) {
@@ -48,7 +48,7 @@ class SurveyInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		val juniorId: Int = request.body.asJson.map(json => json("personId").toString().toInt).get
-		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
+		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 
 			val cb: CacheBroker = rc.cb
 			val data = request.body.asJson

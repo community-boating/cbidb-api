@@ -5,6 +5,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.Util.{NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -14,8 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionContext, ws: WSClient) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 			val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 
 			customerIdOption match {

@@ -1,82 +1,46 @@
 package com.coleji.framework.Core
 
 import com.coleji.framework.API.ResultError
+import com.coleji.framework.Core.Boot.SystemServerParameters
 import com.coleji.framework.Core.Emailer.SSMTPEmailer
 import com.coleji.framework.Core.Logger.{Logger, ProductionLogger, UnitTestLogger}
-import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
-import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedProcedureCall, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.{ResultSetWrapper, StorableClass, StorableObject}
-import com.coleji.framework.Util.Initializable
+import com.coleji.framework.Util.{Initializable, PropertiesWrapper}
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.Server.{PermissionsAuthoritySecrets, ServerParameters}
-import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
 
-import java.math.BigInteger
-import java.security.MessageDigest
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.io.Directory
 import scala.reflect.runtime.universe
 import scala.util.{Failure, Success}
 
-
 class PermissionsAuthority private[Core] (
-	val serverParameters: ServerParameters,
-	val isTestMode: Boolean,
-	val isDebugMode: Boolean,
-	val readOnlyDatabase: Boolean,
-	val allowableUserTypes: List[RequestCacheObject[_]],
-	val preparedQueriesOnly: Boolean,
-	val persistenceSystem: PersistenceSystem,
-	secrets: PermissionsAuthoritySecrets
+	val systemParams: SystemServerParameters,
+	val customParams: PropertiesWrapper,
+	dbGateway: DatabaseGateway,
+	paPostBoot: PropertiesWrapper => Unit
 )  {
-	private val ENTITY_PACKAGE_PATH = "org.sailcbi.APIServer.Entities.EntityDefinitions"
-	println(s"inside PermissionsAuthority constructor: test mode: $isTestMode, readOnlyDatabase: $readOnlyDatabase")
-	println(this.toString)
-	println("AllowableUserTypes: ", allowableUserTypes)
-	println("PA Debug: " + this.isDebugMode)
-	// Initialize sentry
-	secrets.sentryDSN.foreach(Sentry.init)
-	if (secrets.sentryDSN.isDefined) {
-		println("sentry is defined")
-	} else {
-		println("sentry is NOT defined")
-	}
+	println(s"inside PermissionsAuthority constructor: test mode: ${systemParams.isTestMode}, readOnlyDatabase: ${systemParams.readOnlyDatabase}")
+	println(systemParams)
+	println(customParams)
+	println("AllowableUserTypes: ", systemParams.allowableUserTypes)
+	println("PA Debug: " + systemParams.isDebugMode)
 
-	def bootChecks(): Unit = {
-		if (this.isDebugMode) {
-			println("running PA boot checks")
-			if (this.checkAllValueListsMatchReflection.nonEmpty) {
-				throw new Exception("ValuesList is not correct for: " + this.checkAllValueListsMatchReflection)
-			}
-		} else {
-			println("non debug mode, skipping boot checks")
-		}
-	}
-
-	def instanceName: String = secrets.dbConnection.mainSchemaName
-
-	def sleep(): Unit = {
-//		println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-//		println("sleepytime...")
-//		println("Active threads: " + Thread.activeCount())
-//		println("Current thread ID: " + Thread.currentThread().getId)
-//		println("Current thread name: " + Thread.currentThread().getName)
-//		println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-//		Thread.sleep(4000)
-	}
-
-	private lazy val rootRC: RootRequestCache = RootRequestCache.create(secrets)
+	private lazy val rootRC: RootRequestCache = RootRequestCache.create(customParams, dbGateway)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
 	private lazy val rootCB = new RedisBroker
 
-	private lazy val bouncerRC: BouncerRequestCache = BouncerRequestCache.create(secrets)
+	lazy val logger: Logger = if (!systemParams.isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
+
+	paPostBoot(customParams)
+
+	def instanceName: String = dbGateway.mainSchemaName
 
 	def now(): LocalDateTime = {
 		val q = new PreparedQueryForSelect[LocalDateTime](Set(RootRequestCache)) {
@@ -89,20 +53,7 @@ class PermissionsAuthority private[Core] (
 		rootRC.executePreparedQueryForSelect(q).head
 	}
 
-	def testDB = rootRC.testDB
-
-	def procedureTest() = {
-		println("starting executeProcedure...")
-		val ret = rootRC.executeProcedure(PreparedProcedureCall.test)
-		println("finished executeProcedure")
-
-		println("procedure call complete with named params.....")
-		println(s"(b, c, ss, persons) = $ret")
-	}
-
-	def logger: Logger = if (!isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
-
-	def requestIsFromLocalHost(request: ParsedRequest): Boolean = {
+	def requestIsFromLocalHost(request:ParsedRequest): Boolean = {
 		val addressRegex = "127\\.0\\.0\\.1(:[0-9]+)?".r
 		val allowedIPs = Set(
 			"127.0.0.1",
@@ -156,9 +107,16 @@ class PermissionsAuthority private[Core] (
 		)(
 			requiredUserName,
 			parsedRequest,
-			rootCB,
-			secrets
+			rootCB
 		)
+
+	def withRequestCacheNoFuture[T <: RequestCache, U](
+		requiredUserType: RequestCacheObject[T]
+	)(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		block: T => U
+	): Option[U] = getRequestCache(requiredUserType, requiredUserName, parsedRequest).map(block)
 
 	def withRequestCache[T <: RequestCache](
 		requiredUserType: RequestCacheObject[T]
@@ -169,104 +127,20 @@ class PermissionsAuthority private[Core] (
 	)(implicit exec: ExecutionContext): Future[Result] =
 		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
 
-	private def getRequestCacheMember(
-		requiredUserName: Option[String],
-		parsedRequest: ParsedRequest
-	): Option[MemberRequestCache] =
-		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets)
-
-	def withRequestCacheMember(
-		parsedRequest: ParsedRequest,
-		block: MemberRequestCache => Future[Result]
-	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMember(None, parsedRequest), block)
-
-	private def getRequestCacheMemberWithJuniorId(
-		requiredUserName: Option[String],
-		parsedRequest: ParsedRequest,
-		juniorId: Int
-	): Option[MemberRequestCache] = {
-		println("about to validate junior id in request....")
-		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets) match {
-			case None => None
-			case Some(ret: MemberRequestCache) => {
-				// auth was successful
-				//... but does the request juniorId match the auth'd parent id?
-				val authedPersonId = ret.asInstanceOf[MemberRequestCache].getAuthedPersonId()
-				val getAuthedJuniorIDs = new HardcodedQueryForSelect[Int](Set(RootRequestCache)) {
-					override def getQuery: String =
-						s"""
-						   |select b from person_relationships rl
-						   |where a = ${authedPersonId}
-						   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
-				""".stripMargin
-					override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
-				}
-				val juniorIds = rootRC.executePreparedQueryForSelect(getAuthedJuniorIDs)
-				if (juniorIds.contains(juniorId)) {
-					Some(ret)
-				} else {
-					throw new Exception(s"junior ID ${juniorId} in request does not match allowed ids for parent ${authedPersonId}: ${juniorIds.mkString(", ")}")
-				}
-			}
-		}
-	}
-
-	def withRequestCacheMemberWithJuniorId(
-		parsedRequest: ParsedRequest,
-		juniorId: Int,
-		block: MemberRequestCache => Future[Result]
-	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMemberWithJuniorId(None, parsedRequest, juniorId), block)
-
-	private def getRequestCacheMemberWithParentId(
-		requiredUserName: Option[String],
-		parsedRequest: ParsedRequest,
-		parentId: Int
-	): Option[MemberRequestCache] = {
-		authenticate(MemberRequestCache)(requiredUserName, parsedRequest, rootCB, secrets) match {
-			case None => None
-			case Some(ret: MemberRequestCache) => {
-				// auth was successful
-				//... but does the request parentId match the auth'd parent id?
-				val authedPersonId = ret.getAuthedPersonId()
-				if (authedPersonId == parentId) {
-					Some(ret)
-				} else {
-					throw new Exception(s"parent ID ${parentId} in request does not match authed parent ID ${authedPersonId}")
-				}
-			}
-		}
-	}
-
-	def withRequestCacheMemberWithParentId(
-		parsedRequest: ParsedRequest,
-		parentId: Int,
-		block: MemberRequestCache => Future[Result]
-	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCacheMemberWithParentId(None, parsedRequest, parentId), block)
-
-	def getPwHashForUser(request: ParsedRequest, userName: String, userType: RequestCacheObject[_]): Option[(String, String, String)] = {
-		if (
-			allowableUserTypes.contains(userType) && // requested user type is enabled in this server instance
-			BouncerRequestCache.getAuthenticatedUsernameInRequest(request, rootCB, secrets.apexToken, secrets.kioskToken).isDefined
-		) {
-			userType.getPwHashForUser(rootRC, userName)
-		} else None
-	}
-
 	// TODO: better way to handle requests authenticated against multiple mechanisms?
 	// TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things
-
 	// TODO: synchronizing this is a temp solution until i get thread pools figured out.
 	//  Doesn't really solve any problems anyway, except making the log a bit easier to read
-	def authenticate[T <: RequestCache](
+	private def authenticate[T <: RequestCache](requiredUserType: RequestCacheObject[T], parsedRequest: ParsedRequest): Option[T] =
+		authenticate(requiredUserType)(None, parsedRequest)
+
+	@deprecated
+	private def authenticate[T <: RequestCache](
 		requiredUserType: RequestCacheObject[T]
 	)(
 		requiredUserName: Option[String],
 		parsedRequest: ParsedRequest,
-		rootCB: CacheBroker,
-		secrets: PermissionsAuthoritySecrets
+		rootCB: CacheBroker = rootCB
 	): Option[T] = synchronized {
 		println("\n\n====================================================")
 		println("====================================================")
@@ -275,11 +149,15 @@ class PermissionsAuthority private[Core] (
 		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 		println("Headers: " + parsedRequest.headers)
 
-		val authentication: Option[T] = requiredUserType.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
+		val authentication: Option[T] = requiredUserType.getAuthenticatedUsernameInRequest(
+			parsedRequest,
+			rootCB,
+			customParams
+		) match {
 			case None => None
 			case Some(x: String) => {
 				println("AUTHENTICATION:  Request is authenticated as " + requiredUserType.getClass.getName)
-				Some(requiredUserType.create(x)(secrets))
+				Some(requiredUserType.create(x, customParams, dbGateway))
 			}
 		}
 
@@ -288,7 +166,7 @@ class PermissionsAuthority private[Core] (
 		// For now, non-public requests may not be cross site
 		// auth'd GETs are ok if the CORS status is Unknown
 		val corsOK = {
-			if (requiredUserType == StaffRequestCache || requiredUserType == MemberRequestCache) {
+			if (requiredUserType.requireCORSPass) {
 				CORS.getCORSStatus(parsedRequest.headers) match {
 					case Some(UNKNOWN) => parsedRequest.method == ParsedRequest.methods.GET
 					case Some(CROSS_SITE) | None => false
@@ -304,86 +182,8 @@ class PermissionsAuthority private[Core] (
 			println("@@@  CSRF check passed")
 
 			authentication
-
-			// requiredUserType says what this request endpoint requires
-			// If we authenticated as a superior auth (i.e. a staff member requested a public endpoint),
-			// attempt to downgrade to the desired auth
-			// For public endpoints this is overkill but I may one day implement staff making reqs on member endpoints,
-			// so this architecture will make that request behave exactly as if the member requested it themselves
-			//			if (authentication.isDefined) {
-			//				Some()
-			//			} else {
-			//				requiredUserType.getAuthFromSuperiorAuth(authentication, requiredUserName) match {
-			//					case Some(lowerAuth: AuthenticationInstance) => {
-			//						println("@@@ Successfully downgraded to " + lowerAuth.userType)
-			//						Some(new RequestCache(
-			//							trueAuth = authentication,
-			//							auth = lowerAuth,
-			//							secrets
-			//						))
-			//					}
-			//					case None => {
-			//						println("@@@ Unable to downgrade auth to " + requiredUserType)
-			//						None
-			//					}
-			//				}
-			//			}
 		}
 	}
-
-	def validateSymonHash(
-		host: String,
-		program: String,
-		argString: String,
-		status: Int,
-		mac: String,
-		candidateHash: String
-	): Boolean = {
-		println("here we go")
-		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
-		val input = secrets.symonSalt.get + List(host, program, argString, status.toString, mac, now).mkString("-") + secrets.symonSalt.get
-		println(input)
-		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)
-		val expectedHash = String.format("%032X", new BigInteger(1, md5Bytes))
-		println("expectedHash: " + expectedHash)
-		println("candidateHash: " + candidateHash)
-		expectedHash == candidateHash
-	}
-
-	def validateApexSignet(candidate: Option[String]): Boolean = secrets.apexDebugSignet == candidate
-
-
-//	def authenticate(parsedRequest: ParsedRequest): UserType = {
-//		val ret: Option[UserType] = allowableUserTypes
-//				.filter(_ != PublicUserType)
-//				.foldLeft(None: Option[UserType])((retInner: Option[UserType], ut: RequestCacheObject[_ <: UserType]) => retInner match {
-//					// If we already found a valid auth mech, pass it through.  Else hand the auth mech our cookies/headers etc and ask if it matches
-//					case Some(x) => Some(x)
-//					case None => ut.getAuthenticatedUsernameInRequest(parsedRequest, rootCB, secrets.apexToken, secrets.kioskToken) match {
-//						case None => None
-//						case Some(x: String) => {
-//							println("AUTHENTICATION:  Request is authenticated as " + ut)
-//							Some(ut.create(x))
-//						}
-//					}
-//				})
-//
-//		// If after looping through all auth mechs we still didnt find a match, this request is Public
-//		ret match {
-//			case Some(x) => x
-//			case None => {
-//				println("AUTHENTICATION:  No auth mechanisms matched; this is a Public request")
-//				AuthenticationInstance(PublicUserType, PublicUserType.uniqueUserName)
-//			}
-//		}
-//	}
-
-	def assertRC[T <: RequestCache](rco: RequestCacheObject[T], userName: String): T = {
-		if (!isTestMode) throw new Exception("assertRC is for unit testing only")
-		else rco.create(userName)(secrets)
-	}
-
-	def closeDB(): Unit = secrets.dbConnection.close()
 
 	def withParsedPostBodyJSON[T](body: Option[JsValue], ctor: JsValue => T)(block: T => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => {
@@ -395,40 +195,49 @@ class PermissionsAuthority private[Core] (
 		})
 	}
 
-
-
-	def getAllEntityFiles: List[String] = {
-		val folder = Directory("app/" + ENTITY_PACKAGE_PATH.replace(".", "/"))
+	private def getAllEntityFiles(entityPackagePath: String): List[String] = {
+		val folder = Directory("app/" + entityPackagePath.replace(".", "/"))
 		folder.list.toList.map(path => "([^\\.]*)\\.scala".r.findFirstMatchIn(path.name).get.group(1))
 	}
 
-	def getCompanionForEntityFile[T](name: String)(implicit man: Manifest[T]): T = {
+	private def getCompanionForEntityFile[T](entityPackagePath: String, name: String)(implicit man: Manifest[T]): T = {
 		val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-		val module = runtimeMirror.staticModule(ENTITY_PACKAGE_PATH + "." + name + "$")
+		val module = runtimeMirror.staticModule(entityPackagePath + "." + name + "$")
 		runtimeMirror.reflectModule(module).instance.asInstanceOf[T]
 	}
 
-	def instantiateAllEntityCompanions(): List[StorableObject[_]] = {
-		val files = getAllEntityFiles
-		files.foreach(f => getCompanionForEntityFile[Any](f))
+	private def checkAllValueListsMatchReflection(entityPackagePath: String): List[StorableObject[_]] = {
+		val files = getAllEntityFiles(entityPackagePath)
+		files.map(f => getCompanionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.valueListMatchesReflection)
+	}
+
+	private[Core] def bootChecks(): Unit = {
+		if (systemParams.isDebugMode) {
+			println("running PA boot checks")
+			if (this.checkAllValueListsMatchReflection(systemParams.entityPackagePath).nonEmpty) {
+				throw new Exception("ValuesList is not correct for: " + this.checkAllValueListsMatchReflection(systemParams.entityPackagePath))
+			}
+		} else {
+			println("non debug mode, skipping boot checks")
+		}
+	}
+
+	private[Core] def instantiateAllEntityCompanions(entityPackagePath: String): List[StorableObject[_]] = {
+		val files = getAllEntityFiles(entityPackagePath)
+		files.foreach(f => getCompanionForEntityFile[Any](entityPackagePath, f))
 		println(files)
 		StorableObject.getEntities
 	}
 
-	def checkAllEntitiesHaveValuesList: List[StorableObject[_]] = {
-		val files = getAllEntityFiles
-		files.map(f => getCompanionForEntityFile[StorableObject[_]](f)).filter(!_.hasValueList)
+	private[Core] def checkAllEntitiesHaveValuesList(entityPackagePath: String): List[StorableObject[_]] = {
+		val files = getAllEntityFiles(entityPackagePath)
+		files.map(f => getCompanionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.hasValueList)
 	}
 
-	def checkAllValueListsMatchReflection: List[StorableObject[_]] = {
-		val files = getAllEntityFiles
-		files.map(f => getCompanionForEntityFile[StorableObject[_]](f)).filter(!_.valueListMatchesReflection)
-	}
-
-	def nukeDB(): Unit = {
-		if (!isTestMode) throw new Exception("nukeDB can only be called in test mode")
+	private[Core] def nukeDB(): Unit = {
+		if (!systemParams.isTestMode) throw new Exception("nukeDB can only be called in test mode")
 		else {
-			this.instantiateAllEntityCompanions()
+			this.instantiateAllEntityCompanions(systemParams.entityPackagePath)
 			StorableObject.getEntities.foreach(e => {
 				val q = new PreparedQueryForUpdateOrDelete(Set(RootRequestCache)) {
 					override def getQuery: String = "delete from " + e.entityName
@@ -439,8 +248,8 @@ class PermissionsAuthority private[Core] (
 		}
 	}
 
-	def withSeedState(entities: List[StorableClass], block: () => Unit): Unit = {
-		if (!isTestMode) throw new Exception("withSeedState can only be called in test mode")
+	private[Core] def withSeedState(entities: List[StorableClass], block: () => Unit): Unit = {
+		if (!systemParams.isTestMode) throw new Exception("withSeedState can only be called in test mode")
 		else {
 			this.nukeDB()
 			try {
@@ -451,28 +260,29 @@ class PermissionsAuthority private[Core] (
 			}
 		}
 	}
-}
 
+	private[Core] def assertRC[T <: RequestCache](rco: RequestCacheObject[T], userName: String): T = {
+		if (!systemParams.isTestMode) throw new Exception("assertRC is for unit testing only")
+		else rco.create(userName, customParams, dbGateway)
+	}
+
+	private[Core] def closeDB(): Unit = dbGateway.close()
+}
 
 object PermissionsAuthority {
 	private var paWrapper: Initializable[PermissionsAuthority] = new Initializable[PermissionsAuthority]()
-	def setPA(pa: PermissionsAuthority): PermissionsAuthority = paWrapper.set(pa)
+
 	def isBooted: Boolean = paWrapper.isInitialized
 	implicit def PA: PermissionsAuthority = paWrapper.get
-	def clearPA(): Unit = {
-		println("in clearPA()")
-		if (isBooted && paWrapper.get.isTestMode) {
 
+	private[Core] def setPA(pa: PermissionsAuthority): PermissionsAuthority = paWrapper.set(pa)
+
+	private[Core] def clearPA(): Unit = {
+		println("in clearPA()")
+		if (isBooted && paWrapper.get.systemParams.isTestMode) {
 			this.paWrapper = new Initializable[PermissionsAuthority]()
 		}
 	}
-
-	val stripeURL: String = "https://api.stripe.com/v1/"
-	val SEC_COOKIE_NAME = "CBIDB-SEC"
-	val ROOT_AUTH_HEADER = "origin-root"
-	val BOUNCER_AUTH_HEADER = "origin-bouncer"
-
-	val EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB = "$$CBIDB_PUBLIC_WEB_EFUSE"
 
 	trait PersistenceSystem {
 		val pbs: PersistenceBrokerStatic
@@ -489,6 +299,4 @@ object PermissionsAuthority {
 	case object PERSISTENCE_SYSTEM_MYSQL extends PERSISTENCE_SYSTEM_RELATIONAL {
 		val pbs: RelationalBrokerStatic = MysqlBrokerStatic
 	}
-
-
 }

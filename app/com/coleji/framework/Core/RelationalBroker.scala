@@ -12,18 +12,18 @@ import java.sql._
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.collection.mutable.ListBuffer
 
-abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
-	extends PersistenceBroker(dbConnection, preparedQueriesOnly, readOnly)
+abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean)
+	extends PersistenceBroker(dbGateway, preparedQueriesOnly, readOnly)
 {
 	//implicit val pb: PersistenceBroker = this
 
 	protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		val pool = if (pq.useTempSchema) {
 			println("using temp schema")
-			dbConnection.tempPool
+			dbGateway.tempPool
 		} else {
 			println("using main schema")
-			dbConnection.mainPool
+			dbGateway.mainPool
 		}
 		pool.withConnection(c => {
 			val profiler = new Profiler
@@ -167,7 +167,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 				params = overallFilter.params
 			}
 			val sql = sb.toString()
-			dbConnection.mainPool.withConnection(c => {
+			dbGateway.mainPool.withConnection(c => {
 				println("counting objects: ")
 				println(sql)
 				val preparedStatement = c.prepareStatement(sql)
@@ -189,7 +189,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 		}
 		println(" ======   Creating filter table " + tableName + "    =======")
 		val p = new Profiler
-		dbConnection.tempPool.withConnection(c => {
+		dbGateway.tempPool.withConnection(c => {
 			val createTableSQL = "CREATE TABLE " + tableName + " (ID Number)"
 			c.createStatement().executeUpdate(createTableSQL)
 			p.lap("Created table")
@@ -210,13 +210,13 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 			c.createStatement().executeUpdate(createIndexSQL)
 			p.lap("created index")
 
-			val grantSQL = "GRANT INDEX,SELECT ON \"" + tableName + "\" to " + dbConnection.mainUserName
+			val grantSQL = "GRANT INDEX,SELECT ON \"" + tableName + "\" to " + dbGateway.mainUserName
 			c.createStatement().executeUpdate(grantSQL)
 			p.lap("created Grant")
 
 			val sb: StringBuilder = new StringBuilder
-			val ms = dbConnection.mainSchemaName
-			val tts = dbConnection.tempSchemaName
+			val ms = dbGateway.mainSchemaName
+			val tts = dbGateway.tempSchemaName
 			sb.append("SELECT ")
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
@@ -242,7 +242,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 		batchParams: Option[List[List[PreparedValue]]] = None,
 	): Option[String] = {
 		println(sql.replace("\t", "\\t"))
-		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
+		val pool = if (useTempConnection) dbGateway.tempPool else dbGateway.mainPool
 		pool.withConnection(c => {
 			if (batchParams.isDefined && pkPersistenceName.isDefined) {
 				throw new Exception("Do not use PK return with batch insert, it doesn't work")
@@ -280,7 +280,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 
 	private def executeSQLForUpdateOrDelete(sql: String, useTempConnection: Boolean = false, params: Option[List[PreparedValue]] = None): Int = {
 		println(sql)
-		val pool = if (useTempConnection) dbConnection.tempPool else dbConnection.mainPool
+		val pool = if (useTempConnection) dbGateway.tempPool else dbGateway.mainPool
 		pool.withConnection(c => {
 			println("executing prepared update/delete:")
 			println(sql)
@@ -297,7 +297,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 	private def getProtoStorablesFromSelect[T <: ColumnAlias[_, _]](sql: String, params: List[String], properties: List[T], fetchSize: Int): List[ProtoStorable[T]] = {
 		println(sql)
 		val profiler = new Profiler
-		dbConnection.mainPool.withConnection(c => {
+		dbGateway.mainPool.withConnection(c => {
 			val preparedStatement = c.prepareStatement(sql)
 			val preparedParams = params.map(PreparedString)
 			preparedParams.zipWithIndex.foreach(t => t._1.set(preparedStatement)(t._2+1))
@@ -506,7 +506,7 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 	}
 
 	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
-		val pool = if (pc.useTempSchema) dbConnection.tempPool else dbConnection.mainPool
+		val pool = if (pc.useTempSchema) dbGateway.tempPool else dbGateway.mainPool
 		pool.withConnection(conn => {
 			println("STARTING PROCEDURE CALL: " + pc.getQuery)
 			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
@@ -564,12 +564,4 @@ abstract class RelationalBroker private[Core](dbConnection: DatabaseHighLevelCon
 	private def dateToLocalDateTime(d: Date): LocalDateTime =
 		d.toInstant.atZone(ZoneId.systemDefault).toLocalDateTime
 
-	// test query
-	private[Core] def testDB {
-		dbConnection.mainPool.withConnection(c => {
-			val st: Statement = c.createStatement()
-			st.execute("select count(*) from users")
-			println("test query executed successfully")
-		})
-	}
 }

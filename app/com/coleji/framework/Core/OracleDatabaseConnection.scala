@@ -4,7 +4,7 @@ import com.coleji.framework.Util.PropertiesWrapper
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
 object OracleDatabaseConnection {
-	def apply(confFileLocation: String): DatabaseHighLevelConnection = {
+	private[Core] def apply(confFileLocation: String): DatabaseGateway = {
 		val pw = new PropertiesWrapper(confFileLocation, List("username", "password", "host", "port", "sid", "schema", "temptableschema"))
 
 		// TODO: unclear if this does anything
@@ -23,7 +23,7 @@ object OracleDatabaseConnection {
 		val mainConfig = getDataSourceConfig(host, port, sid, username, password)
 		val tempConfig = getDataSourceConfig(host, port, sid, tempUsername, tempPassword)
 
-		DatabaseHighLevelConnection(
+		new DatabaseGateway(
 			mainPool = new ConnectionPoolWrapper(new HikariDataSource(mainConfig)),
 			tempPool = new ConnectionPoolWrapper(new HikariDataSource(tempConfig)),
 			mainSchemaName = mainSchemaName,

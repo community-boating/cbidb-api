@@ -15,8 +15,8 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 			val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
@@ -47,9 +47,9 @@ class ApSelectPurchaseGuestPrivs @Inject()(implicit exec: ExecutionContext) exte
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, ApSelectPurchaseGuestPrivsShape.apply)(parsed => {
-			PA.withRequestCacheMember(parsedRequest, rc => {
+			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 
-				val personId = rc.getAuthedPersonId()
+				val personId = rc.getAuthedPersonId
 				val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
 				PortalLogic.apSetGuestPrivs(rc, personId, orderId, parsed.wantIt)

@@ -1,26 +1,23 @@
 package org.sailcbi.APIServer
 
-import com.coleji.framework.IO.PreparedQueries.{PreparedLocalDate, PreparedLocalDateTime, PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue, PreparedZonedDateTime}
-import org.junit.runner.RunWith
-import org.sailcbi.APIServer.IO.PreparedQueries._
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
 import com.coleji.framework.Core.{PermissionsAuthority, RootRequestCache}
+import com.coleji.framework.IO.PreparedQueries._
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.DateUtil
+import org.junit.runner.RunWith
+import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
+import javax.inject.Inject
 
 @RunWith(classOf[JUnitRunner])
-class Temp extends FunSuite {
+class Temp @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
-		val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
-
-
-
+		val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 		val q = new PreparedQueryForInsert(Set(RootRequestCache)) {
 			override val preparedParams: List[PreparedValue] = List(prepare(d))
@@ -58,13 +55,13 @@ class Temp extends FunSuite {
 		assert(d.equals(dSelected))
 	}
 	test("PreparedLocalDate") {
-		ServerBootLoaderTest.withPAWriteable(testPreparedDate(LocalDate.now(), PreparedLocalDate, _.getLocalDate(1)))
+		loader.withPAWriteable(testPreparedDate(LocalDate.now(), PreparedLocalDate, _.getLocalDate(1)))
 	}
 	test("PreparedLocalDateTime") {
-		ServerBootLoaderTest.withPAWriteable(testPreparedDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), PreparedLocalDateTime, _.getLocalDateTime(1)))
+		loader.withPAWriteable(testPreparedDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), PreparedLocalDateTime, _.getLocalDateTime(1)))
 	}
 	test("PreparedZonedDateTime") {
-		ServerBootLoaderTest.withPAWriteable(testPreparedDate(
+		loader.withPAWriteable(testPreparedDate(
 			ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS),
 			PreparedZonedDateTime,
 			rsw => DateUtil.toBostonTime(rsw.getLocalDateTime(1))

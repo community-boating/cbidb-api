@@ -7,9 +7,9 @@ trait RelationalBrokerStatic extends PersistenceBrokerStatic {
 }
 
 object OracleBrokerStatic extends RelationalBrokerStatic {
-	val MAX_EXPR_IN_LIST: Int = 900
+	override val MAX_EXPR_IN_LIST: Int = 900
 }
 
 object MysqlBrokerStatic extends RelationalBrokerStatic {
-	val MAX_EXPR_IN_LIST: Int = 900
+	override val MAX_EXPR_IN_LIST: Int = 900
 }

@@ -7,7 +7,7 @@ import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderRe
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
-abstract class PersistenceBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean) {
+abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -88,6 +88,4 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseHighLevelCo
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
-
-	private[Core] def testDB
 }

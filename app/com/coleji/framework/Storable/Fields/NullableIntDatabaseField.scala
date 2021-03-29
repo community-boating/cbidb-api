@@ -9,7 +9,7 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 
 	def isNullable: Boolean = true
 
-	def getFieldType: String = PA.persistenceSystem match {
+	def getFieldType: String = PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}

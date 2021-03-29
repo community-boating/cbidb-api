@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.{ValidationError, ValidationOk}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -13,7 +14,7 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Inj
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, JpClassSignupDeletePostShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
+			MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 				println(parsed)
 
 				PortalLogic.attemptDeleteSignup(rc, parsed.juniorId, parsed.instanceId) match {

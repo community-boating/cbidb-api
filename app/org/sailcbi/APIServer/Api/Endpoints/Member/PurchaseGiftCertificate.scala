@@ -27,7 +27,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 						val personId = PortalLogic.persistStandalonePurchaser(
 							rc,
 							rc.userName,
-							rc.getAuthedPersonId(),
+							rc.getAuthedPersonId,
 							parsed.purchaserNameFirst,
 							parsed.purchaserNameLast,
 							parsed.purchaserEmail
@@ -52,7 +52,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 		val parsedRequest = ParsedRequest(request)
 		if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				rc.getAuthedPersonId() match {
+				rc.getAuthedPersonId match {
 					case None => Future(Ok(Json.toJson(dummyEmptyPurchaseGC)))
 					case Some(personId) => {
 						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)

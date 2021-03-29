@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
 
 class ConnectionPoolWrapper(private val source: HikariDataSource)  {
-	def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {
+	private[Core] def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {
 		var c: Connection = null
 		try {
 			c = source.getConnection()
@@ -21,5 +21,5 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 		}
 	}
 
-	def close(): Unit = source.close()
+	private[Core] def close(): Unit = source.close()
 }

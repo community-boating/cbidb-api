@@ -1,4 +1,4 @@
 package com.coleji.framework.Core
 
-class MysqlBroker private[Core](dbConnection: DatabaseHighLevelConnection, preparedQueriesOnly: Boolean, readOnly: Boolean)
+class MysqlBroker private[Core](dbConnection: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean)
 	extends RelationalBroker(dbConnection, preparedQueriesOnly, readOnly)

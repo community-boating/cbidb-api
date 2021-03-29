@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
 
@@ -11,8 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class DeleteOffseasonWaitlist @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withParsedPostBodyJSON(parsedRequest.postJSON, DeleteOffseasonWaitlistShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, DeleteOffseasonWaitlistShape.apply)(block = parsed => {
+			MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 				println(parsed)
 
 				PortalLogic.removeOffseasonWaitlist(rc, parsed.juniorId)

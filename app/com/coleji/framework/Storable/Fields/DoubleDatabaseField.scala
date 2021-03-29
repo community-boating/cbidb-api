@@ -5,7 +5,7 @@ import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL,
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Double](entity, persistenceFieldName) {
-	def getFieldType: String = PA.persistenceSystem match {
+	def getFieldType: String = PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
@@ -24,7 +24,7 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		t => Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
 	}
 
-	def inList(l: List[Double]): String => Filter = t => PA.persistenceSystem match {
+	def inList(l: List[Double]): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case r: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Double]): List[List[Double]] = {
 				if (ids.length <= r.pbs.MAX_EXPR_IN_LIST) List(ids)

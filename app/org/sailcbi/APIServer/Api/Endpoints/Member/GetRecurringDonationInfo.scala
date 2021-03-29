@@ -4,6 +4,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.Util.{CriticalError, NetFailure, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Customer, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -14,8 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetRecurringDonationInfo @Inject()(implicit exec: ExecutionContext, ws: WSClient) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMember(parsedRequest, rc => {
-			val personId = rc.getAuthedPersonId()
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
 
 			PortalLogic.getStripeCustomerId(rc, personId) match {
 				case None => Future(Ok("Error"))

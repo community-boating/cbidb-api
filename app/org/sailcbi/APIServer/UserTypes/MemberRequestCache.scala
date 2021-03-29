@@ -3,17 +3,18 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, TableAlias}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRelationship}
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
+import org.sailcbi.APIServer.Entities.MagicIds
+import play.api.mvc.Result
+
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class MemberRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends LockedRequestCacheWithStripeController(userName, secrets) {
+class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
-
-
-	def getAuthedPersonId(): Int = {
+	lazy val getAuthedPersonId: Int = {
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
 			override def getQuery: String =
 				"""
@@ -25,41 +26,52 @@ class MemberRequestCache(override val userName: String, secrets: PermissionsAuth
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
 		val ids = this.executePreparedQueryForSelect(q)
-		// TODO: critical error if this list has >1 element
-		ids.head
+		ids match {
+			case id :: Nil => id
+			case _ => throw new Exception("Unable to get authed person id for member RC")
+		}
 	}
 
-	def getChildrenPersons(rc: MemberRequestCache, parentPersonId: Int): List[Person] = {
-		val persons = TableAlias.wrapForInnerJoin(Person)
-		val personRelationship = TableAlias.wrapForInnerJoin(PersonRelationship)
-		object cols {
-			val pr_a = PersonRelationship.fields.a.alias(personRelationship)
-			val pr_b = PersonRelationship.fields.b.alias(personRelationship)
-			val personId = Person.fields.personId.alias(persons)
+	lazy val getChildrenPersonIds: List[Int] = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				   |select b from person_relationships rl
+				   |where a = ${getAuthedPersonId}
+				   |and rl.type_id = ${MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK}
+				""".stripMargin
+
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 		}
-
-		val personFields = List(
-			Person.fields.nameFirst,
-			Person.fields.nameLast
-		).map(_.alias(persons))
-
-		val qb = QueryBuilder
-			.from(persons)
-			.innerJoin(personRelationship, cols.pr_b.wrapFilter(_.equalsField(cols.personId)))
-			.where(cols.pr_a.wrapFilter(_.equalsConstant(parentPersonId)))
-			.select(cols.personId :: personFields)
-
-		rc.executeQueryBuilder(qb).map(r => Person.construct(r.ps))
+		executePreparedQueryForSelect(q)
 	}
 }
 
 object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): MemberRequestCache = new MemberRequestCache(userName, secrets)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): MemberRequestCache =
+		new MemberRequestCache(userName, serverParams, dbGateway)
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
-		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => s.contains("@"))
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] =
+		getAuthenticatedUsernameInRequestFromCookie(request, rootCB).filter(s => s.contains("@"))
 
-	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String, String)] = {
+	def withRequestCacheMemberWithJuniorId(
+		parsedRequest: ParsedRequest,
+		juniorId: Int,
+		block: MemberRequestCache => Future[Result]
+	)(implicit exec: ExecutionContext, PA: PermissionsAuthority): Future[Result] =
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			if (rc.getChildrenPersonIds.contains(juniorId)) block(rc)
+			else throw new Exception(s"""
+				  |junior ID ${juniorId} in request does not match allowed ids
+				  | for parent ${rc.getAuthedPersonId}: ${rc.getChildrenPersonIds.mkString(", ")}
+				  |""".stripMargin)
+		})
+
+	def getPwHashForUser(rc: BouncerRequestCache, userName: String): Option[(String, String, String)] = {
 		case class Result(userName: String, pwHashScheme: String, pwHash: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result = Result(rs.getString(1), rs.getString(2), rs.getString(3))
@@ -69,14 +81,9 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 			override val params: List[String] = List(userName.toLowerCase)
 		}
 
-		val users = rootRC.executePreparedQueryForSelect(hq)
+		val users = rc.executePreparedQueryForSelect(hq)
 
 		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash, EMPTY_NONCE)
 		else None
 	}
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

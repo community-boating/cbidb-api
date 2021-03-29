@@ -3,19 +3,25 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.Server.PermissionsAuthoritySecrets
+import com.coleji.framework.Util.PropertiesWrapper
 
-class StaffRequestCache(override val userName: String, secrets: PermissionsAuthoritySecrets) extends UnlockedRequestCache(userName, secrets) {
+class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
+extends UnlockedRequestCache(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 }
 
 object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
-	override def create(userName: String)(secrets: PermissionsAuthoritySecrets): StaffRequestCache = new StaffRequestCache(userName, secrets)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): StaffRequestCache =
+		new StaffRequestCache(userName, serverParams, dbGateway)
 
-	override def getAuthenticatedUsernameInRequest(request: ParsedRequest, rootCB: CacheBroker, apexToken: String, kioskToken: String)(implicit PA: PermissionsAuthority): Option[String] =
-		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, apexToken).filter(s => !s.contains("@"))
+	override def getAuthenticatedUsernameInRequest(
+		request: ParsedRequest,
+		rootCB: CacheBroker,
+		customParams: PropertiesWrapper,
+	)(implicit PA: PermissionsAuthority): Option[String] =
+		getAuthenticatedUsernameInRequestFromCookie(request, rootCB).filter(s => !s.contains("@"))
 
-	override def getPwHashForUser(rootRC: RootRequestCache, userName: String): Option[(String, String, String)] = {
+	def getPwHashForUser(rc: BouncerRequestCache, userName: String): Option[(String, String, String)] = {
 		case class Result(userName: String, pwHashScheme: String, pwHash: String, nonce: String)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result =
@@ -26,14 +32,9 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 			override val params: List[String] = List(userName.toLowerCase)
 		}
 
-		val users = rootRC.executePreparedQueryForSelect(hq)
+		val users = rc.executePreparedQueryForSelect(hq)
 
 		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash, users.head.nonce)
 		else None
 	}
-
-//	override def getAuthenticatedUsernameFromSuperiorAuth(
-//		currentAuthentication: RequestCache,
-//		requiredUserName: Option[String]
-//	): Option[String] = if (currentAuthentication.isInstanceOf[RootRequestCache]) Some(RootRequestCache.uniqueUserName) else None
 }

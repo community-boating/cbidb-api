@@ -11,8 +11,9 @@ class CheckEFusePublicWeb @Inject()(implicit exec: ExecutionContext) extends Inj
 	def get()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
+		val EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB = "$$CBIDB_PUBLIC_WEB_EFUSE"
 		PA.withRequestCache(PublicRequestCache)(None, parsedRequest, rc => {
-			Future(Ok(rc.cb.get(PermissionsAuthority.EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB).getOrElse("-1")))
+			Future(Ok(rc.cb.get(EFUSE_REDIS_KEY_CBIDB_PUBLIC_WEB).getOrElse("-1")))
 		})
 	}
 }

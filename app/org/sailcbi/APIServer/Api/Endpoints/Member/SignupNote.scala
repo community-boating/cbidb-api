@@ -6,7 +6,7 @@ import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json._
 import play.api.mvc.InjectedController
 
@@ -17,7 +17,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	def get(juniorId: Int, instanceId: Int)(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
+		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			PortalLogic.getSignupNote(rc, juniorId, instanceId) match {
 				case Right(os) => os match {
 					case Some(s) => Future(Ok(new JsObject(Map(
@@ -42,7 +42,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 		val parsedRequest = ParsedRequest(request)
 		val data = request.body.asJson
 		PA.withParsedPostBodyJSON(request.body.asJson, SignupNoteShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
+			MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 
 				implicit val format = SignupNoteShape.format
 
@@ -61,7 +61,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				val username = rc.userName
 				println("protoperson username is " + username)
-				val parentPersonId = rc.getAuthedPersonId().get
+				val parentPersonId = rc.getAuthedPersonId.get
 				println("parent personId is " + parentPersonId)
 
 				val juniorMatchesParent = {

@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{SignupForReport, WaitListForReport, WaitListTopForReport}
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -12,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetAllJuniorClassSignups  @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
+		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 			val cb: CacheBroker = rc.cb
 
 			implicit val format = AllSignupsResponse.format

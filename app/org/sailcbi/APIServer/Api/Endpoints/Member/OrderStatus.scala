@@ -5,7 +5,7 @@ import com.coleji.framework.Util.{Currency, NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -19,14 +19,14 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		val parsedRequest = ParsedRequest(request)
 		implicit val format = OrderStatusResult.format
 		program match {
-			case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP => PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId()
+			case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId
 				getInner(rc, program, personId)
 			})
 			case _ => {
 				if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
 					PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-						rc.getAuthedPersonId() match {
+						rc.getAuthedPersonId match {
 							case Some(personId) => getInner(rc, program, personId)
 							case None => Future(Ok(Json.toJson(orderStatusEmpty)))
 						}

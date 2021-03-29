@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -13,8 +14,8 @@ class JpSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 		val logger = PA.logger
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(request.body.asJson, JpSetMembershipPaymentCount.apply)(parsed => {
-			PA.withRequestCacheMember(parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId()
+			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId
 				val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
 				val now = PA.now().toLocalDate

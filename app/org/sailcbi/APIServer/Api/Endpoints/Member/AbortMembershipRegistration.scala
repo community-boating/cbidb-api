@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.framework.API.{ValidationError, ValidationOk}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -13,9 +14,9 @@ class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) ext
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AbortMembershipRegistrationShape.apply)(parsed => {
-			PA.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
+			MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, parsed.juniorId, rc => {
 
-				val parentPersonId = rc.getAuthedPersonId()
+				val parentPersonId = rc.getAuthedPersonId
 
 				PortalLogic.deleteRegistration(rc, parentPersonId, parsed.juniorId) match {
 					case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))

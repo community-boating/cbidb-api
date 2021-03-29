@@ -1,34 +1,36 @@
 package org.sailcbi.APIServer
 
+import com.coleji.framework.Core.RootRequestCache
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, MembershipType}
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
-import com.coleji.framework.Core.RootRequestCache
+import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import javax.inject.Inject
+
 @RunWith(classOf[JUnitRunner])
-class DBTest extends FunSuite {
+class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 	test("dbaccess") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 			val types = rc.getAllObjectsOfClass(JpClassType)
 			println(types)
 		})
 	}
 	test("dbaccess2") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 			val types = rc.getAllObjectsOfClass(MembershipType)
 			println(types)
 		})
 	}
 	test("Writes should fail in test mode...") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			assertThrows[AnyRef]({
@@ -42,8 +44,8 @@ class DBTest extends FunSuite {
 		})
 	}
 	test("... unless we use a writeable PA") {
-		ServerBootLoaderTest.withPAWriteable(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPAWriteable(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val typeName = "Blah333"
@@ -68,8 +70,8 @@ class DBTest extends FunSuite {
 		})
 	}
 	test("sdfgnjkdgfjk") {
-		ServerBootLoaderTest.withPAWriteable(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPAWriteable(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 
 			val q = new PreparedQueryForInsert(Set(RootRequestCache)) {
@@ -86,8 +88,8 @@ class DBTest extends FunSuite {
 		})
 	}
 	test("just get some fields") {
-		ServerBootLoaderTest.withPA(pa => {
-			val rc = pa.assertRC(RootRequestCache, RootRequestCache.uniqueUserName)
+		loader.withPA(pa => {
+			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
 			val types = rc.getAllObjectsOfClass(JpClassType, Some(List(JpClassType.fields.typeName)))
 			val aType = types.head

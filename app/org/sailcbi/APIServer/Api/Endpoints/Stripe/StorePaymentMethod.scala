@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient) extends InjectedController {
 	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val parsedRequest = ParsedRequest(req)
-		PA.withRequestCacheMember(parsedRequest, rc => {
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 				post(rc, parsed.paymentMethodId, parsed.retryLatePayments, None)
 			})
@@ -26,12 +26,12 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 	def postJP(juniorId: Option[Int])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
 		val parsedRequest = ParsedRequest(req)
 		juniorId match {
-			case None => PA.withRequestCacheMember(parsedRequest, rc => {
+			case None => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 				PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, None)
 				})
 			})
-			case Some(id) => PA.withRequestCacheMemberWithJuniorId(parsedRequest, id, rc => {
+			case Some(id) => MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, id, rc => {
 				PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
 					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, juniorId)
 				})
@@ -42,7 +42,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 
 	private def post(rc: MemberRequestCache, paymentMethodId: String, retryLatePayments: Boolean, juniorId: Option[Int])(implicit PA: PermissionsAuthority): Future[Result] =  {
 		val stripe = rc.getStripeIOController(ws)
-		val adultPersonId = rc.getAuthedPersonId()
+		val adultPersonId = rc.getAuthedPersonId
 		val memberPersonId = juniorId.getOrElse(adultPersonId)
 		val customerIdOption = PortalLogic.getStripeCustomerId(rc, adultPersonId)
 		customerIdOption match {
