@@ -27,10 +27,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
 			type ResultUntyped = (
-				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]
+				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]
 			)
 			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberRequestCache)) {
-				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
+				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ResultUntyped = (
 					rsw.getString(1),
@@ -49,7 +49,8 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					rsw.getBooleanFromChar(14),
 					rsw.getBooleanFromChar(15),
 					rsw.getBooleanFromChar(16),
-					rsw.getOptionString(17)
+					rsw.getBooleanFromChar(17),
+					rsw.getOptionString(18)
 				)
 
 				override def getQuery: String =
@@ -74,6 +75,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					  |    select 1 from persons_discounts_eligible
 					  |      where person_id = ? and discount_id = ${MagicIds.DISCOUNTS.MGH_DISCOUNT_ID} and season = util_pkg.get_current_season
 					  |) then 'Y' else 'N' end) as mgh_eligible,
+					  |(case when exists (
+					  |    select 1 from persons_discounts_eligible
+					  |      where person_id = ? and discount_id = ${MagicIds.DISCOUNTS.MA_TEACHERS_ASSN_DISCOUNT_ID} and season = util_pkg.get_current_season
+					  |) then 'Y' else 'N' end) as teachers_eligible,
 					  |person_pkg.can_renew(?),
 					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) >= ${MagicIds.MIN_AGE_FOR_SENIOR} then 'Y' else 'N' end) as senior_available,
 					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) between 18 and ${MagicIds.MAX_AGE_FOR_YOUTH} then 'Y' else 'N' end) as youth_available,
@@ -95,6 +100,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				eligibleForVeteranOnline,
 				eligibleForStudent,
 				eligibleForMGH,
+				eligibleForTeachersAssn,
 				canRenew,
 				seniorAvailable,
 				youthAvailable,
@@ -117,6 +123,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val studentDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID ).get.discountAmount
 			val veteranDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.VETERAN_DISCOUNT_ID ).get.discountAmount
 			val mghDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MGH_DISCOUNT_ID ).get.discountAmount
+			val maTeachersAssnAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MA_TEACHERS_ASSN_DISCOUNT_ID ).get.discountAmount
 			val fyBasePrice = fullYearDiscounts.head.fullPrice
 
 			val expirationDate = {
@@ -136,6 +143,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				eligibleForVeteranOnline = eligibleForVeteranOnline,
 				eligibleForStudent = eligibleForStudent,
 				eligibleForMGH = eligibleForMGH,
+				eligibleForTeachersAssn = eligibleForTeachersAssn,
 				canRenew = canRenew,
 				renewalDiscountAmt = renewalDiscountAmt,
 				seniorDiscountAmt = seniorDiscountAmt,
@@ -143,6 +151,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				studentDiscountAmt = studentDiscountAmt,
 				veteranDiscountAmt = veteranDiscountAmt,
 				mghDiscountAmt = mghDiscountAmt,
+				maTeachersAssnAmt = maTeachersAssnAmt,
 				fyBasePrice = fyBasePrice,
 				seniorAvailable = seniorAvailable,
 				youthAvailable = youthAvailable
@@ -202,6 +211,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		eligibleForVeteranOnline: Boolean,
 		eligibleForStudent: Boolean,
 		eligibleForMGH: Boolean,
+		eligibleForTeachersAssn: Boolean,
 		seniorAvailable: Boolean,
 		youthAvailable: Boolean,
 		canRenew: Boolean,
@@ -211,6 +221,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		studentDiscountAmt: Double,
 		veteranDiscountAmt: Double,
 		mghDiscountAmt: Double,
+		maTeachersAssnAmt: Double,
 		fyBasePrice: Double
 	)
 
