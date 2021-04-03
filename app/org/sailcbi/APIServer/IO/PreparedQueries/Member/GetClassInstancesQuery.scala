@@ -59,7 +59,7 @@ object GetClassInstancesQuery {
 		rs.getString(4),
 		rs.getString(5),
 		rs.getString(6),
-		rs.getString(7),
+		rs.getString(13), // rs.getString(7), // new spotsleft text
 		rs.getString(8),
 		rs.getInt(9),
 		rs.getString(10),
@@ -145,7 +145,8 @@ object GetClassInstancesQuery {
 		   |i.type_id,
 		   |to_char(s1.session_datetime,'MM/DD/YYYY HH24:MI') as start_datetime_raw,
 		   |to_char(s2.session_datetime,'MM/DD/YYYY HH24:MI') as end_datetime_raw,
-		   |w.week
+		   |w.week,
+		   |jp_class_pkg.class_status_text(i.instance_id)
 		   |from jp_class_types t, jp_class_instances i, jp_class_sessions s1, jp_class_Sessions s2, jp_class_bookends bk, jp_weeks w
 		   |where i.type_id = t.type_id
 		   |and (select count(*) from jp_class_staggers where instance_id = i.instance_id) > 0
