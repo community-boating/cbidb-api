@@ -22,6 +22,7 @@ class ApSetMembershipPaymentCount @Inject()(implicit exec: ExecutionContext) ext
 
 				PortalLogic.writeOrderStaggeredPaymentsAP(rc, now, personId, orderId, parsed.additionalPayments)
 				PortalLogic.clearStripeTokensFromOrder(rc, orderId)
+				PortalLogic.unapplyAllGCFromOrder(rc, orderId)
 
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)
