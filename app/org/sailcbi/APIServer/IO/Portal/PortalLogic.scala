@@ -1654,6 +1654,18 @@ object PortalLogic {
 		}
 	}
 
+	def unapplyAllGCFromOrder(rc: RequestCache, orderId: Int): Unit = {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override val params: List[String] = List(orderId.toString)
+
+			override def getQuery: String =
+				"""
+				  |delete from shopping_cart_appl_gc where order_id = ?
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForUpdateOrDelete(q)
+	}
+
 	def unapplyGCFromOrder(rc: RequestCache, orderId: Int, certId: Int): Unit = {
 		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 			override val params: List[String] = List(certId.toString, orderId.toString)
