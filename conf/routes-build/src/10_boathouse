@@ -7,9 +7,8 @@ GET     /pdf/ap-roster                     org.sailcbi.APIServer.Api.Endpoints.P
 GET     /pdf/jp-roster                     org.sailcbi.APIServer.Api.Endpoints.PDFReports.RunJpClassRoster.get(instanceIds: String, signet: Option[String])
 GET     /pdf/jp-spec-needs                     org.sailcbi.APIServer.Api.Endpoints.PDFReports.RunJpSpecialNeedsReport.get(from: String, to: String, signet: Option[String])
 
-POST    /fo-kiosk/create-person             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.post()
+POST    /fo-kiosk/create-person             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.postKiosk()
 POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCard.post()
-
 
 GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getAll()
 GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOne(userId: Int)

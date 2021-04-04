@@ -4,6 +4,8 @@ import com.coleji.framework.API.ResultError
 import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, PreparedQueryForInsert}
 import com.coleji.framework.Storable.ResultSetWrapper
+import org.sailcbi.APIServer.BarcodeFactory
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.KioskRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -13,7 +15,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	object errors {
-
 		val CONTRAINT = JsObject(Map(
 			"code" -> JsString("sql_constraint"),
 			"message" -> JsString("Insert failed due to database constraint.  Probably that personId doesn't exist.")
@@ -21,7 +22,7 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 	}
 
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request => {
-		PA.withRequestCache[KioskRequestCache](KioskRequestCache)(None, ParsedRequest(request), rc => {
+		PA.withRequestCache(KioskRequestCache)(None, ParsedRequest(request), rc => {
 			val cb: CacheBroker = rc.cb
 
 			val params = request.body.asJson
@@ -35,44 +36,14 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 				try {
 					val parsed = CreateCardParams.apply(params.get)
 					println(parsed)
-					val getCardNumber = new HardcodedQueryForSelect[Int](Set(KioskRequestCache)) {
-						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
 
-						override def getQuery: String = "select GUEST_CARD_SEQ.nextval from dual"
-					}
-
-					val cardNumber = rc.executePreparedQueryForSelect(getCardNumber).head
-
-					val getClose = new HardcodedQueryForSelect[Int](Set(KioskRequestCache)) {
-						override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
-
-						override def getQuery: String = "select c.close_id from fo_closes c, current_closes cur where close_id = inperson_close"
-					}
-
-					val closeId = rc.executePreparedQueryForSelect(getClose).head
-
-					val createCard = new PreparedQueryForInsert(Set(KioskRequestCache)) {
-						override def getQuery: String =
-							"""
-							  |insert into persons_cards
-							  |(person_id, issue_date, card_num, temp, active, close_id, paid) values
-							  | (?, sysdate, ?, 'N', 'Y', ?, 'N')
-							""".stripMargin
-
-						override val params: List[String] = List(
-							parsed.personID.toString,
-							cardNumber.toString,
-							closeId.toString
-						)
-						override val pkName: Option[String] = Some("assign_id")
-					}
-
-					val assignID = rc.executePreparedQueryForInsert(createCard)
+					val (cardNumber, assignId, nonce) = PortalLogic.createGuestCard(rc, parsed.personID)
 
 					Future {
 						Ok(JsObject(Map(
-							"cardAssignID" -> JsNumber(assignID.getOrElse("-1").toInt),
-							"cardNumber" -> JsNumber(cardNumber)
+							"cardAssignID" -> JsNumber(assignId),
+							"cardNumber" -> JsNumber(cardNumber),
+							"barcode" -> JsString(BarcodeFactory.getBase64FromImage(BarcodeFactory.getImage(cardNumber.toString), "png"))
 						)))
 					}
 				} catch {

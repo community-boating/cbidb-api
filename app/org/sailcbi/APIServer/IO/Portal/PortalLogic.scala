@@ -6,6 +6,8 @@ import com.coleji.framework.IO.PreparedQueries._
 import com.coleji.framework.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
 import com.coleji.framework.Util._
 import com.coleji.framework.{API, Storable}
+import org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCardParams
+import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
@@ -15,6 +17,9 @@ import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.{JsValue, Json}
 
+import java.awt.image.BufferedImage
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
@@ -2939,6 +2944,94 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		rc.executePreparedQueryForUpdateOrDelete(q)
+	}
+
+	def createGuestCard(rc: RequestCache, personId: Int): (Int, Int, String) = {
+		val getCardNumber = new HardcodedQueryForSelect[Int](Set(ProtoPersonRequestCache, KioskRequestCache)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+
+			override def getQuery: String = "select GUEST_CARD_SEQ.nextval from dual"
+		}
+
+		val cardNumber = rc.executePreparedQueryForSelect(getCardNumber).head
+
+		val getClose = new HardcodedQueryForSelect[Int](Set(ProtoPersonRequestCache, KioskRequestCache)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+
+			override def getQuery: String = "select c.close_id from fo_closes c, current_closes cur where close_id = inperson_close"
+		}
+
+		val closeId = rc.executePreparedQueryForSelect(getClose).head
+
+		val nonce = scala.util.Random.alphanumeric.take(8).mkString
+
+		val createCard = new PreparedQueryForInsert(Set(ProtoPersonRequestCache, KioskRequestCache)) {
+			override def getQuery: String =
+				"""
+				  |insert into persons_cards
+				  |(person_id, issue_date, card_num, temp, active, close_id, paid, nonce) values
+				  | (?, sysdate, ?, 'N', 'Y', ?, 'N', ?)
+							""".stripMargin
+
+			override val params: List[String] = List(
+				personId.toString,
+				cardNumber.toString,
+				closeId.toString,
+				nonce
+			)
+			override val pkName: Option[String] = Some("assign_id")
+		}
+
+		(cardNumber, rc.executePreparedQueryForInsert(createCard).get.toInt, nonce)
+	}
+
+	def getTicketBarcodeBase64(rc: RequestCache, cardNumber: Int, nonce: String): Option[BufferedImage] = {
+		val q = new PreparedQueryForSelect[Option[String]](Set(PublicRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override val preparedParams: List[PreparedValue] = List(cardNumber)
+
+			override def getQuery: String =
+				"""
+				  |select nonce from persons_cards where card_num = ?
+				  |""".stripMargin
+		}
+		val expectedNonce = rc.executePreparedQueryForSelect(q).head
+		if (expectedNonce.get == nonce) {
+			Some(BarcodeFactory.getImage(cardNumber.toString))
+		} else {
+			None
+		}
+
+	}
+
+	def ticketHTML(cardNumber: Int, nonce: String, name: String): String = {
+		val sb = new StringBuilder()
+		sb.append("<div id=\"printbox\" style=\"padding: 40px; width: 220px; border: 2px solid black;\">")
+		sb.append("<img src=\"https://portal.community-boating.org/images/guest-ticket.png\" alt=\"Community Boating Guest Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
+		sb.append("<img src=\"$API_URL$/api/ap/guest-ticket-barcode?cardNumber=" + cardNumber + "&nonce=" + nonce + "\" alt=\"Barcode Error, Please See Front Office\" width=\"150PX\" style=\"padding-top: 10px; padding-left:30px\" />")
+		sb.append("<h3 style=\"text-align: center\">")
+		sb.append(name)
+		sb.append("</h3>")
+		sb.append("<p>Please bring this card with you to the dockhouse when you come sailing.</p>")
+		sb.append("</div>")
+		sb.toString()
+	}
+
+	def sendTicketEmail(rc: RequestCache, email: String, html: String): Unit = {
+		val ppc = new PreparedProcedureCall[Unit](Set(ProtoPersonRequestCache)) {
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"p_email" -> email,
+				"p_ticket_html" -> html,
+			)
+
+			override def registerOutParameters: Map[String, Int] = Map.empty
+
+			override def getOutResults(cs: CallableStatement): Unit = Unit
+
+			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?)"
+		}
+		rc.executeProcedure(ppc)
 	}
 }
 

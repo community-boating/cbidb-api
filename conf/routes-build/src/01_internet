@@ -150,6 +150,10 @@ POST    /member/donate-set-person           org.sailcbi.APIServer.Api.Endpoints.
 
 POST    /proto-detach-member        org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.detach()
 
+POST    /ap/create-ap-guest             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.postPortal()
+
+GET     /ap/guest-ticket-barcode            org.sailcbi.APIServer.Api.Endpoints.Public.GuestTicketHTML.get(cardNumber: Int, nonce: String)
+
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()

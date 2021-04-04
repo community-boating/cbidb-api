@@ -30,6 +30,8 @@ libraryDependencies +="com.zaxxer" % "HikariCP" % "3.3.1"
 
 libraryDependencies += "io.sentry" % "sentry" % "1.7.27"
 
+libraryDependencies += "net.sf.barcode4j" % "barcode4j" % "2.1"
+
 /*
 scalacOptions ++= Seq(
   "-Xcheckinit"

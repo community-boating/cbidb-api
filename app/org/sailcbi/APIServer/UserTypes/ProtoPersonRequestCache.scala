@@ -4,29 +4,40 @@ import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper
+import org.sailcbi.APIServer.Entities.MagicIds
 
 class ProtoPersonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
 extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
 	def getAuthedPersonId: Option[Int] = {
-		val ids = this.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
+		val ts = this.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
 
-		ids match {
-			case id :: Nil => Some(id)
+		ts match {
+			case t :: Nil => Some(t._1)
 			case _ => None
 		}
 	}
 
-	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[Int] = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
+	def isStillProto(): Boolean = {
+		val ts = this.executePreparedQueryForSelect(getMatchingPersonIDsQuery(userName))
+
+		ts match {
+			case t :: Nil => t._2 != MagicIds.PERSONS_PROTO_STATE.WAS_PROTO
+			case Nil => true
+			case _ => false
+		}
+	}
+
+	def getMatchingPersonIDsQuery(cookieValue: String): PreparedQueryForSelect[(Int, String)] = new PreparedQueryForSelect[(Int, String)](Set(ProtoPersonRequestCache)) {
 		override def getQuery: String =
 			"""
-			  |select p.person_id from persons p, (
+			  |select p.person_id, p.proto_state from persons p, (
 			  |    select person_id from persons minus select person_id from persons_to_delete
 			  | ) ilv where p.person_id = ilv.person_id and PROTOPERSON_COOKIE = ?
 				""".stripMargin
 		override val params: List[String] = List(cookieValue)
-		override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
+		override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): (Int, String) = (rs.getInt(1), rs.getString(2))
 	}
 }
 
