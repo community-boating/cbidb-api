@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.mvc.InjectedController
@@ -74,7 +75,10 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		user.update(_.pwChangeRequired, parsed.pwChangeRequired.getOrElse(false))
 		user.update(_.locked, parsed.locked.getOrElse(false))
 		user.update(_.hideFromClose, parsed.hideFromClose.getOrElse(false))
-		if (parsed.pwHash.isDefined) user.update(_.pwHash, parsed.pwHash)
+		if (parsed.pwHash.isDefined) {
+			user.update(_.pwHash, parsed.pwHash)
+			user.update(_.pwHashScheme, Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
+		}
 	}
 
 	private def runValidations(parsed: PutUserShape, userId: Option[Int]): ValidationResult = {
