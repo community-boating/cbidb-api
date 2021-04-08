@@ -428,9 +428,12 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	private def updateObject(i: StorableClass): Unit = {
 		def getFieldValues(vm: Map[String, FieldValue[_]]): List[FieldValue[_]] =
 			vm.values
-					.filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName)
-//					.map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral)
-					.toList
+				.filter(fv =>
+					fv.isSet &&
+					fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName &&
+					fv.isDirty
+				)
+				.toList
 
 		val fieldValues: List[FieldValue[_]] =
 			getFieldValues(i.intValueMap) ++
