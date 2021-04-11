@@ -53,6 +53,18 @@ class PermissionsAuthority private[Core] (
 		rootRC.executePreparedQueryForSelect(q).head
 	}
 
+	def currentSeason(): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(RootRequestCache)) {
+			override val params: List[String] = List()
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String = "select util_pkg.get_current_season from dual"
+		}
+		rootRC.executePreparedQueryForSelect(q).head
+	}
+
+
 	def requestIsFromLocalHost(request:ParsedRequest): Boolean = {
 		val addressRegex = "127\\.0\\.0\\.1(:[0-9]+)?".r
 		val allowedIPs = Set(
@@ -200,7 +212,7 @@ class PermissionsAuthority private[Core] (
 		folder.list.toList.map(path => "([^\\.]*)\\.scala".r.findFirstMatchIn(path.name).get.group(1))
 	}
 
-	private def getCompanionForEntityFile[T](entityPackagePath: String, name: String)(implicit man: Manifest[T]): T = {
+	private def companionForEntityFile[T](entityPackagePath: String, name: String)(implicit man: Manifest[T]): T = {
 		val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 		val module = runtimeMirror.staticModule(entityPackagePath + "." + name + "$")
 		runtimeMirror.reflectModule(module).instance.asInstanceOf[T]
@@ -208,7 +220,7 @@ class PermissionsAuthority private[Core] (
 
 	private def checkAllValueListsMatchReflection(entityPackagePath: String): List[StorableObject[_]] = {
 		val files = getAllEntityFiles(entityPackagePath)
-		files.map(f => getCompanionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.valueListMatchesReflection)
+		files.map(f => companionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.valueListMatchesReflection)
 	}
 
 	private[Core] def bootChecks(): Unit = {
@@ -224,14 +236,14 @@ class PermissionsAuthority private[Core] (
 
 	private[Core] def instantiateAllEntityCompanions(entityPackagePath: String): List[StorableObject[_]] = {
 		val files = getAllEntityFiles(entityPackagePath)
-		files.foreach(f => getCompanionForEntityFile[Any](entityPackagePath, f))
+		files.foreach(f => companionForEntityFile[Any](entityPackagePath, f))
 		println(files)
 		StorableObject.getEntities
 	}
 
 	private[Core] def checkAllEntitiesHaveValuesList(entityPackagePath: String): List[StorableObject[_]] = {
 		val files = getAllEntityFiles(entityPackagePath)
-		files.map(f => getCompanionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.hasValueList)
+		files.map(f => companionForEntityFile[StorableObject[_]](entityPackagePath, f)).filter(!_.hasValueList)
 	}
 
 	private[Core] def nukeDB(): Unit = {
@@ -274,6 +286,7 @@ object PermissionsAuthority {
 
 	def isBooted: Boolean = paWrapper.isInitialized
 	implicit def PA: PermissionsAuthority = paWrapper.get
+	implicit val persistenceSystem = PERSISTENCE_SYSTEM_ORACLE
 
 	private[Core] def setPA(pa: PermissionsAuthority): PermissionsAuthority = paWrapper.set(pa)
 
@@ -284,7 +297,7 @@ object PermissionsAuthority {
 		}
 	}
 
-	trait PersistenceSystem {
+	abstract class PersistenceSystem {
 		val pbs: PersistenceBrokerStatic
 	}
 

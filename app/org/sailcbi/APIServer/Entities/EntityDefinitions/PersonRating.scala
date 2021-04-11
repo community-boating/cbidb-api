@@ -6,9 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
-class PersonRating extends StorableClass {
-	this.setCompanion(PersonRating)
-
+class PersonRating extends StorableClass(PersonRating) {
 	object references extends ReferencesObject {
 		var person = new Initializable[Person]
 		var rating = new Initializable[Rating]

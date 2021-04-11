@@ -1,25 +1,26 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.framework.Util._
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class NullableDateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[LocalDate]](entity, persistenceFieldName) {
+class NullableDateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[LocalDate]](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 	def isNullable: Boolean = true
 
-	def getFieldType: String = PA.systemParams.persistenceSystem match {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {
 		case _: PERSISTENCE_SYSTEM_RELATIONAL => "date"
 	}
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[LocalDate]] = row.dateFields.get(key)
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[LocalDate]] = row.dateFields.get(key)
 
-	def isYearConstant(year: Int): String => Filter = t => PA.systemParams.persistenceSystem match {
+	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -39,7 +40,7 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		}
 	}
 
-	private def dateComparison(date: LocalDate, comp: DateComparison): String => Filter = t => {
+	private def dateComparison(date: LocalDate, comp: DateComparison)(implicit PA: PermissionsAuthority): String => Filter = t => {
 		val comparator: String = comp.comparator
 		PA.systemParams.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
@@ -58,7 +59,4 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 	def greaterEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>=)
 
 	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[LocalDate], NullableDateDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

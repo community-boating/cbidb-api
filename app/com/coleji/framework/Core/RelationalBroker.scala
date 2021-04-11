@@ -89,7 +89,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		sb.append("SELECT ")
 		sb.append(fieldsToGet.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
 		val p = new Profiler
 		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")
@@ -102,7 +102,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-		val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
 		if (rows.length == 1) Some(obj.construct(rows.head))
 		else None
 	}
@@ -120,7 +120,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
-			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 			rows.map(r => obj.construct(r))
 		} else {
 			// Too many IDs; make a filter table
@@ -144,7 +144,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				sb.append(" WHERE " + overallFilter.preparedSQL)
 				params = overallFilter.params
 			}
-			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 			val p = new Profiler
 			val ret = rows.map(r => obj.construct(r))
 			p.lap("finished construction")
@@ -221,7 +221,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
 			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
-			val rows: List[ProtoStorable[ColumnAlias[_, _]]] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
 			c.createStatement().executeUpdate(dropTableSQL)
@@ -294,7 +294,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	}
 
 	// This has to be parameterized, otherwise the compiler shits itself.  At this point shouldnt be anything but ColumnAlias
-	private def getProtoStorablesFromSelect[T <: ColumnAlias[_, _]](sql: String, params: List[String], properties: List[T], fetchSize: Int): List[ProtoStorable[T]] = {
+	private def getProtoStorablesFromSelect(sql: String, params: List[String], properties: List[ColumnAlias[_]], fetchSize: Int): List[ProtoStorable] = {
 		println(sql)
 		val profiler = new Profiler
 		dbGateway.mainPool.withConnection(c => {
@@ -306,50 +306,53 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 			rs.setFetchSize(fetchSize)
 
-			val rows: ListBuffer[ProtoStorable[T]] = ListBuffer()
+			val rows: ListBuffer[ProtoStorable] = ListBuffer()
 			var rowCounter = 0
 			profiler.lap("starting rows")
 			while (rs.next) {
 				rowCounter += 1
-				var intFields: Map[T, Option[Int]] = Map()
-				var doubleFields: Map[T, Option[Double]] = Map()
-				var stringFields: Map[T, Option[String]] = Map()
-				var dateFields: Map[T, Option[LocalDate]] = Map()
-				var dateTimeFields: Map[T, Option[LocalDateTime]] = Map()
+				var intFields: Map[ColumnAlias[_], Option[Int]] = Map()
+				var doubleFields: Map[ColumnAlias[_], Option[Double]] = Map()
+				var stringFields: Map[ColumnAlias[_], Option[String]] = Map()
+				var dateFields: Map[ColumnAlias[_], Option[LocalDate]] = Map()
+				var dateTimeFields: Map[ColumnAlias[_], Option[LocalDateTime]] = Map()
 
 				val p = new Profiler
 
-				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: T, i: Int) => {
+				// I don't understand why the compiler bitches if this cast is not present, but it does
+				def makeCompilerHappy: ColumnAlias[_] => ColumnAlias[_ <: DatabaseField[_]] = _.asInstanceOf[ColumnAlias[_ <: DatabaseField[_]]]
+
+				properties.zip(1.to(properties.length + 1)).foreach(Function.tupled((ca: ColumnAlias[_], i: Int) => {
 					ca.field match {
 						case _: IntDatabaseField | _: NullableIntDatabaseField => {
-							intFields += (ca -> Some(rs.getInt(i)))
-							if (rs.wasNull()) intFields += (ca -> None)
+							intFields += (makeCompilerHappy(ca) -> Some(rs.getInt(i)))
+							if (rs.wasNull()) intFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: DoubleDatabaseField | _: NullableDoubleDatabaseField => {
-							doubleFields += ((ca) -> Some(rs.getDouble(i)))
-							if (rs.wasNull()) doubleFields += ((ca) -> None)
+							doubleFields += (makeCompilerHappy(ca) -> Some(rs.getDouble(i)))
+							if (rs.wasNull()) doubleFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: StringDatabaseField | _: NullableStringDatabaseField => {
-							stringFields += ((ca) -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += ((ca) -> None)
+							stringFields += (makeCompilerHappy(ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: DateDatabaseField | _: NullableDateDatabaseField => {
-							dateFields += ((ca) -> {
+							dateFields += (makeCompilerHappy(ca) -> {
 								try {
 									Some(rs.getDate(i).toLocalDate)
 								} catch {
 									case _: Throwable => None
 								}
 							})
-							if (rs.wasNull()) dateFields += ((ca) -> None)
+							if (rs.wasNull()) dateFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: DateTimeDatabaseField => {
-							dateTimeFields += ((ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
-							if (rs.wasNull()) dateTimeFields += ((ca) -> None)
+							dateTimeFields += (makeCompilerHappy(ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
+							if (rs.wasNull()) dateTimeFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: BooleanDatabaseField => {
-							stringFields += ((ca) -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += ((ca) -> None)
+							stringFields += (makeCompilerHappy(ca) -> Some(rs.getString(i)))
+							if (rs.wasNull()) stringFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _ => {
 							println(" *********** UNKNOWN COLUMN TYPE FOR COL " + ca)
@@ -357,7 +360,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 					}
 				}))
 
-				rows += ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
+				rows += new ProtoStorable(intFields, doubleFields, stringFields, dateFields, dateTimeFields, Map())
 			}
 			profiler.lap(s"finished rows (rowcount: ${rowCounter})")
 			val fetchCount: Int = Math.ceil(rowCounter.toDouble / fetchSize.toDouble).toInt
@@ -384,7 +387,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		def getFieldValues(vm: Map[String, FieldValue[_]]): List[FieldValue[_]] =
 			vm.values
-					.filter(fv => fv.isSet && fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName)
+					.filter(fv => fv.isSet && fv.getPersistenceFieldName != i.companion.primaryKey.getPersistenceFieldName)
 					.toList
 
 		val fieldValues: List[FieldValue[_]] = {
@@ -412,14 +415,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 
 		val sb = new StringBuilder()
-		sb.append("INSERT INTO " + i.getCompanion.entityName + " ( ")
+		sb.append("INSERT INTO " + i.companion.entityName + " ( ")
 		sb.append(columns.mkString(", "))
 		sb.append(") VALUES (")
 		sb.append(values.mkString(", "))
 		sb.append(")")
 		println(sb.toString())
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
-		executeSQLForInsert(sb.toString(), Some(i.getCompanion.primaryKey.getPersistenceFieldName), false, params) match {
+		executeSQLForInsert(sb.toString(), Some(i.companion.primaryKey.getPersistenceFieldName), false, params) match {
 			case Some(s: String) => i.initializePrimaryKeyValue(s.toInt)
 			case None =>
 		}
@@ -430,7 +433,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			vm.values
 				.filter(fv =>
 					fv.isSet &&
-					fv.getPersistenceFieldName != i.getCompanion.primaryKey.getPersistenceFieldName &&
+					fv.getPersistenceFieldName != i.companion.primaryKey.getPersistenceFieldName &&
 					fv.isDirty
 				)
 				.toList
@@ -446,19 +449,19 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 					getFieldValues(i.booleanValueMap)
 
 		val sb = new StringBuilder()
-		sb.append("UPDATE " + i.getCompanion.entityName + " SET ")
+		sb.append("UPDATE " + i.companion.entityName + " SET ")
 		sb.append(fieldValues.map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
-		sb.append(" WHERE " + i.getCompanion.primaryKey.getPersistenceFieldName + " = " + i.getID)
+		sb.append(" WHERE " + i.companion.primaryKey.getPersistenceFieldName + " = " + i.getID)
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
 		val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
 		if (updated != 1) {
-			throw new Exception("Attempted to update storable " + i.getCompanion.entityName + ":" + i.getID + ", updated " + updated + " records")
+			throw new Exception("Attempted to update storable " + i.companion.entityName + ":" + i.getID + ", updated " + updated + " records")
 		}
 	}
 
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		val intValues: Map[ColumnAliasInnerJoined[_, _], Option[Int]] = Map()
-		val stringValues: Map[ColumnAliasInnerJoined[_, _], Option[String]] = Map()
+		val intValues: Map[ColumnAliasInnerJoined[_], Option[Int]] = Map()
+		val stringValues: Map[ColumnAliasInnerJoined[_], Option[String]] = Map()
 
 		qb.tables.map(_._1.obj).foreach(_.init())
 
@@ -470,12 +473,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		if (joinTables.length != joinsReverse.length) {
 			throw new Exception("Malformed Query Builder, tables and joins dont line up")
 		}
-		if (qb.fields.isEmpty) {
-			throw new Exception("Malformed Query Builder, no fields specified")
-		}
+
+		val fields = if (qb.fields.isEmpty) {
+			qb.allFields
+		} else qb.fields
+
 		var params: List[String] = List.empty
 		val joinClause = {
-			def recurse(tables: List[(TableAlias, Boolean)], joins: List[TableJoin], clause: String): String = {
+			def recurse(tables: List[(TableAlias[_ <: StorableObject[_ <: StorableClass]], Boolean)], joins: List[TableJoin], clause: String): String = {
 				if (tables.isEmpty) clause
 				else {
 					val table = tables.head
@@ -497,7 +502,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		params = params ::: whereFilter.params
 		val sql =
 			s"""
-			  |select ${qb.fields.map(f => f.table.name + "." + f.field.asInstanceOf[DatabaseField[_]].getPersistenceFieldName).mkString(", ")}
+			  |select ${fields.map(f => f.table.name + "." + f.field.asInstanceOf[DatabaseField[_]].getPersistenceFieldName).mkString(", ")}
 			  |from ${mainTable._1.obj.entityName} ${mainTable._1.name}
 			  |$joinClause
 			  |$whereClause
@@ -505,7 +510,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		println("QueryBuilder SQL: " + sql)
 
-		getProtoStorablesFromSelect(sql, params, qb.fields, 500).map(ps => new QueryBuilderResultRow(ps))
+		getProtoStorablesFromSelect(sql, params, fields, 500).map(ps => new QueryBuilderResultRow(ps))
 	}
 
 	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {

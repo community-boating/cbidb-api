@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class JpTeamEventPoints extends StorableClass {
-	this.setCompanion(JpTeamEventPoints)
-
+class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
 	object references extends ReferencesObject {
 		var jpTeam = new Initializable[JpTeam]
 	}

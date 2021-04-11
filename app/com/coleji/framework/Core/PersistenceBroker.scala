@@ -37,7 +37,7 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 	final def commitObjectToDatabase(i: StorableClass): Unit = {
 		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
 		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else if (i.valuesList.isEmpty) throw new Exception("Refusing to commit object with empty valuesList: " + i.getCompanion.entityName)
+		else if (i.valuesList.isEmpty) throw new Exception("Refusing to commit object with empty valuesList: " + i.companion.entityName)
 		else commitObjectToDatabaseImplementation(i)
 	}
 

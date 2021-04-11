@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseF
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class JpClassSignup extends StorableClass {
-	this.setCompanion(JpClassSignup)
-
+class JpClassSignup extends StorableClass(JpClassSignup) {
 	object references extends ReferencesObject {
 		var jpClassInstance = new Initializable[JpClassInstance]
 	}

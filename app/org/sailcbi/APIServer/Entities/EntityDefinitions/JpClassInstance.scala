@@ -5,10 +5,7 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDataba
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.{Initializable, InitializableFromCollectionSubset}
 
-class JpClassInstance extends StorableClass {
-	val myself = this
-	this.setCompanion(JpClassInstance)
-
+class JpClassInstance extends StorableClass(JpClassInstance) {
 	object references extends ReferencesObject {
 		var classLocation = new Initializable[Option[ClassLocation]]
 		var classInstructor = new Initializable[Option[ClassInstructor]]
@@ -31,7 +28,7 @@ class JpClassInstance extends StorableClass {
 
 	object calculatedValues extends CalculatedValuesObject {
 		val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {
-			s.values.instanceId.get == myself.values.instanceId.get
+			s.values.instanceId.get == values.instanceId.get
 		})
 
 		// TODO: is there a way to make this not compile if you call it unsafely?  Better way to structure this?

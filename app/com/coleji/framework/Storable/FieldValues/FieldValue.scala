@@ -1,9 +1,11 @@
 package com.coleji.framework.Storable.FieldValues
 
+import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableClass
+import play.api.libs.json.JsValue
 
-abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
+abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) {
 	private var value: Option[T] = None
 	private var dirty: Boolean = false
 
@@ -30,7 +32,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 
 	def get: T = value match {
 		case Some(v) => v
-		case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + instance.getCompanion.entityName + "." + field.getPersistenceFieldName)
+		case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + instance.companion.entityName + "." + field.getPersistenceFieldName)
 	}
 
 	def isSet: Boolean = value match {
@@ -43,6 +45,8 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T]) {
 	def getPersistenceLiteral: (String, List[String])
 
 	def getField: DatabaseField[T] = field
+
+	def asJSValue: JsValue
 }
 
 object FieldValue {

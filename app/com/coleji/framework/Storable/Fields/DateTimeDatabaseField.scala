@@ -1,23 +1,24 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
-class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
+class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 	def isNullable: Boolean = false
 
-	def getFieldType: String = PA.systemParams.persistenceSystem match {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "datetime"
 		case PERSISTENCE_SYSTEM_ORACLE => "date"
 	}
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[LocalDateTime] = {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[LocalDateTime] = {
 		row.dateTimeFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new NonNullFieldWasNullException("non-null DateTime field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
@@ -25,7 +26,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	def isYearConstant(year: Int): String => Filter = t => PA.systemParams.persistenceSystem match {
+	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
@@ -35,7 +36,7 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
-	def isDateConstant(date: LocalDate): String => Filter = t => PA.systemParams.persistenceSystem match {
+	def isDateConstant(date: LocalDate)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL =>
 			Filter(
 				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +
@@ -53,7 +54,4 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 			case _: Throwable => None
 		}
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[LocalDateTime, DateTimeDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

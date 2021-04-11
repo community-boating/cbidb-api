@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDat
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class ApClassInstance extends StorableClass {
-	this.setCompanion(ApClassInstance)
-
+class ApClassInstance extends StorableClass(ApClassInstance) {
 	object references extends ReferencesObject {
 		var apClassFormat = new Initializable[ApClassFormat]
 	}

@@ -7,10 +7,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
-class Person extends StorableClass {
-	val instance: Person = this
-	this.setCompanion(Person)
-
+class Person extends StorableClass(Person) {
 	object references extends ReferencesObject {
 		val personRatings = new Initializable[Set[PersonRating]]
 	}
@@ -46,7 +43,7 @@ class Person extends StorableClass {
 	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
 		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
-			List(PersonRating.fields.personId.equalsConstant(instance.values.personId.get))
+			List(PersonRating.fields.personId.equalsConstant(values.personId.get))
 		).toSet
 	}
 

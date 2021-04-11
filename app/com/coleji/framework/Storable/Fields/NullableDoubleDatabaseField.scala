@@ -1,15 +1,15 @@
 package com.coleji.framework.Storable.Fields
 
-import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Double]] = row.doubleFields.get(key)
+class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[Double]] = row.doubleFields.get(key)
 
 	def isNullable: Boolean = true
 
-	def getFieldType: String = PA.systemParams.persistenceSystem match {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
@@ -51,7 +51,4 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 			}
 		}
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Double], NullableDoubleDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Double], NullableDoubleDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

@@ -1,23 +1,23 @@
 package com.coleji.framework.Storable.Fields
 
-import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
+class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def isNullable: Boolean = true
 
-	def getFieldType: String = getFieldLength match {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = getFieldLength match {
 		case l if l == 1 => "char(" + getFieldLength + ")"
-		case _ => PA.systemParams.persistenceSystem match {
+		case _ => persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL => "char(1)"
 			case PERSISTENCE_SYSTEM_ORACLE => "char(1)"
 		}
 	}
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Option[Boolean]] = {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[Boolean]] = {
 		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(Some(true))
 			case Some(Some("N")) => Some(Some(false))
@@ -37,7 +37,4 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		case "" => Some(None)
 		case _ => None
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Option[Boolean], NullableBooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

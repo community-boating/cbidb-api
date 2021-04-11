@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDateDatab
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class PersonMembership extends StorableClass {
-	this.setCompanion(PersonMembership)
-
+class PersonMembership extends StorableClass(PersonMembership) {
 	object references extends ReferencesObject {
 		var person: Option[Person] = None
 		var membershipType = new Initializable[MembershipType]

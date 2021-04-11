@@ -4,9 +4,7 @@ import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValu
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
 
-class ApClassType extends StorableClass {
-	this.setCompanion(ApClassType)
-
+class ApClassType extends StorableClass(ApClassType) {
 	object references extends ReferencesObject {}
 
 	object values extends ValuesObject {

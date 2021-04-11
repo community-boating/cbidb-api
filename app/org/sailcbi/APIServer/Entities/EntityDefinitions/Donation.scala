@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class Donation extends StorableClass {
-	this.setCompanion(Donation)
-
+class Donation extends StorableClass(Donation) {
 	object references extends ReferencesObject {
 		var person = new Initializable[Person]
 	}

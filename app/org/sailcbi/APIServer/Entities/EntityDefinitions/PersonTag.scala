@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class PersonTag extends StorableClass {
-	this.setCompanion(PersonTag)
-
+class PersonTag extends StorableClass(PersonTag) {
 	object references extends ReferencesObject {
 		var person = new Initializable[Person]
 		var tag = new Initializable[Tag]

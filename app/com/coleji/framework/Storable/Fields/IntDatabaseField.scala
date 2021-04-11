@@ -1,18 +1,19 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Int](entity, persistenceFieldName) {
-	def getFieldType: String = PA.systemParams.persistenceSystem match {
+class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Int](entity, persistenceFieldName) {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "integer"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
 	def isNullable: Boolean = false
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Int] = {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Int] = {
 		row.intFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new NonNullFieldWasNullException("non-null Int field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
@@ -20,7 +21,7 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 		}
 	}
 
-	def inList(l: List[Int]): String => Filter = t => PA.systemParams.persistenceSystem match {
+	def inList(l: List[Int])(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case ps: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Int]): List[List[Int]] = {
 				if (ids.length <= ps.pbs.MAX_EXPR_IN_LIST) List(ids)
@@ -52,7 +53,4 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 			case _: Throwable => None
 		}
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Int, IntDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Int, IntDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

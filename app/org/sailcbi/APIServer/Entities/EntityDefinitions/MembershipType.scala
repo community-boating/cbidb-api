@@ -5,12 +5,9 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDoubleDat
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.InitializableFromCollectionElement
 
-class MembershipType extends StorableClass {
-	val myself = this
-	this.setCompanion(MembershipType)
-
+class MembershipType extends StorableClass(MembershipType) {
 	object references extends ReferencesObject {
-		var program = new InitializableFromCollectionElement[ProgramType](_.values.programId.get == myself.values.programId.get)
+		var program = new InitializableFromCollectionElement[ProgramType](_.values.programId.get == values.programId.get)
 	}
 
 	object values extends ValuesObject {

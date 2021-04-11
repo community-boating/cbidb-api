@@ -1,11 +1,13 @@
 package com.coleji.framework.Storable
 
+import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.Storable.FieldValues.{FieldValue, _}
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Util.Initializable
+import play.api.libs.json.{JsObject, JsValue}
 
 
-abstract class StorableClass {
+abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) {
 	type IntFieldValueMap = Map[String, IntFieldValue]
 	type NullableIntFieldValueMap = Map[String, NullableIntFieldValue]
 	type DoubleFieldValueMap = Map[String, DoubleFieldValue]
@@ -17,7 +19,6 @@ abstract class StorableClass {
 	type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
 	type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 
-	type Companion = StorableObject[_ <: StorableClass]
 
 	// If you need a self in the entity, call it myself or something
 	// Can't take the final off this and override it, or everything crashes horribly.
@@ -26,9 +27,6 @@ abstract class StorableClass {
 
 	override def toString: String = this.valuesList.toString()
 
-	// TODO: unit test that verifies these are all correct.  Or some reflection hotness so they must be correct
-	private val companion = new Initializable[Companion]
-
 	val desiredPrimaryKey = new Initializable[Int]
 
 	def withPK(pk: Int): StorableClass = {
@@ -36,22 +34,22 @@ abstract class StorableClass {
 		this
 	}
 
-	def getCompanion: Companion = companion.get
-
-	def setCompanion(c: Companion): Unit = {
-		c.init()
-		companion.set(c)
-	}
-
 	override def equals(that: Any): Boolean = that match {
-		case i: StorableClass => this.getID == i.getID
+		case i: StorableClass => {
+			try {
+				val myId = this.getID
+				val theirId = i.getID
+				println("companions match? " + (this.companion == i.companion))
+				println("ids match? " + myId + "  " + theirId)
+				this.companion == i.companion && myId == theirId
+			} catch {
+				case _: Throwable => false
+			}
+		}
 		case _ => false
 	}
 
-	override def hashCode: Int = (this.getClass.toString.hashCode, this.getID).hashCode()
-
 	def getPrimaryKeyFieldValue: IntFieldValue = {
-		val companion: Companion = getCompanion
 		val primaryKey: IntDatabaseField = companion.primaryKey
 		val primaryKeyFieldRuntimeName: String = primaryKey.getRuntimeFieldName
 		intValueMap(primaryKeyFieldRuntimeName)
@@ -79,10 +77,14 @@ abstract class StorableClass {
 	}
 
 	def unsetRequiredFields: List[FieldValue[_]] = {
-		valuesList.filter(f => !f.getField.isNullable && f.getField.getRuntimeFieldName != getCompanion.primaryKey.getRuntimeFieldName).filter(!_.isSet)
+		valuesList.filter(f => !f.getField.isNullable && f.getField.getRuntimeFieldName != companion.primaryKey.getRuntimeFieldName).filter(!_.isSet)
 	}
 
 	def isDirty: Boolean = valuesList.foldLeft(false)((agg, a) => agg || a.isDirty)
+
+	def asJsValue: JsValue = {
+		JsObject(valuesList.filter(_.isSet).map(v => v.getPersistenceFieldName -> v.asJSValue).toMap)
+	}
 
 	def getValuesListByReflection: List[(String, FieldValue[_])] = {
 		import scala.reflect.runtime.universe._
@@ -144,7 +146,6 @@ abstract class StorableClass {
 				case (name: String, b: BooleanFieldValue) => booleanMap += (name -> b)
 				case _ => throw new Exception("Unrecognized field type")
 			})
-
 		}
 
 		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)

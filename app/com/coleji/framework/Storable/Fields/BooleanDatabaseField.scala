@@ -1,21 +1,25 @@
 package com.coleji.framework.Storable.Fields
 
-import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.PERSISTENCE_SYSTEM_RELATIONAL
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, nullImpliesFalse: Boolean = false)(implicit PA: PermissionsAuthority) extends DatabaseField[Boolean](entity, persistenceFieldName) {
+class BooleanDatabaseField(
+	override val entity: StorableObject[_ <: StorableClass],
+	persistenceFieldName: String,
+	nullImpliesFalse: Boolean = false
+) extends DatabaseField[Boolean](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def isNullable: Boolean = nullImpliesFalse
 
-	def getFieldType: String = getFieldLength match {
-		case _ => PA.systemParams.persistenceSystem match {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = getFieldLength match {
+		case _ => persistenceSystem match {
 			case _: PERSISTENCE_SYSTEM_RELATIONAL => "char(1)"
 		}
 	}
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Boolean] = {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Boolean] = {
 		row.stringFields.get(key) match {
 			case Some(Some("Y")) => Some(true)
 			case Some(Some("N")) => Some(false)
@@ -34,7 +38,4 @@ class BooleanDatabaseField(override val entity: StorableObject[_ <: StorableClas
 		case "false" => Some(false)
 		case _ => None
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Boolean, BooleanDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Boolean, BooleanDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }

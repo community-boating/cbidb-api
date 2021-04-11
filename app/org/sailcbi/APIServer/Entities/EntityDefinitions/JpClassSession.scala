@@ -8,10 +8,7 @@ import com.coleji.framework.Util.{DefinedInitializable, Initializable}
 import org.sailcbi.APIServer.IO.CachedData
 
 
-class JpClassSession extends StorableClass {
-	val myself = this
-	this.setCompanion(JpClassSession)
-
+class JpClassSession extends StorableClass(JpClassSession) {
 	object references extends ReferencesObject {
 		var jpClassInstance = new Initializable[JpClassInstance]
 	}
@@ -31,7 +28,7 @@ class JpClassSession extends StorableClass {
 	object calculatedValues extends CalculatedValuesObject {
 		val jpWeekAlias = new DefinedInitializable[UnlockedRequestCache, Option[String]]((rc: UnlockedRequestCache) => {
 			val cache = new CachedData(rc)
-			cache.getJpWeekAlias(myself.values.sessionDateTime.get.toLocalDate)
+			cache.getJpWeekAlias(values.sessionDateTime.get.toLocalDate)
 		})
 	}
 }

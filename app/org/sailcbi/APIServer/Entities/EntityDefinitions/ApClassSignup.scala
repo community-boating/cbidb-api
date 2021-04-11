@@ -5,9 +5,7 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseFie
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
-class ApClassSignup extends StorableClass {
-	this.setCompanion(ApClassSignup)
-
+class ApClassSignup extends StorableClass(ApClassSignup) {
 	object references extends ReferencesObject {
 		var apClassInstance = new Initializable[ApClassSignup]
 	}

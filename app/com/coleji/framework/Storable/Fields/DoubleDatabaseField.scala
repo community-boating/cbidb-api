@@ -1,18 +1,19 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
+import com.coleji.framework.Storable.StorableQuery.ColumnAlias
 import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String)(implicit PA: PermissionsAuthority) extends DatabaseField[Double](entity, persistenceFieldName) {
-	def getFieldType: String = PA.systemParams.persistenceSystem match {
+class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Double](entity, persistenceFieldName) {
+	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {
 		case PERSISTENCE_SYSTEM_MYSQL => "decimal"
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
 	def isNullable: Boolean = false
 
-	def findValueInProtoStorableImpl[T](row: ProtoStorable[T], key: T): Option[Double] = {
+	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Double] = {
 		row.doubleFields.get(key) match {
 			case Some(Some(x)) => Some(x)
 			case Some(None) => throw new NonNullFieldWasNullException("non-null Double field " + entity.entityName + "." + this.getRuntimeFieldName + " was null in a proto")
@@ -24,7 +25,7 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		t => Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
 	}
 
-	def inList(l: List[Double]): String => Filter = t => PA.systemParams.persistenceSystem match {
+	def inList(l: List[Double])(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
 		case r: PERSISTENCE_SYSTEM_RELATIONAL => {
 			def groupIDs(ids: List[Double]): List[List[Double]] = {
 				if (ids.length <= r.pbs.MAX_EXPR_IN_LIST) List(ids)
@@ -52,7 +53,4 @@ class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass
 			case _: Throwable => None
 		}
 	}
-
-//	def alias(tableAlias: TableAliasInnerJoined): ColumnAliasInnerJoined[Double, DoubleDatabaseField] = ColumnAliasInnerJoined(tableAlias, this)
-//	def alias(tableAlias: TableAliasOuterJoined): ColumnAliasOuterJoined[Double, DoubleDatabaseField] = ColumnAliasOuterJoined(tableAlias, this)
 }
