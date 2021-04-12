@@ -2,7 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.JpClassInstance
-import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups}
+import org.sailcbi.APIServer.IO.JP.GetWeeks.GetWeeksResult
+import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetWeeks}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -14,18 +15,29 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
+			val weeks = GetWeeks.getWeeks(rc)
 			val instances = AllJPClassInstances.get(rc).map(Function.tupled((instance, start, end) => JpClassInstanceDecorated(
-				jpClassInstance = instance, firstSession = start, lastSession = end, week = 2
+				jpClassInstance = instance, firstSession = start, lastSession = end, week = findWeek(weeks, start)
 			)))
 			val signups = AllJpClassSignups.get(rc, instances.map(t => t.jpClassInstance.values.instanceId.get))
+
+
 			implicit val writes = Json.writes[JpClassInstanceDecorated]
 			val result = Json.toJson(Map(
 				"instances" -> Json.toJson(instances),
 				"signups" -> Json.toJson(signups),
+				"weeks" -> Json.toJson(weeks),
 			))
 			Future(Ok(Json.toJson(result)))
 		})
 	})
+
+	private def findWeek(weeks: Array[GetWeeks.GetWeeksResult], startDate: LocalDateTime): Int = {
+		weeks.find(w =>
+			(w.monday.isEqual(startDate.toLocalDate) || w.monday.isBefore(startDate.toLocalDate)) // monday is before the class
+			&& w.monday.plusDays(6).isAfter(startDate.toLocalDate)						// next monday is after the class
+		).get.weekNumber
+	}
 
 	case class JpClassInstanceDecorated(
 		jpClassInstance: JpClassInstance,
