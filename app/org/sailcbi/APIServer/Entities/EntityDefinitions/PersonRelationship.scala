@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class PersonRelationship extends StorableClass(PersonRelationship) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var a = new Initializable[Person]
 		var b = new Initializable[Person]
 	}
@@ -17,13 +17,6 @@ class PersonRelationship extends StorableClass(PersonRelationship) {
 		val b = new IntFieldValue(self, PersonRelationship.fields.b)
 		val typeId = new IntFieldValue(self, PersonRelationship.fields.typeId)
 	}
-
-	override val valuesList = List(
-		values.relationId,
-		values.a,
-		values.b,
-		values.typeId
-	)
 }
 
 object PersonRelationship extends StorableObject[PersonRelationship] {

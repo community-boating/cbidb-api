@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class PersonTag extends StorableClass(PersonTag) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var person = new Initializable[Person]
 		var tag = new Initializable[Tag]
 	}
@@ -16,12 +16,6 @@ class PersonTag extends StorableClass(PersonTag) {
 		val personId = new IntFieldValue(self, PersonTag.fields.personId)
 		val tagId = new IntFieldValue(self, PersonTag.fields.tagId)
 	}
-
-	override val valuesList = List(
-		values.assignId,
-		values.personId,
-		values.tagId
-	)
 }
 
 object PersonTag extends StorableObject[PersonTag] {

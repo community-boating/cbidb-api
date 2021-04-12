@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class ApClassSignup extends StorableClass(ApClassSignup) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var apClassInstance = new Initializable[ApClassSignup]
 	}
 
@@ -15,12 +15,6 @@ class ApClassSignup extends StorableClass(ApClassSignup) {
 		val instanceId = new IntFieldValue(self, ApClassSignup.fields.instanceId)
 		val signupType = new StringFieldValue(self, ApClassSignup.fields.signupType)
 	}
-
-	override val valuesList = List(
-		values.signupId,
-		values.instanceId,
-		values.signupType
-	)
 }
 
 object ApClassSignup extends StorableObject[ApClassSignup] {

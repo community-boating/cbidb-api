@@ -8,7 +8,7 @@ import com.coleji.framework.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
 class Person extends StorableClass(Person) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		val personRatings = new Initializable[Set[PersonRating]]
 	}
 
@@ -25,20 +25,6 @@ class Person extends StorableClass(Person) {
 		val state = new NullableStringFieldValue(self, Person.fields.state)
 		val zip = new NullableStringFieldValue(self, Person.fields.zip)
 	}
-
-	override val valuesList = List(
-		values.personId,
-		values.nameFirst,
-		values.nameLast,
-		values.email,
-		values.pwHash,
-		values.addr1,
-		values.addr2,
-		values.addr3,
-		values.city,
-		values.state,
-		values.zip
-	)
 
 	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
 		references.personRatings set rc.getObjectsByFilters(

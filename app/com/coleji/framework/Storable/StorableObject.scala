@@ -5,6 +5,7 @@ import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues._
 import com.coleji.framework.Storable.Fields._
 import com.coleji.framework.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, QueryBuilderResultRow, TableAliasInnerJoined}
+import com.coleji.framework.Util.Profiler
 import play.api.libs.json.{JsValue, Writes}
 
 import java.time.{LocalDate, LocalDateTime}
@@ -28,6 +29,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	val self: StorableObject[T] = this
 	val entityName: String
 	val fields: FieldsObject
+
+	private val instanceForReflection: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 	implicit val storableJsonWrites = new Writes[T] {
 		override def writes(o: T): JsValue = o.asJsValue
@@ -129,7 +132,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	// Make sure all the lazy things are actually set
 	def init(): Unit = {
+		val p = new Profiler
 		fieldList
+		p.lap("fieldl ist done")
 	}
 
 	def hasValueList: Boolean = {

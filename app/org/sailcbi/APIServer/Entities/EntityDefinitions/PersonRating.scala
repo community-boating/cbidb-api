@@ -7,7 +7,7 @@ import com.coleji.framework.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
 class PersonRating extends StorableClass(PersonRating) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var person = new Initializable[Person]
 		var rating = new Initializable[Rating]
 		var program = new Initializable[ProgramType]
@@ -19,13 +19,6 @@ class PersonRating extends StorableClass(PersonRating) {
 		val ratingId = new IntFieldValue(self, PersonRating.fields.ratingId)
 		val programId = new IntFieldValue(self, PersonRating.fields.programId)
 	}
-
-	override val valuesList = List(
-		values.assignId,
-		values.personId,
-		values.ratingId,
-		values.programId
-	)
 
 	lazy val asCaseClass = CasePersonRating(
 		this.values.personId.get,

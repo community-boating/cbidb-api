@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.{Initializable, InitializableFromCollectionSubset}
 
 class JpClassInstance extends StorableClass(JpClassInstance) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var classLocation = new Initializable[Option[ClassLocation]]
 		var classInstructor = new Initializable[Option[ClassInstructor]]
 		var jpClassType = new Initializable[JpClassType]
@@ -18,13 +18,6 @@ class JpClassInstance extends StorableClass(JpClassInstance) {
 		val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
 		val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
 	}
-
-	override val valuesList = List(
-		values.instanceId,
-		values.instructorId,
-		values.locationId,
-		values.typeId
-	)
 
 	object calculatedValues extends CalculatedValuesObject {
 		val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {

@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class ApClassFormat extends StorableClass(ApClassFormat) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var apClassType = new Initializable[ApClassType]
 	}
 
@@ -15,12 +15,6 @@ class ApClassFormat extends StorableClass(ApClassFormat) {
 		val typeId = new IntFieldValue(self, ApClassFormat.fields.typeId)
 		val description = new NullableStringFieldValue(self, ApClassFormat.fields.description)
 	}
-
-	override val valuesList = List(
-		values.formatId,
-		values.typeId,
-		values.description
-	)
 }
 
 object ApClassFormat extends StorableObject[ApClassFormat] {

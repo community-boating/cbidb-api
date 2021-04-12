@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var jpTeam = new Initializable[JpTeam]
 	}
 
@@ -15,12 +15,6 @@ class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
 		val teamId = new IntFieldValue(self, JpTeamEventPoints.fields.teamId)
 		val points = new IntFieldValue(self, JpTeamEventPoints.fields.points)
 	}
-
-	override val valuesList = List(
-		values.rowId,
-		values.teamId,
-		values.points
-	)
 }
 
 object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {

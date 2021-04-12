@@ -23,6 +23,16 @@ object AllJPClassInstances {
 			val classType = JpClassType.construct(qbrr)
 			session.references.jpClassInstance.set(instance)
 			instance.references.jpClassType.set(classType)
+
+			classType.valuesList
+			classType.referencesList
+
+			instance.valuesList
+			instance.referencesList
+
+			session.valuesList
+			session.referencesList
+
 			session
 		})
 	}

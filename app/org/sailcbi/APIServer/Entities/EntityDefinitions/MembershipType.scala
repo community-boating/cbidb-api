@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.InitializableFromCollectionElement
 
 class MembershipType extends StorableClass(MembershipType) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var program = new InitializableFromCollectionElement[ProgramType](_.values.programId.get == values.programId.get)
 	}
 
@@ -16,13 +16,6 @@ class MembershipType extends StorableClass(MembershipType) {
 		val programId = new IntFieldValue(self, MembershipType.fields.programId)
 		val price = new NullableDoubleFieldValue(self, MembershipType.fields.price)
 	}
-
-	override val valuesList = List(
-		values.membershipTypeId,
-		values.membershipTypeName,
-		values.programId,
-		values.price
-	)
 }
 
 object MembershipType extends StorableObject[MembershipType] {

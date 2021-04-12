@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.InitializableFromCollectionElement
 
 class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var membershipType = new InitializableFromCollectionElement[MembershipType](_.values.membershipTypeId.get == values.membershipTypeId.get)
 	}
 
@@ -17,14 +17,6 @@ class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
 		val startDate = new DateFieldValue(self, MembershipTypeExp.fields.startDate)
 		val expirationDate = new DateFieldValue(self, MembershipTypeExp.fields.expirationDate)
 	}
-
-	override val valuesList = List(
-		values.expirationId,
-		values.membershipTypeId,
-		values.season,
-		values.startDate,
-		values.expirationDate
-	)
 }
 
 object MembershipTypeExp extends StorableObject[MembershipTypeExp] {

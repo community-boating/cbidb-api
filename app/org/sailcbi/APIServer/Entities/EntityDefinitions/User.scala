@@ -5,7 +5,7 @@ import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseFi
 import com.coleji.framework.Storable._
 
 class User extends StorableClass(User) {
-	object references extends ReferencesObject {}
+	override object references extends ReferencesObject {}
 
 	object values extends ValuesObject {
 		val userId = new IntFieldValue(self, User.fields.userId)
@@ -20,20 +20,6 @@ class User extends StorableClass(User) {
 		val pwChangeRequired = new BooleanFieldValue(self, User.fields.pwChangeRequired)
 		val pwHashScheme = new NullableStringFieldValue(self, User.fields.pwHashScheme)
 	}
-
-	override val valuesList = List(
-		values.userId,
-		values.userName,
-		values.nameFirst,
-		values.nameLast,
-		values.email,
-		values.active,
-		values.hideFromClose,
-		values.pwHash,
-		values.locked,
-		values.pwChangeRequired ,
-		values.pwHashScheme
-	)
 
 	override def toString: String = this.valuesList.filter(_.getPersistenceFieldName != "PW_HASH").toString()
 }

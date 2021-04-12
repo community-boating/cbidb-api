@@ -5,19 +5,11 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDataba
 import com.coleji.framework.Storable._
 
 class JpClassType extends StorableClass(JpClassType) {
-	object references extends ReferencesObject {}
-
 	object values extends ValuesObject {
 		val typeId = new IntFieldValue(self, JpClassType.fields.typeId)
 		val typeName = new StringFieldValue(self, JpClassType.fields.typeName)
 		val displayOrder = new NullableIntFieldValue(self, JpClassType.fields.displayOrder)
 	}
-
-	override val valuesList = List(
-		values.typeId,
-		values.typeName,
-		values.displayOrder
-	)
 }
 
 object JpClassType extends StorableObject[JpClassType] {

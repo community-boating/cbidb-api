@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class ApClassSession extends StorableClass(ApClassSession) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var apClassInstance = new Initializable[ApClassInstance]
 	}
 
@@ -15,12 +15,6 @@ class ApClassSession extends StorableClass(ApClassSession) {
 		val instanceId = new IntFieldValue(self, ApClassSession.fields.instanceId)
 		val sessionDateTime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDateTime)
 	}
-
-	override val valuesList = List(
-		values.sessionId,
-		values.instanceId,
-		values.sessionDateTime
-	)
 }
 
 object ApClassSession extends StorableObject[ApClassSession] {

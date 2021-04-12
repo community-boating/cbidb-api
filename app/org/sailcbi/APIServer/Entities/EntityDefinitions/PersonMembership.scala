@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class PersonMembership extends StorableClass(PersonMembership) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var person: Option[Person] = None
 		var membershipType = new Initializable[MembershipType]
 	}
@@ -18,14 +18,6 @@ class PersonMembership extends StorableClass(PersonMembership) {
 		val startDate = new NullableDateFieldValue(self, PersonMembership.fields.startDate)
 		val expirationDate = new NullableDateFieldValue(self, PersonMembership.fields.expirationDate)
 	}
-
-	override val valuesList = List(
-		values.assignId,
-		values.personId,
-		values.membershipTypeId,
-		values.startDate,
-		values.expirationDate
-	)
 }
 
 object PersonMembership extends StorableObject[PersonMembership] {

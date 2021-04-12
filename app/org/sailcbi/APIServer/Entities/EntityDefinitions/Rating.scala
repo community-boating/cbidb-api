@@ -5,19 +5,13 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDataba
 import com.coleji.framework.Storable._
 
 class Rating extends StorableClass(Rating) {
-	object references extends ReferencesObject {}
+	override object references extends ReferencesObject {}
 
 	object values extends ValuesObject {
 		val ratingId = new IntFieldValue(self, Rating.fields.ratingId)
 		val ratingName = new StringFieldValue(self, Rating.fields.ratingName)
 		val overriddenBy = new NullableIntFieldValue(self, Rating.fields.overriddenBy)
 	}
-
-	override val valuesList = List(
-		values.ratingId,
-		values.ratingName,
-		values.overriddenBy
-	)
 }
 
 object Rating extends StorableObject[Rating] {

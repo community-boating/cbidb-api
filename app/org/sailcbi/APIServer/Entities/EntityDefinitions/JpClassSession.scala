@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.IO.CachedData
 
 
 class JpClassSession extends StorableClass(JpClassSession) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var jpClassInstance = new Initializable[JpClassInstance]
 	}
 
@@ -18,12 +18,6 @@ class JpClassSession extends StorableClass(JpClassSession) {
 		val instanceId = new IntFieldValue(self, JpClassSession.fields.instanceId)
 		val sessionDateTime = new DateTimeFieldValue(self, JpClassSession.fields.sessionDateTime)
 	}
-
-	override val valuesList = List(
-		values.sessionId,
-		values.instanceId,
-		values.sessionDateTime
-	)
 
 	object calculatedValues extends CalculatedValuesObject {
 		val jpWeekAlias = new DefinedInitializable[UnlockedRequestCache, Option[String]]((rc: UnlockedRequestCache) => {

@@ -19,11 +19,14 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
 	type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 
-
 	// If you need a self in the entity, call it myself or something
 	// Can't take the final off this and override it, or everything crashes horribly.
 	final val self: StorableClass = this
+
 	val values: ValuesObject
+
+	object noReferences extends ReferencesObject { }
+	val references: ReferencesObject = noReferences
 
 	override def toString: String = this.valuesList.toString()
 
@@ -66,7 +69,15 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		case None => false
 	}
 
-	val valuesList: List[FieldValue[_]] = List.empty
+	lazy final val valuesList: List[FieldValue[_]] = this.values.getClass.getDeclaredFields.map(f => {
+		f.setAccessible(true)
+		f.get(this.values).asInstanceOf[FieldValue[_]]
+	}).toList
+
+	lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.map(f => {
+		f.setAccessible(true)
+		(f.getName, f.get(this.references).asInstanceOf[Initializable[Object]])
+	}).toList
 
 	def hasValuesList: Boolean = valuesList.nonEmpty
 
@@ -83,7 +94,17 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	def isDirty: Boolean = valuesList.foldLeft(false)((agg, a) => agg || a.isDirty)
 
 	def asJsValue: JsValue = {
-		JsObject(valuesList.filter(_.isSet).map(v => v.getPersistenceFieldName -> v.asJSValue).toMap)
+		var map = valuesList.filter(_.isSet).map(v => v.getPersistenceFieldName -> v.asJSValue).toMap
+		def addObject(name: String, o: StorableClass): Unit = {
+			map += (("$$" + name) -> o.asJsValue)
+		}
+		referencesList.filter(_._2.isInitialized).foreach(Function.tupled((name, ref) => {
+			ref.get match {
+				case Some(o: StorableClass) => addObject(name, o)
+				case o: StorableClass => addObject(name, o)
+			}
+		}))
+		JsObject(map)
 	}
 
 	def getValuesListByReflection: List[(String, FieldValue[_])] = {

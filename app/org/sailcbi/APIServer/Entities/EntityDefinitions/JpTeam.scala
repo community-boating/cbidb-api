@@ -5,17 +5,12 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseFie
 import com.coleji.framework.Storable._
 
 class JpTeam extends StorableClass(JpTeam) {
-	object references extends ReferencesObject {}
+	override object references extends ReferencesObject {}
 
 	object values extends ValuesObject {
 		val teamId = new IntFieldValue(self, JpTeam.fields.teamId)
 		val teamName = new StringFieldValue(self, JpTeam.fields.teamName)
 	}
-
-	override val valuesList = List(
-		values.teamId,
-		values.teamName
-	)
 }
 
 object JpTeam extends StorableObject[JpTeam] {

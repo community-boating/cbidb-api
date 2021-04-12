@@ -6,7 +6,7 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class Donation extends StorableClass(Donation) {
-	object references extends ReferencesObject {
+	override object references extends ReferencesObject {
 		var person = new Initializable[Person]
 	}
 
@@ -16,13 +16,6 @@ class Donation extends StorableClass(Donation) {
 		val amount = new NullableDoubleFieldValue(self, Donation.fields.amount)
 		val donationDate = new DateFieldValue(self, Donation.fields.donationDate)
 	}
-
-	override val valuesList = List(
-		values.donationId,
-		values.personId,
-		values.amount,
-		values.donationDate
-	)
 }
 
 object Donation extends StorableObject[Donation] {
