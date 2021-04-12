@@ -8,9 +8,9 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonR
 
 class PersonRating extends StorableClass(PersonRating) {
 	override object references extends ReferencesObject {
-		var person = new Initializable[Person]
-		var rating = new Initializable[Rating]
-		var program = new Initializable[ProgramType]
+		val person = new Initializable[Person]
+		val rating = new Initializable[Rating]
+		val program = new Initializable[ProgramType]
 	}
 
 	object values extends ValuesObject {

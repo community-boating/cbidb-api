@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.IO.CachedData
 
 class JpClassSession extends StorableClass(JpClassSession) {
 	override object references extends ReferencesObject {
-		var jpClassInstance = new Initializable[JpClassInstance]
+		val jpClassInstance = new Initializable[JpClassInstance]
 	}
 
 	object values extends ValuesObject {

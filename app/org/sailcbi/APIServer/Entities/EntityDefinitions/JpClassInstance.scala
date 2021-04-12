@@ -7,9 +7,9 @@ import com.coleji.framework.Util.{Initializable, InitializableFromCollectionSubs
 
 class JpClassInstance extends StorableClass(JpClassInstance) {
 	override object references extends ReferencesObject {
-		var classLocation = new Initializable[Option[ClassLocation]]
-		var classInstructor = new Initializable[Option[ClassInstructor]]
-		var jpClassType = new Initializable[JpClassType]
+		val classLocation = new Initializable[Option[ClassLocation]]
+		val classInstructor = new Initializable[Option[ClassInstructor]]
+		val jpClassType = new Initializable[JpClassType]
 	}
 
 	object values extends ValuesObject {

@@ -5,8 +5,10 @@ import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, TableAlias}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSession, JpClassType}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
+import java.time.LocalDateTime
+
 object AllJPClassInstances {
-	def get(rc: StaffRequestCache)(implicit PA: PermissionsAuthority): List[JpClassSession] = {
+	def get(rc: StaffRequestCache)(implicit PA: PermissionsAuthority): List[(JpClassInstance, LocalDateTime, LocalDateTime)] = {
 		val types = TableAlias.wrapForInnerJoin(JpClassType)
 		val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
 		val sessions = TableAlias.wrapForInnerJoin(JpClassSession)
@@ -17,23 +19,21 @@ object AllJPClassInstances {
 			.innerJoin(sessions, instances.wrappedFields(_.fields.instanceId).wrapFilter(_.equalsField(sessions.wrappedFields(_.fields.instanceId))))
 			.where(sessions.wrappedFields(_.fields.sessionDateTime).wrapFilter(_.isYearConstant(PA.currentSeason())))
 
-		rc.executeQueryBuilder(sessionsQB).map(qbrr => {
+		val allSessions = rc.executeQueryBuilder(sessionsQB).map(qbrr => {
 			val session = JpClassSession.construct(qbrr)
 			val instance = JpClassInstance.construct(qbrr)
 			val classType = JpClassType.construct(qbrr)
 			session.references.jpClassInstance.set(instance)
 			instance.references.jpClassType.set(classType)
-
-			classType.valuesList
-			classType.referencesList
-
-			instance.valuesList
-			instance.referencesList
-
-			session.valuesList
-			session.referencesList
-
 			session
 		})
+
+		val groupedSessions = allSessions.groupBy(_.references.jpClassInstance.get)
+		groupedSessions.map(Function.tupled((instance, sessions) => {
+			sessions.sortWith((a, b) => a.values.sessionDateTime.get.isBefore(b.values.sessionDateTime.get))
+			val min = sessions.head.values.sessionDateTime.get
+			val max = sessions.last.values.sessionDateTime.get
+			(instance, min, max)
+		})).toList
 	}
 }

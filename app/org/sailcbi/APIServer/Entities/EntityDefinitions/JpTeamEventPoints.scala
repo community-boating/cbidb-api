@@ -7,7 +7,7 @@ import com.coleji.framework.Util.Initializable
 
 class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
 	override object references extends ReferencesObject {
-		var jpTeam = new Initializable[JpTeam]
+		val jpTeam = new Initializable[JpTeam]
 	}
 
 	object values extends ValuesObject {

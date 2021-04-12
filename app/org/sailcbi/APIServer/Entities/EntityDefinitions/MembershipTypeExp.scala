@@ -7,7 +7,7 @@ import com.coleji.framework.Util.InitializableFromCollectionElement
 
 class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
 	override object references extends ReferencesObject {
-		var membershipType = new InitializableFromCollectionElement[MembershipType](_.values.membershipTypeId.get == values.membershipTypeId.get)
+		val membershipType = new InitializableFromCollectionElement[MembershipType](_.values.membershipTypeId.get == values.membershipTypeId.get)
 	}
 
 	object values extends ValuesObject {

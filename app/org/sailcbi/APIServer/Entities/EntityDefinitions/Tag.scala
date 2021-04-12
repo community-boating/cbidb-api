@@ -5,8 +5,6 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseFie
 import com.coleji.framework.Storable._
 
 class Tag extends StorableClass(Tag) {
-	override object references extends ReferencesObject {}
-
 	object values extends ValuesObject {
 		val tagId = new IntFieldValue(self, Tag.fields.tagId)
 		val tagName = new StringFieldValue(self, Tag.fields.tagName)

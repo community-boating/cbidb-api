@@ -5,8 +5,6 @@ import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseFie
 import com.coleji.framework.Storable._
 
 class ClassInstructor extends StorableClass(ClassInstructor) {
-	override object references extends ReferencesObject {}
-
 	object values extends ValuesObject {
 		val instructorId = new IntFieldValue(self, ClassInstructor.fields.instructorId)
 		val nameFirst = new StringFieldValue(self, ClassInstructor.fields.nameFirst)

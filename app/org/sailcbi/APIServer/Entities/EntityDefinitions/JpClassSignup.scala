@@ -7,7 +7,8 @@ import com.coleji.framework.Util.Initializable
 
 class JpClassSignup extends StorableClass(JpClassSignup) {
 	override object references extends ReferencesObject {
-		var jpClassInstance = new Initializable[JpClassInstance]
+		val jpClassInstance = new Initializable[JpClassInstance]
+		val jpClassWlResult = new Initializable[Option[JpClassWlResult]]
 	}
 
 	object values extends ValuesObject {

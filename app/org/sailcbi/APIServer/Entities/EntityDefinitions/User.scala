@@ -5,8 +5,6 @@ import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseFi
 import com.coleji.framework.Storable._
 
 class User extends StorableClass(User) {
-	override object references extends ReferencesObject {}
-
 	object values extends ValuesObject {
 		val userId = new IntFieldValue(self, User.fields.userId)
 		val userName = new StringFieldValue(self, User.fields.userName)

@@ -42,14 +42,22 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 			try {
 				val myId = this.getID
 				val theirId = i.getID
-				println("companions match? " + (this.companion == i.companion))
-				println("ids match? " + myId + "  " + theirId)
 				this.companion == i.companion && myId == theirId
 			} catch {
 				case _: Throwable => false
 			}
 		}
 		case _ => false
+	}
+
+	override def hashCode(): Int = {
+		// If this has a PK, hash the companion and pk together
+		try {
+			val id = this.getID
+			(this.companion, id).hashCode()
+		} catch {
+			case _: Throwable => super.hashCode()
+		}
 	}
 
 	def getPrimaryKeyFieldValue: IntFieldValue = {
@@ -102,6 +110,7 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 			ref.get match {
 				case Some(o: StorableClass) => addObject(name, o)
 				case o: StorableClass => addObject(name, o)
+				case _ =>
 			}
 		}))
 		JsObject(map)

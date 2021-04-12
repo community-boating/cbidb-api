@@ -7,7 +7,7 @@ import com.coleji.framework.Util.Initializable
 
 class ApClassInstance extends StorableClass(ApClassInstance) {
 	override object references extends ReferencesObject {
-		var apClassFormat = new Initializable[ApClassFormat]
+		val apClassFormat = new Initializable[ApClassFormat]
 	}
 
 	object values extends ValuesObject {

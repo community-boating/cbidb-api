@@ -7,8 +7,8 @@ import com.coleji.framework.Util.Initializable
 
 class PersonMembership extends StorableClass(PersonMembership) {
 	override object references extends ReferencesObject {
-		var person: Option[Person] = None
-		var membershipType = new Initializable[MembershipType]
+		val person: Option[Person] = None
+		val membershipType = new Initializable[MembershipType]
 	}
 
 	object values extends ValuesObject {

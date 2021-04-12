@@ -7,7 +7,7 @@ import com.coleji.framework.Util.Initializable
 
 class Donation extends StorableClass(Donation) {
 	override object references extends ReferencesObject {
-		var person = new Initializable[Person]
+		val person = new Initializable[Person]
 	}
 
 	object values extends ValuesObject {

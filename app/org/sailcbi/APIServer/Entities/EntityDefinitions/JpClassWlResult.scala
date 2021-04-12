@@ -6,10 +6,6 @@ import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
 
 class JpClassWlResult extends StorableClass(JpClassWlResult) {
-	override object references extends ReferencesObject {
-		var jpClassSignup = new Initializable[JpClassSignup]
-	}
-
 	object values extends ValuesObject {
 		val signupId = new IntFieldValue(self, JpClassWlResult.fields.signupId)
 		val wlResult = new StringFieldValue(self, JpClassWlResult.fields.wlResult)

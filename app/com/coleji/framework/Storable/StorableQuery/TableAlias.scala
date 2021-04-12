@@ -13,6 +13,8 @@ case class TableAliasInnerJoined[T <: StorableObject[_ <: StorableClass]](overri
 		val ret = f.alias(this).asInstanceOf[ColumnAliasInnerJoined[U]]
 		ret
 	}
+	def construct(qbrr: QueryBuilderResultRow): obj.InstanceType =
+		obj.construct(qbrr, this.asInstanceOf[TableAliasInnerJoined[obj.type]]).asInstanceOf[obj.InstanceType]
 }
 case class TableAliasOuterJoined[T <: StorableObject[_ <: StorableClass]](override val obj: T, override val name: String) extends TableAlias[T](obj, name) {
 	def wrappedFields[U <: DatabaseField[_]](getField: T => U): ColumnAliasOuterJoined[U] = {
@@ -20,6 +22,8 @@ case class TableAliasOuterJoined[T <: StorableObject[_ <: StorableClass]](overri
 		val ret = f.alias(this).asInstanceOf[ColumnAliasOuterJoined[U]]
 		ret
 	}
+	def construct(qbrr: QueryBuilderResultRow): Option[obj.InstanceType] =
+		obj.construct(qbrr, this.asInstanceOf[TableAliasOuterJoined[obj.type]]).asInstanceOf[Option[obj.InstanceType]]
 }
 
 object TableAlias {

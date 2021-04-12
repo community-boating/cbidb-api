@@ -7,8 +7,8 @@ import com.coleji.framework.Util.Initializable
 
 class PersonTag extends StorableClass(PersonTag) {
 	override object references extends ReferencesObject {
-		var person = new Initializable[Person]
-		var tag = new Initializable[Tag]
+		val person = new Initializable[Person]
+		val tag = new Initializable[Tag]
 	}
 
 	object values extends ValuesObject {
