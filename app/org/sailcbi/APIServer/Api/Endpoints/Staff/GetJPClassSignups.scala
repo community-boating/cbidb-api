@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.JpClassInstance
 import org.sailcbi.APIServer.IO.JP.GetWeeks.GetWeeksResult
-import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetWeeks}
+import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetJPClassStaggers, GetWeeks}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
@@ -25,7 +25,11 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 				week = findWeek(weeks, start),
 				spotsLeftHTML = findInstance(instancesWithSpotsLeft, instance.values.instanceId.get).map(_.spotsLeft).orNull
 			))).filter(_.spotsLeftHTML != null)
-			val signups = AllJpClassSignups.get(rc, instances.map(t => t.jpClassInstance.values.instanceId.get))
+
+			val instanceIds = instances.map(t => t.jpClassInstance.values.instanceId.get)
+
+			val signups = AllJpClassSignups.get(rc, instanceIds)
+			val staggers = GetJPClassStaggers.get(rc, instanceIds)
 
 
 
@@ -34,6 +38,7 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 				"instances" -> Json.toJson(instances),
 				"signups" -> Json.toJson(signups),
 				"weeks" -> Json.toJson(weeks),
+				"staggers" -> Json.toJson(staggers),
 			))
 			Future(Ok(Json.toJson(result)))
 		})

@@ -9,6 +9,7 @@ class JpClassSignup extends StorableClass(JpClassSignup) {
 	override object references extends ReferencesObject {
 		val jpClassInstance = new Initializable[JpClassInstance]
 		val jpClassWlResult = new Initializable[Option[JpClassWlResult]]
+		val person = new Initializable[Person]
 	}
 
 	object values extends ValuesObject {

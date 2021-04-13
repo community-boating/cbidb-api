@@ -463,7 +463,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		val intValues: Map[ColumnAliasInnerJoined[_], Option[Int]] = Map()
 		val stringValues: Map[ColumnAliasInnerJoined[_], Option[String]] = Map()
 
-		qb.tables.map(_._1.obj).foreach(_.init())
+		qb.tables.map(_.obj).foreach(_.init())
 
 		val tablesReverse = qb.tables.reverse
 		val joinsReverse = qb.joins.reverse
@@ -480,16 +480,19 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		var params: List[String] = List.empty
 		val joinClause = {
-			def recurse(tables: List[(TableAlias[_ <: StorableObject[_ <: StorableClass]], Boolean)], joins: List[TableJoin], clause: String): String = {
+			def recurse(tables: List[TableAlias[_ <: StorableObject[_ <: StorableClass]]], joins: List[TableJoin], clause: String): String = {
 				if (tables.isEmpty) clause
 				else {
 					val table = tables.head
 					val join = joins.head
 					params = params ::: join.on.params
-					val joinKeyword = if (table._2) "LEFT OUTER JOIN" else "INNER JOIN"
+					val joinKeyword = table match {
+						case _: TableAliasInnerJoined[_] => "INNER JOIN"
+						case _: TableAliasOuterJoined[_] => "LEFT OUTER JOIN"
+					}
 					val newClause = clause +
 						s"""
-						  | $joinKeyword ${table._1.obj.entityName} ${table._1.name}
+						  | $joinKeyword ${table.obj.entityName} ${table.name}
 						  |ON ${join.on.preparedSQL}
 						  |""".stripMargin
 					recurse(tables.tail, joins.tail, newClause)
@@ -503,7 +506,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		val sql =
 			s"""
 			  |select ${fields.map(f => f.table.name + "." + f.field.asInstanceOf[DatabaseField[_]].getPersistenceFieldName).mkString(", ")}
-			  |from ${mainTable._1.obj.entityName} ${mainTable._1.name}
+			  |from ${mainTable.obj.entityName} ${mainTable.name}
 			  |$joinClause
 			  |$whereClause
 			  |""".stripMargin

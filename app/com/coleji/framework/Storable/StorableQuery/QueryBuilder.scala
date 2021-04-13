@@ -5,7 +5,7 @@ import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 import scala.reflect.runtime.universe._
 
 class QueryBuilder(
-	val tables: List[(TableAlias[_ <: StorableObject[_ <: StorableClass]], Boolean)],
+	val tables: List[TableAlias[_ <: StorableObject[_ <: StorableClass]]],
 	val joins: List[TableJoin],
 	val where: List[Filter],
 	val fields: List[ColumnAlias[_]]
@@ -13,15 +13,15 @@ class QueryBuilder(
 	// TODO: try to detect invalid setup and throw. e.g. two TableAliases, same name, different StorableObject
 	// TODO: enforce n-1 join points for n tables unless a crossJoin flag is set
 	val tableAliasesHash: Set[String] = {
-		this.tables.map(_._1.name).toSet
+		this.tables.map(_.name).toSet
 	}
 
-	def innerJoin(t: TableAliasInnerJoined[_ <: StorableObject[_ <: StorableClass]], on: Filter): QueryBuilder = this.join(t, on, false)
+	def innerJoin(t: TableAliasInnerJoined[_ <: StorableObject[_ <: StorableClass]], on: Filter): QueryBuilder = this.join(t, on)
 
-	def outerJoin(t: TableAliasOuterJoined[_ <: StorableObject[_ <: StorableClass]], on: Filter): QueryBuilder = this.join(t, on, true)
+	def outerJoin(t: TableAliasOuterJoined[_ <: StorableObject[_ <: StorableClass]], on: Filter): QueryBuilder = this.join(t, on)
 
-	private def join(t: TableAlias[_ <: StorableObject[_ <: StorableClass]], on: Filter, outerJoin: Boolean): QueryBuilder = new QueryBuilder(
-		tables = (t, outerJoin) :: tables,
+	private def join(t: TableAlias[_ <: StorableObject[_ <: StorableClass]], on: Filter): QueryBuilder = new QueryBuilder(
+		tables = t :: tables,
 		joins = TableJoin(on) :: joins,
 		where = where,
 		fields = fields
@@ -49,24 +49,22 @@ class QueryBuilder(
 	)
 
 	def allFields: List[ColumnAlias[_]] = {
-		tables.flatMap(t => {
-			val (tableAlias, outerJoin) = t
-			if (outerJoin) {
-				tableAlias.obj.fieldList.map(ColumnAlias.wrapForOuterJoin)
-			} else {
-				tableAlias.obj.fieldList.map(ColumnAlias.wrapForInnerJoin)
-			}
-		})
+		tables.flatMap(QueryBuilder.allFieldsFromTable)
 	}
 }
 
 object QueryBuilder {
 	def from(t: TableAlias[_ <: StorableObject[_ <: StorableClass]]): QueryBuilder = new QueryBuilder(
-		tables = List((t, false)),
+		tables = List(t),
 		joins = List.empty,
 		where = List.empty,
 		fields = List.empty
 	)
+
+	def allFieldsFromTable(ta: TableAlias[_ <: StorableObject[_ <: StorableClass]]): List[ColumnAlias[_]] = ta match {
+		case ti: TableAliasInnerJoined[_] => ti.obj.fieldList.map(ColumnAlias.wrapForInnerJoin)
+		case to: TableAliasOuterJoined[_] => to.obj.fieldList.map(ColumnAlias.wrapForOuterJoin)
+	}
 
 	// Using reflection, scan through all val members of a given object
 	// Return all the ones that are ColumnAlias[_] in a list
