@@ -4,6 +4,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.JpClassInstance
 import org.sailcbi.APIServer.IO.JP.GetWeeks.GetWeeksResult
 import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetWeeks}
+import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,10 +17,16 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val weeks = GetWeeks.getWeeks(rc)
+			val instancesWithSpotsLeft = rc.executePreparedQueryForSelect(GetClassInstancesQuery.public)
 			val instances = AllJPClassInstances.get(rc).map(Function.tupled((instance, start, end) => JpClassInstanceDecorated(
-				jpClassInstance = instance, firstSession = start, lastSession = end, week = findWeek(weeks, start)
-			)))
+				jpClassInstance = instance,
+				firstSession = start,
+				lastSession = end,
+				week = findWeek(weeks, start),
+				spotsLeftHTML = findInstance(instancesWithSpotsLeft, instance.values.instanceId.get).map(_.spotsLeft).orNull
+			))).filter(_.spotsLeftHTML != null)
 			val signups = AllJpClassSignups.get(rc, instances.map(t => t.jpClassInstance.values.instanceId.get))
+
 
 
 			implicit val writes = Json.writes[JpClassInstanceDecorated]
@@ -36,13 +43,18 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 		weeks.find(w =>
 			(w.monday.isEqual(startDate.toLocalDate) || w.monday.isBefore(startDate.toLocalDate)) // monday is before the class
 			&& w.monday.plusDays(6).isAfter(startDate.toLocalDate)						// next monday is after the class
-		).get.weekNumber
+		).map(_.weekNumber).getOrElse(-1)
+	}
+
+	private def findInstance(instances: List[GetClassInstancesQueryResult], instanceId: Int): Option[GetClassInstancesQueryResult] = {
+		instances.find(_.instanceId == instanceId)
 	}
 
 	case class JpClassInstanceDecorated(
 		jpClassInstance: JpClassInstance,
 		firstSession: LocalDateTime,
 		lastSession: LocalDateTime,
-		week: Int
+		week: Int,
+		spotsLeftHTML: String,
 	)
 }

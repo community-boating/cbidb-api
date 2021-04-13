@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Member
 
 import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForSelectCastableToJSObject}
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, PublicRequestCache}
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, PublicRequestCache, StaffRequestCache}
 import play.api.libs.json.{JsArray, Json}
 
 object GetClassInstancesQuery {
@@ -15,7 +15,7 @@ object GetClassInstancesQuery {
 	}
 
 	def public(): HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult] = {
-		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(PublicRequestCache)) {
+		new HardcodedQueryForSelectCastableToJSObject[GetClassInstancesQueryResult](Set(StaffRequestCache, PublicRequestCache)) {
 			override def getQuery: String = query(None, None, None)
 
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): GetClassInstancesQueryResult = mapResultSetRowToCaseObjectImpl(rs)
