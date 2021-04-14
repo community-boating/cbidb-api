@@ -101,8 +101,10 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 
 	def isDirty: Boolean = valuesList.foldLeft(false)((agg, a) => agg || a.isDirty)
 
+	def extraFieldsForJSValue: Map[String, JsValue] = Map.empty
+
 	def asJsValue: JsValue = {
-		var map = valuesList.filter(_.isSet).map(v => v.getPersistenceFieldName -> v.asJSValue).toMap
+		var map = valuesList.filter(_.isSet).map(v => v.getPersistenceFieldName -> v.asJSValue).toMap ++ this.extraFieldsForJSValue
 		def addObject(name: String, o: StorableClass): Unit = {
 			map += (("$$" + name) -> o.asJsValue)
 		}

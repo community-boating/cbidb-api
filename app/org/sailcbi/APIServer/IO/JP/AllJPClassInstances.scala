@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import java.time.LocalDateTime
 
 object AllJPClassInstances {
-	def get(rc: StaffRequestCache)(implicit PA: PermissionsAuthority): List[(JpClassInstance, LocalDateTime, LocalDateTime)] = {
+	def get(rc: StaffRequestCache)(implicit PA: PermissionsAuthority): List[(JpClassInstance, LocalDateTime, LocalDateTime, Double)] = {
 		val types = TableAlias.wrapForInnerJoin(JpClassType)
 		val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
 		val sessions = TableAlias.wrapForInnerJoin(JpClassSession)
@@ -33,7 +33,11 @@ object AllJPClassInstances {
 			val sorted = sessions.sortWith((a, b) => a.values.sessionDateTime.get.isBefore(b.values.sessionDateTime.get))
 			val min = sorted.head.values.sessionDateTime.get
 			val max = sorted.last.values.sessionDateTime.get
-			(instance, min, max)
+			val sessionLength = sorted.head.values.lengthOverride.get match {
+				case Some(d) => d
+				case None => instance.references.jpClassType.get.values.sessionlength.get
+			}
+			(instance, min, max, sessionLength)
 		})).toList
 	}
 }

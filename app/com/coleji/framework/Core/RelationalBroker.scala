@@ -347,8 +347,12 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 							if (rs.wasNull()) dateFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _: DateTimeDatabaseField => {
-							dateTimeFields += (makeCompilerHappy(ca) -> Some(rs.getTimestamp(i).toLocalDateTime))
-							if (rs.wasNull()) dateTimeFields += (makeCompilerHappy(ca) -> None)
+							val timestamp = {
+								val ret = Some(rs.getTimestamp(i))
+								if (rs.wasNull()) None
+								else ret
+							}
+							dateTimeFields += (makeCompilerHappy(ca) -> timestamp.map(_.toLocalDateTime))
 						}
 						case _: BooleanDatabaseField => {
 							stringFields += (makeCompilerHappy(ca) -> Some(rs.getString(i)))

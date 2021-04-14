@@ -11,6 +11,8 @@ object AllJpClassSignups {
 		val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
 		val signups = TableAlias.wrapForInnerJoin(JpClassSignup)
 		val persons = TableAlias.wrapForInnerJoin(Person)
+
+		val groups = TableAlias.wrapForOuterJoin(JpGroup)
 		val wlResults = TableAlias.wrapForOuterJoin(JpClassWlResult)
 
 		val sessionsQB = QueryBuilder
@@ -18,13 +20,17 @@ object AllJpClassSignups {
 			.innerJoin(instances, types.wrappedFields(_.fields.typeId).wrapFilter(_.equalsField(instances.wrappedFields(_.fields.typeId))))
 			.innerJoin(signups, instances.wrappedFields(_.fields.instanceId).wrapFilter(_.equalsField(signups.wrappedFields(_.fields.instanceId))))
 			.innerJoin(persons, signups.wrappedFields(_.fields.personId).wrapFilter(_.equalsField(persons.wrappedFields(_.fields.personId))))
+
+			.outerJoin(groups, signups.wrappedFields(_.fields.groupId).wrapFilter(_.equalsField(groups.wrappedFields(_.fields.groupId))))
 			.outerJoin(wlResults, signups.wrappedFields(_.fields.signupId).wrapFilter(_.equalsField(wlResults.wrappedFields(_.fields.signupId))))
+
 			.where(instances.wrappedFields(_.fields.instanceId).wrapFilter(_.inList(instanceIds)))
 			.select(
 				QueryBuilder.allFieldsFromTable(types) ++
 				QueryBuilder.allFieldsFromTable(instances) ++
 				QueryBuilder.allFieldsFromTable(signups) ++
 				QueryBuilder.allFieldsFromTable(wlResults) ++
+				QueryBuilder.allFieldsFromTable(groups) ++
 				List(
 					persons.wrappedFields(_.fields.personId),
 					persons.wrappedFields(_.fields.nameFirst),
@@ -37,10 +43,12 @@ object AllJpClassSignups {
 			val instance = instances.construct(qbrr)
 			val classType = types.construct(qbrr)
 			val wlResult = wlResults.construct(qbrr)
+			val group = groups.construct(qbrr)
 			val person = persons.construct(qbrr)
 
 			signup.references.jpClassWlResult.set(wlResult)
 			signup.references.jpClassInstance.set(instance)
+			signup.references.group.set(group.asInstanceOf[Option[JpGroup]])
 			signup.references.person.set(person)
 			instance.references.jpClassType.set(classType)
 			signup

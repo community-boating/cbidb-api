@@ -31,7 +31,7 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def isNotNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NOT NULL", List.empty)
 
-	def equalsField[U <: DatabaseField[T]](c: ColumnAlias[U]): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = ${c.table.name}.${c.field.getPersistenceFieldName}", List.empty)
+	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[U]): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = ${c.table.name}.${c.field.getPersistenceFieldName}", List.empty)
 
 	def getValueFromString(s: String): Option[T]
 

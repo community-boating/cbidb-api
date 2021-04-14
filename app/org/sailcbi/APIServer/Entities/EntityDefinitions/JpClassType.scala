@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
+import com.coleji.framework.Storable.FieldValues.{DoubleFieldValue, IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import com.coleji.framework.Storable.Fields.{DoubleDatabaseField, IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
 
 class JpClassType extends StorableClass(JpClassType) {
@@ -9,6 +9,7 @@ class JpClassType extends StorableClass(JpClassType) {
 		val typeId = new IntFieldValue(self, JpClassType.fields.typeId)
 		val typeName = new StringFieldValue(self, JpClassType.fields.typeName)
 		val displayOrder = new NullableIntFieldValue(self, JpClassType.fields.displayOrder)
+		val sessionlength = new DoubleFieldValue(self, JpClassType.fields.sessionLength)
 	}
 }
 
@@ -19,6 +20,7 @@ object JpClassType extends StorableObject[JpClassType] {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
 		val typeName = new StringDatabaseField(self, "TYPE_NAME", 50)
 		val displayOrder = new NullableIntDatabaseField(self, "DISPLAY_ORDER")
+		val sessionLength = new DoubleDatabaseField(self, "SESSION_LENGTH")
 	}
 
 	def primaryKey: IntDatabaseField = fields.typeId

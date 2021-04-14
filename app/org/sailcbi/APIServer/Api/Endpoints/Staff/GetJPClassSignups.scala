@@ -18,12 +18,13 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val weeks = GetWeeks.getWeeks(rc)
 			val instancesWithSpotsLeft = rc.executePreparedQueryForSelect(GetClassInstancesQuery.public)
-			val instances = AllJPClassInstances.get(rc).map(Function.tupled((instance, start, end) => JpClassInstanceDecorated(
+			val instances = AllJPClassInstances.get(rc).map(Function.tupled((instance, start, end, sessionLength) => JpClassInstanceDecorated(
 				jpClassInstance = instance,
 				firstSession = start,
 				lastSession = end,
 				week = findWeek(weeks, start),
-				spotsLeftHTML = findInstance(instancesWithSpotsLeft, instance.values.instanceId.get).map(_.spotsLeft).orNull
+				spotsLeftHTML = findInstance(instancesWithSpotsLeft, instance.values.instanceId.get).map(_.spotsLeft).orNull,
+				sessionLength = sessionLength,
 			))).filter(_.spotsLeftHTML != null)
 
 			val instanceIds = instances.map(t => t.jpClassInstance.values.instanceId.get)
@@ -61,5 +62,6 @@ class GetJPClassSignups @Inject()(implicit val exec: ExecutionContext) extends I
 		lastSession: LocalDateTime,
 		week: Int,
 		spotsLeftHTML: String,
+		sessionLength: Double
 	)
 }
