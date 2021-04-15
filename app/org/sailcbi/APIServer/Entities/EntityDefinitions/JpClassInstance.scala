@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField}
+import com.coleji.framework.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableIntFieldValue}
+import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableIntDatabaseField}
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.{Initializable, InitializableFromCollectionSubset}
 
@@ -17,6 +17,7 @@ class JpClassInstance extends StorableClass(JpClassInstance) {
 		val instructorId = new NullableIntFieldValue(self, JpClassInstance.fields.instructorId)
 		val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
 		val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
+		val adminHold = new BooleanFieldValue(self, JpClassInstance.fields.adminHold)
 	}
 
 	object calculatedValues extends CalculatedValuesObject {
@@ -40,6 +41,7 @@ object JpClassInstance extends StorableObject[JpClassInstance] {
 		val instructorId = new NullableIntDatabaseField(self, "INSTRUCTOR_ID")
 		val locationId = new NullableIntDatabaseField(self, "LOCATION_ID")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		val adminHold =  new BooleanDatabaseField(self, "ADMIN_HOLD", true)
 	}
 
 	def primaryKey: IntDatabaseField = fields.instanceId
