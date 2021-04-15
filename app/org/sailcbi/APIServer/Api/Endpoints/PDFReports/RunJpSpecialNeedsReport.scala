@@ -7,7 +7,7 @@ import com.coleji.framework.Util.DateUtil
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.JpSpecialNeedsReport
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Loader.{JpSpecialNeedsReportLiveLoader, JpSpecialNeedsReportLiveParameter}
-import org.sailcbi.APIServer.UserTypes.ApexRequestCache
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import play.api.http.HttpEntity
 import play.api.mvc._
 
@@ -28,7 +28,7 @@ class RunJpSpecialNeedsReport @Inject() (implicit exec: ExecutionContext) extend
 		.addHeader("pas-procName", "DAILY_CLOSE_REPORT")
 		.addHeader("pas-argString", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)*/
 
-		PA.withRequestCache(ApexRequestCache)(None, pr, rc => {
+		PA.withRequestCache(StaffRequestCache)(None, pr, rc => {
 			/* val verifyPas: Boolean =
 			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 

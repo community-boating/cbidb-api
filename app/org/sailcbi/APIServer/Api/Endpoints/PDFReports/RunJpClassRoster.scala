@@ -6,7 +6,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.Reports.JpClassRoster.JpClassRoster
 import org.sailcbi.APIServer.Reports.JpClassRoster.Loader.{JpClassRosterLiveLoader, JpClassRosterLiveParameter}
-import org.sailcbi.APIServer.UserTypes.ApexRequestCache
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 import play.api.http.HttpEntity
 import play.api.mvc._
 
@@ -23,7 +23,7 @@ class RunJpClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 		.addHeader("pas", pas)
 		.addHeader("pas-procName", "DAILY_CLOSE_REPORT")
 		.addHeader("pas-argString", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)*/
-		PA.withRequestCache(ApexRequestCache)(None, pr, rc => {
+		PA.withRequestCache(StaffRequestCache)(None, pr, rc => {
 			/* val verifyPas: Boolean =
 			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 

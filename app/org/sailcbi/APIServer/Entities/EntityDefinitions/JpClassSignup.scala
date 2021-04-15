@@ -11,6 +11,7 @@ class JpClassSignup extends StorableClass(JpClassSignup) {
 		val jpClassWlResult = new Initializable[Option[JpClassWlResult]]
 		val person = new Initializable[Person]
 		val group = new Initializable[Option[JpGroup]]
+		val section = new Initializable[Option[JpClassSection]]
 	}
 
 	object values extends ValuesObject {
@@ -21,6 +22,7 @@ class JpClassSignup extends StorableClass(JpClassSignup) {
 		val signupDatetime = new DateTimeFieldValue(self, JpClassSignup.fields.signupDatetime)
 		val sequence = new IntFieldValue(self, JpClassSignup.fields.sequence)
 		val groupId = new NullableIntFieldValue(self, JpClassSignup.fields.groupId)
+		val sectionid = new NullableIntFieldValue(self, JpClassSignup.fields.sectionId)
 	}
 }
 
@@ -35,6 +37,7 @@ object JpClassSignup extends StorableObject[JpClassSignup] {
 		val signupDatetime = new DateTimeDatabaseField(self, "SIGNUP_DATETIME")
 		val sequence = new IntDatabaseField(self, "SEQUENCE")
 		val groupId = new NullableIntDatabaseField(self, "GROUP_ID")
+		val sectionId = new NullableIntDatabaseField(self, "SECTION_ID")
 	}
 
 	def primaryKey: IntDatabaseField = fields.signupId
