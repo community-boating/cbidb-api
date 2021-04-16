@@ -133,7 +133,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		)
 	}
 
-	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = {
+	def syncBalanceTransactions: Future[ServiceRequestResult[(Int, Int, Int), Unit]] = synchronized {
 		rc.companion.test(Set(ApexRequestCache))
 		// Update DB with all payouts
 		updateLocalDBFromStripeForStorable(
