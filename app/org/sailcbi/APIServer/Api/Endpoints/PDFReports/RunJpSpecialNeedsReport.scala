@@ -7,7 +7,7 @@ import com.coleji.framework.Util.DateUtil
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.JpSpecialNeedsReport
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Loader.{JpSpecialNeedsReportLiveLoader, JpSpecialNeedsReportLiveParameter}
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.http.HttpEntity
 import play.api.mvc._
 

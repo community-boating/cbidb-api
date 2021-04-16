@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Core.PermissionsAuthority
 import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
-import com.coleji.framework.Util.{DateUtil, Initializable}
+import com.coleji.framework.Util.DateUtil
 import play.api.libs.json.{JsString, JsValue}
 
 import java.time.LocalDateTime

@@ -2,11 +2,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.JpClassInstance
-import org.sailcbi.APIServer.IO.JP.GetWeeks.GetWeeksResult
 import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetJPClassStaggers, GetWeeks}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.time.LocalDateTime

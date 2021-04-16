@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable
 
 import com.coleji.framework.Core.RequestCache
-import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedString, PreparedValue}
+import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedString, PreparedValue}
 
 trait CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_]

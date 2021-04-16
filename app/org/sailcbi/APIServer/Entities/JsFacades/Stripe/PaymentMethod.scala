@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.JsFacades.Stripe
 
 import com.coleji.framework.Core.RequestCacheObject
 import com.coleji.framework.IO.PreparedQueries.PreparedValue
-import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject, GetSQLLiteral}
+import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache}
 import play.api.libs.json.{JsValue, Json}
 

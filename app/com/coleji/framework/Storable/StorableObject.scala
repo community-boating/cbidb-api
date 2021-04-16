@@ -4,7 +4,7 @@ import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues._
 import com.coleji.framework.Storable.Fields._
-import com.coleji.framework.Storable.StorableQuery.{ColumnAlias, ColumnAliasInnerJoined, ColumnAliasOuterJoined, QueryBuilderResultRow, TableAlias, TableAliasInnerJoined, TableAliasOuterJoined}
+import com.coleji.framework.Storable.StorableQuery._
 import com.coleji.framework.Util.Profiler
 import play.api.libs.json.{JsValue, Writes}
 

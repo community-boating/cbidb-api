@@ -571,12 +571,4 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			pc.getOutResults(callable)
 		})
 	}
-
-	// TODO: do these belong here or in util somewhere?
-	private def dateToLocalDate(d: Date): LocalDate =
-		d.toInstant.atZone(ZoneId.systemDefault).toLocalDate
-
-	private def dateToLocalDateTime(d: Date): LocalDateTime =
-		d.toInstant.atZone(ZoneId.systemDefault).toLocalDateTime
-
 }

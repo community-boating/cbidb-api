@@ -7,7 +7,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.sailcbi.APIServer.Reports.ApClassRoster.ApClassRoster
 import org.sailcbi.APIServer.Reports.ApClassRoster.Loader.{ApClassRosterLiveLoader, ApClassRosterLiveParameter}
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
+import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.http.HttpEntity
 import play.api.mvc._
 
