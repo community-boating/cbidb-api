@@ -18,7 +18,7 @@ class ApSelectMemForPurchase @Inject()(implicit exec: ExecutionContext) extends 
 				val orderId = PortalLogic.getOrderIdAP(rc, personId)
 				// TODO: check mem type is valid
 
-				val discountInstanceId = parsed.requestedDiscountId.map(PortalLogic.getDiscountActiveInstanceForDiscount(rc, _))
+				val discountInstanceId = parsed.requestedDiscountId.flatMap(PortalLogic.getDiscountActiveInstanceForDiscount(rc, _))
 				val (paymentPlanAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) = PortalLogic.apSelectMemForPurchase(rc, personId, orderId, parsed.memTypeId, discountInstanceId)
 				val now = PA.now().toLocalDate
 

@@ -42,7 +42,7 @@ object Rating extends StorableObject[Rating] {
 	}
 
 	def ratingIsUsableWithMembership(ratingId: Int, membershipTypeId: Int): Boolean = membershipTypeId match {
-		case MagicIds.MEMBERSHIP_TYPES.FULL_30_DAY => ratingId match {
+		case MagicIds.MEMBERSHIP_TYPES.WICKED_BASIC_30_DAY => ratingId match {
 			case Rating.specialIDs.RATING_ID_KAYAK => true
 			case Rating.specialIDs.RATING_ID_SUP => true
 			case Rating.specialIDs.RATING_ID_RIGGING => true

@@ -1211,23 +1211,46 @@ object PortalLogic {
 		result.head
 	}
 
-	def getDiscountActiveInstanceForDiscount(rc: RequestCache, discountId: Int): Int = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+	def getDiscountActiveInstanceForDiscount(rc: RequestCache, discountId: Int): Option[Int] = {
+		val allowedDiscounts = Set(
+			MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.YOUTH_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.SENIOR_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.MGH_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.VETERAN_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.MA_TEACHERS_ASSN_DISCOUNT_ID,
+			MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID,
+		)
 
-			override val params: List[String] = List(discountId.toString)
+		if (!allowedDiscounts.contains(discountId)) None
+		else {
+			val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
-			override def getQuery: String =
-				"""
-				  |select instance_id from discount_active_instances where discount_id = ?
-				  |""".stripMargin
+				override val params: List[String] = List(discountId.toString)
+
+				override def getQuery: String =
+					"""
+					  |select instance_id from discount_active_instances where discount_id = ?
+					  |""".stripMargin
+			}
+
+			rc.executePreparedQueryForSelect(q).headOption
 		}
 
-		rc.executePreparedQueryForSelect(q).head
+
 	}
 
 	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
 	def apSelectMemForPurchase(rc: RequestCache, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
+		val allowedTypes = Set(
+			MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID,
+			MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID,
+			MagicIds.MEMBERSHIP_TYPES.WICKED_BASIC_30_DAY,
+			MagicIds.MEMBERSHIP_TYPES.FULL_30_DAY,
+			MagicIds.MEMBERSHIP_TYPES.FULL_60_DAY,
+		)
+		if (!allowedTypes.contains(memTypeId)) throw new Exception("Invalid membership type selected")
 		val existingSCMs = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
