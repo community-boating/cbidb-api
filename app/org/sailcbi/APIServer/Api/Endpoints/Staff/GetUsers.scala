@@ -13,9 +13,12 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	private def get(userId: Option[Int], theRC: RequestCache): List[UserShape] = {
-		implicit val rc: RequestCache = theRC
-
+	private def get(userId: Option[Int], rc: StaffRequestCache): List[UserShape] = {
+		//implicit val rc: RequestCache = theRC
+		val u = User.getAuthedUser(rc)
+		if (u.values.userName.get != "JCOLE") {
+			throw new Exception("Locked to jcole only")
+		}
 		val users = {
 			val users = TableAlias(User)
 			val filter = userId match {

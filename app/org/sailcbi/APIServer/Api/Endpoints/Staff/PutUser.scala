@@ -23,6 +23,10 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					println(s"its an update: $userId")
 
 					PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
+						val u = User.getAuthedUser(rc)
+						if (u.values.userName.get != "JCOLE") {
+							throw new Exception("Locked to jcole only")
+						}
 
 
 						println(parsed)
@@ -46,6 +50,10 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 				case None => {
 					println(s"its a create")
 					PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
+						val u = User.getAuthedUser(rc)
+						if (u.values.userName.get != "JCOLE") {
+							throw new Exception("Locked to jcole only")
+						}
 
 						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.username.get)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
