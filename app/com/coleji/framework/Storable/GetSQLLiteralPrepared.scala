@@ -7,7 +7,7 @@ import java.time.{LocalDate, ZonedDateTime}
  * For use with Prepared Statements only. Do not inject these directly into SQL!
  */
 object GetSQLLiteralPrepared {
-	def apply(s: String): String = s
+	def apply(s: String): String = if (s == "") null else s
 
 	def apply(s: Option[String]): String = s match {
 		case Some(x) => apply(x);

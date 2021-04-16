@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable
 
 import com.coleji.framework.Core.RequestCache
-import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedValue}
+import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForUpdateOrDelete, PreparedString, PreparedValue}
 
 trait CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_]
@@ -27,24 +27,26 @@ trait CastableToStorableClass {
 
 	def getUpdatePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(storableObject.allowedUserTypes, true) {
 		val setStatements: String = persistenceValues.toList.map(t => t._1 + " = ?").mkString(", ")
-		val values: List[PreparedValue] = persistenceValues.toList.map(t => t._2)
+		val values: List[PreparedValue] = persistenceValues.toList.map(t => t._2) ++ List(PreparedString(pkSqlLiteral))
 
 
 		override def getQuery: String =
 			s"""
-			   |update ${storableObject.apexTableName} set $setStatements where ${storableObject.pkColumnName} = $pkSqlLiteral
+			   |update ${storableObject.apexTableName} set $setStatements where ${storableObject.pkColumnName} = ?
 			   |
       """.stripMargin
 
 		override val preparedParams: List[PreparedValue] = values
 	}
 
-	def getDeletePreparedQuery: HardcodedQueryForUpdateOrDelete = new HardcodedQueryForUpdateOrDelete(storableObject.allowedUserTypes, true) {
+	def getDeletePreparedQuery: PreparedQueryForUpdateOrDelete = new PreparedQueryForUpdateOrDelete(storableObject.allowedUserTypes, true) {
 		override def getQuery: String =
 			s"""
-			   |delete from ${storableObject.apexTableName} where ${storableObject.pkColumnName} = $pkSqlLiteral
+			   |delete from ${storableObject.apexTableName} where ${storableObject.pkColumnName} = ?
 			   |
       """.stripMargin
+
+		override val preparedParams: List[PreparedValue] = List(PreparedString(pkSqlLiteral))
 	}
 
 	def insertIntoLocalDB(rc: RequestCache): Unit =

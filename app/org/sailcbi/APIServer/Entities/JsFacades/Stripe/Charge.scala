@@ -17,7 +17,7 @@ case class Charge(
 ) extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = Charge
 	val persistenceValues: Map[String, PreparedValue] = Charge.persistenceValues(this)
-	val pkSqlLiteral: String = GetSQLLiteral(id)
+	val pkSqlLiteral: String = id
 
 	// e.g. re_abc%123%1000&re_def%456%2000  => refund # re_abc, close 123, refund 1000 cents; refund # re_def, close 456, refund 2000 cents
 	def refunds: List[ChargeRefund] = {

@@ -16,7 +16,7 @@ case class Payout(
 						 balance_transaction: String,
 						 status: String
 				 ) extends CastableToStorableClass {
-	val pkSqlLiteral: String = GetSQLLiteral(id)
+	val pkSqlLiteral: String = id
 	val storableObject: CastableToStorableObject[_] = Payout
 	val persistenceValues: Map[String, PreparedValue] = Payout.persistenceValues(this)
 

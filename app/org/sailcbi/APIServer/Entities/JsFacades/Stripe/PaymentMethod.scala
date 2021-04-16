@@ -14,7 +14,7 @@ case class PaymentMethod(
 )extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = PaymentMethod
 	val persistenceValues: Map[String, PreparedValue] = PaymentMethod.persistenceValues(this)
-	val pkSqlLiteral: String = GetSQLLiteral(id)
+	val pkSqlLiteral: String = id
 }
 
 object PaymentMethod extends StripeCastableToStorableObject[PaymentMethod] {

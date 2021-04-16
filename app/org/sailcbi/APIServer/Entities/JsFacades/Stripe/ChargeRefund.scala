@@ -14,7 +14,7 @@ case class ChargeRefund(
 					   ) extends CastableToStorableClass {
 	val storableObject: CastableToStorableObject[_] = ChargeRefund
 	val persistenceValues: Map[String, PreparedValue] = ChargeRefund.persistenceValues(this)
-	val pkSqlLiteral: String = GetSQLLiteral(refundId)
+	val pkSqlLiteral: String = refundId
 }
 
 object ChargeRefund extends StripeCastableToStorableObject[ChargeRefund] {
