@@ -22,19 +22,31 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 		getAuthenticatedUsernameInRequestFromCookie(request, rootCB).filter(s => !s.contains("@"))
 
 	def getPwHashForUser(rc: BouncerRequestCache, userName: String): Option[(String, String, String)] = {
-		case class Result(userName: String, pwHashScheme: String, pwHash: String, nonce: String)
+		case class Result(userName: String, pwHashScheme: String, pwHash: String, nonce: String, locked: Boolean, active: Boolean)
 		val hq = new PreparedQueryForSelect[Result](allowedUserTypes = Set(BouncerRequestCache, RootRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Result =
-				Result(rs.getString(1), rs.getString(2), rs.getString(3), rs.getOptionString(4).getOrElse(EMPTY_NONCE))
+				Result(
+					rs.getString(1),
+					rs.getString(2),
+					rs.getString(3),
+					rs.getOptionString(4).getOrElse(EMPTY_NONCE),
+					locked = rs.getOptionBooleanFromChar(5).getOrElse(false),
+					active = rs.getBooleanFromChar(6)
+				)
 
-			override def getQuery: String = "select user_name, pw_hash_scheme, pw_hash, auth_nonce from users where lower(user_name) = ?"
+			override def getQuery: String = "select user_name, pw_hash_scheme, pw_hash, auth_nonce, locked, active from users where lower(user_name) = ?"
 
 			override val params: List[String] = List(userName.toLowerCase)
 		}
 
 		val users = rc.executePreparedQueryForSelect(hq)
 
-		if (users.length == 1) Some(users.head.pwHashScheme, users.head.pwHash, users.head.nonce)
+		if (users.length == 1) {
+			val user = users.head
+			if (user.active && !user.locked) {
+				Some(user.pwHashScheme, user.pwHash, user.nonce)
+			} else None
+		}
 		else None
 	}
 }
