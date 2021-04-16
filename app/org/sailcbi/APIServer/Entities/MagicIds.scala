@@ -26,6 +26,9 @@ object MagicIds {
 	object MEMBERSHIP_TYPES {
 		val FULL_YEAR_TYPE_ID = 1
 		val FULL_YEAR_PADDLING_TYPE_ID = 882
+		val FULL_30_DAY: Int = 4
+		val JUNIOR_SUMMER: Int = 10
+		val UAP: Int = 13
 	}
 	object PROGRAM_TYPES {
 		val ADULT_PROGRAM_ID = 1

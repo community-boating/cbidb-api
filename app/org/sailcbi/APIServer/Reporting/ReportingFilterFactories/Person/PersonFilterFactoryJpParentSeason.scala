@@ -4,6 +4,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.DateLogic
 
 class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
@@ -22,7 +23,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		val juniorsThatYear = rc.getObjectsByFilters(
 			PersonMembership,
 			List(
-				PersonMembership.fields.membershipTypeId.equalsConstant(MembershipType.specialIDs.MEM_TYPE_ID_JUNIOR_SUMMER),
+				PersonMembership.fields.membershipTypeId.equalsConstant(MagicIds.MEMBERSHIP_TYPES.JUNIOR_SUMMER),
 				PersonMembership.fields.expirationDate.isYearConstant(season)
 			)
 		).map(_.values.personId.get)

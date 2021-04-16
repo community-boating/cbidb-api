@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.Entities.MagicIds
 
 class Rating extends StorableClass(Rating) {
 	object values extends ValuesObject {
@@ -41,7 +42,7 @@ object Rating extends StorableObject[Rating] {
 	}
 
 	def ratingIsUsableWithMembership(ratingId: Int, membershipTypeId: Int): Boolean = membershipTypeId match {
-		case MembershipType.specialIDs.MEM_TYPE_ID_30_DAY => ratingId match {
+		case MagicIds.MEMBERSHIP_TYPES.FULL_30_DAY => ratingId match {
 			case Rating.specialIDs.RATING_ID_KAYAK => true
 			case Rating.specialIDs.RATING_ID_SUP => true
 			case Rating.specialIDs.RATING_ID_RIGGING => true

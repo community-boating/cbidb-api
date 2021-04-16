@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.IO
 import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
+import org.sailcbi.APIServer.Entities.MagicIds
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -35,7 +36,7 @@ class CachedData(rc: UnlockedRequestCache) {
 		}
 
 		val exps = membershipTypeExps.filter(
-			_.references.membershipType.get.getID == MembershipType.specialIDs.MEM_TYPE_ID_JUNIOR_SUMMER
+			_.references.membershipType.get.getID == MagicIds.MEMBERSHIP_TYPES.JUNIOR_SUMMER
 		)
 
 		val yearToStartDate: Map[Int, (LocalDate => Option[String])] = exps.map(exp => (exp.values.season.get, {
