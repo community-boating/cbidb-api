@@ -451,7 +451,7 @@ object PortalLogic {
 
 			override def setInParametersVarchar: Map[String, String] = Map(
 				"p_override" -> "N",
-				"p_send_email" -> "N",
+				"p_send_email" -> "Y",
 				"p_enroll_type" -> enrollType,
 				"p_do_fallback_wl" -> "N",
 				"p_signup_datetime" -> signupDatetime.map(_.format(DateUtil.DATE_TIME_FORMATTER)).orNull
