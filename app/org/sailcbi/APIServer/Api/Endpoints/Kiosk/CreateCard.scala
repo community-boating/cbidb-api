@@ -43,7 +43,6 @@ class CreateCard @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 						Ok(JsObject(Map(
 							"cardAssignID" -> JsNumber(assignId),
 							"cardNumber" -> JsNumber(cardNumber),
-							"barcode" -> JsString(BarcodeFactory.getBase64FromImage(BarcodeFactory.getImage(cardNumber.toString), "png"))
 						)))
 					}
 				} catch {
