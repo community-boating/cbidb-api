@@ -8,8 +8,11 @@ case class CreatePersonParams(
 	emailAddress: String,
 	dob: String,
 	phonePrimary: String,
+	phonePrimaryType: Option[String],
 	emerg1Name: String,
 	emerg1PhonePrimary: String,
+	emerg1PhonePrimaryType: Option[String],
+	emerg1Relation: Option[String],
 	previousMember: Boolean
 )
 

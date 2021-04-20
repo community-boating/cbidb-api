@@ -155,9 +155,12 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				   |emerg1_phone_primary,
 				   |previous_member,
 				   |proto_state,
-				   |protoperson_cookie
+				   |protoperson_cookie,
+				   |EMERG1_RELATION,
+				   |PHONE_PRIMARY_TYPE,
+				   |EMERG1_PHONE_PRIMARY_TYPE
 				   |) values
-				   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)},'W',?)
+				   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)},'W',?,?,?,?)
 							""".stripMargin
 
 			override val params: List[String] = List(
@@ -168,7 +171,10 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				parsed.phonePrimary,
 				parsed.emerg1Name,
 				parsed.emerg1PhonePrimary,
-				cookieValue.orNull
+				cookieValue.orNull,
+				parsed.emerg1Relation.orNull,
+				parsed.phonePrimaryType.orNull,
+				parsed.emerg1PhonePrimaryType.orNull
 			)
 			override val pkName: Option[String] = Some("person_id")
 		}
