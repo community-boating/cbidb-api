@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, StaffRequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
@@ -17,10 +17,19 @@ class GetOpenOrderDetails @Inject()(implicit val exec: ExecutionContext) extends
 			get(rc, personId)
 		})
 	})
+
 	def getJunior(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => get(rc, juniorId))
 	})
+
+	def getStaff(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
+		val parsedRequest = ParsedRequest(req)
+		PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
+			get(rc, personId)
+		})
+	})
+
 	private def get(rc: RequestCache, personId: Int): Future[Result] = {
 		implicit val format = OpenOrderDetailsResult.format
 
@@ -30,6 +39,9 @@ class GetOpenOrderDetails @Inject()(implicit val exec: ExecutionContext) extends
 		}
 
 	}
+
+
+
 
 	case class OpenOrderDetailsResult(orderId: Int)
 	object OpenOrderDetailsResult {

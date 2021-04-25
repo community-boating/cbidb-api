@@ -56,7 +56,7 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 		rootCB: CacheBroker,
 		customParams: PropertiesWrapper,
 	)(implicit PA: PermissionsAuthority): Option[String] =
-		getAuthenticatedUsernameInRequestFromCookie(request, rootCB).filter(s => s.contains("@"))
+		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, SEC_COOKIE_NAME_PUBLIC).filter(s => s.contains("@"))
 
 	def withRequestCacheMemberWithJuniorId(
 		parsedRequest: ParsedRequest,

@@ -2606,7 +2606,7 @@ object PortalLogic {
 	}
 
 	def getOpenStaggeredOrderForPerson(rc: RequestCache, personId: Int)(implicit PA: PermissionsAuthority): Option[Int] = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, StaffRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
@@ -2631,7 +2631,7 @@ object PortalLogic {
 	}
 
 	def getStaggeredOrderStatus(rc: RequestCache, orderId: Int): List[StaggeredOrderPayment] = {
-		val q = new PreparedQueryForSelect[StaggeredOrderPayment](Set(MemberRequestCache)) {
+		val q = new PreparedQueryForSelect[StaggeredOrderPayment](Set(MemberRequestCache, StaffRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): StaggeredOrderPayment =
 				StaggeredOrderPayment(rsw.getInt(1), rsw.getInt(2), rsw.getInt(3) + rsw.getOptionInt(4).getOrElse(0),
 					rsw.getLocalDate(5), rsw.getBooleanFromChar(6), rsw.getOptionBooleanFromChar(7).getOrElse(false))
@@ -2648,7 +2648,7 @@ object PortalLogic {
 
 	def callDoStaggeredPaymentCron(rc: RequestCache, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): ValidationResult = {
 		// execute ready payments
-		val ppc = new PreparedProcedureCall[(Boolean, String)](Set(MemberRequestCache)) {
+		val ppc = new PreparedProcedureCall[(Boolean, String)](Set(MemberRequestCache, StaffRequestCache)) {
 			//procedure do_staggered_payment_cron(
 			//  i_person_id in number,
 			//  i_order_id in number,
@@ -2685,7 +2685,7 @@ object PortalLogic {
 
 	def finishOpenOrder(rc: RequestCache, personId: Int, orderId: Int): ValidationResult = {
 		// set all staggered payments to ready
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, StaffRequestCache)) {
 			override def getQuery: String =
 				s"""
 				  |update order_staggered_payments

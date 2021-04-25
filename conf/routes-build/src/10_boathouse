@@ -14,6 +14,8 @@ GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.
 GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOne(userId: Int)
 POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.PutUser.post()
 POST     /staff/update-user-password                   org.sailcbi.APIServer.Api.Endpoints.Staff.UpdateUserPassword.post()
+GET     /staff/open-order-details           org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getStaff(personId: Int)
+POST    /staff/finish-open-order            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postStaff(personId: Int)
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 
