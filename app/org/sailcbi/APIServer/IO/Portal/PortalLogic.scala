@@ -999,7 +999,9 @@ object PortalLogic {
 				parentPersonId.toString,
 				parentPersonId.toString,
 				orderId.toString,
-				orderId.toString
+				orderId.toString,
+				parentPersonId.toString,
+				orderId.toString,
 			)
 
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -1031,6 +1033,10 @@ object PortalLogic {
 				  |
 				  |select 1 from shopping_cart_waivers
 				  |where order_id = ?
+				  |
+				  |union all
+				  |select 1 from ap_class_signups
+				  |where person_Id = ? and order_id = ? and signup_type = 'P'
 				  |""".stripMargin
 		}
 
