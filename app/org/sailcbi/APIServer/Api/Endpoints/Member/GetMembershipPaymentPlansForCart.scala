@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -25,11 +26,15 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 
 			val scm = plansResult._1.get
 
-			val plans = plansResult._2.map(_.map(
-				payment => MembershipSinglePayment(payment._1, payment._2.cents)
-			))
+			val plans = plansResult._2.map(planObj => {
+				val mappedPlanObj = planObj.map(
+					payment => MembershipSinglePayment(payment._1, payment._2.cents)
+				)
+				MembershipPaymentPlan(mappedPlanObj, MembershipLogic.memStartDateFromPurchaseDate(mappedPlanObj.last.paymentDate))
+			})
 
 			implicit val format = MembershipSinglePayment.format
+			implicit val formatPlan = MembershipPaymentPlan.format
 
 			Future(Ok(new JsObject(Map(
 				"scm" -> Json.toJson(scm),
@@ -42,7 +47,13 @@ class GetMembershipPaymentPlansForCart @Inject()(implicit exec: ExecutionContext
 
 	object MembershipSinglePayment{
 		implicit val format = Json.format[MembershipSinglePayment]
-
 		def apply(v: JsValue): MembershipSinglePayment = v.as[MembershipSinglePayment]
+	}
+
+	case class MembershipPaymentPlan(payments: List[MembershipSinglePayment], startDate: LocalDate)
+	object MembershipPaymentPlan {
+		implicit val format = Json.format[MembershipPaymentPlan]
+		def apply(v: JsValue): MembershipPaymentPlan = v.as[MembershipPaymentPlan]
+
 	}
 }

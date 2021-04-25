@@ -2,8 +2,9 @@ package org.sailcbi.APIServer.Logic
 
 import com.coleji.framework.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Logic.DateLogic.now
 
-import java.time.LocalDate
+import java.time.{LocalDate, Month}
 
 object MembershipLogic {
 	/**
@@ -38,6 +39,15 @@ object MembershipLogic {
 			case MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID
 				 | MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID => true
 			case _ => false
+		}
+	}
+
+	def memStartDateFromPurchaseDate(purchaseDate: LocalDate): LocalDate = {
+		val purchaseMonth = purchaseDate.getMonthValue // 1 - 12
+		purchaseDate.getMonth match {
+			case Month.NOVEMBER | Month.DECEMBER => purchaseDate.withDayOfMonth(1).plusMonths(16 - purchaseMonth)
+			case Month.JANUARY | Month.FEBRUARY | Month.MARCH => purchaseDate.withDayOfMonth(1).plusMonths(4 - purchaseMonth)
+			case _ => purchaseDate
 		}
 	}
 }
