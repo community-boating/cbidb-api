@@ -2,8 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.ApClassAvailability
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
@@ -16,8 +17,23 @@ class ApClassTypeAvailabilities @Inject()(implicit exec: ExecutionContext) exten
 			val cb: CacheBroker = rc.cb
 			val personId = rc.getAuthedPersonId
 
-			val resultObj = PortalLogic.getApClassTypeAvailabilities(rc, personId)
-			Future(Ok(Json.toJson(resultObj)))
+			val types = PortalLogic.getApClassTypeAvailabilities(rc, personId)
+			val voucherCt = PortalLogic.getApAvailableVoucherCount(rc, personId)
+			implicit val format = ApClassTypeAvailabilitiesShape.format
+			Future(Ok(Json.toJson(ApClassTypeAvailabilitiesShape(
+				types = types,
+				voucherCt = voucherCt
+			))))
 		})
+	}
+
+	case class ApClassTypeAvailabilitiesShape(
+		types: List[ApClassAvailability],
+		voucherCt: Int
+	)
+
+	object ApClassTypeAvailabilitiesShape {
+		implicit val format = Json.format[ApClassTypeAvailabilitiesShape]
+		def apply(v: JsValue): ApClassTypeAvailabilitiesShape = v.as[ApClassTypeAvailabilitiesShape]
 	}
 }

@@ -2016,7 +2016,7 @@ object PortalLogic {
 
 
 			override def setInParametersVarchar: Map[String, String] = Map(
-				"i_signup_type" -> { if (isWaitlist) "W" else "E" },
+				"i_signup_type" -> { if (isWaitlist) "W" else "P" },
 				"i_do_override" -> "N",
 				"i_payment_medium" -> null,
 			)
@@ -3038,6 +3038,23 @@ object PortalLogic {
 			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?)"
 		}
 		rc.executeProcedure(ppc)
+	}
+
+	def getApAvailableVoucherCount(rc: RequestCache, personId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(personId.toString)
+
+			override def getQuery: String =
+				"""
+				  |select count(*) from ap_class_vouchers
+				  |where person_id = ?
+				  |and signup_id is null and void_close_id is null
+				  |and season = util_pkg.get_current_season
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q).head
 	}
 }
 
