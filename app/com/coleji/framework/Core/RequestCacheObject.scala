@@ -5,7 +5,8 @@ import com.coleji.framework.Util.PropertiesWrapper
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	val EMPTY_NONCE = "$EMPTY_AUTH_NONCE$"
-	val SEC_COOKIE_NAME = "CBIDB-SEC"
+	val SEC_COOKIE_NAME_PUBLIC = "CBIDB-SEC"
+	val SEC_COOKIE_NAME_STAFF = "CBIDB-SEC-STAFF"
 
 	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): T
 
@@ -24,15 +25,15 @@ abstract class RequestCacheObject[T <: RequestCache] {
 	)(implicit PA: PermissionsAuthority): Option[String]
 
 	// TODO: this is not a good way to separate members from staff
-	def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker): Option[String] = {
-		val secCookies = request.cookies.filter(_.name == SEC_COOKIE_NAME)
+	def getAuthenticatedUsernameInRequestFromCookie(request: ParsedRequest, rootCB: CacheBroker, cookieName: String): Option[String] = {
+		val secCookies = request.cookies.filter(_.name == cookieName)
 		if (secCookies.isEmpty) None
 		else if (secCookies.size > 1) None
 		else {
 			val cookie = secCookies.toList.head
 			val token = cookie.value
 			println("Found cookie on request: " + token)
-			val cacheResult = rootCB.get(SEC_COOKIE_NAME + "_" + token)
+			val cacheResult = rootCB.get(cookieName + "_" + token)
 			println(cacheResult)
 			cacheResult match {
 				case None => None

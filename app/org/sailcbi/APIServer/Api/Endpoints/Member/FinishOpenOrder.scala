@@ -1,8 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
+import com.coleji.framework.API.ValidationError
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
+import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, StaffRequestCache}
+import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
 import javax.inject.Inject
@@ -16,6 +18,7 @@ class FinishOpenOrder @Inject()(implicit val exec: ExecutionContext) extends Inj
 			post(rc, personId)
 		})
 	})
+
 	def postJP(juniorId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
@@ -24,12 +27,23 @@ class FinishOpenOrder @Inject()(implicit val exec: ExecutionContext) extends Inj
 		})
 	})
 
+	def postStaff(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
+		val parsedRequest = ParsedRequest(req)
+		PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
+			post(rc, personId)
+		})
+	})
+
 	private def post(rc: RequestCache, personId: Int, parentPersonId: Option[Int] = None): Future[Result] = {
+		val success = Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 		PortalLogic.getOpenStaggeredOrderForPerson(rc, personId) match {
-			case None => Future(Ok("success"))
+			case None => success
 			case Some(orderId) => {
-				PortalLogic.finishOpenOrder(rc, parentPersonId.getOrElse(personId), orderId)
-				Future(Ok("success"))
+				PortalLogic.finishOpenOrder(rc, parentPersonId.getOrElse(personId), orderId) match {
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case _ => success
+				}
+
 			}
 		}
 	}

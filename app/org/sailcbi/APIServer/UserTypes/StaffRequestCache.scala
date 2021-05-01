@@ -19,7 +19,7 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 		rootCB: CacheBroker,
 		customParams: PropertiesWrapper,
 	)(implicit PA: PermissionsAuthority): Option[String] =
-		getAuthenticatedUsernameInRequestFromCookie(request, rootCB).filter(s => !s.contains("@"))
+		getAuthenticatedUsernameInRequestFromCookie(request, rootCB, SEC_COOKIE_NAME_STAFF).filter(s => !s.contains("@"))
 
 	def getPwHashForUser(rc: BouncerRequestCache, userName: String): Option[(String, String, String)] = {
 		case class Result(userName: String, pwHashScheme: String, pwHash: String, nonce: String, locked: Boolean, active: Boolean)
