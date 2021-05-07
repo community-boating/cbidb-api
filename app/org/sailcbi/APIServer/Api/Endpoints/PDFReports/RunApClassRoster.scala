@@ -16,20 +16,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class RunApClassRoster @Inject() (implicit exec: ExecutionContext) extends InjectedController {
-	def get(instanceId: Int, signet: Option[String])(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
+	def get(instanceId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req => {
 		val logger = PA.logger
 		val pr = ParsedRequest(req)
-				.addHeader("apex-signet", signet.getOrElse(""))
-//				.addHeader("pas-userName", userName)
-//				.addHeader("pas", pas)
-//				.addHeader("pas-procName", "DAILY_CLOSE_REPORT")
-//				.addHeader("pas-argString", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)
-		PA.withRequestCache(StaffRequestCache)(None, pr, rc => {
-			/* val verifyPas: Boolean =
-			   rc.executePreparedQueryForSelect(new VerifyPas(userName, pas, "DAILY_CLOSE_REPORT", "P_CLOSE_ID=" + closeId.toString + "&P_USER_NAME=" + userName)).head
 
-			 if (!verifyPas) throw new BadPasException
-		 */
+		PA.withRequestCache(StaffRequestCache)(None, pr, rc => {
 			val output = new ByteArrayOutputStream()
 			val document: PDDocument = new PDDocument()
 
