@@ -42,7 +42,7 @@ class JpClassRoster(data: JpClassRosterModel) extends PDFReport(data) {
 			if (rd.isWaitList) WAIT_LIST_SECTION
 			else rd.sectionName.getOrElse(DEFAULT_SECTION)
 		}).toList.sortBy(t => {
-			// I'm sure there's a less ghetto way to do this but w/e
+			// I'm sure there's a less shitty way to do this but w/e
 			if (t._1 == WAIT_LIST_SECTION) "zzzzz"  // ensure it sorts last
 			else if (t._1 == DEFAULT_SECTION) "yyyyy" // ensure it sorts last except for wait list
 			else t._1.toLowerCase()
@@ -54,7 +54,8 @@ class JpClassRoster(data: JpClassRosterModel) extends PDFReport(data) {
 				else sectionName + " - ENROLLMENTS"
 			}
 			val fullWidthTables = List(
-				new JpClassRosterView(data, sectionRosterData, defaultBoldFont, defaultFont, defaultFontSize, titleText),
+				new JpClassRosterView(data, sectionRosterData, defaultBoldFont, defaultFont, defaultFontSize, titleText + " - Attendance"),
+				new JpClassRosterView(data, sectionRosterData, defaultBoldFont, defaultFont, defaultFontSize, titleText + " - Symptom Screening Check"),
 				new JpSpecialNeedsView(sectionRosterData.filter(specNeedsFilter).map(rosterdataToSpecialNeedsData), defaultBoldFont, defaultFont, defaultFontSize),
 				new JpSignupNotesView(sectionRosterData.filter(signupNotesFilter).map(rosterdataToSignupNotesData), defaultBoldFont, defaultFont, defaultFontSize)
 			)
