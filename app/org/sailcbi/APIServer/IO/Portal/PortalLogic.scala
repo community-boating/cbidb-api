@@ -1801,16 +1801,20 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def getDwGpPrices(rc: RequestCache): (Double, Double) = {
-		val q = new PreparedQueryForSelect[(Double, Double)](Set(PublicRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Double) =
-				(rsw.getDouble(1), rsw.getDouble(2))
+	/**
+	 * @return (DW, GP, ApClass)
+	 */
+	def getConstantPrices(rc: RequestCache): (Double, Double, Double) = {
+		val q = new PreparedQueryForSelect[(Double, Double, Double)](Set(PublicRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Double, Double, Double) =
+				(rsw.getDouble(1), rsw.getDouble(2), rsw.getDouble(3))
 
 			override def getQuery: String =
 				"""
 				  |select
 				  |global_constant_pkg.get_value_number('DW_PRICE'),
-				  |global_constant_pkg.get_value_number('GP_PRICE')
+					|global_constant_pkg.get_value_number('GP_PRICE'),
+					|global_constant_pkg.get_value_number('AP_CLASS_PRICE')
 				  |from dual
 				  |""".stripMargin
 		}

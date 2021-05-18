@@ -16,7 +16,7 @@ class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends Injec
 
 
 			val membershipPrices = PortalLogic.getAllMembershipPrices(rc)
-			val (dwPrice, gpPrice) = PortalLogic.getDwGpPrices(rc)
+			val (dwPrice, gpPrice, apClassPrice) = PortalLogic.getConstantPrices(rc)
 			val discounts = PortalLogic.getAllDiscounts(rc)
 
 			val memberships: List[MembershipsShape] = membershipPrices.map(mp => {
@@ -39,7 +39,8 @@ class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends Injec
 			Future(Ok(Json.toJson(CurrentPricesShape(
 				memberships = memberships,
 				damageWaiverPrice = dwPrice,
-				guestPrivsPrice = gpPrice
+				guestPrivsPrice = gpPrice,
+				apClassPrice = apClassPrice
 			))))
 		})
 	})
@@ -66,7 +67,8 @@ class CurrentPrices @Inject()(implicit val exec: ExecutionContext) extends Injec
 	private case class CurrentPricesShape(
 		memberships: List[MembershipsShape],
 		guestPrivsPrice: Double,
-		damageWaiverPrice: Double
+		damageWaiverPrice: Double,
+		apClassPrice: Double,
 	)
 	private object CurrentPricesShape {
 		implicit val format = Json.format[CurrentPricesShape]
