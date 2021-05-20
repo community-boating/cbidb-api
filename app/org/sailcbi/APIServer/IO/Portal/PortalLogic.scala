@@ -374,7 +374,7 @@ object PortalLogic {
 		lazy val hasSpots = {
 			val spots = PortalLogic.spotsLeft(rc, instanceId)
 			if (spots > 0) Right(spots)
-			else Left("The class has no open seats at this time.  Wait listing is available once payment is processed and registration is complete.")
+			else Left("The class has no open seats at this time. In order to proceed with purchasing a membership you must register for an open class that fits with your schedule.")
 		}
 
 		lazy val alreadyStarted = PortalLogic.alreadyStarted(rc, instanceId)
