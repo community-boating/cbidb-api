@@ -16,12 +16,15 @@ POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpo
 POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
 POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
 POST     /stripe/submit-payment-standalone               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postStandalone()
+POST    /stripe/submit-payment-autodonate       org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAutoDonateCreation()
 
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()
 
 POST     /stripe/store-payment-method-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAP()
 POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP(juniorId: Option[Int])
+POST    /stripe/store-payment-method-autodonate         org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAutoDonate()
+POST    /stripe/store-payment-method-donate           org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postDonate()
 
 GET     /stripe/get-recurring-info               org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationInfo.get()
 
@@ -153,6 +156,11 @@ POST    /proto-detach-member        org.sailcbi.APIServer.Api.Endpoints.Security
 POST    /ap/create-ap-guest             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.postPortal()
 
 GET     /ap/guest-ticket-barcode            org.sailcbi.APIServer.Api.Endpoints.Public.GuestTicketHTML.get(cardNumber: Int, nonce: String)
+
+GET     /member/get-recurring-donations     org.sailcbi.APIServer.Api.Endpoints.Member.RecurringDonationAmounts.get()
+POST     /member/set-recurring-donations     org.sailcbi.APIServer.Api.Endpoints.Member.RecurringDonationAmounts.post()
+
+GET     /member/recurring-donation-history  org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationHistory.get()
 
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()

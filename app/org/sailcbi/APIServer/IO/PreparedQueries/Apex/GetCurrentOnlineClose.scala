@@ -2,11 +2,11 @@ package org.sailcbi.APIServer.IO.PreparedQueries.Apex
 
 import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 
 import java.time.LocalDate
 
-class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexRequestCache, MemberRequestCache)) {
+class GetCurrentOnlineClose extends HardcodedQueryForSelect[GetCurrentOnlineCloseResult](Set(ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache)) {
 	val getQuery: String =
 		s"""
 		   |select close_id, created_on, closed_datetime from fo_closes c, current_closes cur where close_id = online_close

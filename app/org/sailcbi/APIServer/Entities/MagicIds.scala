@@ -42,6 +42,7 @@ object MagicIds {
 		val SHARED = "Shared"
 		val DONATE = "Donate"
 		val GC = "GC"
+		val AUTO_DONATE = "AUTO_DONATE"
 	}
 	val MIN_AGE_FOR_SENIOR = 65
 	val MAX_AGE_FOR_YOUTH = 20

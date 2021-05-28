@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, StripeError, _}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
 import org.sailcbi.APIServer.IO.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, PublicRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache, PublicRequestCache}
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +47,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 
 	/** If you call this, you must put the PI ID on the order */
 	def createPaymentIntent(orderId: Int, source: Option[String], totalInCents: Int, customerId: String, closeId: Int): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 
 		val sourceBody = source match {
 			case None => Map.empty
@@ -72,7 +72,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def updatePaymentIntentWithTotal(intentId: String, totalInCents: Int, closeId: Int): Future[ServiceRequestResult[Unit, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + intentId,
@@ -87,7 +87,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def updatePaymentIntentWithPaymentMethod(intentId: String, methodId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + intentId,
 			PaymentIntent.apply,
@@ -100,7 +100,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def getPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + paymentIntentId,
 			PaymentIntent.apply,
@@ -111,7 +111,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def confirmPaymentIntent(paymentIntentId: String): Future[ServiceRequestResult[PaymentIntent, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + paymentIntentId + "/confirm",
 			PaymentIntent.apply,
@@ -122,7 +122,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def detachPaymentMethod(paymentMethodId: String): Future[ServiceRequestResult[Unit, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ProtoPersonRequestCache))
 
 		apiIO.getOrPostStripeSingleton(
 			s"payment_methods/${paymentMethodId}/detach",
@@ -183,7 +183,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	def createStripeCustomerFromPerson(rc: RequestCache, personId: Int): Future[ServiceRequestResult[Customer, StripeError]] = {
 		val (optionEmail, optionStripeCustomerId) = {
 			type ValidationResult = (Option[String], Option[String]) // email, existing stripe customerID
-			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberRequestCache)) {
+			val q = new PreparedQueryForSelect[ValidationResult](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ValidationResult =
 					(rsw.getOptionString(1), rsw.getOptionString(2))
 
@@ -204,7 +204,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 			println("stripe create customer: exists")
 			Future(ValidationError(StripeError("validation", "Stripe customer record already exists.")))
 		} else {
-			rc.companion.test(Set(MemberRequestCache))
+			rc.companion.test(Set(MemberRequestCache, ProtoPersonRequestCache))
 			apiIO.getOrPostStripeSingleton(
 				"customers",
 				Customer.apply,
@@ -215,7 +215,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 					"metadata[cbiInstance]" -> PA.instanceName
 				)),
 				Some((c: Customer) => {
-					val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+					val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 						override val params: List[String] = List(c.id, personId.toString)
 
 						override def getQuery: String =
@@ -243,7 +243,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def storePaymentMethod(customerId: String, paymentMethodId: String): Future[ServiceRequestResult[_, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ProtoPersonRequestCache))
 		apiIO.getOrPostStripeSingleton(
 			s"payment_methods/$paymentMethodId/attach",
 			PaymentMethod.apply,
@@ -268,7 +268,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 	}
 
 	def getCustomerObject(customerId: String): Future[ServiceRequestResult[Customer, StripeError]] = {
-		rc.companion.test(Set(MemberRequestCache, ApexRequestCache))
+		rc.companion.test(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache))
 		apiIO.getOrPostStripeSingleton("customers/" + customerId, Customer.apply, GET, None, None)
 	}
 

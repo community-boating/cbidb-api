@@ -5,6 +5,7 @@ import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCa
 import com.coleji.framework.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Util._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
@@ -24,7 +25,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 
-			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+			SubmitPayment.startChargeProcess(rc, ws, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok(new JsObject(Map(
 					"successAttemptId" -> JsNumber(parseError._1.get)
 				)))
@@ -41,7 +42,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val personId = rc.getAuthedPersonId
 			val orderId = PortalLogic.getOrderIdJP(rc, personId)
 
-			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+			SubmitPayment.startChargeProcess(rc, ws, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok(new JsObject(Map(
 					"successAttemptId" -> JsNumber(parseError._1.get)
 				)))
@@ -57,7 +58,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val personId = params("personId").toInt
 			val orderId: Int = params("orderId").toInt
 
-			startChargeProcess(rc, personId, orderId).map(parseError => parseError._2 match {
+			SubmitPayment.startChargeProcess(rc, ws, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok("success")
 				case Some(err: String) => Ok(err)
 			})
@@ -72,8 +73,17 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			program match {
 				case ORDER_NUMBER_APP_ALIAS.DONATE | ORDER_NUMBER_APP_ALIAS.GC => {
 					val orderId = PortalLogic.getOrderId(rc, personId, program)
-					val result = startStandaloneChargeProcess(rc, orderId)
-					result._2 match {
+					val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
+
+					val result = {
+						if (usePaymentIntent) {
+							SubmitPayment.startChargeProcess(rc, ws, personId, orderId, true)
+						} else {
+							Future(SubmitPayment.startStandaloneChargeProcess(rc, orderId))
+						}
+					}
+
+					result.map(parseResult => parseResult._2 match {
 						case None => {
 							PortalLogic.promoteProtoPerson(rc, personId)
 							val (_, _, _, realPersonId) = PortalLogic.getAuthedPersonInfo(rc, personId)
@@ -81,26 +91,57 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 								case Some(mergeInto) => PortalLogic.mergeRecords(rc, mergeInto = mergeInto, mergeFrom = personId)
 								case None =>
 							}
-							Future(Ok(new JsObject(Map(
-								"successAttemptId" -> JsNumber(result._1.get)
-							))))
+							Ok(new JsObject(Map(
+								"successAttemptId" -> JsNumber(parseResult._1.get)
+							)))
 						}
-						case Some(err: String) => Future(Ok(ResultError("process_err", err).asJsObject()))
-					}
-//					Future(Ok(ValidationResult.from("err " + program + "  " + orderId).toResultError.asJsObject()))
+						case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+					})
 				}
 				case _ => Future(Ok(ValidationResult.from("An internal error has occurred.").toResultError.asJsObject()))
 			}
 		})
 	}
 
+	def postAutoDonateCreation()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			val personId = rc.getAuthedPersonId
+			val orderId = PortalLogic.getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE)
+			PortalLogic.reconstituteAutoDonateOrder(rc, personId, orderId)
+			SubmitPayment.startChargeProcess(rc, ws, personId, orderId, true).map(parseError => parseError._2 match {
+				case None => {
+					val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+						override def getQuery: String = s"update persons set NEXT_RECURRING_DONATION = add_months(util_pkg.get_sysdate,1) where person_id = $personId"
+					}
+					rc.executePreparedQueryForUpdateOrDelete(update)
+
+					Ok(new JsObject(Map(
+						"successAttemptId" -> JsNumber(parseError._1.get)
+					)))
+				}
+				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+			})
+		})
+	}
+
+	case class PostShapeApex(personId: Int, orderId: Int)
+
+	object PostShapeApex {
+		implicit val format = Json.format[PostShapeApex]
+
+		def apply(v: JsValue): PostShapeApex = v.as[PostShapeApex]
+	}
+}
+
+object SubmitPayment {
 	private def startStandaloneChargeProcess(rc: RequestCache, orderId: Int): (Option[Int], Option[String]) = {
-		val ppc = new PreparedProcedureCall[(Option[Int], Option[String])](Set(ProtoPersonRequestCache)) {
-//			procedure start_stripe_transaction(
-//				i_order_id in number,
-//				o_success_attempt_id out number,
-//				o_error_msg out varchar2
-//			) as
+		val ppc = new PreparedProcedureCall[(Option[Int], Option[String])](Set(ProtoPersonRequestCache, MemberRequestCache)) {
+			//			procedure start_stripe_transaction(
+			//				i_order_id in number,
+			//				o_success_attempt_id out number,
+			//				o_error_msg out varchar2
+			//			) as
 
 			override def setInParametersInt: Map[String, Int] = Map(
 				"i_order_id" -> orderId
@@ -128,14 +169,15 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		rc.executeProcedure(ppc)
 	}
 
-	private def startChargeProcess(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def startChargeProcess(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, isAutoDonate: Boolean = false)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
+		val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
 
 		val stripe = rc.getStripeIOController(ws)
 
-		if (isStaggered) {
+		if (isStaggered || isAutoDonate || usePaymentIntent) {
 			val pm = for (
 				pi <- PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents);
 				_ <- stripe.updatePaymentIntentWithTotal(pi.get.id, orderTotalInCents, closeId);
@@ -145,7 +187,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			) yield pm
 
 			pm.flatMap(_ => {
-				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 					override def getQuery: String =
 						s"""
 						   |update ORDERS_STRIPE_PAYMENT_INTENTS set
@@ -157,17 +199,17 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				}
 				rc.executePreparedQueryForUpdateOrDelete(updateQ)
 
-				postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
+				postPaymentIntent(rc, ws, personId, orderId, closeId, orderTotalInCents, isAutoDonate)
 			})
 		} else {
-			postPaymentIntent(rc, personId, orderId, closeId, orderTotalInCents)
+			postPaymentIntent(rc, ws, personId, orderId, closeId, orderTotalInCents, isAutoDonate)
 		}
 	}
 
-	private def postPaymentIntent(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int)(implicit PA: PermissionsAuthority): Future[(Option[Int], Option[String])] = {
+	private def postPaymentIntent(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int, isAutoDonate: Boolean)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
 		val logger = PA.logger
 
-		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberRequestCache, ApexRequestCache)) {
+		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			//				procedure start_stripe_trans_preflight(
 			//						i_order_id in number,
 			//						o_attempt_id out number,
@@ -205,7 +247,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				println("skipping charge")
 				Future(Right(null))
 			} else {
-				doCharge(rc, personId, orderId, orderTotalInCents, closeId) match {
+				doCharge(rc, ws, personId, orderId, orderTotalInCents, closeId, isAutoDonate) match {
 					case Resolved(f) => f.map({
 						case s: NetSuccess[Charge, StripeError] => {
 							println("Create charge net success: " + s.successObject)
@@ -235,7 +277,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		}
 
 		stripeResult.map(result => {
-			val parseQ = new PreparedProcedureCall[(Option[Int], Option[String])](Set(MemberRequestCache, ApexRequestCache)) {
+			val parseQ = new PreparedProcedureCall[(Option[Int], Option[String])](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 				//						procedure start_stripe_transaction_parse(
 				//								i_order_id in number,
 				//								i_total in number,
@@ -290,22 +332,23 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		})
 	}
 
-	private def doCharge(rc: LockedRequestCacheWithStripeController, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
+	private def doCharge(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int, isAutoDonate: Boolean)(implicit exec: ExecutionContext): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 		val stripeController = rc.getStripeIOController(ws)
+		val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
 
-		if (isStaggered) {
+		if (isStaggered || isAutoDonate || usePaymentIntent) {
 			Failover(PortalLogic.getOrCreatePaymentIntent(rc, stripeController, personId, orderId, orderTotalInCents).flatMap(pi => {
 				stripeController.confirmPaymentIntent(pi.get.id).map({
 					case s: NetSuccess[PaymentIntent, StripeError] => {
-						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+						val updatePIQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 							override val params: List[String] = List(pi.get.id)
 							override def getQuery: String =
 								s"""
-								  |update ORDERS_STRIPE_PAYMENT_INTENTS
-								  |set paid = 'Y'
-								  |where PAYMENT_INTENT_ID = ?
-								  |""".stripMargin
+								   |update ORDERS_STRIPE_PAYMENT_INTENTS
+								   |set paid = 'Y'
+								   |where PAYMENT_INTENT_ID = ?
+								   |""".stripMargin
 						}
 						rc.executePreparedQueryForUpdateOrDelete(updatePIQ)
 						s.map(pi => pi.charges.data.head)
@@ -317,13 +360,5 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 			val cardData = PortalLogic.getCardData(rc, orderId).get
 			Failover(stripeController.createCharge(orderTotalInCents, cardData.token, orderId, closeId))
 		}
-	}
-
-	case class PostShapeApex(personId: Int, orderId: Int)
-
-	object PostShapeApex {
-		implicit val format = Json.format[PostShapeApex]
-
-		def apply(v: JsValue): PostShapeApex = v.as[PostShapeApex]
 	}
 }

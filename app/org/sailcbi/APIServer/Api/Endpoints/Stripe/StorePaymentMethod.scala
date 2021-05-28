@@ -2,11 +2,11 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
 import com.coleji.framework.API
 import com.coleji.framework.API.{ResultError, ValidationOk}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.Util.{CriticalError, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.MemberRequestCache
+import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -19,7 +19,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
-				post(rc, parsed.paymentMethodId, parsed.retryLatePayments, None)
+				post(rc, parsed.paymentMethodId, parsed.retryLatePayments, rc.getAuthedPersonId, None)
 			})
 		})
 	}
@@ -28,21 +28,37 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 		juniorId match {
 			case None => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 				PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
-					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, None)
+					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, rc.getAuthedPersonId, None)
 				})
 			})
 			case Some(id) => MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, id, rc => {
 				PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
-					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, juniorId)
+					post(rc, parsed.paymentMethodId, parsed.retryLatePayments, rc.getAuthedPersonId, juniorId)
 				})
 			})
 		}
-
 	}
 
-	private def post(rc: MemberRequestCache, paymentMethodId: String, retryLatePayments: Boolean, juniorId: Option[Int])(implicit PA: PermissionsAuthority): Future[Result] =  {
+	def postAutoDonate()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
+		val parsedRequest = ParsedRequest(req)
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
+				post(rc, parsed.paymentMethodId, false, rc.getAuthedPersonId, None)
+			})
+		})
+	}
+
+	def postDonate()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { req =>
+		val parsedRequest = ParsedRequest(req)
+		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StorePaymentMethodShape.apply)(parsed => {
+				post(rc, parsed.paymentMethodId, false, rc.getAuthedPersonId.get, None)
+			})
+		})
+	}
+
+	private def post(rc: LockedRequestCacheWithStripeController, paymentMethodId: String, retryLatePayments: Boolean, adultPersonId: Int, juniorId: Option[Int])(implicit PA: PermissionsAuthority): Future[Result] =  {
 		val stripe = rc.getStripeIOController(ws)
-		val adultPersonId = rc.getAuthedPersonId
 		val memberPersonId = juniorId.getOrElse(adultPersonId)
 		val customerIdOption = PortalLogic.getStripeCustomerId(rc, adultPersonId)
 		customerIdOption match {

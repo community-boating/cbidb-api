@@ -15,7 +15,7 @@ import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 
 import java.awt.image.BufferedImage
 import java.math.BigInteger
@@ -2066,7 +2066,7 @@ object PortalLogic {
 	}
 
 	def getStripeCustomerId(rc: RequestCache, personId: Int): Option[String] = {
-		val q = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache, ApexRequestCache)) {
+		val q = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
 
 			override val params: List[String] = List(personId.toString)
@@ -2466,7 +2466,7 @@ object PortalLogic {
 	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
-		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache)) {
+		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (String, Int, Int) = (rsw.getString(1), rsw.getInt(2), rsw.getInt(3))
 
 			override def getQuery: String =
@@ -2483,7 +2483,7 @@ object PortalLogic {
 			val (intentId, closeId, rowId) = intentIdsAndCloseIDs.head
 			stripe.getPaymentIntent(intentId).flatMap({
 				case s: NetSuccess[PaymentIntent, _] => {
-					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 						override def getQuery: String =
 							s"""
 							   |update order_staggered_payments set
@@ -2495,7 +2495,7 @@ object PortalLogic {
 					val pi = s.successObject
 					if (pi.amount != totalInCents || pi.metadata.closeId.get.toInt != closeId) {
 						stripe.updatePaymentIntentWithTotal(pi.id, totalInCents, closeId).map(_ => {
-							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+							val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 								override def getQuery: String =
 									s"""
 									   |update ORDERS_STRIPE_PAYMENT_INTENTS set
@@ -2536,8 +2536,19 @@ object PortalLogic {
 	}
 
 	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
-		val staggeredPayments =getStaggeredPaymentsReady(rc, orderId)
-		val totalInCents = staggeredPayments.foldLeft(0)((amt, payment) => amt + payment._2.cents)
+		val appAlias = getAppAliasForOrderId(rc, orderId)
+		val staggeredPayments = if (appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE || appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE) {
+			List.empty
+		} else {
+			getStaggeredPaymentsReady(rc, orderId)
+		}
+		val totalInCents = {
+			if (appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE || appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE) {
+				getOrderTotalCents(rc, orderId)
+			} else {
+				staggeredPayments.foldLeft(0)((amt, payment) => amt + payment._2.cents)
+			}
+		}
 
 		if (totalInCents == 0) Future(None)
 		else {
@@ -2545,7 +2556,7 @@ object PortalLogic {
 				case intentSuccess: NetSuccess[PaymentIntent, _] => {
 					val pi = intentSuccess.successObject
 
-					val createPI = new PreparedQueryForInsert(Set(MemberRequestCache, ApexRequestCache)) {
+					val createPI = new PreparedQueryForInsert(Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
 						override val pkName: Option[String] = Some("ROW_ID")
 
 						override val params: List[String] = List(pi.id)
@@ -2559,16 +2570,18 @@ object PortalLogic {
 
 					val rowId = rc.executePreparedQueryForInsert(createPI).get
 
-					val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
-						override def getQuery: String =
-							s"""
-							   |update order_staggered_payments set
-							   |PAYMENT_INTENT_ROW_ID = $rowId
-							   |where order_id = $orderId
-							   |and stagger_id in (${staggeredPayments.map(_._1).mkString(", ")})
-							   |""".stripMargin
+					if (appAlias != MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE && appAlias != MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE) {
+						val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
+							override def getQuery: String =
+								s"""
+								   |update order_staggered_payments set
+								   |PAYMENT_INTENT_ROW_ID = $rowId
+								   |where order_id = $orderId
+								   |and stagger_id in (${staggeredPayments.map(_._1).mkString(", ")})
+								   |""".stripMargin
+						}
+						rc.executePreparedQueryForUpdateOrDelete(updateQ)
 					}
-					rc.executePreparedQueryForUpdateOrDelete(updateQ)
 
 					val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
 
@@ -2616,7 +2629,7 @@ object PortalLogic {
 	}
 
 	def getOpenStaggeredOrderForPerson(rc: RequestCache, personId: Int)(implicit PA: PermissionsAuthority): Option[Int] = {
-		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, StaffRequestCache)) {
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, StaffRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 			override def getQuery: String =
@@ -2717,7 +2730,7 @@ object PortalLogic {
 	}
 
 	def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
-		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache)) {
+		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
 
 			override def getQuery: String =
@@ -3059,6 +3072,138 @@ object PortalLogic {
 				  |""".stripMargin
 		}
 		rc.executePreparedQueryForSelect(q).head
+	}
+
+	case class RecurringDonation(fundId: Int, amountInCents: Int)
+	object RecurringDonation {
+		implicit val format = Json.format[RecurringDonation]
+		def apply(v: JsValue): RecurringDonation = v.as[RecurringDonation]
+	}
+
+	def getRecurringDonations(rc: RequestCache, personId: Int): List[RecurringDonation] = {
+		val q = new PreparedQueryForSelect[RecurringDonation](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): RecurringDonation = RecurringDonation(
+				fundId = rsw.getInt(1), amountInCents = rsw.getInt(2)
+			)
+
+			override def getQuery: String =
+				s"""
+				  |select fund_id, amount_in_cents from persons_recurring_donations where person_id = $personId
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q)
+	}
+
+	def setRecurringDonations(rc: RequestCache, personId: Int, donations: List[RecurringDonation]): Unit = {
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+			override def getQuery: String = s"delete from persons_recurring_donations where person_id = $personId"
+		}
+		rc.executePreparedQueryForUpdateOrDelete(deleteQ)
+
+		// Won't ever be more than 4-5 of these so I'm not too worried about speed
+		val insertQs = donations.map(d => new PreparedQueryForInsert(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+			override val pkName: Option[String] = Some("ROW_ID")
+
+			override def getQuery: String =
+				s"""
+				  |insert into persons_recurring_donations (person_id, fund_id, amount_in_cents)
+				  |values (${personId}, ${d.fundId}, ${d.amountInCents})
+				  |""".stripMargin
+		})
+
+		insertQs.foreach(rc.executePreparedQueryForInsert)
+
+		if (donations.isEmpty) {
+			val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+				override def getQuery: String = s"update persons set NEXT_RECURRING_DONATION = null where person_id = $personId"
+			}
+			rc.executePreparedQueryForUpdateOrDelete(update)
+		}
+	}
+
+	def getShoppingCartDonationsAsRecurringRecords(rc: RequestCache, orderId: Int): List[RecurringDonation] = {
+		val q = new PreparedQueryForSelect[RecurringDonation](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): RecurringDonation = RecurringDonation(
+				fundId = rsw.getInt(1),
+				amountInCents = (100 * rsw.getDouble(2)).toInt
+			)
+
+			override def getQuery: String = s"select fund_id, amount from shopping_cart_donations where order_id = $orderId"
+		}
+		rc.executePreparedQueryForSelect(q)
+	}
+
+	case class SavedCardOrPaymentMethodData(
+		last4: String,
+		expMonth: Int,
+		expYear: Int,
+		zip: Option[String]
+	)
+
+	object SavedCardOrPaymentMethodData {
+		implicit val format = Json.format[SavedCardOrPaymentMethodData]
+		def apply(v: JsValue): SavedCardOrPaymentMethodData = v.as[SavedCardOrPaymentMethodData]
+	}
+
+	def reconstituteAutoDonateOrder(rc: RequestCache, personId: Int, orderId: Int): Unit = {
+		// clear existing SCDs
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String = s"delete from shopping_cart_donations where order_id = $orderId"
+		}
+		rc.executePreparedQueryForUpdateOrDelete(deleteQ)
+
+		// put in new SCDs
+		val requestedDonations = getRecurringDonations(rc, personId)
+		requestedDonations.foreach(d => addDonationToOrder(rc, orderId, d.fundId, d.amountInCents / 100, None))
+	}
+
+	def getAppAliasForOrderId(rc: RequestCache, orderId: Int): String = {
+		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getOptionString(1).getOrElse(MagicIds.ORDER_NUMBER_APP_ALIAS.SHARED)
+
+			override def getQuery: String = s"select app_alias from order_numbers where order_id = $orderId"
+		}
+		rc.executePreparedQueryForSelect(q).head
+	}
+
+	def setUsePaymentIntent(rc: RequestCache, orderId: Int, usePaymentIntent: Boolean): Unit = {
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+			override val params: List[String] = List(
+				if(usePaymentIntent) "Y" else "N",
+				orderId.toString
+			)
+			override def getQuery: String =
+				"""
+				  |update order_numbers set use_payment_intent = ? where order_id = ?
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForUpdateOrDelete(updateQ)
+	}
+
+	def getUsePaymentIntentFromOrderTable(rc: RequestCache, orderId: Int): Option[Boolean] = {
+		val q = new PreparedQueryForSelect[Option[Boolean]](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Boolean] = rsw.getOptionBooleanFromChar(1)
+
+			override def getQuery: String = s"select use_payment_intent from order_numbers where order_id = $orderId"
+		}
+		rc.executePreparedQueryForSelect(q).head
+	}
+
+	def setUsePaymentIntentDonationStandalone(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, doRecurring: Boolean): Future[Unit] = {
+		val createCustomerIdFuture = {
+			if (doRecurring) {
+				PortalLogic.getStripeCustomerId(rc, personId) match {
+					case None => stripe.createStripeCustomerFromPerson(rc, personId)
+					case Some(_) => Future()
+				}
+			} else {
+				Future()
+			}
+		}
+
+		createCustomerIdFuture.map(_ => {
+			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
+		})
 	}
 }
 

@@ -5,6 +5,7 @@ import com.coleji.framework.Util.{Currency, NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.SavedCardOrPaymentMethodData
 import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -43,6 +44,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		val stripe = rc.getStripeIOController(ws)
 
 		val orderId = PortalLogic.getOrderId(rc, personId, program)
+		val usePaymentIntentFromOrderTable = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId)
 
 		val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)
 		val orderTotalInCents = Currency.toCents(orderTotal)
@@ -69,8 +71,18 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		implicit val format = OrderStatusResult.format
 
-		if (staggeredPaymentAdditionalMonths > 0) {
-			val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
+		val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
+
+		if (staggeredPaymentAdditionalMonths > 0 || (usePaymentIntentFromOrderTable.getOrElse(false) && customerIdOption.isDefined)) {
+			val customerId = customerIdOption.get
+
+			val (nameFirst, nameLast, email, authedAsRealPerson) = {
+				if (usePaymentIntentFromOrderTable.getOrElse(false)) {
+					PortalLogic.getAuthedPersonInfo(rc, personId)
+				} else {
+					(None, None, None, None)
+				}
+			}
 
 			stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
 				case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).map(pi => {
@@ -87,10 +99,10 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 						staggeredPayments = staggeredPayments,
 						paymentIntentId = pi.map(_.id),
 						jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
-						nameFirst = None,
-						nameLast = None,
-						email = None,
-						authedAsRealPerson = false,
+						nameFirst = nameFirst,
+						nameLast = nameLast,
+						email = email,
+						authedAsRealPerson = authedAsRealPerson.isDefined,
 					)))
 				})
 				case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
@@ -101,7 +113,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			Future(Ok(Json.toJson(OrderStatusResult(
 				orderId = orderId,
 				total = orderTotal,
-				paymentMethodRequired = false,
+				paymentMethodRequired = usePaymentIntentFromOrderTable.getOrElse(false),
 				cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
 					last4 = cd.last4,
 					expMonth = cd.expMonth.toInt,
@@ -151,15 +163,4 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		def apply(v: JsValue): OrderStatusResult = v.as[OrderStatusResult]
 	}
 
-	case class SavedCardOrPaymentMethodData(
-		last4: String,
-		expMonth: Int,
-		expYear: Int,
-		zip: Option[String]
-	)
-
-	object SavedCardOrPaymentMethodData {
-		implicit val format = Json.format[SavedCardOrPaymentMethodData]
-		def apply(v: JsValue): SavedCardOrPaymentMethodData = v.as[SavedCardOrPaymentMethodData]
-	}
 }

@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Stripe
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.framework.Util.{NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.PaymentMethod
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
@@ -18,7 +19,7 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, ClearCardShape.apply)(parsed => {
 			parsed.program match {
-				case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+				case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP| ORDER_NUMBER_APP_ALIAS.AUTO_DONATE => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 					val personId = rc.getAuthedPersonId
 					postInner(rc, personId, parsed.program)
 				})
@@ -33,9 +34,11 @@ class ClearCard @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) ext
 	private def postInner(rc: LockedRequestCacheWithStripeController, personId: Int, program: String): Future[Result] = {
 		val stripeIOController = rc.getStripeIOController(ws)
 
-		val orderId = PortalLogic.getOrderId(rc, personId, program)
+		lazy val orderId = PortalLogic.getOrderId(rc, personId, program)
 
-		if (PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0) {
+		lazy val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
+
+		if (program == MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE || usePaymentIntent || PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0) {
 			val stripeCustomerId = PortalLogic.getStripeCustomerId(rc, personId)
 			stripeIOController.getCustomerDefaultPaymentMethod(stripeCustomerId.get).flatMap({
 				case s: NetSuccess[Option[PaymentMethod], _] => s.successObject match {
