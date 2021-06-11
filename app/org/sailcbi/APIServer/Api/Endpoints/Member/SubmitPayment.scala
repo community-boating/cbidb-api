@@ -85,6 +85,9 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 
 					result.map(parseResult => parseResult._2 match {
 						case None => {
+							if (usePaymentIntent) {
+								PortalLogic.setRecurringDonations(rc, personId, PortalLogic.getShoppingCartDonationsAsRecurringRecords(rc, orderId))
+							}
 							PortalLogic.promoteProtoPerson(rc, personId)
 							val (_, _, _, realPersonId) = PortalLogic.getAuthedPersonInfo(rc, personId)
 							realPersonId match {

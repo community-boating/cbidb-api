@@ -88,8 +88,6 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 
 						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
-						PortalLogic.setRecurringDonations(rc, personId, PortalLogic.getShoppingCartDonationsAsRecurringRecords(rc, orderId))
-
 						PortalLogic.setUsePaymentIntentDonationStandalone(rc, stripe, personId, orderId, parsed.doRecurring).map(_ => {
 							Ok(JsObject(Map("success" -> JsBoolean(true))))
 						})
