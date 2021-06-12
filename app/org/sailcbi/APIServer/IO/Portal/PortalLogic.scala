@@ -3094,7 +3094,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q)
 	}
 
-	def setRecurringDonations(rc: RequestCache, personId: Int, donations: List[RecurringDonation]): Unit = {
+	def setRecurringDonations(rc: RequestCache, personId: Int, donations: List[RecurringDonation], embryonic: Boolean): Unit = {
 		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def getQuery: String = s"delete from persons_recurring_donations where person_id = $personId"
 		}
@@ -3106,8 +3106,8 @@ object PortalLogic {
 
 			override def getQuery: String =
 				s"""
-				  |insert into persons_recurring_donations (person_id, fund_id, amount_in_cents)
-				  |values (${personId}, ${d.fundId}, ${d.amountInCents})
+				  |insert into persons_recurring_donations (person_id, fund_id, amount_in_cents, embryonic)
+				  |values (${personId}, ${d.fundId}, ${d.amountInCents}, ${GetSQLLiteral(embryonic)})
 				  |""".stripMargin
 		})
 

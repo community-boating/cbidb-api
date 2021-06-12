@@ -1,6 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.NetSuccess
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
@@ -10,6 +12,7 @@ import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,7 +59,15 @@ class RecurringDonationAmounts @Inject()(ws: WSClient)(implicit exec: ExecutionC
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, GetRecurringDonationsShape.apply)(parsed => {
 				val personId = rc.getAuthedPersonId
-				PortalLogic.setRecurringDonations(rc, personId, parsed.recurringDonations)
+
+				val q = new PreparedQueryForSelect[Option[LocalDate]](Set(MemberRequestCache)) {
+					override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[LocalDate] = rsw.getOptionLocalDate(1)
+
+					override def getQuery: String = s"select NEXT_RECURRING_DONATION from persons where person_id = $personId"
+				}
+				val nextDonation = rc.executePreparedQueryForSelect(q).head
+
+				PortalLogic.setRecurringDonations(rc, personId, parsed.recurringDonations, nextDonation.isEmpty)
 				Future(Ok(new JsObject(Map(
 					"success" -> JsBoolean(true)
 				))))

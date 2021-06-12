@@ -86,7 +86,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					result.map(parseResult => parseResult._2 match {
 						case None => {
 							if (usePaymentIntent) {
-								PortalLogic.setRecurringDonations(rc, personId, PortalLogic.getShoppingCartDonationsAsRecurringRecords(rc, orderId))
+								PortalLogic.setRecurringDonations(rc, personId, PortalLogic.getShoppingCartDonationsAsRecurringRecords(rc, orderId), false)
 							}
 							PortalLogic.promoteProtoPerson(rc, personId)
 							val (_, _, _, realPersonId) = PortalLogic.getAuthedPersonInfo(rc, personId)
@@ -118,6 +118,10 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 						override def getQuery: String = s"update persons set NEXT_RECURRING_DONATION = add_months(util_pkg.get_sysdate,1) where person_id = $personId"
 					}
 					rc.executePreparedQueryForUpdateOrDelete(update)
+					val updatePRDs = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+						override def getQuery: String = s"update persons_recurring_donations set embryonic = 'N' where person_id = $personId"
+					}
+					rc.executePreparedQueryForUpdateOrDelete(updatePRDs)
 
 					Ok(new JsObject(Map(
 						"successAttemptId" -> JsNumber(parseError._1.get)
