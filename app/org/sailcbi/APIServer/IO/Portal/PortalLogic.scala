@@ -3019,13 +3019,10 @@ object PortalLogic {
 				  |select nonce from persons_cards where card_num = ?
 				  |""".stripMargin
 		}
-		val expectedNonce = rc.executePreparedQueryForSelect(q).head
-		if (expectedNonce.get == nonce) {
-			Some(BarcodeFactory.getImage(cardNumber.toString))
-		} else {
-			None
-		}
-
+		rc.executePreparedQueryForSelect(q).head.flatMap(n => {
+			if (n == nonce) Some(BarcodeFactory.getImage(cardNumber.toString))
+			else None
+		})
 	}
 
 	def ticketHTML(cardNumber: Int, nonce: String, name: String): String = {
