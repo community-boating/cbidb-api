@@ -14,7 +14,7 @@ class UserPermissions @Inject()(implicit val exec: ExecutionContext) extends Inj
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val u = User.getAuthedUser(rc)
 			implicit val format = PermissionsShape.format
-			Future(Ok(Json.toJson(PermissionsShape(u.values.userType.get))))
+			Future(Ok(Json.toJson(PermissionsShape(u.values.userType.get.get))))
 		})
 	})
 

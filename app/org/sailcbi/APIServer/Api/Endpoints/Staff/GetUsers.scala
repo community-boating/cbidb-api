@@ -37,7 +37,8 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 					User.fields.locked,
 					User.fields.pwChangeRequired,
 					User.fields.active,
-					User.fields.hideFromClose
+					User.fields.hideFromClose,
+					User.fields.userType,
 				).map(_.alias(users)))
 			rc.executeQueryBuilder(qb).map(User.construct)
 		}
@@ -50,7 +51,8 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			locked = u.values.locked.get,
 			pwChangeRequired = u.values.pwChangeRequired.get,
 			active = u.values.active.get,
-			hideFromClose = u.values.hideFromClose.get
+			hideFromClose = u.values.hideFromClose.get,
+			userType = u.values.userType.get,
 		))
 	}
 
@@ -86,7 +88,8 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		locked: Boolean,
 		pwChangeRequired: Boolean,
 		active: Boolean,
-		hideFromClose: Boolean
+		hideFromClose: Boolean,
+		userType: Option[String],
 	)
 
 	object UserShape {

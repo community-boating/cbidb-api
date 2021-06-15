@@ -83,6 +83,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		user.update(_.pwChangeRequired, parsed.pwChangeRequired.getOrElse(false))
 		user.update(_.locked, parsed.locked.getOrElse(false))
 		user.update(_.hideFromClose, parsed.hideFromClose.getOrElse(false))
+		user.update(_.userType, parsed.userType)
 		if (parsed.pwHash.isDefined) {
 			user.update(_.pwHash, parsed.pwHash)
 			user.update(_.pwHashScheme, Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
@@ -115,7 +116,8 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		hideFromClose: Option[Boolean],
 		locked: Option[Boolean],
 		pwChangeRequired: Option[Boolean],
-		pwHash: Option[String]
+		pwHash: Option[String],
+		userType: Option[String],
 	)
 
 	object PutUserShape {
