@@ -4,10 +4,11 @@ import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.MagicIds
 
-class ProtoPersonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
+class ProtoPersonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
 	def getAuthedPersonId: Option[Int] = {
@@ -47,8 +48,8 @@ object ProtoPersonRequestCache extends RequestCacheObject[ProtoPersonRequestCach
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ProtoPersonRequestCache =
-		new ProtoPersonRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): ProtoPersonRequestCache =
+		new ProtoPersonRequestCache(userName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

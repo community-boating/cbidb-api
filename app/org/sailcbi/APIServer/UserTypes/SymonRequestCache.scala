@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
 import java.math.BigInteger
@@ -9,8 +10,8 @@ import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
-class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCache(userName, serverParams, dbGateway) {
+class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
 }
 
@@ -19,10 +20,10 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): SymonRequestCache =
-		new SymonRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): SymonRequestCache =
+		new SymonRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): SymonRequestCache = create(uniqueUserName, serverParams, dbGateway)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): SymonRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 
 	private def validateSymonHash(

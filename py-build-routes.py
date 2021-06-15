@@ -5,7 +5,7 @@ import re
 import sys
 
 FILES_LOCATION = "conf/routes-build/src"
-OUTPUT_LOCATION = "conf/routes-build/dist/routes"
+OUTPUT_LOCATION = "conf/routes"
 CONF_FILE = "conf/private/server-properties"
 
 def getLevelFromServerProps():

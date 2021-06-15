@@ -4,14 +4,15 @@ import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.MagicIds
 import play.api.mvc.Result
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
+class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
 	lazy val getAuthedPersonId: Int = {
@@ -48,8 +49,8 @@ extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway
 }
 
 object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): MemberRequestCache =
-		new MemberRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): MemberRequestCache =
+		new MemberRequestCache(userName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

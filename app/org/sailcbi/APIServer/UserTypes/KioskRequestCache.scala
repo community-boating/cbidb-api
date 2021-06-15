@@ -2,10 +2,11 @@ package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class KioskRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCache(userName, serverParams, dbGateway) {
+class KioskRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[KioskRequestCache] = KioskRequestCache
 }
 
@@ -14,10 +15,10 @@ object KioskRequestCache extends RequestCacheObject[KioskRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): KioskRequestCache =
-		new KioskRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): KioskRequestCache =
+		new KioskRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): KioskRequestCache = create(uniqueUserName, serverParams, dbGateway)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): KioskRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

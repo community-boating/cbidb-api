@@ -5,13 +5,15 @@ import com.coleji.framework.Storable.Fields.DatabaseField
 import com.coleji.framework.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
 sealed abstract class RequestCache private[Core](
 	val userName: String,
 	serverParams: PropertiesWrapper,
-	dbGateway: DatabaseGateway
+	dbGateway: DatabaseGateway,
+	redisPool: RedisClientPool
 )(implicit val PA: PermissionsAuthority) {
 	def companion: RequestCacheObject[_]
 
@@ -20,7 +22,7 @@ sealed abstract class RequestCache private[Core](
 		else new OracleBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
 	}
 
-	val cb: CacheBroker = new RedisBroker
+	val cb: CacheBroker = new RedisBroker(redisPool)
 
 	def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		this.companion.test(pq.allowedUserTypes)
@@ -50,16 +52,18 @@ sealed abstract class RequestCache private[Core](
 abstract class LockedRequestCache(
 	override val userName: String,
 	serverParams: PropertiesWrapper,
-	dbGateway: DatabaseGateway
-) extends RequestCache(userName, serverParams, dbGateway) {
+	dbGateway: DatabaseGateway,
+	redisPool: RedisClientPool,
+) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
 
 }
 
 abstract class UnlockedRequestCache(
 	override val userName: String,
 	serverParams: PropertiesWrapper,
-	dbGateway: DatabaseGateway
-) extends RequestCache(userName, serverParams, dbGateway) {
+	dbGateway: DatabaseGateway,
+	redisPool: RedisClientPool,
+) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
 	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] =
 		pb.getObjectById(obj, id)
 

@@ -8,6 +8,7 @@ import com.coleji.framework.Exception.{CORSException, PostBodyNotJSONException, 
 import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.framework.Storable.{ResultSetWrapper, StorableClass, StorableObject}
 import com.coleji.framework.Util.{Initializable, PropertiesWrapper}
+import com.redis.RedisClientPool
 import io.sentry.Sentry
 import play.api.libs.json.JsValue
 import play.api.mvc.{Result, Results}
@@ -23,7 +24,8 @@ class PermissionsAuthority private[Core] (
 	val systemParams: SystemServerParameters,
 	val customParams: PropertiesWrapper,
 	dbGateway: DatabaseGateway,
-	paPostBoot: PropertiesWrapper => Unit
+	redisPool: RedisClientPool,
+	paPostBoot: PropertiesWrapper => Unit,
 )  {
 	println(s"inside PermissionsAuthority constructor: test mode: ${systemParams.isTestMode}, readOnlyDatabase: ${systemParams.readOnlyDatabase}")
 	println(systemParams)
@@ -31,10 +33,10 @@ class PermissionsAuthority private[Core] (
 	println("AllowableUserTypes: ", systemParams.allowableUserTypes)
 	println("PA Debug: " + systemParams.isDebugMode)
 
-	private lazy val rootRC: RootRequestCache = RootRequestCache.create(customParams, dbGateway)
+	private lazy val rootRC: RootRequestCache = RootRequestCache.create(customParams, dbGateway, redisPool)
 	// TODO: should this ever be used except by actual root-originated reqs e.g. crons?
 	// e.g. there are some staff/member accessible functions that ultimately use this (even if they cant access rootPB directly)
-	private lazy val rootCB = new RedisBroker
+	private lazy val rootCB = new RedisBroker(redisPool)
 
 	lazy val logger: Logger = if (!systemParams.isTestMode) new ProductionLogger(new SSMTPEmailer(Some("jon@community-boating.org"))) else new UnitTestLogger
 
@@ -67,11 +69,16 @@ class PermissionsAuthority private[Core] (
 
 	def requestIsFromLocalHost(request:ParsedRequest): Boolean = {
 		val addressRegex = "127\\.0\\.0\\.1(:[0-9]+)?".r
+		// TODO: this is stupid.  Replace with actual intelligent CIDR checking
+		val dockerAddressRegex = "172\\.(?:16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\\.[0-9]+\\.[0-9]+".r
 		val allowedIPs = Set(
 			"127.0.0.1",
 			"0:0:0:0:0:0:0:1"
 		)
-		allowedIPs.contains(request.remoteAddress) || addressRegex.findFirstIn(request.remoteAddress).isDefined
+
+		allowedIPs.contains(request.remoteAddress) ||
+		addressRegex.findFirstIn(request.remoteAddress).isDefined ||
+		dockerAddressRegex.findFirstIn(request.remoteAddress).isDefined
 	}
 
 	private def wrapInStandardTryCatch(block: () => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
@@ -169,7 +176,7 @@ class PermissionsAuthority private[Core] (
 			case None => None
 			case Some(x: String) => {
 				println("AUTHENTICATION:  Request is authenticated as " + requiredUserType.getClass.getName)
-				Some(requiredUserType.create(x, customParams, dbGateway))
+				Some(requiredUserType.create(x, customParams, dbGateway, redisPool))
 			}
 		}
 
@@ -275,7 +282,7 @@ class PermissionsAuthority private[Core] (
 
 	private[Core] def assertRC[T <: RequestCache](rco: RequestCacheObject[T], userName: String): T = {
 		if (!systemParams.isTestMode) throw new Exception("assertRC is for unit testing only")
-		else rco.create(userName, customParams, dbGateway)
+		else rco.create(userName, customParams, dbGateway, redisPool)
 	}
 
 	private[Core] def closeDB(): Unit = dbGateway.close()

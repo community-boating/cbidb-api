@@ -4,10 +4,11 @@ import com.coleji.framework.Core.{ParsedRequest, _}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway) {
+class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
 
@@ -16,10 +17,10 @@ object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ApexRequestCache =
-		new ApexRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): ApexRequestCache =
+		new ApexRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): ApexRequestCache = create(uniqueUserName, serverParams, dbGateway)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): ApexRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

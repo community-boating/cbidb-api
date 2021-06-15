@@ -2,10 +2,11 @@ package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.framework.Core._
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 
-class BouncerRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends LockedRequestCache(userName, serverParams, dbGateway) {
+class BouncerRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
 
 	def getUserByUsername(username: String): Option[User] =
@@ -36,10 +37,10 @@ object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 		}).flatten
 	}
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): BouncerRequestCache =
-		new BouncerRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): BouncerRequestCache =
+		new BouncerRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): BouncerRequestCache = create(uniqueUserName, serverParams, dbGateway)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): BouncerRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

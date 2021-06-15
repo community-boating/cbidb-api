@@ -4,15 +4,16 @@ import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 
-class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway)
-extends UnlockedRequestCache(userName, serverParams, dbGateway) {
+class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+extends UnlockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 }
 
 object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): StaffRequestCache =
-		new StaffRequestCache(userName, serverParams, dbGateway)
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): StaffRequestCache =
+		new StaffRequestCache(userName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

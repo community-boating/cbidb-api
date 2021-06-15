@@ -2,6 +2,7 @@ package com.coleji.framework.Core.Boot
 
 import com.coleji.framework.Core.{DatabaseGateway, OracleDatabaseConnection, PermissionsAuthority, RequestCacheObject}
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future
@@ -47,6 +48,7 @@ object ServerBootLoader {
 					.map(t => t._1)
 
 			val dbConnection = getDBPools()
+			val redisPool = new RedisClientPool(paramFile.getOptionalString("RedisHost").getOrElse("localhost"), 6379)
 			lifecycle match {
 				case Some(lc) => lc.addStopHook(() => Future.successful({
 					println("****************************    Stop hook: closing pools  **********************")
@@ -70,6 +72,7 @@ object ServerBootLoader {
 				),
 				customParams = paramFile,
 				dbGateway = dbConnection,
+				redisPool = redisPool,
 				paPostBoot
 			)
 		}

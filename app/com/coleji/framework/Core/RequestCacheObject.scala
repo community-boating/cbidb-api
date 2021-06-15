@@ -2,13 +2,14 @@ package com.coleji.framework.Core
 
 import com.coleji.framework.Exception.UserTypeMismatchException
 import com.coleji.framework.Util.PropertiesWrapper
+import com.redis.RedisClientPool
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	val EMPTY_NONCE = "$EMPTY_AUTH_NONCE$"
 	val SEC_COOKIE_NAME_PUBLIC = "CBIDB-SEC"
 	val SEC_COOKIE_NAME_STAFF = "CBIDB-SEC-STAFF"
 
-	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway): T
+	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): T
 
 	def test(allowed: Set[RequestCacheObject[_]]): Unit = {
 		if (!allowed.contains(this)) throw new UserTypeMismatchException()

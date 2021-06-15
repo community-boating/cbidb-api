@@ -16,7 +16,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutUserShape.apply)(parsed => {
 			import com.coleji.framework.Util.JsValueWrapper.wrapJsValue
-			request.body.asJson.map(json => json.getNonNull("userId")).get match {
+			request.body.asJson.map(json => json.getNonNull("USER_ID")).get match {
 				case Some(id: JsValue) => {
 
 					val userId: Int = id.toString().toInt
@@ -55,12 +55,12 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							throw new Exception("Locked to jcole only")
 						}
 
-						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.username.get)) match {
+						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.USER_NAME)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
 								val user = new User
 								setValues(user, parsed)
-								user.update(_.userName, parsed.username.get)
+								user.update(_.userName, parsed.USER_NAME)
 
 								rc.commitObjectToDatabase(user)
 								Future(Ok(new JsObject(Map(
@@ -76,13 +76,14 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 	}
 
 	private def setValues(user: User, parsed: PutUserShape): Unit = {
-		user.update(_.email, parsed.email.get)
-		user.update(_.nameFirst, parsed.nameFirst)
-		user.update(_.nameLast, parsed.nameLast)
-		user.update(_.active, parsed.active.getOrElse(false))
-		user.update(_.pwChangeRequired, parsed.pwChangeRequired.getOrElse(false))
-		user.update(_.locked, parsed.locked.getOrElse(false))
-		user.update(_.hideFromClose, parsed.hideFromClose.getOrElse(false))
+		user.update(_.email, parsed.EMAIL)
+		user.update(_.nameFirst, parsed.NAME_FIRST)
+		user.update(_.nameLast, parsed.NAME_LAST)
+		user.update(_.active, parsed.ACTIVE)
+		user.update(_.pwChangeRequired, parsed.PW_CHANGE_REQD)
+		user.update(_.locked, parsed.LOCKED)
+		user.update(_.hideFromClose, parsed.HIDE_FROM_CLOSE)
+		user.update(_.userType, parsed.USER_TYPE)
 		if (parsed.pwHash.isDefined) {
 			user.update(_.pwHash, parsed.pwHash)
 			user.update(_.pwHashScheme, Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
@@ -91,10 +92,8 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 
 	private def runValidations(parsed: PutUserShape, userId: Option[Int]): ValidationResult = {
 		ValidationResult.combine(List(
-			ValidationResult.checkBlank(parsed.username, "Username"),
-			ValidationResult.checkBlank(parsed.email, "Email"),
-			ValidationResult.checkBlank(parsed.nameFirst, "First Name"),
-			ValidationResult.checkBlank(parsed.nameLast, "Last Name"),
+			ValidationResult.checkBlank(parsed.NAME_FIRST, "First Name"),
+			ValidationResult.checkBlank(parsed.NAME_LAST, "Last Name"),
 		))
 	}
 
@@ -106,16 +105,17 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 	}
 
 	case class PutUserShape(
-		userId: Option[Int],
-		username: Option[String],
-		email: Option[String],
-		nameFirst: Option[String],
-		nameLast: Option[String],
-		active: Option[Boolean],
-		hideFromClose: Option[Boolean],
-		locked: Option[Boolean],
-		pwChangeRequired: Option[Boolean],
-		pwHash: Option[String]
+		USER_ID: Option[Int],
+		USER_NAME: String,
+		NAME_FIRST: Option[String],
+		NAME_LAST: Option[String],
+		EMAIL: String,
+		ACTIVE: Boolean,
+		HIDE_FROM_CLOSE: Boolean,
+		LOCKED: Boolean,
+		PW_CHANGE_REQD: Boolean,
+		USER_TYPE: Option[String],
+		pwHash: Option[String],
 	)
 
 	object PutUserShape {
