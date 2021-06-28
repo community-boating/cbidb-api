@@ -2027,7 +2027,7 @@ object PortalLogic {
 
 			override def getOutResults(cs: CallableStatement): String = cs.getString("o_error_msg")
 
-			override def getQuery: String = "ap_class_pkg.do_signup(?, ?, ?, ?, ?, ?, ?, ?)"
+			override def getQuery: String = "ap_class_pkg.attempt_signup(?, ?, ?, ?, ?, ?, ?, ?)"
 		}
 
 		rc.executeProcedure(ppc) match {
