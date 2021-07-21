@@ -31,8 +31,8 @@ jobs:
     - name: save artifact
       uses: actions/upload-artifact@v2
       with:
-        name: CBI DB API_0.1.0_all.deb
-        path: target/CBI DB API_0.1.0_all.deb
+        name: CBI-DB-API_0.1.0_all.deb
+        path: target/CBI-DB-API_0.1.0_all.deb
   image:
     runs-on: ubuntu-latest
     needs: build
@@ -41,7 +41,7 @@ jobs:
       - name: Fetch artifact
         uses: actions/download-artifact@v2
         with:
-          name: CBI DB API_0.1.0_all.deb
+          name: CBI-DB-API_0.1.0_all.deb
       - name: Install doctl 
         uses: digitalocean/action-doctl@v2
         with:
