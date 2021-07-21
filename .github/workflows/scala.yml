@@ -46,6 +46,8 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_ACCESS_TOKEN }}
+      - name: ls
+        run: ls
       - name: build image
         run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api:latest .
       - name: Log in to DO Container Registry 
