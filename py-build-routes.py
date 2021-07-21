@@ -2,6 +2,7 @@
 from os import listdir
 from os.path import isfile, join
 import re
+import sys
 
 FILES_LOCATION = "conf/routes-build/src"
 OUTPUT_LOCATION = "conf/routes-build/dist/routes"
@@ -37,7 +38,10 @@ def combineFiles(inPaths, outPath):
                 outfile.write(infile.read())
 
 def main():
-    level = getLevelFromServerProps()
+    if (len(sys.argv) > 1):
+        level = int(sys.argv[1])
+    else:
+        level = getLevelFromServerProps()
     print("Building routes with security level " + str(level))
     pathsToKeep = []
     pathsToDrop = []

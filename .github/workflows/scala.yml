@@ -2,15 +2,21 @@ name: Scala CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - release/*
+      - dev/*
+      - cluster/*
   pull_request:
-    branches: [ master ]
-
+    branches:
+      - master
+      - release/*
+      - dev/*
+      - cluster/*
+  workflow_dispatch:
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -18,5 +24,12 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: Run tests
-      run: sbt test
+    - name: generate routes
+      run: ./py-build-routes.py 1
+    - name: build deb
+      run: sbt debian:packageBin
+    - name: save artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: CBI DB API_0.1.0_all.deb
+        path: target/CBI DB API_0.1.0_all.deb
