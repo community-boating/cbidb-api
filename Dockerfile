@@ -3,5 +3,12 @@ RUN mkdir /app
 COPY CBI-DB-API_0.1.0_all.deb /app/
 RUN dpkg -i /app/CBI-DB-API_0.1.0_all.deb
 COPY py-build-routes.py /usr/share/cbi-db-api/
-COPY start.sh.template /usr/share/cbi-db-api/start.sh
-CMD /usr/share/cbi-db-api/py-build-routes.py && /usr/share/cbi-db-api/start.sh
+CMD cd /usr/share/cbi-db-api && \
+mkdir conf/private && \
+cp /mnt/conf/server-properties conf/private/server-properties && \
+cp /mnt/conf/oracle-credentials conf/private/oracle-credentials && \
+./py-build-routes.py && \
+cbi-db-api \
+  -J-Djava.security.egd=file:/dev/./urandom \
+  -Dplay.http.secret.key='$PLAY_SECRET' \
+  -Dconfig.resource=conf/application.conf
