@@ -29,7 +29,7 @@ object GetWeeks {
 				  |monday + 4
 				  |from jp_weeks
 				  |where season = util_pkg.get_current_season
-				  |and week between 0 and 10
+				  |and week between 0 and 11
 				  |order by week
 				  |""".stripMargin
 		}
