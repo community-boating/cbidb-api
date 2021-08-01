@@ -9,7 +9,7 @@ cp /mnt/conf/server-properties conf/private/server-properties && \
 cp /mnt/conf/oracle-credentials conf/private/oracle-credentials && \
 touch /usr/share/cbi-db-api/RUNNING_PID && \
 rm /usr/share/cbi-db-api/RUNNING_PID && \
-cbi-db-api \
+exec cbi-db-api \
   -J-Djava.security.egd=file:/dev/./urandom \
   -Dplay.http.secret.key=$PLAY_SECRET \
   -Dconfig.resource=conf/application.conf
