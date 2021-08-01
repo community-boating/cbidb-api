@@ -15,6 +15,7 @@ trait CacheableResult[T <: ParamsObject, U] {
 	type CacheKey = String
 	val cacheExpirationDatePattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ")
 	protected val cacheExpiresKeyName = "$cacheExpires"
+	protected val cacheCreatedKeyName = "$cacheCreated"
 
 	protected def formatTime(time: LocalDateTime): String = {
 		val zonedTime: ZonedDateTime = time.atZone(ZoneId.systemDefault())
@@ -113,7 +114,10 @@ trait CacheableResult[T <: ParamsObject, U] {
 				p.completeWith(calculateValue().map(json => {
 					// Whether it crashed or not, release the hold on this cache key
 					CacheableResult.inUse.remove(cacheKey)
-					val newData: JsObject = json + (cacheExpiresKeyName, JsString(formatTime(getExpirationTime)))
+					val newData: JsObject = (json +
+						(cacheExpiresKeyName, JsString(formatTime(getExpirationTime))) +
+						(cacheCreatedKeyName, JsString(formatTime(LocalDateTime.now)))
+					)
 					val result: String = new JsObject(Map("data" -> newData)).toString()
 					saveToCache(cb, result, params)
 					println("done son; completing all queued")
