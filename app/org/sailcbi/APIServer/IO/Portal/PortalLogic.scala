@@ -693,7 +693,7 @@ object PortalLogic {
 				  |i.instance_id,
 				  |t.type_id,
 				  |t.type_name as class_name,
-				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |(case w.week when 0 then 'Spring' else 'Week '||w.week end) as week,
 				  |to_char(s1.session_datetime,'Mon ddth')||
 				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
 				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
@@ -752,7 +752,7 @@ object PortalLogic {
 				  |i.instance_id,
 				  |t.type_id,
 				  |t.type_name as class_name,
-				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |(case w.week when 0 then 'Spring' else 'Week '||w.week end) as week,
 				  |to_char(s1.session_datetime,'Mon ddth')||
 				  |(case when s1.session_datetime <> s2.session_datetime then ' - '||to_char(s2.session_datetime,'Mon ddth') end) as class_date,
 				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
@@ -804,7 +804,7 @@ object PortalLogic {
 				  |i.instance_id,
 				  |t.type_id,
 				  |t.type_name as class_name,
-				  |(case w.week when 0 then 'Spring' when 11 then 'Fall' else 'Week '||w.week end) as week,
+				  |(case w.week when 0 then 'Spring' else 'Week '||w.week end) as week,
 				  |to_char(s1.session_datetime,'Mon ddth')||(case when s1.session_datetime <> s2.session_datetime then ' - '||
 				  |to_char(s2.session_datetime,'Mon ddth') end) as class_date,
 				  |to_char(s1.session_datetime,'HH:MIPM')||' - '||
