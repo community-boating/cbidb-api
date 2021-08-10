@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff
 import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
+import org.sailcbi.APIServer.Entities.dto.PutUserDTO
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
@@ -14,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutUserShape.apply)(parsed => {
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutUserDTO.apply)(parsed => {
 			import com.coleji.framework.Util.JsValueWrapper.wrapJsValue
 			request.body.asJson.map(json => json.getNonNull("USER_ID")).get match {
 				case Some(id: JsValue) => {
@@ -35,7 +36,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							case ValidationOk => {
 								// do update
 								val user = rc.getObjectById(User, userId).get
-								setValues(user, parsed)
+								parsed.mutateStorable(user)
 
 								rc.commitObjectToDatabase(user)
 
@@ -58,8 +59,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 						runValidations(parsed, None).combine(checkUsernameUnique(rc, parsed.USER_NAME)) match {
 							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
 							case ValidationOk => {
-								val user = new User
-								setValues(user, parsed)
+								val user = parsed.unpackage
 								user.update(_.userName, parsed.USER_NAME)
 
 								rc.commitObjectToDatabase(user)
@@ -75,22 +75,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		})
 	}
 
-	private def setValues(user: User, parsed: PutUserShape): Unit = {
-		user.update(_.email, parsed.EMAIL)
-		user.update(_.nameFirst, parsed.NAME_FIRST)
-		user.update(_.nameLast, parsed.NAME_LAST)
-		user.update(_.active, parsed.ACTIVE)
-		user.update(_.pwChangeRequired, parsed.PW_CHANGE_REQD)
-		user.update(_.locked, parsed.LOCKED)
-		user.update(_.hideFromClose, parsed.HIDE_FROM_CLOSE)
-		user.update(_.userType, parsed.USER_TYPE)
-		if (parsed.pwHash.isDefined) {
-			user.update(_.pwHash, parsed.pwHash)
-			user.update(_.pwHashScheme, Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
-		}
-	}
-
-	private def runValidations(parsed: PutUserShape, userId: Option[Int]): ValidationResult = {
+	private def runValidations(parsed: PutUserDTO, userId: Option[Int]): ValidationResult = {
 		ValidationResult.combine(List(
 			ValidationResult.checkBlank(parsed.NAME_FIRST, "First Name"),
 			ValidationResult.checkBlank(parsed.NAME_LAST, "Last Name"),
@@ -104,23 +89,5 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 		else ValidationOk
 	}
 
-	case class PutUserShape(
-		USER_ID: Option[Int],
-		USER_NAME: String,
-		NAME_FIRST: Option[String],
-		NAME_LAST: Option[String],
-		EMAIL: String,
-		ACTIVE: Boolean,
-		HIDE_FROM_CLOSE: Boolean,
-		LOCKED: Boolean,
-		PW_CHANGE_REQD: Boolean,
-		USER_TYPE: Option[String],
-		pwHash: Option[String],
-	)
 
-	object PutUserShape {
-		implicit val format = Json.format[PutUserShape]
-
-		def apply(v: JsValue): PutUserShape = v.as[PutUserShape]
-	}
 }
