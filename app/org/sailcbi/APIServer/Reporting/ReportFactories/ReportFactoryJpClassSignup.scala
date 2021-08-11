@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter
 class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	val entityCompanion: StorableObject[JpClassSignup] = JpClassSignup
 
-	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), 20)
+	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), Set.empty, 20)
 
 	lazy val classInstanceIDs: Set[Int] = getInstances.map(_.values.instanceId.get).toSet
 
@@ -28,6 +28,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
 		List(JpClassSession.fields.instanceId.inList(classInstanceIDs.toList)),
+		Set.empty,
 		100
 	)
 

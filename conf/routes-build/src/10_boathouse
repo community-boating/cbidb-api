@@ -11,7 +11,7 @@ POST    /fo-kiosk/create-person             org.sailcbi.APIServer.Api.Endpoints.
 POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCard.post()
 
 GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getAll()
-GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOne(userId: Int)
+GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOneUser(userId: Int)
 POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.PutUser.post()
 POST     /staff/update-user-password                   org.sailcbi.APIServer.Api.Endpoints.Staff.UpdateUserPassword.post()
 GET     /staff/open-order-details           org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getStaff(personId: Int)

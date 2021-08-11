@@ -20,6 +20,7 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonTag,
 			List(PersonTag.fields.tagId.equalsConstant(tagId)),
+			Set.empty,
 			10000
 		).map(_.values.personId.get)
 

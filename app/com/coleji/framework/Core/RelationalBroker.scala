@@ -17,7 +17,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 {
 	//implicit val pb: PersistenceBroker = this
 
-	protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
+	override protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		val pool = if (pq.useTempSchema) {
 			println("using temp schema")
 			dbGateway.tempPool
@@ -60,7 +60,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		})
 	}
 
-	protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
+	override protected def executePreparedQueryForInsertImplementation(pq: HardcodedQueryForInsert): Option[String] = pq match {
 		case p: PreparedQueryForInsert => {
 			if (p.preparedParamsBatch.isEmpty) executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, Some(p.getParams), None)
 			else executeSQLForInsert(p.getQuery, p.pkName, p.useTempSchema, None, Some(p.preparedParamsBatch))
@@ -68,14 +68,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		case hq: HardcodedQueryForInsert => executeSQLForInsert(hq.getQuery, hq.pkName, hq.useTempSchema)
 	}
 
-	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
+	override protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int = {
 		pq match {
 			case p: PreparedQueryForUpdateOrDelete => executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema, Some(p.asInstanceOf[PreparedQueryForUpdateOrDelete].getParams))
 			case _ => executeSQLForUpdateOrDelete(pq.getQuery, pq.useTempSchema)
 		}
 	}
 
-	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	override protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
 		val profiler = new Profiler
 		val fieldsToGet = fields match{
 			case None => obj.fieldList
@@ -96,18 +96,28 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		ret
 	}
 
-	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] = {
+	override protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] = {
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
-		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
+		sb.append(obj.fieldList
+			.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+			.map(f => f.getPersistenceFieldName).mkString(", ")
+		)
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(
+			sb.toString(),
+			List.empty,
+			obj.fieldList
+				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.map(f => ColumnAlias.wrapForInnerJoin(f)),
+			6
+		)
 		if (rows.length == 1) Some(obj.construct(rows.head, fieldShutter))
 		else None
 	}
 
-	protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
 		println("#################################################")
 		println("About to get " + ids.length + " instances of " + obj.entityName)
 		println("#################################################")
@@ -128,7 +138,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
@@ -136,7 +146,10 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
-			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
+			sb.append(obj.fieldList
+				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.map(f => f.getPersistenceFieldName).mkString(", ")
+			)
 			sb.append(" FROM " + obj.entityName + " " + obj.entityName)
 			var params: List[String] = List.empty
 			if (filters.nonEmpty) {
@@ -144,15 +157,22 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				sb.append(" WHERE " + overallFilter.preparedSQL)
 				params = overallFilter.params
 			}
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), params, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(
+				sb.toString(),
+				params,
+				obj.fieldList
+					.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+					.map(f => ColumnAlias.wrapForInnerJoin(f)),
+				fetchSize
+			)
 			val p = new Profiler
-			val ret = rows.map(r => obj.construct(r))
+			val ret = rows.map(r => obj.construct(r, fieldShutter))
 			p.lap("finished construction")
 			ret
 		}
 	}
 
-	protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	override protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
@@ -373,7 +393,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		})
 	}
 
-	protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
+	override protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
 		if (i.hasID) {
 			updateObject(i)
 		} else {
@@ -463,7 +483,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+	override protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
 		val intValues: Map[ColumnAliasInnerJoined[_], Option[Int]] = Map()
 		val stringValues: Map[ColumnAliasInnerJoined[_], Option[String]] = Map()
 
@@ -520,7 +540,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		getProtoStorablesFromSelect(sql, params, fields, 500).map(ps => new QueryBuilderResultRow(ps))
 	}
 
-	 protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
+	 override protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
 		val pool = if (pc.useTempSchema) dbGateway.tempPool else dbGateway.mainPool
 		pool.withConnection(conn => {
 			println("STARTING PROCEDURE CALL: " + pc.getQuery)

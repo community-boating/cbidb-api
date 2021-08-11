@@ -6,10 +6,10 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: StorableObject[S]) {
-	def runValidationsForUpdate(rc: UnlockedRequestCache, d: D): ValidationResult
-	def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
+	protected def runValidationsForUpdate(rc: UnlockedRequestCache, d: D): ValidationResult
+	protected def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
 
-	def put(rc: StaffRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
+	protected def put(rc: StaffRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
 		val u = User.getAuthedUser(rc)
 		if (u.values.userName.get != "JCOLE") {
 			throw new Exception("Locked to jcole only")

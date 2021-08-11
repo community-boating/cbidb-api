@@ -16,6 +16,7 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 		rc.getObjectsByFilters(
 			JpClassInstance,
 			List(JpClassInstance.fields.typeId.equalsConstant(typeId)),
+			Set.empty,
 			100
 		).toSet
 	})

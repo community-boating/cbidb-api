@@ -8,13 +8,14 @@ import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.ApClassInstance.
 import java.time.format.DateTimeFormatter
 
 class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
-	lazy val apClassFormats: List[ApClassFormat] = rc.getObjectsByFilters(ApClassFormat, List(), 20)
+	lazy val apClassFormats: List[ApClassFormat] = rc.getObjectsByFilters(ApClassFormat, List(), Set.empty, 20)
 
-	lazy val apClassTypes: List[ApClassType] = rc.getObjectsByFilters(ApClassType, List(), 20)
+	lazy val apClassTypes: List[ApClassType] = rc.getObjectsByFilters(ApClassType, List(), Set.empty, 20)
 
 	lazy val apClassSessions: List[ApClassSession] = rc.getObjectsByFilters(
 		ApClassSession,
 		List(ApClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
+		Set.empty,
 		1000
 	)
 

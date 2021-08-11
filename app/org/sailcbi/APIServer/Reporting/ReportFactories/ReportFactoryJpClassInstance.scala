@@ -8,19 +8,20 @@ import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassInstance.
 import java.time.format.DateTimeFormatter
 
 class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
-	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), 20)
+	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), Set.empty, 20)
 
 	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
 		List(JpClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
+		Set.empty,
 		1000
 	)
 
 	val entityCompanion: StorableObject[JpClassInstance] = JpClassInstance
 
-	def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
+	override def decorateInstancesWithParentReferences(instances: List[JpClassInstance]): Unit = {
 		val types: Map[Int, JpClassType] =
-			rc.getObjectsByFilters(JpClassType, List(), 20)
+			rc.getObjectsByFilters(JpClassType, List(), Set.empty, 20)
 					.map(t => (t.getID, t))
 					.foldLeft(Map(): Map[Int, JpClassType])((m: Map[Int, JpClassType], x: (Int, JpClassType)) => m + x)
 

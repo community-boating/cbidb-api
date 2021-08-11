@@ -25,6 +25,7 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.ratingId.inList(ratingsToHave)),
+			Set.empty,
 			10000
 		).map(_.values.personId.get)
 

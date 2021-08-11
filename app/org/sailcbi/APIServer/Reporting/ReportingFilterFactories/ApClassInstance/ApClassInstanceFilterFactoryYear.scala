@@ -17,6 +17,7 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 		val ss: List[ApClassSession] = rc.getObjectsByFilters(
 			ApClassSession,
 			List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),
+			Set.empty,
 			1000
 		)
 		val instanceIDs = ss.map(s => s.values.instanceId.get)
@@ -24,6 +25,7 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 		rc.getObjectsByFilters(
 			ApClassInstance,
 			List(ApClassInstance.fields.instanceId.inList(instanceIDs)),
+			Set.empty,
 			1000
 		).toSet
 	})
