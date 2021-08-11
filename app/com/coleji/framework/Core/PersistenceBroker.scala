@@ -9,9 +9,9 @@ import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
 abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean) {
 	// All public requests need to go through user type-based security
-	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else getObjectByIdImplementation(obj, id)
+		else getObjectByIdImplementation(obj, id, fieldShutter)
 	}
 
 	final def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
@@ -67,7 +67,7 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 	}
 
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
-	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T]
+	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T]
 
 	protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T]
 

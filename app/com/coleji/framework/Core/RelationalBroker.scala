@@ -96,14 +96,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		ret
 	}
 
-	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int): Option[T] = {
+	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] = {
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
 		sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
 		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), 6)
-		if (rows.length == 1) Some(obj.construct(rows.head))
+		if (rows.length == 1) Some(obj.construct(rows.head, fieldShutter))
 		else None
 	}
 

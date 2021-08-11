@@ -14,11 +14,14 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 //		})
 //	}
 
-	def mutateStorable(s: S): S
+	def getId: Option[Int]
+
+	def mutateStorableForUpdate(s: S): S
+	def mutateStorableForInsert(s: S): S
 
 	def unpackage: S = {
 		val s: S = manifest.runtimeClass.newInstance.asInstanceOf[S]
-		mutateStorable(s)
+		mutateStorableForInsert(s)
 //		getCaseValues.foreach(tup => {
 //			val (name, value) = tup
 //			s.valuesList.find(_.getPersistenceFieldName == name).map(fv => {

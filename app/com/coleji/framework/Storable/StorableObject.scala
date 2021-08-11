@@ -151,16 +151,16 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		valuesList equals valuesListReflection
 	}
 
-	def construct(qbrr: QueryBuilderResultRow): T = construct(qbrr.ps, None).get
+	def construct(qbrr: QueryBuilderResultRow): T = construct(qbrr.ps, None, Set.empty).get
 
-	def construct(qbrr: QueryBuilderResultRow, tableAlias: TableAliasInnerJoined[this.type]): T = construct(qbrr.ps, Some(tableAlias)).get
+	def construct(qbrr: QueryBuilderResultRow, tableAlias: TableAliasInnerJoined[this.type]): T = construct(qbrr.ps, Some(tableAlias), Set.empty).get
 
-	def construct(qbrr: QueryBuilderResultRow, tableAlias: TableAliasOuterJoined[this.type]): Option[T] = construct(qbrr.ps, Some(tableAlias))
+	def construct(qbrr: QueryBuilderResultRow, tableAlias: TableAliasOuterJoined[this.type]): Option[T] = construct(qbrr.ps, Some(tableAlias), Set.empty)
 
-	def construct(ps: ProtoStorable): T =
-		construct(ps, None).get
+	def construct(ps: ProtoStorable, fieldShutter: Set[DatabaseField[_]] = Set.empty): T =
+		construct(ps, None, fieldShutter).get
 
-	private def construct(ps: ProtoStorable, tableAlias: Option[TableAlias[this.type]]): Option[T] = {
+	private def construct(ps: ProtoStorable, tableAlias: Option[TableAlias[this.type]], fieldShutter: Set[DatabaseField[_]]): Option[T] = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 		type FieldDefinition = (String, DatabaseField[_])
@@ -171,7 +171,9 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			case None => ColumnAlias.wrapForInnerJoin(f)//.asInstanceOf[ColumnAliasInnerJoined[_]]
 		}
 
-		val filterFunction: (FieldDefinition => Boolean) = (fd: FieldDefinition) => true
+		val filterFunction: (FieldDefinition => Boolean) = (fd: FieldDefinition) => {
+			fieldShutter.isEmpty || fieldShutter.contains(fd._2)
+		}
 
 		def abort(): Boolean = {
 			val wrappedPK = aliasField[IntDatabaseField](self.primaryKey)

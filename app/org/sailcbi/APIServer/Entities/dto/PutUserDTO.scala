@@ -18,7 +18,9 @@ case class PutUserDTO(
 	USER_TYPE: Option[String],
 	pwHash: Option[String],
 ) extends DTOClass[User] {
-	override def mutateStorable(s: User): User = {
+	override def getId: Option[Int] = USER_ID
+
+	override def mutateStorableForUpdate(s: User): User = {
 		s.update(_.email, EMAIL)
 		s.update(_.nameFirst, NAME_FIRST)
 		s.update(_.nameLast, NAME_LAST)
@@ -31,6 +33,12 @@ case class PutUserDTO(
 			s.update(_.pwHash, pwHash)
 			s.update(_.pwHashScheme, Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
 		}
+		s
+	}
+
+	override def mutateStorableForInsert(s: User): User = {
+		mutateStorableForUpdate(s)
+		s.update(_.userName, USER_NAME)
 		s
 	}
 }

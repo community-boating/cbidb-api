@@ -43,18 +43,6 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			rc.executeQueryBuilder(qb).map(User.construct)
 		}
 		users
-//		users.map(u => UserShape(
-//			userId = u.values.userId.get,
-//			username = u.values.userName.get,
-//			nameFirst = u.values.nameFirst.get,
-//			nameLast = u.values.nameLast.get,
-//			email = u.values.email.get,
-//			locked = u.values.locked.get,
-//			pwChangeRequired = u.values.pwChangeRequired.get,
-//			active = u.values.active.get,
-//			hideFromClose = u.values.hideFromClose.get,
-//			userType = u.values.userType.get,
-//		))
 	}
 
 	def getOne(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
@@ -79,22 +67,4 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			Future(Ok(Json.toJson(users)))
 		})
 	})
-
-//	case class UserShape (
-//		userId: Int,
-//		username: String,
-//		nameFirst: Option[String],
-//		nameLast: Option[String],
-//		email: String,
-//		locked: Boolean,
-//		pwChangeRequired: Boolean,
-//		active: Boolean,
-//		hideFromClose: Boolean,
-//		userType: Option[String],
-//	)
-//
-//	object UserShape {
-//		implicit val format = Json.format[UserShape]
-//		def apply(v: JsValue): UserShape = v.as[UserShape]
-//	}
 }
