@@ -10,11 +10,6 @@ abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: 
 	protected def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
 
 	protected def put(rc: StaffRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
-		val u = User.getAuthedUser(rc)
-		if (u.values.userName.get != "JCOLE") {
-			throw new Exception("Locked to jcole only")
-		}
-
 		dto.getId match {
 			case Some(dtoId: Int) => {
 				println(s"its an update: $dtoId")
