@@ -19,7 +19,7 @@ class PutClassInstructor @Inject()(implicit exec: ExecutionContext) extends Rest
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
 					case Right(i: ClassInstructor) => Future(Ok(new JsObject(Map(
-						"instructorId" -> JsNumber(i.values.instructorId.get)
+						"INSTRUCTOR_ID" -> JsNumber(i.values.instructorId.get)
 					))))
 				}
 			})
