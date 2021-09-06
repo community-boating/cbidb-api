@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api.Endpoints.Staff
+package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User
 
 import com.coleji.framework.API.{RestController, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}

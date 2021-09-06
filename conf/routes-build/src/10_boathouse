@@ -10,14 +10,15 @@ GET     /pdf/jp-spec-needs                     org.sailcbi.APIServer.Api.Endpoin
 POST    /fo-kiosk/create-person             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreatePerson.postKiosk()
 POST    /fo-kiosk/create-card             org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCard.post()
 
-GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getAll()
-GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.GetUsers.getOneUser(userId: Int)
-POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.PutUser.post()
+GET     /staff/get-users                    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User.GetUsers.getAll()
+GET     /staff/get-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User.GetUsers.getOneUser(userId: Int)
+POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User.PutUser.post()
 POST     /staff/update-user-password                   org.sailcbi.APIServer.Api.Endpoints.Staff.UpdateUserPassword.post()
 GET     /staff/open-order-details           org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getStaff(personId: Int)
 POST    /staff/finish-open-order            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postStaff(personId: Int)
 
-GET     /rest/class-instructor              org.sailcbi.APIServer.Api.Endpoints.Staff.ClassInstructorRest.getAll()
+GET     /rest/class-instructor              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor.GetClassInstructor.getAll()
+POST     /rest/class-instructor              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor.PutClassInstructor.post()
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 
