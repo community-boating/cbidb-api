@@ -15,7 +15,7 @@ case class PutUserDTO(
 	HIDE_FROM_CLOSE: Boolean,
 	LOCKED: Boolean,
 	PW_CHANGE_REQD: Boolean,
-	USER_TYPE: Option[String],
+	USER_TYPE: String,
 	pwHash: Option[String],
 ) extends DTOClass[User] {
 	override def getId: Option[Int] = USER_ID

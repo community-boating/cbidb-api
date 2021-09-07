@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{DoubleFieldValue, IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{DoubleDatabaseField, IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassType extends StorableClass(JpClassType) {
 	object values extends ValuesObject {
@@ -18,8 +19,10 @@ object JpClassType extends StorableObject[JpClassType] {
 
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val typeName = new StringDatabaseField(self, "TYPE_NAME", 50)
 		val displayOrder = new NullableIntDatabaseField(self, "DISPLAY_ORDER")
+		@NullableInDatabase
 		val sessionLength = new DoubleDatabaseField(self, "SESSION_LENGTH")
 	}
 

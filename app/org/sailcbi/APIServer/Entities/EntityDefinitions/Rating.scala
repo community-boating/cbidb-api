@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
-import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Entities.{MagicIds, NullableInDatabase}
 
 class Rating extends StorableClass(Rating) {
 	object values extends ValuesObject {
@@ -18,6 +18,7 @@ object Rating extends StorableObject[Rating] {
 
 	object fields extends FieldsObject {
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
+		@NullableInDatabase
 		val ratingName = new StringDatabaseField(self, "RATING_NAME", 100)
 		val overriddenBy = new NullableIntDatabaseField(self, "OVERRIDDEN_BY")
 	}

@@ -4,6 +4,7 @@ import com.coleji.framework.Storable.FieldValues.IntFieldValue
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassSection extends StorableClass(JpClassSection) {
 	override object references extends ReferencesObject {
@@ -23,7 +24,9 @@ object JpClassSection extends StorableObject[JpClassSection] {
 
 	object fields extends FieldsObject {
 		val sectionId = new IntDatabaseField(self, "SECTION_ID")
+		@NullableInDatabase
 		val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
+		@NullableInDatabase
 		val lookupId = new IntDatabaseField(self, "LOOKUP_ID")
 	}
 

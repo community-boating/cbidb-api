@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassSectionLookup extends StorableClass(JpClassSectionLookup) {
 	override object references extends ReferencesObject {
@@ -21,7 +22,9 @@ object JpClassSectionLookup extends StorableObject[JpClassSectionLookup] {
 
 	object fields extends FieldsObject {
 		val sectionId = new IntDatabaseField(self, "SECTION_ID")
+		@NullableInDatabase
 		val sectionName = new StringDatabaseField(self, "SECTION_NAME", 50)
+		@NullableInDatabase
 		val svgUrl = new StringDatabaseField(self, "SVG_URL", 100)
 	}
 

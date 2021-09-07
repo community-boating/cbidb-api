@@ -4,6 +4,7 @@ import com.coleji.framework.Storable.FieldValues.IntFieldValue
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
 	override object references extends ReferencesObject {
@@ -22,7 +23,9 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
+		@NullableInDatabase
 		val teamId = new IntDatabaseField(self, "TEAM_ID")
+		@NullableInDatabase
 		val points = new IntDatabaseField(self, "POINTS")
 	}
 

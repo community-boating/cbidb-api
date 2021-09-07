@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class Tag extends StorableClass(Tag) {
 	object values extends ValuesObject {
@@ -16,6 +17,7 @@ object Tag extends StorableObject[Tag] {
 
 	object fields extends FieldsObject {
 		val tagId = new IntDatabaseField(self, "TAG_ID")
+		@NullableInDatabase
 		val tagName = new StringDatabaseField(self, "TAG_NAME", 100)
 	}
 

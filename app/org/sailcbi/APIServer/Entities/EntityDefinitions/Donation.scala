@@ -4,6 +4,7 @@ import com.coleji.framework.Storable.FieldValues.{DateFieldValue, IntFieldValue,
 import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class Donation extends StorableClass(Donation) {
 	override object references extends ReferencesObject {
@@ -23,8 +24,10 @@ object Donation extends StorableObject[Donation] {
 
 	object fields extends FieldsObject {
 		val donationId = new IntDatabaseField(self, "DONATION_ID")
+		@NullableInDatabase
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val amount = new NullableDoubleDatabaseField(self, "AMOUNT")
+		@NullableInDatabase
 		val donationDate = new DateDatabaseField(self, "DONATION_DATE")
 	}
 

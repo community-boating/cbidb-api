@@ -4,6 +4,7 @@ import com.coleji.framework.Storable.FieldValues.IntFieldValue
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class PersonRelationship extends StorableClass(PersonRelationship) {
 	override object references extends ReferencesObject {
@@ -24,8 +25,11 @@ object PersonRelationship extends StorableObject[PersonRelationship] {
 
 	object fields extends FieldsObject {
 		val relationId = new IntDatabaseField(self, "RELATION_ID")
+		@NullableInDatabase
 		val a = new IntDatabaseField(self, "A")
+		@NullableInDatabase
 		val b = new IntDatabaseField(self, "B")
+		@NullableInDatabase
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
 	}
 

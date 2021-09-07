@@ -4,6 +4,7 @@ import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldVa
 import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._
 import com.coleji.framework.Util.Initializable
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassSignup extends StorableClass(JpClassSignup) {
 	override object references extends ReferencesObject {
@@ -32,9 +33,12 @@ object JpClassSignup extends StorableObject[JpClassSignup] {
 	object fields extends FieldsObject {
 		val signupId = new IntDatabaseField(self, "SIGNUP_ID")
 		val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
+		@NullableInDatabase
 		val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
 		val personId = new IntDatabaseField(self, "PERSON_ID")
+		@NullableInDatabase
 		val signupDatetime = new DateTimeDatabaseField(self, "SIGNUP_DATETIME")
+		@NullableInDatabase
 		val sequence = new IntDatabaseField(self, "SEQUENCE")
 		val groupId = new NullableIntDatabaseField(self, "GROUP_ID")
 		val sectionId = new NullableIntDatabaseField(self, "SECTION_ID")

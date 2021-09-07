@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
+import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpGroup extends StorableClass(JpGroup) {
 	object values extends ValuesObject {
@@ -16,6 +17,7 @@ object JpGroup extends StorableObject[JpGroup] {
 
 	object fields extends FieldsObject {
 		val groupId = new IntDatabaseField(self, "GROUP_ID")
+		@NullableInDatabase
 		val groupName = new StringDatabaseField(self, "GROUP_NAME", 200)
 	}
 
