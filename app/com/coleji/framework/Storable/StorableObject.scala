@@ -25,6 +25,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	type NullableDoubleFieldMap = Map[String, NullableDoubleDatabaseField]
 	type NullableStringFieldMap = Map[String, NullableStringDatabaseField]
 	type NullableDateFieldMap = Map[String, NullableDateDatabaseField]
+	type NullableDateTimeFieldMap = Map[String, NullableDateTimeDatabaseField]
 
 	type InstanceType = T
 
@@ -61,6 +62,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		var nullableStringMap: NullableStringFieldMap = Map()
 		var dateMap: DateFieldMap = Map()
 		var nullableDateMap: NullableDateFieldMap = Map()
+		var nullableDateTimeMap: NullableDateTimeFieldMap = Map()
 		var dateTimeMap: DateTimeFieldMap = Map()
 		var booleanMap: BooleanFieldMap = Map()
 
@@ -102,11 +104,14 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 				case dt: DateTimeDatabaseField =>
 					dt.setRuntimeFieldName(name)
 					dateTimeMap += (name -> dt)
+				case ndt: NullableDateTimeDatabaseField =>
+					ndt.setRuntimeFieldName(name)
+					nullableDateTimeMap += (name -> ndt)
 				case _ => throw new Exception("Unrecognized field type")
 			}
 		}
 
-		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, booleanMap)
+		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, nullableDateTimeMap, booleanMap)
 	}
 
 	lazy val intFieldMap: IntFieldMap = fieldMaps._1
@@ -118,7 +123,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	lazy val dateFieldMap: DateFieldMap = fieldMaps._7
 	lazy val nullableDateFieldMap: NullableDateFieldMap = fieldMaps._8
 	lazy val dateTimeFieldMap: DateTimeFieldMap = fieldMaps._9
-	lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._10
+	lazy val nullableDateTimeFieldMap: NullableDateTimeFieldMap = fieldMaps._10
+	lazy val booleanFieldMap: BooleanFieldMap = fieldMaps._11
 
 	lazy val fieldList: List[DatabaseField[_]] =
 		intFieldMap.values.toList ++
@@ -130,6 +136,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 				dateFieldMap.values.toList ++
 				nullableDateFieldMap.values.toList ++
 				dateTimeFieldMap.values.toList ++
+				nullableDateTimeFieldMap.values.toList ++
 				booleanFieldMap.values.toList
 
 	// Make sure all the lazy things are actually set
@@ -279,6 +286,17 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 				embryo.dateTimeValueMap.get(fieldName) match {
 					case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(ps, aliasField[DateTimeDatabaseField](field)) match {
 						case Some(dt: LocalDateTime) => fv.initialize(dt)
+						case None =>
+					}
+					case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)
+				}
+			}))
+
+			nullableDateTimeFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDateTimeDatabaseField) => {
+				embryo.nullableDateTimeValueMap.get(fieldName) match {
+					case Some(fv: NullableDateTimeFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableDateTimeDatabaseField](field)) match {
+						case Some(Some(d: LocalDateTime)) => fv.initialize(Some(d))
+						case Some(None) => fv.initialize(None)
 						case None =>
 					}
 					case _ => throw new Exception("Field mismatch error between class and object for entity " + entityName + " field " + fieldName)

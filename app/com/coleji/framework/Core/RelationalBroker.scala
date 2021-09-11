@@ -366,7 +366,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 							})
 							if (rs.wasNull()) dateFields += (makeCompilerHappy(ca) -> None)
 						}
-						case _: DateTimeDatabaseField => {
+						case _: DateTimeDatabaseField | _: NullableDateTimeDatabaseField => {
 							val timestamp = {
 								val ret = Some(rs.getTimestamp(i))
 								if (rs.wasNull()) None
@@ -422,6 +422,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.dateValueMap) ++
 			getFieldValues(i.nullableDateValueMap) ++
 			getFieldValues(i.dateTimeValueMap) ++
+			getFieldValues(i.nullableDateTimeValueMap) ++
 			getFieldValues(i.booleanValueMap)
 		}
 
@@ -470,6 +471,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 					getFieldValues(i.dateValueMap) ++
 					getFieldValues(i.nullableDateValueMap) ++
 					getFieldValues(i.dateTimeValueMap) ++
+					getFieldValues(i.nullableDateTimeValueMap) ++
 					getFieldValues(i.booleanValueMap)
 
 		val sb = new StringBuilder()

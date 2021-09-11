@@ -19,6 +19,8 @@ POST    /staff/finish-open-order            org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /rest/class-instructor              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor.GetClassInstructor.getAll()
 POST     /rest/class-instructor              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor.PutClassInstructor.post()
+GET     /rest/event              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Event.GetEvent.getAll()
+POST     /rest/event              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Event.PutEvent.post()
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 
