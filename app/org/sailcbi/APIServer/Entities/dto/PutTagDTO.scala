@@ -4,8 +4,6 @@ import com.coleji.framework.Storable.DTOClass
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Tag
 import play.api.libs.json.{JsValue, Json}
 
-import java.time.LocalDateTime
-
 case class PutTagDTO (
 	TAG_ID: Option[Int],
 	TAG_NAME: String,

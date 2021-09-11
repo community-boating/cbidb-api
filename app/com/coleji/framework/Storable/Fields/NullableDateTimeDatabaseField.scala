@@ -1,12 +1,12 @@
 package com.coleji.framework.Storable.Fields
 
 import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
 import com.coleji.framework.Storable.StorableQuery.ColumnAlias
+import com.coleji.framework.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 
 class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[LocalDateTime]](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

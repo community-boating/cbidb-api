@@ -4,10 +4,9 @@ import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.{EmailUtil, NetFailure, NetSuccess}
+import com.coleji.framework.Util.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.IO.Portal.PortalLogic.RecurringDonation
 import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient

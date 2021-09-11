@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Core.UnlockedRequestCache
 import com.coleji.framework.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
 import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
 import com.coleji.framework.Storable._

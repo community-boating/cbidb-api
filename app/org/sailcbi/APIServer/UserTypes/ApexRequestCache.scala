@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core.{ParsedRequest, _}
+import com.coleji.framework.Core._
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.framework.Storable.ResultSetWrapper
 import com.coleji.framework.Util.PropertiesWrapper

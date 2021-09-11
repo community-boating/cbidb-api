@@ -6,7 +6,6 @@ import com.coleji.framework.IO.PreparedQueries._
 import com.coleji.framework.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
 import com.coleji.framework.Util._
 import com.coleji.framework.{API, Storable}
-import org.sailcbi.APIServer.Api.Endpoints.Kiosk.CreateCardParams
 import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -15,11 +14,9 @@ import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
-import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 import java.awt.image.BufferedImage
-import java.math.BigInteger
-import java.security.MessageDigest
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}

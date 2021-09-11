@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Tag
 
 import com.coleji.framework.API.RestController
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Event, Tag}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.Tag
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}

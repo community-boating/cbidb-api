@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeErr
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{RecurringDonation, SavedCardOrPaymentMethodData}
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
 

@@ -2,7 +2,6 @@ package org.sailcbi.APIServer.Logic
 
 import com.coleji.framework.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
-import org.sailcbi.APIServer.Logic.DateLogic.now
 
 import java.time.{LocalDate, Month}
 

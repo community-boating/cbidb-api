@@ -2,7 +2,6 @@ package com.coleji.framework.API
 
 import com.coleji.framework.Core.{PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.framework.Storable.{DTOClass, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: StorableObject[S]) {

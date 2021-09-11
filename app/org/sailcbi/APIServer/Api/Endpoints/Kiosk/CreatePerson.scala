@@ -5,7 +5,6 @@ import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthori
 import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
 import com.coleji.framework.Storable.GetSQLLiteral
 import com.coleji.framework.Util.DateUtil
-import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.{KioskRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json._

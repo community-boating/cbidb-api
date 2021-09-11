@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.dto
 
 import com.coleji.framework.Storable.DTOClass
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ClassInstructor, Event}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.Event
 import play.api.libs.json.{JsValue, Json}
 
 import java.time.LocalDateTime

@@ -1,7 +1,7 @@
 package com.coleji.framework.Storable
 
 import com.coleji.framework.Core.PermissionsAuthority.PersistenceSystem
-import com.coleji.framework.Storable.FieldValues.{FieldValue, _}
+import com.coleji.framework.Storable.FieldValues._
 import com.coleji.framework.Storable.Fields.IntDatabaseField
 import com.coleji.framework.Util.Initializable
 import play.api.libs.json.{JsObject, JsValue}

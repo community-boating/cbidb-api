@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Event
 
 import com.coleji.framework.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ClassInstructor, Event}
-import org.sailcbi.APIServer.Entities.dto.{PutClassInstructorDTO, PutEventDTO}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.Event
+import org.sailcbi.APIServer.Entities.dto.PutEventDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.mvc.InjectedController

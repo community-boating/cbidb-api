@@ -1,8 +1,7 @@
 package com.coleji.framework.API
 
 import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.{DTOClass, Filter, StorableClass, StorableObject}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.User
+import com.coleji.framework.Storable.{Filter, StorableClass, StorableObject}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 abstract class RestController[S <: StorableClass](obj: StorableObject[S]) {

@@ -1,11 +1,11 @@
 package com.coleji.framework.Storable.FieldValues
 
 import com.coleji.framework.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.framework.Storable.Fields.{NullableDateDatabaseField, NullableDateTimeDatabaseField}
+import com.coleji.framework.Storable.Fields.NullableDateTimeDatabaseField
 import com.coleji.framework.Storable.StorableClass
 import play.api.libs.json.{JsNull, JsString, JsValue}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class NullableDateTimeFieldValue(instance: StorableClass, field: NullableDateTimeDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[Option[LocalDateTime]](instance, field) {
