@@ -23,6 +23,8 @@ GET     /rest/event              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.
 POST     /rest/event              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Event.PutEvent.post()
 GET     /rest/tag              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Tag.GetTag.getAll()
 POST     /rest/tag              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Tag.PutTag.post()
+GET     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool.GetSchool.getAll()
+POST     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool.PutSchool.post()
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 
