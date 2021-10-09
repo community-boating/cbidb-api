@@ -31,3 +31,4 @@ GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpo
 GET     /staff/all-jp-signups           org.sailcbi.APIServer.Api.Endpoints.Staff.GetJPClassSignups.get()
 
 POST    /auth/validate-apex-session-key      org.sailcbi.APIServer.Api.Endpoints.Security.ValidateApexSessionKey.post()
+POST    /auth/set-staff-pw              org.sailcbi.APIServer.Api.Endpoints.Security.SetStaffPassword.post()
