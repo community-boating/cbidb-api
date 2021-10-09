@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
 
 class HighSchool extends StorableClass(HighSchool) {
 	object values extends ValuesObject {

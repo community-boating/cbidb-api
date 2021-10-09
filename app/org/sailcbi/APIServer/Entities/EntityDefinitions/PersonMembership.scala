@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableDateFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDateDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDateFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDateDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class PersonMembership extends StorableClass(PersonMembership) {
 	override object references extends ReferencesObject {

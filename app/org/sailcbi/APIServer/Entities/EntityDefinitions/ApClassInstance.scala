@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class ApClassInstance extends StorableClass(ApClassInstance) {
 	override object references extends ReferencesObject {

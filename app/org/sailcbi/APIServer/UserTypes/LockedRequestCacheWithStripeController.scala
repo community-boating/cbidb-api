@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core.{DatabaseGateway, LockedRequestCache}
-import com.coleji.framework.IO.HTTP.FromWSClient
-import com.coleji.framework.Util.PropertiesWrapper
+import com.coleji.neptune.Core.{DatabaseGateway, LockedRequestCache}
+import com.coleji.neptune.IO.HTTP.FromWSClient
+import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism

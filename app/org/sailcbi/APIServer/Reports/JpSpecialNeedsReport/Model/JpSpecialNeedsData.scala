@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Model
 
-import com.coleji.framework.PDFBox.Abstract.RowData
+import com.coleji.neptune.PDFBox.Abstract.RowData
 
 case class JpSpecialNeedsData(
 	personId: Int,

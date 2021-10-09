@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpSpecialNeedsReport
 
-import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
-import com.coleji.framework.Storable
-import com.coleji.framework.Storable.{GetSQLLiteral, ResultSetWrapper}
-import com.coleji.framework.Util.NAStrings
+import com.coleji.neptune.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.neptune.Storable
+import com.coleji.neptune.Storable.{GetSQLLiteral, ResultSetWrapper}
+import com.coleji.neptune.Util.NAStrings
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Model.JpSpecialNeedsData
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 

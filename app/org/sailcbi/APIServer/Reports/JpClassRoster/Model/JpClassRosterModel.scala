@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reports.JpClassRoster.Model
 
-import com.coleji.framework.PDFBox.ReportModel
+import com.coleji.neptune.PDFBox.ReportModel
 
 case class JpClassRosterModel(
 	rosterData: List[JpRosterData],

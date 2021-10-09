@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.ApClassInstance
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export.Report.BadReportingFilterArgumentsException
-import com.coleji.framework.Export._
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Export.Report.BadReportingFilterArgumentsException
+import com.coleji.neptune.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassType}
 
 class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassInstance] with ReportingFilterFactoryDropdown {

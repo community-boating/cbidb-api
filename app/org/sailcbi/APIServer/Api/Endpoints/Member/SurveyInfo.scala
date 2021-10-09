@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import com.coleji.framework.Storable.{GetSQLLiteralPrepared, ResultSetWrapper}
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import com.coleji.neptune.Storable.{GetSQLLiteralPrepared, ResultSetWrapper}
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

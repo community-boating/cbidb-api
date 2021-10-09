@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FullWidthTables
 
-import com.coleji.framework.PDFBox.Abstract.AbstractTable
-import com.coleji.framework.PDFBox.Drawable.MultiPageDrawable
-import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
+import com.coleji.neptune.PDFBox.Abstract.AbstractTable
+import com.coleji.neptune.PDFBox.Drawable.MultiPageDrawable
+import com.coleji.neptune.PDFBox.{ContentStreamDecorator, PDFReport}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont

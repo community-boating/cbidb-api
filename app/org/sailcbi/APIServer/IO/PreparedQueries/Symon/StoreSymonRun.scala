@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Symon
 
-import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForInsert
 import org.sailcbi.APIServer.UserTypes.SymonRequestCache
 
 class StoreSymonRun(

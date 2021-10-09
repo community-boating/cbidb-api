@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Server
 
-import com.coleji.framework.Core.Boot.ServerBootLoaderTest
+import com.coleji.neptune.Core.Boot.ServerBootLoaderTest
 
 class CBIBootLoaderTest extends ServerBootLoaderTest(CBIBootLoaderTest.writeableDatabases) {
 

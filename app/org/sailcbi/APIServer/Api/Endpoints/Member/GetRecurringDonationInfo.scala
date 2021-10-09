@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.{CriticalError, NetFailure, NetSuccess, ValidationError}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.{CriticalError, NetFailure, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Customer, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache

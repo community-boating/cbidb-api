@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
 import play.api.mvc.InjectedController
 

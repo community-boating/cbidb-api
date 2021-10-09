@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Kiosk
 
-import com.coleji.framework.API.ResultError
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
-import com.coleji.framework.IO.PreparedQueries.PreparedQueryForInsert
-import com.coleji.framework.Storable.GetSQLLiteral
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.API.ResultError
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForInsert
+import com.coleji.neptune.Storable.GetSQLLiteral
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.{KioskRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json._

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
-import com.coleji.framework.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
-import com.coleji.framework.Storable.ResultSetWrapper
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
+import com.coleji.neptune.IO.PreparedQueries.{HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedQueryForInsert, PreparedQueryForSelect}
+import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsBoolean, JsObject}

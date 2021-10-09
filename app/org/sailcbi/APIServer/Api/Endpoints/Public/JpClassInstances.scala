@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.framework.Core.PermissionsAuthority
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.neptune.Core.PermissionsAuthority
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpClassInstances.JpClassInstancesParamsObject
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpClassInstances, GetJpClassInstancesResult}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache

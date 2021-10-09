@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport
 
-import com.coleji.framework.PDFBox.{ContentStreamDecorator, PDFReport}
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.PDFBox.{ContentStreamDecorator, PDFReport}
+import com.coleji.neptune.Util.Currency
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}

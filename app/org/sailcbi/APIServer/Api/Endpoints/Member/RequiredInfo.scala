@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
-import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.PhoneUtil
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, RequestCache}
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.PhoneUtil
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
@@ -83,7 +83,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, RequiredInfoShape.apply)(parsed => {
-			import com.coleji.framework.Util.JsValueWrapper.wrapJsValue
+			import com.coleji.neptune.Util.JsValueWrapper.wrapJsValue
 			request.body.asJson.map(json => json.getNonNull("personId")).get match {
 				case Some(id: JsValue) => {
 					val juniorId: Int = id.toString().toInt

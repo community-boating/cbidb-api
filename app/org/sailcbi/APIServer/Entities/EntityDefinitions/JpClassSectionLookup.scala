@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable._
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable._
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassSectionLookup extends StorableClass(JpClassSectionLookup) {

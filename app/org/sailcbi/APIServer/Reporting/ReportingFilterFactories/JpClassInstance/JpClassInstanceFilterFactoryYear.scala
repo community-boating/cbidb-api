@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassInstance
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export.{ARG_INT, ReportingFilter, ReportingFilterFactory, ReportingFilterFunction}
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Export.{ARG_INT, ReportingFilter, ReportingFilterFactory, ReportingFilterFunction}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSession}
 import org.sailcbi.APIServer.Logic.DateLogic
 

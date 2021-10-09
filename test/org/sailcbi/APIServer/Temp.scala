@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer
 
-import com.coleji.framework.Core.{PermissionsAuthority, RootRequestCache}
-import com.coleji.framework.IO.PreparedQueries._
-import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.Core.{PermissionsAuthority, RootRequestCache}
+import com.coleji.neptune.IO.PreparedQueries._
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.DateUtil
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest

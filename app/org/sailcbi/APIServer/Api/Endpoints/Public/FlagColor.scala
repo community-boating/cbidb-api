@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache

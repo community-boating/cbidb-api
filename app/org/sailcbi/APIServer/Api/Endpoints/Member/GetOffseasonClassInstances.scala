@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.JpOffseasonClasses
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.Json

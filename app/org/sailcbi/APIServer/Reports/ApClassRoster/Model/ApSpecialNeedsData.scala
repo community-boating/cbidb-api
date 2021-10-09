@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster.Model
 
-import com.coleji.framework.PDFBox.Abstract.RowData
+import com.coleji.neptune.PDFBox.Abstract.RowData
 
 class ApSpecialNeedsData(rd: ApRosterData) extends RowData {
 	lazy val cellValues = {

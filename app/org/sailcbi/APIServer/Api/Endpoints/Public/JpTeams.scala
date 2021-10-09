@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.neptune.Core.PermissionsAuthority
 import org.sailcbi.APIServer.Api.Endpoints.Public.JpTeams.JpTeamsParamsObject
 import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetJpTeams, GetJpTeamsResult}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache

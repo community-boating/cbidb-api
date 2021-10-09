@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer
 
-import com.coleji.framework.Core.RootRequestCache
-import com.coleji.framework.Storable.Fields.DatabaseField
-import com.coleji.framework.Storable.Filter
-import com.coleji.framework.Storable.StorableQuery._
+import com.coleji.neptune.Core.RootRequestCache
+import com.coleji.neptune.Storable.Fields.DatabaseField
+import com.coleji.neptune.Storable.Filter
+import com.coleji.neptune.Storable.StorableQuery._
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSignup, JpClassType, JpClassWlResult}
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest

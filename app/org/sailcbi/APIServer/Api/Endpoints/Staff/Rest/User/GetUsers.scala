@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User
 
-import com.coleji.framework.API.{RestController, ValidationResult}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Storable.Fields.DatabaseField
+import com.coleji.neptune.API.{RestController, ValidationResult}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Storable.Fields.DatabaseField
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableDateTimeFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDateTimeDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDateTimeFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDateTimeDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
 
 class Event extends StorableClass(Event) {
 	object values extends ValuesObject {

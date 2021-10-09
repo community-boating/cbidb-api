@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.JP
 
-import com.coleji.framework.Core.RequestCache
-import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import com.coleji.framework.Storable.ResultSetWrapper
+import com.coleji.neptune.Core.RequestCache
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{PublicRequestCache, StaffRequestCache}
 import play.api.libs.json.{JsValue, Json}
 

@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Test.IO.PreparedQueries
 
 
-import com.coleji.framework.Core.RootRequestCache
-import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedValue}
+import com.coleji.neptune.Core.RootRequestCache
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedValue}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest.FunSuite

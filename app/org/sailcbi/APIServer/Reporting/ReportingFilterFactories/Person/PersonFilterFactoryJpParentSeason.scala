@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Export._
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.DateLogic

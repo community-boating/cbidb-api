@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable._
+import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 class User extends StorableClass(User) {

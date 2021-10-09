@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.{CriticalError, Succeeded}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.{CriticalError, Succeeded}
 import org.sailcbi.APIServer.UserTypes.ApexRequestCache
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}

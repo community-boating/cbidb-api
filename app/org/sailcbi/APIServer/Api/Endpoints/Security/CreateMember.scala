@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
-import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
-import com.coleji.framework.Storable.ResultSetWrapper
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
+import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}

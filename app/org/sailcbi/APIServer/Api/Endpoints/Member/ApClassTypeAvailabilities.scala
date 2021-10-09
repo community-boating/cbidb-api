@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.ApClassAvailability
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache

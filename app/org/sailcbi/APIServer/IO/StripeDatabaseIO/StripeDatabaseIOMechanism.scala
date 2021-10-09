@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.StripeDatabaseIO
 
-import com.coleji.framework.Core.PersistenceBroker
-import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
-import com.coleji.framework.Storable.{CastableToStorableClass, CastableToStorableObject}
+import com.coleji.neptune.Core.PersistenceBroker
+import com.coleji.neptune.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.neptune.Storable.{CastableToStorableClass, CastableToStorableObject}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{BalanceTransaction, Charge, ChargeRefund, Payout}
 
 class StripeDatabaseIOMechanism (pb: PersistenceBroker) {

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.NetSuccess
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.NetSuccess
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{RecurringDonation, SavedCardOrPaymentMethodData}

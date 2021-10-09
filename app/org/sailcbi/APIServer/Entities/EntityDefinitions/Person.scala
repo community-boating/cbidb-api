@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Storable.FieldValues.{FieldValue, IntFieldValue, NullableStringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
 
 class Person extends StorableClass(Person) {

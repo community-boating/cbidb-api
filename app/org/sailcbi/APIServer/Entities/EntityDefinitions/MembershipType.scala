@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.InitializableFromCollectionElement
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.InitializableFromCollectionElement
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class MembershipType extends StorableClass(MembershipType) {

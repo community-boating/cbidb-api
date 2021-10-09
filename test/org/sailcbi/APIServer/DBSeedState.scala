@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer
 
-import com.coleji.framework.Core.RootRequestCache
+import com.coleji.neptune.Core.RootRequestCache
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest

@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core._
-import com.coleji.framework.IO.PreparedQueries.PreparedQueryForSelect
-import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.PropertiesWrapper
+import com.coleji.neptune.Core._
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 
 class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)

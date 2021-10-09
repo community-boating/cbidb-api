@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Model
 
-import com.coleji.framework.PDFBox.Abstract.RowData
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.PDFBox.Abstract.RowData
+import com.coleji.neptune.Util.Currency
 
 class GCRedemptionData(
 							  val lastName: String,

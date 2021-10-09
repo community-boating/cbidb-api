@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.UserTypes
 
-import com.coleji.framework.Core._
-import com.coleji.framework.Util.PropertiesWrapper
+import com.coleji.neptune.Core._
+import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 

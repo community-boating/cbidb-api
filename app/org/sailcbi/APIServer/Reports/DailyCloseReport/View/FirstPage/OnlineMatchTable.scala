@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage
 
-import com.coleji.framework.PDFBox.ContentStreamDecorator
-import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, Drawable, DrawableTable}
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.PDFBox.ContentStreamDecorator
+import com.coleji.neptune.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_RIGHT, Drawable, DrawableTable}
+import com.coleji.neptune.Util.Currency
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.DailyCloseReport.DailyCloseReport
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.DailyCloseReportModel

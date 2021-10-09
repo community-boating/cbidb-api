@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.JpClassRoster.View
 
-import com.coleji.framework.PDFBox.Abstract.AbstractTable
-import com.coleji.framework.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, DrawableTable, MultiDrawableTable}
+import com.coleji.neptune.PDFBox.Abstract.AbstractTable
+import com.coleji.neptune.PDFBox.Drawable.{ALIGN_CENTER, ALIGN_LEFT, DrawableTable, MultiDrawableTable}
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.JpSpecialNeedsData
 

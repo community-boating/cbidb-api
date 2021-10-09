@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import com.coleji.framework.API.{ValidationOk, ValidationResult}
-import com.coleji.framework.Core.{PermissionsAuthority, RequestCache}
-import com.coleji.framework.IO.PreparedQueries._
-import com.coleji.framework.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
-import com.coleji.framework.Util._
-import com.coleji.framework.{API, Storable}
+import com.coleji.neptune.API.{ValidationOk, ValidationResult}
+import com.coleji.neptune.Core.{PermissionsAuthority, RequestCache}
+import com.coleji.neptune.IO.PreparedQueries._
+import com.coleji.neptune.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
+import com.coleji.neptune.Util._
+import com.coleji.neptune.{API, Storable}
 import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds

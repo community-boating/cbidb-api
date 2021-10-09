@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Model
 
-import com.coleji.framework.PDFBox.ReportModel
+import com.coleji.neptune.PDFBox.ReportModel
 
 import java.time.ZonedDateTime
 

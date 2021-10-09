@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer
 
-import com.coleji.framework.Core.RootRequestCache
-import com.coleji.framework.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
+import com.coleji.neptune.Core.RootRequestCache
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForUpdateOrDelete}
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, MembershipType}
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest

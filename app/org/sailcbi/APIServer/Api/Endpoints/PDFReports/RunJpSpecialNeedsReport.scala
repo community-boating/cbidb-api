@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.PDFReports
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.DateUtil
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.JpSpecialNeedsReport
 import org.sailcbi.APIServer.Reports.JpSpecialNeedsReport.Loader.{JpSpecialNeedsReportLiveLoader, JpSpecialNeedsReportLiveParameter}

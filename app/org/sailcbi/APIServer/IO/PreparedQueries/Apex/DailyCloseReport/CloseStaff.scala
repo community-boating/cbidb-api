@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport
 
-import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
-import com.coleji.framework.Storable.ResultSetWrapper
+import com.coleji.neptune.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 
 class CloseStaff(closeId: Int) extends HardcodedQueryForSelect[CloseStaffResult](Set(StaffRequestCache, ApexRequestCache)) {

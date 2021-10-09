@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.ReportingAPI
 
-import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import com.coleji.framework.Export._
-import com.coleji.framework.Storable.StorableClass
+import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
+import com.coleji.neptune.Export._
+import com.coleji.neptune.Storable.StorableClass
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.{GetReportRunOptionsParamsObject, GetReportRunOptionsResult}
 import org.sailcbi.APIServer.Reporting.CBIReportFactoryMap
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache

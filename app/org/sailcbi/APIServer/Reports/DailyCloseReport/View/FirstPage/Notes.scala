@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage
 
-import com.coleji.framework.PDFBox.ContentStreamDecorator
-import com.coleji.framework.PDFBox.Drawable.{ALIGN_LEFT, Drawable}
+import com.coleji.neptune.PDFBox.ContentStreamDecorator
+import com.coleji.neptune.PDFBox.Drawable.{ALIGN_LEFT, Drawable}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont

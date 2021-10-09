@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Logic
 
-import com.coleji.framework.Core.PermissionsAuthority
+import com.coleji.neptune.Core.PermissionsAuthority
 
 import java.time.{LocalDate, LocalDateTime, Month}
 

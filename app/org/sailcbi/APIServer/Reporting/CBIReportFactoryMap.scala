@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reporting
 
-import com.coleji.framework.Export.Report.ReportFactoryMap
+import com.coleji.neptune.Export.Report.ReportFactoryMap
 import org.sailcbi.APIServer.Reporting.ReportFactories._
 
 object CBIReportFactoryMap {

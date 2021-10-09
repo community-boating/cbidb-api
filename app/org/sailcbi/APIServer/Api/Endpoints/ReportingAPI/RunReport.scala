@@ -2,10 +2,10 @@ package org.sailcbi.APIServer.Api.Endpoints.ReportingAPI
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.coleji.framework.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.framework.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import com.coleji.framework.Exception.UnauthorizedAccessException
-import com.coleji.framework.Export.Report
+import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
+import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
+import com.coleji.neptune.Exception.UnauthorizedAccessException
+import com.coleji.neptune.Export.Report
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.GetReportRunOptions.GetReportRunOptionsResult
 import org.sailcbi.APIServer.Api.Endpoints.ReportingAPI.RunReport.RunReportParamsObject
 import org.sailcbi.APIServer.Reporting.CBIReportFactoryMap

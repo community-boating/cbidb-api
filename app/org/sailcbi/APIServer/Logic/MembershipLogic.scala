@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Logic
 
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 
 import java.time.{LocalDate, Month}

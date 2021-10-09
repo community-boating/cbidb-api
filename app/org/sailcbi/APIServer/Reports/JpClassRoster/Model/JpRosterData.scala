@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.JpClassRoster.Model
 
-import com.coleji.framework.PDFBox.Abstract.RowData
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.PDFBox.Abstract.RowData
+import com.coleji.neptune.Util.Initializable
 
 class JpRosterData(
 	val personId: Int,

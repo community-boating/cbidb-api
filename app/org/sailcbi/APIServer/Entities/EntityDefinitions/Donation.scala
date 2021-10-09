@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
-import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.{DateFieldValue, IntFieldValue, NullableDoubleFieldValue}
+import com.coleji.neptune.Storable.Fields.{DateDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class Donation extends StorableClass(Donation) {

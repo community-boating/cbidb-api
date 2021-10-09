@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.dto
 
-import com.coleji.framework.Storable.DTOClass
+import com.coleji.neptune.Storable.DTOClass
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Entities.MagicIds
 import play.api.libs.json.{JsValue, Json}

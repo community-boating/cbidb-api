@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reporting.ReportFactories
 
-import com.coleji.framework.Export.{ReportFactory, ReportingField, ReportingFilterFactory}
-import com.coleji.framework.Storable.StorableObject
+import com.coleji.neptune.Export.{ReportFactory, ReportingField, ReportingFilterFactory}
+import com.coleji.neptune.Storable.StorableObject
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
 

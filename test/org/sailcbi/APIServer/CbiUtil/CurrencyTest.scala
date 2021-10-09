@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.CbiUtil
 
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.Util.Currency
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

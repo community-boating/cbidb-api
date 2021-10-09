@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.JpClassRoster.Loader
 
-import com.coleji.framework.Core.RequestCache
-import com.coleji.framework.PDFBox.ReportLoader
+import com.coleji.neptune.Core.RequestCache
+import com.coleji.neptune.PDFBox.ReportLoader
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster.{GetJpClassInstanceData, GetJpClassSignups}
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.{JpClassInstanceData, JpClassRosterModel}
 

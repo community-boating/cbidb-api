@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpGroup extends StorableClass(JpGroup) {

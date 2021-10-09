@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.{NetFailure, NetSuccess}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.{NetFailure, NetSuccess}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.PaymentMethod
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS

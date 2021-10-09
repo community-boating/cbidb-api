@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{MembershipType, MembershipTypeExp, ProgramType, Rating}
 import org.sailcbi.APIServer.Entities.MagicIds
 

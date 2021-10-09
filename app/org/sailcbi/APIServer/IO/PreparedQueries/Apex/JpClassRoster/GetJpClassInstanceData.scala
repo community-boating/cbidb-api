@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.IO.PreparedQueries.Apex.JpClassRoster
 
-import com.coleji.framework.IO.PreparedQueries.HardcodedQueryForSelect
-import com.coleji.framework.Storable.ResultSetWrapper
-import com.coleji.framework.Util.DateUtil
+import com.coleji.neptune.IO.PreparedQueries.HardcodedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.JpClassInstanceData
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, StaffRequestCache}
 

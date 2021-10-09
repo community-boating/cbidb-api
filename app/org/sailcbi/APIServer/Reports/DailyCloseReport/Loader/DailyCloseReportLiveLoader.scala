@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Loader
 
-import com.coleji.framework.Core.RequestCache
-import com.coleji.framework.PDFBox.ReportLoader
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.Core.RequestCache
+import com.coleji.neptune.PDFBox.ReportLoader
+import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport._
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.{DailyCloseReportModel, ParkingData}
 

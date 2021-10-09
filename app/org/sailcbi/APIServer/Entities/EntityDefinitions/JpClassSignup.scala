@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, NullableIntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpClassSignup extends StorableClass(JpClassSignup) {

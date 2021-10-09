@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
-import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue}
+import com.coleji.neptune.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class JpClassStagger extends StorableClass(JpClassStagger) {
 	override object references extends ReferencesObject {

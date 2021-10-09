@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.IntFieldValue
-import com.coleji.framework.Storable.Fields.IntDatabaseField
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.Initializable
+import com.coleji.neptune.Storable.FieldValues.IntFieldValue
+import com.coleji.neptune.Storable.Fields.IntDatabaseField
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {

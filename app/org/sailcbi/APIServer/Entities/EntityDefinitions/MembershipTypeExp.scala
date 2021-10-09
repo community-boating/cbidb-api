@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{DateFieldValue, IntFieldValue}
-import com.coleji.framework.Storable.Fields.{DateDatabaseField, IntDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.InitializableFromCollectionElement
+import com.coleji.neptune.Storable.FieldValues.{DateFieldValue, IntFieldValue}
+import com.coleji.neptune.Storable.Fields.{DateDatabaseField, IntDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.InitializableFromCollectionElement
 
 class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
 	override object references extends ReferencesObject {

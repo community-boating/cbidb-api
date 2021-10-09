@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Reports.DailyCloseReport.Model
 
-import com.coleji.framework.Util.Currency
+import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.DailyCloseReport.CloseCashResult
 
 // value in each denom

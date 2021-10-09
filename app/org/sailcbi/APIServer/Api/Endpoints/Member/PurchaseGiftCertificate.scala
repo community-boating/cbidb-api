@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.EmailUtil
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{PurchaseGiftCertShape, dummyEmptyPurchaseGC}

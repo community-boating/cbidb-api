@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Reports.ApClassRoster
 
-import com.coleji.framework.PDFBox.Abstract.AbstractTable
-import com.coleji.framework.PDFBox.PDFReport
+import com.coleji.neptune.PDFBox.Abstract.AbstractTable
+import com.coleji.neptune.PDFBox.PDFReport
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}

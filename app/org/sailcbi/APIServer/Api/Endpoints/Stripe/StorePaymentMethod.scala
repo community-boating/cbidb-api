@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Stripe
 
-import com.coleji.framework.API
-import com.coleji.framework.API.{ResultError, ValidationOk}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Util.{CriticalError, NetSuccess, ValidationError}
+import com.coleji.neptune.API
+import com.coleji.neptune.API.{ResultError, ValidationOk}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Util.{CriticalError, NetSuccess, ValidationError}
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.StripeError
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}

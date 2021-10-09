@@ -1,10 +1,10 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Core.UnlockedRequestCache
-import com.coleji.framework.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, NullableDoubleFieldValue}
-import com.coleji.framework.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
-import com.coleji.framework.Storable._
-import com.coleji.framework.Util.{DefinedInitializable, Initializable}
+import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, NullableDoubleFieldValue}
+import com.coleji.neptune.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, NullableDoubleDatabaseField}
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.{DefinedInitializable, Initializable}
 import org.sailcbi.APIServer.IO.CachedData
 
 

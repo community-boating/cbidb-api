@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff
 
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.JpClassInstance
 import org.sailcbi.APIServer.IO.JP.{AllJPClassInstances, AllJpClassSignups, GetJPClassStaggers, GetWeeks}
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}

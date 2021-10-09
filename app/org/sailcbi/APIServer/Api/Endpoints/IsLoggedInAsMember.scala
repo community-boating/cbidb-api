@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
-import com.coleji.framework.API.ResultError
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.framework.Exception.UnauthorizedAccessException
+import com.coleji.neptune.API.ResultError
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Exception.UnauthorizedAccessException
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.{JsObject, JsString}
 import play.api.mvc.{Action, AnyContent, InjectedController}

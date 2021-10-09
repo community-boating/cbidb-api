@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.framework.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
-import com.coleji.framework.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
-import com.coleji.framework.Storable._
+import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable._
 import org.sailcbi.APIServer.Entities.{MagicIds, NullableInDatabase}
 
 class Rating extends StorableClass(Rating) {

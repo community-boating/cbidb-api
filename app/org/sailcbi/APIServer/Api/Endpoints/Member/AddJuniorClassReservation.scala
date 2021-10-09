@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.framework.API.{ValidationError, ValidationResult}
-import com.coleji.framework.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.API.{ValidationError, ValidationResult}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
