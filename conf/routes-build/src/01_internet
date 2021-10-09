@@ -169,6 +169,7 @@ POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Se
 POST    /auth/do-claim-acct                        org.sailcbi.APIServer.Api.Endpoints.Security.ApDoClaimAccount.post()
 POST    /auth/update-acct               org.sailcbi.APIServer.Api.Endpoints.Security.UpdateAccount.post()
 POST    /auth/prove-member              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
+POST    /auth/set-staff-pw              org.sailcbi.APIServer.Api.Endpoints.Security.SetStaffPassword.post()
 
 POST /auth/create-member                org.sailcbi.APIServer.Api.Endpoints.Security.CreateMember.post()
 GET     /auth/getPwHash                     org.sailcbi.APIServer.Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String ?= "staff")
