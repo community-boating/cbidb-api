@@ -1250,7 +1250,8 @@ object PortalLogic {
 	}
 
 	/**  @return (staggeredPaymentsAllowed, guestPrivsAuto, guestPrivsNA, dmgWaiverAuto) */
-	def apSelectMemForPurchase(rc: RequestCache, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int]): (Boolean, Boolean, Boolean, Boolean) = {
+	def apSelectMemForPurchase(rc: RequestCache, personId: Int, orderId: Int, memTypeId: Int, requestedDiscountInstanceId: Option[Int])(implicit PA: PermissionsAuthority):
+	(Boolean, Boolean, Boolean, Boolean) = {
 		val allowedTypes = Set(
 			MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID,
 			MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_PADDLING_TYPE_ID,
@@ -1325,7 +1326,10 @@ object PortalLogic {
 			rc.executePreparedQueryForUpdateOrDelete(updateQ)
 		}
 
-		val paymentPlanAllowed = MembershipLogic.membershipTypeAllowsStaggeredPayments(memTypeId)
+		val now = PA.now()
+		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
+
+		val paymentPlanAllowed = (month > 9 || month < 5) && MembershipLogic.membershipTypeAllowsStaggeredPayments(memTypeId)
 
 		val gpdwQuery = new PreparedQueryForSelect[(Boolean, Boolean, Boolean)](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Boolean, Boolean, Boolean) =

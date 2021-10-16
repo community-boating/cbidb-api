@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Logic
 import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, Month}
 
 object MembershipLogic {
@@ -11,7 +12,7 @@ object MembershipLogic {
 	 * For simplicity, let's say if I start in December, why would I want to start later than next August
 	 * 0 means lump payment, 1 means two payments (1 additional month) etc
 	 */
-	val STAGGERED_PAYMENT_MAX_ADDL_MONTHS = 8
+	val STAGGERED_PAYMENT_MAX_ADDL_MONTHS = 6
 
 	/**
 	 * @return List of all possible payments schedules less than {@code maxAddlMonths}long
@@ -19,10 +20,15 @@ object MembershipLogic {
 	 * (e.g. checks each of them for renewal eligibilty in one query), then returns a function on a single end date to total price
 	 */
 	def calculateAllPaymentSchedules(startDate: LocalDate, priceFunction: List[LocalDate] => LocalDate => Currency, maxAddlMonths: Int = STAGGERED_PAYMENT_MAX_ADDL_MONTHS): List[List[(LocalDate, Currency)]] = {
-		val endDates = (0 to maxAddlMonths).toList.map(startDate.plusMonths(_))
+		val countAndEndDates = (0 to maxAddlMonths).toList.map(ct => (ct, startDate.plusMonths(ct)))
+			.filter(countAndEndDate => {
+				val endDate = countAndEndDate._2
+				val month = endDate.format(DateTimeFormatter.ofPattern("MM")).toInt
+				endDate.equals(startDate) || month > 10 || month < 6
+			})
 		// Call the DB, check renewal eligibility on each end date, keep the result as a hash for the next step
-		val priceFunctionApplied = priceFunction(endDates)
-		(0 to maxAddlMonths).toList.map(ct => calculatePaymentSchedule(startDate, priceFunctionApplied, ct))
+		val priceFunctionApplied = priceFunction(countAndEndDates.map(_._2))
+		countAndEndDates.map(countAndEndDate => calculatePaymentSchedule(startDate, priceFunctionApplied, countAndEndDate._1))
 	}
 
 	def calculatePaymentSchedule(startDate: LocalDate, endDateToPrice: LocalDate => Currency, additionalMonths: Int): List[(LocalDate, Currency)] = {
