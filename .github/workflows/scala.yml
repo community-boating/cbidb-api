@@ -46,16 +46,31 @@ jobs:
           name: CBI-DB-API_0.1.0_all-pub.deb
       - name: rename image
         run: mv CBI-DB-API_0.1.0_all-pub.deb CBI-DB-API_0.1.0_all.deb
-      - name: build image
-        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-pub:latest .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+
+      - name: echo branch name
+        run: echo ${{ env.BRANCH_NAME }}
+
+      - name: build image
+        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }} .
+
       - name: Log in to DO Container Registry 
         run: doctl registry login --expiry-seconds 600
       - name: push image
-        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-pub:latest
+        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildstaff:
@@ -89,15 +104,30 @@ jobs:
           name: CBI-DB-API_0.1.0_all-staff.deb
       - name: rename image
         run: mv CBI-DB-API_0.1.0_all-staff.deb CBI-DB-API_0.1.0_all.deb
-      - name: build image
-        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-staff:latest .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+
+      - name: echo branch name
+        run: echo ${{ env.BRANCH_NAME }}
+
+      - name: build image
+        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }} .
+
       - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
       - name: push image
-        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-staff:latest
+        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
