@@ -26,10 +26,8 @@ jobs:
           distribution: 'adopt'
       - name: generate routes
         run: ./py-build-routes.py 10
-      - name: build deb
-        run: sbt compile
       - name: tar all
-        run: tar -zcf src.tar app conf lib project public sbt-dist script seed target test build.sbt sbt sbt.bat sbt-debug
+        run: tar -zcf src.tar app conf lib project public sbt-dist script seed test build.sbt sbt sbt.bat sbt-debug
       - name: save tar
         uses: actions/upload-artifact@v2
         with:
