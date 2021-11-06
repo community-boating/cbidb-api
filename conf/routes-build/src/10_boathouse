@@ -27,6 +27,8 @@ GET     /rest/tag              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ta
 POST     /rest/tag              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Tag.PutTag.post()
 GET     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool.GetSchool.getAll()
 POST     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool.PutSchool.post()
+GET     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.GetDonationFund.getAll()
+POST     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.PutDonationFund.post()
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 
