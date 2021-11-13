@@ -10,7 +10,7 @@ import com.coleji.neptune.Storable.{ResultSetWrapper, StorableClass, StorableObj
 import com.coleji.neptune.Util.{Initializable, PropertiesWrapper}
 import com.redis.RedisClientPool
 import io.sentry.Sentry
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResultException, JsValue}
 import play.api.mvc.{Result, Results}
 
 import java.time.LocalDateTime
@@ -97,6 +97,10 @@ class PermissionsAuthority private[Core] (
 			case e: PostBodyNotJSONException => {
 				Sentry.capture(e)
 				Future(Results.Status(400)(ResultError.NOT_JSON))
+			}
+			case e: JsResultException => {
+				Sentry.capture(e)
+				Future(Results.Status(400)(ResultError.PARSE_FAILURE(e.errors)))
 			}
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
