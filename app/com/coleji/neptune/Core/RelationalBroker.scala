@@ -352,7 +352,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 							doubleFields += (makeCompilerHappy(ca) -> Some(rs.getDouble(i)))
 							if (rs.wasNull()) doubleFields += (makeCompilerHappy(ca) -> None)
 						}
-						case _: StringDatabaseField | _: NullableStringDatabaseField => {
+						case _: StringDatabaseField | _: NullableStringDatabaseField | _: BooleanDatabaseField | _: NullableBooleanDatabaseField | _: NullableClobDatabaseField => {
 							stringFields += (makeCompilerHappy(ca) -> Some(rs.getString(i)))
 							if (rs.wasNull()) stringFields += (makeCompilerHappy(ca) -> None)
 						}
@@ -373,10 +373,6 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 								else ret
 							}
 							dateTimeFields += (makeCompilerHappy(ca) -> timestamp.map(_.toLocalDateTime))
-						}
-						case _: BooleanDatabaseField => {
-							stringFields += (makeCompilerHappy(ca) -> Some(rs.getString(i)))
-							if (rs.wasNull()) stringFields += (makeCompilerHappy(ca) -> None)
 						}
 						case _ => {
 							println(" *********** UNKNOWN COLUMN TYPE FOR COL " + ca)

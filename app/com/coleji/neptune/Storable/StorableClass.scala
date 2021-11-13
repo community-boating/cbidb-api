@@ -19,6 +19,8 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	type DateTimeFieldValueMap = Map[String, DateTimeFieldValue]
 	type NullableDateTimeFieldValueMap = Map[String, NullableDateTimeFieldValue]
 	type BooleanFieldValueMap = Map[String, BooleanFieldValue]
+	type NullableBooleanFieldValueMap = Map[String, NullableBooleanFieldValue]
+	type NullableClobFieldValueMap = Map[String, NullableClobFieldValue]
 
 	// If you need a self in the entity, call it myself or something
 	// Can't take the final off this and override it, or everything crashes horribly.
@@ -139,7 +141,21 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		})
 	}
 
-	lazy val (intValueMap, nullableIntValueMap, doubleValueMap, nullableDoubleValueMap, stringValueMap, nullableStringValueMap, dateValueMap, nullableDateValueMap, dateTimeValueMap, nullableDateTimeValueMap, booleanValueMap) = {
+	lazy val (
+		intValueMap,
+		nullableIntValueMap,
+		doubleValueMap,
+		nullableDoubleValueMap,
+		stringValueMap,
+		nullableStringValueMap,
+		dateValueMap,
+		nullableDateValueMap,
+		dateTimeValueMap,
+		nullableDateTimeValueMap,
+		booleanValueMap,
+		nullableBooleanValueMap,
+		nullableClobValueMap
+	) = {
 		var intMap: IntFieldValueMap = Map()
 		var nullableIntMap: NullableIntFieldValueMap = Map()
 		var doubleMap: DoubleFieldValueMap = Map()
@@ -151,6 +167,8 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		var dateTimeMap: DateTimeFieldValueMap = Map()
 		var nullableDateTimeMap: NullableDateTimeFieldValueMap = Map()
 		var booleanMap: BooleanFieldValueMap = Map()
+		var nullableBooleanMap: NullableBooleanFieldValueMap = Map()
+		var nullableClobMap: NullableClobFieldValueMap = Map()
 
 		if (valuesList.nonEmpty) {
 			valuesList.foreach({
@@ -165,6 +183,8 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 				case dt: DateTimeFieldValue => dateTimeMap += (dt.getField.getRuntimeFieldName -> dt)
 				case ndt: NullableDateTimeFieldValue => nullableDateTimeMap += (ndt.getField.getRuntimeFieldName -> ndt)
 				case b: BooleanFieldValue => booleanMap += (b.getField.getRuntimeFieldName -> b)
+				case nb: NullableBooleanFieldValue => nullableBooleanMap += (nb.getField.getRuntimeFieldName -> nb)
+				case nc: NullableClobFieldValue => nullableClobMap += (nc.getField.getRuntimeFieldName -> nc)
 				case _ => throw new Exception("Unrecognized field type")
 			})
 		} else {
@@ -180,10 +200,12 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 				case (name: String, dt: DateTimeFieldValue) => dateTimeMap += (name -> dt)
 				case (name: String, ndt: NullableDateTimeFieldValue) => nullableDateTimeMap += (name -> ndt)
 				case (name: String, b: BooleanFieldValue) => booleanMap += (name -> b)
+				case (name: String, nb: NullableBooleanFieldValue) => nullableBooleanMap += (name -> nb)
+				case (name: String, nc: NullableClobFieldValue) => nullableClobMap += (name -> nc)
 				case _ => throw new Exception("Unrecognized field type")
 			})
 		}
 
-		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, nullableDateTimeMap, booleanMap)
+		(intMap, nullableIntMap, doubleMap, nullableDoubleMap, stringMap, nullableStringMap, dateMap, nullableDateMap, dateTimeMap, nullableDateTimeMap, booleanMap, nullableBooleanMap, nullableClobMap)
 	}
 }
