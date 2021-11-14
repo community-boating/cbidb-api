@@ -1,0 +1,24 @@
+# SSH PORTAL
+docker run \
+-d \
+-e SSH_USER=user \
+-e SSH_HOST=host \
+-e SSH_OPTS='-tt -g -L post:remote:port -i ~/.ssh/key' \
+-v /home/`whoami`/.ssh/docker-cbi:/root/.ssh \
+-p port:port \
+--net=cbi-dev \
+--restart=on-failure \
+--name=ssh-portal-finn \
+coleji/ssh-portal
+
+# API DEV
+docker pull registry.digitalocean.com/community-boating-docker/cbidb-api-dev:master
+
+docker run \
+-d \
+-p 9000:9000 \
+-v /home/`whoami`/docker-mnt/cbidb-api-src:/app/app \
+-v /home/`whoami`/docker-mnt/cbidb-api-conf:/app/conf \
+--net=cbi-dev \
+--name=cbidb-api \
+registry.digitalocean.com/community-boating-docker/cbidb-api-dev:master
