@@ -18,8 +18,8 @@ class PutSchool @Inject()(implicit exec: ExecutionContext) extends RestControlle
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
-					case Right(i: Event) => Future(Ok(new JsObject(Map(
-						"SCHOOL_ID" -> JsNumber(i.values.eventId.get)
+					case Right(i: HighSchool) => Future(Ok(new JsObject(Map(
+						"SCHOOL_ID" -> JsNumber(i.values.schoolId.get)
 					))))
 				}
 			})
