@@ -39,6 +39,7 @@ object ReportingField {
 		fieldDisplayName: String,
 		isDefault: Boolean
 	): ReportingField[T] = f match {
+		// TODO: valuemaps are missing!
 		case i: IntDatabaseField => new ReportingField[T]((t: T) => {
 			getParent(t).intValueMap.get(i.getRuntimeFieldName) match {
 				case Some(v: IntFieldValue) => v.get.toString

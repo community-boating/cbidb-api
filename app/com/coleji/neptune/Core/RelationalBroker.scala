@@ -423,7 +423,9 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.nullableDateValueMap) ++
 			getFieldValues(i.dateTimeValueMap) ++
 			getFieldValues(i.nullableDateTimeValueMap) ++
-			getFieldValues(i.booleanValueMap)
+			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.doubleValueMap) ++
+			getFieldValues(i.nullableDoubleValueMap)
 		}
 
 		val startingColumns = fieldValues.map(fv => fv.getPersistenceFieldName)
@@ -465,14 +467,16 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		val fieldValues: List[FieldValue[_]] =
 			getFieldValues(i.intValueMap) ++
-					getFieldValues(i.nullableIntValueMap) ++
-					getFieldValues(i.stringValueMap) ++
-					getFieldValues(i.nullableStringValueMap) ++
-					getFieldValues(i.dateValueMap) ++
-					getFieldValues(i.nullableDateValueMap) ++
-					getFieldValues(i.dateTimeValueMap) ++
-					getFieldValues(i.nullableDateTimeValueMap) ++
-					getFieldValues(i.booleanValueMap)
+			getFieldValues(i.nullableIntValueMap) ++
+			getFieldValues(i.stringValueMap) ++
+			getFieldValues(i.nullableStringValueMap) ++
+			getFieldValues(i.dateValueMap) ++
+			getFieldValues(i.nullableDateValueMap) ++
+			getFieldValues(i.dateTimeValueMap) ++
+			getFieldValues(i.nullableDateTimeValueMap) ++
+			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.doubleValueMap) ++
+			getFieldValues(i.nullableDoubleValueMap)
 
 		val sb = new StringBuilder()
 		sb.append("UPDATE " + i.companion.entityName + " SET ")
