@@ -20,7 +20,7 @@ class Person extends StorableClass(Person) {
 		val namePrefix = new NullableStringFieldValue(self, Person.fields.namePrefix)
 		val nameSuffix = new NullableStringFieldValue(self, Person.fields.nameSuffix)
 		val gender = new NullableStringFieldValue(self, Person.fields.gender)
-		val dob = new NullableDateTimeFieldValue(self, Person.fields.dob)
+		val dob = new NullableDateFieldValue(self, Person.fields.dob)
 		val email = new NullableStringFieldValue(self, Person.fields.email)
 		val parentEmail = new NullableStringFieldValue(self, Person.fields.parentEmail)
 		val addr1 = new NullableStringFieldValue(self, Person.fields.addr1)
@@ -113,7 +113,7 @@ class Person extends StorableClass(Person) {
 		val stripeCustomerId = new NullableStringFieldValue(self, Person.fields.stripeCustomerId)
 		val hasAuthedAs = new NullableIntFieldValue(self, Person.fields.hasAuthedAs)
 		val pwHashScheme = new NullableStringFieldValue(self, Person.fields.pwHashScheme)
-		val nextRecurringDonation = new NullableDateTimeFieldValue(self, Person.fields.nextRecurringDonation)
+		val nextRecurringDonation = new NullableDateFieldValue(self, Person.fields.nextRecurringDonation)
 	}
 
 	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
@@ -163,7 +163,7 @@ object Person extends StorableObject[Person] {
 		val namePrefix = new NullableStringDatabaseField(self, "NAME_PREFIX", 50)
 		val nameSuffix = new NullableStringDatabaseField(self, "NAME_SUFFIX", 50)
 		val gender = new NullableStringDatabaseField(self, "GENDER", 1)
-		val dob = new NullableDateTimeDatabaseField(self, "DOB")
+		val dob = new NullableDateDatabaseField(self, "DOB")
 		val email = new NullableStringDatabaseField(self, "EMAIL", 100)
 		val parentEmail = new NullableStringDatabaseField(self, "PARENT_EMAIL", 100)
 		val addr1 = new NullableStringDatabaseField(self, "ADDR_1", 200)
@@ -256,7 +256,7 @@ object Person extends StorableObject[Person] {
 		val stripeCustomerId = new NullableStringDatabaseField(self, "STRIPE_CUSTOMER_ID", 30)
 		val hasAuthedAs = new NullableIntDatabaseField(self, "HAS_AUTHED_AS")
 		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
-		val nextRecurringDonation = new NullableDateTimeDatabaseField(self, "NEXT_RECURRING_DONATION")
+		val nextRecurringDonation = new NullableDateDatabaseField(self, "NEXT_RECURRING_DONATION")
 	}
 
 	def primaryKey: IntDatabaseField = fields.personId
