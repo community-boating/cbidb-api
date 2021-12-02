@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.Initializable
 
 class PersonMembership extends StorableClass(PersonMembership) {
 	override object references extends ReferencesObject {
-		val person: Option[Person] = None
+		val person = new Initializable[Person]
 		val membershipType = new Initializable[MembershipType]
 	}
 
