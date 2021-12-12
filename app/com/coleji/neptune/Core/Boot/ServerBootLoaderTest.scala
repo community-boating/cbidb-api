@@ -2,9 +2,8 @@ package com.coleji.neptune.Core.Boot
 
 import com.coleji.neptune.Core.{PermissionsAuthority, RequestCache, RequestCacheObject}
 import com.coleji.neptune.Storable.StorableClass
-import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
-class ServerBootLoaderTest(writeableDatabases: Set[String]) {
+class ServerBootLoaderTest(writeableDatabases: Set[String], entityPackagePath: String) {
 	def init(entityPackagePath: String, writeable: Boolean): PermissionsAuthority = ServerBootLoader.load(
 		lifecycle = None,
 		isTestMode = true,
@@ -16,7 +15,7 @@ class ServerBootLoaderTest(writeableDatabases: Set[String]) {
 	)
 
 	def withPA(block: PermissionsAuthority => Unit): Unit = {
-		val pa = this.init(CBIBootLoaderLive.ENTITY_PACKAGE_PATH, false)
+		val pa = this.init(entityPackagePath, false)
 		PermissionsAuthority.setPA(pa)
 		pa.bootChecks()
 		block(pa)
@@ -25,7 +24,7 @@ class ServerBootLoaderTest(writeableDatabases: Set[String]) {
 	}
 
 	def withPAWriteable(block: PermissionsAuthority => Unit): Unit = {
-		val pa = this.init(CBIBootLoaderLive.ENTITY_PACKAGE_PATH, true)
+		val pa = this.init(entityPackagePath, true)
 		if (!writeableDatabases.contains(pa.instanceName)) {
 			pa.closeDB()
 			throw new Exception("Cowardly refusing to provide a writeable PB on an unregistered database: " + pa.instanceName)

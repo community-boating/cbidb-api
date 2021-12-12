@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Server
 
 import com.coleji.neptune.Core.Boot.ServerBootLoaderTest
 
-class CBIBootLoaderTest extends ServerBootLoaderTest(CBIBootLoaderTest.writeableDatabases) {
+class CBIBootLoaderTest extends ServerBootLoaderTest(CBIBootLoaderTest.writeableDatabases, CBIBootLoaderLive.ENTITY_PACKAGE_PATH) {
 
 }
 

@@ -2,13 +2,12 @@ package com.coleji.neptune.API
 
 import com.coleji.neptune.Core.{PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.{DTOClass, StorableClass, StorableObject}
-import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: StorableObject[S]) {
 	protected def runValidationsForUpdate(rc: UnlockedRequestCache, d: D): ValidationResult
 	protected def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
 
-	protected def put(rc: StaffRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
+	protected def put(rc: UnlockedRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
 		dto.getId match {
 			case Some(dtoId: Int) => {
 				println(s"its an update: $dtoId")
