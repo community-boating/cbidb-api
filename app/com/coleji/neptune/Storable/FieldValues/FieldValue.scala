@@ -9,7 +9,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 	private var value: Option[T] = None
 	private var dirty: Boolean = false
 
-	override def toString: String = getPersistenceFieldName + ": " + (peek match {
+	override def toString: String = persistenceFieldName + ": " + (peek match {
 		case None => "(unset)"
 		case Some(t: T) => t.toString
 	})
@@ -32,7 +32,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 
 	def get: T = value match {
 		case Some(v) => v
-		case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + instance.companion.entityName + "." + field.getPersistenceFieldName)
+		case None => throw new Exception("Attemted to get() an unset/unretrieved FieldValue " + instance.companion.entityName + "." + field.persistenceFieldName)
 	}
 
 	def isSet: Boolean = value match {
@@ -40,7 +40,7 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 		case None => false
 	}
 
-	def getPersistenceFieldName: String = field.getPersistenceFieldName
+	def persistenceFieldName: String = field.persistenceFieldName
 
 	def getPersistenceLiteral: (String, List[String])
 
@@ -51,6 +51,6 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 
 object FieldValue {
 	object OrderByPersistenceName extends Ordering[FieldValue[_]] {
-		def compare(a: FieldValue[_], b: FieldValue[_]) = a.getPersistenceFieldName compare b.getPersistenceFieldName
+		def compare(a: FieldValue[_], b: FieldValue[_]) = a.persistenceFieldName compare b.persistenceFieldName
 	}
 }

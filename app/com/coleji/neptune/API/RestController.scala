@@ -9,7 +9,7 @@ abstract class RestController[S <: StorableClass](obj: StorableObject[S]) {
 		rc.getObjectById(obj, id, fieldShutter)
 	}
 
-	protected def getByFilters(rc: UnlockedRequestCache, filters: List[String => Filter], fieldShutter: Set[DatabaseField[_]]): List[S] = {
+	protected def getByFilters(rc: UnlockedRequestCache, filters: List[Filter], fieldShutter: Set[DatabaseField[_]]): List[S] = {
 		rc.getObjectsByFilters(obj, filters, fieldShutter)
 	}
 }

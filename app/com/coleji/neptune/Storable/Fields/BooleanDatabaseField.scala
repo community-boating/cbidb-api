@@ -6,7 +6,7 @@ import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, Storab
 
 class BooleanDatabaseField(
 	override val entity: StorableObject[_ <: StorableClass],
-	persistenceFieldName: String,
+	override val persistenceFieldName: String,
 	nullImpliesFalse: Boolean = false
 ) extends DatabaseField[Boolean](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
@@ -31,7 +31,7 @@ class BooleanDatabaseField(
 	}
 
 	def equals(b: Boolean): String => Filter =
-		t => Filter(s"$t.$getPersistenceFieldName = '${if (b) "Y" else "N"}'", List.empty)
+		t => Filter(s"$t.$persistenceFieldName = '${if (b) "Y" else "N"}'", List.empty)
 
 	def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
 		case "true" => Some(true)

@@ -119,7 +119,7 @@ class Person extends StorableClass(Person) {
 	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
 		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
-			List(PersonRating.fields.personId.equalsConstant(values.personId.get))
+			List(PersonRating.fields.personId.alias.equalsConstant(values.personId.get))
 		).toSet
 	}
 
@@ -148,7 +148,7 @@ class Person extends StorableClass(Person) {
 				v.getPersistenceLiteral._1
 			}
 		}
-		s"(PERSON ${this.valuesList.filter(_.isSet).map(v => s"[${v.getPersistenceFieldName}:${showValue(v)}]")})"
+		s"(PERSON ${this.valuesList.filter(_.isSet).map(v => s"[${v.persistenceFieldName}:${showValue(v)}]")})"
 	}
 }
 

@@ -35,7 +35,7 @@ class UserCrud @Inject()(implicit exec: ExecutionContext) extends InjectedContro
 //					println("committing!")
 //					pb.commitObjectToDatabase(newUser)
 
-					val userFields: Set[String] = User.fieldList.map(_.getPersistenceFieldName).toSet
+					val userFields: Set[String] = User.fieldList.map(_.persistenceFieldName).toSet
 					val reqFields: Set[String] = v.keySet
 					val unspecifiedFields: Set[String] = userFields -- reqFields
 					println(userFields)

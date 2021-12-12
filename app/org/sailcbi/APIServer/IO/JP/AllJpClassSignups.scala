@@ -19,17 +19,17 @@ object AllJpClassSignups {
 
 		val sessionsQB = QueryBuilder
 			.from(types)
-			.innerJoin(instances, types.wrappedFields(_.fields.typeId).wrapFilter(_.equalsField(instances.wrappedFields(_.fields.typeId))))
-			.innerJoin(signups, instances.wrappedFields(_.fields.instanceId).wrapFilter(_.equalsField(signups.wrappedFields(_.fields.instanceId))))
-			.innerJoin(persons, signups.wrappedFields(_.fields.personId).wrapFilter(_.equalsField(persons.wrappedFields(_.fields.personId))))
+			.innerJoin(instances, types.wrappedFields(_.typeId).wrapFilter(_.equalsField(instances.wrappedFields(_.typeId))))
+			.innerJoin(signups, instances.wrappedFields(_.instanceId).wrapFilter(_.equalsField(signups.wrappedFields(_.instanceId))))
+			.innerJoin(persons, signups.wrappedFields(_.personId).wrapFilter(_.equalsField(persons.wrappedFields(_.personId))))
 
-			.outerJoin(groups, signups.wrappedFields(_.fields.groupId).wrapFilter(_.equalsField(groups.wrappedFields(_.fields.groupId))))
-			.outerJoin(wlResults, signups.wrappedFields(_.fields.signupId).wrapFilter(_.equalsField(wlResults.wrappedFields(_.fields.signupId))))
-			.outerJoin(sections, signups.wrappedFields(_.fields.sectionId).wrapFilter(_.equalsField(sections.wrappedFields(_.fields.sectionId))))
-			.outerJoin(sectionLookups, sections.wrappedFields(_.fields.lookupId).wrapFilter(_.equalsField(sectionLookups.wrappedFields(_.fields.sectionId))))
+			.outerJoin(groups, signups.wrappedFields(_.groupId).wrapFilter(_.equalsField(groups.wrappedFields(_.groupId))))
+			.outerJoin(wlResults, signups.wrappedFields(_.signupId).wrapFilter(_.equalsField(wlResults.wrappedFields(_.signupId))))
+			.outerJoin(sections, signups.wrappedFields(_.sectionId).wrapFilter(_.equalsField(sections.wrappedFields(_.sectionId))))
+			.outerJoin(sectionLookups, sections.wrappedFields(_.lookupId).wrapFilter(_.equalsField(sectionLookups.wrappedFields(_.sectionId))))
 
-			.where(instances.wrappedFields(_.fields.instanceId).wrapFilter(_.inList(instanceIds)))
-			// .where(instances.wrappedFields(_.fields.instanceId).wrapFilter(_.equalsConstant(5361)))
+			.where(instances.wrappedFields(_.instanceId).wrapFilter(_.inList(instanceIds)))
+			// .where(instances.wrappedFields(_.instanceId).wrapFilter(_.equalsConstant(5361)))
 
 			.select(
 				QueryBuilder.allFieldsFromTable(types) ++
@@ -40,9 +40,9 @@ object AllJpClassSignups {
 				QueryBuilder.allFieldsFromTable(sections) ++
 				QueryBuilder.allFieldsFromTable(sectionLookups) ++
 				List(
-					persons.wrappedFields(_.fields.personId),
-					persons.wrappedFields(_.fields.nameFirst),
-					persons.wrappedFields(_.fields.nameLast),
+					persons.wrappedFields(_.personId),
+					persons.wrappedFields(_.nameFirst),
+					persons.wrappedFields(_.nameLast),
 				)
 			)
 

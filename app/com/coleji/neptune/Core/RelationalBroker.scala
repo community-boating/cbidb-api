@@ -80,14 +80,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		val fieldsToGet = fields match{
 			case None => obj.fieldList
 			case Some(fl) => {
-				val fieldNames = fl.map(_.getPersistenceFieldName)
-				obj.fieldList.filter(f => fieldNames.contains(f.getPersistenceFieldName))
+				val fieldNames = fl.map(_.persistenceFieldName)
+				obj.fieldList.filter(f => fieldNames.contains(f.persistenceFieldName))
 			}
 		}
 		profiler.lap("did intersect")
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
-		sb.append(fieldsToGet.map(f => f.getPersistenceFieldName).mkString(", "))
+		sb.append(fieldsToGet.map(f => f.persistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
 		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
 		val p = new Profiler
@@ -101,10 +101,10 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		sb.append("SELECT ")
 		sb.append(obj.fieldList
 			.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
-			.map(f => f.getPersistenceFieldName).mkString(", ")
+			.map(f => f.persistenceFieldName).mkString(", ")
 		)
 		sb.append(" FROM " + obj.entityName)
-		sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " = " + id)
+		sb.append(" WHERE " + obj.primaryKey.persistenceFieldName + " = " + id)
 		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(
 			sb.toString(),
 			List.empty,
@@ -127,9 +127,9 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else if (ids.length <= MAX_IDS_NO_TEMP_TABLE) {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
-			sb.append(obj.fieldList.map(f => f.getPersistenceFieldName).mkString(", "))
+			sb.append(obj.fieldList.map(f => f.persistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
-			sb.append(" WHERE " + obj.primaryKey.getPersistenceFieldName + " in (" + ids.mkString(", ") + ")")
+			sb.append(" WHERE " + obj.primaryKey.persistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 			rows.map(r => obj.construct(r))
 		} else {
@@ -138,22 +138,22 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
-		if (filters.exists(f => f(obj.entityName).preparedSQL == "")) List.empty
+		if (filters.exists(f => f.preparedSQL == "")) List.empty
 		else {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
 			sb.append(obj.fieldList
 				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
-				.map(f => f.getPersistenceFieldName).mkString(", ")
+				.map(f => f.persistenceFieldName).mkString(", ")
 			)
 			sb.append(" FROM " + obj.entityName + " " + obj.entityName)
 			var params: List[String] = List.empty
 			if (filters.nonEmpty) {
-				val overallFilter = Filter.and(filters.map(f => f(obj.entityName)))
+				val overallFilter = Filter.and(filters.map(f => f))
 				sb.append(" WHERE " + overallFilter.preparedSQL)
 				params = overallFilter.params
 			}
@@ -172,17 +172,17 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[String => Filter]): Int = {
+	override protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter]): Int = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
-		if (filters.exists(f => f(obj.entityName).preparedSQL == "")) 0
+		if (filters.exists(f => f.preparedSQL == "")) 0
 		else {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT COUNT(*) FROM " + obj.entityName + " " + obj.entityName)
 			var params: List[String] = List.empty
 			if (filters.nonEmpty) {
-				val overallFilter = Filter.and(filters.map(f => f(obj.entityName)))
+				val overallFilter = Filter.and(filters.map(f => f))
 				sb.append(" WHERE " + overallFilter.preparedSQL)
 				params = overallFilter.params
 			}
@@ -238,9 +238,9 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			val ms = dbGateway.mainSchemaName
 			val tts = dbGateway.tempSchemaName
 			sb.append("SELECT ")
-			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.getPersistenceFieldName).mkString(", "))
+			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.persistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
-			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.getPersistenceFieldName + " = " + tts + "." + tableName + ".ID")
+			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.persistenceFieldName + " = " + tts + "." + tableName + ".ID")
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
@@ -394,7 +394,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			updateObject(i)
 		} else {
 			if (i.unsetRequiredFields.nonEmpty) {
-				throw new Exception("Attempted to insert new StorableClass instance, but not all fields are set: " + i.unsetRequiredFields.map(_.getPersistenceFieldName).mkString(", "))
+				throw new Exception("Attempted to insert new StorableClass instance, but not all fields are set: " + i.unsetRequiredFields.map(_.persistenceFieldName).mkString(", "))
 			} else {
 				insertObject(i)
 			}
@@ -407,7 +407,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		def getFieldValues(vm: Map[String, FieldValue[_]]): List[FieldValue[_]] =
 			vm.values
-					.filter(fv => fv.isSet && fv.getPersistenceFieldName != i.companion.primaryKey.getPersistenceFieldName)
+					.filter(fv => fv.isSet && fv.persistenceFieldName != i.companion.primaryKey.persistenceFieldName)
 					.toList
 
 		val fieldValues: List[FieldValue[_]] = {
@@ -424,11 +424,11 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.nullableDoubleValueMap)
 		}
 
-		val startingColumns = fieldValues.map(fv => fv.getPersistenceFieldName)
+		val startingColumns = fieldValues.map(fv => fv.persistenceFieldName)
 		val startingValues = fieldValues.map(fv => fv.getPersistenceLiteral._1)
 
 		val columns = {
-			if (i.desiredPrimaryKey.isInitialized) i.getPrimaryKeyFieldValue.getPersistenceFieldName :: startingColumns
+			if (i.desiredPrimaryKey.isInitialized) i.getPrimaryKeyFieldValue.persistenceFieldName :: startingColumns
 			else startingColumns
 		}
 
@@ -445,7 +445,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		sb.append(")")
 		println(sb.toString())
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
-		executeSQLForInsert(sb.toString(), Some(i.companion.primaryKey.getPersistenceFieldName), false, params) match {
+		executeSQLForInsert(sb.toString(), Some(i.companion.primaryKey.persistenceFieldName), false, params) match {
 			case Some(s: String) => i.initializePrimaryKeyValue(s.toInt)
 			case None =>
 		}
@@ -456,7 +456,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			vm.values
 				.filter(fv =>
 					fv.isSet &&
-					fv.getPersistenceFieldName != i.companion.primaryKey.getPersistenceFieldName &&
+					fv.persistenceFieldName != i.companion.primaryKey.persistenceFieldName &&
 					fv.isDirty
 				)
 				.toList
@@ -476,8 +476,8 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		val sb = new StringBuilder()
 		sb.append("UPDATE " + i.companion.entityName + " SET ")
-		sb.append(fieldValues.map(fv => fv.getPersistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
-		sb.append(" WHERE " + i.companion.primaryKey.getPersistenceFieldName + " = " + i.getID)
+		sb.append(fieldValues.map(fv => fv.persistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
+		sb.append(" WHERE " + i.companion.primaryKey.persistenceFieldName + " = " + i.getID)
 		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
 		val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
 		if (updated != 1) {
@@ -486,8 +486,8 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	}
 
 	override protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		val intValues: Map[ColumnAliasInnerJoined[_], Option[Int]] = Map()
-		val stringValues: Map[ColumnAliasInnerJoined[_], Option[String]] = Map()
+		val intValues: Map[ColumnAlias[_], Option[Int]] = Map()
+		val stringValues: Map[ColumnAlias[_], Option[String]] = Map()
 
 		qb.tables.map(_.obj).foreach(_.init())
 
@@ -531,7 +531,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		params = params ::: whereFilter.params
 		val sql =
 			s"""
-			  |select ${fields.map(f => f.table.name + "." + f.field.asInstanceOf[DatabaseField[_]].getPersistenceFieldName).mkString(", ")}
+			  |select ${fields.map(f => f.table.name + "." + f.field.asInstanceOf[DatabaseField[_]].persistenceFieldName).mkString(", ")}
 			  |from ${mainTable.obj.entityName} ${mainTable.name}
 			  |$joinClause
 			  |$whereClause

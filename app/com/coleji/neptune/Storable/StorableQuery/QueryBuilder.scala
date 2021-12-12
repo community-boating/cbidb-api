@@ -54,6 +54,8 @@ class QueryBuilder(
 }
 
 object QueryBuilder {
+//	def from(o: StorableObject[_ <: StorableClass]): QueryBuilder = from(TableAlias.wrapForInnerJoin(o))
+
 	def from(t: TableAlias[_ <: StorableObject[_ <: StorableClass]]): QueryBuilder = new QueryBuilder(
 		tables = List(t),
 		joins = List.empty,

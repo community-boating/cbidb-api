@@ -1,10 +1,10 @@
 package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, IntColumnAlias, StringColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
+class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
 	def getFieldLength: Int = fieldLength
 
 	def isNullable: Boolean = false
@@ -25,12 +25,11 @@ class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass
 		}
 	}
 
-	def equalsConstant(c: String): String => Filter =
-		t => Filter(s"$t.$getPersistenceFieldName = ?", List(c))
-
-
-	def equalsConstantLowercase(c: String): String => Filter =
-		t => Filter(s"lower($t.$getPersistenceFieldName) = ?", List(c.toLowerCase()))
-
 	def getValueFromString(s: String): Option[String] = Some(s)
+
+	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): StringColumnAlias =
+		StringColumnAlias(tableAlias, this)
+
+	override def alias: StringColumnAlias =
+		StringColumnAlias(entity.alias, this)
 }

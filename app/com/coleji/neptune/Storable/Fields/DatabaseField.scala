@@ -4,9 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.StorableQuery._
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) {
-	def getPersistenceFieldName: String = persistenceFieldName
-
+abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], val persistenceFieldName: String) {
 	type ValueType = T
 
 	def getFieldType(implicit persistenceSystem: PersistenceSystem): String
@@ -27,16 +25,10 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[T]
 
-	def isNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
-
-	def isNotNull: String => Filter = t => Filter(s"$t.$getPersistenceFieldName IS NOT NULL", List.empty)
-
-	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[U]): String => Filter = t => Filter(s"$t.$getPersistenceFieldName = ${c.table.name}.${c.field.getPersistenceFieldName}", List.empty)
-
 	def getValueFromString(s: String): Option[T]
 
-	def alias(tableAlias: TableAliasInnerJoined[_ <: StorableObject[_ <: StorableClass]]): ColumnAliasInnerJoined[this.type] = ColumnAliasInnerJoined(tableAlias, this)
-	def alias(tableAlias: TableAliasOuterJoined[_ <: StorableObject[_ <: StorableClass]]): ColumnAliasOuterJoined[this.type] = ColumnAliasOuterJoined(tableAlias, this)
+	def alias[U <: ColumnAlias[_]](tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): U
+	def alias[U <: ColumnAlias[_]]: U
 }
 
 object DatabaseField {

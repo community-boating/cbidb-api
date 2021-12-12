@@ -8,7 +8,7 @@ import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, Storab
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
-class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[LocalDateTime]](entity, persistenceFieldName) {
+class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[LocalDateTime]](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 	def isNullable: Boolean = true
@@ -25,9 +25,9 @@ class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: St
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
 			val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}", List.empty)
+			Filter(s"$t.$persistenceFieldName >= ${jan1.format(pattern)} AND $t.$persistenceFieldName < ${nextJan1.format(pattern)}", List.empty)
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$persistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[LocalDateTime]] = {

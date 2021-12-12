@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, P
 import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableStringDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
+class NullableStringDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String, fieldLength: Int) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
 	def getFieldLength: Int = fieldLength
 
 	def isNullable: Boolean = true
@@ -20,13 +20,13 @@ class NullableStringDatabaseField(override val entity: StorableObject[_ <: Stora
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[String]] = row.stringFields.get(key)
 
 	def equalsConstant(os: Option[String]): String => Filter = t => os match {
-		case Some(s: String) => Filter(s"$t.$getPersistenceFieldName = ?", List(s))
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
+		case Some(s: String) => Filter(s"$t.$persistenceFieldName = ?", List(s))
+		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
 	}
 
 	def equalsConstantLowercase(os: Option[String]): String => Filter = t => os match {
-		case Some(s: String) => Filter(s"lower($t.$getPersistenceFieldName) = ?", List(s.toLowerCase()))
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
+		case Some(s: String) => Filter(s"lower($t.$persistenceFieldName) = ?", List(s.toLowerCase()))
+		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[String]] = if (s == "") Some(None) else Some(Some(s))

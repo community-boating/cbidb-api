@@ -24,7 +24,7 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 		mutateStorableForInsert(s)
 //		getCaseValues.foreach(tup => {
 //			val (name, value) = tup
-//			s.valuesList.find(_.getPersistenceFieldName == name).map(fv => {
+//			s.valuesList.find(_.persistenceFieldName == name).map(fv => {
 //				fv.asInstanceOf[FieldValue[Any]].update(value)
 //			})
 //		})

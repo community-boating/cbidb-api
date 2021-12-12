@@ -9,15 +9,15 @@ import java.time.LocalDateTime
 
 object AllJPClassInstances {
 	def get(rc: StaffRequestCache)(implicit PA: PermissionsAuthority): List[(JpClassInstance, LocalDateTime, LocalDateTime, Double)] = {
-		val types = TableAlias.wrapForInnerJoin(JpClassType)
-		val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
-		val sessions = TableAlias.wrapForInnerJoin(JpClassSession)
+		val types = JpClassType.alias
+		val instances = JpClassInstance.alias
+		val sessions = JpClassSession.alias
 
 		val sessionsQB = QueryBuilder
 			.from(types)
-			.innerJoin(instances, types.wrappedFields(_.fields.typeId).wrapFilter(_.equalsField(instances.wrappedFields(_.fields.typeId))))
-			.innerJoin(sessions, instances.wrappedFields(_.fields.instanceId).wrapFilter(_.equalsField(sessions.wrappedFields(_.fields.instanceId))))
-			.where(sessions.wrappedFields(_.fields.sessionDateTime).wrapFilter(_.isYearConstant(PA.currentSeason())))
+			.innerJoin(instances, JpClassType.fields.typeId.alias equalsField JpClassInstance.fields.typeId.alias)
+			.innerJoin(sessions, JpClassInstance.fields.instanceId.alias equalsField JpClassSession.fields.instanceId.alias)
+			.where(JpClassSession.fields.sessionDateTime.alias.isYearConstant(PA.currentSeason()))
 
 		val allSessions = rc.executeQueryBuilder(sessionsQB).map(qbrr => {
 			val session = JpClassSession.construct(qbrr)

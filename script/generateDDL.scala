@@ -60,7 +60,7 @@ val dropTables: String = entities.map("drop table " + _.entityName + ";").mkStri
 
 val createTables: String = entities.map(e => {
   "create table " + e.entityName + "(" + e.fieldList.map(f => {
-    f.getPersistenceFieldName + " " + f.getFieldType
+    f.persistenceFieldName + " " + f.getFieldType
   }).mkString(", ") + ");"
 }).mkString("\n")
 
@@ -71,7 +71,7 @@ val inserts: String = seedObjects.map(obj => {
   val fieldValues: List[FieldValue] = obj.deconstruct.toList
   val sb = new StringBuilder
   sb.append("INSERT INTO " + obj.companion.entityName + "(")
-  sb.append(fieldValues.map(_.getPersistenceFieldName).mkString(", "))
+  sb.append(fieldValues.map(_.persistenceFieldName).mkString(", "))
   sb.append(") values (")
   sb.append(fieldValues.map(_.getPersistenceLiteral).mkString(", "))
   sb.append(");")

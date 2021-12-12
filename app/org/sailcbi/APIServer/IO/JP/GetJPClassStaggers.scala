@@ -10,7 +10,7 @@ object GetJPClassStaggers {
 		val staggers = TableAlias.wrapForInnerJoin(JpClassStagger)
 		val sessionsQB = QueryBuilder
 			.from(staggers)
-			.where(staggers.wrappedFields(_.fields.instanceId).wrapFilter(_.inList(instanceIds)))
+			.where(staggers.wrappedFields(_.instanceId).wrapFilter(_.inList(instanceIds)))
 
 		rc.executeQueryBuilder(sessionsQB).map(staggers.construct).asInstanceOf[List[JpClassStagger]]
 	}

@@ -172,6 +172,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		valuesList equals valuesListReflection
 	}
 
+	def alias(name: String): TableAliasInnerJoined[this.type] = TableAliasInnerJoined(this, name)
+	def aliasOuter(name: String): TableAliasOuterJoined[this.type] = TableAliasOuterJoined(this, name)
+
+	def alias: TableAliasInnerJoined[this.type] = TableAliasInnerJoined(this, this.entityName)
+	def aliasOuter: TableAliasOuterJoined[this.type] = TableAliasOuterJoined(this, this.entityName)
+
 	def construct(qbrr: QueryBuilderResultRow): T = construct(qbrr.ps, None, Set.empty).get
 
 	def construct(qbrr: QueryBuilderResultRow, tableAlias: TableAliasInnerJoined[this.type]): T = construct(qbrr.ps, Some(tableAlias), Set.empty).get
@@ -187,8 +193,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 		type FieldDefinition = (String, DatabaseField[_])
 
 		def aliasField[U <: DatabaseField[_]](f: U): ColumnAlias[_] = tableAlias match {
-			case Some(ta: TableAliasInnerJoined[_]) => ColumnAliasInnerJoined[U](ta, f)//.asInstanceOf[ColumnAliasInnerJoined[_]]
-			case Some(ta: TableAliasOuterJoined[_]) => ColumnAliasOuterJoined[U](ta, f)//.asInstanceOf[ColumnAliasOuterJoined[_]]
+			case Some(ta: TableAlias[_]) => f.alias(ta)
 			case None => ColumnAlias.wrapForInnerJoin(f)//.asInstanceOf[ColumnAliasInnerJoined[_]]
 		}
 
@@ -198,7 +203,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 		def abort(): Boolean = {
 			val wrappedPK = aliasField[IntDatabaseField](self.primaryKey)
-			if (wrappedPK.isInstanceOf[ColumnAliasOuterJoined[_]]) {
+			if (wrappedPK.isInstanceOf[ColumnAlias[_]]) {
 				try {
 					self.primaryKey.findValueInProtoStorable(ps, wrappedPK)
 					false

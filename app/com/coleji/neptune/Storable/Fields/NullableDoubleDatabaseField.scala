@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, P
 import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
+class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[Double]] = row.doubleFields.get(key)
 
 	def isNullable: Boolean = true
@@ -15,7 +15,7 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 	}
 
 	def lessThanConstant(c: Double): String => Filter = t => {
-		Filter(s"$t.$getPersistenceFieldName < $c", List.empty)
+		Filter(s"$t.$persistenceFieldName < $c", List.empty)
 	}
 
 	def inList(l: List[Double]): String => Filter = t => {
@@ -30,14 +30,14 @@ class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: Stora
 
 		if (l.isEmpty) Filter.empty
 		else Filter.or(groupIDs(l).map(group => Filter(
-			s"$t.$getPersistenceFieldName in (${group.mkString(", ")})",
+			s"$t.$persistenceFieldName in (${group.mkString(", ")})",
 			List.empty
 		)))
 	}
 
 	def equalsConstant(i: Option[Double]): String => Filter = t => i match {
-		case Some(x: Double) => Filter(s"$t.$getPersistenceFieldName = $i", List.empty)
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
+		case Some(x: Double) => Filter(s"$t.$persistenceFieldName = $i", List.empty)
+		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[Double]] = {

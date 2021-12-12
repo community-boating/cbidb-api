@@ -37,7 +37,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends RestControllerW
 		runValidationsForUpdate(rc, d).combine(checkUsernameUnique(rc, d.USER_NAME))
 
 	private def checkUsernameUnique(rc: UnlockedRequestCache, candidate: String): ValidationResult = {
-		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.equalsConstant(candidate)))
+		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.alias.equalsConstant(candidate)))
 
 		if (existingUsers > 0) ValidationResult.from("That username is already in use")
 		else ValidationOk

@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, P
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
 
-class NullableClobDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
+class NullableClobDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[String]](entity, persistenceFieldName) {
 	def isNullable: Boolean = true
 
 	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {

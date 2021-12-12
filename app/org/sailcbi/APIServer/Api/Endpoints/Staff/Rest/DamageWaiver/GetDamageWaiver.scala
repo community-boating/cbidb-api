@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetDamageWaiver @Inject()(implicit val exec: ExecutionContext) extends RestController(DamageWaiver) with InjectedController {
 	def getAllForPerson(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val dws = getByFilters(rc, List(DamageWaiver.fields.personId.equalsConstant(personId)), Set(
+			val dws = getByFilters(rc, List(DamageWaiver.fields.personId.alias.equalsConstant(personId)), Set(
 				DamageWaiver.fields.waiverId,
 				DamageWaiver.fields.personId,
 				DamageWaiver.fields.price

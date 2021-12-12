@@ -14,18 +14,21 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetGuestPriv @Inject()(implicit val exec: ExecutionContext) extends RestController(GuestPriv) with InjectedController {
 	def getAllForPerson(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val tableGp = TableAlias.wrapForInnerJoin(GuestPriv)
-			val tablePm = TableAlias.wrapForInnerJoin(PersonMembership)
+			val gp = GuestPriv.alias
+			val pm = PersonMembership.alias
+
 			val q = QueryBuilder
-				.from(tableGp)
-				.innerJoin(tablePm, tablePm.wrappedFields(_.fields.assignId).wrapFilter(_.equalsField(tableGp.wrappedFields(_.fields.membershipId))))
-				.where(tablePm.wrappedFields(_.fields.personId).wrapFilter(_.equalsConstant(personId)))
+				.from(gp)
+				.innerJoin(pm,
+					PersonMembership.fields.assignId.alias(pm) equalsField GuestPriv.fields.membershipId.alias(gp)
+				)
+				.where(PersonMembership.fields.personId.alias(pm) equalsConstant personId)
 				.select(List(
-					GuestPriv.fields.membershipId.alias(tableGp),
-					GuestPriv.fields.price.alias(tableGp)
+					gp.wrappedFields(_.membershipId),
+					gp.wrappedFields(_.price)
 				))
 
-			val gps = rc.executeQueryBuilder(q).map(tableGp.construct)
+			val gps = rc.executeQueryBuilder(q).map(gp.construct)
 
 			Future(Ok(Json.toJson(gps)))
 		})

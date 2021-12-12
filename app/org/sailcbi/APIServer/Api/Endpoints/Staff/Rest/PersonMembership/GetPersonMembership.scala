@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetPersonMembership @Inject()(implicit val exec: ExecutionContext) extends RestController(PersonMembership) with InjectedController {
 	def getAllForPerson(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val pms = getByFilters(rc, List(PersonMembership.fields.personId.equalsConstant(personId)), Set(
+			val pms = getByFilters(rc, List(PersonMembership.fields.personId.alias.equalsConstant(personId)), Set(
 				PersonMembership.fields.assignId,
 				PersonMembership.fields.personId,
 			))

@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, P
 import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
+class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1
 
 	def isNullable: Boolean = true
@@ -27,8 +27,8 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 	}
 
 	def equals(b: Option[Boolean]): String => Filter = t => b match {
-		case Some(x) => Filter(s"$t.$getPersistenceFieldName = '${if (x) "Y" else "N"}'", List.empty)
-		case None => Filter(s"$t.$getPersistenceFieldName IS NULL", List.empty)
+		case Some(x) => Filter(s"$t.$persistenceFieldName = '${if (x) "Y" else "N"}'", List.empty)
+		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[Option[Boolean]] = s.toLowerCase match {

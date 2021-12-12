@@ -60,7 +60,7 @@ class QueryBuilderTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 
 			val results = rc.executeQueryBuilder(q)
 			results.foreach(row => {
-				val typeId = row.getValue(columns.types_typeId)
+				val typeId = row.getValue(types)(_.typeId)
 				val typeName = row.getValue(columns.typeName)
 				val instanceId = row.getValue(columns.instanceId)
 				println( instanceId + ":  " + typeId + "(" + typeName + ")")

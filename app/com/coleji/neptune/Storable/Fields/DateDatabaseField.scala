@@ -9,7 +9,7 @@ import com.coleji.neptune.Util._
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
+class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[LocalDate](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 	def isNullable: Boolean = false
@@ -30,9 +30,9 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		case PERSISTENCE_SYSTEM_MYSQL => {
 			val jan1 = LocalDate.of(year, 1, 1)
 			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
+			Filter(s"$t.$persistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$persistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
 		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
+		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$persistenceFieldName, 'YYYY') = $year", List.empty)
 	}
 
 	def getValueFromString(s: String): Option[LocalDate] = {
@@ -47,9 +47,9 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		val comparator: String = comp.comparator
 		PA.systemParams.persistenceSystem match {
 			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(s"$t.$getPersistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
+				Filter(s"$t.$persistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
 			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(s"TRUNC($t.$getPersistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
+				Filter(s"TRUNC($t.$persistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
 		}
 	}
 

@@ -2,13 +2,13 @@ package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateTimeColumnAlias, IntColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
-class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
+class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 	def isNullable: Boolean = false
@@ -26,27 +26,6 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
-		case PERSISTENCE_SYSTEM_MYSQL => {
-			val jan1 = LocalDate.of(year, 1, 1)
-			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-			Filter(s"$t.$getPersistenceFieldName >= ${jan1.format(pattern)} AND $t.$getPersistenceFieldName < ${nextJan1.format(pattern)}", List.empty)
-		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$getPersistenceFieldName, 'YYYY') = $year", List.empty)
-	}
-
-	def isDateConstant(date: LocalDate)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
-		case PERSISTENCE_SYSTEM_MYSQL =>
-			Filter(
-				s"$t.$getPersistenceFieldName >= '${date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}' AND " +
-						s"$t.$getPersistenceFieldName < '${date.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}'",
-				List.empty
-			)
-		case PERSISTENCE_SYSTEM_ORACLE =>
-			Filter(s"TRUNC($t.$getPersistenceFieldName) = TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
-	}
-
 	def getValueFromString(s: String): Option[LocalDateTime] = {
 		try {
 			Some(LocalDateTime.parse(s, standardPattern))
@@ -54,4 +33,10 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 			case _: Throwable => None
 		}
 	}
+
+	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): DateTimeColumnAlias =
+		DateTimeColumnAlias(tableAlias, this)
+
+	override def alias: DateTimeColumnAlias =
+		DateTimeColumnAlias(entity.alias, this)
 }
