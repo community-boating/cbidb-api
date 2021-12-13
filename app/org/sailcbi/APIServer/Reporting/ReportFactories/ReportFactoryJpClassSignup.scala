@@ -27,7 +27,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 
 	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
-		List(JpClassSession.fields.instanceId.inList(classInstanceIDs.toList)),
+		List(JpClassSession.fields.instanceId.alias.inList(classInstanceIDs.toList)),
 		Set.empty,
 		100
 	)

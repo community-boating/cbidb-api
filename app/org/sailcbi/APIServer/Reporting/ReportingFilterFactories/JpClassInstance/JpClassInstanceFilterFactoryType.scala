@@ -15,7 +15,7 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 		implicit val rc: UnlockedRequestCache = _rc
 		rc.getObjectsByFilters(
 			JpClassInstance,
-			List(JpClassInstance.fields.typeId.equalsConstant(typeId)),
+			List(JpClassInstance.fields.typeId.alias.equalsConstant(typeId)),
 			Set.empty,
 			100
 		).toSet

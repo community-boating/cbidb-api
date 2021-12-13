@@ -16,7 +16,7 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 		implicit val rc: UnlockedRequestCache = _rc
 		val ss: List[ApClassSession] = rc.getObjectsByFilters(
 			ApClassSession,
-			List(ApClassSession.fields.sessionDateTime.isYearConstant(year)),
+			List(ApClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
 			Set.empty,
 			1000
 		)
@@ -24,7 +24,7 @@ class ApClassInstanceFilterFactoryYear extends ReportingFilterFactory[ApClassIns
 
 		rc.getObjectsByFilters(
 			ApClassInstance,
-			List(ApClassInstance.fields.instanceId.inList(instanceIDs)),
+			List(ApClassInstance.fields.instanceId.alias.inList(instanceIDs)),
 			Set.empty,
 			1000
 		).toSet

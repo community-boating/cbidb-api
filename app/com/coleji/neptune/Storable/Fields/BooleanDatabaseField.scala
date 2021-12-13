@@ -1,7 +1,7 @@
 package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{BooleanColumnAlias, ColumnAlias, DateColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class BooleanDatabaseField(
@@ -30,12 +30,15 @@ class BooleanDatabaseField(
 		}
 	}
 
-	def equals(b: Boolean): String => Filter =
-		t => Filter(s"$t.$persistenceFieldName = '${if (b) "Y" else "N"}'", List.empty)
-
 	def getValueFromString(s: String): Option[Boolean] = s.toLowerCase match {
 		case "true" => Some(true)
 		case "false" => Some(false)
 		case _ => None
 	}
+
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): BooleanColumnAlias =
+		BooleanColumnAlias(tableAlias, this)
+
+	def alias: BooleanColumnAlias =
+		BooleanColumnAlias(entity.alias, this)
 }

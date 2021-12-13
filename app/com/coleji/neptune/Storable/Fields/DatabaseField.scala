@@ -27,8 +27,46 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def getValueFromString(s: String): Option[T]
 
-	def alias[U <: ColumnAlias[_]](tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): U
-	def alias[U <: ColumnAlias[_]]: U
+	def abstractAlias: ColumnAlias[_]
+	def abstractAlias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): ColumnAlias[_]
+	def abstractAlias(tableAlias: Option[TableAlias[_ <: StorableObject[_ <: StorableClass]]]): ColumnAlias[_] = {
+		tableAlias match {
+			case Some(ta) => {
+				this match {
+					case b: BooleanDatabaseField => b.alias(ta)
+					case d: DateDatabaseField => d.alias(ta)
+					case dt: DateTimeDatabaseField => dt.alias(ta)
+					case d: DoubleDatabaseField => d.alias(ta)
+					case i: IntDatabaseField => i.alias(ta)
+					case s: StringDatabaseField => s.alias(ta)
+
+					case b: NullableBooleanDatabaseField => b.alias(ta)
+					case d: NullableDateDatabaseField => d.alias(ta)
+					case dt: NullableDateTimeDatabaseField => dt.alias(ta)
+					case d: NullableDoubleDatabaseField => d.alias(ta)
+					case i: NullableIntDatabaseField => i.alias(ta)
+					case s: NullableStringDatabaseField => s.alias(ta)
+				}
+			}
+			case None => {
+				this match {
+					case b: BooleanDatabaseField => b.alias
+					case d: DateDatabaseField => d.alias
+					case dt: DateTimeDatabaseField => dt.alias
+					case d: DoubleDatabaseField => d.alias
+					case i: IntDatabaseField => i.alias
+					case s: StringDatabaseField => s.alias
+
+					case b: NullableBooleanDatabaseField => b.alias
+					case d: NullableDateDatabaseField => d.alias
+					case dt: NullableDateTimeDatabaseField => dt.alias
+					case d: NullableDoubleDatabaseField => d.alias
+					case i: NullableIntDatabaseField => i.alias
+					case s: NullableStringDatabaseField => s.alias
+				}
+			}
+		}
+	}
 }
 
 object DatabaseField {

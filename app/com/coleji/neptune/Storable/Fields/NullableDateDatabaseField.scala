@@ -2,7 +2,7 @@ package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateColumnAlias, NullableDateColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.neptune.Util._
 
@@ -20,14 +20,7 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[LocalDate]] = row.dateFields.get(key)
 
-	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
-		case PERSISTENCE_SYSTEM_MYSQL => {
-			val jan1 = LocalDate.of(year, 1, 1)
-			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(s"$t.$persistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$persistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
-		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$persistenceFieldName, 'YYYY') = $year", List.empty)
-	}
+
 
 	def getValueFromString(s: String): Option[Option[LocalDate]] = {
 		if (s == "") Some(None)
@@ -40,23 +33,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		}
 	}
 
-	private def dateComparison(date: LocalDate, comp: DateComparison)(implicit PA: PermissionsAuthority): String => Filter = t => {
-		val comparator: String = comp.comparator
-		PA.systemParams.persistenceSystem match {
-			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(s"$t.$persistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
-			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(s"TRUNC($t.$persistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
-		}
-	}
+	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): NullableDateColumnAlias =
+		NullableDateColumnAlias(tableAlias, this)
 
-	def isDateConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_=)
-
-	def greaterThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>)
-
-	def lessThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<)
-
-	def greaterEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>=)
-
-	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
+	override def alias: NullableDateColumnAlias =
+		NullableDateColumnAlias(entity.alias, this)
 }

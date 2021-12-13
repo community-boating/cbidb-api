@@ -16,7 +16,7 @@ class JpClassInstanceFilterFactoryYear extends ReportingFilterFactory[JpClassIns
 		implicit val rc: UnlockedRequestCache = _rc
 		val ss: List[JpClassSession] = rc.getObjectsByFilters(
 			JpClassSession,
-			List(JpClassSession.fields.sessionDateTime.isYearConstant(year)),
+			List(JpClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
 			Set.empty,
 			1000
 		)
@@ -25,7 +25,7 @@ class JpClassInstanceFilterFactoryYear extends ReportingFilterFactory[JpClassIns
 
 		rc.getObjectsByFilters(
 			JpClassInstance,
-			List(JpClassInstance.fields.instanceId.inList(instanceIDs)),
+			List(JpClassInstance.fields.instanceId.alias.inList(instanceIDs)),
 			Set.empty,
 			1000
 		).toSet

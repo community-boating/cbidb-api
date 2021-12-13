@@ -12,7 +12,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
 
 	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
-		List(JpClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
+		List(JpClassSession.fields.instanceId.alias.inList(getInstances.map(i => i.values.instanceId.get))),
 		Set.empty,
 		1000
 	)

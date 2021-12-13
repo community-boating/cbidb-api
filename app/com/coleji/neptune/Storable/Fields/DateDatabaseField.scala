@@ -2,7 +2,7 @@ package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateColumnAlias, DateTimeColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 import com.coleji.neptune.Util._
 
@@ -26,14 +26,7 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		}
 	}
 
-	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
-		case PERSISTENCE_SYSTEM_MYSQL => {
-			val jan1 = LocalDate.of(year, 1, 1)
-			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			Filter(s"$t.$persistenceFieldName >= ${jan1.format(standardPattern)} AND $t.$persistenceFieldName < ${nextJan1.format(standardPattern)}", List.empty)
-		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$persistenceFieldName, 'YYYY') = $year", List.empty)
-	}
+
 
 	def getValueFromString(s: String): Option[LocalDate] = {
 		try {
@@ -43,23 +36,9 @@ class DateDatabaseField(override val entity: StorableObject[_ <: StorableClass],
 		}
 	}
 
-	private def dateComparison(date: LocalDate, comp: DateComparison)(implicit PA: PermissionsAuthority): String => Filter = t => {
-		val comparator: String = comp.comparator
-		PA.systemParams.persistenceSystem match {
-			case PERSISTENCE_SYSTEM_MYSQL =>
-				Filter(s"$t.$persistenceFieldName $comparator '${date.format(standardPattern)}'", List.empty)
-			case PERSISTENCE_SYSTEM_ORACLE =>
-				Filter(s"TRUNC($t.$persistenceFieldName) $comparator TO_DATE('${date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))}','MM/DD/YYYY')", List.empty)
-		}
-	}
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): DateColumnAlias =
+		DateColumnAlias(tableAlias, this)
 
-	def isDateConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_=)
-
-	def greaterThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>)
-
-	def lessThanConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<)
-
-	def greaterEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_>=)
-
-	def lessEqualConstant(date: LocalDate): String => Filter = dateComparison(date, DATE_<=)
+	def alias: DateColumnAlias =
+		DateColumnAlias(entity.alias, this)
 }

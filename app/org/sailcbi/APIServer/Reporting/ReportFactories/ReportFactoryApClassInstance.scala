@@ -14,7 +14,7 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
 
 	lazy val apClassSessions: List[ApClassSession] = rc.getObjectsByFilters(
 		ApClassSession,
-		List(ApClassSession.fields.instanceId.inList(getInstances.map(i => i.values.instanceId.get))),
+		List(ApClassSession.fields.instanceId.alias.inList(getInstances.map(i => i.values.instanceId.get))),
 		Set.empty,
 		1000
 	)

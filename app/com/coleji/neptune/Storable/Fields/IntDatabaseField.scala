@@ -30,9 +30,9 @@ class IntDatabaseField(override val entity: StorableObject[_ <: StorableClass], 
 		}
 	}
 
-	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): IntColumnAlias =
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): IntColumnAlias =
 		IntColumnAlias(tableAlias, this)
 
-	override def alias: IntColumnAlias =
+	def alias: IntColumnAlias =
 		IntColumnAlias(entity.alias, this)
 }

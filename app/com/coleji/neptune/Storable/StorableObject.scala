@@ -192,17 +192,17 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 		type FieldDefinition = (String, DatabaseField[_])
 
-		def aliasField[U <: DatabaseField[_]](f: U): ColumnAlias[_] = tableAlias match {
-			case Some(ta: TableAlias[_]) => f.alias(ta)
-			case None => ColumnAlias.wrapForInnerJoin(f)//.asInstanceOf[ColumnAliasInnerJoined[_]]
-		}
+//		def aliasField[U <: DatabaseField[_]](f: U): ColumnAlias[_] = tableAlias match {
+//			case Some(ta: TableAlias[_]) => f.alias(ta)
+//			case None => ColumnAlias.wrapForInnerJoin(f)//.asInstanceOf[ColumnAliasInnerJoined[_]]
+//		}
 
 		val filterFunction: (FieldDefinition => Boolean) = (fd: FieldDefinition) => {
 			fieldShutter.isEmpty || fieldShutter.contains(fd._2)
 		}
 
 		def abort(): Boolean = {
-			val wrappedPK = aliasField[IntDatabaseField](self.primaryKey)
+			val wrappedPK = tableAlias.map(self.primaryKey.alias).getOrElse(self.primaryKey.alias)
 			if (wrappedPK.isInstanceOf[ColumnAlias[_]]) {
 				try {
 					self.primaryKey.findValueInProtoStorable(ps, wrappedPK)
@@ -219,7 +219,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 				t._2 == self.primaryKey || filterFunction(t)
 			}).foreach(tupled((fieldName: String, field: IntDatabaseField) => {
 				embryo.intValueMap.get(fieldName) match {
-					case Some(fv: IntFieldValue) => field.findValueInProtoStorable(ps, aliasField[IntDatabaseField](field)) match {
+					case Some(fv: IntFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(i: Int) => fv.initialize(i)
 						case None =>
 					}
@@ -229,7 +229,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableIntFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableIntDatabaseField) => {
 				embryo.nullableIntValueMap.get(fieldName) match {
-					case Some(fv: NullableIntFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableIntDatabaseField](field)) match {
+					case Some(fv: NullableIntFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(i: Int)) => fv.initialize(Some(i))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -240,7 +240,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			doubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DoubleDatabaseField) => {
 				embryo.doubleValueMap.get(fieldName) match {
-					case Some(fv: DoubleFieldValue) => field.findValueInProtoStorable(ps, aliasField[DoubleDatabaseField](field)) match {
+					case Some(fv: DoubleFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(d: Double) => fv.initialize(d)
 						case None =>
 					}
@@ -250,7 +250,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableDoubleFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDoubleDatabaseField) => {
 				embryo.nullableDoubleValueMap.get(fieldName) match {
-					case Some(fv: NullableDoubleFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableDoubleDatabaseField](field)) match {
+					case Some(fv: NullableDoubleFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(d: Double)) => fv.initialize(Some(d))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -261,7 +261,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			stringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: StringDatabaseField) => {
 				embryo.stringValueMap.get(fieldName) match {
-					case Some(fv: StringFieldValue) => field.findValueInProtoStorable(ps, aliasField[StringDatabaseField](field)) match {
+					case Some(fv: StringFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(s: String) => fv.initialize(s)
 						case None =>
 					}
@@ -271,7 +271,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableStringFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableStringDatabaseField) => {
 				embryo.nullableStringValueMap.get(fieldName) match {
-					case Some(fv: NullableStringFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableStringDatabaseField](field)) match {
+					case Some(fv: NullableStringFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(s: String)) => fv.initialize(Some(s))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -282,7 +282,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			dateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateDatabaseField) => {
 				embryo.dateValueMap.get(fieldName) match {
-					case Some(fv: DateFieldValue) => field.findValueInProtoStorable(ps, aliasField[DateDatabaseField](field)) match {
+					case Some(fv: DateFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(d: LocalDate) => fv.initialize(d)
 						case None =>
 					}
@@ -292,7 +292,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableDateFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDateDatabaseField) => {
 				embryo.nullableDateValueMap.get(fieldName) match {
-					case Some(fv: NullableDateFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableDateDatabaseField](field)) match {
+					case Some(fv: NullableDateFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(d: LocalDate)) => fv.initialize(Some(d))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -303,7 +303,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			dateTimeFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: DateTimeDatabaseField) => {
 				embryo.dateTimeValueMap.get(fieldName) match {
-					case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(ps, aliasField[DateTimeDatabaseField](field)) match {
+					case Some(fv: DateTimeFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(dt: LocalDateTime) => fv.initialize(dt)
 						case None =>
 					}
@@ -313,7 +313,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableDateTimeFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableDateTimeDatabaseField) => {
 				embryo.nullableDateTimeValueMap.get(fieldName) match {
-					case Some(fv: NullableDateTimeFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableDateTimeDatabaseField](field)) match {
+					case Some(fv: NullableDateTimeFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(d: LocalDateTime)) => fv.initialize(Some(d))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -324,7 +324,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			booleanFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: BooleanDatabaseField) => {
 				embryo.booleanValueMap.get(fieldName) match {
-					case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(ps, aliasField[BooleanDatabaseField](field)) match {
+					case Some(fv: BooleanFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(b: Boolean) => fv.initialize(b)
 						case None =>
 					}
@@ -334,7 +334,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableBooleanFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableBooleanDatabaseField) => {
 				embryo.nullableBooleanValueMap.get(fieldName) match {
-					case Some(fv: NullableBooleanFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableBooleanDatabaseField](field)) match {
+					case Some(fv: NullableBooleanFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(b: Boolean)) => fv.initialize(Some(b))
 						case Some(None) => fv.initialize(None)
 						case None =>
@@ -345,7 +345,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 			nullableClobFieldMap.filter(filterFunction).foreach(tupled((fieldName: String, field: NullableClobDatabaseField) => {
 				embryo.nullableClobValueMap.get(fieldName) match {
-					case Some(fv: NullableClobFieldValue) => field.findValueInProtoStorable(ps, aliasField[NullableClobDatabaseField](field)) match {
+					case Some(fv: NullableClobFieldValue) => field.findValueInProtoStorable(ps, tableAlias.map(field.alias).getOrElse(field.alias)) match {
 						case Some(Some(c: String)) => fv.initialize(Some(c))
 						case Some(None) => fv.initialize(None)
 						case None =>

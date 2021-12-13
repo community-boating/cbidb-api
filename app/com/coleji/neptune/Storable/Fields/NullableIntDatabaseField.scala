@@ -14,32 +14,6 @@ class NullableIntDatabaseField(override val entity: StorableObject[_ <: Storable
 		case PERSISTENCE_SYSTEM_ORACLE => "number"
 	}
 
-	def lessThanConstant(c: Int): String => Filter = t => {
-		Filter(s"$t.$persistenceFieldName < $c", List.empty)
-	}
-
-	def inList(l: List[Int]): String => Filter = t => {
-		def groupIDs(ids: List[Int]): List[List[Int]] = {
-			val MAX_IDS = 900
-			if (ids.length <= MAX_IDS) List(ids)
-			else {
-				val splitList = ids.splitAt(MAX_IDS)
-				splitList._1 :: groupIDs(splitList._2)
-			}
-		}
-
-		if (l.isEmpty) Filter.empty
-		else Filter.or(groupIDs(l).map(group => Filter(
-			s"$t.$persistenceFieldName in (${group.mkString(", ")})",
-			List.empty
-		)))
-	}
-
-	def equalsConstant(i: Option[Int]): String => Filter = t => i match {
-		case Some(x: Int) => Filter(s"$t.$persistenceFieldName = $i", List.empty)
-		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
-	}
-
 	def getValueFromString(s: String): Option[Option[Int]] = {
 		if (s == "") Some(None)
 		else {

@@ -89,7 +89,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		sb.append("SELECT ")
 		sb.append(fieldsToGet.map(f => f.persistenceFieldName).mkString(", "))
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(f => ColumnAlias.wrapForInnerJoin(f)), 50)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(abstractAlias), 50)
 		val p = new Profiler
 		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")
@@ -110,7 +110,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			List.empty,
 			obj.fieldList
 				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
-				.map(f => ColumnAlias.wrapForInnerJoin(f)),
+				.map(abstractAlias),
 			6
 		)
 		if (rows.length == 1) Some(obj.construct(rows.head, fieldShutter))
@@ -130,7 +130,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.append(obj.fieldList.map(f => f.persistenceFieldName).mkString(", "))
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.persistenceFieldName + " in (" + ids.mkString(", ") + ")")
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(abstractAlias), fetchSize)
 			rows.map(r => obj.construct(r))
 		} else {
 			// Too many IDs; make a filter table
@@ -162,7 +162,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				params,
 				obj.fieldList
 					.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
-					.map(f => ColumnAlias.wrapForInnerJoin(f)),
+					.map(abstractAlias),
 				fetchSize
 			)
 			val p = new Profiler
@@ -241,7 +241,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.append(obj.fieldList.map(f => ms + "." + obj.entityName + "." + f.persistenceFieldName).mkString(", "))
 			sb.append(" FROM " + ms + "." + obj.entityName + ", " + tts + "." + tableName)
 			sb.append(" WHERE " + ms + "." + obj.entityName + "." + obj.primaryKey.persistenceFieldName + " = " + tts + "." + tableName + ".ID")
-			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(f => ColumnAlias.wrapForInnerJoin(f)), fetchSize)
+			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(abstractAlias), fetchSize)
 
 			val dropTableSQL = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS"
 			c.createStatement().executeUpdate(dropTableSQL)

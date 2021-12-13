@@ -26,7 +26,7 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 		val donationsSinceDate: List[Donation] = rc.getObjectsByFilters(
 			Donation,
 			List(
-				Donation.fields.donationDate.greaterEqualConstant(sinceDate)
+				Donation.fields.donationDate.alias.greaterEqualConstant(sinceDate)
 			)
 		)
 

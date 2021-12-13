@@ -9,7 +9,7 @@ abstract class ColumnAlias[U <: DatabaseField[_]](val table: TableAlias[_ <: Sto
 
 	def isNotNull: Filter = Filter(s"${table.name}.${field.persistenceFieldName} IS NOT NULL", List.empty)
 
-	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[U]): Filter = Filter(s"${table.name}.${field.persistenceFieldName} = ${c.table.name}.${c.field.persistenceFieldName}", List.empty)
+	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[_ <: DatabaseField[_]]): Filter = Filter(s"${table.name}.${field.persistenceFieldName} = ${c.table.name}.${c.field.persistenceFieldName}", List.empty)
 
 }
 
@@ -18,6 +18,6 @@ abstract class ColumnAlias[U <: DatabaseField[_]](val table: TableAlias[_ <: Sto
 //
 object ColumnAlias {
 	// Only use when you don't care about recovering e.g. IntDatabaseField from this field
-	def wrapForInnerJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForInnerJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
-	def wrapForOuterJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForOuterJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
+//	def wrapForInnerJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForInnerJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
+//	def wrapForOuterJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForOuterJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
 }

@@ -23,16 +23,16 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		val juniorsThatYear = rc.getObjectsByFilters(
 			PersonMembership,
 			List(
-				PersonMembership.fields.membershipTypeId.equalsConstant(MagicIds.MEMBERSHIP_TYPES.JUNIOR_SUMMER),
-				PersonMembership.fields.expirationDate.isYearConstant(season)
+				PersonMembership.fields.membershipTypeId.alias.equalsConstant(MagicIds.MEMBERSHIP_TYPES.JUNIOR_SUMMER),
+				PersonMembership.fields.expirationDate.alias.isYearConstant(season)
 			)
 		).map(_.values.personId.get)
 
 		val parentIds = rc.getObjectsByFilters(
 			PersonRelationship,
 			List(
-				PersonRelationship.fields.typeId.equalsConstant(PersonRelationship.specialIDs.TYPE_ID_PARENT_CHILD_ACCT_LINKED),
-				PersonRelationship.fields.b.inList(juniorsThatYear)
+				PersonRelationship.fields.typeId.alias.equalsConstant(PersonRelationship.specialIDs.TYPE_ID_PARENT_CHILD_ACCT_LINKED),
+				PersonRelationship.fields.b.alias.inList(juniorsThatYear)
 			)
 		).map(_.values.a.get)
 

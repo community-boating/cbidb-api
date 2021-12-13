@@ -63,10 +63,10 @@ object QueryBuilder {
 		fields = List.empty
 	)
 
-	def allFieldsFromTable(ta: TableAlias[_ <: StorableObject[_ <: StorableClass]]): List[ColumnAlias[_]] = ta match {
-		case ti: TableAliasInnerJoined[_] => ti.obj.fieldList.map(ColumnAlias.wrapForInnerJoin)
-		case to: TableAliasOuterJoined[_] => to.obj.fieldList.map(ColumnAlias.wrapForOuterJoin)
-	}
+//	def allFieldsFromTable(ta: TableAlias[_ <: StorableObject[_ <: StorableClass]]): List[ColumnAlias[_]] = ta match {
+//		case ti: TableAliasInnerJoined[_] => ti.obj.fieldList.map(ColumnAlias.wrapForInnerJoin)
+//		case to: TableAliasOuterJoined[_] => to.obj.fieldList.map(ColumnAlias.wrapForOuterJoin)
+//	}
 
 	// Using reflection, scan through all val members of a given object
 	// Return all the ones that are ColumnAlias[_] in a list

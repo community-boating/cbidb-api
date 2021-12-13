@@ -16,14 +16,14 @@ class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignu
 		implicit val rc: UnlockedRequestCache = _rc
 		val sessions = rc.getObjectsByFilters(
 			JpClassSession,
-			List(JpClassSession.fields.sessionDateTime.isYearConstant(year)),
+			List(JpClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
 			Set.empty,
 			100
 		)
 		val instanceIDs = sessions.map(_.values.instanceId.get).toSet
 		rc.getObjectsByFilters(
 			JpClassSignup,
-			List(JpClassSignup.fields.instanceId.inList(instanceIDs.toList)),
+			List(JpClassSignup.fields.instanceId.alias.inList(instanceIDs.toList)),
 			Set.empty,
 			100
 		).toSet

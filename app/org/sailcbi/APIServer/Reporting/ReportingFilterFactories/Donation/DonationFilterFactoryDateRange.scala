@@ -23,8 +23,8 @@ class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
 		rc.getObjectsByFilters(
 			Donation,
 			List(
-				Donation.fields.donationDate.greaterEqualConstant(start),
-				Donation.fields.donationDate.lessEqualConstant(end)
+				Donation.fields.donationDate.alias.greaterEqualConstant(start),
+				Donation.fields.donationDate.alias.lessEqualConstant(end)
 			)
 		).toSet
 	})
