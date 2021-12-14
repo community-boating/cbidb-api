@@ -2,7 +2,7 @@ package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, NullableDateColumnAlias, NullableDateTimeColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 import java.time.format.DateTimeFormatter
@@ -20,16 +20,6 @@ class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: St
 
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[LocalDateTime]] = row.dateTimeFields.get(key)
 
-	def isYearConstant(year: Int)(implicit PA: PermissionsAuthority): String => Filter = t => PA.systemParams.persistenceSystem match {
-		case PERSISTENCE_SYSTEM_MYSQL => {
-			val jan1 = LocalDate.of(year, 1, 1)
-			val nextJan1 = LocalDate.of(year + 1, 1, 1)
-			val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-			Filter(s"$t.$persistenceFieldName >= ${jan1.format(pattern)} AND $t.$persistenceFieldName < ${nextJan1.format(pattern)}", List.empty)
-		}
-		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR($t.$persistenceFieldName, 'YYYY') = $year", List.empty)
-	}
-
 	def getValueFromString(s: String): Option[Option[LocalDateTime]] = {
 		if (s == "") Some(None)
 		else {
@@ -40,4 +30,10 @@ class NullableDateTimeDatabaseField (override val entity: StorableObject[_ <: St
 			}
 		}
 	}
+
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): NullableDateTimeColumnAlias =
+		NullableDateTimeColumnAlias(tableAlias, this)
+
+	def alias: NullableDateTimeColumnAlias =
+		NullableDateTimeColumnAlias(entity.alias, this)
 }

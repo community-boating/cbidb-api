@@ -47,10 +47,6 @@ class QueryBuilder(
 		where = where,
 		fields = fs
 	)
-
-	def allFields: List[ColumnAlias[_]] = {
-		tables.flatMap(QueryBuilder.allFieldsFromTable)
-	}
 }
 
 object QueryBuilder {

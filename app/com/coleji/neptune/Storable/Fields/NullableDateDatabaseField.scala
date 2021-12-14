@@ -33,9 +33,9 @@ class NullableDateDatabaseField(override val entity: StorableObject[_ <: Storabl
 		}
 	}
 
-	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): NullableDateColumnAlias =
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): NullableDateColumnAlias =
 		NullableDateColumnAlias(tableAlias, this)
 
-	override def alias: NullableDateColumnAlias =
+	def alias: NullableDateColumnAlias =
 		NullableDateColumnAlias(entity.alias, this)
 }

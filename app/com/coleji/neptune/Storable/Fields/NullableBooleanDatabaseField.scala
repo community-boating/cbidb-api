@@ -1,7 +1,7 @@
 package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, NullableBooleanColumnAlias, TableAlias}
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
 class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
@@ -26,15 +26,16 @@ class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: Stor
 		}
 	}
 
-	def equals(b: Option[Boolean]): String => Filter = t => b match {
-		case Some(x) => Filter(s"$t.$persistenceFieldName = '${if (x) "Y" else "N"}'", List.empty)
-		case None => Filter(s"$t.$persistenceFieldName IS NULL", List.empty)
-	}
-
 	def getValueFromString(s: String): Option[Option[Boolean]] = s.toLowerCase match {
 		case "true" => Some(Some(true))
 		case "false" => Some(Some(false))
 		case "" => Some(None)
 		case _ => None
 	}
+
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): NullableBooleanColumnAlias =
+		NullableBooleanColumnAlias(tableAlias, this)
+
+	def alias: NullableBooleanColumnAlias =
+		NullableBooleanColumnAlias(entity.alias, this)
 }

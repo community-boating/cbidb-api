@@ -27,8 +27,8 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 
 	def getValueFromString(s: String): Option[T]
 
-	def abstractAlias: ColumnAlias[_]
-	def abstractAlias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): ColumnAlias[_]
+	def abstractAlias: ColumnAlias[_] = abstractAlias(None)
+	def abstractAlias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): ColumnAlias[_] = abstractAlias(Some(tableAlias))
 	def abstractAlias(tableAlias: Option[TableAlias[_ <: StorableObject[_ <: StorableClass]]]): ColumnAlias[_] = {
 		tableAlias match {
 			case Some(ta) => {
@@ -41,6 +41,7 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 					case s: StringDatabaseField => s.alias(ta)
 
 					case b: NullableBooleanDatabaseField => b.alias(ta)
+					case c: NullableClobDatabaseField => c.alias(ta)
 					case d: NullableDateDatabaseField => d.alias(ta)
 					case dt: NullableDateTimeDatabaseField => dt.alias(ta)
 					case d: NullableDoubleDatabaseField => d.alias(ta)
@@ -58,6 +59,7 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 					case s: StringDatabaseField => s.alias
 
 					case b: NullableBooleanDatabaseField => b.alias
+					case c: NullableClobDatabaseField => c.alias
 					case d: NullableDateDatabaseField => d.alias
 					case dt: NullableDateTimeDatabaseField => dt.alias
 					case d: NullableDoubleDatabaseField => d.alias
