@@ -34,9 +34,9 @@ class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableCla
 		}
 	}
 
-	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): DateTimeColumnAlias =
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): DateTimeColumnAlias =
 		DateTimeColumnAlias(tableAlias, this)
 
-	override def alias: DateTimeColumnAlias =
+	def alias: DateTimeColumnAlias =
 		DateTimeColumnAlias(entity.alias, this)
 }

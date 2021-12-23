@@ -27,9 +27,9 @@ class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass
 
 	def getValueFromString(s: String): Option[String] = Some(s)
 
-	override def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): StringColumnAlias =
+	def alias(tableAlias: TableAlias[_ <: StorableObject[_ <: StorableClass]]): StringColumnAlias =
 		StringColumnAlias(tableAlias, this)
 
-	override def alias: StringColumnAlias =
+	def alias: StringColumnAlias =
 		StringColumnAlias(entity.alias, this)
 }

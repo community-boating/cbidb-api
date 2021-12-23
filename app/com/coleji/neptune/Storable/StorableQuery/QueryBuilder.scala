@@ -27,17 +27,20 @@ class QueryBuilder(
 		fields = fields
 	)
 
-	def where(f: Filter): QueryBuilder = new QueryBuilder(
-		tables = tables,
-		joins = joins,
-		where = List(f),
-		fields = fields
-	)
+	def where(f: Filter): QueryBuilder = f match {
+		case Filter.empty => this
+		case ff => new QueryBuilder(
+			tables = tables,
+			joins = joins,
+			where = List(ff),
+			fields = fields
+		)
+	}
 
 	def where(fs: List[Filter]): QueryBuilder = new QueryBuilder(
 		tables = tables,
 		joins = joins,
-		where = fs,
+		where = fs.filter(f => f != Filter.empty),
 		fields = fields
 	)
 

@@ -7,6 +7,7 @@ import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 object AllJpClassSignups {
 	def get(rc: StaffRequestCache, instanceIds: List[Int])(implicit PA: PermissionsAuthority): List[JpClassSignup] = {
+		println("***************  STARTING GET ALL SIGNUPS ******************************")
 		val types = TableAlias.wrapForInnerJoin(JpClassType)
 		val instances = TableAlias.wrapForInnerJoin(JpClassInstance)
 		val signups = TableAlias.wrapForInnerJoin(JpClassSignup)
@@ -16,6 +17,8 @@ object AllJpClassSignups {
 		val wlResults = TableAlias.wrapForOuterJoin(JpClassWlResult)
 		val sections = TableAlias.wrapForOuterJoin(JpClassSection)
 		val sectionLookups = TableAlias.wrapForOuterJoin(JpClassSectionLookup)
+
+		println("tables aliased")
 
 		val sessionsQB = QueryBuilder
 			.from(types)
@@ -32,19 +35,24 @@ object AllJpClassSignups {
 			// .where(instances.wrappedFields(_.instanceId).wrapFilter(_.equalsConstant(5361)))
 
 			.select(
-				QueryBuilder.allFieldsFromTable(types) ++
-				QueryBuilder.allFieldsFromTable(instances) ++
-				QueryBuilder.allFieldsFromTable(signups) ++
-				QueryBuilder.allFieldsFromTable(wlResults) ++
-				QueryBuilder.allFieldsFromTable(groups) ++
-				QueryBuilder.allFieldsFromTable(sections) ++
-				QueryBuilder.allFieldsFromTable(sectionLookups) ++
+				types.wrappedFields(f => List(f.typeId, f.typeName, f.displayOrder)) ++
+				instances.wrappedFields(f => List(f.instanceId, f.typeId, f.instructorId, f.locationId, f.adminHold)) ++
+				signups.wrappedFields(f => List(f.signupId, f.signupType, f.signupDatetime, f.sequence, f.sectionId, f.groupId, f.personId, f.instanceId)) ++
+				wlResults.wrappedFields(f => List(f.signupId, f.wlResult, f.offerExpDatetime)) ++
+				groups.wrappedFields(f => List(f.groupId, f.groupName)) ++
+				sections.wrappedFields(f => List(f.sectionId, f.lookupId, f.instanceId)) ++
+				sectionLookups.wrappedFields(f => List(f.sectionId, f.sectionName, f.svgUrl)) ++
 				List(
 					persons.wrappedFields(_.personId),
 					persons.wrappedFields(_.nameFirst),
 					persons.wrappedFields(_.nameLast),
 				)
 			)
+
+		println("qb constructed")
+		println(JpClassInstance.fields.instanceId.alias.inList(instanceIds))
+		println(sessionsQB.where)
+		println("==================")
 
 		val allSignups = rc.executeQueryBuilder(sessionsQB).map(qbrr => {
 			val signup = signups.construct(qbrr)

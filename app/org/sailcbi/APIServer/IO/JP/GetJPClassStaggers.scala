@@ -11,6 +11,7 @@ object GetJPClassStaggers {
 		val sessionsQB = QueryBuilder
 			.from(staggers)
 			.where(JpClassStagger.fields.instanceId.alias.inList(instanceIds))
+			.select(staggers.wrappedFields(f => List(f.staggerId, f.instanceId, f.staggerDate, f.occupancy)))
 
 		rc.executeQueryBuilder(sessionsQB).map(staggers.construct)
 	}
