@@ -19,7 +19,7 @@ object AllJPClassInstances {
 			.innerJoin(sessions, JpClassInstance.fields.instanceId.alias equalsField JpClassSession.fields.instanceId.alias)
 			.where(JpClassSession.fields.sessionDateTime.alias.isYearConstant(PA.currentSeason()))
 			.select(
-				types.wrappedFields(f => List(f.typeId, f.typeName, f.displayOrder)) ++
+				types.wrappedFields(f => List(f.typeId, f.typeName, f.displayOrder, f.sessionLength)) ++
 				instances.wrappedFields(f => List(f.instanceId, f.typeId, f.instructorId, f.locationId, f.adminHold)) ++
 				sessions.wrappedFields(f => List(f.sessionId, f.instanceId, f.sessionDateTime, f.lengthOverride))
 			)

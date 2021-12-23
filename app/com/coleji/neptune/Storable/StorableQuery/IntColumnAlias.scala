@@ -17,7 +17,7 @@ extends ColumnAlias[DatabaseField[Int]](table, field) {
 				}
 			}
 
-			if (l.isEmpty) Filter.empty
+			if (l.isEmpty) Filter.noneMatch
 			else Filter.or(groupIDs(l).map(group => Filter(
 				s"${table.name}.${field.persistenceFieldName} in (${group.mkString(", ")})",
 				List.empty
