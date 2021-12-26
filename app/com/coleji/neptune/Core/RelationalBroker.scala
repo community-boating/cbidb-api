@@ -522,7 +522,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			recurse(joinTables, joinsReverse, "")
 		}
 		val whereFilter = Filter.and(qb.where)
-		val whereClause = if(qb.where.nonEmpty) "WHERE " + whereFilter.preparedSQL else ""
+		val whereClause = "WHERE " + whereFilter.preparedSQL
 		params = params ::: whereFilter.params
 		val sql =
 			s"""
