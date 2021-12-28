@@ -39,7 +39,7 @@ object OracleDatabaseConnection {
 		config.setPassword(password)
 
 		// other options
-		config.setMaximumPoolSize(10)
+		config.setMaximumPoolSize(2)
 		config.setLeakDetectionThreshold(30 * 1000)
 
 		config
