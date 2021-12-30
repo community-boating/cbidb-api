@@ -66,7 +66,8 @@ class GetMembershipSale @Inject()(implicit val exec: ExecutionContext) extends I
 				voidClosedDatetime = row.getValue(voidClose)(_.closedDatetime).flatten
 			))
 
-			Future(Ok(Json.toJson(rows)))
+			// TODO: paginate?
+			Future(Ok(Json.toJson(rows.take(1000))))
 		})
 	})
 }
