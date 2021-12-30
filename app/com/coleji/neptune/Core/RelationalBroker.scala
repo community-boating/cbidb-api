@@ -486,6 +486,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	}
 
 	override protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+		qb.validate()
 		qb.tables.map(_.obj).foreach(_.init())
 
 		val tablesReverse = qb.tables.reverse

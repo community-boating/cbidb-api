@@ -15,4 +15,7 @@ class ProtoStorable(
 	val dateFields: Map[ColumnAlias[_], Option[LocalDate]],
 	val dateTimeFields: Map[ColumnAlias[_], Option[LocalDateTime]],
 	val ignored: Map[ColumnAlias[_], String]
-)
+) {
+
+	override def toString = s"ProtoStorable(intFields=$intFields\n\n doubleFields=$doubleFields\n\n stringFields=$stringFields\n\n dateFields=$dateFields\n\n dateTimeFields=$dateTimeFields\n\n ignored=$ignored)"
+}

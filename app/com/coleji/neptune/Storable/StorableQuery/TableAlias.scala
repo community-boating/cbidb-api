@@ -4,9 +4,11 @@ import com.coleji.neptune.Storable.Fields.DatabaseField
 import com.coleji.neptune.Storable.{StorableClass, StorableObject}
 
 sealed abstract class TableAlias[T <: StorableObject[_ <: StorableClass]](val obj: T, val name: String) {
-	// TODO: throw if name has invalid characters.  for safety i think only [a-zA-Z]
+	val r = "^[a-zA-Z_]+$".r
+	if (r.findFirstMatchIn(name).isEmpty) throw new Exception("Invalid table alias name")
+
 	type Fields = obj.fields.type
-	val fields = obj.fields
+	private val fields: Fields = obj.fields
 	def wrappedFields[U <: DatabaseField[_]](getField: Fields => U): ColumnAlias[U] = {
 		val field = getField(obj.fields.asInstanceOf[Fields])
 		field.abstractAlias(this).asInstanceOf[ColumnAlias[U]]
@@ -15,6 +17,8 @@ sealed abstract class TableAlias[T <: StorableObject[_ <: StorableClass]](val ob
 		val fields = getFields(obj.fields.asInstanceOf[Fields])
 		fields.map(_.abstractAlias(this))
 	}
+
+	override def toString: String = s"(${obj.entityName} as ${name})"
 }
 
 case class TableAliasInnerJoined[T <: StorableObject[_ <: StorableClass]](override val obj: T, override val name: String) extends TableAlias[T](obj, name) {
@@ -30,5 +34,5 @@ case class TableAliasOuterJoined[T <: StorableObject[_ <: StorableClass]](overri
 object TableAlias {
 	def wrapForInnerJoin[T <: StorableObject[_ <: StorableClass]](obj: T): TableAliasInnerJoined[T] = TableAliasInnerJoined(obj, obj.entityName)
 	def wrapForOuterJoin[T <: StorableObject[_ <: StorableClass]](obj: T): TableAliasOuterJoined[T] = TableAliasOuterJoined(obj, obj.entityName)
-	def apply[T <: StorableObject[_ <: StorableClass]](obj: T): TableAliasInnerJoined[T] = wrapForInnerJoin(obj)
+	implicit def apply[T <: StorableObject[_ <: StorableClass]](obj: T): TableAliasInnerJoined[T] = wrapForInnerJoin(obj)
 }

@@ -10,7 +10,7 @@ abstract class ColumnAlias[U <: DatabaseField[_]](val table: TableAlias[_ <: Sto
 	def isNotNull: Filter = Filter(s"${table.name}.${field.persistenceFieldName} IS NOT NULL", List.empty)
 
 	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[_ <: DatabaseField[_]]): Filter = Filter(s"${table.name}.${field.persistenceFieldName} = ${c.table.name}.${c.field.persistenceFieldName}", List.empty)
-
+	override def toString: String = s"${table}.${field.persistenceFieldName}"
 }
 
 //case class ColumnAliasInnerJoined[U <: DatabaseField[_]](override val table: TableAliasInnerJoined[_ <: StorableObject[_ <: StorableClass]], override val field: U) extends ColumnAlias[U](table, field)
@@ -20,4 +20,5 @@ object ColumnAlias {
 	// Only use when you don't care about recovering e.g. IntDatabaseField from this field
 //	def wrapForInnerJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForInnerJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
 //	def wrapForOuterJoin[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.alias(TableAlias.wrapForOuterJoin(field.entity)).asInstanceOf[ColumnAlias[U]]
+	implicit def wrap[U <: DatabaseField[_]](field: U): ColumnAlias[U] = field.abstractAlias.asInstanceOf[ColumnAlias[U]]
 }
