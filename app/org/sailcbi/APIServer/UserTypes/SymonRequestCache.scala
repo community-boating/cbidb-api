@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.neptune.Core._
+import com.coleji.neptune.Util.DateUtil.HOME_TIME_ZONE
 import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
@@ -37,7 +38,7 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 	): Boolean = {
 		println("here we go")
 		val symonSalt = customParams.getString(CBIBootLoaderLive.PROPERTY_NAMES.SYMON_SALT)
-		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(ZoneId.of("America/New_York")))
+		val now: String = ZonedDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH").withZone(HOME_TIME_ZONE))
 		val input = symonSalt + List(host, program, argString, status.toString, mac, now).mkString("-") + symonSalt
 		println(input)
 		val md5Bytes = MessageDigest.getInstance("MD5").digest(input.getBytes)

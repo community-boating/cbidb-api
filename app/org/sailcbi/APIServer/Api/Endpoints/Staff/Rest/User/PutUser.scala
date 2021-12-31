@@ -2,12 +2,14 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User
 
 import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.User
+import com.coleji.neptune.Util.DateUtil.HOME_TIME_ZONE
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{DamageWaiver, User}
 import org.sailcbi.APIServer.Entities.dto.PutUserDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.mvc.InjectedController
 
+import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

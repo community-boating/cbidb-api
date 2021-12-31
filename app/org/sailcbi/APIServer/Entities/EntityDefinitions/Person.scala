@@ -139,17 +139,6 @@ class Person extends StorableClass(Person) {
 			subRatings.map(_.values.ratingId.get).foldLeft(false)((agg, r) => agg || hasRatingSomehow(ratings, r, programId))
 		}
 	}
-
-	override def toString(): String = {
-		def showValue(v: FieldValue[_]): String = {
-			if (v.getPersistenceLiteral._2.nonEmpty) {
-				v.getPersistenceLiteral._2.head
-			} else {
-				v.getPersistenceLiteral._1
-			}
-		}
-		s"(PERSON ${this.valuesList.filter(_.isSet).map(v => s"[${v.persistenceFieldName}:${showValue(v)}]")})"
-	}
 }
 
 object Person extends StorableObject[Person] {
