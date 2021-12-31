@@ -37,7 +37,7 @@ POST     /rest/damage-waiver              org.sailcbi.APIServer.Api.Endpoints.St
 GET     /rest/guest-priv/get-all-for-person       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.GuestPriv.GetGuestPriv.getAllForPerson(personId: Int)
 POST     /rest/guest-priv              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.GuestPriv.PutGuestPriv.post()
 
-GET     /rest/membership-sale       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.MembershipSale.GetMembershipSale.get()
+GET     /rest/membership-sale       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.MembershipSale.GetMembershipSale.get(season: Int)
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
 

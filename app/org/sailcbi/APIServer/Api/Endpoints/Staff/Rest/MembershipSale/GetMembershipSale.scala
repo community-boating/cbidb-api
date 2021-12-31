@@ -10,12 +10,11 @@ import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetMembershipSale @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
-	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
+	def get(season: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val saleClose = FoClose.alias("SALES_CLOSE")
 			val voidClose = FoClose.aliasOuter("VOID_CLOSE")
@@ -34,7 +33,7 @@ class GetMembershipSale @Inject()(implicit val exec: ExecutionContext) extends I
 					voidClose,
 					voidClose.wrappedFields(_.closeId) equalsField PersonMembership.fields.voidCloseId
 				)
-				.where(Filter.allMatch)
+				.where(PersonMembership.fields.purchaseDate.alias isYearConstant season)
 				.select(List(
 					PersonMembership.fields.assignId,
 					PersonMembership.fields.membershipTypeId,
