@@ -65,8 +65,24 @@ jobs:
 
       - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
       - name: push image
         run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-dev:${{ env.BRANCH_NAME }}
+      - name: tag & push aws
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildpub:
@@ -105,6 +121,17 @@ jobs:
         with:
           token: ${{ secrets.DO_ACCESS_TOKEN }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
         shell: bash
@@ -127,6 +154,13 @@ jobs:
         run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: tag & push aws
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
   buildstaff:
     runs-on: ubuntu-latest
     steps:
@@ -181,7 +215,23 @@ jobs:
 
       - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
       - name: push image
         run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }}
+      - name: tag & push aws
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
