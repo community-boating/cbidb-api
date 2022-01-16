@@ -5,10 +5,13 @@ import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
 
 class ConnectionPoolWrapper(private val source: HikariDataSource)  {
+	var openConnections = 0
+
 	private[Core] def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {
 		var c: Connection = null
 		try {
 			c = source.getConnection()
+			increment()
 			val ret = block(c)
 			ret
 		} catch {
@@ -17,8 +20,21 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 				throw e
 			}
 		} finally {
-			c.close()
+			if (c != null) {
+				c.close()
+				decrement()
+			}
 		}
+	}
+
+	private def increment(): Unit = {
+		openConnections += 1
+		println("Grabbed DB connection; in use: " + openConnections)
+	}
+
+	private def decrement(): Unit = {
+		openConnections -= 1
+		println("Freed DB connection; in use: " + openConnections)
 	}
 
 	private[Core] def close(): Unit = source.close()
