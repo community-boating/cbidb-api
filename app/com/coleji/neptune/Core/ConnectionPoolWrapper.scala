@@ -6,6 +6,7 @@ import java.sql.Connection
 
 class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 	var openConnections = 0
+	var connectionHighWaterMark = 0;
 
 	private[Core] def withConnection[T](block: Connection => T)(implicit PA: PermissionsAuthority): T = {
 		var c: Connection = null
@@ -29,7 +30,11 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 
 	private def increment(): Unit = {
 		openConnections += 1
+		if (openConnections > connectionHighWaterMark) {
+			connectionHighWaterMark = openConnections
+		}
 		println("Grabbed DB connection; in use: " + openConnections)
+		println("high water mark: " + connectionHighWaterMark)
 	}
 
 	private def decrement(): Unit = {
