@@ -21,9 +21,10 @@ object OracleDatabaseConnection {
 		val tempPassword = pw.getString("temptablepassword")
 		val poolSize = pw.getOptionalString("maxPoolSize").map(_.toInt).getOrElse(2)
 		val poolSizeTemp = pw.getOptionalString("maxPoolSizeTemp").map(_.toInt).getOrElse(1)
+		val tnsName = pw.getString("tnsName")
 
-		val mainConfig = getDataSourceConfig(host, port, sid, username, password, poolSize)
-		val tempConfig = getDataSourceConfig(host, port, sid, tempUsername, tempPassword, poolSizeTemp)
+		val mainConfig = getDataSourceConfig(host, port, sid, tnsName, username, password, poolSize)
+		val tempConfig = getDataSourceConfig(host, port, sid, tnsName, tempUsername, tempPassword, poolSizeTemp)
 
 		new DatabaseGateway(
 			mainPool = new ConnectionPoolWrapper(new HikariDataSource(mainConfig)),
@@ -34,11 +35,10 @@ object OracleDatabaseConnection {
 		)
 	}
 
-	private def getDataSourceConfig(host: String, port: String, sid: String, username: String, password: String, poolSize: Int): HikariConfig = {
-		val connector = ""
+	private def getDataSourceConfig(host: String, port: String, sid: String, tnsName: String, username: String, password: String, poolSize: Int): HikariConfig = {
 		val config = new HikariConfig()
 		println("username: " + username + " max pool size: " + poolSize)
-		config.setJdbcUrl(s"jdbc:oracle:thin:@$connector?TNS_ADMIN=conf/private/oracle-wallet")
+		config.setJdbcUrl(s"jdbc:oracle:thin:@$tnsName?TNS_ADMIN=conf/private/oracle-wallet")
 		config.setUsername(username)
 		config.setPassword(password)
 
