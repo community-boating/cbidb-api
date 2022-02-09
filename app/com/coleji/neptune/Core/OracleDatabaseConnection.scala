@@ -35,9 +35,10 @@ object OracleDatabaseConnection {
 	}
 
 	private def getDataSourceConfig(host: String, port: String, sid: String, username: String, password: String, poolSize: Int): HikariConfig = {
+		val connector = ""
 		val config = new HikariConfig()
 		println("username: " + username + " max pool size: " + poolSize)
-		config.setJdbcUrl(s"jdbc:oracle:thin:@$host:$port:$sid")
+		config.setJdbcUrl(s"jdbc:oracle:thin:@$connector?TNS_ADMIN=conf/private/oracle-wallet")
 		config.setUsername(username)
 		config.setPassword(password)
 
