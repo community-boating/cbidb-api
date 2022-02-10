@@ -10,6 +10,8 @@ import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
+import org.sailcbi.APIServer.Entities.dto.PersonNotification
+import org.sailcbi.APIServer.Entities.dto.PersonNotification.{PersonAllNotificationsDto, PersonNotificationDbRecord}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
@@ -3202,6 +3204,46 @@ object PortalLogic {
 		createCustomerIdFuture.map(_ => {
 			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
 		})
+	}
+
+	def getNotifications(rc: RequestCache, personid: Int): PersonAllNotificationsDto = {
+		val q = new PreparedQueryForSelect[PersonNotificationDbRecord](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): PersonNotificationDbRecord = PersonNotificationDbRecord(
+				notificationEvent = rsw.getString(1),
+				notificationMethod = rsw.getString(2)
+			)
+			override def getQuery: String = s"select NOTIFICATION_EVENT, NOTIFICATION_METHOD from PERSONS_NOTIFICATION_PREFERENCES where person_id = $personid"
+		}
+		val dbRecords = rc.executePreparedQueryForSelect(q)
+
+		PersonNotification.PersonAllNotificationsDto.mapRecordsToDto(dbRecords)
+	}
+
+	def putNotifications(rc: RequestCache, personId: Int, notifications: PersonAllNotificationsDto): PersonAllNotificationsDto = {
+		val records = PersonNotification.PersonAllNotificationsDto.mapDtoToRecords(notifications)
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String = s"delete from PERSONS_NOTIFICATION_PREFERENCES where person_id = $personId"
+		}
+		rc.executePreparedQueryForUpdateOrDelete(deleteQ)
+		records.foreach(rec => {
+			val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
+				override val pkName: Option[String] = Some("PREF_ID")
+
+				override val params: List[String] = List(
+					rec.notificationEvent,
+					rec.notificationMethod
+				)
+
+				override def getQuery: String =
+					s"""
+					  |insert into PERSONS_NOTIFICATION_PREFERENCES (PERSON_ID, NOTIFICATION_EVENT, NOTIFICATION_METHOD)
+					  |values ($personId, ?, ?)
+					  |""".stripMargin
+			}
+			rc.executePreparedQueryForInsert(insertQ)
+		})
+
+		notifications
 	}
 }
 

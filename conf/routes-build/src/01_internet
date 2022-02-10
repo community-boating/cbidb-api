@@ -163,6 +163,9 @@ POST     /member/set-recurring-donations     org.sailcbi.APIServer.Api.Endpoints
 
 GET     /member/recurring-donation-history  org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationHistory.get()
 
+GET    /member/alerts             org.sailcbi.APIServer.Api.Endpoints.Member.Alerts.get()
+POST    /member/alerts             org.sailcbi.APIServer.Api.Endpoints.Member.Alerts.post()
+
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()
