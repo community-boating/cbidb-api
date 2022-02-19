@@ -162,7 +162,7 @@ object SubmitPayment {
 			override def getOutResults(cs: CallableStatement): (Option[Int], Option[String]) = {
 				val err = {
 					val s = cs.getString("o_error_msg")
-					if (cs.wasNull()) None else Some(s)
+					if (s == "" || cs.wasNull()) None else Some(s)
 				}
 				val successAttemptId = {
 					val ret = cs.getInt("o_success_attempt_id")
