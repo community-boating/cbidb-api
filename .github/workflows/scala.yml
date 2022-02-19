@@ -42,10 +42,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: src.tar
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_ACCESS_TOKEN }}
 
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
@@ -61,10 +57,11 @@ jobs:
         run: echo ${{ env.BRANCH_NAME }}
 
       - name: build image
-        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-dev:${{ env.BRANCH_NAME }} -f Dockerfile.build .
+        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }} -f Dockerfile.build .
 
-      - name: Log in to DO Container Registry
-        run: doctl registry login --expiry-seconds 600
+      - name: Log in to nexus Registry
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -75,13 +72,13 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - name: push image
-        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-dev:${{ env.BRANCH_NAME }}
+      - name: nexus push image
+        run: docker push docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
+          docker tag docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
           docker push $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -116,10 +113,6 @@ jobs:
           name: CBI-DB-API_0.1.0_all-pub.deb
       - name: rename image
         run: mv CBI-DB-API_0.1.0_all-pub.deb CBI-DB-API_0.1.0_all.deb
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_ACCESS_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -146,12 +139,14 @@ jobs:
         run: echo ${{ env.BRANCH_NAME }}
 
       - name: build image
-        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }} .
+        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }} .
 
-      - name: Log in to DO Container Registry 
-        run: doctl registry login --expiry-seconds 600
-      - name: push image
-        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }}
+      - name: Log in to nexus Registry
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+
+      - name: nexus push image
+        run: docker push docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }}
+
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
@@ -159,7 +154,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
+          docker tag docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
           docker push $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
   buildstaff:
     runs-on: ubuntu-latest
@@ -192,10 +187,6 @@ jobs:
           name: CBI-DB-API_0.1.0_all-staff.deb
       - name: rename image
         run: mv CBI-DB-API_0.1.0_all-staff.deb CBI-DB-API_0.1.0_all.deb
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_ACCESS_TOKEN }}
 
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
@@ -211,10 +202,11 @@ jobs:
         run: echo ${{ env.BRANCH_NAME }}
 
       - name: build image
-        run: docker build -t registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }} .
+        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }} .
 
-      - name: Log in to DO Container Registry
-        run: doctl registry login --expiry-seconds 600
+      - name: Log in to nexus Registry
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -226,12 +218,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: push image
-        run: docker push registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }}
+        run: docker push docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag registry.digitalocean.com/community-boating-docker/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
+          docker tag docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
           docker push $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
