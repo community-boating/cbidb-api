@@ -53,6 +53,8 @@ class CBIBootLoaderLive @Inject()(lifecycle: ApplicationLifecycle) extends Serve
 		}
 	}
 
+	println("GIT HASH: $$GITHUB_SHA$$")
+
 	this.init(lifecycle, CBIBootLoaderLive.ENTITY_PACKAGE_PATH, definedAuthMechanisms,  requiredProperties, paPostBoot)
 }
 

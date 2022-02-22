@@ -93,6 +93,8 @@ jobs:
         distribution: 'adopt'
     - name: generate routes
       run: ./py-build-routes.py 1
+    - name: write git hash
+      run: sed -i 's/\$\$GITHUB_SHA\$\$/'"${GITHUB_SHA}"'/' app/org/sailcbi/APIServer/Server/CBIBootLoaderLive.scala
     - name: build deb
       run: sbt debian:packageBin
     - name: rename deb
@@ -167,6 +169,8 @@ jobs:
           distribution: 'adopt'
       - name: generate routes
         run: ./py-build-routes.py 10
+      - name: write git hash
+        run: sed -i 's/\$\$GITHUB_SHA\$\$/'"${GITHUB_SHA}"'/' app/org/sailcbi/APIServer/Server/CBIBootLoaderLive.scala
       - name: build deb
         run: sbt debian:packageBin
       - name: rename deb
