@@ -86,7 +86,7 @@ trait CacheableResult[T <: ParamsObject, U] {
 				} else {
 					// TODO: this is probably a horrible thing to do but this crap is bugged and the above line keeps throwing tons of exceptions
 					// replace all this shit with the new object caching ASAP
-					Promise.successful(null)
+					Promise.successful("")
 				}
 				CacheableResult.waiting.get(cacheKey) match {
 					case Some(x) => x += p
