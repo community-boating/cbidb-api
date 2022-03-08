@@ -3,9 +3,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Public
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.Util.{DateUtil, JsconUtil}
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstances.{ApClassInstanceDto, ApClassInstancesCache, ApClassInstancesCacheKey}
-import org.sailcbi.APIServer.IO.PreparedQueries.Public.GetApClassInstancesResult
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import play.api.libs.json.{JsArray, JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
