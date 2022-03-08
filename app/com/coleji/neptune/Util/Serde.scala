@@ -28,6 +28,7 @@ object Serde {
 	}
 
 	def deserializeList[T](resultString: String): List[T] = {
-		resultString.split(":").toList.map(deseralizeStandard[T])
+		if (resultString == "") List.empty
+		else resultString.split(":").toList.map(deseralizeStandard[T])
 	}
 }

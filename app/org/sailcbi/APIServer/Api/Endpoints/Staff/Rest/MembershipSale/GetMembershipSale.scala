@@ -12,9 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetMembershipSale @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get(calendarYear: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val rows = MembershipSalesCache.get(rc, MembershipSalesCacheKey(calendarYear))
-
-			// TODO: paginate?
+			val (rows, _) = MembershipSalesCache.get(rc, MembershipSalesCacheKey(calendarYear))
 			Future(Ok(Json.toJson(rows)))
 		})
 	})
