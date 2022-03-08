@@ -20,7 +20,8 @@ abstract class Cacheable[T_KeyConfig, T_Result] {
 	def get(rc: RequestCache, config: T_KeyConfig): T_Result = {
 		val cb = rc.cb
 		val key = calculateKey(config)
-		key.synchronized {
+		// TODO: some way to sync per cache key
+		synchronized {
 			if (isExpired(cb, key)) {
 				val result: T_Result = generateResult(rc, config)
 				cb.set(key, serialize(result))
