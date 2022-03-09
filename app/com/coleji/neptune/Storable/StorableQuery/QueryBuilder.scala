@@ -2,8 +2,6 @@ package com.coleji.neptune.Storable.StorableQuery
 
 import com.coleji.neptune.Storable.{Filter, StorableClass, StorableObject}
 
-import scala.reflect.runtime.universe._
-
 class QueryBuilder(
 	val tables: List[TableAlias[_ <: StorableObject[_ <: StorableClass]]],
 	val joins: List[TableJoin],

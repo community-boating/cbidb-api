@@ -1,7 +1,7 @@
 package com.coleji.neptune.Storable.FieldValues
 
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
-import com.coleji.neptune.Storable.Fields.{NullableClobDatabaseField, NullableStringDatabaseField}
+import com.coleji.neptune.Storable.Fields.NullableClobDatabaseField
 import com.coleji.neptune.Storable.{GetSQLLiteralPrepared, StorableClass}
 import play.api.libs.json.{JsNull, JsString, JsValue}
 

@@ -1,8 +1,8 @@
 package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, NullableDateTimeColumnAlias, NullableDoubleColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, NullableDoubleColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
 class NullableDoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[Double]](entity, persistenceFieldName) {
 	def findValueInProtoStorable(row: ProtoStorable, key: ColumnAlias[_]): Option[Option[Double]] = row.doubleFields.get(key)

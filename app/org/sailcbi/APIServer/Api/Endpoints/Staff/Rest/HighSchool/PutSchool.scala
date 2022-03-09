@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool
 
 import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Event, HighSchool}
-import org.sailcbi.APIServer.Entities.dto.{PutEventDTO, PutHighSchoolDTO}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.HighSchool
+import org.sailcbi.APIServer.Entities.dto.PutHighSchoolDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.mvc.InjectedController
