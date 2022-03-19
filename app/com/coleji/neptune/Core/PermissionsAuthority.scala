@@ -4,7 +4,7 @@ import com.coleji.neptune.API.ResultError
 import com.coleji.neptune.Core.Boot.SystemServerParameters
 import com.coleji.neptune.Core.Emailer.SSMTPEmailer
 import com.coleji.neptune.Core.Logger.{Logger, ProductionLogger, UnitTestLogger}
-import com.coleji.neptune.Exception.{CORSException, PostBodyNotJSONException, UnauthorizedAccessException}
+import com.coleji.neptune.Exception.{CORSException, MuteEmailException, PostBodyNotJSONException, UnauthorizedAccessException}
 import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.neptune.Storable.{ResultSetWrapper, StorableClass, StorableObject}
 import com.coleji.neptune.Util.{Initializable, PropertiesWrapper}
@@ -101,6 +101,10 @@ class PermissionsAuthority private[Core] (
 			case e: JsResultException => {
 				Sentry.capture(e)
 				Future(Results.Status(400)(ResultError.PARSE_FAILURE(e.errors)))
+			}
+			case e: MuteEmailException => {
+				Sentry.capture(e)
+				Future(Results.Status(400)(ResultError.UNKNOWN))
 			}
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
