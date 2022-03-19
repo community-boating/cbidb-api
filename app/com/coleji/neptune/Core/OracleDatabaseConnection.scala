@@ -5,7 +5,7 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
 object OracleDatabaseConnection {
 	private[Core] def apply(confFileLocation: String): DatabaseGateway = {
-		val pw = new PropertiesWrapper(confFileLocation, List("username", "password", "host", "port", "sid", "schema", "temptableschema"))
+		val pw = new PropertiesWrapper(confFileLocation, List("username", "password", "host", "port", "schema", "temptableschema"))
 
 		// TODO: unclear if this does anything
 		Class.forName("oracle.jdbc.driver.OracleDriver")
@@ -14,7 +14,8 @@ object OracleDatabaseConnection {
 		val tempSchemaName = pw.getString("temptableschema")
 		val host = pw.getString("host")
 		val port = pw.getString("port")
-		val sid = pw.getString("sid")
+		val sid = pw.getOptionalString("sid")
+		val serviceName = pw.getOptionalString("servicename")
 		val username = pw.getString("username")
 		val password = pw.getString("password")
 		val tempUsername = pw.getString("temptableusername")
@@ -22,8 +23,8 @@ object OracleDatabaseConnection {
 		val poolSize = pw.getOptionalString("maxPoolSize").map(_.toInt).getOrElse(2)
 		val poolSizeTemp = pw.getOptionalString("maxPoolSizeTemp").map(_.toInt).getOrElse(1)
 
-		val mainConfig = getDataSourceConfig(host, port, sid, username, password, poolSize)
-		val tempConfig = getDataSourceConfig(host, port, sid, tempUsername, tempPassword, poolSizeTemp)
+		val mainConfig = getDataSourceConfig(host, port, sid, serviceName, username, password, poolSize)
+		val tempConfig = getDataSourceConfig(host, port, sid, serviceName, tempUsername, tempPassword, poolSizeTemp)
 
 		new DatabaseGateway(
 			mainPool = new ConnectionPoolWrapper(new HikariDataSource(mainConfig)),
@@ -34,10 +35,23 @@ object OracleDatabaseConnection {
 		)
 	}
 
-	private def getDataSourceConfig(host: String, port: String, sid: String, username: String, password: String, poolSize: Int): HikariConfig = {
+	private def getDataSourceConfig(host: String, port: String, sid: Option[String], serviceName: Option[String], username: String, password: String, poolSize: Int): HikariConfig = {
 		val config = new HikariConfig()
 		println("username: " + username + " max pool size: " + poolSize)
-		config.setJdbcUrl(s"jdbc:oracle:thin:@$host:$port:$sid")
+
+		val url = if (sid.nonEmpty) {
+			println("using sid")
+			s"jdbc:oracle:thin:@$host:$port:${sid.get}"
+		} else if (serviceName.nonEmpty) {
+			println("using servicename")
+			s"jdbc:oracle:thin:@$host:$port/${serviceName.get}"
+		} else {
+			throw new Exception("Oracle connection config: must specify sid or servicename")
+		}
+
+	//	println("jdbc url: " + url)
+		config.setJdbcUrl(url)
+
 		config.setUsername(username)
 		config.setPassword(password)
 

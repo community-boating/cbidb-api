@@ -1,8 +1,8 @@
 package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, IntColumnAlias, StringColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, StringColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
 class StringDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String, fieldLength: Int) extends DatabaseField[String](entity, persistenceFieldName) {
 	def getFieldLength: Int = fieldLength

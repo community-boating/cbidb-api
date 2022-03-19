@@ -1,12 +1,11 @@
 package com.coleji.neptune.Storable.Fields
 
-import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateTimeColumnAlias, IntColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateTimeColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
 
 class DateTimeDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[LocalDateTime](entity, persistenceFieldName) {
 	val standardPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

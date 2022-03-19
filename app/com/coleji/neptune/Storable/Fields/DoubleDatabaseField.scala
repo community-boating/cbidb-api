@@ -1,9 +1,8 @@
 package com.coleji.neptune.Storable.Fields
 
-import com.coleji.neptune.Core.PermissionsAuthority
-import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateColumnAlias, DoubleColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DoubleColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
 class DoubleDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Double](entity, persistenceFieldName) {
 	def getFieldType(implicit persistenceSystem: PersistenceSystem): String = persistenceSystem match {

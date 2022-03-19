@@ -2,7 +2,7 @@ package com.coleji.neptune.Storable.Fields
 
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
 import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, NullableBooleanColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
 class NullableBooleanDatabaseField(override val entity: StorableObject[_ <: StorableClass], override val persistenceFieldName: String) extends DatabaseField[Option[Boolean]](entity, persistenceFieldName) {
 	def getFieldLength: Int = 1

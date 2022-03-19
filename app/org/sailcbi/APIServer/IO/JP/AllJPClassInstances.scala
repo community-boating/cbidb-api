@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.IO.JP
 
 import com.coleji.neptune.Core.PermissionsAuthority
-import com.coleji.neptune.Storable.StorableQuery.{QueryBuilder, TableAlias}
+import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSession, JpClassType}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 

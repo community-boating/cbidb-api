@@ -584,7 +584,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 //			}))
 
 			val hadResults: Boolean = callable.execute()
-			conn.commit()
+//			conn.commit()
 
 			pc.getOutResults(callable)
 		})

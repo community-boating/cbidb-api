@@ -1,6 +1,6 @@
 package com.coleji.neptune.Storable.FieldValues
 
-import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PersistenceSystem}
+import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.Fields.DateDatabaseField
 import com.coleji.neptune.Storable.{GetSQLLiteral, StorableClass}
 import play.api.libs.json.{JsString, JsValue}

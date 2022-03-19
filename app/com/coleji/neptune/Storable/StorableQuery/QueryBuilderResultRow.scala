@@ -1,7 +1,7 @@
 package com.coleji.neptune.Storable.StorableQuery
 
 import com.coleji.neptune.Storable.Fields.{DatabaseField, NonNullFieldWasNullException}
-import com.coleji.neptune.Storable.{ProtoStorable, StorableObject}
+import com.coleji.neptune.Storable.ProtoStorable
 
 class QueryBuilderResultRow(val ps: ProtoStorable) {
 	def getValue[T](t: TableAliasInnerJoined[_])(f: t.Fields => DatabaseField[T]): T = {

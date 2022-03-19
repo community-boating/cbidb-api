@@ -1,10 +1,8 @@
 package com.coleji.neptune.Storable.Fields
 
-import com.coleji.neptune.Core.PermissionsAuthority
-import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE, PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateColumnAlias, DateTimeColumnAlias, TableAlias}
-import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
-import com.coleji.neptune.Util._
+import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_RELATIONAL, PersistenceSystem}
+import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, DateColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.{ProtoStorable, StorableClass, StorableObject}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
