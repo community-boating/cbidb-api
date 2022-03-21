@@ -1,5 +1,6 @@
 package com.coleji.neptune.Core
 
+import com.coleji.neptune.Core.access.Permission
 import com.coleji.neptune.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import com.coleji.neptune.Storable.Fields.DatabaseField
 import com.coleji.neptune.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
@@ -23,6 +24,8 @@ sealed abstract class RequestCache private[Core](
 	}
 
 	val cb: CacheBroker = new RedisBroker(redisPool)
+
+	def hasPermission(p: Permission): Boolean = false
 
 	def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		this.companion.test(pq.allowedUserTypes)

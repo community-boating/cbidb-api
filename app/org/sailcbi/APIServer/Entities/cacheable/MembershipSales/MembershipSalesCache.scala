@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.cacheable.MembershipSales
 
-import com.coleji.neptune.Core.{Cacheable, RequestCache}
+import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
 import com.coleji.neptune.Storable.StorableQuery.ColumnAlias.wrap
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.Serde
@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.Entities.dto.MembershipSale
 
 import java.time.Duration
 
-object MembershipSalesCache extends Cacheable[MembershipSalesCacheKey, List[MembershipSale]] {
+object MembershipSalesCache extends CacheableFactory[MembershipSalesCacheKey, List[MembershipSale]] {
 	override protected val lifetime: Duration = Duration.ofHours(1)
 
 	override protected def calculateKey(config: MembershipSalesCacheKey): String = CacheKeys.membershipSales(config)

@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.cacheable.ApClassInstances
 
-import com.coleji.neptune.Core.{Cacheable, RequestCache}
+import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.Serde
@@ -10,7 +10,7 @@ import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, PublicRequestCache, 
 import java.time.Duration
 import java.time.format.DateTimeFormatter
 
-object ApClassInstancesCache extends Cacheable[ApClassInstancesCacheKey, List[ApClassInstanceDto]]{
+object ApClassInstancesCache extends CacheableFactory[ApClassInstancesCacheKey, List[ApClassInstanceDto]]{
 	override protected val lifetime: Duration = Duration.ofMinutes(5)
 
 	override protected def calculateKey(config: ApClassInstancesCacheKey): String = CacheKeys.apClassInstances(config)

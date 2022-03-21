@@ -4,7 +4,7 @@ import com.coleji.neptune.Util.{Serde, StringUtil}
 
 import java.time.{Duration, Instant, ZoneId, ZonedDateTime}
 
-abstract class Cacheable[T_KeyConfig, T_Result] {
+abstract class CacheableFactory[T_KeyConfig, T_Result] {
 	private val EXPIRATION_KEY_PREFIX = "$$EXP_"
 
 	protected val lifetime: Duration

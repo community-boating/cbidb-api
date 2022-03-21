@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor
 import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.ClassInstructor
+import org.sailcbi.APIServer.Entities.access.CbiAccess
 import org.sailcbi.APIServer.Entities.dto.PutClassInstructorDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
@@ -15,7 +16,7 @@ class PutClassInstructor @Inject()(implicit exec: ExecutionContext) extends Rest
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutClassInstructorDTO.apply)(parsed => {
-			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
+			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
 					case Right(i: ClassInstructor) => Future(Ok(new JsObject(Map(

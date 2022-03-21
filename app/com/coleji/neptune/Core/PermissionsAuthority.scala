@@ -4,6 +4,7 @@ import com.coleji.neptune.API.ResultError
 import com.coleji.neptune.Core.Boot.SystemServerParameters
 import com.coleji.neptune.Core.Emailer.SSMTPEmailer
 import com.coleji.neptune.Core.Logger.{Logger, ProductionLogger, UnitTestLogger}
+import com.coleji.neptune.Core.access.Permission
 import com.coleji.neptune.Exception.{CORSException, MuteEmailException, PostBodyNotJSONException, UnauthorizedAccessException}
 import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.neptune.Storable.{ResultSetWrapper, StorableClass, StorableObject}
@@ -116,11 +117,18 @@ class PermissionsAuthority private[Core] (
 
 	private def withRCWrapper[T <: RequestCache](
 		get: () => Option[T],
-		block: T => Future[Result]
+		block: T => Future[Result],
+		permission: Option[Permission]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
 			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
-			case Some(rc) => block(rc)
+			case Some(rc) => permission match {
+				case None => block(rc)
+				case Some(p) => {
+					if (rc.hasPermission(p)) block(rc)
+					else Future(Results.Ok(ResultError.UNAUTHORIZED))
+				}
+			}
 		})
 	}
 
@@ -152,7 +160,17 @@ class PermissionsAuthority private[Core] (
 		parsedRequest: ParsedRequest,
 		block: T => Future[Result]
 	)(implicit exec: ExecutionContext): Future[Result] =
-		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block)
+		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block, None)
+
+	def withRequestCache[T <: RequestCache](
+		requiredUserType: RequestCacheObject[T],
+		p: Permission
+	)(
+		requiredUserName: Option[String],
+		parsedRequest: ParsedRequest,
+		block: T => Future[Result]
+	)(implicit exec: ExecutionContext): Future[Result] =
+		withRCWrapper(() => getRequestCache(requiredUserType, requiredUserName, parsedRequest), block, Some(p))
 
 	// TODO: better way to handle requests authenticated against multiple mechanisms?
 	// TODO: any reason this should be in a companion obj vs just in teh PA?  Seems like only the PA should be making these things

@@ -7,7 +7,10 @@ abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: 
 	protected def runValidationsForUpdate(rc: UnlockedRequestCache, d: D): ValidationResult
 	protected def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
 
-	protected def put(rc: UnlockedRequestCache, dto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
+	protected def mutateDtoBeforeOperating(dto: D): D = dto
+
+	protected def put(rc: UnlockedRequestCache, rawDto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
+		val dto = mutateDtoBeforeOperating(rawDto)
 		dto.getId match {
 			case Some(dtoId: Int) => {
 				println(s"its an update: $dtoId")
