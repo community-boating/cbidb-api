@@ -8,7 +8,7 @@ on:
       - dev/*
       - cluster/*
     tags:
-      - *
+      - '*'
   pull_request:
     branches:
       - master
