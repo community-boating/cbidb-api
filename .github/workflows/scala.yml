@@ -35,7 +35,7 @@ jobs:
         run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
       - name: its a tag
         if: github.ref_type == 'tag'
-        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _)" >> $GITHUB_ENV
+        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
       - name: echo REF_NAME
         run: echo ${{ env.REF_NAME }}
       - name: generate routes
