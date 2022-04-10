@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 jobs:
   tarsrc:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -36,7 +36,8 @@ jobs:
           name: src.tar
           path: src.tar
   imagedev:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    if: github.event_name != 'pull_request'
     needs: tarsrc
     steps:
       - uses: actions/checkout@v2
@@ -100,7 +101,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildpub:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -122,8 +123,9 @@ jobs:
         name: CBI-DB-API_0.1.0_all-pub.deb
         path: target/CBI-DB-API_0.1.0_all-pub.deb
   imagepub:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: buildpub
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - name: Fetch artifact
@@ -191,7 +193,7 @@ jobs:
           docker tag ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.REF_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
   buildstaff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -213,8 +215,9 @@ jobs:
           name: CBI-DB-API_0.1.0_all-staff.deb
           path: target/CBI-DB-API_0.1.0_all-staff.deb
   imagestaff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: buildstaff
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - name: Fetch artifact
