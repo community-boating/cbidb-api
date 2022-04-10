@@ -57,24 +57,39 @@ jobs:
         with:
           name: src.tar
 
-      - name: Get branch name (merge)
-        if: github.event_name != 'pull_request'
+      - name: set docker env (branch non PR)
+        if: github.ref_type == 'branch' && github.event_name != 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
-
-      - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request'
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-dev-snapshot" >> $GITHUB_ENV
+      - name: set docker env (branch PR)
+        if: github.ref_type == 'branch' && github.event_name == 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-dev-snapshot" >> $GITHUB_ENV
+      - name: set docker env (tag)
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-dev-release" >> $GITHUB_ENV
 
-      - name: echo branch name
-        run: echo ${{ env.BRANCH_NAME }}
+      - name: echo vars
+        run: |
+          echo ${{ env.REF_NAME }}
+          echo ${{ env.NEXUS_URL }}
+          echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }} -f Dockerfile.build .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }} -f Dockerfile.build .
 
       - name: Log in to nexus Registry
-        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -87,13 +102,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: nexus push image
-        run: docker push docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag docker-snapshots.community-boating.org/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/cbidb-api-dev-snapshot:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildpub:
@@ -141,27 +156,42 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Get branch name (merge)
-        if: github.event_name != 'pull_request'
+      - name: set docker env (branch non PR)
+        if: github.ref_type == 'branch' && github.event_name != 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
-
-      - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request'
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-pub-snapshot" >> $GITHUB_ENV
+      - name: set docker env (branch PR)
+        if: github.ref_type == 'branch' && github.event_name == 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-pub-snapshot" >> $GITHUB_ENV
+      - name: set docker env (tag)
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-pub-release" >> $GITHUB_ENV
 
-      - name: echo branch name
-        run: echo ${{ env.BRANCH_NAME }}
+      - name: echo vars
+        run: |
+          echo ${{ env.REF_NAME }}
+          echo ${{ env.NEXUS_URL }}
+          echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }} .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }} .
 
       - name: Log in to nexus Registry
-        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
 
       - name: nexus push image
-        run: docker push docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -170,8 +200,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag docker-snapshots.community-boating.org/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/cbidb-api-pub-snapshot:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
   buildstaff:
     runs-on: ubuntu-latest
     steps:
@@ -206,24 +236,39 @@ jobs:
       - name: rename image
         run: mv CBI-DB-API_0.1.0_all-staff.deb CBI-DB-API_0.1.0_all.deb
 
-      - name: Get branch name (merge)
-        if: github.event_name != 'pull_request'
+      - name: set docker env (branch non PR)
+        if: github.ref_type == 'branch' && github.event_name != 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
-
-      - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request'
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-staff-snapshot" >> $GITHUB_ENV
+      - name: set docker env (branch PR)
+        if: github.ref_type == 'branch' && github.event_name == 'pull_request'
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-staff-snapshot" >> $GITHUB_ENV
+      - name: set docker env (tag)
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
+          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "ECR_REPO=cbidb-api-staff-release" >> $GITHUB_ENV
 
-      - name: echo branch name
-        run: echo ${{ env.BRANCH_NAME }}
+      - name: echo vars
+        run: |
+          echo ${{ env.REF_NAME }}
+          echo ${{ env.NEXUS_URL }}
+          echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }} .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }} .
 
       - name: Log in to nexus Registry
-        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} docker-snapshots.community-boating.org
+        run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -236,12 +281,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: push image
-        run: docker push docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag docker-snapshots.community-boating.org/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/cbidb-api-staff-snapshot:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
