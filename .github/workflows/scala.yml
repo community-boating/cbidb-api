@@ -24,6 +24,26 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+      - name: echo $GITHUB_ENV
+        run: echo $GITHUB_ENV
+      - name: echo $GITHUB_REF
+        run: echo $GITHUB_REF
+      - name: its a branch
+        if: github.ref_type == 'branch'
+        run: echo 'its a branch!'
+        env:
+          CBI_REF_TYPE: branch
+          CBI_REF: ${{ github.ref }}
+      - name: its a tag
+        if: github.ref_type == 'tag'
+        run: echo 'its a tag!'
+        env:
+          CBI_REF_TYPE: tag
+          CBI_REF: ${{ github.ref }}
+      - name: echo CBI_REF_TYPE
+        run: echo ${{ env.CBI_REF_TYPE }}
+      - name: echo CBI_REF
+        run: echo ${{ env.CBI_REF }}
       - name: generate routes
         run: ./py-build-routes.py 10
       - name: tar all
