@@ -30,20 +30,12 @@ jobs:
         run: echo $GITHUB_REF
       - name: its a branch
         if: github.ref_type == 'branch'
-        run: echo 'its a branch!'
-        env:
-          CBI_REF_TYPE: branch
-          CBI_REF: ${{ github.ref }}
+        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
       - name: its a tag
         if: github.ref_type == 'tag'
-        run: echo 'its a tag!'
-        env:
-          CBI_REF_TYPE: tag
-          CBI_REF: ${{ github.ref }}
-      - name: echo CBI_REF_TYPE
-        run: echo ${{ env.CBI_REF_TYPE }}
-      - name: echo CBI_REF
-        run: echo ${{ env.CBI_REF }}
+        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _)" >> $GITHUB_ENV
+      - name: echo REF_NAME
+        run: echo ${{ env.REF_NAME }}
       - name: generate routes
         run: ./py-build-routes.py 10
       - name: tar all
