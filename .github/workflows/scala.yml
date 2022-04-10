@@ -26,18 +26,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: echo $GITHUB_ENV
-        run: echo $GITHUB_ENV
-      - name: echo $GITHUB_REF
-        run: echo $GITHUB_REF
-      - name: its a branch
-        if: github.ref_type == 'branch'
-        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / _)" >> $GITHUB_ENV
-      - name: its a tag
-        if: github.ref_type == 'tag'
-        run: echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
-      - name: echo REF_NAME
-        run: echo ${{ env.REF_NAME }}
       - name: generate routes
         run: ./py-build-routes.py 10
       - name: tar all
@@ -86,7 +74,7 @@ jobs:
           echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }} -f Dockerfile.build .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.REF_NAME }} -f Dockerfile.build .
 
       - name: Log in to nexus Registry
         run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
@@ -102,13 +90,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: nexus push image
-        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.REF_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-dev:${{ env.REF_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildpub:
@@ -185,13 +173,13 @@ jobs:
           echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }} .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.REF_NAME }} .
 
       - name: Log in to nexus Registry
         run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
 
       - name: nexus push image
-        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.REF_NAME }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -200,8 +188,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-pub:${{ env.REF_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
   buildstaff:
     runs-on: ubuntu-latest
     steps:
@@ -265,7 +253,7 @@ jobs:
           echo ${{ env.ECR_REPO }}
 
       - name: build image
-        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }} .
+        run: docker build -t ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.REF_NAME }} .
 
       - name: Log in to nexus Registry
         run: docker login -u ci -p ${{ secrets.NEXUS_PASSWORD }} ${{ env.NEXUS_URL }}
@@ -281,12 +269,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: push image
-        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }}
+        run: docker push ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.REF_NAME }}
       - name: tag & push aws
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.BRANCH_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.BRANCH_NAME }}
+          docker tag ${{ env.NEXUS_URL }}/cbidb-api-staff:${{ env.REF_NAME }} $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO }}:${{ env.REF_NAME }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
