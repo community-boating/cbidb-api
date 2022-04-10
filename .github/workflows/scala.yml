@@ -57,14 +57,14 @@ jobs:
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-dev-snapshot" >> $GITHUB_ENV
       - name: set docker env (tag)
         if: github.ref_type == 'tag'
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-releases.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-dev-release" >> $GITHUB_ENV
 
       - name: echo vars
@@ -156,14 +156,14 @@ jobs:
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-pub-snapshot" >> $GITHUB_ENV
       - name: set docker env (tag)
         if: github.ref_type == 'tag'
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-releases.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-pub-release" >> $GITHUB_ENV
 
       - name: echo vars
@@ -236,14 +236,14 @@ jobs:
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_HEAD_REF} | tr / _)" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-snapshots.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-snapshots.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-staff-snapshot" >> $GITHUB_ENV
       - name: set docker env (tag)
         if: github.ref_type == 'tag'
         shell: bash
         run: |
           echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
-          echo "NEXUS_REPO=docker-releases.community-boating.org" >> $GITHUB_ENV
+          echo "NEXUS_URL=docker-releases.community-boating.org" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-staff-release" >> $GITHUB_ENV
 
       - name: echo vars
