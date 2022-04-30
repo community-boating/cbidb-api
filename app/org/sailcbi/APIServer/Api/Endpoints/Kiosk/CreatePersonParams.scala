@@ -13,7 +13,8 @@ case class CreatePersonParams(
 	emerg1PhonePrimary: String,
 	emerg1PhonePrimaryType: Option[String],
 	emerg1Relation: Option[String],
-	previousMember: Boolean
+	previousMember: Boolean,
+	forRental: Option[Boolean],
 )
 
 object CreatePersonParams {

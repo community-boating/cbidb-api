@@ -3041,18 +3041,19 @@ object PortalLogic {
 		sb.toString()
 	}
 
-	def sendTicketEmail(rc: RequestCache, email: String, html: String): Unit = {
+	def sendTicketEmail(rc: RequestCache, email: String, html: String, forRental: Boolean): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(ProtoPersonRequestCache)) {
 			override def setInParametersVarchar: Map[String, String] = Map(
 				"p_email" -> email,
 				"p_ticket_html" -> html,
+				"p_for_rental" -> ( if (forRental) "Y" else "N" )
 			)
 
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
 			override def getOutResults(cs: CallableStatement): Unit = Unit
 
-			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?)"
+			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?, ?)"
 		}
 		rc.executeProcedure(ppc)
 	}
