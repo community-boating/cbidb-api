@@ -161,7 +161,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				   |EMERG1_RELATION,
 				   |PHONE_PRIMARY_TYPE,
 				   |EMERG1_PHONE_PRIMARY_TYPE,
-				   |guest_portal_ref
+				   |guest_portal_reg
 				   |) values
 				   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)},'W',?,?,?,?, ?)
 							""".stripMargin
