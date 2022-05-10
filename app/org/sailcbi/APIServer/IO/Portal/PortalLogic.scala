@@ -3028,7 +3028,7 @@ object PortalLogic {
 		})
 	}
 
-	def ticketHTML(cardNumber: Int, nonce: String, name: String): String = {
+	def ticketHTML(cardNumber: Int, nonce: String, name: String, forRental: Boolean): String = {
 		val sb = new StringBuilder()
 		sb.append("<div id=\"printbox\" style=\"padding: 40px; width: 220px; border: 2px solid black;\">")
 		sb.append("<img src=\"https://portal.community-boating.org/images/guest-ticket.png\" alt=\"Community Boating Guest Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
@@ -3036,7 +3036,11 @@ object PortalLogic {
 		sb.append("<h3 style=\"text-align: center\">")
 		sb.append(name)
 		sb.append("</h3>")
-		sb.append("<p>Please bring this card with you to the dockhouse when you come sailing.</p>")
+		if (forRental) {
+			sb.append("<p>Please return this ticket to the front office and tell them you have completed registration online and would like to pay.</p>")
+		} else {
+			sb.append("<p>Please bring this card with you to the dockhouse when you come sailing.</p>")
+		}
 		sb.append("</div>")
 		sb.toString()
 	}

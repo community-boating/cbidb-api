@@ -58,7 +58,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					val guestPortalRegValue = if (forRental) "R" else "Y"
 					val id = doPost(rc, parsed, Some(rc.userName), guestPortalRegValue)
 					val (cardNumber, assignId, nonce) = PortalLogic.createGuestCard(rc, id)
-					val ticketHTML = PortalLogic.ticketHTML(cardNumber, nonce, parsed.firstName + " " + parsed.lastName)
+					val ticketHTML = PortalLogic.ticketHTML(cardNumber, nonce, parsed.firstName + " " + parsed.lastName, forRental)
 					PortalLogic.sendTicketEmail(rc, parsed.emailAddress, ticketHTML, forRental)
 					Future {
 						Ok(JsObject(Map(
