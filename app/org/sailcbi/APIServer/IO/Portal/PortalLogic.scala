@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -3029,9 +3030,11 @@ object PortalLogic {
 	}
 
 	def ticketHTML(cardNumber: Int, nonce: String, name: String, forRental: Boolean): String = {
+		val imgUrl = if (forRental) "https://portal.community-boating.org/images/rental-ticket.png" else "https://portal.community-boating.org/images/guest-ticket.png"
+		val noun = if (forRental) "Rental" else "Guest"
 		val sb = new StringBuilder()
 		sb.append("<div id=\"printbox\" style=\"padding: 40px; width: 220px; border: 2px solid black;\">")
-		sb.append("<img src=\"https://portal.community-boating.org/images/guest-ticket.png\" alt=\"Community Boating Guest Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
+		sb.append("<img src=\"" + imgUrl + "\" alt=\"Community Boating " + noun + " Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
 		sb.append("<img src=\"$API_URL$/api/ap/guest-ticket-barcode?cardNumber=" + cardNumber + "&nonce=" + nonce + "\" alt=\"Barcode Error, Please See Front Office\" width=\"150PX\" style=\"padding-top: 10px; padding-left:30px\" />")
 		sb.append("<h3 style=\"text-align: center\">")
 		sb.append(name)
