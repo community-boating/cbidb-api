@@ -12,10 +12,10 @@ case class BalanceTransaction(
 	description: Option[String],
 	fee: Int,
 	net: Int,
-	source: String,
+	source: Option[String],
 	status: String,
 	`type`: String,
-	payout: String,
+	payout: Option[String],
 	created: Int
 ) extends CastableToStorableClass {
 	val pkSqlLiteral: String = id

@@ -20,10 +20,10 @@ class GetLocalStripeBalanceTransactions(payout: Payout) extends PreparedQueryFor
 		description = rs.getOptionString(3),
 		fee = rs.getInt(4),
 		net = rs.getInt(5),
-		source = rs.getString(6),
+		source = Some(rs.getString(6)),
 		status = rs.getString(7),
 		`type` = rs.getString(8),
-		payout = payout.id,
+		payout = Some(payout.id),
 		created = rs.getInt(9)
 	)
 
