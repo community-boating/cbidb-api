@@ -1,5 +1,8 @@
 package com.coleji.neptune.Storable
 
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.Core.UnlockedRequestCache
+
 abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Manifest[S]) {
 //	protected def classAccessors: List[MethodSymbol] = typeOf[T].members.collect {
 //		case m: MethodSymbol if m.isCaseAccessor => m
@@ -30,4 +33,40 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 //		})
 //		s
 	}
+
+	protected def runValidationsForUpdate(rc: UnlockedRequestCache): ValidationResult = ValidationOk
+	protected def runValidationsForInsert(rc: UnlockedRequestCache): ValidationResult = ValidationOk
+
+	def recurseThroughObject[S <: StorableClass, T <: DTOClass[S]](dto: T, obj: StorableObject[S], rc: UnlockedRequestCache): Either[ValidationError, S] = {
+		dto.getId match {
+			case Some(dtoId: Int) => {
+				println(s"its an update: $dtoId")
+
+				dto.runValidationsForUpdate(rc) match {
+					case ve: ValidationError => Left(ve)
+					case ValidationOk => {
+						// do update
+						val storable = rc.getObjectById(obj, dtoId).get
+						dto.mutateStorableForUpdate(storable)
+						rc.commitObjectToDatabase(storable)
+						Right(storable)
+					}
+				}
+			}
+			case None => {
+				println(s"its a create")
+
+				dto.runValidationsForInsert(rc) match {
+					case ve: ValidationError =>Left(ve)
+					case ValidationOk => {
+						val storable = dto.unpackage
+						rc.commitObjectToDatabase(storable)
+						Right(storable)
+					}
+				}
+			}
+		}
+	}
+
+	protected def recurse(rc: UnlockedRequestCache): ValidationResult = ValidationOk
 }
