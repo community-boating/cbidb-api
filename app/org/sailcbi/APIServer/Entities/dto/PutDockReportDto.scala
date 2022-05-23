@@ -9,26 +9,26 @@ import play.api.libs.json.{JsValue, Json}
 import java.time.{LocalDate, LocalDateTime}
 
 case class PutDockReportDto (
-	dockReportId: Option[Int],
-	reportDate: Option[LocalDate],
-	sunsetDatetime: Option[LocalDateTime],
-	incidentsNotes: Option[String],
-	announcements: Option[String],
-	semiPermanentRestrictions: Option[String],
+	DOCK_REPORT_ID: Option[Int],
+	REPORT_DATE: Option[LocalDate],
+	SUNSET_DATETIME: Option[LocalDateTime],
+	INCIDENTS_NOTES: Option[String],
+	ANNOUNCEMENTS: Option[String],
+	SEMI_PERMANENT_RESTRICTIONS: Option[String],
 	staff: List[PutDockReportStaffDto],
 	apClasses: List[PutDockReportApClassDto],
 	uapAppts: List[PutDockReportUapApptDto],
 	hullCounts: List[PutDockReportHullCountDto],
 	weather: List[PutDockReportWeatherDto]
 ) extends DTOClass[DockReport] {
-	override def getId: Option[Int] = dockReportId
+	override def getId: Option[Int] = DOCK_REPORT_ID
 
 	override def mutateStorableForUpdate(s: DockReport): DockReport = {
-		s.update(_.reportDate, reportDate)
-		s.update(_.sunsetDatetime, sunsetDatetime)
-		s.update(_.incidentsNotes, incidentsNotes)
-		s.update(_.announcements, announcements)
-		s.update(_.semiPermanentRestrictions, semiPermanentRestrictions)
+		s.update(_.reportDate, REPORT_DATE)
+		s.update(_.sunsetDatetime, SUNSET_DATETIME)
+		s.update(_.incidentsNotes, INCIDENTS_NOTES)
+		s.update(_.announcements, ANNOUNCEMENTS)
+		s.update(_.semiPermanentRestrictions, SEMI_PERMANENT_RESTRICTIONS)
 		s
 	}
 
