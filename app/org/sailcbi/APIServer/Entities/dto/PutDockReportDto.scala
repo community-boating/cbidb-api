@@ -15,7 +15,8 @@ case class PutDockReportDto (
 	INCIDENTS_NOTES: Option[String],
 	ANNOUNCEMENTS: Option[String],
 	SEMI_PERMANENT_RESTRICTIONS: Option[String],
-	staff: List[PutDockReportStaffDto],
+	dockstaff: List[PutDockReportStaffDto],
+	dockmasters: List[PutDockReportStaffDto],
 	apClasses: List[PutDockReportApClassDto],
 	uapAppts: List[PutDockReportUapApptDto],
 	hullCounts: List[PutDockReportHullCountDto],
@@ -35,7 +36,8 @@ case class PutDockReportDto (
 	override def mutateStorableForInsert(s: DockReport):  DockReport = mutateStorableForUpdate(s)
 
 	override protected def recurse(rc: UnlockedRequestCache): ValidationResult = {
-		val staffValidations = staff.map(s => s.recurseThroughObject(s, DockReportStaff, rc))
+		val dockstaffValidations = dockstaff.map(s => s.recurseThroughObject(s, DockReportStaff, rc))
+		val dockmastersValidations = dockmasters.map(s => s.recurseThroughObject(s, DockReportStaff, rc))
 		val apClassesValidations = apClasses.map(s => s.recurseThroughObject(s, DockReportApClass, rc))
 		val uapApptsValidations = uapAppts.map(s => s.recurseThroughObject(s, DockReportUapAppt, rc))
 		val hullCountsValidations = hullCounts.map(s => s.recurseThroughObject(s, DockReportHullCount, rc))

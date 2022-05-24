@@ -19,7 +19,7 @@ class PutDockReport @Inject()(implicit exec: ExecutionContext) extends RestContr
 			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
-					case Right(i: DonationFund) => Future(Ok(JsNull))
+					case Right(i: DockReport) => Future(Ok(JsNull))
 				}
 			})
 		})
