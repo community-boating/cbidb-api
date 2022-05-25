@@ -35,14 +35,34 @@ case class PutDockReportDto (
 
 	override def mutateStorableForInsert(s: DockReport):  DockReport = mutateStorableForUpdate(s)
 
-	override protected def recurse(rc: UnlockedRequestCache): ValidationResult = {
-		val dockstaffValidations = dockstaff.map(s => s.recurseThroughObject(s, DockReportStaff, rc))
-		val dockmastersValidations = dockmasters.map(s => s.recurseThroughObject(s, DockReportStaff, rc))
-		val apClassesValidations = apClasses.map(s => s.recurseThroughObject(s, DockReportApClass, rc))
-		val uapApptsValidations = uapAppts.map(s => s.recurseThroughObject(s, DockReportUapAppt, rc))
-		val hullCountsValidations = hullCounts.map(s => s.recurseThroughObject(s, DockReportHullCount, rc))
-		val weatherValidations = weather.map(s => s.recurseThroughObject(s, DockReportWeather, rc))
-		ValidationOk
+	override def recurse(rc: UnlockedRequestCache): ValidationResult = {
+		for (
+			_ <- ValidationResult.combine(dockstaff.map(s => {
+				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportStaff, rc).swap.getOrElse(ValidationOk)
+			}));
+			_ <- ValidationResult.combine(dockmasters.map(s => {
+				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportStaff, rc).swap.getOrElse(ValidationOk)
+			}));
+			_ <- ValidationResult.combine(apClasses.map(s => {
+				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportApClass, rc).swap.getOrElse(ValidationOk)
+			}));
+			_ <- ValidationResult.combine(uapAppts.map(s => {
+				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportUapAppt, rc).swap.getOrElse(ValidationOk)
+			}));
+			_ <- ValidationResult.combine(hullCounts.map(s => {
+				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportHullCount, rc).swap.getOrElse(ValidationOk)
+			}));
+			validationResult <- ValidationResult.combine(weather.map(s => {
+				println("doing weather")
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.recurseThroughObject(DockReportWeather, rc).swap.getOrElse(ValidationOk)
+			}))
+		) yield validationResult
 	}
 }
 
@@ -50,4 +70,19 @@ object PutDockReportDto {
 	implicit val format = Json.format[PutDockReportDto]
 
 	def apply(v: JsValue): PutDockReportDto = v.as[PutDockReportDto]
+
+	def apply(dr: DockReport): PutDockReportDto = new PutDockReportDto(
+		DOCK_REPORT_ID=Some(dr.values.dockReportId.get),
+		REPORT_DATE=dr.values.reportDate.get,
+		SUNSET_DATETIME=dr.values.sunsetDatetime.peek.flatten,
+		INCIDENTS_NOTES=dr.values.incidentsNotes.peek.flatten,
+		ANNOUNCEMENTS=dr.values.announcements.peek.flatten,
+		SEMI_PERMANENT_RESTRICTIONS=dr.values.semiPermanentRestrictions.peek.flatten,
+		dockstaff=List.empty,
+		dockmasters=List.empty,
+		apClasses=List.empty,
+		uapAppts=List.empty,
+		hullCounts=List.empty,
+		weather=List.empty,
+	)
 }

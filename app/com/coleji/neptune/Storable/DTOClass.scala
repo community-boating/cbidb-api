@@ -37,17 +37,17 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 	protected def runValidationsForUpdate(rc: UnlockedRequestCache): ValidationResult = ValidationOk
 	protected def runValidationsForInsert(rc: UnlockedRequestCache): ValidationResult = ValidationOk
 
-	def recurseThroughObject[S <: StorableClass, T <: DTOClass[S]](dto: T, obj: StorableObject[S], rc: UnlockedRequestCache): Either[ValidationError, S] = {
-		dto.getId match {
+	def recurseThroughObject(obj: StorableObject[S], rc: UnlockedRequestCache): Either[ValidationError, S] = {
+		getId match {
 			case Some(dtoId: Int) => {
 				println(s"its an update: $dtoId")
 
-				dto.runValidationsForUpdate(rc) match {
+				runValidationsForUpdate(rc) match {
 					case ve: ValidationError => Left(ve)
 					case ValidationOk => {
 						// do update
 						val storable = rc.getObjectById(obj, dtoId).get
-						dto.mutateStorableForUpdate(storable)
+						mutateStorableForUpdate(storable)
 						rc.commitObjectToDatabase(storable)
 						Right(storable)
 					}
@@ -56,10 +56,10 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 			case None => {
 				println(s"its a create")
 
-				dto.runValidationsForInsert(rc) match {
+				runValidationsForInsert(rc) match {
 					case ve: ValidationError =>Left(ve)
 					case ValidationOk => {
-						val storable = dto.unpackage
+						val storable = unpackage
 						rc.commitObjectToDatabase(storable)
 						Right(storable)
 					}
@@ -68,5 +68,5 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 		}
 	}
 
-	protected def recurse(rc: UnlockedRequestCache): ValidationResult = ValidationOk
+	def recurse(rc: UnlockedRequestCache): ValidationResult = ValidationOk
 }
