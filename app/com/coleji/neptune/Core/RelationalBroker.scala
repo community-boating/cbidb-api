@@ -390,6 +390,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	}
 
 	override protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
+		i.companion.init()
 		if (i.hasID) {
 			updateObject(i)
 		} else {

@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport
 
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DockReport, DockReportWeather}
-import org.sailcbi.APIServer.Entities.dto.{PutDockReportDto, PutDockReportWeatherDto}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{DockReport, DockReportStaff, DockReportUapAppt, DockReportWeather}
+import org.sailcbi.APIServer.Entities.dto.{PutDockReportDto, PutDockReportStaffDto, PutDockReportUapApptDto, PutDockReportWeatherDto}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNull, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -19,6 +19,8 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 				.map(dr => {
 					val dockRptId = dr.values.dockReportId.get
 					val weather = rc.getObjectsByFilters(DockReportWeather, List(DockReportWeather.fields.dockReportId.alias.equalsConstant(dockRptId)), Set.empty)
+					val dockstaff = rc.getObjectsByFilters(DockReportStaff, List(DockReportStaff.fields.dockReportId.alias.equalsConstant(dockRptId)), Set.empty)
+					val uapAppts = rc.getObjectsByFilters(DockReportUapAppt, List(DockReportUapAppt.fields.dockReportId.alias.equalsConstant(dockRptId)), Set.empty)
 					new PutDockReportDto(
 						DOCK_REPORT_ID=Some(dr.values.dockReportId.get),
 						REPORT_DATE=dr.values.reportDate.get,
@@ -26,10 +28,10 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 						INCIDENTS_NOTES=dr.values.incidentsNotes.get,
 						ANNOUNCEMENTS=dr.values.announcements.get,
 						SEMI_PERMANENT_RESTRICTIONS=dr.values.semiPermanentRestrictions.get,
-						dockstaff=List.empty,
-						dockmasters=List.empty,
+						dockstaff=dockstaff.filter(!_.values.dockmasterOnDuty.get).map(PutDockReportStaffDto.apply),
+						dockmasters=dockstaff.filter(_.values.dockmasterOnDuty.get).map(PutDockReportStaffDto.apply),
 						apClasses=List.empty,
-						uapAppts=List.empty,
+						uapAppts=uapAppts.map(PutDockReportUapApptDto.apply),
 						hullCounts=List.empty,
 						weather=weather.map(PutDockReportWeatherDto.apply),
 					)

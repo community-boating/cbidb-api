@@ -38,11 +38,11 @@ case class PutDockReportDto (
 	override def recurse(rc: UnlockedRequestCache): ValidationResult = {
 		for (
 			_ <- ValidationResult.combine(dockstaff.map(s => {
-				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportStaff, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(dockmasters.map(s => {
-				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportStaff, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(apClasses.map(s => {
@@ -50,7 +50,7 @@ case class PutDockReportDto (
 				s.recurseThroughObject(DockReportApClass, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(uapAppts.map(s => {
-				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportUapAppt, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(hullCounts.map(s => {
@@ -58,7 +58,6 @@ case class PutDockReportDto (
 				s.recurseThroughObject(DockReportHullCount, rc).swap.getOrElse(ValidationOk)
 			}));
 			validationResult <- ValidationResult.combine(weather.map(s => {
-				println("doing weather")
 				s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
 				s.recurseThroughObject(DockReportWeather, rc).swap.getOrElse(ValidationOk)
 			}))
