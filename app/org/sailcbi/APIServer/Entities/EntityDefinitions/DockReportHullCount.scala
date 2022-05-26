@@ -9,9 +9,9 @@ class DockReportHullCount extends StorableClass(DockReportHullCount) {
 	object values extends ValuesObject {
 		val dockReportHullCtId = new IntFieldValue(self, DockReportHullCount.fields.dockReportHullCtId)
 		val dockReportId = new IntFieldValue(self, DockReportHullCount.fields.dockReportId)
-		val hullType = new NullableStringFieldValue(self, DockReportHullCount.fields.hullType)
-		val inService = new NullableDoubleFieldValue(self, DockReportHullCount.fields.inService)
-		val staffTally = new NullableDoubleFieldValue(self, DockReportHullCount.fields.staffTally)
+		val hullType = new StringFieldValue(self, DockReportHullCount.fields.hullType)
+		val inService = new NullableIntFieldValue(self, DockReportHullCount.fields.inService)
+		val staffTally = new NullableIntFieldValue(self, DockReportHullCount.fields.staffTally)
 	}
 }
 
@@ -21,9 +21,9 @@ object DockReportHullCount extends StorableObject[DockReportHullCount] {
 	object fields extends FieldsObject {
 		val dockReportHullCtId = new IntDatabaseField(self, "DOCK_REPORT_HULL_CT_ID")
 		val dockReportId = new IntDatabaseField(self, "DOCK_REPORT_ID")
-		val hullType = new NullableStringDatabaseField(self, "HULL_TYPE", 50)
-		val inService = new NullableDoubleDatabaseField(self, "IN_SERVICE")
-		val staffTally = new NullableDoubleDatabaseField(self, "STAFF_TALLY")
+		val hullType = new StringDatabaseField(self, "HULL_TYPE", 50)
+		val inService = new NullableIntDatabaseField(self, "IN_SERVICE")
+		val staffTally = new NullableIntDatabaseField(self, "STAFF_TALLY")
 	}
 
 	def primaryKey: IntDatabaseField = fields.dockReportHullCtId

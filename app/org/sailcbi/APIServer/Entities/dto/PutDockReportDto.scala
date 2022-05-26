@@ -46,7 +46,7 @@ case class PutDockReportDto (
 				s.recurseThroughObject(DockReportStaff, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(apClasses.map(s => {
-				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportApClass, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(uapAppts.map(s => {
@@ -54,7 +54,7 @@ case class PutDockReportDto (
 				s.recurseThroughObject(DockReportUapAppt, rc).swap.getOrElse(ValidationOk)
 			}));
 			_ <- ValidationResult.combine(hullCounts.map(s => {
-				//			s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportHullCount, rc).swap.getOrElse(ValidationOk)
 			}));
 			validationResult <- ValidationResult.combine(weather.map(s => {

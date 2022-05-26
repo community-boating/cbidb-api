@@ -14,7 +14,7 @@ class DockReportApClass extends StorableClass(DockReportApClass) {
 		val classDatetime = new NullableDateTimeFieldValue(self, DockReportApClass.fields.classDatetime)
 		val location = new NullableStringFieldValue(self, DockReportApClass.fields.location)
 		val instructor = new NullableStringFieldValue(self, DockReportApClass.fields.instructor)
-		val attend = new NullableDoubleFieldValue(self, DockReportApClass.fields.attend)
+		val attend = new NullableIntFieldValue(self, DockReportApClass.fields.attend)
 	}
 }
 
@@ -29,7 +29,7 @@ object DockReportApClass extends StorableObject[DockReportApClass] {
 		val classDatetime = new NullableDateTimeDatabaseField(self, "CLASS_DATETIME")
 		val location = new NullableStringDatabaseField(self, "LOCATION", 50)
 		val instructor = new NullableStringDatabaseField(self, "INSTRUCTOR", 50)
-		val attend = new NullableDoubleDatabaseField(self, "ATTEND")
+		val attend = new NullableIntDatabaseField(self, "ATTEND")
 	}
 
 	def primaryKey: IntDatabaseField = fields.dockReportApClassId
