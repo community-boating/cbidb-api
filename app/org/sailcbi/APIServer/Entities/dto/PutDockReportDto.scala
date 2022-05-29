@@ -10,7 +10,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 case class PutDockReportDto (
 	DOCK_REPORT_ID: Option[Int],
-	REPORT_DATE: Option[LocalDate],
+	REPORT_DATE: LocalDate,
 	SUNSET_DATETIME: Option[LocalDateTime],
 	INCIDENTS_NOTES: Option[String],
 	ANNOUNCEMENTS: Option[String],

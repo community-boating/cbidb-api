@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 case class PutDockReportWeatherDto (
 	WEATHER_ID: Option[Int],
 	var DOCK_REPORT_ID: Int,
-	WEATHER_DATETIME: Option[LocalDateTime],
+	WEATHER_DATETIME: LocalDateTime,
 	TEMP: Option[Double],
 	WEATHER_SUMMARY: Option[String],
 	WIND_DIR: Option[String],

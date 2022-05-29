@@ -10,7 +10,7 @@ case class PutDockReportStaffDto (
 	DOCK_REPORT_STAFF_ID: Option[Int],
 	var DOCK_REPORT_ID: Option[Int],
 	DOCKMASTER_ON_DUTY: Boolean,
-	STAFF_NAME: Option[String],
+	STAFF_NAME: String,
 	TIME_IN: Option[LocalDateTime],
 	TIME_OUT: Option[LocalDateTime],
 ) extends DTOClass[DockReportStaff] {

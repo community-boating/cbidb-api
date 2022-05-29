@@ -3,19 +3,32 @@ package com.coleji.neptune.Storable
 import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.UnlockedRequestCache
 
+import scala.reflect.runtime.universe
+import scala.reflect.runtime.universe.{MethodSymbol, typeOf}
+
 abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Manifest[S]) {
-//	protected def classAccessors: List[MethodSymbol] = typeOf[T].members.collect {
-//		case m: MethodSymbol if m.isCaseAccessor => m
-//	}.toList
-//
-//	protected def getCaseValues: List[(String, _)] = {
-//		val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-//		val instanceMirror = runtimeMirror.reflect(this)
-//		classAccessors.map(ca => {
-//			val fieldMirror = instanceMirror.reflectField(ca)
-//			(ca.name.toString, fieldMirror.get)
-//		})
-//	}
+	lazy val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+
+	protected def classAccessors: List[MethodSymbol] = {
+		val ret = runtimeMirror.classSymbol(this.getClass).toType.members.collect {
+			case m: MethodSymbol if m.isCaseAccessor => m
+		}.toList
+		println("@@@@ ", ret)
+		ret
+	}
+
+	protected def getCaseValues: List[(String, _)] = {
+		val instanceMirror = runtimeMirror.reflect(this)
+		classAccessors.map(ca => {
+			val fieldMirror = instanceMirror.reflectField(ca).get
+			println(fieldMirror.getClass.getCanonicalName)
+			println(fieldMirror)
+			if (fieldMirror.isInstanceOf[String] && fieldMirror.equals("")) {
+				println("$$$$$$$$$$ FOUND AN EMPTY STRING $$$$$$$$$$")
+			}
+			(ca.name.toString, fieldMirror)
+		})
+	}
 
 	def getId: Option[Int]
 
@@ -42,9 +55,14 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 			case Some(dtoId: Int) => {
 				println(s"its an update: $dtoId")
 
+				// TODO: reject objects where the case type is a Strign and the value is ""
+
+//				println(classAccessors)
+//				println(getCaseValues)
 				runValidationsForUpdate(rc) match {
 					case ve: ValidationError => Left(ve)
 					case ValidationOk => {
+						println(classAccessors)
 						// do update
 						val storable = rc.getObjectById(obj, dtoId).get
 						mutateStorableForUpdate(storable)
@@ -69,4 +87,8 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 	}
 
 	def recurse(rc: UnlockedRequestCache): ValidationResult = ValidationOk
+}
+
+object DTOClass {
+
 }

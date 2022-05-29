@@ -9,11 +9,11 @@ import java.time.LocalDateTime
 case class PutDockReportUapApptDto (
 	DOCK_REPORT_APPT_ID: Option[Int],
 	var DOCK_REPORT_ID: Option[Int],
-	APPT_DATETIME: LocalDateTime,
-	APPT_TYPE: String,
+	APPT_DATETIME: Option[LocalDateTime],
+	APPT_TYPE: Option[String],
 	PARTICIPANT_NAME: String,
-	BOAT_TYPE_ID: Int,
-	INSTRUCTOR_NAME: String,
+	BOAT_TYPE_ID: Option[Int],
+	INSTRUCTOR_NAME: Option[String],
 ) extends DTOClass[DockReportUapAppt] {
 	override def getId: Option[Int] = DOCK_REPORT_APPT_ID
 

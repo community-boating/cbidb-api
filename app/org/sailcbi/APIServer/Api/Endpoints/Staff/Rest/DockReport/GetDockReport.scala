@@ -43,7 +43,7 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 				case Some(dr) => Future(Ok(Json.toJson(dockReport)))
 				case None => {
 					val newDockReport = new DockReport
-					newDockReport.values.reportDate.update(Some(LocalDate.now))
+					newDockReport.values.reportDate.update(LocalDate.now)
 					// copy yesterday's values
 					getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now.minusDays(1))), Set.empty).headOption.foreach(yesterday => {
 						newDockReport.values.semiPermanentRestrictions.update(yesterday.values.semiPermanentRestrictions.get)
