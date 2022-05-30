@@ -6,7 +6,7 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.{DockReport, DonationFun
 import org.sailcbi.APIServer.Entities.access.CbiAccess
 import org.sailcbi.APIServer.Entities.dto.{PutDockReportDto, PutDonationFundDTO}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsNull, JsNumber, JsObject}
+import play.api.libs.json.{JsNull, JsNumber, JsObject, Json}
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject
@@ -19,7 +19,7 @@ class PutDockReport @Inject()(implicit exec: ExecutionContext) extends RestContr
 			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
-					case Right(i: DockReport) => Future(Ok(JsNull))
+					case Right(i: DockReport) => Future(Ok(Json.toJson(PutDockReportDto.applyWithSubObjects(rc)(i))))
 				}
 			})
 		})

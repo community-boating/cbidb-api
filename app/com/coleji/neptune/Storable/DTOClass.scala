@@ -2,24 +2,30 @@ package com.coleji.neptune.Storable
 
 import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Util.Profiler
 
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.{MethodSymbol, typeOf}
 
 abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Manifest[S]) {
+	protected val CHECK_FOR_EMPTY_STRING = true
+
 	lazy val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 
 	protected def classAccessors: List[MethodSymbol] = {
+		val p = new Profiler
 		val ret = runtimeMirror.classSymbol(this.getClass).toType.members.collect {
 			case m: MethodSymbol if m.isCaseAccessor => m
 		}.toList
 		println("@@@@ ", ret)
+		p.lap("did class Accessors")
 		ret
 	}
 
 	protected def getCaseValues: List[(String, _)] = {
+		val p = new Profiler
 		val instanceMirror = runtimeMirror.reflect(this)
-		classAccessors.map(ca => {
+		val ret = classAccessors.map(ca => {
 			val fieldMirror = instanceMirror.reflectField(ca).get
 			println(fieldMirror.getClass.getCanonicalName)
 			println(fieldMirror)
@@ -28,6 +34,8 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 			}
 			(ca.name.toString, fieldMirror)
 		})
+		p.lap("did getCaseValues")
+		ret
 	}
 
 	def getId: Option[Int]
@@ -35,7 +43,7 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 	def mutateStorableForUpdate(s: S): S
 	def mutateStorableForInsert(s: S): S
 
-	def unpackage: S = {
+	def unpackage(rc: UnlockedRequestCache): S = {
 		val s: S = manifest.runtimeClass.newInstance.asInstanceOf[S]
 		mutateStorableForInsert(s)
 //		getCaseValues.foreach(tup => {
@@ -53,17 +61,9 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 	def recurseThroughObject(obj: StorableObject[S], rc: UnlockedRequestCache): Either[ValidationError, S] = {
 		getId match {
 			case Some(dtoId: Int) => {
-				println(s"its an update: $dtoId")
-
-				// TODO: reject objects where the case type is a Strign and the value is ""
-
-//				println(classAccessors)
-//				println(getCaseValues)
 				runValidationsForUpdate(rc) match {
 					case ve: ValidationError => Left(ve)
 					case ValidationOk => {
-						println(classAccessors)
-						// do update
 						val storable = rc.getObjectById(obj, dtoId).get
 						mutateStorableForUpdate(storable)
 						rc.commitObjectToDatabase(storable)
@@ -72,12 +72,10 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 				}
 			}
 			case None => {
-				println(s"its a create")
-
 				runValidationsForInsert(rc) match {
-					case ve: ValidationError =>Left(ve)
+					case ve: ValidationError => Left(ve)
 					case ValidationOk => {
-						val storable = unpackage
+						val storable = unpackage(rc)
 						rc.commitObjectToDatabase(storable)
 						Right(storable)
 					}
@@ -86,7 +84,7 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 		}
 	}
 
-	def recurse(rc: UnlockedRequestCache): ValidationResult = ValidationOk
+	def recurse(rc: UnlockedRequestCache, s: S): ValidationResult = ValidationOk
 }
 
 object DTOClass {

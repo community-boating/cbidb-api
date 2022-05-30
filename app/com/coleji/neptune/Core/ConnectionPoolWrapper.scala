@@ -29,6 +29,13 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 		}
 	}
 
+	private[Core] def getConnectionForTransaction: Connection = {
+		val c = source.getConnection()
+		increment()
+		c.setAutoCommit(false)
+		c
+	}
+
 	private def increment(): Unit = {
 		openConnections.incrementAndGet()
 		if (openConnections.get() > connectionHighWaterMark.get()) {
@@ -38,7 +45,7 @@ class ConnectionPoolWrapper(private val source: HikariDataSource)  {
 		println("high water mark: " + connectionHighWaterMark.get())
 	}
 
-	private def decrement(): Unit = {
+	private[Core] def decrement(): Unit = {
 		openConnections.decrementAndGet()
 		println("Freed DB connection; in use: " + openConnections.get())
 	}
