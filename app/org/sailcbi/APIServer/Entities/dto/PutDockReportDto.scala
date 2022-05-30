@@ -96,7 +96,7 @@ case class PutDockReportDto (
 				s.recurseThroughObject(DockReportHullCount, rc).swap.getOrElse(ValidationOk)
 			}));
 			validationResult <- ValidationResult.combine(weather.map(s => {
-				s.DOCK_REPORT_ID = DOCK_REPORT_ID.get
+				s.DOCK_REPORT_ID = DOCK_REPORT_ID
 				s.recurseThroughObject(DockReportWeather, rc).swap.getOrElse(ValidationOk)
 			}))
 		) yield validationResult
