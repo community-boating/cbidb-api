@@ -14,6 +14,7 @@ class DockReportUapAppt extends StorableClass(DockReportUapAppt) {
 		val participantName = new StringFieldValue(self, DockReportUapAppt.fields.participantName)
 		val boatTypeId = new NullableIntFieldValue(self, DockReportUapAppt.fields.boatTypeId)
 		val instructorName = new NullableStringFieldValue(self, DockReportUapAppt.fields.instructorName)
+		val hoyer = new NullableBooleanFieldValue(self, DockReportUapAppt.fields.hoyer)
 	}
 }
 
@@ -28,6 +29,7 @@ object DockReportUapAppt extends StorableObject[DockReportUapAppt] {
 		val participantName = new StringDatabaseField(self, "PARTICIPANT_NAME", 150)
 		val boatTypeId = new NullableIntDatabaseField(self, "BOAT_TYPE_ID")
 		val instructorName = new NullableStringDatabaseField(self, "INSTRUCTOR_NAME", 100)
+		val hoyer = new NullableBooleanDatabaseField(self, "HOYER")
 	}
 
 	def primaryKey: IntDatabaseField = fields.dockReportApptId

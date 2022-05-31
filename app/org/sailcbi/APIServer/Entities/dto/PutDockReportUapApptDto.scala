@@ -14,6 +14,7 @@ case class PutDockReportUapApptDto (
 	PARTICIPANT_NAME: String,
 	BOAT_TYPE_ID: Option[Int],
 	INSTRUCTOR_NAME: Option[String],
+	HOYER: Option[Boolean]
 ) extends DTOClass[DockReportUapAppt] {
 	override def getId: Option[Int] = DOCK_REPORT_APPT_ID
 
@@ -24,6 +25,9 @@ case class PutDockReportUapApptDto (
 		s.update(_.participantName, PARTICIPANT_NAME)
 		s.update(_.boatTypeId, BOAT_TYPE_ID)
 		s.update(_.instructorName, INSTRUCTOR_NAME)
+		s.update(_.hoyer, HOYER)
+		println(s)
+		Thread.dumpStack()
 		s
 	}
 
@@ -43,5 +47,6 @@ object PutDockReportUapApptDto {
 		PARTICIPANT_NAME=u.values.participantName.get,
 		BOAT_TYPE_ID=u.values.boatTypeId.get,
 		INSTRUCTOR_NAME=u.values.instructorName.get,
+		HOYER=u.values.hoyer.get
 	)
 }

@@ -13,7 +13,8 @@ class DockReportWeather extends StorableClass(DockReportWeather) {
 		val temp = new NullableDoubleFieldValue(self, DockReportWeather.fields.temp)
 		val weatherSummary = new NullableStringFieldValue(self, DockReportWeather.fields.weatherSummary)
 		val windDir = new NullableStringFieldValue(self, DockReportWeather.fields.windDir)
-		val windSpeedKts = new NullableDoubleFieldValue(self, DockReportWeather.fields.windSpeedKts)
+		val windSpeedKtsSteady = new NullableDoubleFieldValue(self, DockReportWeather.fields.windSpeedKtsSteady)
+		val windSpeedKtsGust = new NullableDoubleFieldValue(self, DockReportWeather.fields.windSpeedKtsGust)
 		val restrictions = new NullableStringFieldValue(self, DockReportWeather.fields.restrictions)
 	}
 }
@@ -28,7 +29,8 @@ object DockReportWeather extends StorableObject[DockReportWeather] {
 		val temp = new NullableDoubleDatabaseField(self, "TEMP")
 		val weatherSummary = new NullableStringDatabaseField(self, "WEATHER_SUMMARY", 50)
 		val windDir = new NullableStringDatabaseField(self, "WIND_DIR", 5)
-		val windSpeedKts = new NullableDoubleDatabaseField(self, "WIND_SPEED_KTS")
+		val windSpeedKtsSteady = new NullableDoubleDatabaseField(self, "WIND_SPEED_KTS_STEADY")
+		val windSpeedKtsGust = new NullableDoubleDatabaseField(self, "WIND_SPEED_KTS_GUST")
 		val restrictions = new NullableStringDatabaseField(self, "RESTRICTIONS", 500)
 	}
 

@@ -428,6 +428,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.dateTimeValueMap) ++
 			getFieldValues(i.nullableDateTimeValueMap) ++
 			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.nullableBooleanValueMap) ++
 			getFieldValues(i.doubleValueMap) ++
 			getFieldValues(i.nullableDoubleValueMap)
 		}
@@ -479,6 +480,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.dateTimeValueMap) ++
 			getFieldValues(i.nullableDateTimeValueMap) ++
 			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.nullableBooleanValueMap) ++
 			getFieldValues(i.doubleValueMap) ++
 			getFieldValues(i.nullableDoubleValueMap)
 

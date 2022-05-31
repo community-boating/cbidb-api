@@ -18,7 +18,7 @@ case class PutDockReportDto (
 	SEMI_PERMANENT_RESTRICTIONS: Option[String],
 	dockstaff: List[PutDockReportStaffDto],
 	dockmasters: List[PutDockReportStaffDto],
-	apClasses: List[PutDockReportApClassDto],
+	var apClasses: List[PutDockReportApClassDto],
 	uapAppts: List[PutDockReportUapApptDto],
 	hullCounts: List[PutDockReportHullCountDto],
 	weather: List[PutDockReportWeatherDto]

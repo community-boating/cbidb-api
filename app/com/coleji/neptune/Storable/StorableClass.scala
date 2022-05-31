@@ -85,6 +85,8 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		f.get(this.values).asInstanceOf[FieldValue[_]]
 	}).toList
 
+	lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
+
 	lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.map(f => {
 		f.setAccessible(true)
 		(f.getName, f.get(this.references).asInstanceOf[Initializable[Object]])
@@ -138,6 +140,12 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 			}
 
 			(name, instanceMirror.reflectMethod(acc).apply().asInstanceOf[FieldValue[_]])
+		})
+	}
+
+	def defaultAllUnsetNullableFields(): Unit = {
+		nullableValuesList.filter(!_.isSet).foreach(v => {
+			v.update(None)
 		})
 	}
 
