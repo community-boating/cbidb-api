@@ -26,8 +26,6 @@ case class PutDockReportUapApptDto (
 		s.update(_.boatTypeId, BOAT_TYPE_ID)
 		s.update(_.instructorName, INSTRUCTOR_NAME)
 		s.update(_.hoyer, HOYER)
-		println(s)
-		Thread.dumpStack()
 		s
 	}
 

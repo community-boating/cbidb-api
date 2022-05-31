@@ -40,8 +40,6 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 
 		rc.commitObjectToDatabase(newDockReport)
 
-		println("created new dock report id " + newDockReport.values.dockReportId.get)
-
 		// today's ap classes
 		val apClassesQb = QueryBuilder
 			.from(ApClassSession)

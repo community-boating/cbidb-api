@@ -47,9 +47,6 @@ case class PutDockReportDto (
 			apClassesExisting.map(PutDockReportApClassDto.apply),
 		)
 
-		println("staff is DB ", dockstaffExistingDto)
-		println("staff in request", (dockstaff ++ dockmasters))
-
 		// Compare against incoming, get ids to delete
 		val (weatherIdsToDelete, staffIdsToDelete, uapApptIdsToDelete, hullCountIdsToDelete, apClassIdsToDelete) = (
 			GenerateSetDelta[PutDockReportWeatherDto](weather.toSet, weatherExistingDto.toSet, d => d.WEATHER_ID.getOrElse(-1).toString)
@@ -63,8 +60,6 @@ case class PutDockReportDto (
 			GenerateSetDelta[PutDockReportApClassDto](apClasses.toSet, apClassesExistingDto.toSet, d => d.DOCK_REPORT_AP_CLASS_ID.getOrElse(-1).toString)
 				.toDestroy.filter(_.DOCK_REPORT_AP_CLASS_ID.isDefined).map(_.DOCK_REPORT_AP_CLASS_ID.get).toList
 		)
-
-		println("staff to delete ", staffIdsToDelete)
 
 		// do the dirty deed
 		rc.deleteObjectsById(DockReportWeather, weatherIdsToDelete)

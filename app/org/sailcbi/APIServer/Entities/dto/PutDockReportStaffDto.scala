@@ -17,14 +17,11 @@ case class PutDockReportStaffDto (
 	override def getId: Option[Int] = DOCK_REPORT_STAFF_ID
 
 	override def mutateStorableForUpdate(s: DockReportStaff): DockReportStaff = {
-
-		println(this)
 		s.update(_.dockReportId, DOCK_REPORT_ID.get)
 		s.update(_.dockmasterOnDuty, DOCKMASTER_ON_DUTY)
 		s.update(_.staffName, STAFF_NAME)
 		s.update(_.timeIn, TIME_IN)
 		s.update(_.timeOut, TIME_OUT)
-		println(s.values.dockmasterOnDuty.get)
 		s
 	}
 
