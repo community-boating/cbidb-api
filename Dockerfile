@@ -11,6 +11,7 @@ cp /mnt/conf/revaliases /etc/ssmtp/ && \
 mkdir -p conf/private && \
 cp /mnt/conf/server-properties conf/private/server-properties && \
 cp /mnt/conf/oracle-credentials conf/private/oracle-credentials && \
+touch /mnt/conf/ora-wallet && cp /mnt/conf/ora-wallet conf/private/ora-wallet -r && \
 touch /usr/share/cbi-db-api/RUNNING_PID && \
 rm /usr/share/cbi-db-api/RUNNING_PID && \
 exec cbi-db-api \
