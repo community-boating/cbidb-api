@@ -5,8 +5,8 @@ import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, P
 import com.coleji.neptune.Storable.Fields.{DatabaseField, NullableDateTimeDatabaseField}
 import com.coleji.neptune.Storable.{Filter, StorableClass, StorableObject}
 
-import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 
 case class NullableDateTimeColumnAlias(override val table: TableAlias[_ <: StorableObject[_ <: StorableClass]], override val field: NullableDateTimeDatabaseField)
 extends ColumnAlias[DatabaseField[Option[LocalDateTime]]](table, field) {

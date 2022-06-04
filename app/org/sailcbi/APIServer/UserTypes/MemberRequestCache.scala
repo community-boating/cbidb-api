@@ -1,11 +1,13 @@
 package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.neptune.Core._
+import com.coleji.neptune.Exception.MuteEmailException
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.MagicIds
+import play.api.libs.json.JsResultException
 import play.api.mvc.Result
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -66,7 +68,7 @@ object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
 	)(implicit exec: ExecutionContext, PA: PermissionsAuthority): Future[Result] =
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			if (rc.getChildrenPersonIds.contains(juniorId)) block(rc)
-			else throw new Exception(s"""
+			else throw new MuteEmailException(s"""
 				  |junior ID ${juniorId} in request does not match allowed ids
 				  | for parent ${rc.getAuthedPersonId}: ${rc.getChildrenPersonIds.mkString(", ")}
 				  |""".stripMargin)

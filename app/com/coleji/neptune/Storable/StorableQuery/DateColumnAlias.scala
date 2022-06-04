@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority
 import com.coleji.neptune.Core.PermissionsAuthority.{PERSISTENCE_SYSTEM_MYSQL, PERSISTENCE_SYSTEM_ORACLE}
 import com.coleji.neptune.Storable.Fields.{DatabaseField, DateDatabaseField}
 import com.coleji.neptune.Storable.{Filter, StorableClass, StorableObject}
-import com.coleji.neptune.Util.{DATE_<, DATE_<=, DATE_=, DATE_>, DATE_>=, DateComparison}
+import com.coleji.neptune.Util._
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

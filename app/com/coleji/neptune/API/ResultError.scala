@@ -1,6 +1,6 @@
 package com.coleji.neptune.API
 
-import play.api.libs.json.{JsObject, JsPath, Json, JsonValidationError, OFormat}
+import play.api.libs.json.{JsObject, JsPath, Json, JsonValidationError}
 
 case class ResultError (
 	code: String,

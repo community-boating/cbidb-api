@@ -12,19 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserPermissions @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val u = User.getAuthedUser(rc)
-			implicit val format = PermissionsShape.format
-			Future(Ok(Json.toJson(PermissionsShape(u.values.userType.get))))
+			println(rc.upa)
+			Future(Ok(Json.toJson(rc.upa.permissionList)))
 		})
 	})
-
-
-	case class PermissionsShape (
-		userType: String
-	)
-
-	object PermissionsShape {
-		implicit val format = Json.format[PermissionsShape]
-		def apply(v: JsValue): PermissionsShape = v.as[PermissionsShape]
-	}
 }

@@ -8,8 +8,8 @@ import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.{ZoneId, ZonedDateTime}
 
 class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
 extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {

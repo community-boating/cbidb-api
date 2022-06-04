@@ -54,10 +54,12 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 			} else {
 				try {
 					val parsed = CreatePersonParams.apply(params.get)
-					val id = doPost(rc, parsed, Some(rc.userName))
+					val forRental = parsed.forRental.getOrElse(false)
+					val guestPortalRegValue = if (forRental) "R" else "Y"
+					val id = doPost(rc, parsed, Some(rc.userName), guestPortalRegValue)
 					val (cardNumber, assignId, nonce) = PortalLogic.createGuestCard(rc, id)
-					val ticketHTML = PortalLogic.ticketHTML(cardNumber, nonce, parsed.firstName + " " + parsed.lastName)
-					PortalLogic.sendTicketEmail(rc, parsed.emailAddress, ticketHTML)
+					val ticketHTML = PortalLogic.ticketHTML(cardNumber, nonce, parsed.firstName + " " + parsed.lastName, forRental)
+					PortalLogic.sendTicketEmail(rc, parsed.emailAddress, ticketHTML, forRental)
 					Future {
 						Ok(JsObject(Map(
 							"cardAssignID" -> JsNumber(assignId),
@@ -109,7 +111,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 			} else {
 				try {
 					val parsed = CreatePersonParams.apply(params.get)
-					val id = doPost(rc, parsed, None)
+					val id = doPost(rc, parsed, None, null)
 						Future {
 						Ok(JsObject(Map("personID" -> JsNumber(id))))
 					}
@@ -138,7 +140,8 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 		})
 	}
 
-	private def doPost(rc: RequestCache, parsed: CreatePersonParams, cookieValue: Option[String])(implicit PA: PermissionsAuthority): Int = {
+	private def doPost(rc: RequestCache, parsed: CreatePersonParams, cookieValue: Option[String], guestPortalReg: String)
+		(implicit PA: PermissionsAuthority): Int = {
 		val parsedDOB = DateUtil.parse(parsed.dob)
 		val q = new PreparedQueryForInsert(Set(ProtoPersonRequestCache, KioskRequestCache)) {
 			override def getQuery: String =
@@ -157,9 +160,10 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				   |protoperson_cookie,
 				   |EMERG1_RELATION,
 				   |PHONE_PRIMARY_TYPE,
-				   |EMERG1_PHONE_PRIMARY_TYPE
+				   |EMERG1_PHONE_PRIMARY_TYPE,
+				   |guest_portal_reg
 				   |) values
-				   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)},'W',?,?,?,?)
+				   | ('N',?,?,to_date(?,'MM/DD/YYYY'),?,?,?,?,${GetSQLLiteral(parsed.previousMember)},'W',?,?,?,?, ?)
 							""".stripMargin
 
 			override val params: List[String] = List(
@@ -173,7 +177,8 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 				cookieValue.orNull,
 				parsed.emerg1Relation.orNull,
 				parsed.phonePrimaryType.orNull,
-				parsed.emerg1PhonePrimaryType.orNull
+				parsed.emerg1PhonePrimaryType.orNull,
+				guestPortalReg
 			)
 			override val pkName: Option[String] = Some("person_id")
 		}

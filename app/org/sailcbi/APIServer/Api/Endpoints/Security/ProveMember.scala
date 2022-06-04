@@ -22,12 +22,12 @@ class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 						override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (Option[String], Option[String], Int) =
 							(rsw.getOptionString(1), rsw.getOptionString(2), rsw.getInt(3))
 
-						override def getParams: List[PreparedValue] = List(authedEmail)
+						override def getParams: List[PreparedValue] = List(authedEmail.toLowerCase)
 
 						override def getQuery: String =
 							"""
 							  |select name_first, name_last, person_id
-							  |from persons where email = ? and pw_hash is not null
+							  |from persons where lower(email) = ? and pw_hash is not null
 							  |""".stripMargin
 					}
 					val (nameFirst, nameLast, existingPersonId) = bouncerRC.executePreparedQueryForSelect(personQ).head

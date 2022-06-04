@@ -10,6 +10,8 @@ import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
+import org.sailcbi.APIServer.Entities.dto.PersonNotification
+import org.sailcbi.APIServer.Entities.dto.PersonNotification.{PersonAllNotificationsDto, PersonNotificationDbRecord}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
@@ -20,6 +22,7 @@ import java.awt.image.BufferedImage
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -3026,31 +3029,38 @@ object PortalLogic {
 		})
 	}
 
-	def ticketHTML(cardNumber: Int, nonce: String, name: String): String = {
+	def ticketHTML(cardNumber: Int, nonce: String, name: String, forRental: Boolean): String = {
+		val imgUrl = if (forRental) "https://portal.community-boating.org/images/rental-ticket.png" else "https://portal.community-boating.org/images/guest-ticket.png"
+		val noun = if (forRental) "Rental" else "Guest"
 		val sb = new StringBuilder()
 		sb.append("<div id=\"printbox\" style=\"padding: 40px; width: 220px; border: 2px solid black;\">")
-		sb.append("<img src=\"https://portal.community-boating.org/images/guest-ticket.png\" alt=\"Community Boating Guest Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
+		sb.append("<img src=\"" + imgUrl + "\" alt=\"Community Boating " + noun + " Ticket\" width=\"150px\" style=\"padding-left: 30px\"></img>")
 		sb.append("<img src=\"$API_URL$/api/ap/guest-ticket-barcode?cardNumber=" + cardNumber + "&nonce=" + nonce + "\" alt=\"Barcode Error, Please See Front Office\" width=\"150PX\" style=\"padding-top: 10px; padding-left:30px\" />")
 		sb.append("<h3 style=\"text-align: center\">")
 		sb.append(name)
 		sb.append("</h3>")
-		sb.append("<p>Please bring this card with you to the dockhouse when you come sailing.</p>")
+		if (forRental) {
+			sb.append("<p>Please return this ticket to the front office and tell them you have completed registration online and would like to pay.</p>")
+		} else {
+			sb.append("<p>Please bring this card with you to the dockhouse when you come sailing.</p>")
+		}
 		sb.append("</div>")
 		sb.toString()
 	}
 
-	def sendTicketEmail(rc: RequestCache, email: String, html: String): Unit = {
+	def sendTicketEmail(rc: RequestCache, email: String, html: String, forRental: Boolean): Unit = {
 		val ppc = new PreparedProcedureCall[Unit](Set(ProtoPersonRequestCache)) {
 			override def setInParametersVarchar: Map[String, String] = Map(
 				"p_email" -> email,
 				"p_ticket_html" -> html,
+				"p_for_rental" -> ( if (forRental) "Y" else "N" )
 			)
 
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
 			override def getOutResults(cs: CallableStatement): Unit = Unit
 
-			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?)"
+			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?, ?)"
 		}
 		rc.executeProcedure(ppc)
 	}
@@ -3202,6 +3212,46 @@ object PortalLogic {
 		createCustomerIdFuture.map(_ => {
 			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
 		})
+	}
+
+	def getNotifications(rc: RequestCache, personid: Int): PersonAllNotificationsDto = {
+		val q = new PreparedQueryForSelect[PersonNotificationDbRecord](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): PersonNotificationDbRecord = PersonNotificationDbRecord(
+				notificationEvent = rsw.getString(1),
+				notificationMethod = rsw.getString(2)
+			)
+			override def getQuery: String = s"select NOTIFICATION_EVENT, NOTIFICATION_METHOD from PERSONS_NOTIFICATION_PREFERENCES where person_id = $personid"
+		}
+		val dbRecords = rc.executePreparedQueryForSelect(q)
+
+		PersonNotification.PersonAllNotificationsDto.mapRecordsToDto(dbRecords)
+	}
+
+	def putNotifications(rc: RequestCache, personId: Int, notifications: PersonAllNotificationsDto): PersonAllNotificationsDto = {
+		val records = PersonNotification.PersonAllNotificationsDto.mapDtoToRecords(notifications)
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String = s"delete from PERSONS_NOTIFICATION_PREFERENCES where person_id = $personId"
+		}
+		rc.executePreparedQueryForUpdateOrDelete(deleteQ)
+		records.foreach(rec => {
+			val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
+				override val pkName: Option[String] = Some("PREF_ID")
+
+				override val params: List[String] = List(
+					rec.notificationEvent,
+					rec.notificationMethod
+				)
+
+				override def getQuery: String =
+					s"""
+					  |insert into PERSONS_NOTIFICATION_PREFERENCES (PERSON_ID, NOTIFICATION_EVENT, NOTIFICATION_METHOD)
+					  |values ($personId, ?, ?)
+					  |""".stripMargin
+			}
+			rc.executePreparedQueryForInsert(insertQ)
+		})
+
+		notifications
 	}
 }
 

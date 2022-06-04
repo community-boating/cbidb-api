@@ -1,8 +1,8 @@
 package com.coleji.neptune.Storable.FieldValues
 
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
-import com.coleji.neptune.Storable.Fields.{DatabaseField, IntDatabaseField}
-import com.coleji.neptune.Storable.{GetSQLLiteralPrepared, StorableClass}
+import com.coleji.neptune.Storable.Fields.DatabaseField
+import com.coleji.neptune.Storable.StorableClass
 import play.api.libs.json.JsValue
 
 abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) {
