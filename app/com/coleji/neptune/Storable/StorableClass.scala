@@ -109,7 +109,8 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	def extraFieldsForJSValue: Map[String, JsValue] = Map.empty
 
 	def asJsValue: JsValue = {
-		var map = valuesList.filter(_.isSet).map(v => v.persistenceFieldName -> v.asJSValue).toMap ++ this.extraFieldsForJSValue
+		val useRuntimeFieldnamesForJson = self.companion.useRuntimeFieldnamesForJson
+		var map = valuesList.filter(_.isSet).map(v => (if(useRuntimeFieldnamesForJson) v.getField.getRuntimeFieldName else v.persistenceFieldName) -> v.asJSValue).toMap ++ this.extraFieldsForJSValue
 		def addObject(name: String, o: StorableClass): Unit = {
 			map += (("$$" + name) -> o.asJsValue)
 		}

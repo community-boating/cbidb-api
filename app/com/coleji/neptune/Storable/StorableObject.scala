@@ -37,6 +37,8 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	private val instanceForReflection: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
+	val useRuntimeFieldnamesForJson = false
+
 	implicit val storableJsonWrites = new Writes[T] {
 		override def writes(o: T): JsValue = o.asJsValue
 	}
