@@ -34,7 +34,9 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 		val newDockReport = new DockReport
 		newDockReport.values.reportDate.update(LocalDate.now)
 		// copy yesterday's values
-		getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now.minusDays(1))), Set.empty).headOption.foreach(yesterday => {
+		val yesterday = getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now.minusDays(1))), Set.empty).headOption
+
+		yesterday.foreach(yesterday => {
 			newDockReport.values.semiPermanentRestrictions.update(yesterday.values.semiPermanentRestrictions.get)
 		})
 
@@ -66,8 +68,24 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 			PutDockReportApClassDto(dockRptClass)
 		})
 
+		// copy in svc hull counts
+		val yesterdaysHullCts = yesterday.map(y => y.values.dockReportId.get).map(id => {
+			rc.getObjectsByFilters(DockReportHullCount, List(DockReportHullCount.fields.dockReportId.alias.equalsConstant(id)), Set.empty)
+		}).getOrElse(List.empty)
+
+		val newHullCts = yesterdaysHullCts.map(ct => {
+			val newHullCt = new DockReportHullCount
+			newHullCt.values.dockReportId.update(newDockReport.values.dockReportId.get)
+			newHullCt.values.hullType.update(ct.values.hullType.get)
+			newHullCt.values.inService.update(ct.values.inService.get)
+			newHullCt.defaultAllUnsetNullableFields()
+			rc.commitObjectToDatabase(newHullCt)
+			newHullCt
+		}).map(PutDockReportHullCountDto.apply)
+
 		val dockReportDto = PutDockReportDto(newDockReport)
 		dockReportDto.apClasses = dockReportClasses
+		dockReportDto.hullCounts = newHullCts
 		dockReportDto
 	}
 }

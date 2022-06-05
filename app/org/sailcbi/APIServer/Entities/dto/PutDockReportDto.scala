@@ -20,7 +20,7 @@ case class PutDockReportDto (
 	dockmasters: List[PutDockReportStaffDto],
 	var apClasses: List[PutDockReportApClassDto],
 	uapAppts: List[PutDockReportUapApptDto],
-	hullCounts: List[PutDockReportHullCountDto],
+	var hullCounts: List[PutDockReportHullCountDto],
 	weather: List[PutDockReportWeatherDto]
 ) extends DTOClass[DockReport] {
 	override def getId: Option[Int] = DOCK_REPORT_ID
