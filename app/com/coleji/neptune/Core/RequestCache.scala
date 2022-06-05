@@ -85,4 +85,29 @@ abstract class UnlockedRequestCache(
 
 	def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)
+
+	def deleteObjectsById[T <: StorableClass](obj: StorableObject[T], ids: List[Int]): Unit =
+		pb.deleteObjectsByIds(obj, ids)
+
+	def withTransaction[L, R](block: () => Either[L, R]): Either[L, R] = {
+		pb.openTransaction()
+		try {
+			val result = block()
+			result match {
+				case l: Left[L, R] => {
+					pb.rollback()
+					l
+				}
+				case r: Right[L, R] => {
+					pb.commit()
+					r
+				}
+			}
+		} catch {
+			case e: Throwable => {
+				pb.rollback()
+				throw e
+			}
+		}
+	}
 }

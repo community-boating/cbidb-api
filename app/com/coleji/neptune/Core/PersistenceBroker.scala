@@ -6,8 +6,47 @@ import com.coleji.neptune.Storable.Fields.DatabaseField
 import com.coleji.neptune.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.neptune.Storable.{Filter, StorableClass, StorableObject}
 
+import java.sql.Connection
+
 // TODO: decide on one place for all the fetchSize defaults and delete the rest
 abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean) {
+	var transactionConnection: Option[Connection] = None
+
+	override def finalize(): Unit = {
+		transactionConnection.foreach(c => {
+			println("A transaction connection just got GC'd")
+			c.close()
+			dbConnection.mainPool.decrement()
+		})
+		super.finalize()
+	}
+
+	def openTransaction(): Unit = {
+		println("getting connection for transaction")
+		transactionConnection = Some(dbConnection.mainPool.getConnectionForTransaction)
+		println("transaction connection id: " + transactionConnection.get.hashCode())
+	}
+
+	def commit(): Unit = {
+		println("committing connection for transaction")
+		transactionConnection.foreach(c => {
+			c.commit()
+			c.close()
+			dbConnection.mainPool.decrement()
+		})
+		transactionConnection = None
+	}
+
+	def rollback(): Unit = {
+		println("rolling back connection for transaction")
+		transactionConnection.foreach(c => {
+			c.rollback()
+			c.close()
+			dbConnection.mainPool.decrement()
+		})
+		transactionConnection = None
+	}
+
 	// All public requests need to go through user type-based security
 	final def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
@@ -66,6 +105,12 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 		else executeProcedureImpl(pc)
 	}
 
+	final def deleteObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int]): Unit = {
+		if (readOnly) throw new UnauthorizedAccessException("Server is in Database Read Only mode.")
+		else if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
+		else deleteObjectsByIdsImplementation(obj, ids)
+	}
+
 	// Implementations of PersistenceBroker should implement these.  Assume user type security has already been passed if you're calling these
 	protected def getObjectByIdImplementation[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T]
 
@@ -88,4 +133,6 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
+
+	protected def deleteObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int]): Unit
 }

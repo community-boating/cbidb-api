@@ -10,34 +10,20 @@ abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: 
 	protected def mutateDtoBeforeOperating(dto: D): D = dto
 
 	protected def put(rc: UnlockedRequestCache, rawDto: D)(implicit PA: PermissionsAuthority): Either[ValidationError, S] = {
-		val dto = mutateDtoBeforeOperating(rawDto)
-		dto.getId match {
-			case Some(dtoId: Int) => {
-				println(s"its an update: $dtoId")
-
-				runValidationsForUpdate(rc, dto) match {
-					case ve: ValidationError => Left(ve)
-					case ValidationOk => {
-						// do update
-						val storable = rc.getObjectById(obj, dtoId).get
-						dto.mutateStorableForUpdate(storable)
-						rc.commitObjectToDatabase(storable)
-						Right(storable)
+		rc.withTransaction(() => {
+			val dto = mutateDtoBeforeOperating(rawDto)
+			val result = dto.recurseThroughObject(obj, rc)
+			result match {
+				case Left(e) => {
+					Left(e)
+				}
+				case Right(s) => dto.recurse(rc, s) match {
+					case e: ValidationError => {
+						Left(e)
 					}
+					case ValidationOk => Right(s)
 				}
 			}
-			case None => {
-				println(s"its a create")
-
-				runValidationsForInsert(rc, dto) match {
-					case ve: ValidationError =>Left(ve)
-					case ValidationOk => {
-						val storable = dto.unpackage
-						rc.commitObjectToDatabase(storable)
-						Right(storable)
-					}
-				}
-			}
-		}
+		})
 	}
 }

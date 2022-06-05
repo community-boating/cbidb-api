@@ -15,8 +15,14 @@ import scala.collection.mutable.ListBuffer
 abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, preparedQueriesOnly: Boolean, readOnly: Boolean)
 	extends PersistenceBroker(dbGateway, preparedQueriesOnly, readOnly)
 {
-	//implicit val pb: PersistenceBroker = this
-
+	private def withConnection[T](pool: ConnectionPoolWrapper)(block: Connection => T)(implicit PA: PermissionsAuthority): T = {
+		if (pool.equals(dbGateway.mainPool) && transactionConnection.isDefined) {
+			println("reusing transaction connection")
+			block(transactionConnection.get)
+		} else {
+			pool.withConnection(block)
+		}
+	}
 	override protected def executePreparedQueryForSelectImplementation[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		val pool = if (pq.useTempSchema) {
 			println("using temp schema")
@@ -25,7 +31,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			println("using main schema")
 			dbGateway.mainPool
 		}
-		pool.withConnection(c => {
+		withConnection(pool)(c => {
 			val profiler = new Profiler
 			val rs: ResultSet = pq match {
 				case p: PreparedQueryForSelect[T] => {
@@ -187,8 +193,9 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				params = overallFilter.params
 			}
 			val sql = sb.toString()
-			dbGateway.mainPool.withConnection(c => {
+			withConnection(dbGateway.mainPool)(c => {
 				println("counting objects: ")
+				println(c.hashCode())
 				println(sql)
 				val preparedStatement = c.prepareStatement(sql)
 				val preparedParams = params.map(PreparedString)
@@ -209,7 +216,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 		println(" ======   Creating filter table " + tableName + "    =======")
 		val p = new Profiler
-		dbGateway.tempPool.withConnection(c => {
+		withConnection(dbGateway.tempPool)(c => {
 			val createTableSQL = "CREATE TABLE " + tableName + " (ID Number)"
 			c.createStatement().executeUpdate(createTableSQL)
 			p.lap("Created table")
@@ -263,7 +270,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	): Option[String] = {
 		println(sql.replace("\t", "\\t"))
 		val pool = if (useTempConnection) dbGateway.tempPool else dbGateway.mainPool
-		pool.withConnection(c => {
+		withConnection(pool)(c => {
 			if (batchParams.isDefined && pkPersistenceName.isDefined) {
 				throw new Exception("Do not use PK return with batch insert, it doesn't work")
 			}
@@ -301,7 +308,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	private def executeSQLForUpdateOrDelete(sql: String, useTempConnection: Boolean = false, params: Option[List[PreparedValue]] = None): Int = {
 		println(sql)
 		val pool = if (useTempConnection) dbGateway.tempPool else dbGateway.mainPool
-		pool.withConnection(c => {
+		withConnection(pool)(c => {
 			println("executing prepared update/delete:")
 			println(sql)
 			val ps = c.prepareStatement(sql)
@@ -317,7 +324,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	private def getProtoStorablesFromSelect(sql: String, params: List[String], properties: List[ColumnAlias[_]], fetchSize: Int): List[ProtoStorable] = {
 		println(sql)
 		val profiler = new Profiler
-		dbGateway.mainPool.withConnection(c => {
+		withConnection(dbGateway.mainPool)(c => {
 			val preparedStatement = c.prepareStatement(sql)
 			val preparedParams = params.map(PreparedString)
 			preparedParams.zipWithIndex.foreach(t => t._1.set(preparedStatement)(t._2+1))
@@ -390,6 +397,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 	}
 
 	override protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit = {
+		i.companion.init()
 		if (i.hasID) {
 			updateObject(i)
 		} else {
@@ -420,6 +428,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.dateTimeValueMap) ++
 			getFieldValues(i.nullableDateTimeValueMap) ++
 			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.nullableBooleanValueMap) ++
 			getFieldValues(i.doubleValueMap) ++
 			getFieldValues(i.nullableDoubleValueMap)
 		}
@@ -471,6 +480,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.dateTimeValueMap) ++
 			getFieldValues(i.nullableDateTimeValueMap) ++
 			getFieldValues(i.booleanValueMap) ++
+			getFieldValues(i.nullableBooleanValueMap) ++
 			getFieldValues(i.doubleValueMap) ++
 			getFieldValues(i.nullableDoubleValueMap)
 
@@ -540,7 +550,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 	 override protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
 		val pool = if (pc.useTempSchema) dbGateway.tempPool else dbGateway.mainPool
-		pool.withConnection(conn => {
+		withConnection(pool)(conn => {
 			println("STARTING PROCEDURE CALL: " + pc.getQuery)
 			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
 
@@ -588,5 +598,13 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 			pc.getOutResults(callable)
 		})
+	}
+
+	override protected def deleteObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int]): Unit = {
+		if (ids.nonEmpty) {
+			val sql = "DELETE FROM " + obj.entityName + " WHERE " + obj.primaryKey.persistenceFieldName + " IN (" + ids.mkString(",") + ")"
+			println(sql)
+			executeSQLForUpdateOrDelete(sql, false, None)
+		}
 	}
 }
