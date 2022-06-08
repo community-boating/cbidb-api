@@ -19,6 +19,8 @@ POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.End
 POST     /stripe/submit-payment-standalone               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postStandalone()
 POST    /stripe/submit-payment-autodonate       org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAutoDonateCreation()
 
+POST    /stripe/apex-do-auto-donate             org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.apexDoAutoDonate(personId: Int)
+
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()
 

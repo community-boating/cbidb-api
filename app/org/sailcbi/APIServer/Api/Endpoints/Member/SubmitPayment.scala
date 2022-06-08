@@ -8,6 +8,7 @@ import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, P
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.PortalLogic.getRecurringDonations
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
@@ -110,25 +111,42 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId
-			val orderId = PortalLogic.getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE)
-			PortalLogic.reconstituteAutoDonateOrder(rc, personId, orderId)
-			SubmitPayment.startChargeProcess(rc, ws, personId, orderId, true).map(parseError => parseError._2 match {
-				case None => {
-					val update = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-						override def getQuery: String = s"update persons set NEXT_RECURRING_DONATION = add_months(util_pkg.get_sysdate,1) where person_id = $personId"
-					}
-					rc.executePreparedQueryForUpdateOrDelete(update)
-					val updatePRDs = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-						override def getQuery: String = s"update persons_recurring_donations set embryonic = 'N' where person_id = $personId"
-					}
-					rc.executePreparedQueryForUpdateOrDelete(updatePRDs)
+			doAutoDonateOrder(rc, personId)
+		})
+	}
 
-					Ok(new JsObject(Map(
-						"successAttemptId" -> JsNumber(parseError._1.get)
-					)))
+	def apexDoAutoDonate(personId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+		val parsedRequest = ParsedRequest(request)
+		PA.withRequestCache(ApexRequestCache)(None, parsedRequest, rc => {
+			println("Doing auto donate order for person " + personId)
+			val donationCount = getRecurringDonations(rc, personId, true).size
+			if (donationCount > 0) {
+				doAutoDonateOrder(rc, personId)
+			} else {
+				Future(Ok("nothing to do"))
+			}
+		})
+	}
+
+	private def doAutoDonateOrder(rc: LockedRequestCacheWithStripeController, personId: Int) = {
+		val orderId = PortalLogic.getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE)
+		PortalLogic.reconstituteAutoDonateOrder(rc, personId, orderId)
+		SubmitPayment.startChargeProcess(rc, ws, personId, orderId, true).map(parseError => parseError._2 match {
+			case None => {
+				val update = new PreparedQueryForUpdateOrDelete(Set(ApexRequestCache, MemberRequestCache)) {
+					override def getQuery: String = s"update persons set NEXT_RECURRING_DONATION = add_months(util_pkg.get_sysdate,1) where person_id = $personId"
 				}
-				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
-			})
+				rc.executePreparedQueryForUpdateOrDelete(update)
+				val updatePRDs = new PreparedQueryForUpdateOrDelete(Set(ApexRequestCache, MemberRequestCache)) {
+					override def getQuery: String = s"update persons_recurring_donations set embryonic = 'N' where person_id = $personId"
+				}
+				rc.executePreparedQueryForUpdateOrDelete(updatePRDs)
+
+				Ok(new JsObject(Map(
+					"successAttemptId" -> JsNumber(parseError._1.get)
+				)))
+			}
+			case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
 		})
 	}
 

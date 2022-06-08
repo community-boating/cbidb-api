@@ -530,7 +530,7 @@ object PortalLogic {
 	def getOrderId(rc: RequestCache, personId: Int): Int = getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.SHARED)
 
 	def getOrderId(rc: RequestCache, personId: Int, appAlias: String): Int = {
-		val pc = new PreparedProcedureCall[Int](Set(MemberRequestCache, ProtoPersonRequestCache)) {
+		val pc = new PreparedProcedureCall[Int](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 //			procedure get_or_create_order_id(
 //					i_person_id in number,
 //					i_app_alias in varchar2,
@@ -1512,7 +1512,7 @@ object PortalLogic {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
-			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ProtoPersonRequestCache)) {
+			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 				override val params: List[String] = List(orderId.toString, fundId.toString)
@@ -1524,7 +1524,7 @@ object PortalLogic {
 			}
 			val exists = rc.executePreparedQueryForSelect(existsQ).nonEmpty
 			if (exists) {
-				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+				val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 					override val params: List[String] = List(amount.toString, orderId.toString, fundId.toString)
 					override def getQuery: String =
 						"""
@@ -1535,7 +1535,7 @@ object PortalLogic {
 				}
 				rc.executePreparedQueryForUpdateOrDelete(updateQ)
 			} else {
-				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 					override val pkName: Option[String] = Some("ITEM_ID")
 
 					override val params: List[String] = List(
@@ -2436,7 +2436,7 @@ object PortalLogic {
 
 	def calculateFirstStaggeredPaymentOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		// Add everything in the cart that is not staggered, to the first payment
-		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache, ProtoPersonRequestCache)) {
+		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
 
 			override def getQuery: String =
@@ -2453,7 +2453,7 @@ object PortalLogic {
 	def updateFirstStaggeredPaymentWithOneTimes(rc: RequestCache, orderId: Int): Currency = {
 		val oneTimePrice = calculateFirstStaggeredPaymentOneTimes(rc, orderId)
 		
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 			override def getQuery: String =
 				s"""
 				   |update ORDER_STAGGERED_PAYMENTS
@@ -3088,15 +3088,17 @@ object PortalLogic {
 		def apply(v: JsValue): RecurringDonation = v.as[RecurringDonation]
 	}
 
-	def getRecurringDonations(rc: RequestCache, personId: Int): List[RecurringDonation] = {
-		val q = new PreparedQueryForSelect[RecurringDonation](Set(MemberRequestCache)) {
+	def getRecurringDonations(rc: RequestCache, personId: Int, onlyNonEmbryonic: Boolean = false): List[RecurringDonation] = {
+		val q = new PreparedQueryForSelect[RecurringDonation](Set(MemberRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): RecurringDonation = RecurringDonation(
-				fundId = rsw.getInt(1), amountInCents = rsw.getInt(2)
+				fundId = rsw.getInt(1),
+				amountInCents = rsw.getInt(2)
 			)
 
 			override def getQuery: String =
 				s"""
-				  |select fund_id, amount_in_cents from persons_recurring_donations where person_id = $personId
+				  |select fund_id, amount_in_cents, embryonic from persons_recurring_donations where person_id = $personId
+				  |${if (onlyNonEmbryonic) " and embryonic = 'N'" else ""}
 				  |""".stripMargin
 		}
 		rc.executePreparedQueryForSelect(q)
@@ -3155,7 +3157,7 @@ object PortalLogic {
 
 	def reconstituteAutoDonateOrder(rc: RequestCache, personId: Int, orderId: Int): Unit = {
 		// clear existing SCDs
-		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+		val deleteQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ApexRequestCache)) {
 			override def getQuery: String = s"delete from shopping_cart_donations where order_id = $orderId"
 		}
 		rc.executePreparedQueryForUpdateOrDelete(deleteQ)
