@@ -38,6 +38,7 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 
 		yesterday.foreach(yesterday => {
 			newDockReport.values.semiPermanentRestrictions.update(yesterday.values.semiPermanentRestrictions.get)
+			newDockReport.values.announcements.update(yesterday.values.announcements.get)
 		})
 
 		rc.commitObjectToDatabase(newDockReport)
