@@ -29,6 +29,7 @@ class PersonRating extends StorableClass(PersonRating) {
 
 object PersonRating extends StorableObject[PersonRating] {
 	val entityName: String = "PERSONS_RATINGS"
+	override val useRuntimeFieldnamesForJson: Boolean = true
 
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")

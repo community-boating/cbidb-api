@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields.IntDatabaseField
 import com.coleji.neptune.Util.Initializable
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 
 abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) {
@@ -118,6 +118,9 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 			ref.get match {
 				case Some(o: StorableClass) => addObject(name, o)
 				case o: StorableClass => addObject(name, o)
+				case ol: List[StorableClass] => {
+					map += (("$$" + name) -> JsArray(ol.map(_.asJsValue)))
+				}
 				case _ =>
 			}
 		}))

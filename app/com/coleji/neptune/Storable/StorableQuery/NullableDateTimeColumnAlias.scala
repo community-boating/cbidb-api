@@ -19,4 +19,9 @@ extends ColumnAlias[DatabaseField[Option[LocalDateTime]]](table, field) {
 		}
 		case PERSISTENCE_SYSTEM_ORACLE => Filter(s"TO_CHAR(${table.name}.${field.persistenceFieldName}, 'YYYY') = $year", List.empty)
 	}
+
+	def isDateConstant(date: LocalDate)(implicit PA: PermissionsAuthority): Filter = {
+		val dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+		Filter(s"TRUNC(${table.name}.${field.persistenceFieldName}) = TO_DATE('${dateString}', 'YYYY-MM-dd')", List.empty)
+	}
 }
