@@ -10,4 +10,5 @@ object CacheKeys {
 	def membershipSales(config: MembershipSalesCacheKey): String = s"membership-sales-${config.calendarYear}"
 	def userPermissionsAuthority(config: String): String = s"user-permissions-authority-${config}"
 	def signoutsToday: String = "signouts-today"
+	def boatTypes = "boat-types"
 }
