@@ -11,4 +11,5 @@ object CacheKeys {
 	def userPermissionsAuthority(config: String): String = s"user-permissions-authority-${config}"
 	def signoutsToday: String = "signouts-today"
 	def boatTypes = "boat-types"
+	def ratings = "ratings"
 }

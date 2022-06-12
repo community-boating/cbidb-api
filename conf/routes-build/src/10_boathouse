@@ -38,6 +38,7 @@ GET     /rest/guest-priv/get-all-for-person       org.sailcbi.APIServer.Api.Endp
 POST     /rest/guest-priv              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.GuestPriv.PutGuestPriv.post()
 GET     /rest/signouts-today       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.GetSignouts.getToday()
 GET     /rest/boat-types       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.BoatTypes.getAll()
+GET     /rest/ratings       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ratings.getAll()
 
 GET     /rest/dock-report              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport.GetDockReport.get()
 POST     /rest/dock-report              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport.PutDockReport.post()

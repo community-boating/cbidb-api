@@ -3,9 +3,15 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableIntFieldValue, StringFieldValue}
 import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableIntDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.{MagicIds, NullableInDatabase}
 
 class Rating extends StorableClass(Rating) {
+	override object references extends ReferencesObject {
+		val boats = new Initializable[List[BoatRating]]
+		val programs = new Initializable[List[RatingProgram]]
+	}
+
 	object values extends ValuesObject {
 		val ratingId = new IntFieldValue(self, Rating.fields.ratingId)
 		val ratingName = new StringFieldValue(self, Rating.fields.ratingName)
@@ -15,6 +21,7 @@ class Rating extends StorableClass(Rating) {
 
 object Rating extends StorableObject[Rating] {
 	val entityName: String = "RATINGS"
+	override val useRuntimeFieldnamesForJson: Boolean = true
 
 	object fields extends FieldsObject {
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
