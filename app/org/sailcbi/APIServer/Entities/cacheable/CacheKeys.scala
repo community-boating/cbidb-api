@@ -9,4 +9,5 @@ object CacheKeys {
 	def apClassInstances(config: ApClassInstancesCacheKey): String = "ap-class-instances-" + config.date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
 	def membershipSales(config: MembershipSalesCacheKey): String = s"membership-sales-${config.calendarYear}"
 	def userPermissionsAuthority(config: String): String = s"user-permissions-authority-${config}"
+	def signoutsToday: String = "signouts-today"
 }
