@@ -36,7 +36,9 @@ GET     /rest/damage-waiver/get-all-for-person     org.sailcbi.APIServer.Api.End
 POST     /rest/damage-waiver              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DamageWaiver.PutDamageWaiver.post()
 GET     /rest/guest-priv/get-all-for-person       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.GuestPriv.GetGuestPriv.getAllForPerson(personId: Int)
 POST     /rest/guest-priv              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.GuestPriv.PutGuestPriv.post()
-GET     /rest/signouts-today       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.GetSignouts.getToday()
+GET     /rest/signouts-today       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.getToday()
+POST     /rest/signout       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.post()
+POST     /rest/signouts       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.postList()
 GET     /rest/boat-types       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.BoatTypes.getAll()
 GET     /rest/ratings       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ratings.getAll()
 

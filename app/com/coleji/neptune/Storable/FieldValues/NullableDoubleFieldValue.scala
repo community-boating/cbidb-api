@@ -12,4 +12,10 @@ class NullableDoubleFieldValue(instance: StorableClass, field: NullableDoubleDat
 		case None => JsNull
 		case Some(v) => JsNumber(v)
 	}
+
+	override def updateFromJsValue(v: JsValue): Boolean = v match {
+		case n: JsNumber => update(Some(n.value.doubleValue()))
+		case JsNull => update(None)
+		case _ => false
+	}
 }

@@ -15,4 +15,10 @@ class NullableDateFieldValue(instance: StorableClass, field: NullableDateDatabas
 		case None => JsNull
 		case Some(v) => JsString(v.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
 	}
+
+	override def updateFromJsValue(v: JsValue): Boolean = v match {
+		case s: JsString => update(Some(LocalDate.parse(s.value)))
+		case JsNull => update(None)
+		case _ => false
+	}
 }

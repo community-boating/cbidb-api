@@ -41,6 +41,9 @@ object ValidationResult {
 		if (errors.isEmpty) ValidationOk
 		else errors.reduce(_.combine(_))
 	}
+
+	def reduce(a: ValidationResult, b: ValidationResult): ValidationResult = a.combine(b)
+
 	def checkBlank(value: Option[_], name: String): ValidationResult = {
 		value match {
 			case Some(_) => ValidationOk

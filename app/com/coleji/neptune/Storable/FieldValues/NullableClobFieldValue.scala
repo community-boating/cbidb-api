@@ -12,4 +12,10 @@ class NullableClobFieldValue(instance: StorableClass, field: NullableClobDatabas
 		case None => JsNull
 		case Some(v) => JsString(v)
 	}
+
+	override def updateFromJsValue(v: JsValue): Boolean = v match {
+		case s: JsString => update(Some(s.value))
+		case JsNull => update(None)
+		case _ => false
+	}
 }

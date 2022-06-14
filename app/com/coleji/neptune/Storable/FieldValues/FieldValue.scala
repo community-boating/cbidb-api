@@ -21,10 +21,13 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 		}
 	}
 
-	def update(v: T): Unit = {
+	def update(v: T): Boolean = {
 		value = Some(v)
 		dirty = true
+		true
 	}
+
+	def updateFromJsValue(v: JsValue): Boolean
 
 	def isDirty = dirty
 
