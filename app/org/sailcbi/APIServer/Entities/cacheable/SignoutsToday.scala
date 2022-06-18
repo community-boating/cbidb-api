@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Entities.cacheable
 import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.{DateUtil, Profiler, Serde}
+import io.sentry.Sentry
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRating, Signout, SignoutCrew}
 import play.api.libs.json.Json
 
@@ -149,7 +150,7 @@ object SignoutsToday extends CacheableFactory[Null, String]{
 		).reverse.take(MAX_RECORDS_TO_RETURN)
 
 		if (signouts.size > MAX_RECORDS_TO_RETURN) {
-			PA.logger.error("Today's signouts had " + signouts.size + " results, sending an abridged list to client")
+			Sentry.capture("Today's signouts had " + signouts.size + " results, sending an abridged list to client")
 		}
 
 		val ret = signoutsToReturn
