@@ -4,6 +4,7 @@ import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.{NetFailure, NetSuccess, Profiler}
+import io.sentry.Sentry
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
@@ -64,7 +65,7 @@ class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			// do this async, user doesnt need to wait for it.
 			if (stripeCustomerIdOption.isEmpty) {
 				stripe.createStripeCustomerFromPerson(rc, personId).map({
-					case f: NetFailure[_, _] => logger.error("Failed to create stripe customerId for person " + personId)
+					case f: NetFailure[_, _] => Sentry.capture("Failed to create stripe customerId for person " + personId)
 					case s: NetSuccess[_, _] =>
 				})
 			}
