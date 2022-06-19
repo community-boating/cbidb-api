@@ -484,14 +484,18 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			getFieldValues(i.doubleValueMap) ++
 			getFieldValues(i.nullableDoubleValueMap)
 
-		val sb = new StringBuilder()
-		sb.append("UPDATE " + i.companion.entityName + " SET ")
-		sb.append(fieldValues.map(fv => fv.persistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
-		sb.append(" WHERE " + i.companion.primaryKey.persistenceFieldName + " = " + i.getID)
-		val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
-		val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
-		if (updated != 1) {
-			throw new Exception("Attempted to update storable " + i.companion.entityName + ":" + i.getID + ", updated " + updated + " records")
+		if (fieldValues.isEmpty) {
+			println("NOOP update")
+		} else {
+			val sb = new StringBuilder()
+			sb.append("UPDATE " + i.companion.entityName + " SET ")
+			sb.append(fieldValues.map(fv => fv.persistenceFieldName + " = " + fv.getPersistenceLiteral._1).mkString(", "))
+			sb.append(" WHERE " + i.companion.primaryKey.persistenceFieldName + " = " + i.getID)
+			val params = Some(fieldValues.flatMap(fv => fv.getPersistenceLiteral._2).map(PreparedString))
+			val updated = executeSQLForUpdateOrDelete(sb.toString(), false, params)
+			if (updated != 1) {
+				throw new Exception("Attempted to update storable " + i.companion.entityName + ":" + i.getID + ", updated " + updated + " records")
+			}
 		}
 	}
 
