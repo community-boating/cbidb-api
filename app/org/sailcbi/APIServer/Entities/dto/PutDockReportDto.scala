@@ -16,6 +16,7 @@ case class PutDockReportDto (
 	INCIDENTS_NOTES: Option[String],
 	ANNOUNCEMENTS: Option[String],
 	SEMI_PERMANENT_RESTRICTIONS: Option[String],
+	SIGNED_BY: Option[Int],
 	dockstaff: List[PutDockReportStaffDto],
 	dockmasters: List[PutDockReportStaffDto],
 	var apClasses: List[PutDockReportApClassDto],
@@ -31,6 +32,7 @@ case class PutDockReportDto (
 		s.update(_.incidentsNotes, INCIDENTS_NOTES)
 		s.update(_.announcements, ANNOUNCEMENTS)
 		s.update(_.semiPermanentRestrictions, SEMI_PERMANENT_RESTRICTIONS)
+		s.update(_.signedBy, SIGNED_BY)
 		s
 	}
 
@@ -110,6 +112,7 @@ object PutDockReportDto {
 		INCIDENTS_NOTES=dr.values.incidentsNotes.peek.flatten,
 		ANNOUNCEMENTS=dr.values.announcements.peek.flatten,
 		SEMI_PERMANENT_RESTRICTIONS=dr.values.semiPermanentRestrictions.peek.flatten,
+		SIGNED_BY=dr.values.signedBy.peek.flatten,
 		dockstaff=List.empty,
 		dockmasters=List.empty,
 		apClasses=List.empty,
@@ -127,6 +130,7 @@ object PutDockReportDto {
 			INCIDENTS_NOTES=dr.values.incidentsNotes.get,
 			ANNOUNCEMENTS=dr.values.announcements.get,
 			SEMI_PERMANENT_RESTRICTIONS=dr.values.semiPermanentRestrictions.get,
+			SIGNED_BY = dr.values.signedBy.get,
 			dockstaff=dockstaff.filter(!_.values.dockmasterOnDuty.get).map(PutDockReportStaffDto.apply),
 			dockmasters=dockstaff.filter(_.values.dockmasterOnDuty.get).map(PutDockReportStaffDto.apply),
 			apClasses=apClasses.map(PutDockReportApClassDto.apply),
