@@ -12,7 +12,7 @@ class IntFieldValue(instance: StorableClass, field: IntDatabaseField)(implicit p
 
 	override def updateFromJsValue(v: JsValue): Boolean = v match {
 		case n: JsNumber => update(n.value.toIntExact)
-		case JsNull => throw new Exception("JsNull provided to nonnull field")
+		case JsNull => throw new Exception("JsNull provided to nonnull field " + field.getRuntimeFieldName)
 		case _ => false
 	}
 }

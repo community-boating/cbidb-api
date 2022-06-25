@@ -15,7 +15,7 @@ class DateFieldValue(instance: StorableClass, field: DateDatabaseField)(implicit
 
 	override def updateFromJsValue(v: JsValue): Boolean = v match {
 		case s: JsString => update(LocalDate.parse(s.value))
-		case JsNull => throw new Exception("JsNull provided to nonnull field")
+		case JsNull => throw new Exception("JsNull provided to nonnull field " + field.getRuntimeFieldName)
 		case _ => false
 	}
 }
