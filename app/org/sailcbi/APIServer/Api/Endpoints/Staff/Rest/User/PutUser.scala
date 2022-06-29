@@ -15,14 +15,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class PutUser @Inject()(implicit exec: ExecutionContext) extends RestControllerWithDTO[User, PutUserDTO](User) with InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutUserDTO.apply)(parsed => {
+		PA.withParsedPostBodyJSON(parsedRequest.postJSON, User.constructFromJsValue)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
-				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
-					case Right(u: User) => Future(Ok(new JsObject(Map(
-						"userId" -> JsNumber(u.values.userId.get)
-					))))
+				// If the password is set as blank, unset
+				parsed.values.pwHash.peek match {
+					case Some(None) => parsed.values.pwHash.unset()
+					case _ =>
 				}
+				println("Received: " + parsed)
+				Future(Ok("ok"))
 			})
 		})
 	}

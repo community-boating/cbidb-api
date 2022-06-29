@@ -23,7 +23,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends RestContro
 		User.fields.pwChangeRequired,
 		User.fields.active,
 		User.fields.hideFromClose,
-		User.fields.userType
+//		User.fields.userType
 	)
 
 	def getOneUser(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {

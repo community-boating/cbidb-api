@@ -21,7 +21,7 @@ class User extends StorableClass(User) {
 		val userType = new StringFieldValue(self, User.fields.userType)
 	}
 
-	override def toString: String = this.valuesList.filter(_.persistenceFieldName != "PW_HASH").toString()
+	//override def toString: String = this.valuesList.filter(_.persistenceFieldName != "PW_HASH").toString()
 
 	def canManage(otherUser: User): Boolean = {
 		val myTypeLevel = User.userTypeLevel(this.values.userType.get)
