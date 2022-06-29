@@ -27,6 +27,11 @@ sealed abstract class RequestCache private[Core](
 
 	def hasPermission(p: Permission): Boolean = false
 
+	def assertUnlocked: UnlockedRequestCache = this match {
+		case urc: UnlockedRequestCache => urc
+		case _ => throw new Exception("Failed to assert rc was unlocked")
+	}
+
 	def executePreparedQueryForSelect[T](pq: HardcodedQueryForSelect[T], fetchSize: Int = 50): List[T] = {
 		this.companion.test(pq.allowedUserTypes)
 		pb.executePreparedQueryForSelect(pq, fetchSize)

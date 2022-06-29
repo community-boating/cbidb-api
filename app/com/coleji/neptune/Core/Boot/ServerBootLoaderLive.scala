@@ -4,6 +4,8 @@ import com.coleji.neptune.Core.{PermissionsAuthority, RequestCacheObject}
 import com.coleji.neptune.Util.PropertiesWrapper
 import play.api.inject.ApplicationLifecycle
 
+import java.nio.charset.Charset
+
 class ServerBootLoaderLive {
 	protected def init(
 		lifecycle: ApplicationLifecycle,
@@ -14,6 +16,7 @@ class ServerBootLoaderLive {
 	): PermissionsAuthority = {
 		val pa = ServerBootLoader.load(Some(lifecycle), isTestMode = false, readOnlyDatabase = false, entityPackagePath, definedAuthMechanisms, requiredProperties, paPostBoot)
 		println("Live loader::::: setting PA!")
+		println("Default charset: " + Charset.defaultCharset().displayName())
 		PermissionsAuthority.setPA(pa)
 		println("Starting entity boot")
 		pa.instantiateAllEntityCompanions(entityPackagePath)

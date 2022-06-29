@@ -9,7 +9,7 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonR
 
 class Person extends StorableClass(Person) {
 	override object references extends ReferencesObject {
-		val personRatings = new Initializable[Set[PersonRating]]
+		val personRatings = new Initializable[List[PersonRating]]
 	}
 
 	object values extends ValuesObject {
@@ -120,10 +120,10 @@ class Person extends StorableClass(Person) {
 		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.personId.alias.equalsConstant(values.personId.get))
-		).toSet
+		)
 	}
 
-	lazy val casePersonRatings: Set[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
+	lazy val casePersonRatings: List[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
 
 	// TODO: move to logic
 	def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
@@ -142,6 +142,8 @@ class Person extends StorableClass(Person) {
 }
 
 object Person extends StorableObject[Person] {
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	val entityName: String = "PERSONS"
 
 	object fields extends FieldsObject {

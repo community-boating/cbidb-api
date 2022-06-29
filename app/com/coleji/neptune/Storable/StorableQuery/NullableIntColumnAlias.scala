@@ -10,7 +10,7 @@ case class NullableIntColumnAlias(override val table: TableAlias[_ <: StorableOb
 		Filter(s"${table.name}.${field.persistenceFieldName} < $c", List.empty)
 	}
 
-	def inList(l: List[Int]): String => Filter = t => {
+	def inList(l: List[Int]): Filter = {
 		def groupIDs(ids: List[Int]): List[List[Int]] = {
 			val MAX_IDS = 900
 			if (ids.length <= MAX_IDS) List(ids)

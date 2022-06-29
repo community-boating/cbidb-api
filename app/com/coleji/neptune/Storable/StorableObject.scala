@@ -6,7 +6,7 @@ import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable.StorableQuery._
 import com.coleji.neptune.Util.Profiler
-import play.api.libs.json.{JsValue, Writes}
+import play.api.libs.json.{JsArray, JsNumber, JsObject, JsValue, Writes}
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled
@@ -179,6 +179,21 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	def alias: TableAliasInnerJoined[this.type] = TableAliasInnerJoined(this, this.entityName)
 	def aliasOuter: TableAliasOuterJoined[this.type] = TableAliasOuterJoined(this, this.entityName)
+
+	def constructFromJsValue(jsv: JsValue): T = {
+		init()
+		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
+		embryo.valuesList.foreach(f => {
+			val name = f.getField.getRuntimeFieldName
+			val value = jsv.asInstanceOf[JsObject].value.get(name)
+			value.foreach(f.updateFromJsValue)
+		})
+		embryo
+	}
+
+	def constructListFromJsArray(jsa: JsValue): List[T] = {
+		jsa.asInstanceOf[JsArray].value.toList.map(constructFromJsValue)
+	}
 
 	def construct(qbrr: QueryBuilderResultRow): T = construct(qbrr.ps, None, Set.empty).get
 

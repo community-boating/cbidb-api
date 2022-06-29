@@ -13,5 +13,11 @@ class NullableBooleanFieldValue (instance: StorableClass, field: NullableBoolean
 		case Some(false) => JsBoolean(false)
 		case None => JsNull
 	}
+
+	override def updateFromJsValue(v: JsValue): Boolean = v match {
+		case b: JsBoolean => update(Some(b.value))
+		case JsNull => update(None)
+		case _ => false
+	}
 }
 

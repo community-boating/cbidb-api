@@ -14,6 +14,7 @@ class DockReport extends StorableClass(DockReport) {
 		val incidentsNotes = new NullableStringFieldValue(self, DockReport.fields.incidentsNotes)
 		val announcements = new NullableStringFieldValue(self, DockReport.fields.announcements)
 		val semiPermanentRestrictions = new NullableStringFieldValue(self, DockReport.fields.semiPermanentRestrictions)
+		val signedBy = new NullableIntFieldValue(self, DockReport.fields.signedBy)
 	}
 
 	def getSubobjects(rc: UnlockedRequestCache): (List[DockReportWeather], List[DockReportStaff], List[DockReportUapAppt], List[DockReportHullCount], List[DockReportApClass]) ={
@@ -50,6 +51,7 @@ object DockReport extends StorableObject[DockReport] {
 		val incidentsNotes = new NullableStringDatabaseField(self, "INCIDENTS_NOTES", 4000)
 		val announcements = new NullableStringDatabaseField(self, "ANNOUNCEMENTS", 4000)
 		val semiPermanentRestrictions = new NullableStringDatabaseField(self, "SEMI_PERMANENT_RESTRICTIONS", 4000)
+		val signedBy = new NullableIntDatabaseField(self, "SIGNED_BY")
 	}
 
 	def primaryKey: IntDatabaseField = fields.dockReportId
