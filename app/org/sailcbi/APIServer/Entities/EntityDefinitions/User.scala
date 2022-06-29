@@ -33,6 +33,8 @@ class User extends StorableClass(User) {
 object User extends StorableObject[User] {
 	override val entityName: String = "USERS"
 
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	object USER_TYPES {
 		val USER = "U"
 		val MANAGER = "M"
