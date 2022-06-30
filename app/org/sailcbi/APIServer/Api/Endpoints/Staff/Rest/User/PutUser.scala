@@ -6,13 +6,13 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Entities.access.CbiAccess
 import org.sailcbi.APIServer.Entities.dto.PutUserDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsNumber, JsObject}
+import play.api.libs.json.{JsNumber, JsObject, Json}
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PutUser @Inject()(implicit exec: ExecutionContext) extends RestControllerWithDTO[User, PutUserDTO](User) with InjectedController {
+class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, User.constructFromJsValue)(parsed => {
@@ -22,38 +22,44 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends RestControllerW
 					case Some(None) => parsed.values.pwHash.unset()
 					case _ =>
 				}
-				println("Received: " + parsed)
-				Future(Ok("ok"))
+
+				// Set username to uppercase
+				parsed.values.userName.update(parsed.values.userName.get.toUpperCase)
+
+				val isUpdate = parsed.values.userId.isSet && rc.countObjectsByFilters(User, List(User.fields.userId.alias.equalsConstant(parsed.values.userId.get))) > 0
+
+				if (isUpdate) {
+					runValidationsForUpdate(rc, parsed) match {
+						case ValidationOk => {
+							rc.commitObjectToDatabase(parsed)
+							Future(Ok(Json.toJson(parsed)))
+						}
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					}
+				} else {
+					// TODO: remove this
+					parsed.values.userType.update("U")
+					runValidationsForInsert(rc, parsed) match {
+						case ValidationOk => {
+							rc.commitObjectToDatabase(parsed)
+							Future(Ok(Json.toJson(parsed)))
+						}
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					}
+				}
 			})
 		})
 	}
 
-	override protected def mutateDtoBeforeOperating(dto: PutUserDTO): PutUserDTO = {
-		// Uppercase username
-		PutUserDTO(
-			USER_ID=dto.USER_ID,
-			USER_NAME=dto.USER_NAME.toUpperCase,
-			NAME_FIRST=dto.NAME_FIRST,
-			NAME_LAST=dto.NAME_LAST,
-			EMAIL=dto.EMAIL,
-			ACTIVE=dto.ACTIVE,
-			HIDE_FROM_CLOSE=dto.HIDE_FROM_CLOSE,
-			LOCKED=dto.LOCKED,
-			PW_CHANGE_REQD=dto.PW_CHANGE_REQD,
-			USER_TYPE=dto.USER_TYPE,
-			pwHash=dto.pwHash,
-		)
-	}
-
-	override def runValidationsForUpdate(rc: UnlockedRequestCache, d: PutUserDTO): ValidationResult = {
+	def runValidationsForUpdate(rc: UnlockedRequestCache, u: User): ValidationResult = {
 		ValidationResult.combine(List(
-			ValidationResult.checkBlank(d.NAME_FIRST, "First Name"),
-			ValidationResult.checkBlank(d.NAME_LAST, "Last Name"),
+			ValidationResult.checkBlank(u.values.nameFirst.get, "First Name"),
+			ValidationResult.checkBlank(u.values.nameLast.get, "Last Name"),
 		))
 	}
 
-	override def runValidationsForInsert(rc: UnlockedRequestCache, d: PutUserDTO): ValidationResult =
-		runValidationsForUpdate(rc, d).combine(checkUsernameUnique(rc, d.USER_NAME))
+	def runValidationsForInsert(rc: UnlockedRequestCache, u: User): ValidationResult =
+		runValidationsForUpdate(rc, u).combine(checkUsernameUnique(rc, u.values.userName.get))
 
 	private def checkUsernameUnique(rc: UnlockedRequestCache, candidate: String): ValidationResult = {
 		val existingUsers = rc.countObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(candidate.toLowerCase)))
