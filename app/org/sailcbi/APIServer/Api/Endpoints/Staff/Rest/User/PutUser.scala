@@ -4,7 +4,6 @@ import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, Validatio
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Entities.access.CbiAccess
-import org.sailcbi.APIServer.Entities.dto.PutUserDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject, Json}
 import play.api.mvc.InjectedController
