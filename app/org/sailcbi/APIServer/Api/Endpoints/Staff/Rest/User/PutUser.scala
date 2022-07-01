@@ -1,11 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.User
 
-import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
-import org.sailcbi.APIServer.Entities.access.CbiAccess
+import org.sailcbi.APIServer.Entities.access.CbiPermissions
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsNumber, JsObject, Json}
+import play.api.libs.json.Json
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject
@@ -15,7 +15,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, User.constructFromJsValue)(parsed => {
-			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
+			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
 				// If the password is set as blank, unset
 				parsed.values.pwHash.peek match {
 					case Some(None) => parsed.values.pwHash.unset()
@@ -37,7 +37,6 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 					}
 				} else {
 					// TODO: remove this
-					parsed.values.userType.update("U")
 					runValidationsForInsert(rc, parsed) match {
 						case ValidationOk => {
 							rc.commitObjectToDatabase(parsed)

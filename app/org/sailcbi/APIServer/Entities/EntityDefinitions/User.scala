@@ -18,34 +18,15 @@ class User extends StorableClass(User) {
 		val locked = new BooleanFieldValue(self, User.fields.locked)
 		val pwChangeRequired = new BooleanFieldValue(self, User.fields.pwChangeRequired)
 		val pwHashScheme = new NullableStringFieldValue(self, User.fields.pwHashScheme)
-		val userType = new StringFieldValue(self, User.fields.userType)
 	}
 
-	//override def toString: String = this.valuesList.filter(_.persistenceFieldName != "PW_HASH").toString()
-
-	def canManage(otherUser: User): Boolean = {
-		val myTypeLevel = User.userTypeLevel(this.values.userType.get)
-		val othersTypeLevel = User.userTypeLevel(otherUser.values.userType.get)
-		myTypeLevel > othersTypeLevel
-	}
+	override def toString: String = this.valuesList.filter(_.persistenceFieldName != "PW_HASH").toString()
 }
 
 object User extends StorableObject[User] {
 	override val entityName: String = "USERS"
 
 	override val useRuntimeFieldnamesForJson: Boolean = true
-
-	object USER_TYPES {
-		val USER = "U"
-		val MANAGER = "M"
-		val ADMIN = "A"
-	}
-
-	def userTypeLevel(userType: String): Int = userType match {
-		case USER_TYPES.USER => 1
-		case USER_TYPES.MANAGER => 2
-		case USER_TYPES.ADMIN => 3
-	}
 
 	object fields extends FieldsObject {
 		val userId = new IntDatabaseField(self, "USER_ID")
@@ -59,7 +40,6 @@ object User extends StorableObject[User] {
 		val locked = new BooleanDatabaseField(self, "LOCKED", nullImpliesFalse = true)
 		val pwChangeRequired = new BooleanDatabaseField(self, "PW_CHANGE_REQD", nullImpliesFalse = true)
 		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
-		val userType = new StringDatabaseField(self, "USER_TYPE", 1)
 	}
 
 	def getAuthedUser(rc: StaffRequestCache): User = {

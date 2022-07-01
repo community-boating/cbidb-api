@@ -51,7 +51,7 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 
 		val roles: List[Role] = rc.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.equalsConstant(userId)))
 			.map(_.values.roleId.get)
-			.map(CbiAccess.allRoles(_))
+			.map(CbiAccessUtil.roleMap(_))
 
 		val permissions = roles.map(_.permissions).foldLeft(Set.empty.asInstanceOf[Set[Permission]])(_ ++ _)
 

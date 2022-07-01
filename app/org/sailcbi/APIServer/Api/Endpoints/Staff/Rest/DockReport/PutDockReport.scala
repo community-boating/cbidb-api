@@ -2,11 +2,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport
 
 import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DockReport, DonationFund}
-import org.sailcbi.APIServer.Entities.access.CbiAccess
-import org.sailcbi.APIServer.Entities.dto.{PutDockReportDto, PutDonationFundDTO}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.DockReport
+import org.sailcbi.APIServer.Entities.dto.PutDockReportDto
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsNull, JsNumber, JsObject, Json}
+import play.api.libs.json.Json
 import play.api.mvc.InjectedController
 
 import javax.inject.Inject
