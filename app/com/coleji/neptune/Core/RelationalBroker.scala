@@ -106,7 +106,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
 		sb.append(obj.fieldList
-			.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+			.filter(f => fieldShutter.contains(f))
 			.map(f => f.persistenceFieldName).mkString(", ")
 		)
 		sb.append(" FROM " + obj.entityName)
@@ -115,7 +115,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.toString(),
 			List.empty,
 			obj.fieldList
-				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.filter(f => fieldShutter.contains(f))
 				.map(_.abstractAlias),
 			6
 		)

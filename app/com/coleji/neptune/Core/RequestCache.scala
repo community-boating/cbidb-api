@@ -72,7 +72,7 @@ abstract class UnlockedRequestCache(
 	dbGateway: DatabaseGateway,
 	redisPool: RedisClientPool,
 ) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
-	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]] = Set.empty): Option[T] =
+	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] =
 		pb.getObjectById(obj, id, fieldShutter)
 
 	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =

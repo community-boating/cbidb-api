@@ -65,7 +65,7 @@ abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Man
 					case ve: ValidationError => Left(ve)
 					case ValidationOk => {
 						println("about to fetch " + obj.entityName + "#" + dtoId)
-						val storable = rc.getObjectById(obj, dtoId).get
+						val storable = rc.getObjectById(obj, dtoId, Set(obj.primaryKey)).get
 						mutateStorableForUpdate(storable)
 						rc.commitObjectToDatabase(storable)
 						Right(storable)
