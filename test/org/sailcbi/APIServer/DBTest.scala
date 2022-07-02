@@ -16,7 +16,7 @@ class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 		loader.withPA(pa => {
 			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
-			val types = rc.getAllObjectsOfClass(JpClassType)
+			val types = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.primaryKey))
 			println(types)
 		})
 	}
@@ -24,7 +24,7 @@ class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 		loader.withPA(pa => {
 			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
-			val types = rc.getAllObjectsOfClass(MembershipType)
+			val types = rc.getAllObjectsOfClass(MembershipType, Set(MembershipType.primaryKey))
 			println(types)
 		})
 	}
@@ -56,7 +56,7 @@ class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 
 				override def getQuery: String = "INSERT INTO JP_CLASS_TYPES (TYPE_NAME) VALUES (?)"
 			})
-			val types = rc.getAllObjectsOfClass(JpClassType)
+			val types = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.primaryKey))
 			println(types.size)
 
 			rc.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(RootRequestCache)) {
@@ -64,7 +64,7 @@ class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 
 				override def getQuery: String = "DELETE FROM JP_CLASS_TYPES WHERE TYPE_NAME = ?"
 			})
-			val types2 = rc.getAllObjectsOfClass(JpClassType)
+			val types2 = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.primaryKey))
 			println(types2.size)
 			assert(types.size == types2.size + 1)
 		})
@@ -91,7 +91,7 @@ class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 		loader.withPA(pa => {
 			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 
-			val types = rc.getAllObjectsOfClass(JpClassType, Some(List(JpClassType.fields.typeName)))
+			val types = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.fields.typeName))
 			val aType = types.head
 			println(aType.values.typeName.get)
 			assertThrows[AnyRef]({

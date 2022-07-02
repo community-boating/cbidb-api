@@ -68,9 +68,9 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 		else getObjectsByFiltersImplementation(obj, filters, fieldShutter, fetchSize)
 	}
 
-	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	final def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else getAllObjectsOfClassImplementation(obj, fields)
+		else getAllObjectsOfClassImplementation(obj, fieldShutter, fetchSize)
 	}
 
 	final def commitObjectToDatabase(i: StorableClass): Unit = {
@@ -120,7 +120,7 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 
 	protected def countObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter]): Int
 
-	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T]
+	protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T]
 
 	protected def commitObjectToDatabaseImplementation(i: StorableClass): Unit
 

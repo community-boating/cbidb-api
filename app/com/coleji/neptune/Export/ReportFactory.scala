@@ -33,7 +33,8 @@ abstract class ReportFactory[T <: StorableClass] {
 	val getAllFilter: (UnlockedRequestCache => ReportingFilter[T]) = rc =>
 		new ReportingFilterFunction[T](rc, rc => {
 			rc.getAllObjectsOfClass(
-				entityCompanion
+				entityCompanion,
+				Set(entityCompanion.primaryKey)
 			).toSet
 		})
 

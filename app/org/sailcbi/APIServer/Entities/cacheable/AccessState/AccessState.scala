@@ -31,7 +31,11 @@ object AccessState extends CacheableFactory[Null, String]{
 		)
 		users.foreach(u => u.references.extraRoles.set(usersRoles.filter(_.values.userId.get == u.values.userId.get)))
 
-		val accessProfileRoles = rc.assertUnlocked.getAllObjectsOfClass(AccessProfileRole)
+		val accessProfileRoles = rc.assertUnlocked.getAllObjectsOfClass(AccessProfileRole, Set(
+			AccessProfileRole.fields.assignId,
+			AccessProfileRole.fields.accessProfileId,
+			AccessProfileRole.fields.roleId,
+		))
 
 		val accessProfiles = CbiAccessUtil.allAccessProfiles
 		val roles = CbiAccessUtil.allRoles

@@ -62,7 +62,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val programs: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType)
+		val programs: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType, Set(ProgramType.primaryKey))
 		List(programs.map(p =>
 			(p.values.programId.get.toString, p.values.programName.get.toString)
 		))

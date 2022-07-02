@@ -29,7 +29,7 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 
 	// TODO: exclude inactive?  Filter them to the bottom?
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val allTags = rc.getAllObjectsOfClass(Tag)
+		val allTags = rc.getAllObjectsOfClass(Tag, Set(Tag.primaryKey))
 		List(allTags.sortWith((a, b) => a.values.tagName.get < b.values.tagName.get).map(r =>
 			(r.values.tagId.get.toString, r.values.tagName.get.toString)
 		))

@@ -22,7 +22,7 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val types: List[JpClassType] = rc.getAllObjectsOfClass(JpClassType)
+		val types: List[JpClassType] = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.primaryKey))
 		List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
 	}
 }

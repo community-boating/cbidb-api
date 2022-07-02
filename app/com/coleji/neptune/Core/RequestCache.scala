@@ -85,8 +85,8 @@ abstract class UnlockedRequestCache(
 	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByFilters(obj, filters, fieldShutter, fetchSize)
 
-	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		pb.getAllObjectsOfClass(obj, fields)
+	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
+		pb.getAllObjectsOfClass(obj, fieldShutter, fetchSize)
 
 	def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)

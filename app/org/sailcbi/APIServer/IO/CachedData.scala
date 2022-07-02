@@ -57,18 +57,36 @@ class CachedData(rc: UnlockedRequestCache) {
 			}
 	}
 
-	lazy val programTypes: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType)
+	lazy val programTypes: List[ProgramType] = rc.getAllObjectsOfClass(ProgramType, Set(
+		ProgramType.fields.programId,
+		ProgramType.fields.programName,
+	))
 	lazy val membershipTypes: List[MembershipType] = {
-		rc.getAllObjectsOfClass(MembershipType).map(m => {
+		rc.getAllObjectsOfClass(MembershipType, Set(
+			MembershipType.fields.membershipTypeId,
+			MembershipType.fields.membershipTypeName,
+			MembershipType.fields.programId,
+			MembershipType.fields.price,
+		)).map(m => {
 			m.references.program.findOneInCollection(programTypes)
 			m
 		})
 	}
 	lazy val membershipTypeExps: List[MembershipTypeExp] = {
-		rc.getAllObjectsOfClass(MembershipTypeExp).map(me => {
+		rc.getAllObjectsOfClass(MembershipTypeExp, Set(
+			MembershipTypeExp.fields.expirationId,
+			MembershipTypeExp.fields.membershipTypeId,
+			MembershipTypeExp.fields.season,
+			MembershipTypeExp.fields.startDate,
+			MembershipTypeExp.fields.expirationDate,
+		)).map(me => {
 			me.references.membershipType.findOneInCollection(membershipTypes)
 			me
 		})
 	}
-	lazy val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating)
+	lazy val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating, Set(
+		Rating.fields.ratingId,
+		Rating.fields.ratingName,
+		Rating.fields.overriddenBy,
+	))
 }

@@ -81,21 +81,24 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	override protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		val profiler = new Profiler
-		val fieldsToGet = fields match{
-			case None => obj.fieldList
-			case Some(fl) => {
-				val fieldNames = fl.map(_.persistenceFieldName)
-				obj.fieldList.filter(f => fieldNames.contains(f.persistenceFieldName))
-			}
-		}
 		profiler.lap("did intersect")
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
-		sb.append(fieldsToGet.map(f => f.persistenceFieldName).mkString(", "))
+		sb.append(obj.fieldList
+			.filter(f => fieldShutter.contains(f))
+			.map(f => f.persistenceFieldName).mkString(", ")
+		)
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(_.abstractAlias), 50)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(
+			sb.toString(),
+			List.empty,
+			obj.fieldList
+				.filter(f => fieldShutter.contains(f))
+				.map(_.abstractAlias),
+			fetchSize
+		)
 		val p = new Profiler
 		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")

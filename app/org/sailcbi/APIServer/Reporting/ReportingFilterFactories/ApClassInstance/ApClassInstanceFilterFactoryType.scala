@@ -44,7 +44,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val types: List[ApClassType] = rc.getAllObjectsOfClass(ApClassType)
+		val types: List[ApClassType] = rc.getAllObjectsOfClass(ApClassType, Set(ApClassType.primaryKey))
 		List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
 	}
 }
