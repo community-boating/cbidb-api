@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 import java.time.Duration
 
 object AccessState extends CacheableFactory[Null, String]{
-	override protected val lifetime: Duration = Duration.ofMinutes(5)
+	override protected val lifetime: Duration = Duration.ofSeconds(5)
 
 	override protected def calculateKey(config: Null): String = CacheKeys.accessState
 
@@ -19,7 +19,7 @@ object AccessState extends CacheableFactory[Null, String]{
 			User.fields.userId,
 			User.fields.userName,
 			User.fields.accessProfileId
-		))
+		), 200)
 
 		val usersRoles = rc.assertUnlocked.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.inList(users.map(_.values.userId.get))))
 		users.foreach(u => u.references.extraRoles.set(usersRoles.filter(_.values.userId.get == u.values.userId.get)))

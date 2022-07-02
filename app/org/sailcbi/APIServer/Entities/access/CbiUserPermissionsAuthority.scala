@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Entities.access
 import com.coleji.neptune.Core.access.{Permission, Role, UserPermissionsAuthority}
 import com.coleji.neptune.Core.{CacheableFactory, RequestCache, UnlockedRequestCache}
 import com.coleji.neptune.Util.Serde
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{User, UserRole}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{AccessProfileRole, User, UserRole}
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
 
 import java.time.Duration
@@ -18,7 +18,7 @@ class CbiUserPermissionsAuthority(
 }
 
 object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermissionsAuthority] {
-	override protected val lifetime: Duration = Duration.ofMinutes(5)
+	override protected val lifetime: Duration = Duration.ofSeconds(5)
 
 	override protected def calculateKey(config: String): String = CacheKeys.userPermissionsAuthority(config)
 
@@ -36,9 +36,7 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 		val userName = Serde.deseralizeStandard[String](parts(1))
 		val roles = Serde.deserializeList[Int](parts(2)).map(id => CbiAccessUtil.roleMap(id)).toSet
 		val permissions = Serde.deseralizeStandard[Set[Permission]](parts(3))
-		val ret = new CbiUserPermissionsAuthority(userId, userName, roles, permissions)
-		println(ret)
-		ret
+		new CbiUserPermissionsAuthority(userId, userName, roles, permissions)
 	}
 
 	override protected def generateResult(rc: RequestCache, config: String): CbiUserPermissionsAuthority = rc match {
@@ -47,25 +45,34 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 	}
 
 	private def apply(rc: UnlockedRequestCache, userName: String): CbiUserPermissionsAuthority = {
-		val userId = {
+		val user = {
 			val users = rc.getObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(userName.toLowerCase)))
 			if (users.length != 1) throw new Exception ("Found " + users.length + " users for username " + userName)
-			users.head.values.userId.get
+			users.head
 		}
 
-		val roles: List[Role] = rc.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.equalsConstant(userId)))
+		val userId = user.values.userId.get
+		val accessProfileId = user.values.accessProfileId.get
+
+		val apRoles = rc.getObjectsByFilters(AccessProfileRole, List(AccessProfileRole.fields.accessProfileId.alias.equalsConstant(accessProfileId)))
 			.map(_.values.roleId.get)
 			.map(CbiAccessUtil.roleMap(_))
+			.toSet
+
+		val overrideRoles = rc.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.equalsConstant(userId)))
+			.map(_.values.roleId.get)
+			.map(CbiAccessUtil.roleMap(_))
+			.toSet
+
+		val roles = apRoles ++ overrideRoles
 
 		val permissions = roles.map(_.permissions).foldLeft(Set.empty.asInstanceOf[Set[Permission]])(_ ++ _)
 
-		val ret = new CbiUserPermissionsAuthority(
+		new CbiUserPermissionsAuthority(
 			userId,
 			userName,
-			roles.toSet,
+			roles,
 			permissions
 		)
-		println(ret)
-		ret
 	}
 }
