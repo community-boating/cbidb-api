@@ -18,6 +18,7 @@ class User extends StorableClass(User) {
 		val locked = new BooleanFieldValue(self, User.fields.locked)
 		val pwChangeRequired = new BooleanFieldValue(self, User.fields.pwChangeRequired)
 		val pwHashScheme = new NullableStringFieldValue(self, User.fields.pwHashScheme)
+		val accessProfileId = new IntFieldValue(self, User.fields.accessProfileId)
 	}
 
 	override def toString: String = this.valuesList.filter(_.persistenceFieldName != "PW_HASH").toString()
@@ -40,6 +41,7 @@ object User extends StorableObject[User] {
 		val locked = new BooleanDatabaseField(self, "LOCKED", nullImpliesFalse = true)
 		val pwChangeRequired = new BooleanDatabaseField(self, "PW_CHANGE_REQD", nullImpliesFalse = true)
 		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
+		val accessProfileId = new IntDatabaseField(self, "ACCESS_PROFILE_ID")
 	}
 
 	def getAuthedUser(rc: StaffRequestCache): User = {
