@@ -13,7 +13,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetTag @Inject()(implicit val exec: ExecutionContext) extends RestController(Tag) with InjectedController {
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val tags = getByFilters(rc, List.empty, Set.empty)
+			val tags = getByFilters(rc, List.empty, Set(
+				Tag.fields.tagId,
+				Tag.fields.tagName
+			))
 			Future(Ok(Json.toJson(tags)))
 		})
 	})

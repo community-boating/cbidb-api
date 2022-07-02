@@ -27,7 +27,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		val membershipTypeIDs = rc.getObjectsByFilters(
 			MembershipType,
 			List(MembershipType.fields.programId.alias.equalsConstant(programId)),
-			Set.empty,
+			Set(MembershipType.primaryKey),
 			15
 		).map(_.values.membershipTypeId.get)
 
@@ -37,7 +37,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 				PersonMembership.fields.membershipTypeId.alias.inList(membershipTypeIDs),
 				PersonMembership.fields.expirationDate.alias.isYearConstant(year)
 			),
-			Set.empty,
+			Set(PersonMembership.primaryKey),
 			500
 		).map(_.values.personId.get).toSet
 
@@ -47,7 +47,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 				PersonMembership.fields.membershipTypeId.alias.inList(membershipTypeIDs),
 				PersonMembership.fields.startDate.alias.isYearConstant(year)
 			),
-			Set.empty,
+			Set(PersonMembership.primaryKey),
 			500
 		).map(_.values.personId.get).toSet
 

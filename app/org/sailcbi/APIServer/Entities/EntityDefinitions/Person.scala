@@ -119,7 +119,13 @@ class Person extends StorableClass(Person) {
 	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
 		references.personRatings set rc.getObjectsByFilters(
 			PersonRating,
-			List(PersonRating.fields.personId.alias.equalsConstant(values.personId.get))
+			List(PersonRating.fields.personId.alias.equalsConstant(values.personId.get)),
+			Set(
+				PersonRating.fields.assignId,
+				PersonRating.fields.personId,
+				PersonRating.fields.ratingId,
+				PersonRating.fields.programId
+			)
 		)
 	}
 

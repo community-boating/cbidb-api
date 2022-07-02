@@ -16,7 +16,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestController(DockReport) with InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val dockReport = getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now)), Set.empty)
+			val dockReport = getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now)), Set(
+				DockReport.fields.dockReportId,
+				DockReport.fields.reportDate,
+				DockReport.fields.sunsetDatetime,
+				DockReport.fields.incidentsNotes,
+				DockReport.fields.announcements,
+				DockReport.fields.semiPermanentRestrictions,
+				DockReport.fields.signedBy,
+			))
 				.map(PutDockReportDto.applyWithSubObjects(rc)).headOption
 
 			dockReport match {
@@ -34,7 +42,15 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 		val newDockReport = new DockReport
 		newDockReport.values.reportDate.update(LocalDate.now)
 		// copy yesterday's values
-		val yesterday = getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now.minusDays(1))), Set.empty).headOption
+		val yesterday = getByFilters(rc, List(DockReport.fields.reportDate.alias.isDateConstant(LocalDate.now.minusDays(1))), Set(
+			DockReport.fields.dockReportId,
+			DockReport.fields.reportDate,
+			DockReport.fields.sunsetDatetime,
+			DockReport.fields.incidentsNotes,
+			DockReport.fields.announcements,
+			DockReport.fields.semiPermanentRestrictions,
+			DockReport.fields.signedBy,
+		)).headOption
 
 		yesterday.foreach(yesterday => {
 			newDockReport.values.semiPermanentRestrictions.update(yesterday.values.semiPermanentRestrictions.get)
@@ -71,7 +87,13 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 
 		// copy in svc hull counts
 		val yesterdaysHullCts = yesterday.map(y => y.values.dockReportId.get).map(id => {
-			rc.getObjectsByFilters(DockReportHullCount, List(DockReportHullCount.fields.dockReportId.alias.equalsConstant(id)), Set.empty)
+			rc.getObjectsByFilters(DockReportHullCount, List(DockReportHullCount.fields.dockReportId.alias.equalsConstant(id)), Set(
+				DockReportHullCount.fields.dockReportId,
+				DockReportHullCount.fields.dockReportHullCtId,
+				DockReportHullCount.fields.hullType,
+				DockReportHullCount.fields.inService,
+				DockReportHullCount.fields.staffTally
+			))
 		}).getOrElse(List.empty)
 
 		val newHullCts = yesterdaysHullCts.map(ct => {

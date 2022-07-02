@@ -46,7 +46,15 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 
 	private def apply(rc: UnlockedRequestCache, userName: String): CbiUserPermissionsAuthority = {
 		val user = {
-			val users = rc.getObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(userName.toLowerCase)))
+			val users = rc.getObjectsByFilters(
+				User,
+				List(User.fields.userName.alias.equalsConstantLowercase(userName.toLowerCase)),
+				Set(
+					User.fields.userId,
+					User.fields.userName,
+					User.fields.accessProfileId,
+				)
+			)
 			if (users.length != 1) throw new Exception ("Found " + users.length + " users for username " + userName)
 			users.head
 		}
@@ -54,12 +62,26 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 		val userId = user.values.userId.get
 		val accessProfileId = user.values.accessProfileId.get
 
-		val apRoles = rc.getObjectsByFilters(AccessProfileRole, List(AccessProfileRole.fields.accessProfileId.alias.equalsConstant(accessProfileId)))
+		val apRoles = rc.getObjectsByFilters(
+			AccessProfileRole,
+			List(AccessProfileRole.fields.accessProfileId.alias.equalsConstant(accessProfileId)),
+			Set(
+				AccessProfileRole.fields.accessProfileId,
+				AccessProfileRole.fields.roleId
+			)
+		)
 			.map(_.values.roleId.get)
 			.map(CbiAccessUtil.roleMap(_))
 			.toSet
 
-		val overrideRoles = rc.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.equalsConstant(userId)))
+		val overrideRoles = rc.getObjectsByFilters(
+			UserRole,
+			List(UserRole.fields.userId.alias.equalsConstant(userId)),
+			Set(
+				UserRole.fields.userId,
+				UserRole.fields.roleId
+			)
+		)
 			.map(_.values.roleId.get)
 			.map(CbiAccessUtil.roleMap(_))
 			.toSet

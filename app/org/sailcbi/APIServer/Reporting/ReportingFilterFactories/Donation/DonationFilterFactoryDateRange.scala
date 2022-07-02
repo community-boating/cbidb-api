@@ -25,7 +25,8 @@ class DonationFilterFactoryDateRange extends ReportingFilterFactory[Donation] {
 			List(
 				Donation.fields.donationDate.alias.greaterEqualConstant(start),
 				Donation.fields.donationDate.alias.lessEqualConstant(end)
-			)
+			),
+			Set(Donation.primaryKey)
 		).toSet
 	})
 }

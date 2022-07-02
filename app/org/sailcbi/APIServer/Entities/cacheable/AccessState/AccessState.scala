@@ -21,7 +21,14 @@ object AccessState extends CacheableFactory[Null, String]{
 			User.fields.accessProfileId
 		), 200)
 
-		val usersRoles = rc.assertUnlocked.getObjectsByFilters(UserRole, List(UserRole.fields.userId.alias.inList(users.map(_.values.userId.get))))
+		val usersRoles = rc.assertUnlocked.getObjectsByFilters(
+			UserRole,
+			List(UserRole.fields.userId.alias.inList(users.map(_.values.userId.get))),
+			Set(
+				UserRole.fields.userId,
+				UserRole.fields.roleId
+			)
+		)
 		users.foreach(u => u.references.extraRoles.set(usersRoles.filter(_.values.userId.get == u.values.userId.get)))
 
 		val accessProfileRoles = rc.assertUnlocked.getAllObjectsOfClass(AccessProfileRole)

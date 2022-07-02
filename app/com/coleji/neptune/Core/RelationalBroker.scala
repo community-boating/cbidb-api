@@ -147,7 +147,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
@@ -156,7 +156,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
 			sb.append(obj.fieldList
-				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.filter(f => fieldShutter.contains(f))
 				.map(f => f.persistenceFieldName).mkString(", ")
 			)
 			sb.append(" FROM " + obj.entityName + " " + obj.entityName)
@@ -170,7 +170,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				sb.toString(),
 				params,
 				obj.fieldList
-					.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+					.filter(f => fieldShutter.contains(f))
 					.map(_.abstractAlias),
 				fetchSize
 			)

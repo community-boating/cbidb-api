@@ -18,7 +18,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 			val ts: List[ApClassType] = rc.getObjectsByFilters(
 				ApClassType,
 				List(ApClassType.fields.typeId.alias.equalsConstant(typeId)),
-				Set.empty,
+				Set(ApClassType.primaryKey),
 				5
 			)
 			if (ts.size != 1) throw new BadReportingFilterArgumentsException("No such ApClassType with ID " + typeId)
@@ -29,7 +29,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 			val fs: List[ApClassFormat] = rc.getObjectsByFilters(
 				ApClassFormat,
 				List(ApClassFormat.fields.typeId.alias.equalsConstant(typeID)),
-				Set.empty,
+				Set(ApClassFormat.primaryKey),
 				5
 			)
 			fs.map(f => f.values.formatId.get)
@@ -38,7 +38,7 @@ class ApClassInstanceFilterFactoryType extends ReportingFilterFactory[ApClassIns
 		rc.getObjectsByFilters(
 			ApClassInstance,
 			List(ApClassInstance.fields.formatId.alias.inList(formatIDs)),
-			Set.empty,
+			Set(ApClassInstance.primaryKey),
 			500
 		).toSet
 	})

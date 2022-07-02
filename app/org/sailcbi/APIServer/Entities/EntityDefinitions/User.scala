@@ -49,9 +49,5 @@ object User extends StorableObject[User] {
 		val accessProfileId = new IntDatabaseField(self, "ACCESS_PROFILE_ID")
 	}
 
-	def getAuthedUser(rc: StaffRequestCache): User = {
-		rc.getObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(rc.userName))).head
-	}
-
 	override def primaryKey: IntDatabaseField = fields.userId
 }

@@ -13,7 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetClassInstructor @Inject()(implicit val exec: ExecutionContext) extends RestController(ClassInstructor) with InjectedController {
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val instructors = getByFilters(rc, List.empty, Set.empty)
+			val instructors = getByFilters(rc, List.empty, Set(
+				ClassInstructor.fields.instructorId,
+				ClassInstructor.fields.nameFirst,
+				ClassInstructor.fields.nameLast,
+			))
 			Future(Ok(Json.toJson(instructors)))
 		})
 	})

@@ -10,7 +10,7 @@ extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[BouncerRequestCache] = BouncerRequestCache
 
 	def getUserByUsername(username: String): Option[User] =
-	pb.getObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(username.toLowerCase))) match {
+	pb.getObjectsByFilters(User, List(User.fields.userName.alias.equalsConstantLowercase(username.toLowerCase)), Set(User.primaryKey)) match {
 		case u :: Nil => Some(u)
 		case _ => None
 	}
