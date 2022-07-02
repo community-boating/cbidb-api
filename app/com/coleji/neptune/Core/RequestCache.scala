@@ -75,8 +75,8 @@ abstract class UnlockedRequestCache(
 	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] =
 		pb.getObjectById(obj, id, fieldShutter)
 
-	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		pb.getObjectsByIds(obj, ids, fetchSize)
+	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
+		pb.getObjectsByIds(obj, ids, fieldShutter, fetchSize)
 
 	def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter]): Int = {
 		pb.countObjectsByFilters(obj, filters)

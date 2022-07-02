@@ -36,7 +36,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 			)
 		).map(_.values.a.get)
 
-		rc.getObjectsByIds(Person, parentIds).toSet
+		rc.getObjectsByIds(Person, parentIds, Set(Person.primaryKey)).toSet
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {

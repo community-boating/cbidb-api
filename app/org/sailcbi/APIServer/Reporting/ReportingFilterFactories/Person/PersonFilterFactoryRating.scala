@@ -29,7 +29,7 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 			10000
 		).map(_.values.personId.get)
 
-		rc.getObjectsByIds(Person, personIDs, 10000).toSet
+		rc.getObjectsByIds(Person, personIDs, Set(Person.primaryKey), 10000).toSet
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?

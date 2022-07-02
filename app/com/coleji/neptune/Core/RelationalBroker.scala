@@ -123,7 +123,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else None
 	}
 
-	override protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		println("#################################################")
 		println("About to get " + ids.length + " instances of " + obj.entityName)
 		println("#################################################")
@@ -133,11 +133,14 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else if (ids.length <= MAX_IDS_NO_TEMP_TABLE) {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
-			sb.append(obj.fieldList.map(f => f.persistenceFieldName).mkString(", "))
+			sb.append(obj.fieldList
+				.filter(f => fieldShutter.contains(f))
+				.map(f => f.persistenceFieldName).mkString(", ")
+			)
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.persistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(_.abstractAlias), fetchSize)
-			rows.map(r => obj.construct(r))
+			rows.map(r => obj.construct(r, fieldShutter))
 		} else {
 			// Too many IDs; make a filter table
 			getObjectsByIdsWithFilterTable(obj, ids, fetchSize)

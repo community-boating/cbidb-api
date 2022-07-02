@@ -56,6 +56,7 @@ class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] w
 		rc.getObjectsByIds(
 			Person,
 			personIDs.toList,
+			Set(Person.primaryKey),
 			1000
 		).toSet
 	})

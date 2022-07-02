@@ -16,7 +16,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 
 	// decorated with types
 	lazy val jpClassInstances: List[JpClassInstance] = {
-		val classInstances: List[JpClassInstance] = rc.getObjectsByIds(JpClassInstance, classInstanceIDs.toList)
+		val classInstances: List[JpClassInstance] = rc.getObjectsByIds(JpClassInstance, classInstanceIDs.toList, Set(JpClassInstance.primaryKey))
 		classInstances.foreach(i => {
 			val typeId = i.values.typeId.get
 			val typeInstance = jpClassTypes.find(_.values.typeId.get == typeId)

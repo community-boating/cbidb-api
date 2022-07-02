@@ -44,7 +44,7 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 			}) >= amount
 		}).keys.toList
 
-		rc.getObjectsByIds(Person, personIDs).toSet
+		rc.getObjectsByIds(Person, personIDs, Set(Person.primaryKey)).toSet
 	})
 
 }
