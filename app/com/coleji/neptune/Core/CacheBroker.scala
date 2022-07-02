@@ -6,4 +6,6 @@ abstract class CacheBroker private[Core] {
 	def get(key: String): Option[String]
 
 	def peek(key: String): Boolean
+
+	def delete(key: String): Unit
 }

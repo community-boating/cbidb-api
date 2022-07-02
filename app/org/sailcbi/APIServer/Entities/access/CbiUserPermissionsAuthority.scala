@@ -13,7 +13,9 @@ class CbiUserPermissionsAuthority(
 	override val userName: String,
 	override val roles: Set[Role],
 	override val permissions: Set[Permission]
-) extends UserPermissionsAuthority[Int](userId, userName, roles, permissions) with Serializable
+) extends UserPermissionsAuthority[Int](userId, userName, roles, permissions) with Serializable {
+	override def toString: String = roles.toString() + " ::: " + permissions.toString()
+}
 
 object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermissionsAuthority] {
 	override protected val lifetime: Duration = Duration.ofMinutes(5)
@@ -23,18 +25,20 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 	override protected def serialize(result: CbiUserPermissionsAuthority): String = {
 		val userId = Serde.serializeStandard(result.userId)
 		val userName = Serde.serializeStandard(result.userName)
-		val roles = Serde.serializeStandard(result.roles)
+		val roles = Serde.serializeList(result.roles.toList.map(_.id))
 		val permissions = Serde.serializeStandard(result.permissions)
-		userId + ":" + userName + ":" + roles + ":" + permissions
+		userId + "%" + userName + "%" + roles + "%" + permissions
 	}
 
 	override protected def deseralize(resultString: String): CbiUserPermissionsAuthority = {
-		val parts = resultString.split(":")
+		val parts = resultString.split("%")
 		val userId = Serde.deseralizeStandard[Int](parts(0))
 		val userName = Serde.deseralizeStandard[String](parts(1))
-		val roles = Serde.deseralizeStandard[Set[Role]](parts(2))
+		val roles = Serde.deserializeList[Int](parts(2)).map(id => CbiAccessUtil.roleMap(id)).toSet
 		val permissions = Serde.deseralizeStandard[Set[Permission]](parts(3))
-		new CbiUserPermissionsAuthority(userId, userName, roles, permissions)
+		val ret = new CbiUserPermissionsAuthority(userId, userName, roles, permissions)
+		println(ret)
+		ret
 	}
 
 	override protected def generateResult(rc: RequestCache, config: String): CbiUserPermissionsAuthority = rc match {
@@ -55,11 +59,13 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 
 		val permissions = roles.map(_.permissions).foldLeft(Set.empty.asInstanceOf[Set[Permission]])(_ ++ _)
 
-		new CbiUserPermissionsAuthority(
+		val ret = new CbiUserPermissionsAuthority(
 			userId,
 			userName,
 			roles.toSet,
 			permissions
 		)
+		println(ret)
+		ret
 	}
 }

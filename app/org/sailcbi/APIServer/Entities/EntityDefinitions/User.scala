@@ -3,9 +3,14 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableStringFieldValue, StringFieldValue}
 import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 class User extends StorableClass(User) {
+	override object references extends ReferencesObject {
+		val extraRoles = new Initializable[List[UserRole]]
+	}
+
 	object values extends ValuesObject {
 		val userId = new IntFieldValue(self, User.fields.userId)
 		val userName = new StringFieldValue(self, User.fields.userName)

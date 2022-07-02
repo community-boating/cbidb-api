@@ -4,12 +4,11 @@ case class Role(
 	id: Int,
 	name: String,
 	description: String,
-	permissions: Set[Permission]
+	permissions: List[Permission]
 )
 
 object Role {
-//	def apply(id: Int, name: String, description: String): Role = Role(id, name, description, Set.empty)
-	def apply(id: Int, name: String, permissions: Set[Permission]): Role = Role(id, name, name, permissions)
+	def apply(id: Int, name: String, permissions: List[Permission]): Role = Role(id, name, name, permissions)
 
 //	val ROLE_DATA_ADMINISTRATOR = Role(1, "Data Adminstrator", "Super admin with all the low level access")
 //	val ROLE_GLOBAL_USER_ADMIN = Role(2, "Global User Admin", "Unlimited access to manage users")
