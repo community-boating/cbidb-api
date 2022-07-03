@@ -69,6 +69,7 @@ object ServerBootLoader {
 					allowableUserTypes = enabledAuthMechanisms,
 					preparedQueriesOnly = preparedQueriesOnly,
 					persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
+					emailCrashesTo = paramFile.getOptionalString("EmailCrashesTo").getOrElse("jon@community-boating.org"),
 				),
 				customParams = paramFile,
 				dbGateway = dbConnection,
