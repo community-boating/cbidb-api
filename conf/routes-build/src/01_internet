@@ -175,6 +175,8 @@ POST    /auth/do-claim-acct                        org.sailcbi.APIServer.Api.End
 POST    /auth/update-acct               org.sailcbi.APIServer.Api.Endpoints.Security.UpdateAccount.post()
 POST    /auth/prove-member              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
 
+POST    /auth/crash                     org.sailcbi.APIServer.Api.Endpoints.Crash.crash()
+
 POST /auth/create-member                org.sailcbi.APIServer.Api.Endpoints.Security.CreateMember.post()
 GET     /auth/getPwHash                     org.sailcbi.APIServer.Api.Endpoints.Security.GetPwHashForUser.get(userName: String, userType: String ?= "staff")
 # Map static resources from the /public folder to the /assets URL path
