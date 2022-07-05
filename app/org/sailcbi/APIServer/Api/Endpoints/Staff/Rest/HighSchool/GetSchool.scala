@@ -13,7 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetSchool @Inject()(implicit val exec: ExecutionContext) extends RestController(HighSchool) with InjectedController {
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val schools = getByFilters(rc, List.empty, Set.empty)
+			val schools = getByFilters(rc, List.empty, Set(
+				HighSchool.fields.schoolId,
+				HighSchool.fields.schoolName,
+				HighSchool.fields.active,
+			))
 			Future(Ok(Json.toJson(schools)))
 		})
 	})

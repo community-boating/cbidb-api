@@ -27,6 +27,12 @@ abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(i
 		true
 	}
 
+	def unset(): Boolean = {
+		value = None
+		dirty = false
+		true
+	}
+
 	def updateFromJsValue(v: JsValue): Boolean
 
 	def isDirty = dirty

@@ -81,21 +81,24 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] = {
+	override protected def getAllObjectsOfClassImplementation[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		val profiler = new Profiler
-		val fieldsToGet = fields match{
-			case None => obj.fieldList
-			case Some(fl) => {
-				val fieldNames = fl.map(_.persistenceFieldName)
-				obj.fieldList.filter(f => fieldNames.contains(f.persistenceFieldName))
-			}
-		}
 		profiler.lap("did intersect")
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
-		sb.append(fieldsToGet.map(f => f.persistenceFieldName).mkString(", "))
+		sb.append(obj.fieldList
+			.filter(f => fieldShutter.contains(f))
+			.map(f => f.persistenceFieldName).mkString(", ")
+		)
 		sb.append(" FROM " + obj.entityName)
-		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, fieldsToGet.map(_.abstractAlias), 50)
+		val rows: List[ProtoStorable] = getProtoStorablesFromSelect(
+			sb.toString(),
+			List.empty,
+			obj.fieldList
+				.filter(f => fieldShutter.contains(f))
+				.map(_.abstractAlias),
+			fetchSize
+		)
 		val p = new Profiler
 		val ret = rows.map(r => obj.construct(r))
 		p.lap("assembled from protostorables into storableclasses")
@@ -106,7 +109,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		val sb: StringBuilder = new StringBuilder
 		sb.append("SELECT ")
 		sb.append(obj.fieldList
-			.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+			.filter(f => fieldShutter.contains(f))
 			.map(f => f.persistenceFieldName).mkString(", ")
 		)
 		sb.append(" FROM " + obj.entityName)
@@ -115,7 +118,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			sb.toString(),
 			List.empty,
 			obj.fieldList
-				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.filter(f => fieldShutter.contains(f))
 				.map(_.abstractAlias),
 			6
 		)
@@ -123,7 +126,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else None
 	}
 
-	override protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByIdsImplementation[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		println("#################################################")
 		println("About to get " + ids.length + " instances of " + obj.entityName)
 		println("#################################################")
@@ -133,18 +136,21 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		else if (ids.length <= MAX_IDS_NO_TEMP_TABLE) {
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
-			sb.append(obj.fieldList.map(f => f.persistenceFieldName).mkString(", "))
+			sb.append(obj.fieldList
+				.filter(f => fieldShutter.contains(f))
+				.map(f => f.persistenceFieldName).mkString(", ")
+			)
 			sb.append(" FROM " + obj.entityName)
 			sb.append(" WHERE " + obj.primaryKey.persistenceFieldName + " in (" + ids.mkString(", ") + ")")
 			val rows: List[ProtoStorable] = getProtoStorablesFromSelect(sb.toString(), List.empty, obj.fieldList.map(_.abstractAlias), fetchSize)
-			rows.map(r => obj.construct(r))
+			rows.map(r => obj.construct(r, fieldShutter))
 		} else {
 			// Too many IDs; make a filter table
 			getObjectsByIdsWithFilterTable(obj, ids, fetchSize)
 		}
 	}
 
-	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] = {
+	override protected def getObjectsByFiltersImplementation[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int): List[T] = {
 		// Filter("") means a filter that can't possibly match anything.
 		// E.g. if you try to make a int in list filter and pass in an empty list, it will generate a short circuit filter
 		// If there are any short circuit filters, don't bother talking to the database
@@ -153,7 +159,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 			val sb: StringBuilder = new StringBuilder
 			sb.append("SELECT ")
 			sb.append(obj.fieldList
-				.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+				.filter(f => fieldShutter.contains(f))
 				.map(f => f.persistenceFieldName).mkString(", ")
 			)
 			sb.append(" FROM " + obj.entityName + " " + obj.entityName)
@@ -167,7 +173,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				sb.toString(),
 				params,
 				obj.fieldList
-					.filter(f => fieldShutter.isEmpty || fieldShutter.contains(f))
+					.filter(f => fieldShutter.contains(f))
 					.map(_.abstractAlias),
 				fetchSize
 			)

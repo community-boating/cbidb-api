@@ -13,7 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetEvent @Inject()(implicit val exec: ExecutionContext) extends RestController(Event) with InjectedController {
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val events = getByFilters(rc, List.empty, Set.empty)
+			val events = getByFilters(rc, List.empty, Set(
+				Event.fields.eventId,
+				Event.fields.eventName,
+				Event.fields.eventDateTime,
+			))
 			Future(Ok(Json.toJson(events)))
 		})
 	})

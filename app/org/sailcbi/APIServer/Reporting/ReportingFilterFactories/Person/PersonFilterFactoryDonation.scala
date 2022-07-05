@@ -27,7 +27,8 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 			Donation,
 			List(
 				Donation.fields.donationDate.alias.greaterEqualConstant(sinceDate)
-			)
+			),
+			Set(Donation.primaryKey)
 		)
 
 		println("found " + donationsSinceDate.length + " donations")
@@ -44,7 +45,7 @@ class PersonFilterFactoryDonation extends ReportingFilterFactory[Person] {
 			}) >= amount
 		}).keys.toList
 
-		rc.getObjectsByIds(Person, personIDs).toSet
+		rc.getObjectsByIds(Person, personIDs, Set(Person.primaryKey)).toSet
 	})
 
 }

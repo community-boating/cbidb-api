@@ -18,23 +18,31 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 
 		val ratingId: Int = arg.toInt
 
-		val allRatings = rc.getAllObjectsOfClass(Rating)
+		val allRatings = rc.getAllObjectsOfClass(Rating, Set(
+			Rating.fields.ratingId,
+			Rating.fields.ratingName,
+			Rating.fields.overriddenBy,
+		))
 
 		val ratingsToHave: List[Int] = Rating.getAllHigherRatingsThanRating(allRatings, ratingId).map(_.values.ratingId.get)
 
 		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonRating,
 			List(PersonRating.fields.ratingId.alias.inList(ratingsToHave)),
-			Set.empty,
+			Set(PersonRating.primaryKey),
 			10000
 		).map(_.values.personId.get)
 
-		rc.getObjectsByIds(Person, personIDs, 10000).toSet
+		rc.getObjectsByIds(Person, personIDs, Set(Person.primaryKey), 10000).toSet
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating)
+		val ratings: List[Rating] = rc.getAllObjectsOfClass(Rating, Set(
+			Rating.fields.ratingId,
+			Rating.fields.ratingName,
+			Rating.fields.overriddenBy,
+		))
 		List(ratings.sortWith((a, b) => a.values.ratingName.get < b.values.ratingName.get).map(r =>
 			(r.values.ratingId.get.toString, r.values.ratingName.get.toString)
 		))

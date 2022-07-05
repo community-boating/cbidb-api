@@ -72,21 +72,21 @@ abstract class UnlockedRequestCache(
 	dbGateway: DatabaseGateway,
 	redisPool: RedisClientPool,
 ) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
-	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]] = Set.empty): Option[T] =
+	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] =
 		pb.getObjectById(obj, id, fieldShutter)
 
-	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fetchSize: Int = 50): List[T] =
-		pb.getObjectsByIds(obj, ids, fetchSize)
+	def getObjectsByIds[T <: StorableClass](obj: StorableObject[T], ids: List[Int], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
+		pb.getObjectsByIds(obj, ids, fieldShutter, fetchSize)
 
 	def countObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter]): Int = {
 		pb.countObjectsByFilters(obj, filters)
 	}
 
-	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]] = Set.empty, fetchSize: Int = 50): List[T] =
+	def getObjectsByFilters[T <: StorableClass](obj: StorableObject[T], filters: List[Filter], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
 		pb.getObjectsByFilters(obj, filters, fieldShutter, fetchSize)
 
-	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fields: Option[List[DatabaseField[_]]] = None): List[T] =
-		pb.getAllObjectsOfClass(obj, fields)
+	def getAllObjectsOfClass[T <: StorableClass](obj: StorableObject[T], fieldShutter: Set[DatabaseField[_]], fetchSize: Int = 50): List[T] =
+		pb.getAllObjectsOfClass(obj, fieldShutter, fetchSize)
 
 	def commitObjectToDatabase(i: StorableClass): Unit =
 		pb.commitObjectToDatabase(i)

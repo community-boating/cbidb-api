@@ -17,14 +17,14 @@ class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignu
 		val sessions = rc.getObjectsByFilters(
 			JpClassSession,
 			List(JpClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
-			Set.empty,
+			Set(JpClassSession.primaryKey),
 			100
 		)
 		val instanceIDs = sessions.map(_.values.instanceId.get).toSet
 		rc.getObjectsByFilters(
 			JpClassSignup,
 			List(JpClassSignup.fields.instanceId.alias.inList(instanceIDs.toList)),
-			Set.empty,
+			Set(JpClassSignup.primaryKey),
 			100
 		).toSet
 	})

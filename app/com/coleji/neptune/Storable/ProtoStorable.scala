@@ -1,6 +1,6 @@
 package com.coleji.neptune.Storable
 
-import com.coleji.neptune.Storable.StorableQuery.{ColumnAlias, TableAlias}
+import com.coleji.neptune.Storable.StorableQuery.ColumnAlias
 
 import java.time.{LocalDate, LocalDateTime}
 
@@ -16,9 +16,6 @@ class ProtoStorable(
 	val dateTimeFields: Map[ColumnAlias[_], Option[LocalDateTime]],
 	val ignored: Map[ColumnAlias[_], String]
 ) {
-	def populateStorable(storable: StorableClass, tableAlias: TableAlias[_]): Unit = {
-
-	}
 
 	override def toString = s"ProtoStorable(intFields=$intFields\n\n doubleFields=$doubleFields\n\n stringFields=$stringFields\n\n dateFields=$dateFields\n\n dateTimeFields=$dateTimeFields\n\n ignored=$ignored)"
 }

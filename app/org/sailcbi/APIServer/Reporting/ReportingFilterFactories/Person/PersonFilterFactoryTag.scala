@@ -20,16 +20,16 @@ class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with Reporti
 		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonTag,
 			List(PersonTag.fields.tagId.alias.equalsConstant(tagId)),
-			Set.empty,
+			Set(PersonTag.primaryKey),
 			10000
 		).map(_.values.personId.get)
 
-		rc.getObjectsByIds(Person, personIDs, 10000).toSet
+		rc.getObjectsByIds(Person, personIDs, Set(Person.primaryKey), 10000).toSet
 	})
 
 	// TODO: exclude inactive?  Filter them to the bottom?
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val allTags = rc.getAllObjectsOfClass(Tag)
+		val allTags = rc.getAllObjectsOfClass(Tag, Set(Tag.primaryKey))
 		List(allTags.sortWith((a, b) => a.values.tagName.get < b.values.tagName.get).map(r =>
 			(r.values.tagId.get.toString, r.values.tagName.get.toString)
 		))

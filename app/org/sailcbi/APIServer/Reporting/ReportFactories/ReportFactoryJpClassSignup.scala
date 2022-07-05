@@ -10,13 +10,13 @@ import java.time.format.DateTimeFormatter
 class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	val entityCompanion: StorableObject[JpClassSignup] = JpClassSignup
 
-	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), Set.empty, 20)
+	lazy val jpClassTypes: List[JpClassType] = rc.getObjectsByFilters(JpClassType, List(), Set(JpClassType.primaryKey), 20)
 
 	lazy val classInstanceIDs: Set[Int] = getInstances.map(_.values.instanceId.get).toSet
 
 	// decorated with types
 	lazy val jpClassInstances: List[JpClassInstance] = {
-		val classInstances: List[JpClassInstance] = rc.getObjectsByIds(JpClassInstance, classInstanceIDs.toList)
+		val classInstances: List[JpClassInstance] = rc.getObjectsByIds(JpClassInstance, classInstanceIDs.toList, Set(JpClassInstance.primaryKey))
 		classInstances.foreach(i => {
 			val typeId = i.values.typeId.get
 			val typeInstance = jpClassTypes.find(_.values.typeId.get == typeId)
@@ -28,7 +28,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	lazy val jpClassSessions: List[JpClassSession] = rc.getObjectsByFilters(
 		JpClassSession,
 		List(JpClassSession.fields.instanceId.alias.inList(classInstanceIDs.toList)),
-		Set.empty,
+		Set(JpClassSession.primaryKey),
 		100
 	)
 

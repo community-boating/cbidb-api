@@ -16,9 +16,23 @@ object Ratings extends CacheableFactory[Null, String]{
 	}
 
 	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): List[Rating] = {
-		val ratings = rc.getAllObjectsOfClass(Rating)
-		val boatsRatings = rc.getAllObjectsOfClass(BoatRating)
-		val ratingsPrograms = rc.getAllObjectsOfClass(RatingProgram)
+		val ratings = rc.getAllObjectsOfClass(Rating, Set(
+			Rating.fields.ratingId,
+			Rating.fields.ratingName,
+			Rating.fields.overriddenBy,
+		))
+		val boatsRatings = rc.getAllObjectsOfClass(BoatRating, Set(
+			BoatRating.fields.assignId,
+			BoatRating.fields.boatId,
+			BoatRating.fields.programId,
+			BoatRating.fields.flag,
+			BoatRating.fields.ratingId,
+		))
+		val ratingsPrograms = rc.getAllObjectsOfClass(RatingProgram, Set(
+			RatingProgram.fields.assignId,
+			RatingProgram.fields.ratingId,
+			RatingProgram.fields.programId,
+		))
 
 		ratings.foreach(r => {
 			val ratingId = r.values.ratingId.get

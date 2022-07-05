@@ -16,6 +16,13 @@ object BoatTypes extends CacheableFactory[Null, String] {
 	}
 
 	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): List[BoatType] = {
-		rc.getAllObjectsOfClass(BoatType)
+		rc.getAllObjectsOfClass(BoatType, Set(
+			BoatType.fields.boatId,
+			BoatType.fields.boatName,
+			BoatType.fields.active,
+			BoatType.fields.displayOrder,
+			BoatType.fields.minCrew,
+			BoatType.fields.maxCrew,
+		))
 	}
 }

@@ -16,13 +16,13 @@ class JpClassInstanceFilterFactoryType extends ReportingFilterFactory[JpClassIns
 		rc.getObjectsByFilters(
 			JpClassInstance,
 			List(JpClassInstance.fields.typeId.alias.equalsConstant(typeId)),
-			Set.empty,
+			Set(JpClassInstance.primaryKey),
 			100
 		).toSet
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {
-		val types: List[JpClassType] = rc.getAllObjectsOfClass(JpClassType)
+		val types: List[JpClassType] = rc.getAllObjectsOfClass(JpClassType, Set(JpClassType.primaryKey))
 		List(types.map(t => (t.values.typeId.get.toString, t.values.typeName.get)).sortWith((a, b) => a._2 < b._2))
 	}
 }

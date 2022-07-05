@@ -3,7 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool
 import com.coleji.neptune.API.{RestControllerWithDTO, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.HighSchool
-import org.sailcbi.APIServer.Entities.access.CbiAccess
+import org.sailcbi.APIServer.Entities.access.CbiPermissions
 import org.sailcbi.APIServer.Entities.dto.PutHighSchoolDTO
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsNumber, JsObject}
@@ -16,7 +16,7 @@ class PutSchool @Inject()(implicit exec: ExecutionContext) extends RestControlle
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutHighSchoolDTO.apply)(parsed => {
-			PA.withRequestCache(StaffRequestCache, CbiAccess.permissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
+			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
 					case Right(i: HighSchool) => Future(Ok(new JsObject(Map(

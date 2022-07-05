@@ -17,7 +17,7 @@ class JpClassInstanceFilterFactoryYear extends ReportingFilterFactory[JpClassIns
 		val ss: List[JpClassSession] = rc.getObjectsByFilters(
 			JpClassSession,
 			List(JpClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
-			Set.empty,
+			Set(JpClassSession.primaryKey),
 			1000
 		)
 
@@ -26,7 +26,7 @@ class JpClassInstanceFilterFactoryYear extends ReportingFilterFactory[JpClassIns
 		rc.getObjectsByFilters(
 			JpClassInstance,
 			List(JpClassInstance.fields.instanceId.alias.inList(instanceIDs)),
-			Set.empty,
+			Set(JpClassInstance.primaryKey),
 			1000
 		).toSet
 	})

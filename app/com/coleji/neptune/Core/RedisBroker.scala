@@ -8,4 +8,6 @@ class RedisBroker private[Core](val clientPool: RedisClientPool)  extends CacheB
 	override def get(key: String): Option[String] = clientPool.withClient(c => c.get(key))
 
 	override def peek(key: String): Boolean = clientPool.withClient(c => c.strlen(key).exists(_ > 0))
+
+	override def delete(key: String): Unit = clientPool.withClient(c => c.del(key))
 }

@@ -25,7 +25,8 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 			List(
 				PersonMembership.fields.membershipTypeId.alias.equalsConstant(MagicIds.MEMBERSHIP_TYPES.JUNIOR_SUMMER),
 				PersonMembership.fields.expirationDate.alias.isYearConstant(season)
-			)
+			),
+			Set(PersonMembership.primaryKey)
 		).map(_.values.personId.get)
 
 		val parentIds = rc.getObjectsByFilters(
@@ -33,10 +34,11 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 			List(
 				PersonRelationship.fields.typeId.alias.equalsConstant(PersonRelationship.specialIDs.TYPE_ID_PARENT_CHILD_ACCT_LINKED),
 				PersonRelationship.fields.b.alias.inList(juniorsThatYear)
-			)
+			),
+			Set(PersonRelationship.primaryKey)
 		).map(_.values.a.get)
 
-		rc.getObjectsByIds(Person, parentIds).toSet
+		rc.getObjectsByIds(Person, parentIds, Set(Person.primaryKey)).toSet
 	})
 
 	def getDropdownValues(rc: UnlockedRequestCache): List[List[(String, String)]] = {

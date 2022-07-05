@@ -12,4 +12,5 @@ object CacheKeys {
 	def signoutsToday: String = "signouts-today"
 	def boatTypes = "boat-types"
 	def ratings = "ratings"
+	def accessState = "access-state"
 }

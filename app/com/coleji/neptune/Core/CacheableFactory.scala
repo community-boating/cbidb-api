@@ -21,6 +21,12 @@ abstract class CacheableFactory[T_KeyConfig, T_Result] {
 
 	protected def deseralize(resultString: String): T_Result = Serde.deseralizeStandard[T_Result](resultString)
 
+	def nuke(rc: RequestCache, config: T_KeyConfig): Unit = {
+		val cb = rc.cb
+		val key = calculateKey(config)
+		cb.delete(key)
+	}
+
 	def get(rc: RequestCache, config: T_KeyConfig): (T_Result, (ZonedDateTime, ZonedDateTime)) = {
 		val cb = rc.cb
 		val key = calculateKey(config)
