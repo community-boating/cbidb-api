@@ -4,8 +4,6 @@ import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
-import org.sailcbi.APIServer.Entities.EntityDefinitions.DockReportWeather.self
 
 class DockReport extends StorableClass(DockReport) {
 	object values extends ValuesObject {

@@ -5,7 +5,7 @@ import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Util.Profiler
 
 import scala.reflect.runtime.universe
-import scala.reflect.runtime.universe.{MethodSymbol, typeOf}
+import scala.reflect.runtime.universe.MethodSymbol
 
 abstract class DTOClass[S <: StorableClass](implicit manifest: scala.reflect.Manifest[S]) {
 	protected val CHECK_FOR_EMPTY_STRING = true

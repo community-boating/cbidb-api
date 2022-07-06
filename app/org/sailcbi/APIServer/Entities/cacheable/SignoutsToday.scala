@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.cacheable
 
 import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import com.coleji.neptune.Util.{DateUtil, Profiler, Serde}
+import com.coleji.neptune.Util.{DateUtil, Profiler}
 import io.sentry.Sentry
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRating, Signout, SignoutCrew}
 import play.api.libs.json.Json

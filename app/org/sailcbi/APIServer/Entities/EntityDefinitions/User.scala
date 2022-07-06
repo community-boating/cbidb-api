@@ -4,7 +4,6 @@ import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue
 import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
-import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 class User extends StorableClass(User) {
 	override object references extends ReferencesObject {

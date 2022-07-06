@@ -3,10 +3,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassSession, ApClassType, DockReport, DockReportApClass, DockReportHullCount, DockReportStaff, DockReportUapAppt, DockReportWeather}
-import org.sailcbi.APIServer.Entities.dto.{PutDockReportApClassDto, PutDockReportDto, PutDockReportHullCountDto, PutDockReportStaffDto, PutDockReportUapApptDto, PutDockReportWeatherDto}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.dto.{PutDockReportApClassDto, PutDockReportDto, PutDockReportHullCountDto}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsNull, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.time.LocalDate

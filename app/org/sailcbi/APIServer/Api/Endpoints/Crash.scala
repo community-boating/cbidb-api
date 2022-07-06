@@ -1,10 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.IO.JP.GetWeeks
-import org.sailcbi.APIServer.IO.JP.GetWeeks.GetWeeksResult
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject

@@ -3,7 +3,6 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
 
 class DockReportStaff extends StorableClass(DockReportStaff) {
 	object values extends ValuesObject {

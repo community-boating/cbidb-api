@@ -1,12 +1,11 @@
 package com.coleji.neptune.Storable
 
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
-import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable.StorableQuery._
 import com.coleji.neptune.Util.Profiler
-import play.api.libs.json.{JsArray, JsNumber, JsObject, JsValue, Writes}
+import play.api.libs.json.{JsArray, JsObject, JsValue, Writes}
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled

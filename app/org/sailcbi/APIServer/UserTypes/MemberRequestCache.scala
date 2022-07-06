@@ -7,7 +7,6 @@ import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.MagicIds
-import play.api.libs.json.JsResultException
 import play.api.mvc.Result
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.cacheable
 
 import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestCache, UnlockedRequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Signout}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.BoatType
 import play.api.libs.json.Json
 
 import java.time.Duration

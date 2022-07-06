@@ -5,7 +5,7 @@ import com.coleji.neptune.Storable.Fields.DateTimeDatabaseField
 import com.coleji.neptune.Storable.{GetSQLLiteral, StorableClass}
 import play.api.libs.json.{JsNull, JsString, JsValue}
 
-import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class DateTimeFieldValue(instance: StorableClass, field: DateTimeDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[LocalDateTime](instance, field) {

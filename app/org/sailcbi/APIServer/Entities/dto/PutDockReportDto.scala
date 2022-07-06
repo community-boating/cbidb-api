@@ -4,7 +4,7 @@ import com.coleji.neptune.API.{ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Storable.DTOClass
 import com.coleji.neptune.Util.GenerateSetDelta
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DockReport, DockReportApClass, DockReportHullCount, DockReportStaff, DockReportUapAppt, DockReportWeather}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import play.api.libs.json.{JsValue, Json}
 
 import java.time.{LocalDate, LocalDateTime}

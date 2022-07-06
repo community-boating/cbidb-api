@@ -1,7 +1,6 @@
 package org.sailcbi.APIServer.Entities.cacheable.AccessState
 
 import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
-import com.coleji.neptune.Core.access.{AccessProfile, Permission, Role}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{AccessProfileRole, User, UserRole}
 import org.sailcbi.APIServer.Entities.access.CbiAccessUtil
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
