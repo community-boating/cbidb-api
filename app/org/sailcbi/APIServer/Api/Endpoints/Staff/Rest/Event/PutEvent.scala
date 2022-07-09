@@ -16,7 +16,7 @@ class PutEvent @Inject()(implicit exec: ExecutionContext) extends RestController
 	def post()(implicit PA: PermissionsAuthority) = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutEventDTO.apply)(parsed => {
-			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_GENERAL_ADMIN)(None, parsedRequest, rc => {
+			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_EVENTS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
 					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
 					case Right(i: Event) => Future(Ok(new JsObject(Map(

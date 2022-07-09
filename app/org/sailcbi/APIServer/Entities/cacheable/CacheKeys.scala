@@ -13,4 +13,5 @@ object CacheKeys {
 	def boatTypes = "boat-types"
 	def ratings = "ratings"
 	def accessState = "access-state"
+	def accessProfiles = "access-profiles"
 }

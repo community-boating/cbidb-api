@@ -10,8 +10,8 @@ class UserPermissionsAuthority[T_UserId](
 	/**
 	 * @return true if you can reset permissions at all, and the other user doesnt have any permissions that you dont
 	 */
-	def canResetPasswordUser(otherUser: UserPermissionsAuthority[T_UserId]): Boolean = {
-		permissions.contains(Permission.PERM_RESET_PASSWORD) && otherUser.permissions.diff(permissions).isEmpty
-	}
+//	def canResetPasswordUser(otherUser: UserPermissionsAuthority[T_UserId]): Boolean = {
+//		permissions.contains(Permission.PERM_RESET_PASSWORD) && otherUser.permissions.diff(permissions).isEmpty
+//	}
 }
 

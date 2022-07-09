@@ -26,7 +26,7 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 		val userId = Serde.serializeStandard(result.userId)
 		val userName = Serde.serializeStandard(result.userName)
 		val roles = Serde.serializeList(result.roles.toList.map(_.id))
-		val permissions = Serde.serializeStandard(result.permissions)
+		val permissions = Serde.serializeList(result.permissions.toList.map(_.id))
 		userId + "%" + userName + "%" + roles + "%" + permissions
 	}
 
@@ -35,7 +35,7 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 		val userId = Serde.deseralizeStandard[Int](parts(0))
 		val userName = Serde.deseralizeStandard[String](parts(1))
 		val roles = Serde.deserializeList[Int](parts(2)).map(id => CbiAccessUtil.roleMap(id)).toSet
-		val permissions = Serde.deseralizeStandard[Set[Permission]](parts(3))
+		val permissions = Serde.deserializeList[Int](parts(3)).map(id => CbiAccessUtil.permissionMap(id)).toSet
 		new CbiUserPermissionsAuthority(userId, userName, roles, permissions)
 	}
 
@@ -71,7 +71,8 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 			)
 		)
 			.map(_.values.roleId.get)
-			.map(CbiAccessUtil.roleMap(_))
+			.map(CbiAccessUtil.roleMap.get)  // ignore roleIds in the DB that we don't recognize
+			.filter(_.isDefined).map(_.get)
 			.toSet
 
 		val overrideRoles = rc.getObjectsByFilters(
