@@ -5,6 +5,7 @@ import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Signout
 import org.sailcbi.APIServer.Entities.cacheable.SignoutsToday
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
@@ -23,7 +24,7 @@ class Signouts @Inject()(implicit val exec: ExecutionContext) extends RestContro
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, Signout.constructFromJsValue)(parsed => {
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				doSignout(rc)(parsed) match {
-					case ValidationOk => Future(Ok("Ok"))
+					case ValidationOk => Future(Ok(Json.toJson(parsed)))
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 				}
 			})
@@ -35,7 +36,7 @@ class Signouts @Inject()(implicit val exec: ExecutionContext) extends RestContro
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, Signout.constructListFromJsArray)(parsed => {
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				parsed.map(doSignout(rc)).reduce(ValidationResult.reduce) match {
-					case ValidationOk => Future(Ok("Ok"))
+					case ValidationOk => Future(Ok(Json.toJson(parsed)))
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
 				}
 			})
