@@ -52,6 +52,10 @@ object SignoutsToday extends CacheableFactory[Null, String]{
 					Signout.fields.jpAttendanceId.alias,
 					Signout.fields.apAttendanceId.alias,
 					Signout.fields.hullNumber.alias,
+					Signout.fields.createdOn.alias,
+					Signout.fields.createdBy.alias,
+					Signout.fields.updatedOn.alias,
+					Signout.fields.updatedBy.alias,
 
 					Person.fields.personId,
 					Person.fields.nameFirst,

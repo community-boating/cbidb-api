@@ -30,6 +30,10 @@ class Signout extends StorableClass(Signout) {
 		val jpAttendanceId = new NullableIntFieldValue(self, Signout.fields.jpAttendanceId)
 		val apAttendanceId = new NullableIntFieldValue(self, Signout.fields.apAttendanceId)
 		val hullNumber = new NullableStringFieldValue(self, Signout.fields.hullNumber)
+		val createdOn = new NullableDateTimeFieldValue(self, Signout.fields.createdOn)
+		val createdBy = new NullableStringFieldValue(self, Signout.fields.createdBy)
+		val updatedOn = new NullableDateTimeFieldValue(self, Signout.fields.updatedOn)
+		val updatedBy = new NullableStringFieldValue(self, Signout.fields.updatedBy)
 	}
 }
 
@@ -57,6 +61,10 @@ object Signout extends StorableObject[Signout] {
 		val jpAttendanceId = new NullableIntDatabaseField(self, "JP_ATTENDANCE_ID")
 		val apAttendanceId = new NullableIntDatabaseField(self, "AP_ATTENDANCE_ID")
 		val hullNumber = new NullableStringDatabaseField(self, "HULL_NUMBER", 15)
+		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}
 
 	def primaryKey: IntDatabaseField = fields.signoutId
