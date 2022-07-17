@@ -27,7 +27,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends RestContro
 	)
 
 	def getOneUser(userId: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
-		PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_GENERAL_ADMIN)(None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_MANAGE_USERS_SCREEN)(None, ParsedRequest(req), rc => {
 			getOne(rc, userId, fieldShutter) match {
 				case Some(u) => Future(Ok(Json.toJson(u)))
 				case None => Future(Ok(ValidationResult.from("No user found").toResultError.asJsObject()))
@@ -36,7 +36,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends RestContro
 	})
 
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
-		PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_GENERAL_ADMIN)(None, ParsedRequest(req), rc => {
+		PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_MANAGE_USERS_SCREEN)(None, ParsedRequest(req), rc => {
 			val users = getByFilters(rc, List.empty, fieldShutter)
 			Future(Ok(Json.toJson(users)))
 		})

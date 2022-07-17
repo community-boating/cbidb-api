@@ -44,6 +44,7 @@ POST     /rest/signout       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Sign
 POST     /rest/signouts       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Signouts.postList()
 GET     /rest/boat-types       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.BoatTypes.getAll()
 GET     /rest/ratings       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ratings.getAll()
+GET     /rest/access-profiles       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.AccessProfiles.getAll()
 
 POST    /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.SignoutCrewRest.post()
 DELETE  /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.SignoutCrewRest.delete()
