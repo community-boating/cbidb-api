@@ -15,6 +15,7 @@ object CbiRoles {
 
 	// AP Management: 600 - 799
 	val ROLE_MANAGE_DOCK_REPORTS = Role(600, "Manage Dock Reports", List(
+		PERM_SIGN_DOCK_REPORT,
 		PERM_UPDATE_DOCK_REPORT_RESTRICTED
 	))
 
