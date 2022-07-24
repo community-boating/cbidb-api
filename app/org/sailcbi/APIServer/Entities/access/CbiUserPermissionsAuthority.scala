@@ -31,7 +31,7 @@ object CbiUserPermissionsAuthority extends CacheableFactory[String, CbiUserPermi
 	}
 
 	override protected def deseralize(resultString: String): CbiUserPermissionsAuthority = {
-		val parts = resultString.split("%")
+		val parts = resultString.split("%", -1)
 		val userId = Serde.deseralizeStandard[Int](parts(0))
 		val userName = Serde.deseralizeStandard[String](parts(1))
 		val roles = Serde.deserializeList[Int](parts(2)).map(id => CbiAccessUtil.roleMap(id)).toSet
