@@ -3254,5 +3254,65 @@ object PortalLogic {
 
 		notifications
 	}
+
+	def getDiscordVerificationToken(rc: RequestCache, personId: Int): String = {
+		val getQ = new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[String] = rsw.getOptionString(1)
+
+			override def getQuery: String =
+				s"""
+				  |select discord_verify_token from persons where person_id = $personId
+				  |""".stripMargin
+		}
+
+		val result = rc.executePreparedQueryForSelect(getQ).head
+
+		result match {
+			case Some(token) => token
+			case None => {
+				val token = scala.util.Random.alphanumeric.take(24).mkString
+				val setQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+					override val params = List(token)
+					override def getQuery: String =
+						s"""
+						  |update persons set discord_verify_token = ?
+						  |where person_id = $personId
+						  |""".stripMargin
+				}
+				rc.executePreparedQueryForUpdateOrDelete(setQ)
+				token
+			}
+		}
+	}
+
+	def discordVerifyToken(rc: RequestCache, verificationToken: String, discordUserId: String, discordUserName: String, discordUserDiscriminator: String): Option[Int] = {
+		val getQ = new PreparedQueryForSelect[Int](Set(PublicRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(verificationToken)
+
+			override def getQuery: String =
+				"""
+				  |select person_id from persons where discord_verify_token = ?
+				  |""".stripMargin
+		}
+
+		val results = rc.executePreparedQueryForSelect(getQ)
+
+		if (results.size == 1) {
+			val personId = results.head
+			val updateQ = new PreparedQueryForUpdateOrDelete(Set(PublicRequestCache)) {
+				override val params: List[String] = List(discordUserId, discordUserName, discordUserDiscriminator)
+				override def getQuery: String =
+					s"""
+					  |update persons
+					  |set DISCORD_USER_ID = ?, DISCORD_USER_NAME = ?, DISCORD_USER_DISCRIMINATOR = ?
+					  |where person_id = $personId
+					  |""".stripMargin
+			}
+			rc.executePreparedQueryForUpdateOrDelete(updateQ)
+			Some(personId)
+		} else None
+	}
 }
 

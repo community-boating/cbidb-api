@@ -145,6 +145,8 @@ GET     /member/open-order-details-jp          org.sailcbi.APIServer.Api.Endpoin
 POST    /member/finish-open-order-ap            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postSelf()
 POST    /member/finish-open-order-jp            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postJP(juniorId: Int)
 
+POST    /member/discord-verification-token      org.sailcbi.APIServer.Api.Endpoints.Member.GetDiscordVerifyToken.post()
+
 GET     /order-status                           org.sailcbi.APIServer.Api.Endpoints.Member.OrderStatus.get(program: String)
 
 GET     /prices                             org.sailcbi.APIServer.Api.Endpoints.Public.CurrentPrices.get()
