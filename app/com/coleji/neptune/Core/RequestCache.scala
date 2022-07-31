@@ -47,8 +47,8 @@ sealed abstract class RequestCache private[Core](
 		pb.executePreparedQueryForUpdateOrDelete(pq)
 	}
 
-	def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		pb.executeQueryBuilder(qb)
+	def executeQueryBuilder(qb: QueryBuilder, fetchSize: Int = 50): List[QueryBuilderResultRow] = {
+		pb.executeQueryBuilder(qb, fetchSize)
 	}
 
 	def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {

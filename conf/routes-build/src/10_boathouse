@@ -31,8 +31,8 @@ GET     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff
 POST     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.HighSchool.PutSchool.post()
 GET     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.GetDonationFund.getAll()
 POST     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.PutDonationFund.post()
-GET     /rest/person/summary              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Person.GetPerson.getOneForSummaryScreen(personId: Int)
-GET     /rest/person/by-card              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Person.GetPerson.findByCardNumber(cardNumber: String)
+GET     /rest/person/summary              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonRest.GetPerson.getOneForSummaryScreen(personId: Int)
+GET     /rest/person/by-card              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonRest.GetPerson.findByCardNumber(cardNumber: String)
 GET     /rest/person-membership/get-all-for-person      org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership.getAllForPerson(personId: Int)
 POST     /rest/person-membership      org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.PutPersonMembership.post()
 GET     /rest/damage-waiver/get-all-for-person     org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DamageWaiver.GetDamageWaiver.getAllForPerson(personId: Int)
@@ -46,6 +46,7 @@ GET     /rest/boat-types       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Bo
 GET     /rest/ratings       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ratings.getAll()
 GET     /rest/access-profiles       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.AccessProfiles.getAll()
 GET     /rest/ap-class-types           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ApClassTypes.getAll()
+GET     /rest/ap-class-instances/this-season           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ApClassInstances.getThisSeason()
 
 POST    /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.SignoutCrewRest.post()
 DELETE  /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.SignoutCrewRest.delete()

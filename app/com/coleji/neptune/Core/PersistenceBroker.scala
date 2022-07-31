@@ -94,10 +94,9 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 		else executePreparedQueryForUpdateOrDeleteImplementation(pq)
 	}
 
-	final def executeQueryBuilder(qb: QueryBuilder): List[QueryBuilderResultRow] = {
-		// TODO: security
+	final def executeQueryBuilder(qb: QueryBuilder, fetchSize: Int = 50): List[QueryBuilderResultRow] = {
 		if (preparedQueriesOnly) throw new UnauthorizedAccessException("Server is in Prepared Queries Only mode.")
-		else executeQueryBuilderImplementation(qb)
+		else executeQueryBuilderImplementation(qb, fetchSize)
 	}
 
 	final def executeProcedure[T](pc: PreparedProcedureCall[T]): T = {
@@ -130,7 +129,7 @@ abstract class PersistenceBroker private[Core](dbConnection: DatabaseGateway, pr
 
 	protected def executePreparedQueryForUpdateOrDeleteImplementation(pq: HardcodedQueryForUpdateOrDelete): Int
 
-	protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow]
+	protected def executeQueryBuilderImplementation(qb: QueryBuilder, fetchSize: Int): List[QueryBuilderResultRow]
 
 	protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T
 

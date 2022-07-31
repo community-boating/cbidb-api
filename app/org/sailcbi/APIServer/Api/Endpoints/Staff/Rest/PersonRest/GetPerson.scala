@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Person
+package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonRest
 
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}

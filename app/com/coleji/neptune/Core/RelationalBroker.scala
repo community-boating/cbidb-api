@@ -505,7 +505,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		}
 	}
 
-	override protected def executeQueryBuilderImplementation(qb: QueryBuilder): List[QueryBuilderResultRow] = {
+	override protected def executeQueryBuilderImplementation(qb: QueryBuilder, fetchSize: Int): List[QueryBuilderResultRow] = {
 		qb.validate()
 		qb.tables.map(_.obj).foreach(_.init())
 
@@ -555,7 +555,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 		println("QueryBuilder SQL: " + sql)
 
-		getProtoStorablesFromSelect(sql, params, fields, 500).map(ps => new QueryBuilderResultRow(ps))
+		getProtoStorablesFromSelect(sql, params, fields, fetchSize).map(ps => new QueryBuilderResultRow(ps))
 	}
 
 	 override protected def executeProcedureImpl[T](pc: PreparedProcedureCall[T]): T = {
