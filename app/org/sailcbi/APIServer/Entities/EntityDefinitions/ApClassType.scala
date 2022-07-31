@@ -1,10 +1,15 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableDoubleFieldValue, NullableIntFieldValue, NullableStringFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class ApClassType extends StorableClass(ApClassType) {
+	override object references extends ReferencesObject {
+		val apClassFormats = new Initializable[List[ApClassFormat]]
+	}
+
 	object values extends ValuesObject {
 		val typeId = new IntFieldValue(self, ApClassType.fields.typeId)
 		val typeName = new StringFieldValue(self, ApClassType.fields.typeName)
@@ -25,6 +30,8 @@ class ApClassType extends StorableClass(ApClassType) {
 
 object ApClassType extends StorableObject[ApClassType] {
 	val entityName: String = "AP_CLASS_TYPES"
+
+	override val useRuntimeFieldnamesForJson: Boolean = true
 
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")

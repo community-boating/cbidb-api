@@ -25,6 +25,8 @@ class ApClassFormat extends StorableClass(ApClassFormat) {
 object ApClassFormat extends StorableObject[ApClassFormat] {
 	val entityName: String = "AP_CLASS_FORMATS"
 
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	object fields extends FieldsObject {
 		val formatId = new IntDatabaseField(self, "FORMAT_ID")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")

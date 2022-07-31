@@ -14,4 +14,5 @@ object CacheKeys {
 	def ratings = "ratings"
 	def accessState = "access-state"
 	def accessProfiles = "access-profiles"
+	def apClassTypes = "ap-class-types"
 }
