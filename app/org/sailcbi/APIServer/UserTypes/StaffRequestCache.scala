@@ -43,7 +43,7 @@ object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
 					active = rs.getBooleanFromChar(6)
 				)
 
-			override def getQuery: String = "select user_name, pw_hash_scheme, pw_hash, auth_nonce, locked, active from users where lower(user_name) = ?"
+			override def getQuery: String = "select user_name, pw_hash_scheme, pw_hash, auth_nonce, locked, active from USERS where lower(user_name) = ?"
 
 			override val params: List[String] = List(userName.toLowerCase)
 		}
