@@ -1,5 +1,6 @@
 package com.coleji.neptune.Core
 
+import com.coleji.neptune.Core.Boot.ServerBootLoader
 import com.coleji.neptune.Core.access.Permission
 import com.coleji.neptune.IO.PreparedQueries.{HardcodedQueryForInsert, HardcodedQueryForSelect, HardcodedQueryForUpdateOrDelete, PreparedProcedureCall}
 import com.coleji.neptune.Storable.Fields.DatabaseField
@@ -19,8 +20,16 @@ sealed abstract class RequestCache private[Core](
 	def companion: RequestCacheObject[_]
 
 	protected val pb: PersistenceBroker = {
-		if (this.isInstanceOf[RootRequestCache]) new OracleBroker(dbGateway, false, PA.systemParams.readOnlyDatabase)
-		else new OracleBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
+		dbGateway.driverName match {
+			case ServerBootLoader.DB_DRIVER_MYSQL => {
+				if (this.isInstanceOf[RootRequestCache]) new MysqlBroker(dbGateway, false, PA.systemParams.readOnlyDatabase)
+				else new MysqlBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
+			}
+			case _ => {
+				if (this.isInstanceOf[RootRequestCache]) new OracleBroker(dbGateway, false, PA.systemParams.readOnlyDatabase)
+				else new OracleBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
+			}
+		}
 	}
 
 	val cb: CacheBroker = new RedisBroker(redisPool)

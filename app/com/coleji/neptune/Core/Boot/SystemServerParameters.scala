@@ -15,7 +15,8 @@ case class SystemServerParameters(
 	allowableUserTypes: List[RequestCacheObject[_]],
 	preparedQueriesOnly: Boolean,
 	persistenceSystem: PersistenceSystem,
-	emailCrashesTo: String
+	emailCrashesTo: String,
+	dbDriver: String
 ) {
 	def nowDateTime: LocalDateTime = LocalDateTime.now.minusSeconds(serverTimeOffsetSeconds)
 	val dateTimeFormatDefault: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

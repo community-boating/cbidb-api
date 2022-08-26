@@ -32,6 +32,9 @@ libraryDependencies += "io.sentry" % "sentry" % "1.7.27"
 
 libraryDependencies += "net.sf.barcode4j" % "barcode4j" % "2.1"
 
+// https://mvnrepository.com/artifact/mysql/mysql-connector-java
+libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
+
 /*
 scalacOptions ++= Seq(
   "-Xcheckinit"

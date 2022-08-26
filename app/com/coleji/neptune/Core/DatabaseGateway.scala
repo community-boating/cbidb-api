@@ -1,6 +1,7 @@
 package com.coleji.neptune.Core
 
 class DatabaseGateway(
+	val driverName: String,
 	private[Core] val mainPool: ConnectionPoolWrapper,
 	private[Core] val tempPool: ConnectionPoolWrapper,
 	private[Core] val mainSchemaName: String,

@@ -1,6 +1,6 @@
 package com.coleji.neptune.Core.Boot
 
-import com.coleji.neptune.Core.{DatabaseGateway, OracleDatabaseConnection, PermissionsAuthority, RequestCacheObject}
+import com.coleji.neptune.Core.{DatabaseGateway, MysqlDatabaseConnection, OracleDatabaseConnection, PermissionsAuthority, RequestCacheObject}
 import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import play.api.inject.ApplicationLifecycle
@@ -8,16 +8,22 @@ import play.api.inject.ApplicationLifecycle
 import scala.concurrent.Future
 
 object ServerBootLoader {
-	private def getDBPools(attempts: Int = 0): DatabaseGateway = {
+	val DB_DRIVER_ORACLE = "oracle"
+	val DB_DRIVER_MYSQL = "mysql"
+
+	private def getDBPools(dbDriver: String, attempts: Int = 0): DatabaseGateway = {
 		val MAX_ATTEMPTS = 3
 		try {
-			OracleDatabaseConnection("conf/private/oracle-credentials")
+			dbDriver match {
+				case DB_DRIVER_MYSQL => MysqlDatabaseConnection("conf/private/mysql-credentials")
+				case _ => OracleDatabaseConnection("conf/private/oracle-credentials")
+			}
 		} catch {
 			case e: Exception => {
 				if (attempts < MAX_ATTEMPTS) {
 					println("failed to get pools, sleeping and trying again....")
 					Thread.sleep(1000)
-					getDBPools(attempts + 1)
+					getDBPools(dbDriver, attempts + 1)
 				} else {
 					throw e
 				}
@@ -47,7 +53,15 @@ object ServerBootLoader {
 					.filter(t => t._3(paramFile)) // check the nuke function
 					.map(t => t._1)
 
-			val dbConnection = getDBPools()
+
+			val dbDriver = paramFile.getOptionalString("DBDriver") match {
+				case Some(DB_DRIVER_MYSQL) => DB_DRIVER_MYSQL
+				case _ => DB_DRIVER_ORACLE
+			}
+
+			println("Using DB Driver: " + dbDriver)
+
+			val dbConnection = getDBPools(dbDriver)
 			val redisPool = new RedisClientPool(paramFile.getOptionalString("RedisHost").getOrElse("localhost"), 6379)
 			lifecycle match {
 				case Some(lc) => lc.addStopHook(() => Future.successful({
@@ -70,6 +84,7 @@ object ServerBootLoader {
 					preparedQueriesOnly = preparedQueriesOnly,
 					persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
 					emailCrashesTo = paramFile.getOptionalString("EmailCrashesTo").getOrElse("jon@community-boating.org"),
+					dbDriver = dbDriver
 				),
 				customParams = paramFile,
 				dbGateway = dbConnection,

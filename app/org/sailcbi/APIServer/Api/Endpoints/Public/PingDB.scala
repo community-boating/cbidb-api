@@ -20,7 +20,7 @@ class PingDB @Inject()(implicit exec: ExecutionContext) extends InjectedControll
 
 				override def getQuery: String =
 					s"""
-					   |select count(*) from boat_types
+					   |select count(*) from BOAT_TYPES
         """.stripMargin
 
 				override val params: List[String] = List.empty
