@@ -72,6 +72,10 @@ object ServerBootLoader {
 			}
 
 			val preparedQueriesOnly = paramFile.getOptionalString("PreparedQueriesOnly").getOrElse("true").equals("true")
+			val forceReadOnlyDatabase = paramFile.getOptionalString("ForceReadOnlyDatabase").getOrElse("false").equals("true")
+
+			val doReadOnlyDatabase = readOnlyDatabase || forceReadOnlyDatabase
+			println("ready only database? " + doReadOnlyDatabase)
 
 			new PermissionsAuthority(
 				systemParams = SystemServerParameters(
@@ -79,7 +83,7 @@ object ServerBootLoader {
 					serverTimeOffsetSeconds = 0,
 					isDebugMode = paramFile.getOptionalString("PADebug").getOrElse("false").equals("true"),
 					isTestMode = isTestMode,
-					readOnlyDatabase = readOnlyDatabase,
+					readOnlyDatabase = doReadOnlyDatabase,
 					allowableUserTypes = enabledAuthMechanisms,
 					preparedQueriesOnly = preparedQueriesOnly,
 					persistenceSystem = PermissionsAuthority.PERSISTENCE_SYSTEM_ORACLE,
