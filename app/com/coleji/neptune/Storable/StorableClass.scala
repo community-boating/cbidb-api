@@ -87,7 +87,7 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 
 	lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
 
-	lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.map(f => {
+	lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
 		f.setAccessible(true)
 		(f.getName, f.get(this.references).asInstanceOf[Initializable[Object]])
 	}).toList

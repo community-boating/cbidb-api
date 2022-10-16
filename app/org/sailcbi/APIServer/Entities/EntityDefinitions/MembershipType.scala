@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableDoubleFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.InitializableFromCollectionElement
 import org.sailcbi.APIServer.Entities.NullableInDatabase
@@ -16,10 +16,14 @@ class MembershipType extends StorableClass(MembershipType) {
 		val membershipTypeName = new StringFieldValue(self, MembershipType.fields.membershipTypeName)
 		val programId = new IntFieldValue(self, MembershipType.fields.programId)
 		val price = new NullableDoubleFieldValue(self, MembershipType.fields.price)
+		val active = new BooleanFieldValue(self, MembershipType.fields.active)
+		val displayOrder = new IntFieldValue(self, MembershipType.fields.displayOrder)
 	}
 }
 
 object MembershipType extends StorableObject[MembershipType] {
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	val entityName: String = "MEMBERSHIP_TYPES"
 
 	object fields extends FieldsObject {
@@ -29,6 +33,8 @@ object MembershipType extends StorableObject[MembershipType] {
 		@NullableInDatabase
 		val programId = new IntDatabaseField(self, "PROGRAM_ID")
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
+		val active = new BooleanDatabaseField(self, "ACTIVE", true)
+		val displayOrder = new IntDatabaseField(self, "DISPLAY_ORDER")
 	}
 
 	def primaryKey: IntDatabaseField = fields.membershipTypeId
