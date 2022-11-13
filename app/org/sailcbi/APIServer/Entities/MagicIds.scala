@@ -34,6 +34,9 @@ object MagicIds {
 	}
 	object PROGRAM_TYPES {
 		val ADULT_PROGRAM_ID = 1
+		val JUNIOR_PROGRAM_ID = 2
+		val UAP_PROGRAM_ID = 3
+		val HS_PROGRAM_ID = 4
 	}
 
 	object ORDER_NUMBER_APP_ALIAS {

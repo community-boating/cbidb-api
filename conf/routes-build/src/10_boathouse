@@ -16,6 +16,7 @@ POST     /staff/put-user                   org.sailcbi.APIServer.Api.Endpoints.S
 POST     /staff/update-user-password                   org.sailcbi.APIServer.Api.Endpoints.Staff.UpdateUserPassword.post()
 GET     /staff/open-order-details           org.sailcbi.APIServer.Api.Endpoints.Member.GetOpenOrderDetails.getStaff(personId: Int)
 POST    /staff/finish-open-order            org.sailcbi.APIServer.Api.Endpoints.Member.FinishOpenOrder.postStaff(personId: Int)
+GET     /staff/rating-html                  org.sailcbi.APIServer.Api.Endpoints.Staff.RatingHtml.get(personId: Int)
 
 GET     /staff/access-state                org.sailcbi.APIServer.Api.Endpoints.Staff.GetAccessState.get()
 
