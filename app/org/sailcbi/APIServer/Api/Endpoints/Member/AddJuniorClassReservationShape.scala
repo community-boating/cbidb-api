@@ -5,7 +5,8 @@ import play.api.libs.json.{JsValue, Json}
 case class AddJuniorClassReservationShape(
 	juniorFirstName: String,
 	beginnerInstanceId: Option[Int],
-	intermediateInstanceId: Option[Int]
+	intermediate1InstanceId: Option[Int],
+	intermediate2InstanceId: Option[Int]
 )
 
 object AddJuniorClassReservationShape {
