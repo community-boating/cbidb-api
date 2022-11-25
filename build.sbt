@@ -34,6 +34,9 @@ libraryDependencies += "net.sf.barcode4j" % "barcode4j" % "2.1"
 
 // https://mvnrepository.com/artifact/mysql/mysql-connector-java
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
+// https://mvnrepository.com/artifact/com.auth0/java-jwt
+libraryDependencies += "com.auth0" % "java-jwt" % "4.2.1"
+
 
 /*
 scalacOptions ++= Seq(
