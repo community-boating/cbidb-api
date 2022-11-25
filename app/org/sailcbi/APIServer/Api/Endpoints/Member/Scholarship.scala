@@ -44,19 +44,18 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId
-			val data = request.body.asJson
 			PA.withParsedPostBodyJSON(request.body.asJson, ScholarshipYesShape.apply)(parsed => {
 				Scholarship.setOthersNonCurrent(rc, personId)
-				val adults = {
-					if (parsed.numberWorkers < 1) 1
-					else if (parsed.numberWorkers > 2) 2
-					else parsed.numberWorkers
+				val (adults, nonWorkingAdults) = parsed.numberWorkers match {
+					case 1 => (1, 0)
+					case 2 => (2, 0)
+					case _ => (2, 1)
 				}
 
-				val children = {
-					if (parsed.childCount < 1) 1
-					else if (parsed.childCount > 6) 6
-					else parsed.childCount
+				val children = parsed.childCount match {
+					case 3 => 3
+					case 2 => 2
+					case _ => 1
 				}
 
 				val eiiQ = new PreparedQueryForSelect[Double](Set(MemberRequestCache)) {
@@ -65,13 +64,14 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 						   |select eii
 						   |from eii_mit
 						   |where adults = ?
+						   |and nonworking_adults = ?
 						   |and children = ?
 						   |and generation = 3
 					 """.stripMargin
 
 					def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Double = rs.getDouble(1)
 
-					override val params: List[String] = List(adults.toString, children.toString)
+					override val params: List[String] = List(adults.toString, nonWorkingAdults.toString, children.toString)
 				}
 				val eiis = rc.executePreparedQueryForSelect(eiiQ)
 				if (eiis.length == 1) {
@@ -86,6 +86,7 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 							   |(PERSON_ID,
 							   |        SEASON,
 							   |        WORKERS,
+							   |        NONWORKING_ADULTS,
 							   |        CHILDREN,
 							   |        INCOME,
 							   |        COMPUTED_EII,
@@ -95,7 +96,8 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 							   |  ) values (
 							   |  ?,
 							   |  util_pkg.get_current_season,
-							   |  ${parsed.numberWorkers},
+							   |  ${adults-nonWorkingAdults},
+							   |  ${nonWorkingAdults},
 							   |  ${parsed.childCount},
 							   |  ${parsed.income},
 							   |  ${eiis.head},
