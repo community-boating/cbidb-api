@@ -510,6 +510,14 @@ object PortalLogic {
 				}
 				case _ =>
 			})
+			println("was a fail")
+			intermediate1Result.forEach({
+				case Right(rollback) => {
+					println("should be calling the rollback...")
+					rollback()
+				}
+				case _ =>
+			})
 			Some(totalResult.swap.getOrElse(""))
 		} else None
 	}
