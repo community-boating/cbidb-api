@@ -473,7 +473,8 @@ object PortalLogic {
 		rc: RequestCache,
 		juniorPersonId: Int,
 		beginnerInstanceId: Option[Int],
-		intermediateInstanceId: Option[Int],
+		intermediate1InstanceId: Option[Int],
+		intermediate2InstanceId: Option[Int],
 		signupDatetime: Option[LocalDateTime],
 		orderId: Int
 	): Option[String] = {
@@ -484,19 +485,33 @@ object PortalLogic {
 			case Some(id) => PortalLogic.attemptSingleClassSignupReservation(rc, juniorPersonId, id, signupDatetime, orderId)
 		})
 
-		val intermediateResult = new DefinedInitializableNullary(() => intermediateInstanceId match {
+		val intermediate1Result = new DefinedInitializableNullary(() => intermediate1InstanceId match {
+			case None => Right(() => {})
+			case Some(id) => PortalLogic.attemptSingleClassSignupReservation(rc, juniorPersonId, id, signupDatetime, orderId)
+		})
+
+		val intermediate2Result = new DefinedInitializableNullary(() => intermediate2InstanceId match {
 			case None => Right(() => {})
 			case Some(id) => PortalLogic.attemptSingleClassSignupReservation(rc, juniorPersonId, id, signupDatetime, orderId)
 		})
 
 		val totalResult = for {
 			_ <- beginnerResult.get()
-			x <- intermediateResult.get()
+			_ <- intermediate1Result.get()
+			x <- intermediate2Result.get()
 		} yield x
 
 		if (totalResult.isLeft) {
 			println("was a fail")
 			beginnerResult.forEach({
+				case Right(rollback) => {
+					println("should be calling the rollback...")
+					rollback()
+				}
+				case _ =>
+			})
+			println("was a fail")
+			intermediate1Result.forEach({
 				case Right(rollback) => {
 					println("should be calling the rollback...")
 					rollback()

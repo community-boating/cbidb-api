@@ -51,13 +51,13 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 				rc,
 				parentPersonId,
 				body.juniorFirstName,
-				body.beginnerInstanceId.isDefined || body.intermediateInstanceId.isDefined
+				body.beginnerInstanceId.isDefined || body.intermediate1InstanceId.isDefined || body.intermediate2InstanceId.isDefined
 			)
 
 			// create new signup with the min(signup_time) of all this protoparent's other signups
 			val minSignupTime = PortalLogic.getMinSignupTimeForParent(rc, parentPersonId)
 			println("min signup is " + minSignupTime)
-			val signupResult = PortalLogic.attemptSignupReservation(rc, juniorPersonId, body.beginnerInstanceId, body.intermediateInstanceId, minSignupTime, orderId)
+			val signupResult = PortalLogic.attemptSignupReservation(rc, juniorPersonId, body.beginnerInstanceId, body.intermediate1InstanceId, body.intermediate2InstanceId, minSignupTime, orderId)
 			println(" result is:" + signupResult)
 			if (signupResult.isDefined) {
 				rollbackCreateJunior()
