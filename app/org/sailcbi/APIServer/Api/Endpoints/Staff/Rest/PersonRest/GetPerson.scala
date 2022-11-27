@@ -17,7 +17,19 @@ class GetPerson @Inject()(implicit val exec: ExecutionContext) extends RestContr
 			val person = getOne(rc, personId, Set(
 				Person.fields.personId,
 				Person.fields.nameFirst,
-				Person.fields.nameLast
+				Person.fields.nameLast,
+				Person.fields.dob,
+				Person.fields.email,
+				Person.fields.phonePrimary,
+				Person.fields.phoneAlternate,
+				Person.fields.emerg1Name,
+				Person.fields.emerg1Relation,
+				Person.fields.emerg1PhonePrimary,
+				Person.fields.emerg1PhoneAlternate,
+				Person.fields.emerg2Name,
+				Person.fields.emerg2Relation,
+				Person.fields.emerg2PhonePrimary,
+				Person.fields.emerg2PhoneAlternate,
 			))
 			Future(Ok(Json.toJson(person)))
 		})

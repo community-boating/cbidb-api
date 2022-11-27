@@ -52,6 +52,8 @@ class PersonMembership extends StorableClass(PersonMembership) {
 object PersonMembership extends StorableObject[PersonMembership] {
 	val entityName: String = "PERSONS_MEMBERSHIPS"
 
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
