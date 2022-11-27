@@ -16,6 +16,7 @@ class GetPersonMembership @Inject()(implicit val exec: ExecutionContext) extends
 			val pms = getByFilters(rc, List(PersonMembership.fields.personId.alias.equalsConstant(personId)), Set(
 				PersonMembership.fields.assignId,
 				PersonMembership.fields.personId,
+				PersonMembership.fields.membershipTypeId
 			))
 			Future(Ok(Json.toJson(pms)))
 		})
