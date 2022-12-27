@@ -217,11 +217,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			fieldShutter.isEmpty || fieldShutter.contains(fd._2)
 		}
 
-		def abort(): Boolean = {
+		val abort: Boolean = {
 			val wrappedPK = tableAlias.map(self.primaryKey.alias).getOrElse(self.primaryKey.alias)
 			if (wrappedPK.isInstanceOf[ColumnAlias[_]]) {
 				try {
-					self.primaryKey.findValueInProtoStorable(ps, wrappedPK)
+					val ret = self.primaryKey.findValueInProtoStorable(ps, wrappedPK)
+					if (ret.isEmpty && tableAlias.exists(_.isInstanceOf[TableAliasOuterJoined[_]])) throw new Exception("PK of outer joined tables must be included in QueryBuilder")
 					false
 				} catch {
 					case e: NonNullFieldWasNullException => true
@@ -229,7 +230,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			} else false
 		}
 
-		if (abort()) None
+		if (abort) None
 		else {
 			intFieldMap.filter(t => {
 				t._2 == self.primaryKey || filterFunction(t)

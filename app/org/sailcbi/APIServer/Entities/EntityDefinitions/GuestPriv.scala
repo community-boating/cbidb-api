@@ -26,6 +26,8 @@ class GuestPriv extends StorableClass(GuestPriv) {
 object GuestPriv extends StorableObject[GuestPriv] {
 	val entityName: String = "GUEST_PRIVS"
 
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	object fields extends FieldsObject {
 		val membershipId = new IntDatabaseField(self, "MEMBERSHIP_ID")
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")

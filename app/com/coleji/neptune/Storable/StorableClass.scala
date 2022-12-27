@@ -3,8 +3,8 @@ package com.coleji.neptune.Storable
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields.IntDatabaseField
-import com.coleji.neptune.Util.Initializable
-import play.api.libs.json.{JsArray, JsObject, JsValue}
+import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
+import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
 
 abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) {
@@ -30,6 +30,9 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 
 	object noReferences extends ReferencesObject { }
 	val references: ReferencesObject = noReferences
+
+	object noCalculations extends CalculationsObject { }
+	val calculations: CalculationsObject = noCalculations
 
 	override def toString: String = this.valuesList.toString()
 
@@ -85,11 +88,16 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		f.get(this.values).asInstanceOf[FieldValue[_]]
 	}).toList
 
-	lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
+	private lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
 
-	lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
+	private lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
 		f.setAccessible(true)
 		(f.getName, f.get(this.references).asInstanceOf[Initializable[Object]])
+	}).toList
+
+	private lazy final val calculationsList: List[(String, InitializableCastableToJs[Object])] = this.calculations.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
+		f.setAccessible(true)
+		(f.getName, f.get(this.calculations).asInstanceOf[InitializableCastableToJs[Object]])
 	}).toList
 
 	def hasValuesList: Boolean = valuesList.nonEmpty
@@ -124,6 +132,15 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 				case _ =>
 			}
 		}))
+		val calculationsJs: Map[String, JsValue] = calculationsList.filter(_._2.isInitialized).map(t => t._2.get match {
+			case Some(o: AnyRef) => (t._1, t._2.cast(o))
+			case o: AnyRef => (t._1, t._2.cast(o))
+			case ol: List[AnyRef] => (t._1, new JsArray(ol.map(t._2.cast).toIndexedSeq))
+			case _ => throw new Exception("Unable to serialize calculated values for " + this.getClass.getCanonicalName)
+		}).toMap
+
+		if (calculationsJs.nonEmpty) map += ("$$calculations" -> JsObject(calculationsJs))
+
 		JsObject(map)
 	}
 

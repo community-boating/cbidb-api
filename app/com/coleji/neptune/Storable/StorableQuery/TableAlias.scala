@@ -19,6 +19,11 @@ sealed abstract class TableAlias[T <: StorableObject[_ <: StorableClass]](val ob
 	}
 
 	override def toString: String = s"(${obj.entityName} as ${name})"
+
+	override def equals(obj: Any): Boolean = obj match {
+		case t: TableAlias[_] => (t.obj equals this.obj) && (t.name equals this.name)
+		case _ => false
+	}
 }
 
 case class TableAliasInnerJoined[T <: StorableObject[_ <: StorableClass]](override val obj: T, override val name: String) extends TableAlias[T](obj, name) {

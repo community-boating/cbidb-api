@@ -3,12 +3,19 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
+import play.api.libs.json.JsBoolean
 
 class PersonMembership extends StorableClass(PersonMembership) {
+	override object calculations extends CalculationsObject {
+		val isDiscountFrozen = new InitializableCastableToJs[Boolean](JsBoolean)
+	}
+
 	override object references extends ReferencesObject {
 		val person = new Initializable[Person]
 		val membershipType = new Initializable[MembershipType]
+		val discountInstance = new Initializable[Option[DiscountInstance]]
+		val guestPriv = new Initializable[Option[GuestPriv]]
 	}
 
 	object values extends ValuesObject {
