@@ -30,7 +30,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				case None => Ok(new JsObject(Map(
 					"successAttemptId" -> JsNumber(parseError._1.get)
 				)))
-				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject)
 			})
 		})
 	}
@@ -47,7 +47,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 				case None => Ok(new JsObject(Map(
 					"successAttemptId" -> JsNumber(parseError._1.get)
 				)))
-				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+				case Some(err: String) => Ok(ResultError("process_err", err).asJsObject)
 			})
 		})
 	}
@@ -99,10 +99,10 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 								"successAttemptId" -> JsNumber(parseResult._1.get)
 							)))
 						}
-						case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+						case Some(err: String) => Ok(ResultError("process_err", err).asJsObject)
 					})
 				}
-				case _ => Future(Ok(ValidationResult.from("An internal error has occurred.").toResultError.asJsObject()))
+				case _ => Future(Ok(ValidationResult.from("An internal error has occurred.").toResultError.asJsObject))
 			}
 		})
 	}
@@ -146,7 +146,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 					"successAttemptId" -> JsNumber(parseError._1.get)
 				)))
 			}
-			case Some(err: String) => Ok(ResultError("process_err", err).asJsObject())
+			case Some(err: String) => Ok(ResultError("process_err", err).asJsObject)
 		})
 	}
 

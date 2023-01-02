@@ -90,7 +90,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					println(s"its an update: $juniorId")
 					MemberRequestCache.withRequestCacheMemberWithJuniorId(parsedRequest, juniorId, rc => {
 						runValidations(parsed, rc, Some(id.toString().toInt)) match {
-							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 							case ValidationOk => {
 								doUpdate(rc, parsed, rc.getAuthedPersonId)
 								Future(Ok(new JsObject(Map(
@@ -106,7 +106,7 @@ class RequiredInfo @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 
 						runValidations(parsed, rc, None) match {
-							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+							case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 							case ValidationOk => {
 								val newJuniorId = doCreate(rc, parsed, rc.getAuthedPersonId)
 								Future(Ok(new JsObject(Map(

@@ -21,7 +21,7 @@ class IsLoggedInAsMember @Inject()(implicit exec: ExecutionContext) extends Inje
 		} catch {
 			// no need to print a stacktrace or fire an email
 			case _: UnauthorizedAccessException => Future {
-				Ok(ResultError.UNAUTHORIZED)
+				Ok(ResultError.UNAUTHORIZED.asJsObject)
 			}
 		}
 	}

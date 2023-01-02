@@ -17,7 +17,7 @@ class PutDamageWaiver @Inject()(implicit exec: ExecutionContext) extends RestCon
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutDamageWaiverDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: DamageWaiver) => Future(Ok(new JsObject(Map(
 						"WAIVER_ID" -> JsNumber(i.values.waiverId.get)
 					))))

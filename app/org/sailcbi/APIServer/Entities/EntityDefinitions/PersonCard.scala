@@ -8,8 +8,8 @@ class PersonCard extends StorableClass(PersonCard) {
 	object values extends ValuesObject {
 		val assignId = new IntFieldValue(self, PersonCard.fields.assignId)
 		val personId = new IntFieldValue(self, PersonCard.fields.personId)
-		val issueDate = new NullableDateTimeFieldValue(self, PersonCard.fields.issueDate)
-		val cardNum = new NullableStringFieldValue(self, PersonCard.fields.cardNum)
+		val issueDate = new DateTimeFieldValue(self, PersonCard.fields.issueDate)
+		val cardNum = new StringFieldValue(self, PersonCard.fields.cardNum)
 		val active = new BooleanFieldValue(self, PersonCard.fields.active)
 		val price = new NullableDoubleFieldValue(self, PersonCard.fields.price)
 		val paymentMedium = new NullableStringFieldValue(self, PersonCard.fields.paymentMedium)
@@ -27,8 +27,8 @@ object PersonCard extends StorableObject[PersonCard] {
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
-		val issueDate = new NullableDateTimeDatabaseField(self, "ISSUE_DATE")
-		val cardNum = new NullableStringDatabaseField(self, "CARD_NUM", 50)
+		val issueDate = new DateTimeDatabaseField(self, "ISSUE_DATE")
+		val cardNum = new StringDatabaseField(self, "CARD_NUM", 50)
 		val active = new BooleanDatabaseField(self, "ACTIVE")
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
 		val paymentMedium = new NullableStringDatabaseField(self, "PAYMENT_MEDIUM", 100)

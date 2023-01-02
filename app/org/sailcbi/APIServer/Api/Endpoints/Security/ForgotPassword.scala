@@ -49,7 +49,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						  |No account was found with that email address.  If you are already a member,
 						  |please call the Front Office at 617-523-1038 for assistance setting up your account.
 						  |Otherwise you may return to the previous page to purchase a membership.
-						  |""".stripMargin).toResultError.asJsObject()))
+						  |""".stripMargin).toResultError.asJsObject))
 				} else {
 					val ppc = new PreparedProcedureCall[Unit](Set(BouncerRequestCache)) {
 						override def setInParametersVarchar: Map[String, String] = Map(

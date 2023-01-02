@@ -89,15 +89,15 @@ class PermissionsAuthority private[Core] (
 				case Failure(e: Throwable) => {
 					logger.error(e.getMessage, e)
 					Sentry.capture(e)
-					Success(Results.Status(400)(ResultError.UNKNOWN))
+					Success(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 				}
 			})
 		} catch {
-			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
-			case _: CORSException => Future(Results.Status(400)(ResultError.UNAUTHORIZED))
+			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED.asJsObject))
+			case _: CORSException => Future(Results.Status(400)(ResultError.UNAUTHORIZED.asJsObject))
 			case e: PostBodyNotJSONException => {
 				Sentry.capture(e)
-				Future(Results.Status(400)(ResultError.NOT_JSON))
+				Future(Results.Status(400)(ResultError.NOT_JSON.asJsObject))
 			}
 			case e: JsResultException => {
 				Sentry.capture(e)
@@ -105,12 +105,12 @@ class PermissionsAuthority private[Core] (
 			}
 			case e: MuteEmailException => {
 				Sentry.capture(e)
-				Future(Results.Status(400)(ResultError.UNKNOWN))
+				Future(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 			}
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
 				Sentry.capture(e)
-				Future(Results.Status(400)(ResultError.UNKNOWN))
+				Future(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 			}
 		}
 	}
@@ -121,12 +121,12 @@ class PermissionsAuthority private[Core] (
 		permission: Option[Permission]
 	)(implicit exec: ExecutionContext): Future[Result] = {
 		wrapInStandardTryCatch(() => get() match {
-			case None => Future(Results.Ok(ResultError.UNAUTHORIZED))
+			case None => Future(Results.Ok(ResultError.UNAUTHORIZED.asJsObject))
 			case Some(rc) => permission match {
 				case None => block(rc)
 				case Some(p) => {
 					if (rc.hasPermission(p)) block(rc)
-					else Future(Results.Ok(ResultError.UNAUTHORIZED))
+					else Future(Results.Ok(ResultError.UNAUTHORIZED.asJsObject))
 				}
 			}
 		})

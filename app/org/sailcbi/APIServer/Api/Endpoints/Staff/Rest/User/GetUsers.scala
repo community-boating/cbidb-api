@@ -30,7 +30,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends RestContro
 		PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_MANAGE_USERS_SCREEN)(None, ParsedRequest(req), rc => {
 			getOne(rc, userId, fieldShutter) match {
 				case Some(u) => Future(Ok(Json.toJson(u)))
-				case None => Future(Ok(ValidationResult.from("No user found").toResultError.asJsObject()))
+				case None => Future(Ok(ValidationResult.from("No user found").toResultError.asJsObject))
 			}
 		})
 	})

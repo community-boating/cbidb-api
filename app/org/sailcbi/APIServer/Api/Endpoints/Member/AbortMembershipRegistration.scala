@@ -20,7 +20,7 @@ class AbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) ext
 
 				PortalLogic.deleteRegistration(rc, parentPersonId, parsed.juniorId) match {
 					case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})

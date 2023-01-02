@@ -70,7 +70,7 @@ class ApEmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inje
 				val personId = rc.getAuthedPersonId
 
 				runValidations(parsed) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 							override def getQuery: String =

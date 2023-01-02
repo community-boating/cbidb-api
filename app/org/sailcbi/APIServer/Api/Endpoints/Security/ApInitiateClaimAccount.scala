@@ -18,7 +18,7 @@ class ApInitiateClaimAccount @Inject()(implicit exec: ExecutionContext) extends 
 
 
 				PortalLogic.apCanClaim(rc, parsed.email) match {
-					case Left(e) => Future(Ok(ValidationResult.from(e).toResultError.asJsObject()))
+					case Left(e) => Future(Ok(ValidationResult.from(e).toResultError.asJsObject))
 					case Right(personId) => {
 						PortalLogic.apDoClaim(rc, personId)
 						Future(Ok(new JsObject(Map(

@@ -40,7 +40,7 @@ class FinishOpenOrder @Inject()(implicit val exec: ExecutionContext) extends Inj
 			case None => success
 			case Some(orderId) => {
 				PortalLogic.finishOpenOrder(rc, parentPersonId.getOrElse(personId), orderId) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case _ => success
 				}
 

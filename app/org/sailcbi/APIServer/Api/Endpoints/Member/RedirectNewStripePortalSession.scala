@@ -20,10 +20,10 @@ class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionConte
 			val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
 
 			customerIdOption match {
-				case None => Future(Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject()))
+				case None => Future(Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject))
 				case Some(id: String) => rc.getStripeIOController(ws).getCustomerPortalURL(id).map({
 					case s: NetSuccess[String, _] => MovedPermanently(s.successObject)
-					case f: NetFailure[_, StripeError] => Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject())
+					case f: NetFailure[_, StripeError] => Ok(ValidationResult.from("An internal error occurred.").toResultError.asJsObject)
 				})
 			}
 		})

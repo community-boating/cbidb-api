@@ -17,7 +17,7 @@ class PutDockReport @Inject()(implicit exec: ExecutionContext) extends RestContr
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutDockReportDto.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: DockReport) => Future(Ok(Json.toJson(PutDockReportDto.applyWithSubObjects(rc)(i))))
 				}
 			})

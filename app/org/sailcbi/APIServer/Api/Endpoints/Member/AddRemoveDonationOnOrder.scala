@@ -24,7 +24,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 				}
 			})
@@ -66,7 +66,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match{
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => PortalLogic.setUsePaymentIntentDonationStandalone(rc, stripe, personId, orderId, parsed.doRecurring.getOrElse(false)).map(_ => {
 						Ok(JsObject(Map("success" -> JsBoolean(true))))
 					})
@@ -81,7 +81,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				val stripe = rc.getStripeIOController(ws)
 				runValidationstandalonePersonInfo(rc, parsed) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						val personId = PortalLogic.persistStandalonePurchaser(rc, rc.userName, rc.getAuthedPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
 

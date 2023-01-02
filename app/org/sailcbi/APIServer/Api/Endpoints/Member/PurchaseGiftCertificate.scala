@@ -22,7 +22,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 				println("got RC")
 				runValidations(parsed) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						val personId = PortalLogic.persistStandalonePurchaser(
 							rc,

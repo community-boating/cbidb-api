@@ -22,7 +22,7 @@ class UpdateAccount @Inject()(implicit exec: ExecutionContext) extends InjectedC
 
 
 				validate(rc, parsed.oldEmail, parsed.newEmail) match {
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => {
 						val q = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 							override val params: List[String] = List(parsed.pwHash, MagicIds.PW_HASH_SCHEME.MEMBER_2, parsed.newEmail, parsed.oldEmail)

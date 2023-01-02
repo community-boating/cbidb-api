@@ -33,7 +33,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 
 					))))
 				}
-				case Left(err) => Future(Ok(err.toResultError.asJsObject()))
+				case Left(err) => Future(Ok(err.toResultError.asJsObject))
 			}
 		})
 	}
@@ -48,7 +48,7 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 
 				PortalLogic.saveSignupNote(rc, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})
@@ -84,12 +84,12 @@ class SignupNote @Inject()(implicit exec: ExecutionContext) extends InjectedCont
 
 				if (!juniorMatchesParent) {
 					val ve = ValidationResult.from("Unable to locate junior")
-					Future(Ok(ve.toResultError.asJsObject()))
+					Future(Ok(ve.toResultError.asJsObject))
 				} else {
 					implicit val format = SignupNoteShape.format
 					PortalLogic.saveSignupNote(rc, parsed.juniorId, parsed.instanceId, parsed.signupNote) match {
 						case ValidationOk => Future(Ok(Json.toJson(parsed)))
-						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					}
 				}
 			})

@@ -19,7 +19,7 @@ class DeleteJpClassSignup @Inject()(implicit exec: ExecutionContext) extends Inj
 
 				PortalLogic.attemptDeleteSignup(rc, parsed.juniorId, parsed.instanceId) match {
 					case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})

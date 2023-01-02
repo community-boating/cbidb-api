@@ -85,7 +85,7 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId
 				runValidations(parsed, rc, personId) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						doUpdate(rc, parsed, personId)
 						Future(Ok(new JsObject(Map(

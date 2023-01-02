@@ -28,7 +28,7 @@ class ApDoClaimAccount @Inject()(implicit exec: ExecutionContext) extends Inject
 					_ <- canClaim
 					e <- PortalLogic.validateClaimAcctHash(rc, parsed.email, parsed.personId, parsed.hash)
 				} yield e) match {
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => {
 						val update = new PreparedQueryForUpdateOrDelete(Set(BouncerRequestCache)) {
 							override val params: List[String] = List(

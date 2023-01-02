@@ -19,10 +19,10 @@ class AddRemoveApplyGC @Inject()(implicit exec: ExecutionContext) extends Inject
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program)
 
 				if (parsed.gcCode.isEmpty || parsed.gcNumber.isEmpty) {
-					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject()))
+					Future(Ok(ValidationResult.from("Gift Certificate number or code is invalid.").toResultError.asJsObject))
 				} else {
 					PortalLogic.addGiftCertificateToOrder(rc, parsed.gcNumber.get, parsed.gcCode.get, orderId, PA.now.toLocalDate) match{
-						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 						case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 					}
 				}

@@ -90,7 +90,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						e.printStackTrace()
 						println("this is the err")
 						Future {
-							Status(400)(JsObject(Map("error" -> ResultError.UNKNOWN)))
+							Status(400)(JsObject(Map("error" -> ResultError.UNKNOWN.asJsObject)))
 						}
 					}
 				}
@@ -132,7 +132,7 @@ class CreatePerson @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 						e.printStackTrace()
 						println("this is the err")
 						Future {
-							Status(400)(JsObject(Map("error" -> ResultError.UNKNOWN)))
+							Status(400)(JsObject(Map("error" -> ResultError.UNKNOWN.asJsObject)))
 						}
 					}
 				}

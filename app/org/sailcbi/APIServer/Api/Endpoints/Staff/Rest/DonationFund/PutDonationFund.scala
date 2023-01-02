@@ -18,7 +18,7 @@ class PutDonationFund @Inject()(implicit exec: ExecutionContext) extends RestCon
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutDonationFundDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_DONATION_FUNDS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: DonationFund) => Future(Ok(new JsObject(Map(
 						"FUND_ID" -> JsNumber(i.values.fundId.get)
 					))))

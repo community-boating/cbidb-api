@@ -17,7 +17,7 @@ class AddJuniorClassReservation @Inject()(implicit exec: ExecutionContext) exten
 		PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(request.body.asJson, AddJuniorClassReservationShape.apply)(parsed => {
 				doPost(rc, parsed) match {
-					case Left(err) => Future(Ok(err.toResultError.asJsObject()))
+					case Left(err) => Future(Ok(err.toResultError.asJsObject))
 					case Right(juniorId) => Future(Ok(new JsObject(Map(
 						"personId" -> JsNumber(juniorId)
 					))))

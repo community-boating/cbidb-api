@@ -25,7 +25,7 @@ class Signouts @Inject()(implicit val exec: ExecutionContext) extends RestContro
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				doSignout(rc)(parsed) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})
@@ -37,7 +37,7 @@ class Signouts @Inject()(implicit val exec: ExecutionContext) extends RestContro
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				parsed.map(doSignout(rc)).reduce(ValidationResult.reduce) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})

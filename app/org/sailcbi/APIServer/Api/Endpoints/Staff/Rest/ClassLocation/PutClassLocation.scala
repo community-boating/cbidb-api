@@ -18,7 +18,7 @@ class PutClassLocation @Inject()(implicit exec: ExecutionContext) extends RestCo
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutClassLocationDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_JP_CLASS_LOCATIONS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: ClassLocation) => Future(Ok(new JsObject(Map(
 						"LOCATION_ID" -> JsNumber(i.values.locationId.get)
 					))))

@@ -6,6 +6,8 @@ import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
 import play.api.libs.json.JsBoolean
 
+import java.time.LocalDate
+
 class PersonMembership extends StorableClass(PersonMembership) {
 	override object calculations extends CalculationsObject {
 		val isDiscountFrozen = new InitializableCastableToJs[Boolean](JsBoolean)
@@ -53,6 +55,14 @@ class PersonMembership extends StorableClass(PersonMembership) {
 //		val covidDays = new NullableDoubleFieldValue(self, PersonMembership.fields.covidDays)
 //		val covidEmailSent = new NullableBooleanFIeldValue(self, PersonMembership.fields.covidEmailSent)
 //		val originalExpirationDate = new NullableLocalDateTimeFieldValue(self, PersonMembership.fields.originalExpirationDate)
+	}
+
+	def isActive(now: LocalDate): Boolean = {
+		val start = values.startDate.get
+		val exp = values.expirationDate.get
+
+		(start.isEmpty || !start.get.isAfter(now)) &&
+		(exp.isEmpty || !exp.get.isBefore(now))
 	}
 }
 

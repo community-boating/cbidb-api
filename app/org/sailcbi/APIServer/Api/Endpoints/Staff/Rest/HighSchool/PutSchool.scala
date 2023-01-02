@@ -18,7 +18,7 @@ class PutSchool @Inject()(implicit exec: ExecutionContext) extends RestControlle
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutHighSchoolDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_SCHOOLS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: HighSchool) => Future(Ok(new JsObject(Map(
 						"SCHOOL_ID" -> JsNumber(i.values.schoolId.get)
 					))))

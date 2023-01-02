@@ -18,7 +18,7 @@ class PutEvent @Inject()(implicit exec: ExecutionContext) extends RestController
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutEventDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_EVENTS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: Event) => Future(Ok(new JsObject(Map(
 						"EVENT_ID" -> JsNumber(i.values.eventId.get)
 					))))

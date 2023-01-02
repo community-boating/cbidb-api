@@ -26,7 +26,7 @@ class CreateMember @Inject()(implicit exec: ExecutionContext) extends InjectedCo
 					pwHash = cms.pwHash,
 					protoPersonValue = protoPersonCookieValMaybe
 				) match {
-					case Left(v: ValidationResult) => Future(Ok(v.toResultError.asJsObject()))
+					case Left(v: ValidationResult) => Future(Ok(v.toResultError.asJsObject))
 					case Right(id: Int) => Future(Ok(new JsObject(Map(
 						"personId" -> JsNumber(id)
 					))))

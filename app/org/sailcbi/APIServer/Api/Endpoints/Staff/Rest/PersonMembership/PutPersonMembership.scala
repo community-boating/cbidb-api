@@ -17,7 +17,7 @@ class PutPersonMembership @Inject()(implicit exec: ExecutionContext) extends Res
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutPersonMembershipDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: PersonMembership) => Future(Ok(new JsObject(Map(
 						"ASSIGN_ID" -> JsNumber(i.values.assignId.get)
 					))))

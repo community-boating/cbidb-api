@@ -20,7 +20,7 @@ class ApAbortMembershipRegistration @Inject()(implicit exec: ExecutionContext) e
 
 			PortalLogic.apDeleteReservation(rc, memberId) match {
 				case ValidationOk => Future(Ok(new JsObject(Map("success" -> JsBoolean(true)))))
-				case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+				case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 			}
 		})
 	}}

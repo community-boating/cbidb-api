@@ -17,7 +17,7 @@ class SignoutCrewRest @Inject()(implicit val exec: ExecutionContext) extends Inj
 			PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 				doPost(rc, parsed) match {
 					case ValidationOk => Future(Ok(Json.toJson(parsed)))
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})
@@ -32,7 +32,7 @@ class SignoutCrewRest @Inject()(implicit val exec: ExecutionContext) extends Inj
 						rc.deleteObjectsById(SignoutCrew, List(id))
 						Future(Ok(Json.toJson(parsed)))
 					}
-					case None => Future(Ok(ValidationResult.from("No ID found for delete").toResultError.asJsObject()))
+					case None => Future(Ok(ValidationResult.from("No ID found for delete").toResultError.asJsObject))
 				}
 			})
 		})

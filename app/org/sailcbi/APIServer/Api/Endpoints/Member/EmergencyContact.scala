@@ -71,7 +71,7 @@ class EmergencyContact @Inject()(implicit exec: ExecutionContext) extends Inject
 
 				val cb: CacheBroker = rc.cb
 				runValidations(parsed, None) match {
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						val updateQuery = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 							override def getQuery: String =

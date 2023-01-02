@@ -35,7 +35,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							rc.commitObjectToDatabase(parsed)
 							Future(Ok(Json.toJson(parsed)))
 						}
-						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					}
 				} else {
 					// TODO: remove this
@@ -44,7 +44,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 							rc.commitObjectToDatabase(parsed)
 							Future(Ok(Json.toJson(parsed)))
 						}
-						case e: ValidationError => Future(Ok(e.toResultError.asJsObject()))
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					}
 				}
 			})

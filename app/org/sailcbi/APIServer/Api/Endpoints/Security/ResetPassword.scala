@@ -26,7 +26,7 @@ class ResetPassword @Inject()(implicit exec: ExecutionContext) extends InjectedC
 						setNewPassword(rc, parsed.email, parsed.pwHash)
 						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 					}
-					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject()))
+					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 				}
 			})
 		})

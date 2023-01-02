@@ -18,7 +18,7 @@ class PutClassInstructor @Inject()(implicit exec: ExecutionContext) extends Rest
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PutClassInstructorDTO.apply)(parsed => {
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_UPDATE_JP_INSTRUCTORS)(None, parsedRequest, rc => {
 				put(rc, parsed) match {
-					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject()))
+					case Left(ve: ValidationError) => Future(Ok(ve.toResultError.asJsObject))
 					case Right(i: ClassInstructor) => Future(Ok(new JsObject(Map(
 						"INSTRUCTOR_ID" -> JsNumber(i.values.instructorId.get)
 					))))

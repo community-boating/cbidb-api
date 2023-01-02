@@ -67,7 +67,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 				stripe.storePaymentMethod(customerId, paymentMethodId).flatMap({
 					case ve: ValidationError[_, StripeError] => {
 						if (ve.errorObject.`type` == "card_error") {
-							Future(Ok(ResultError("process_err", ve.errorObject.message).asJsObject()))
+							Future(Ok(ResultError("process_err", ve.errorObject.message).asJsObject))
 						} else {
 							throw new Exception("non-card stripe error: " + ve.errorObject)
 						}
@@ -81,7 +81,7 @@ class StorePaymentMethod @Inject()(implicit exec: ExecutionContext, ws: WSClient
 							println("... and let's retry failed payments")
 							PortalLogic.retryFailedPayments(rc, adultPersonId, orderId.get) match {
 								case ValidationOk => Ok(JsObject(Map("success" -> JsBoolean(true))))
-								case ve: API.ValidationError => Ok(ve.toResultError.asJsObject())
+								case ve: API.ValidationError => Ok(ve.toResultError.asJsObject)
 							}
 						} else {
 							Ok(JsObject(Map("success" -> JsBoolean(true))))
