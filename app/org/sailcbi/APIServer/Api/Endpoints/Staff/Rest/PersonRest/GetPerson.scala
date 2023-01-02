@@ -34,4 +34,24 @@ class GetPerson @Inject()(implicit val exec: ExecutionContext) extends RestContr
 			Future(Ok(Json.toJson(person)))
 		})
 	})
+
+	def findByCardNumber(cardNumber: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
+		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
+			val qb = QueryBuilder
+				.from(Person)
+				.innerJoin(PersonCard, PersonCard.fields.personId.alias.equalsField(Person.fields.personId.alias))
+				.where(List(
+					PersonCard.fields.cardNum.alias.equalsConstant(cardNumber),
+					PersonCard.fields.active.alias.equals(true)
+				))
+				.select(List(
+					Person.fields.personId.alias,
+					Person.fields.nameFirst.alias,
+					Person.fields.nameLast.alias
+				))
+
+			val op = rc.executeQueryBuilder(qb).map(Person.construct).headOption
+			Future(Ok(op.map(p => Json.toJson(p)).getOrElse(JsNull)))
+		})
+	})
 }

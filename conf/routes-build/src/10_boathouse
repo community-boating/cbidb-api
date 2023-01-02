@@ -33,6 +33,7 @@ POST     /rest/high-school              org.sailcbi.APIServer.Api.Endpoints.Staf
 GET     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.GetDonationFund.getAll()
 POST     /rest/donation-fund              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DonationFund.PutDonationFund.post()
 GET     /rest/person/summary              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonRest.GetPerson.getOneForSummaryScreen(personId: Int)
+GET     /rest/person/by-card              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonRest.GetPerson.findByCardNumber(cardNumber: String)
 GET     /rest/person-membership/get-all-for-person      org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership.getAllForPerson(personId: Int)
 POST     /rest/person-membership      org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.PutPersonMembership.post()
 GET     /rest/damage-waiver/get-all-for-person     org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DamageWaiver.GetDamageWaiver.getAllForPerson(personId: Int)
