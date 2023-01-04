@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.ScanCard
 
 import com.coleji.neptune.API.ResultError
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache, UnlockedRequestCache}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DiscountInstance, GuestPriv, MembershipType, Person, PersonCard, PersonMembership, PersonRating, Rating}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonCard, PersonRating, Rating}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.time.LocalDate

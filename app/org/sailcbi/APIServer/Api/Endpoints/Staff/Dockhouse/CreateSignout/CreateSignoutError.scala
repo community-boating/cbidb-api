@@ -1,7 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout
 
-import com.coleji.neptune.API.ResultError
+import play.api.libs.json.{JsObject, Json}
 
-case class CreateSignoutError(override val code: String, override val message: String, extras: List[CreateSignoutSingleError]) extends ResultError(code, message)
+case class CreateSignoutError(code: String, message: String, extras: List[CreateSignoutSingleError]) {
+	implicit val crewFormat = Json.format[CreateSignoutSingleError]
+	implicit val format = Json.format[CreateSignoutError]
+	def asJsObject: JsObject = JsObject(Map("error" -> Json.toJson(this)))
+}
 
-case class CreateSignoutSingleError(override val code: String, override val message: String, overridable: Boolean) extends ResultError(code, message)
+case class CreateSignoutSingleError(code: String, message: String, overridable: Boolean)
