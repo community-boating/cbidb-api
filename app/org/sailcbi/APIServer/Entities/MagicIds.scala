@@ -55,4 +55,10 @@ object MagicIds {
 		val STAFF_1 = "staff_01"
 		val STAFF_2 = "staff_02"
 	}
+
+	object RATING_IDS {
+		val RIGGING = 61
+		val VERBAL = 62
+		val MERCURY_GREEN = 261
+	}
 }
