@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields.IntDatabaseField
 import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
-import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
+import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 
 abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) {

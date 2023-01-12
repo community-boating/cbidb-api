@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDateTimeFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableBooleanDatabaseField, NullableDateTimeDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDateTimeDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
 
 class ApClassWaitlistResult extends StorableClass(ApClassWaitlistResult) {

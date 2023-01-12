@@ -1,6 +1,6 @@
 package com.coleji.neptune.Core.Boot
 
-import com.coleji.neptune.Core.{DatabaseGateway, MysqlDatabaseConnection, OracleDatabaseConnection, PermissionsAuthority, RequestCacheObject}
+import com.coleji.neptune.Core._
 import com.coleji.neptune.Util.PropertiesWrapper
 import com.redis.RedisClientPool
 import play.api.inject.ApplicationLifecycle

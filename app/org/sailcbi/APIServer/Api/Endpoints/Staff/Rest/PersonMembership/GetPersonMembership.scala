@@ -3,9 +3,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Discount, DiscountInstance, GuestPriv, MembershipType, PersonMembership}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsBoolean, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject

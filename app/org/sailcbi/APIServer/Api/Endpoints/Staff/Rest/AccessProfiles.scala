@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{AccessProfile, BoatType}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.AccessProfile
 import org.sailcbi.APIServer.Entities.cacheable.AccessProfiles
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.mvc.{Action, AnyContent, InjectedController}

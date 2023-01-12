@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, DateTimeFieldValue, IntFieldValue, NullableDoubleFieldValue, NullableIntFieldValue, NullableStringFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, DateTimeDatabaseField, IntDatabaseField, NullableDoubleDatabaseField, NullableIntDatabaseField, NullableStringDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
 

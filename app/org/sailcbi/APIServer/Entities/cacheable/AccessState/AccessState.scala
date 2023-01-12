@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.cacheable.AccessState
 
 import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{AccessProfile, AccessProfileRelationship, AccessProfileRole, User, UserRole}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.access.CbiAccessUtil
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
 import play.api.libs.json.Json

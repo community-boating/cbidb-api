@@ -4,7 +4,6 @@ import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{AccessProfileRelationship, User}
 import org.sailcbi.APIServer.Entities.access.CbiPermissions
-import org.sailcbi.APIServer.Entities.cacheable.AccessState.AccessState
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.InjectedController
