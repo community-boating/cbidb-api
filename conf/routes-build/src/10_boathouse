@@ -70,3 +70,4 @@ POST    /auth/set-staff-pw              org.sailcbi.APIServer.Api.Endpoints.Secu
 
 GET    /staff/dockhouse/scan-card      org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.ScanCard.ScanCard.get(cardNumber: String)
 POST    /staff/dockhouse/create-signout     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout.CreateSignout.post()
+GET     /staff/dockhouse/dh-globals     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.GetDhGlobals.get()
