@@ -1,0 +1,285 @@
+openapi: 3.0.0
+info:
+    description: "Signout REST"
+    version: "1.0.0"
+    title: "Signout REST"
+    contact:
+        email: "jon@community-boating.org"
+paths:
+    /staff/dockhouse/grant-ratings:
+        get:
+          summary: "Grant ratings"
+          responses:
+            "200":
+                description: "Success"
+                content:
+                    application/json:
+                        schema:
+                              $ref: "#/components/schemas/GrantRatingsRequest"
+    /staff/dockhouse/dh-globals:
+        get:
+          summary: "Get DH global values"
+          responses:
+            "200":
+                description: "Success"
+                content:
+                    application/json:
+                        schema:
+                              $ref: "#/components/schemas/DockhouseGlobals"
+    /staff/dockhouse/scan-card:
+        get:
+          summary: "Scan a card to fetch person info"
+          parameters:
+          - in: query
+            name: cardNumber
+            schema:
+              type: integer
+          responses:
+            "200":
+                description: "Success"
+                content:
+                    application/json:
+                        schema:
+                              $ref: "#/components/schemas/CardScanResult"
+    /staff/dockhouse/create-signout:
+        post:
+          summary: "Attempt to create a signout"
+          requestBody:
+            required: true
+            content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/CreateSignout"
+          responses:
+            "200":
+                description: "Success"
+                content:
+                    application/json:
+                        schema:
+                              $ref: "#/components/schemas/Signout"
+    /rest/signouts-today:
+        get:
+          summary: "Get today's signouts"
+          responses:
+            "200":
+                description: "Success"
+                content:
+                    application/json:
+                      schema:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Signout"
+    /rest/signout:
+        post:
+            summary: "Update a signout"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Signout"
+            responses:
+                "200":
+                    description: "Success"
+                    content:
+                        application/json:
+                            schema:
+                                 $ref: "#/components/schemas/Signout"
+components:
+  schemas:
+    GrantRatingsRequest:
+      type: object
+      properties:
+        instructor:
+          type: string
+        programId:
+          type: number
+        personIds:
+          type: array
+          items:
+            type: number
+        ratingIds:
+          type: array
+          items:
+            type: number
+    FlagColorHistory:
+      type: object
+      properties:
+        flag:
+          type: string
+        changeDatetime:
+          type: string
+    DockhouseAnnouncement:
+      type: object
+      properties:
+        message:
+          type: string
+        priority:
+          type: string
+    DockhouseGlobals:
+      type: object
+      properties:
+        serverDateTime: 
+          type: string
+        sunsetTime: 
+          type: string
+        windSpeedAvg: 
+          type: number
+        winDir: 
+          type: string
+        announcements: 
+          type: array
+          items:
+            $ref: "#/components/schemas/DockhouseAnnouncement"
+        flagChanges: 
+          type: array
+          items:
+            $ref: "#/components/schemas/CardScanResultRating"
+    CardScanResultMembership:
+      type: object
+      properties:
+        assignId: 
+          type: number
+        membershipTypeId: 
+          type: number
+        startDate: 
+          nullable: true
+          type: string
+        expirationDate: 
+          nullable: true
+          type: string
+        discountName: 
+          nullable: true
+          type: string
+        isDiscountFrozen: 
+          type: boolean
+        hasGuestPrivs: 
+          type: boolean
+    CardScanResultRating:
+      type: object
+      properties:
+        ratingId: 
+          type: number
+        programId: 
+          type: number
+        ratingName: 
+          type: string
+        status: 
+          type: string
+          enum: [Y,F]
+    CardScanResult:
+      type: object
+      properties:
+        personId: 
+          type: number
+        cardNumber: 
+          type: string
+        nameFirst: 
+          type: string
+        nameLast: 
+          type: string
+        bannerComment: 
+          nullable: true
+          type: string
+        specialNeeds: 
+          nullable: true
+          type: string
+        activeMemberships: 
+          type: array
+          items:
+            $ref: "#/components/schemas/CardScanResultMembership"
+        personRatings: 
+          type: array
+          items:
+            $ref: "#/components/schemas/CardScanResultRating"
+    CreateSignoutCrew:
+      type: object
+      properties:
+        personId: 
+          type: number
+        cardNumber: 
+          type: string
+        testRatingId: 
+          nullable: true
+          type: number
+    CreateSignout:
+      type: object
+      properties:
+        skipperPersonId: 
+          type: number
+        skipperCardNumber: 
+          type: string
+        skipperTestRatingId: 
+          nullable: true
+          type: number
+        boatId: 
+          type: number
+        sailNumber: 
+          nullable: true
+          type: string
+        hullNumber: 
+          nullable: true
+          type: string
+        classSessionId: 
+          nullable: true
+          type: number
+        isRacing: 
+          type: boolean
+        dockmasterOverride: 
+          type: boolean
+        didInformKayakRules: 
+          type: boolean
+        signoutCrew: 
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateSignoutCrew"
+    Signout:
+      type: object
+      properties:
+        signoutId: 
+          type: number
+        programId:
+          type: number
+        boatId:
+          type: number
+        personId:
+          type: number
+        cardNumber:
+          type: string
+        sailNumber:
+          type: string
+        hullNumber:
+          type: string
+        signoutDatetime:
+          type: string
+        signinDatetime:
+          type: string
+        testRatingId:
+          type: number
+        testResult:
+          type: string
+        signoutType:
+          type: string
+        didCapsize:
+          type: boolean
+        comments:
+          type: string
+        crew:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignoutCrew"
+    SignoutCrew:
+      type: object
+      properties:
+        crewId:
+          type: number
+        signoutId:
+          type: number
+        cardNumber:
+          type: string
+        personId:
+          type: number
+        startActive:
+          type: string
+        endActive:
+          type: string
