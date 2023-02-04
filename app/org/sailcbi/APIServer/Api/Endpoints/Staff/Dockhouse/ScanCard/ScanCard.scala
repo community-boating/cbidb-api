@@ -33,6 +33,9 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		) yield ret
 	}
 
+	/**
+	 * return CardScanResult.ERROR_NOT_FOUND if the number is not exactly 7 characters long
+	 */
 	private def validateCardNumber(cardNumber: String): Either[ResultError, Unit] = {
 		if (cardNumber == null || cardNumber.length != 7) Left(CardScanResult.ERROR_NOT_FOUND)
 		else Right()
