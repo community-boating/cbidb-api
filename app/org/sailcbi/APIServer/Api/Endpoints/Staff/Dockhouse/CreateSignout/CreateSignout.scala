@@ -98,7 +98,7 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 		boatId: Int,
 		sailNumber: Option[String],
 		hullNumber: Option[String],
-		classSessionid: Option[Int],
+		classSessionId: Option[Int],
 		isRacing: Boolean,
 		dockmasterOverride: Boolean,
 		didInformKayakRules: Boolean,
