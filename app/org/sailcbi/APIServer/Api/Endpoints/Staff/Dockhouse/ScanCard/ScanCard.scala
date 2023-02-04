@@ -98,7 +98,9 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			Person.fields.personId,
 			Person.fields.nameFirst,
 			Person.fields.nameLast,
-			Person.fields.specialNeeds
+			Person.fields.specialNeeds,
+			Person.fields.memberComment,
+			Person.fields.signoutBlockReason
 		)).get
 
 		val personId = person.values.personId.get
@@ -108,7 +110,8 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			personId = pc.values.personId.get,
 			nameFirst = person.values.nameFirst.get.getOrElse(""),
 			nameLast = person.values.nameLast.get.getOrElse(""),
-			bannerComment = None, // TODO
+			bannerComment = person.values.memberComment.get,
+			signoutBlockReason = person.values.signoutBlockReason.get,
 			specialNeeds = person.values.specialNeeds.get,
 			activeMemberships = constructMemberships(rc, personId),
 			personRatings = constructRatings(rc, personId)
@@ -138,6 +141,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		nameFirst: String,
 		nameLast: String,
 		bannerComment: Option[String],
+		signoutBlockReason: Option[String],
 		specialNeeds: Option[String],
 		activeMemberships: List[CardScanResultMembership],
 		personRatings: List[CardScanResultRating]

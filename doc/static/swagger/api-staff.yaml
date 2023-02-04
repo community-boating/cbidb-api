@@ -155,6 +155,12 @@ components:
           type: boolean
         hasGuestPrivs: 
           type: boolean
+        bannerComment:
+          type: string
+          nullable: true
+        signoutBlockReason:
+          type: string,
+          nullable: true
     CardScanResultRating:
       type: object
       properties:
