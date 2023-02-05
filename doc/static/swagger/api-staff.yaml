@@ -99,6 +99,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Signout"
+  /rest/ap-class-sessions/today:
+    get:
+      summary: "Get today's class sessions"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApClassSession"
 components:
   schemas:
     GrantRatingsRequest:
@@ -303,3 +315,98 @@ components:
           type: string
         endActive:
           type: string
+    ApClassType:
+      type: object
+      properties:
+        signupMinDefault:
+          type: number
+          nullable: true
+        noSignup:
+          type: boolean
+        disallowIfOverkill:
+          type: boolean
+        signupMaxDefault:
+          type: number
+          nullable: true
+        typeId:
+          type: number
+        typeName:
+          type: string
+        priceDefault:
+          type: number
+          nullable: true
+        displayOrder:
+          type: number
+    ApClassFormat:
+      type: object
+      properties:
+        sessionLengthDefault:
+          type: number
+        typeId:
+          type: number
+        signupMinDefaultOverride:
+          type: number
+          nullable: true
+        signupMaxDefaultOverride:
+          type: number
+          nullable: true
+        formatId:
+          type: number
+        priceDefaultOverride:
+          type: number
+          nullable: true
+        sessionCtDefault:
+          type: number
+        $$apClassType:
+          $ref: "#/components/schemas/ApClassType"
+    ApClassInstance:
+      type: object
+      properties:
+        instanceId:
+          type: number
+        cancelledDatetime:
+          type: string
+          nullable: true
+        signupsStartOverride:
+          type: string
+          nullable: true
+        signupMin:
+          type: number
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        signupMax:
+          type: number
+          nullable: true
+        formatId:
+          type: number
+        hideOnline:
+          type: boolean
+        cancelByOverride:
+          type: string
+          nullable: true
+        locationString:
+          type: string
+          nullable: true
+        $$apClassFormat:
+          $ref: "#/components/schemas/ApClassFormat"
+    ApClassSession:
+      type: object
+      properties:
+        instanceId:
+          type: number
+        sessionId:
+          type: number
+        cancelledDateTime:
+          type: string
+          nullable: true
+        sessionDateTime:
+          type: string
+        headcount:
+          type: number
+          nullable: true
+        sessionLength:
+          type: number
+        $$apClassInstance:
+          $ref: "#/components/schemas/ApClassInstance"

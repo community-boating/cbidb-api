@@ -48,6 +48,7 @@ GET     /rest/ratings       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Ratin
 GET     /rest/access-profiles       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.AccessProfiles.getAll()
 GET     /rest/ap-class-types           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ApClassTypes.getAll()
 GET     /rest/ap-class-instances/this-season           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ApClassInstances.getThisSeason()
+GET     /rest/ap-class-sessions/today           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ApClassSessions.getTodaysSessionsWithSignups()
 GET     /rest/membership-types           org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.MembershipTypes.getAll()
 
 POST    /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.SignoutCrewRest.post()
