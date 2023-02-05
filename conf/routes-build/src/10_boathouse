@@ -72,3 +72,4 @@ GET    /staff/dockhouse/scan-card      org.sailcbi.APIServer.Api.Endpoints.Staff
 POST    /staff/dockhouse/create-signout     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout.CreateSignout.post()
 GET     /staff/dockhouse/dh-globals     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.GetDhGlobals.get()
 POST    /staff/dockhouse/grant-ratings     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.GrantRatings.post()
+POST    /staff/dockhouse/put-flag-change     org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.PutFlagChange.post()

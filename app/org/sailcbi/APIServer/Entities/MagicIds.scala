@@ -61,4 +61,11 @@ object MagicIds {
 		val VERBAL = 62
 		val MERCURY_GREEN = 261
 	}
+
+	object FLAG_COLORS {
+		val FLAG_GREEN = "G"
+		val FLAG_YELLOW = "Y"
+		val FLAG_RED = "R"
+		val FLAG_CLOSED = "C"
+	}
 }
