@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
-import org.sailcbi.APIServer.Entities.EntityDefinitions.FlagChange
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.IO.DockhouseIo
 
@@ -19,5 +19,10 @@ object DockhouseLogic {
 		} else {
 			Left("Unrecognized flag color " + flagColor)
 		}
+	}
+
+	def addPersonToApClass(rc: UnlockedRequestCache, personId: Int, instanceId: Int): Either[String, ApClassSignup] = {
+		// TODO: for DH, confirm the instance has a session today
+		DockhouseIo.addPersonToApClass(rc, personId, instanceId)
 	}
 }
