@@ -1,4 +1,4 @@
-package org.sailcbi.APIServer.Logic
+package org.sailcbi.APIServer.Logic.DockhouseLogic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange}

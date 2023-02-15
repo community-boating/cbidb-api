@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse
 
 import com.coleji.neptune.API.ValidationResult
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Logic.DockhouseLogic
+import org.sailcbi.APIServer.Logic.DockhouseLogic.DockhouseLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}

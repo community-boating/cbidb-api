@@ -13,6 +13,7 @@ const createSignoutValidator = t.type({
 	skipperPersonId: t.number,
 	skipperCardNumber: t.string,
 	skipperTestRatingId: OptionalNumber,
+	programId: t.number,
 	boatId: t.number,
 	sailNumber: OptionalString,
 	hullNumber: OptionalString,

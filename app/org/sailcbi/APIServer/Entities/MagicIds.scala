@@ -68,4 +68,12 @@ object MagicIds {
 		val FLAG_RED = "R"
 		val FLAG_CLOSED = "C"
 	}
+	object SIGNOUT_TYPES {
+		val SAIL = "S"
+		val RACING = "R"
+		val CLASS = "C"
+		val TESTING = "T"
+		val RIGGING = "G"
+		val RENTAL = "N"
+	}
 }
