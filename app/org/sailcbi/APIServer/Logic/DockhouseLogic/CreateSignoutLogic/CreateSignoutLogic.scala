@@ -43,10 +43,14 @@ object CreateSignoutLogic {
 
 	def attemptSignout(rc: UnlockedRequestCache, req: CreateSignoutRequest): Either[CreateSignoutError, Signout] = {
 		val errors = {
-			if (!req.isRacing) List.empty
-			req.sailNumber match {
-				case Some(s) => mapSailNumToArtificalErrors(s)
-				case None => List.empty
+			if (!req.isRacing) {
+				List.empty
+			} else {
+				req.sailNumber match {
+					case Some(s)
+					=> mapSailNumToArtificalErrors(s)
+					case None => List.empty
+				}
 			}
 		}
 		errors match {
@@ -62,7 +66,7 @@ object CreateSignoutLogic {
 			else MagicIds.SIGNOUT_TYPES.SAIL
 		}
 
-		DockhouseIo.createSignout(
+		val signout = DockhouseIo.createSignout(
 			rc = rc,
 			personId = req.skipperPersonId,
 			programId = req.programId,
@@ -72,8 +76,16 @@ object CreateSignoutLogic {
 			sailNumber = req.sailNumber,
 			hullNumber = req.hullNumber,
 			testRatingId = req.skipperTestRatingId,
-			isQueued = false
+			isQueued = false,
 		)
+
+		val crewObjs = req.signoutCrew.map(crew => {
+			DockhouseIo.createSignoutCrew(rc, crew.personId, crew.cardNumber, signout.values.signoutId.get)
+		})
+
+		signout.references.crew.set(crewObjs)
+
+		signout
 	}
 
 	private def mapSailNumToArtificalErrors(sailNumber: String): List[CreateSignoutSingleError] = {
