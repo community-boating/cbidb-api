@@ -8,8 +8,8 @@ import org.sailcbi.APIServer.Entities.{MagicIds, NullableInDatabase}
 
 class Rating extends StorableClass(Rating) {
 	override object references extends ReferencesObject {
-		val boats = new Initializable[List[BoatRating]]
-		val programs = new Initializable[List[RatingProgram]]
+		val boats = new Initializable[IndexedSeq[BoatRating]]
+		val programs = new Initializable[IndexedSeq[RatingProgram]]
 	}
 
 	object values extends ValuesObject {

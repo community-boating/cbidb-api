@@ -330,7 +330,7 @@ object PermissionsAuthority {
 		}
 	}
 
-	abstract class PersistenceSystem {
+	abstract class PersistenceSystem extends Serializable {
 		val pbs: PersistenceBrokerStatic
 	}
 

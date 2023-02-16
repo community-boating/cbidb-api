@@ -1,5 +1,5 @@
 package com.coleji.neptune.Storable
 
-trait ReferencesObject {
+trait ReferencesObject extends Serializable {
 
 }

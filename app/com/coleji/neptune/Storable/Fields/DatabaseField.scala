@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.StorableQuery._
 import com.coleji.neptune.Storable.{Filter, ProtoStorable, StorableClass, StorableObject}
 
-abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], val persistenceFieldName: String) {
+abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], val persistenceFieldName: String) extends Serializable {
 	type ValueType = T
 
 	def getFieldType(implicit persistenceSystem: PersistenceSystem): String

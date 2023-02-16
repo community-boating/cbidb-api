@@ -1,6 +1,6 @@
 package com.coleji.neptune.Util
 
-class Initializable[T] {
+class Initializable[T] extends Serializable {
 	protected var value: Option[T] = None
 
 	def get: T = value match {

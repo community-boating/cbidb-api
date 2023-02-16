@@ -1,5 +1,5 @@
 package com.coleji.neptune.Storable
 
-trait CalculationsObject {
+trait CalculationsObject extends Serializable {
 
 }

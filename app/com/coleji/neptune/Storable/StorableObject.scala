@@ -11,7 +11,7 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
 
-abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T], persistenceSystem: PersistenceSystem) {
+abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T], persistenceSystem: PersistenceSystem) extends Serializable {
 	StorableObject.addEntity(this)
 	type IntFieldMap = Map[String, IntDatabaseField]
 	type DoubleFieldMap = Map[String, DoubleDatabaseField]
@@ -38,7 +38,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 
 	val useRuntimeFieldnamesForJson = false
 
-	implicit val storableJsonWrites = new Writes[T] {
+	implicit def storableJsonWrites = new Writes[T] {
 		override def writes(o: T): JsValue = o.asJsValue
 	}
 
@@ -139,7 +139,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	lazy val nullableBooleanFieldMap: NullableBooleanFieldMap = fieldMaps._12
 	lazy val nullableClobFieldMap: NullableClobFieldMap = fieldMaps._13
 
-	lazy val fieldList: List[DatabaseField[_]] =
+	def fieldList: List[DatabaseField[_]] =
 		intFieldMap.values.toList ++
 		nullableIntFieldMap.values.toList ++
 		doubleFieldMap.values.toList ++

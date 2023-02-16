@@ -1,5 +1,5 @@
 package com.coleji.neptune.Storable
 
-trait FieldsObject {
+trait FieldsObject extends Serializable {
 
 }

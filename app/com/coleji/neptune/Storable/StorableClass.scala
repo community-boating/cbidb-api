@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 
-abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) {
+abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
 	type IntFieldValueMap = Map[String, IntFieldValue]
 	type NullableIntFieldValueMap = Map[String, NullableIntFieldValue]
 	type DoubleFieldValueMap = Map[String, DoubleFieldValue]

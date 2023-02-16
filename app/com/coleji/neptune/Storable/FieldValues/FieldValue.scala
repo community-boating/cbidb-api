@@ -5,7 +5,7 @@ import com.coleji.neptune.Storable.Fields.DatabaseField
 import com.coleji.neptune.Storable.StorableClass
 import play.api.libs.json.JsValue
 
-abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) {
+abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
 	private var value: Option[T] = None
 	private var dirty: Boolean = false
 
