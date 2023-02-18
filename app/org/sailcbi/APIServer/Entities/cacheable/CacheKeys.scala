@@ -15,4 +15,5 @@ object CacheKeys {
 	def accessState = "access-state"
 	def accessProfiles = "access-profiles"
 	def apClassTypes = "ap-class-types"
+	def programTypes = "program-types"
 }

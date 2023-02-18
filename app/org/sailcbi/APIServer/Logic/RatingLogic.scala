@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.neptune.Util.ListUtil
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatRating, PersonRating, Rating, RatingProgram}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatRating, BoatType, PersonRating, ProgramType, Rating, RatingProgram}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
@@ -19,11 +19,24 @@ object RatingLogic {
 
 	def userCanGrantRating(rc: StaffRequestCache, ratingId: Int, programId: Int): Boolean = true
 
+	def maxFlags(
+		boatTypes: List[BoatType],
+		programs: List[ProgramType],
+		prs: List[PersonRating],
+		rs: List[Rating]
+	): List[(BoatType, List[(ProgramType, Option[(String, PersonRating)])])] = {
+		boatTypes.map(b =>
+			(b, programs.map(p =>
+				(p, maxFlagForBoat(prs, rs, b.values.boatId.get, p.values.programId.get))
+			))
+		)
+	}
+
 	/**
 	 * MUST pass Ratings list from the ratings cache (with BRs populated)
 	 */
-	def maxFlag(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int): Option[(String, PersonRating)] = {
-		ListUtil.findAndReturn(FLAG_ORDER)(f => ratingCheck(prs, rs, boatId, programId, f).map(pr => (f, pr)))
+	def maxFlagForBoat(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int): Option[(String, PersonRating)] = {
+		ListUtil.findAndReturn(FLAG_ORDER)(f => canSailBoatProgram(prs, rs, boatId, programId, f).map(pr => (f, pr)))
 	}
 
 	/**
@@ -34,7 +47,7 @@ object RatingLogic {
 	 * @param flag Desired flag
 	 * @return
 	 */
-	def ratingCheck(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int, flag: String): Option[PersonRating] = {
+	def canSailBoatProgram(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int, flag: String): Option[PersonRating] = {
 		val ratingHash = rs.map(r => (r.values.ratingId.get, r)).toMap
 		val brs = rs.flatMap(_.references.boats.get)
 
@@ -44,26 +57,26 @@ object RatingLogic {
 			br.values.flag.get == flag
 		)
 
-		def findRating(ratingId: Int): Option[PersonRating] = {
-			val matches = prs.filter(pr =>
-				pr.values.programId.get == programId &&
-				pr.values.ratingId.get == ratingId
-			)
-			if (matches.nonEmpty) Some(matches.head)
-			else {
-				val rating = ratingHash(ratingId)
-				rating.values.overriddenBy.get match {
-					case None => None
-					case Some(r) => findRating(r)
-				}
-			}
-		}
-
 		neededRatings
 			.map(_.values.ratingId.get)
-			.map(findRating)
+			.map(hasRatingForProgram(prs, ratingHash, programId))
 			.filter(_.isDefined)
 			.map(_.get)
 			.headOption
+	}
+
+	def hasRatingForProgram(prs: List[PersonRating], ratingHash: Map[Int, Rating], programId: Int)(ratingId: Int): Option[PersonRating] = {
+		val matches = prs.filter(pr =>
+			pr.values.programId.get == programId &&
+			pr.values.ratingId.get == ratingId
+		)
+		if (matches.nonEmpty) Some(matches.head)
+		else {
+			val rating = ratingHash(ratingId)
+			rating.values.overriddenBy.get match {
+				case None => None
+				case Some(r) => hasRatingForProgram(prs, ratingHash, programId)(r)
+			}
+		}
 	}
 }

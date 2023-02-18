@@ -14,6 +14,8 @@ class ProgramType extends StorableClass(ProgramType) {
 object ProgramType extends StorableObject[ProgramType] {
 	val entityName: String = "PROGRAM_TYPES"
 
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
 	object fields extends FieldsObject {
 		val programId = new IntDatabaseField(self, "PROGRAM_ID")
 		val programName = new StringDatabaseField(self, "PROGRAM_NAME", 100)

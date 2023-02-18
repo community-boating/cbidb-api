@@ -4,7 +4,9 @@ import com.coleji.neptune.API.ResultError
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonCard, PersonRating, Rating}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonCard, PersonRating, ProgramType, Rating}
+import org.sailcbi.APIServer.Entities.cacheable.{BoatTypes, Programs, Ratings}
+import org.sailcbi.APIServer.Logic.RatingLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -105,6 +107,26 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 		val personId = person.values.personId.get
 
+		val boatTypes = BoatTypes.get(rc, null)
+		val ratings = Ratings.get(rc, null)
+		val programs = Programs.get(rc, null)
+		val prsQb = QueryBuilder
+			.from(PersonRating)
+			.where(PersonRating.fields.personId.alias.equalsConstant(personId))
+			.select(List(
+				PersonRating.fields.assignId,
+				PersonRating.fields.personId,
+				PersonRating.fields.programId,
+				PersonRating.fields.ratingId
+			))
+
+		val prs = rc.executeQueryBuilder(prsQb).map(PersonRating.construct)
+
+		val maxFlags: List[MaxRatingsResult] =
+			RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, prs, ratings._1.toList)
+				.flatMap(b => b._2.map(p => MaxRatingsResult(b._1, p._1, p._2.map(t => t._1))))
+				.filter(_.maxFlag.nonEmpty)
+
 		Right(CardScanResult(
 			cardNumber = pc.values.cardNum.get,
 			personId = pc.values.personId.get,
@@ -114,7 +136,8 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			signoutBlockReason = person.values.signoutBlockReason.get,
 			specialNeeds = person.values.specialNeeds.get,
 			activeMemberships = constructMemberships(rc, personId),
-			personRatings = constructRatings(rc, personId)
+			personRatings = constructRatings(rc, personId),
+			maxFlagsPerBoat = maxFlags
 		))
 	}
 
@@ -144,22 +167,32 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		signoutBlockReason: Option[String],
 		specialNeeds: Option[String],
 		activeMemberships: List[CardScanResultMembership],
-		personRatings: List[CardScanResultRating]
+		personRatings: List[CardScanResultRating],
+		maxFlagsPerBoat: List[MaxRatingsResult]
 	) {
 		def toJson: JsValue = {
-			implicit val successFormat = CardScanResult.format
+			implicit val successFormat = CardScanResult.writes
 			Json.toJson(this)
 		}
 	}
+
+	case class MaxRatingsResult (
+		$$boatType: BoatType,
+		$$programType: ProgramType,
+		maxFlag: Option[String]
+	)
 
 	object CardScanResult {
 		val ERROR_NOT_FOUND = ResultError(code = "card-not-found", message = "Card not found.")
 		val ERROR_INACTIVE = ResultError(code = "card-inactive", message = "Card inactive.")
 
-		implicit val membershipFormat = Json.format[CardScanResultMembership]
-		implicit val ratingFormat = Json.format[CardScanResultRating]
-		implicit val format = Json.format[CardScanResult]
+		implicit val membershipWrites = Json.writes[CardScanResultMembership]
+		implicit val ratingWrites = Json.writes[CardScanResultRating]
+		implicit val boatWrites = BoatType.storableJsonWrites
+		implicit val programWrites = ProgramType.storableJsonWrites
+		implicit val maxRatingWrites = Json.writes[MaxRatingsResult]
+		implicit val writes = Json.writes[CardScanResult]
 
-		def apply(v: JsValue): CardScanResult = v.as[CardScanResult]
+	//	def apply(v: JsValue): CardScanResult = v.as[CardScanResult]
 	}
 }
