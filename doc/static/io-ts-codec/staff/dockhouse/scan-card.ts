@@ -14,15 +14,6 @@ const scanCardMembershipValidator = t.type({
 	programId: OptionalNumber,
 	bannerComment: OptionalString,
     signoutBlockReason: OptionalString,
-    maxFlagsPerBoat: t.array(t.type({
-		$$boatType: t.type({
-			boatId: t.number
-		}),
-		$$programType: t.type({
-			programId: t.number
-		}),
-		maxFlag: t.string // G | Y | R
-    })
 })
 
 const scanCardRatingValidator = t.type({
@@ -30,6 +21,15 @@ const scanCardRatingValidator = t.type({
 	programId: t.number,
 	ratingName: t.string,
 	status: t.string // Y | F
+})
+
+const scanCardClassSignupValidator = t.type({
+    signupId: t.number,
+    instanceId: t.number,
+    personId: t.number,
+    signupType: t.string,
+    signupDatetime: t.string,
+    sequence: t.number,
 })
 
 export const scanCardValidator = t.type({
@@ -40,7 +40,18 @@ export const scanCardValidator = t.type({
 	bannerComment: OptionalString,
 	specialNeeds: OptionalString,
 	activeMemberships: t.array(scanCardMembershipValidator),
-	personRatings: t.array(scanCardRatingValidator)
+	personRatings: t.array(scanCardRatingValidator),
+    maxFlagsPerBoat: t.array(t.type({
+		$$boatType: t.type({
+			boatId: t.number
+		}),
+		$$programType: t.type({
+			programId: t.number
+		}),
+		maxFlag: t.string // G | Y | R
+    }),
+	apClassSignupsToday: t.array(scanCardClassSignupValidator),
+	jpClassSignupsToday: t.array(scanCardClassSignupValidator),
 })
 
 export type ScannedPersonType = t.TypeOf<typeof scanCardValidator>;

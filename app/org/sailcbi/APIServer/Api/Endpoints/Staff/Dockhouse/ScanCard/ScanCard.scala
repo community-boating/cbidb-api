@@ -4,7 +4,7 @@ import com.coleji.neptune.API.ResultError
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonCard, PersonRating, ProgramType, Rating}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSession, ApClassSignup, BoatType, JpClassSession, JpClassSignup, Person, PersonCard, PersonRating, ProgramType, Rating}
 import org.sailcbi.APIServer.Entities.cacheable.{BoatTypes, Programs, Ratings}
 import org.sailcbi.APIServer.Logic.RatingLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -95,6 +95,44 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		})
 	}
 
+	private def constructApClassSignups(rc: UnlockedRequestCache, personId: Int): List[ApClassSignup] = {
+		val qb = QueryBuilder
+			.from(ApClassSignup)
+			.innerJoin(ApClassSession, ApClassSession.fields.instanceId.alias.equalsField(ApClassSignup.fields.instanceId))
+			.where(List(
+				ApClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate),
+				ApClassSignup.fields.personId.alias.equalsConstant(personId)
+			))
+			.select(List(
+				ApClassSignup.fields.signupId,
+				ApClassSignup.fields.instanceId,
+				ApClassSignup.fields.personId,
+				ApClassSignup.fields.signupType,
+				ApClassSignup.fields.signupDatetime,
+				ApClassSignup.fields.sequence,
+			))
+		rc.executeQueryBuilder(qb).map(ApClassSignup.construct)
+	}
+
+	private def constructJpClassSignups(rc: UnlockedRequestCache, personId: Int): List[JpClassSignup] = {
+		val qb = QueryBuilder
+			.from(JpClassSignup)
+			.innerJoin(JpClassSession, JpClassSession.fields.instanceId.alias.equalsField(JpClassSignup.fields.instanceId))
+			.where(List(
+				JpClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate),
+				JpClassSignup.fields.personId.alias.equalsConstant(personId)
+			))
+			.select(List(
+				JpClassSignup.fields.signupId,
+				JpClassSignup.fields.instanceId,
+				JpClassSignup.fields.personId,
+				JpClassSignup.fields.signupType,
+				JpClassSignup.fields.signupDatetime,
+				JpClassSignup.fields.sequence,
+			))
+		rc.executeQueryBuilder(qb).map(JpClassSignup.construct)
+	}
+
 	private def constructResult(rc: UnlockedRequestCache, pc: PersonCard): Either[ResultError, CardScanResult] = {
 		val person = rc.getObjectById(Person, pc.values.personId.get, Set(
 			Person.fields.personId,
@@ -139,7 +177,9 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			specialNeeds = person.values.specialNeeds.get,
 			activeMemberships = constructMemberships(rc, personId),
 			personRatings = constructRatings(rc, personId),
-			maxFlagsPerBoat = maxFlags
+			maxFlagsPerBoat = maxFlags,
+			apClassSignupsToday = constructApClassSignups(rc, personId),
+			jpClassSignupsToday = constructJpClassSignups(rc, personId)
 		))
 	}
 
@@ -170,7 +210,9 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		specialNeeds: Option[String],
 		activeMemberships: List[CardScanResultMembership],
 		personRatings: List[CardScanResultRating],
-		maxFlagsPerBoat: List[MaxRatingsResult]
+		maxFlagsPerBoat: List[MaxRatingsResult],
+		apClassSignupsToday: List[ApClassSignup],
+		jpClassSignupsToday: List[JpClassSignup]
 	) {
 		def toJson: JsValue = {
 			implicit val successFormat = CardScanResult.writes

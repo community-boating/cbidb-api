@@ -224,6 +224,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CardScanResultRating"
+        apClassSignupsToday:
+          type: array
+          items:
+            type: object
+            properties:
+              signupId:
+                type: number
+              instanceId:
+                type: number
+              personId:
+                type: number
+              signupType:
+                type: string
+              signupDatetime:
+                type: string
+              sequence:
+                type: number
+        jpClassSignupsToday:
+          type: array
+          items:
+            type: object
+            properties:
+              signupId:
+                type: number
+              instanceId:
+                type: number
+              personId:
+                type: number
+              signupType:
+                type: string
+              signupDatetime:
+                type: string
+              sequence:
+                type: number
         maxFlagsPerBoat:
           type: array
           items:
