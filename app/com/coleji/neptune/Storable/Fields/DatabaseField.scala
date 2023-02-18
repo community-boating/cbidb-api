@@ -69,6 +69,15 @@ abstract class DatabaseField[T](val entity: StorableObject[_ <: StorableClass], 
 			}
 		}
 	}
+
+	override def toString: String = "DatabaseField{" + entity.entityName + "." + persistenceFieldName + "}"
+
+	override def equals(obj: Any): Boolean = obj match {
+		case f: DatabaseField[_] => {
+			f.entity == this.entity && f.persistenceFieldName == this.persistenceFieldName
+		}
+		case _ => false
+	}
 }
 
 object DatabaseField {

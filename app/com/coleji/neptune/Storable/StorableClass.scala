@@ -2,7 +2,7 @@ package com.coleji.neptune.Storable
 
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.FieldValues._
-import com.coleji.neptune.Storable.Fields.IntDatabaseField
+import com.coleji.neptune.Storable.Fields.{DatabaseField, IntDatabaseField}
 import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
@@ -21,6 +21,14 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 	type NullableBooleanFieldValueMap = Map[String, NullableBooleanFieldValue]
 	type NullableClobFieldValueMap = Map[String, NullableClobFieldValue]
+
+	def applyFieldMask(fs: Set[DatabaseField[_]]): Unit = {
+		valuesList.foreach(fv => {
+			if (!fs.contains(fv.getField)) {
+				fv.unset()
+			}
+		})
+	}
 
 	// If you need a self in the entity, call it myself or something
 	// Can't take the final off this and override it, or everything crashes horribly.

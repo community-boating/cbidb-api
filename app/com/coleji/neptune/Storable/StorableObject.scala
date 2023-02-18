@@ -11,7 +11,7 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
 
-abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T], persistenceSystem: PersistenceSystem) extends Serializable {
+abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T], val persistenceSystem: PersistenceSystem) extends Serializable {
 	StorableObject.addEntity(this)
 	type IntFieldMap = Map[String, IntDatabaseField]
 	type DoubleFieldMap = Map[String, DoubleDatabaseField]
@@ -374,6 +374,12 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 			Some(embryo)
 		}
 	}
+
+	override def equals(obj: Any): Boolean = obj match {
+		case s: StorableObject[_] => s.entityName == this.entityName && s.persistenceSystem == this.persistenceSystem
+	}
+
+	override def toString: String = "StorableObject{" + entityName + "}"
 }
 
 object StorableObject {

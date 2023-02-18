@@ -108,8 +108,10 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		val personId = person.values.personId.get
 
 		val boatTypes = BoatTypes.get(rc, null)
+		boatTypes._1.foreach(_.applyFieldMask(Set(BoatType.fields.boatId)))
 		val ratings = Ratings.get(rc, null)
 		val programs = Programs.get(rc, null)
+		programs._1.foreach(_.applyFieldMask(Set(ProgramType.fields.programId)))
 		val prsQb = QueryBuilder
 			.from(PersonRating)
 			.where(PersonRating.fields.personId.alias.equalsConstant(personId))

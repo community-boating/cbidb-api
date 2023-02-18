@@ -14,6 +14,15 @@ const scanCardMembershipValidator = t.type({
 	programId: OptionalNumber,
 	bannerComment: OptionalString,
     signoutBlockReason: OptionalString,
+    maxFlagsPerBoat: t.array(t.type({
+		$$boatType: t.type({
+			boatId: t.number
+		}),
+		$$programType: t.type({
+			programId: t.number
+		}),
+		maxFlag: t.string // G | Y | R
+    })
 })
 
 const scanCardRatingValidator = t.type({

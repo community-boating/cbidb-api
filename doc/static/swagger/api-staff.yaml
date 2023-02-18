@@ -224,6 +224,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CardScanResultRating"
+        maxFlagsPerBoat:
+          type: array
+          items:
+            type: object
+            properties:
+              $$boatType:
+                type: object
+                properties:
+                  boatId:
+                    type: number
+              $$programId:
+                type: object
+                properties:
+                  programId:
+                    type: number
+              maxFlag:
+                type: string
     CreateSignoutCrew:
       type: object
       properties:
