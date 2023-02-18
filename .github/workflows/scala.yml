@@ -20,9 +20,9 @@ jobs:
   tarsrc:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
@@ -31,7 +31,7 @@ jobs:
       - name: tar all
         run: tar -zcf src.tar app conf lib project public sbt-dist script seed test build.sbt sbt sbt.bat sbt-debug
       - name: save tar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: src.tar
           path: src.tar
@@ -40,7 +40,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: tarsrc
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch artifact
         uses: actions/download-artifact@v2
         with:
@@ -86,9 +86,9 @@ jobs:
   buildpub:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up JDK 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'adopt'
@@ -101,7 +101,7 @@ jobs:
     - name: rename deb
       run: mv target/CBI-DB-API_0.1.0_all.deb target/CBI-DB-API_0.1.0_all-pub.deb
     - name: save deb
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: CBI-DB-API_0.1.0_all-pub.deb
         path: target/CBI-DB-API_0.1.0_all-pub.deb
@@ -110,7 +110,7 @@ jobs:
     needs: buildpub
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch artifact
         uses: actions/download-artifact@v2
         with:
@@ -157,9 +157,9 @@ jobs:
   buildstaff:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
@@ -172,7 +172,7 @@ jobs:
       - name: rename deb
         run: mv target/CBI-DB-API_0.1.0_all.deb target/CBI-DB-API_0.1.0_all-staff.deb
       - name: save artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: CBI-DB-API_0.1.0_all-staff.deb
           path: target/CBI-DB-API_0.1.0_all-staff.deb
@@ -181,7 +181,7 @@ jobs:
     needs: buildstaff
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch artifact
         uses: actions/download-artifact@v2
         with:
