@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassSession, ApClassType}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassSession, ApClassSignup, ApClassType, ApClassWaitlistResult, Person}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -19,8 +19,6 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			val qb = QueryBuilder
 				.from(ApClassSession)
 				.innerJoin(ApClassInstance, ApClassSession.fields.instanceId.alias.equalsField(ApClassInstance.fields.instanceId.alias))
-				.innerJoin(ApClassFormat, ApClassInstance.fields.formatId.alias.equalsField(ApClassFormat.fields.formatId))
-				.innerJoin(ApClassType, ApClassFormat.fields.typeId.alias.equalsField(ApClassType.fields.typeId))
 				.where(ApClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate))
 				.select(List(
 					ApClassSession.fields.sessionId,
@@ -40,36 +38,66 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 					ApClassInstance.fields.cancelledDatetime,
 					ApClassInstance.fields.hideOnline,
 					ApClassInstance.fields.locationString,
-
-					ApClassFormat.fields.formatId,
-					ApClassFormat.fields.typeId,
-					ApClassFormat.fields.signupMinDefaultOverride,
-					ApClassFormat.fields.signupMaxDefaultOverride,
-					ApClassFormat.fields.sessionCtDefault,
-					ApClassFormat.fields.sessionLengthDefault,
-					ApClassFormat.fields.priceDefaultOverride,
-
-					ApClassType.fields.typeId,
-					ApClassType.fields.typeName,
-					ApClassType.fields.displayOrder,
-					ApClassType.fields.noSignup,
-					ApClassType.fields.priceDefault,
-					ApClassType.fields.signupMinDefault,
-					ApClassType.fields.signupMaxDefault,
-					ApClassType.fields.disallowIfOverkill,
 				))
 
 			val sessions = rc.executeQueryBuilder(qb).map(qbrr => {
 				val session = ApClassSession.construct(qbrr)
 				val instance = ApClassInstance.construct(qbrr)
-				val format = ApClassFormat.construct(qbrr)
-				val classType = ApClassType.construct(qbrr)
 
-				format.references.apClassType.set(classType)
-				instance.references.apClassFormat.set(format)
 				session.references.apClassInstance.set(instance)
 				session
 			})
+
+			val instanceIds = sessions.map(s => s.values.instanceId.get).distinct
+
+			val signupsQb = QueryBuilder
+				.from(ApClassSignup)
+				.innerJoin(Person.alias, Person.fields.personId.alias.equalsField(ApClassSignup.fields.personId.alias))
+				.outerJoin(ApClassWaitlistResult.aliasOuter, ApClassWaitlistResult.fields.signupId.alias.equalsField(ApClassSignup.fields.signupId.alias))
+				.where(ApClassSignup.fields.instanceId.alias.inList(instanceIds))
+				.select(List(
+					ApClassSignup.fields.signupId.alias,
+					ApClassSignup.fields.instanceId.alias,
+					ApClassSignup.fields.personId.alias,
+					ApClassSignup.fields.orderId.alias,
+					ApClassSignup.fields.signupDatetime.alias,
+					ApClassSignup.fields.sequence.alias,
+					ApClassSignup.fields.signupType.alias,
+					ApClassSignup.fields.price.alias,
+					ApClassSignup.fields.closeId.alias,
+					ApClassSignup.fields.discountInstanceId.alias,
+					ApClassSignup.fields.paymentMedium.alias,
+					ApClassSignup.fields.ccTransNum.alias,
+					ApClassSignup.fields.voidCloseId.alias,
+					ApClassSignup.fields.signupNote.alias,
+					ApClassSignup.fields.voidedOnline.alias,
+					ApClassSignup.fields.paymentLocation.alias,
+
+					ApClassWaitlistResult.fields.signupId.alias(ApClassWaitlistResult.aliasOuter),
+					ApClassWaitlistResult.fields.foVmDatetime.alias(ApClassWaitlistResult.aliasOuter),
+					ApClassWaitlistResult.fields.wlResult.alias(ApClassWaitlistResult.aliasOuter),
+					ApClassWaitlistResult.fields.offerExpDatetime.alias(ApClassWaitlistResult.aliasOuter),
+					ApClassWaitlistResult.fields.foAlertDatetime.alias(ApClassWaitlistResult.aliasOuter),
+
+					Person.fields.personId.alias,
+					Person.fields.nameFirst.alias,
+					Person.fields.nameLast.alias
+				))
+
+			val signups = rc.executeQueryBuilder(signupsQb, 2000).map(qbrr => {
+				val signup = ApClassSignup.construct(qbrr)
+				val person = Person.construct(qbrr)
+				signup.references.person.set(person)
+				ApClassWaitlistResult.construct(qbrr, ApClassWaitlistResult.aliasOuter) match {
+					case Some(wlResult) => signup.references.apClassWaitlistResult.set(wlResult)
+					case None =>
+				}
+				signup
+			})
+
+			sessions.foreach(_.references.apClassInstance.forEach(
+				i => i.references.apClassSignups.set(signups.filter(s => s.values.instanceId.get == i.values.instanceId.get))
+			))
 
 			Future(Ok(Json.toJson(sessions)))
 		})

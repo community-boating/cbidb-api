@@ -3,27 +3,38 @@ import APIWrapper from 'core/APIWrapper';
 import { HttpMethod } from "core/HttpMethod";
 import { OptionalNumber, OptionalString } from 'util/OptionalTypeValidators';
 
-const apClassTypeValidator = t.type({
-	"signupMinDefault": OptionalNumber,
-	"noSignup": t.boolean,
-	"disallowIfOverkill": t.boolean,
-	"signupMaxDefault": OptionalNumber,
-	"typeId": t.number,
-	"typeName": t.string,
-	"priceDefault": OptionalNumber,
-	"displayOrder": t.number
-});
+const apClassWaitListValidator = t.type({
+	"wlResult": "E",
+	"foVmDatetime": null,
+	"offerExpDatetime": null,
+	"signupId": 2104,
+	"foAlertDatetime": null
+})
 
-const apClassFormatValidator = t.type({
-	"sessionLengthDefault": t.number,
-	"typeId": t.number,
-	"signupMinDefaultOverride": OptionalNumber,
-	"signupMaxDefaultOverride": OptionalNumber,
-	"formatId": t.number,
-	"priceDefaultOverride": OptionalNumber,
-	"sessionCtDefault": t.number,
-	"$$apClassType": apClassTypeValidator
-});
+const apClassSignupValidator = t.type({
+    instanceId: t.number,
+    discountInstanceId: OptionalNumber,
+    voidedOnline: t.boolean,
+    $$apClassWaitlistResult: apClassWaitListValidator,
+    personId: t.number,
+    orderId: OptionalNumber,
+    price: OptionalNumber,
+    signupId:  t.number4,
+    $$person: t.type({
+        personId:  t.number,
+        nameFirst: OptionalString,
+        nameLast: OptionalString
+    }),
+    closeId: OptionalNumber,
+    sequence: t.number,
+    paymentMedium: OptionalString,
+    ccTransNum: OptionalString,
+    paymentLocation: OptionalString,
+    voidCloseId: OptionalNumber,
+    signupType: t.string,
+    signupNote: t.string,
+    signupDatetime: t.string
+})
 
 const apClassInstanceValidator = t.type({
 	"instanceId": t.number,
@@ -36,7 +47,7 @@ const apClassInstanceValidator = t.type({
 	"hideOnline": t.boolean,
 	"cancelByOverride": OptionalString,
 	"locationString": OptionalString,
-	"$$apClassFormat": apClassFormatValidator
+	$$apClassSignups: t.array(apClassSignupValidator)
 })
 
 const apClassSessionValidator = t.type({
@@ -50,8 +61,6 @@ const apClassSessionValidator = t.type({
 })
 
 
-export type ApClassType = t.TypeOf<typeof apClassTypeValidator>
-export type ApClassFormat = t.TypeOf<typeof apClassFormatValidator>
 export type ApClassInstance = t.TypeOf<typeof apClassInstanceValidator>
 export type ApClassSession = t.TypeOf<typeof apClassSessionValidator>
 

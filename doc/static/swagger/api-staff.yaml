@@ -442,8 +442,77 @@ components:
         locationString:
           type: string
           nullable: true
-        $$apClassFormat:
-          $ref: "#/components/schemas/ApClassFormat"
+        $$apClassSignups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApClassSignup"
+    ApClassSignup:
+      type: object
+      properties:
+        instanceId:
+          type: number
+        discountInstanceId:
+          type: number
+          nullable: true
+        voidedOnline:
+          type: boolean
+        $$apClassWaitlistResult:
+          type: object
+          nullable: true
+          properties:
+            wlResult:
+              type: string
+            foVmDatetime:
+              type: string
+            offerExpDatetime:
+              type: string
+            signupId:
+              type: number
+            foAlertDatetime:
+              type: string
+        personId:
+          type: number
+        orderId:
+          type: number
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        signupId:
+          type: number
+        $$person:
+          type: object
+          properties:
+            personId:
+              type: number
+            nameFirst:
+              type: string
+            nameLast:
+              type: string
+        closeId:
+          type: number
+          nullable: true
+        sequence:
+          type: number
+        paymentMedium:
+          type: string
+          nullable: true
+        ccTransNum:
+          type: string
+          nullable: true
+        paymentLocation:
+          type: string
+          nullable: true
+        voidCloseId:
+          type: number
+          nullable: true
+        signupType:
+          type: string
+        signupNote:
+          type: string
+          nullable: true
+        signupDatetime:
+          type: string
     ApClassSession:
       type: object
       properties:

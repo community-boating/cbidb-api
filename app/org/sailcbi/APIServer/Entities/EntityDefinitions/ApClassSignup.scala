@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.Initializable
 
 class ApClassSignup extends StorableClass(ApClassSignup) {
 	override object references extends ReferencesObject {
-		val apClassInstance = new Initializable[ApClassSignup]
+		val apClassInstance = new Initializable[ApClassInstance]
 		val person = new Initializable[Person]
 		val apClassWaitlistResult = new Initializable[ApClassWaitlistResult]
 	}
