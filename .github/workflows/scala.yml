@@ -69,7 +69,7 @@ jobs:
           echo ${{ env.REF_NAME }}
           echo ${{ env.ECR_REPO }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
@@ -136,7 +136,7 @@ jobs:
           echo "REF_NAME=$(echo ${GITHUB_REF#refs/tags/} | tr / _ | sed 's/^v//g')" >> $GITHUB_ENV
           echo "ECR_REPO=cbidb-api-pub-release" >> $GITHUB_ENV
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
@@ -212,7 +212,7 @@ jobs:
           echo ${{ env.REF_NAME }}
           echo ${{ env.ECR_REPO }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
