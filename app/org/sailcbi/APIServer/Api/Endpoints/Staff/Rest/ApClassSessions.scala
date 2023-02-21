@@ -88,10 +88,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 				val signup = ApClassSignup.construct(qbrr)
 				val person = Person.construct(qbrr)
 				signup.references.person.set(person)
-				ApClassWaitlistResult.construct(qbrr, ApClassWaitlistResult.aliasOuter) match {
-					case Some(wlResult) => signup.references.apClassWaitlistResult.set(wlResult)
-					case None =>
-				}
+				signup.references.apClassWaitlistResult.set(ApClassWaitlistResult.construct(qbrr, ApClassWaitlistResult.aliasOuter))
 				signup
 			})
 

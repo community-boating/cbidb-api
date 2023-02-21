@@ -3,11 +3,13 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
+import java.time.ZonedDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,9 +42,14 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 				ApClassInstance.fields.locationString,
 			), 1200)
 
+			implicit val ordering: Ordering[ZonedDateTime] = Ordering.by(_.toEpochSecond)
+
 			instances.foreach(i => {
 				val instanceId = i.values.instanceId.get
-				i.references.apClassSessions.set(sessions.filter(_.values.instanceId.get == instanceId))
+				i.references.apClassSessions.set(sessions
+					.filter(_.values.instanceId.get == instanceId)
+					.sortBy(s => DateUtil.toBostonTime(s.values.sessionDateTime.get))
+				)
 			})
 
 			Future(Ok(Json.toJson(instances)))

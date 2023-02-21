@@ -10,6 +10,8 @@ class JpClassInstance extends StorableClass(JpClassInstance) {
 		val classLocation = new Initializable[Option[ClassLocation]]
 		val classInstructor = new Initializable[Option[ClassInstructor]]
 		val jpClassType = new Initializable[JpClassType]
+		val jpClassSessions = new Initializable[IndexedSeq[JpClassSession]]
+		val jpClassSignups = new Initializable[IndexedSeq[JpClassSignup]]
 	}
 
 	object values extends ValuesObject {
