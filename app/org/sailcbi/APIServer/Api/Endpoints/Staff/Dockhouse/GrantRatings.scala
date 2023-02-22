@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import org.sailcbi.APIServer.Logic.DockhouseLogic.DockhouseLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -13,6 +14,7 @@ class GrantRatings @Inject()(implicit val exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
 			PA.withParsedPostBodyJSON(parsedRequest.postJSON, GrantRatingsShape.apply)(parsed => {
+				DockhouseLogic.grantRatings(rc, parsed.instructor, parsed.programId, parsed.ratingIds, parsed.personIds)
 				Future(Ok("OK"))
 			})
 		})
