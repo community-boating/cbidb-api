@@ -2,12 +2,22 @@ package com.coleji.neptune.Storable.FieldValues
 
 import com.coleji.neptune.Core.PermissionsAuthority.PersistenceSystem
 import com.coleji.neptune.Storable.Fields.DatabaseField
-import com.coleji.neptune.Storable.StorableClass
+import com.coleji.neptune.Storable.{StorableClass, StorableObject}
 import play.api.libs.json.JsValue
 
-abstract class FieldValue[T](instance: StorableClass, field: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
+abstract class FieldValue[T](instance: StorableClass, @transient fieldInner: DatabaseField[T])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
 	private var value: Option[T] = None
 	private var dirty: Boolean = false
+
+	private val entityName: String = instance.companion.entityName
+	private val fieldNameInner: String = fieldInner.persistenceFieldName
+
+	@transient lazy val field: DatabaseField[T] = {
+		if (fieldInner != null) fieldInner
+		else StorableObject.getEntities.find(_.entityName == entityName).flatMap(o =>
+			o.fieldList.find(_.persistenceFieldName == fieldNameInner)
+		).orNull.asInstanceOf[DatabaseField[T]]
+	}
 
 	override def toString: String = persistenceFieldName + ": " + (peek match {
 		case None => "(unset)"

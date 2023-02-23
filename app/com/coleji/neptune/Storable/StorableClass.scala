@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
 import play.api.libs.json.{JsArray, JsObject, JsValue}
 
 
-abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
+abstract class StorableClass(@transient private var companionInner: StorableObject[_ <: StorableClass])(implicit persistenceSystem: PersistenceSystem) extends Serializable {
 	type IntFieldValueMap = Map[String, IntFieldValue]
 	type NullableIntFieldValueMap = Map[String, NullableIntFieldValue]
 	type DoubleFieldValueMap = Map[String, DoubleFieldValue]
@@ -21,6 +21,18 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 	type BooleanFieldValueMap = Map[String, BooleanFieldValue]
 	type NullableBooleanFieldValueMap = Map[String, NullableBooleanFieldValue]
 	type NullableClobFieldValueMap = Map[String, NullableClobFieldValue]
+
+	private val entityName: String = companionInner.entityName
+
+	@transient lazy val companion: StorableObject[_ <: StorableClass] = {
+		if (companionInner != null) companionInner
+		else if (entityName != null) {
+			val oo = StorableObject.getEntities.find(o => o.entityName == entityName)
+			oo.map(o => {
+				o.asInstanceOf[StorableObject[_ <: StorableClass]]
+			}).orNull
+		} else null
+	}
 
 	def applyFieldMask(fs: Set[DatabaseField[_]]): Unit = {
 		valuesList.foreach(fv => {
@@ -91,19 +103,19 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		case None => false
 	}
 
-	lazy final val valuesList: List[FieldValue[_]] = this.values.getClass.getDeclaredFields.map(f => {
+	@transient lazy final val valuesList: List[FieldValue[_]] = this.values.getClass.getDeclaredFields.map(f => {
 		f.setAccessible(true)
 		f.get(this.values).asInstanceOf[FieldValue[_]]
 	}).toList
 
-	private lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
+	@transient private lazy final val nullableValuesList: List[FieldValue[Option[_]]] = valuesList.filter(_.getField.isNullable).map(_.asInstanceOf[FieldValue[Option[_]]])
 
-	private lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
+	@transient private lazy final val referencesList: List[(String, Initializable[Object])] = this.references.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
 		f.setAccessible(true)
 		(f.getName, f.get(this.references).asInstanceOf[Initializable[Object]])
 	}).toList
 
-	private lazy final val calculationsList: List[(String, InitializableCastableToJs[Object])] = this.calculations.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
+	@transient private lazy final val calculationsList: List[(String, InitializableCastableToJs[Object])] = this.calculations.getClass.getDeclaredFields.filter(f => f.getName != "$outer").map(f => {
 		f.setAccessible(true)
 		(f.getName, f.get(this.calculations).asInstanceOf[InitializableCastableToJs[Object]])
 	}).toList
@@ -152,7 +164,7 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		JsObject(map)
 	}
 
-	def getValuesListByReflection: List[(String, FieldValue[_])] = {
+	@transient lazy val valuesListByReflection: IndexedSeq[(String, FieldValue[_])] = {
 		import scala.reflect.runtime.universe._
 		val rm = scala.reflect.runtime.currentMirror
 		val accessors = rm.classSymbol(values.getClass).toType.members.collect {
@@ -161,7 +173,7 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		val instanceMirror = rm.reflect(values)
 		val regex = "^(value|method) (.*)$".r
 
-		accessors.toList.map(acc => {
+		accessors.toIndexedSeq.map(acc => {
 			val symbol = instanceMirror.reflectMethod(acc).symbol.toString
 			val name = symbol match {
 				case regex(t, name1) => name1
@@ -178,21 +190,21 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 		})
 	}
 
-	lazy val (
-		intValueMap,
-		nullableIntValueMap,
-		doubleValueMap,
-		nullableDoubleValueMap,
-		stringValueMap,
-		nullableStringValueMap,
-		dateValueMap,
-		nullableDateValueMap,
-		dateTimeValueMap,
-		nullableDateTimeValueMap,
-		booleanValueMap,
-		nullableBooleanValueMap,
-		nullableClobValueMap
-	) = {
+	@transient lazy val intValueMap = valueMaps._1
+	@transient lazy val nullableIntValueMap = valueMaps._2
+	@transient lazy val doubleValueMap = valueMaps._3
+	@transient lazy val nullableDoubleValueMap = valueMaps._4
+	@transient lazy val stringValueMap = valueMaps._5
+	@transient lazy val nullableStringValueMap = valueMaps._6
+	@transient lazy val dateValueMap = valueMaps._7
+	@transient lazy val nullableDateValueMap = valueMaps._8
+	@transient lazy val dateTimeValueMap = valueMaps._9
+	@transient lazy val nullableDateTimeValueMap = valueMaps._10
+	@transient lazy val booleanValueMap = valueMaps._11
+	@transient lazy val nullableBooleanValueMap = valueMaps._12
+	@transient lazy val nullableClobValueMap = valueMaps._13
+	
+	@transient private lazy val valueMaps = {
 		var intMap: IntFieldValueMap = Map()
 		var nullableIntMap: NullableIntFieldValueMap = Map()
 		var doubleMap: DoubleFieldValueMap = Map()
@@ -225,7 +237,7 @@ abstract class StorableClass(val companion: StorableObject[_ <: StorableClass])(
 				case _ => throw new Exception("Unrecognized field type")
 			})
 		} else {
-			getValuesListByReflection.foreach({
+			valuesListByReflection.foreach({
 				case (name: String, i: IntFieldValue) => intMap += (name -> i)
 				case (name: String, ni: NullableIntFieldValue) => nullableIntMap += (name -> ni)
 				case (name: String, d: DoubleFieldValue) => doubleMap += (name -> d)

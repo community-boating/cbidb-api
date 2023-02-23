@@ -8,7 +8,7 @@ import play.api.libs.json.{JsNull, JsString, JsValue}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class NullableDateTimeFieldValue(instance: StorableClass, field: NullableDateTimeDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[Option[LocalDateTime]](instance, field) {
+class NullableDateTimeFieldValue(instance: StorableClass, @transient fieldInner: NullableDateTimeDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[Option[LocalDateTime]](instance, fieldInner) {
 	override def getPersistenceLiteral: (String, List[String]) = (GetSQLLiteral(super.get), List.empty)
 
 	override def asJSValue: JsValue = super.get match {

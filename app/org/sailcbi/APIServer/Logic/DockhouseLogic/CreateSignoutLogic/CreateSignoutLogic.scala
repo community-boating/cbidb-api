@@ -83,7 +83,7 @@ object CreateSignoutLogic {
 			DockhouseIo.createSignoutCrew(rc, crew.personId, crew.cardNumber, signout.values.signoutId.get)
 		})
 
-		signout.references.crew.set(crewObjs)
+		signout.references.crew.set(crewObjs.toIndexedSeq)
 
 		signout
 	}

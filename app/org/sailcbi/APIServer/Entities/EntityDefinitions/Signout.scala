@@ -8,7 +8,7 @@ import com.coleji.neptune.Util.Initializable
 class Signout extends StorableClass(Signout) {
 	override object references extends ReferencesObject {
 		val skipper = new Initializable[Person]
-		val crew = new Initializable[List[SignoutCrew]]
+		val crew = new Initializable[IndexedSeq[SignoutCrew]]
 	}
 
 	object values extends ValuesObject {

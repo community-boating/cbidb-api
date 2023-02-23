@@ -4,29 +4,31 @@ import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestC
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.{DateUtil, Profiler}
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{Person, PersonRating, Signout, SignoutCrew}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonRating, ProgramType, Signout, SignoutCrew}
+import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
+import org.sailcbi.APIServer.Logic.RatingLogic
 import play.api.libs.json.Json
 
 import java.time.{Duration, LocalDate}
 import scala.collection.mutable
 
-object SignoutsToday extends CacheableFactory[Null, String]{
+object SignoutsToday extends CacheableFactory[Null, IndexedSeq[Signout]]{
 	val MAX_RECORDS_TO_RETURN = 600
 
 	override protected val lifetime: Duration = Duration.ofSeconds(3)
 
 	override protected def calculateKey(config: Null): String = CacheKeys.signoutsToday
 
-	override protected def generateResult(rc: RequestCache, config: Null): String = rc match {
+	override protected def generateResult(rc: RequestCache, config: Null): IndexedSeq[Signout] = rc match {
 		case urc: UnlockedRequestCache => getResult(urc)
 		case _ => throw new Exception("Locked request cache used for signouts")
 	}
 
-	def getResult(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): String = {
-		Json.toJson(getObjects(rc)).toString()
+	def getResult(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): IndexedSeq[Signout] = {
+		getObjects(rc)
 	}
 
-	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): List[Signout] = {
+	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): IndexedSeq[Signout] = {
 		val p = new Profiler
 
 		// get signouts and skippers, attach skippers to signouts
@@ -104,7 +106,7 @@ object SignoutsToday extends CacheableFactory[Null, String]{
 		// attach crew to signouts
 		signouts.foreach(s => {
 			val signoutId = s.values.signoutId.get
-			s.references.crew.set(crew.filter(_.values.signoutId.get == signoutId))
+			s.references.crew.set(crew.filter(_.values.signoutId.get == signoutId).toIndexedSeq)
 		})
 
 		val personIds = signouts
@@ -127,23 +129,25 @@ object SignoutsToday extends CacheableFactory[Null, String]{
 			rc.executeQueryBuilder(personsRatingsQB).map(PersonRating.construct)
 		}
 
-		type PersonsRatingsMap = mutable.HashMap[Int, List[PersonRating]]
-
 		// hash ratings by personid
-		val personsRatingsByPerson = personsRatings.foldLeft(new mutable.HashMap[Int, List[PersonRating]])((map: PersonsRatingsMap, pr: PersonRating) => {
-			val personId = pr.values.personId.get
-			if (!map.contains(personId)) {
-				map(personId) = List.empty
-			}
-			val e = map(personId)
-			map(personId) = pr :: e
-			map
-		})
+		val personsRatingsByPerson = personIds.map(pid => (pid, personsRatings.filter(_.values.personId.get == pid))).toMap
+
+		val boatTypes = BoatTypes.get(rc, null)
+		boatTypes._1.foreach(_.applyFieldMask(Set(BoatType.fields.boatId)))
+		val ratings = Ratings.get(rc, null)
+		val programs = Programs.get(rc, null)
+		programs._1.foreach(_.applyFieldMask(Set(ProgramType.fields.programId)))
+
+		val maxBoatFlagsByPerson = personIds.map(pid => {
+			val maxFlags: List[MaxBoatFlag] = RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, personsRatingsByPerson(pid), ratings._1.toList)
+			(pid, maxFlags)
+		}).toMap
 
 		// attach ratings to skippers
 		signouts.foreach(_.references.skipper.peek.foreach(s => {
 			val prs = personsRatingsByPerson.getOrElse(s.values.personId.get, List.empty)
-			s.references.personRatings.set(prs)
+			s.references.personRatings.set(prs.toIndexedSeq)
+			s.references.maxBoatFlags.set(maxBoatFlagsByPerson(s.values.personId.get).toIndexedSeq)
 		}))
 
 		// order by datetime and cap at MAX_RECORDS_TO_RETURN
@@ -161,6 +165,6 @@ object SignoutsToday extends CacheableFactory[Null, String]{
 
 		p.lap("completed signouts")
 
-		ret
+		ret.toIndexedSeq
 	}
 }

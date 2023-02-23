@@ -6,10 +6,12 @@ import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
 import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
+import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 
 class Person extends StorableClass(Person) {
 	override object references extends ReferencesObject {
-		val personRatings = new Initializable[List[PersonRating]]
+		val personRatings = new Initializable[IndexedSeq[PersonRating]]
+		val maxBoatFlags = new Initializable[IndexedSeq[MaxBoatFlag]]
 	}
 
 	object values extends ValuesObject {
@@ -114,36 +116,6 @@ class Person extends StorableClass(Person) {
 		val hasAuthedAs = new NullableIntFieldValue(self, Person.fields.hasAuthedAs)
 		val pwHashScheme = new NullableStringFieldValue(self, Person.fields.pwHashScheme)
 		val nextRecurringDonation = new NullableDateFieldValue(self, Person.fields.nextRecurringDonation)
-	}
-
-	def setPersonRatings(rc: UnlockedRequestCache): Unit = {
-		references.personRatings set rc.getObjectsByFilters(
-			PersonRating,
-			List(PersonRating.fields.personId.alias.equalsConstant(values.personId.get)),
-			Set(
-				PersonRating.fields.assignId,
-				PersonRating.fields.personId,
-				PersonRating.fields.ratingId,
-				PersonRating.fields.programId
-			)
-		)
-	}
-
-	lazy val casePersonRatings: List[CasePersonRating] = references.personRatings.get.map(_.asCaseClass)
-
-	// TODO: move to logic
-	def hasRatingDirect(ratingId: Int, programId: Int): Boolean = casePersonRatings.contains(CasePersonRating(
-		this.values.personId.get,
-		ratingId,
-		programId
-	))
-
-	def hasRatingSomehow(ratings: Set[Rating], ratingId: Int, programId: Int): Boolean = {
-		if (hasRatingDirect(ratingId, programId)) true
-		else {
-			val subRatings: Set[Rating] = ratings.filter(_.values.overriddenBy.get == Some(ratingId))
-			subRatings.map(_.values.ratingId.get).foldLeft(false)((agg, r) => agg || hasRatingSomehow(ratings, r, programId))
-		}
 	}
 }
 

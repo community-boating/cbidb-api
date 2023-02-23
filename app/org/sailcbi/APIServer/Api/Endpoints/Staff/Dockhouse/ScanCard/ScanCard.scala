@@ -6,6 +6,7 @@ import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSession, ApClassSignup, BoatType, JpClassSession, JpClassSignup, Person, PersonCard, PersonRating, ProgramType, Rating}
 import org.sailcbi.APIServer.Entities.cacheable.{BoatTypes, Programs, Ratings}
+import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.Logic.RatingLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.{JsValue, Json}
@@ -162,10 +163,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 		val prs = rc.executeQueryBuilder(prsQb).map(PersonRating.construct)
 
-		val maxFlags: List[MaxRatingsResult] =
-			RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, prs, ratings._1.toList)
-				.flatMap(b => b._2.map(p => MaxRatingsResult(b._1, p._1, p._2.map(t => t._1))))
-				.filter(_.maxFlag.nonEmpty)
+		val maxFlags: List[MaxBoatFlag] = RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, prs, ratings._1.toList)
 
 		Right(CardScanResult(
 			cardNumber = pc.values.cardNum.get,
@@ -177,7 +175,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			specialNeeds = person.values.specialNeeds.get,
 			activeMemberships = constructMemberships(rc, personId),
 			personRatings = constructRatings(rc, personId),
-			maxFlagsPerBoat = maxFlags,
+			maxBoatFlags = maxFlags,
 			apClassSignupsToday = constructApClassSignups(rc, personId),
 			jpClassSignupsToday = constructJpClassSignups(rc, personId)
 		))
@@ -210,7 +208,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		specialNeeds: Option[String],
 		activeMemberships: List[CardScanResultMembership],
 		personRatings: List[CardScanResultRating],
-		maxFlagsPerBoat: List[MaxRatingsResult],
+		maxBoatFlags: List[MaxBoatFlag],
 		apClassSignupsToday: List[ApClassSignup],
 		jpClassSignupsToday: List[JpClassSignup]
 	) {
@@ -220,12 +218,6 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	case class MaxRatingsResult (
-		$$boatType: BoatType,
-		$$programType: ProgramType,
-		maxFlag: Option[String]
-	)
-
 	object CardScanResult {
 		val ERROR_NOT_FOUND = ResultError(code = "card-not-found", message = "Card not found.")
 		val ERROR_INACTIVE = ResultError(code = "card-inactive", message = "Card inactive.")
@@ -234,7 +226,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		implicit val ratingWrites = Json.writes[CardScanResultRating]
 		implicit val boatWrites = BoatType.storableJsonWrites
 		implicit val programWrites = ProgramType.storableJsonWrites
-		implicit val maxRatingWrites = Json.writes[MaxRatingsResult]
+		implicit val maxBoatFlagWrotes = MaxBoatFlag.format
 		implicit val writes = Json.writes[CardScanResult]
 
 	//	def apply(v: JsValue): CardScanResult = v.as[CardScanResult]

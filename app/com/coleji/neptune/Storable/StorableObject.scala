@@ -11,7 +11,7 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.Function.tupled
 import scala.reflect.runtime.universe._
 
-abstract class StorableObject[T <: StorableClass](implicit manifest: scala.reflect.Manifest[T], val persistenceSystem: PersistenceSystem) extends Serializable {
+abstract class StorableObject[T <: StorableClass](implicit @transient manifest: scala.reflect.Manifest[T], val persistenceSystem: PersistenceSystem) extends Serializable {
 	StorableObject.addEntity(this)
 	type IntFieldMap = Map[String, IntDatabaseField]
 	type DoubleFieldMap = Map[String, DoubleDatabaseField]
@@ -33,8 +33,6 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	val self: StorableObject[T] = this
 	val entityName: String
 	val fields: FieldsObject
-
-	private val instanceForReflection: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 
 	val useRuntimeFieldnamesForJson = false
 
@@ -169,7 +167,7 @@ abstract class StorableObject[T <: StorableClass](implicit manifest: scala.refle
 	def valueListMatchesReflection: Boolean = {
 		val embryo: T = manifest.runtimeClass.newInstance.asInstanceOf[T]
 		val valuesList = embryo.valuesList.sorted(FieldValue.OrderByPersistenceName)
-		val valuesListReflection = embryo.getValuesListByReflection.map(_._2).sorted(FieldValue.OrderByPersistenceName)
+		val valuesListReflection = embryo.valuesListByReflection.map(_._2).sorted(FieldValue.OrderByPersistenceName)
 		valuesList equals valuesListReflection
 	}
 

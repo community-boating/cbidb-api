@@ -5,7 +5,7 @@ import com.coleji.neptune.Storable.Fields.IntDatabaseField
 import com.coleji.neptune.Storable.{GetSQLLiteral, StorableClass}
 import play.api.libs.json.{JsNull, JsNumber, JsValue}
 
-class IntFieldValue(instance: StorableClass, field: IntDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[Int](instance, field) {
+class IntFieldValue(instance: StorableClass, @transient fieldInner: IntDatabaseField)(implicit persistenceSystem: PersistenceSystem) extends FieldValue[Int](instance, fieldInner) {
 	override def getPersistenceLiteral: (String, List[String]) = (GetSQLLiteral(super.get), List.empty)
 
 	override def asJSValue: JsValue = JsNumber(super.get)

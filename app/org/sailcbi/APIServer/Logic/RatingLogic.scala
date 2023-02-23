@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Logic
 import com.coleji.neptune.Util.ListUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatRating, BoatType, PersonRating, ProgramType, Rating, RatingProgram}
 import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 
 object RatingLogic {
@@ -24,12 +25,17 @@ object RatingLogic {
 		programs: List[ProgramType],
 		prs: List[PersonRating],
 		rs: List[Rating]
-	): List[(BoatType, List[(ProgramType, Option[(String, PersonRating)])])] = {
-		boatTypes.map(b =>
+	): List[MaxBoatFlag] = {
+		val intermediate = boatTypes.map(b =>
 			(b, programs.map(p =>
 				(p, maxFlagForBoat(prs, rs, b.values.boatId.get, p.values.programId.get))
 			))
 		)
+		intermediate.flatMap(b => b._2.filter(_._2.nonEmpty).map(p => MaxBoatFlag(
+			boatId = b._1.values.boatId.get,
+			programId = p._1.values.programId.get,
+			maxFlag = p._2.map(t => t._1).get
+		)))
 	}
 
 	/**
