@@ -146,7 +146,7 @@ abstract class StorableClass(@transient private var companionInner: StorableObje
 			ref.get match {
 				case Some(o: StorableClass) => addObject(name, o)
 				case o: StorableClass => addObject(name, o)
-				case ol: List[StorableClass] => {
+				case ol: IndexedSeq[StorableClass] => {
 					map += (("$$" + name) -> JsArray(ol.map(_.asJsValue)))
 				}
 				case _ =>
@@ -155,7 +155,7 @@ abstract class StorableClass(@transient private var companionInner: StorableObje
 		val calculationsJs: Map[String, JsValue] = calculationsList.filter(_._2.isInitialized).map(t => t._2.get match {
 			case Some(o: AnyRef) => (t._1, t._2.cast(o))
 			case o: AnyRef => (t._1, t._2.cast(o))
-			case ol: List[AnyRef] => (t._1, new JsArray(ol.map(t._2.cast).toIndexedSeq))
+			case ol: IndexedSeq[AnyRef] => (t._1, new JsArray(ol.map(t._2.cast).toIndexedSeq))
 			case _ => throw new Exception("Unable to serialize calculated values for " + this.getClass.getCanonicalName)
 		}).toMap
 

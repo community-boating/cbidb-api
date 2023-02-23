@@ -147,7 +147,7 @@ object SignoutsToday extends CacheableFactory[Null, IndexedSeq[Signout]]{
 		signouts.foreach(_.references.skipper.peek.foreach(s => {
 			val prs = personsRatingsByPerson.getOrElse(s.values.personId.get, List.empty)
 			s.references.personRatings.set(prs.toIndexedSeq)
-			s.references.maxBoatFlags.set(maxBoatFlagsByPerson(s.values.personId.get).toIndexedSeq)
+			s.calculations.maxBoatFlags.set(maxBoatFlagsByPerson(s.values.personId.get).toIndexedSeq)
 		}))
 
 		// order by datetime and cap at MAX_RECORDS_TO_RETURN

@@ -1,17 +1,19 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
-import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonRating.CasePersonRating
+import com.coleji.neptune.Util.{Initializable, InitializableCastableToJs}
 import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
+import play.api.libs.json.Json
 
 class Person extends StorableClass(Person) {
 	override object references extends ReferencesObject {
 		val personRatings = new Initializable[IndexedSeq[PersonRating]]
-		val maxBoatFlags = new Initializable[IndexedSeq[MaxBoatFlag]]
+	}
+
+	override object calculations extends CalculationsObject {
+		val maxBoatFlags = new InitializableCastableToJs[IndexedSeq[MaxBoatFlag]](Json.toJson)
 	}
 
 	object values extends ValuesObject {
