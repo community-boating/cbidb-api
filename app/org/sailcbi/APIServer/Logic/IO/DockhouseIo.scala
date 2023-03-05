@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic.IO
 
 import com.coleji.neptune.Core.UnlockedRequestCache
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange, Signout, SignoutCrew}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange, Signout, SignoutCrew, SignoutTest}
 
 private[Logic] object DockhouseIo {
 	def putFlagChange(rc: UnlockedRequestCache, flagColor: String): FlagChange = {
@@ -39,6 +39,20 @@ private[Logic] object DockhouseIo {
 		s.values.signoutDatetime.update(Some(rc.PA.now))
 
 		rc.commitObjectToDatabase(s)
+
+		testRatingId match {
+			case Some(id) => {
+				val st = new SignoutTest
+				st.values.signoutId.update(s.values.signoutId.get)
+				st.values.personId.update(personId)
+				st.values.ratingId.update(id)
+
+				rc.commitObjectToDatabase(st)
+
+				s.references.tests.set(IndexedSeq(st))
+			}
+			case None =>
+		}
 
 		s
 	}

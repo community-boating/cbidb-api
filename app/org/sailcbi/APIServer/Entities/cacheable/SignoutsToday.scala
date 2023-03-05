@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestC
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.{DateUtil, Profiler}
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonRating, ProgramType, Signout, SignoutCrew}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonRating, ProgramType, Signout, SignoutCrew, SignoutTest}
 import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.Logic.RatingLogic
 import play.api.libs.json.Json
@@ -103,10 +103,38 @@ object SignoutsToday extends CacheableFactory[Null, IndexedSeq[Signout]]{
 			})
 		}
 
+		val tests = {
+			val qb = QueryBuilder
+				.from(SignoutTest)
+				.innerJoin(Person, Person.fields.personId.alias.equalsField(SignoutTest.fields.personId.alias))
+				.where(SignoutTest.fields.signoutId.alias.inList(signoutIds))
+				.select(List(
+					SignoutTest.fields.testId,
+					SignoutTest.fields.signoutId,
+					SignoutTest.fields.personId,
+					SignoutTest.fields.ratingId,
+					SignoutTest.fields.testResult,
+					SignoutTest.fields.instructorString,
+
+					Person.fields.personId,
+					Person.fields.nameFirst,
+					Person.fields.nameLast
+				))
+
+			rc.executeQueryBuilder(qb).map(qbrr => {
+				val person = Person.construct(qbrr)
+				val test = SignoutTest.construct(qbrr)
+				test.references.person.set(person)
+
+				test
+			})
+		}
+
 		// attach crew to signouts
 		signouts.foreach(s => {
 			val signoutId = s.values.signoutId.get
 			s.references.crew.set(crew.filter(_.values.signoutId.get == signoutId).toIndexedSeq)
+			s.references.tests.set(tests.filter(_.values.signoutId.get == signoutId).toIndexedSeq)
 		})
 
 		val personIds = signouts

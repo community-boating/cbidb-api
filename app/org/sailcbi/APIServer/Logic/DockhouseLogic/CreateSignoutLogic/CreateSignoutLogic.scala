@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Util.BitVector
-import org.sailcbi.APIServer.Entities.EntityDefinitions.Signout
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{Signout, SignoutTest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.IO.DockhouseIo
 
@@ -83,8 +83,24 @@ object CreateSignoutLogic {
 			DockhouseIo.createSignoutCrew(rc, crew.personId, crew.cardNumber, signout.values.signoutId.get)
 		})
 
-		signout.references.crew.set(crewObjs.toIndexedSeq)
+		val crewTests = req.signoutCrew.filter(_.testRatingId.isDefined).map(crew => {
+			val st = new SignoutTest
+			st.values.signoutId.update(signout.values.signoutId.get)
+			st.values.personId.update(crew.personId)
+			st.values.ratingId.update(crew.testRatingId.get)
 
+			rc.commitObjectToDatabase(st)
+
+			st
+		})
+
+		signout.references.crew.set(crewObjs.toIndexedSeq)
+		if (crewTests.nonEmpty) {
+			// add crew tests to existing skipper test, if present
+			val existingTests = signout.references.tests.peek.map(_.toList).getOrElse(List.empty)
+			val updatedTests = crewTests ::: existingTests
+			signout.references.tests.forceSet(updatedTests.toIndexedSeq)
+		}
 		signout
 	}
 

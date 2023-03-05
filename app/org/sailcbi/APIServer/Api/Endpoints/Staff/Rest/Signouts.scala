@@ -15,9 +15,6 @@ class Signouts @Inject()(implicit val exec: ExecutionContext) extends RestContro
 	def getToday()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val (result, (created, expires)) = SignoutsToday.get(rc, null)
-			println(result(0).references.skipper.get.calculations.maxBoatFlags.peek)
-			println(Json.toJson(result(0).references.skipper.get))
-			println(Json.toJson(result(0)))
 			Future(Ok(Json.toJson(result)))
 		})
 	})

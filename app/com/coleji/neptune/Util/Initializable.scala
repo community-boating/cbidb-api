@@ -23,6 +23,11 @@ class Initializable[T] extends Serializable {
 		}
 	}
 
+	def forceSet(t: T): T = synchronized {
+		value = Some(t)
+		t
+	}
+
 	def peek: Option[T] = value
 
 	def isInitialized: Boolean = value.isDefined
