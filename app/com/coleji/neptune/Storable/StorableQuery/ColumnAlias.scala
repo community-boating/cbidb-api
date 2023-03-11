@@ -11,6 +11,15 @@ abstract class ColumnAlias[U <: DatabaseField[_]](val table: TableAlias[_ <: Sto
 
 	def equalsField[U <: DatabaseField[_]](c: ColumnAlias[_ <: DatabaseField[_]]): Filter = Filter(s"${table.name}.${field.persistenceFieldName} = ${c.table.name}.${c.field.persistenceFieldName}", List.empty)
 	override def toString: String = s"${table}.${field.persistenceFieldName}"
+
+	protected def groupValues[T](values: List[T]): List[List[T]] = {
+		val MAX_IDS = 900
+		if (values.length <= MAX_IDS) List(values)
+		else {
+			val splitList = values.splitAt(MAX_IDS)
+			splitList._1 :: groupValues(splitList._2)
+		}
+	}
 }
 
 //case class ColumnAliasInnerJoined[U <: DatabaseField[_]](override val table: TableAliasInnerJoined[_ <: StorableObject[_ <: StorableClass]], override val field: U) extends ColumnAlias[U](table, field)

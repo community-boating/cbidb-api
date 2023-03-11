@@ -1,8 +1,9 @@
 package com.coleji.neptune.Core
 
 import io.sentry.Sentry
+import play.api.libs.Files
 import play.api.libs.json.JsValue
-import play.api.mvc.{AnyContent, Cookies, Headers, Request}
+import play.api.mvc.{AnyContent, Cookies, Headers, MultipartFormData, Request}
 
 case class ParsedRequest(
 	headers: Headers,
@@ -11,7 +12,7 @@ case class ParsedRequest(
 	method: String,
 	remoteAddress: String,
 	postParams: Map[String, String],
-	postJSON: Option[JsValue]
+	body: AnyContent
 ) {
 	def addHeader(h: (String, String)): ParsedRequest = ParsedRequest(
 		headers.add(h),
@@ -20,12 +21,14 @@ case class ParsedRequest(
 		method,
 		remoteAddress,
 		postParams,
-		postJSON
+		body
 	)
+
+	lazy val postJSON: Option[JsValue] = body.asJson
+	lazy val bodyMultipartFormData: Option[MultipartFormData[Files.TemporaryFile]] = body.asMultipartFormData
 }
 
 object ParsedRequest {
-
 	object methods {
 		val GET = "GET"
 	}
@@ -38,7 +41,7 @@ object ParsedRequest {
 			method = request.method,
 			remoteAddress = request.remoteAddress,
 			postParams = getPostParams(request),
-			postJSON = request.body.asJson
+			body = request.body
 		)
 	} catch {
 		case e: Throwable => {

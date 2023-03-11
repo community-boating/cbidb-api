@@ -9,16 +9,8 @@ case class IntColumnAlias(override val table: TableAlias[_ <: StorableObject[_ <
 extends ColumnAlias[DatabaseField[Int]](table, field) {
 	def inList(l: List[Int])(implicit PA: PermissionsAuthority): Filter = PA.systemParams.persistenceSystem match {
 		case ps: PERSISTENCE_SYSTEM_RELATIONAL => {
-			def groupIDs(ids: List[Int]): List[List[Int]] = {
-				if (ids.length <= ps.pbs.MAX_EXPR_IN_LIST) List(ids)
-				else {
-					val splitList = ids.splitAt(ps.pbs.MAX_EXPR_IN_LIST)
-					splitList._1 :: groupIDs(splitList._2)
-				}
-			}
-
 			if (l.isEmpty) Filter.noneMatch
-			else Filter.or(groupIDs(l).map(group => Filter(
+			else Filter.or(groupValues(l).map(group => Filter(
 				s"${table.name}.${field.persistenceFieldName} in (${group.mkString(", ")})",
 				List.empty
 			)))

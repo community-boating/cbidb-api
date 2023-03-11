@@ -14,16 +14,8 @@ extends ColumnAlias[DatabaseField[Double]](table, field) {
 
 	def inList(l: List[Double])(implicit PA: PermissionsAuthority): Filter = PA.systemParams.persistenceSystem match {
 		case r: PERSISTENCE_SYSTEM_RELATIONAL => {
-			def groupIDs(ids: List[Double]): List[List[Double]] = {
-				if (ids.length <= r.pbs.MAX_EXPR_IN_LIST) List(ids)
-				else {
-					val splitList = ids.splitAt(r.pbs.MAX_EXPR_IN_LIST)
-					splitList._1 :: groupIDs(splitList._2)
-				}
-			}
-
 			if (l.isEmpty) Filter.noneMatch
-			else Filter.or(groupIDs(l).map(group => Filter(
+			else Filter.or(groupValues(l).map(group => Filter(
 				s"${table.name}.${field.persistenceFieldName} in (${group.mkString(", ")})",
 				List.empty
 			)))

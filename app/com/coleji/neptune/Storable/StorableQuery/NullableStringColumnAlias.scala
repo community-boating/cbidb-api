@@ -14,4 +14,12 @@ extends ColumnAlias[DatabaseField[Option[String]]](table, field) {
 		case Some(s: String) => Filter(s"lower(${table.name}.${field.persistenceFieldName}) = ?", List(s.toLowerCase()))
 		case None => Filter(s"${table.name}.${field.persistenceFieldName} IS NULL", List.empty)
 	}
+
+	def inList(ls: List[String]): Filter = Filter.or(groupValues(ls).map(group =>
+		Filter(s"${table.name}.${field.persistenceFieldName} in (${group.map(_ => "?").mkString(", ")})", group)
+	))
+
+	def inListLowercase(ls: List[String]): Filter = Filter.or(groupValues(ls).map(group =>
+		Filter(s"lower(${table.name}.${field.persistenceFieldName}) in (${group.map(_ => "?").mkString(", ")})", group.map(_.toLowerCase))
+	))
 }

@@ -35,6 +35,10 @@ libraryDependencies += "net.sf.barcode4j" % "barcode4j" % "2.1"
 // https://mvnrepository.com/artifact/mysql/mysql-connector-java
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
 
+// https://mvnrepository.com/artifact/org.apache.commons/commons-csv
+libraryDependencies += "org.apache.commons" % "commons-csv" % "1.10.0"
+
+
 /*
 scalacOptions ++= Seq(
   "-Xcheckinit"

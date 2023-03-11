@@ -118,6 +118,7 @@ class Person extends StorableClass(Person) {
 		val hasAuthedAs = new NullableIntFieldValue(self, Person.fields.hasAuthedAs)
 		val pwHashScheme = new NullableStringFieldValue(self, Person.fields.pwHashScheme)
 		val nextRecurringDonation = new NullableDateFieldValue(self, Person.fields.nextRecurringDonation)
+		val slackUserId = new NullableStringFieldValue(self, Person.fields.slackUserId)
 	}
 }
 
@@ -228,6 +229,7 @@ object Person extends StorableObject[Person] {
 		val hasAuthedAs = new NullableIntDatabaseField(self, "HAS_AUTHED_AS")
 		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
 		val nextRecurringDonation = new NullableDateDatabaseField(self, "NEXT_RECURRING_DONATION")
+		val slackUserId = new NullableStringDatabaseField(self, "SLACK_USER_ID", 20)
 	}
 
 	def primaryKey: IntDatabaseField = fields.personId

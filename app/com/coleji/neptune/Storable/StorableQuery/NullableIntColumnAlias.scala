@@ -11,17 +11,8 @@ case class NullableIntColumnAlias(override val table: TableAlias[_ <: StorableOb
 	}
 
 	def inList(l: List[Int]): Filter = {
-		def groupIDs(ids: List[Int]): List[List[Int]] = {
-			val MAX_IDS = 900
-			if (ids.length <= MAX_IDS) List(ids)
-			else {
-				val splitList = ids.splitAt(MAX_IDS)
-				splitList._1 :: groupIDs(splitList._2)
-			}
-		}
-
 		if (l.isEmpty) Filter.noneMatch
-		else Filter.or(groupIDs(l).map(group => Filter(
+		else Filter.or(groupValues(l).map(group => Filter(
 			s"${table.name}.${field.persistenceFieldName} in (${group.mkString(", ")})",
 			List.empty
 		)))

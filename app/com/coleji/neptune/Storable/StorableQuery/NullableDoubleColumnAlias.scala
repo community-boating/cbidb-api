@@ -10,17 +10,8 @@ extends ColumnAlias[DatabaseField[Option[Double]]](table, field) {
 	}
 
 	def inList(l: List[Double]): Filter = {
-		def groupIDs(ids: List[Double]): List[List[Double]] = {
-			val MAX_IDS = 900
-			if (ids.length <= MAX_IDS) List(ids)
-			else {
-				val splitList = ids.splitAt(MAX_IDS)
-				splitList._1 :: groupIDs(splitList._2)
-			}
-		}
-
 		if (l.isEmpty) Filter.noneMatch
-		else Filter.or(groupIDs(l).map(group => Filter(
+		else Filter.or(groupValues(l).map(group => Filter(
 			s"${table.name}.${field.persistenceFieldName} in (${group.mkString(", ")})",
 			List.empty
 		)))

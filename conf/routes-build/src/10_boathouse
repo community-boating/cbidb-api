@@ -69,6 +69,8 @@ GET     /staff/all-jp-signups           org.sailcbi.APIServer.Api.Endpoints.Staf
 POST    /auth/validate-apex-session-key      org.sailcbi.APIServer.Api.Endpoints.Security.ValidateApexSessionKey.post()
 POST    /auth/set-staff-pw              org.sailcbi.APIServer.Api.Endpoints.Security.SetStaffPassword.post()
 
+# POST    /staff/slack-sync-users     org.sailcbi.APIServer.Api.Endpoints.Staff.slacksyncusers.SlackSyncUsers.post()
+
 
 ### DOCKHOUSE
 
