@@ -235,7 +235,6 @@ class APRequiredInfo @Inject()(implicit exec: ExecutionContext) extends Injected
 
 	object APRequiredInfoShape {
 		implicit val format = Json.format[APRequiredInfoShape]
-
 		def apply(v: JsValue): APRequiredInfoShape = v.as[APRequiredInfoShape]
 	}
 }
