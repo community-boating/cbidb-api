@@ -19,27 +19,42 @@ case class StaffDockhouseCreateSignoutPostResponseSuccessDto (
 	hullNumber: Option[String],
 	testRatingId: Option[Int],
 	testResult: Option[String],
-	isQueued: String,
+	isQueued: Boolean,
 	signoutDatetime: Option[String],
-	signinDatetime: Option[String],
-	comments: Option[String],
-	$$apClassInstance: StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance,
+	$$crew: List[StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew],
+	$$tests: List[StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests],
 )
 
-case class StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance (
-	instanceId: Int,
-	cancelledDatetime: Option[String],
+case class StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew (
+	signoutId: Int,
+	personId: Option[Int],
+	cardNum: Option[String],
+	startActive: Option[String],
 )
 
-object StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance {
-	implicit val format = Json.format[StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance]
-	def apply(v: JsValue): StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance
-		= v.as[StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance]
+object StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew {
+	implicit val format = Json.format[StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew]
+	def apply(v: JsValue): StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew
+		= v.as[StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew]
+}
+
+case class StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests (
+	signoutId: Int,
+	personId: Int,
+	ratingId: Int,
+)
+
+object StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests {
+	implicit val format = Json.format[StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests]
+	def apply(v: JsValue): StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests
+		= v.as[StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests]
 }
 
 object StaffDockhouseCreateSignoutPostResponseSuccessDto {
-	implicit val StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstanceFormat
-		= StaffDockhouseCreateSignoutPostResponseSuccessDto_ApClassInstance.format
+	implicit val StaffDockhouseCreateSignoutPostResponseSuccessDto_CrewFormat
+		= StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew.format
+	implicit val StaffDockhouseCreateSignoutPostResponseSuccessDto_TestsFormat
+		= StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests.format
 	implicit val format = Json.format[StaffDockhouseCreateSignoutPostResponseSuccessDto]
 	def apply(v: JsValue): StaffDockhouseCreateSignoutPostResponseSuccessDto
 		= v.as[StaffDockhouseCreateSignoutPostResponseSuccessDto]

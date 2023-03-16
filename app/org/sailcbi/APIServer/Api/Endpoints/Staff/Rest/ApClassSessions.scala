@@ -111,7 +111,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			headcount = session.values.headcount.get,
 			cancelledDatetime = session.values.cancelledDateTime.get.map(_.toString),
 			sessionDatetime = session.values.sessionDateTime.get.toString,
-			sessionLength = 1, //session.values.sessionLength.get,
+			sessionLength = session.values.sessionLength.get,
 			$$apClassInstance = {
 				val instance = session.references.apClassInstance.get
 				new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance(
@@ -119,20 +119,20 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 					cancelledDatetime = instance.values.cancelledDatetime.get.map(_.toString),
 					signupsStartOverride = instance.values.signupsStartOverride.get.map(_.toString),
 					signupMin = instance.values.signupMin.get,
-					price = None, //instance.values.price.get,
+					price = instance.values.price.get,
 					signupMax = instance.values.signupMax.get,
 					formatId = instance.values.formatId.get,
-					hideOnline = None, // instance.values.hideOnline.get,
+					hideOnline = instance.values.hideOnline.get,
 					cancelByOverride = instance.values.cancelByOverride.get.map(_.toString),
 					locationString = instance.values.locationString.get,
 					$$apClassSignups = instance.references.apClassSignups.get.map(s =>
 						new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups(
 							instanceId = s.values.instanceId.get,
 							discountInstanceId = s.values.discountInstanceId.get,
-							voidedOnline = None, //s.values.voidedOnline.get,
+							voidedOnline = s.values.voidedOnline.get,
 							personId = s.values.personId.get,
 							orderId = s.values.orderId.get,
-							price = None, //s.values.price.get,
+							price = s.values.price.get,
 							signupId = s.values.signupId.get,
 							closeId = s.values.closeId.get,
 							sequence = s.values.sequence.get,

@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Util.BitVector
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.StaffDockhouseCreateSignoutPostRequestDto
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Signout, SignoutTest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.IO.DockhouseIo
@@ -41,7 +42,7 @@ object CreateSignoutLogic {
 		ERROR_CREW_INVALID,
 	)
 
-	def attemptSignout(rc: UnlockedRequestCache, req: CreateSignoutRequest): Either[CreateSignoutError, Signout] = {
+	def attemptSignout(rc: UnlockedRequestCache, req: StaffDockhouseCreateSignoutPostRequestDto): Either[CreateSignoutError, Signout] = {
 		val errors = {
 			if (!req.isRacing) {
 				List.empty
@@ -59,7 +60,7 @@ object CreateSignoutLogic {
 		}
 	}
 
-	private def createSignout(rc: UnlockedRequestCache, req: CreateSignoutRequest): Signout = {
+	private def createSignout(rc: UnlockedRequestCache, req: StaffDockhouseCreateSignoutPostRequestDto): Signout = {
 		// TODO
 		val signoutType = {
 			if (req.isRacing) MagicIds.SIGNOUT_TYPES.RACING
