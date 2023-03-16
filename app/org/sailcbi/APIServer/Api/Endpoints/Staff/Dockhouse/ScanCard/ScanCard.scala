@@ -74,7 +74,8 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			expirationDate = pm.values.expirationDate.get.map(_.toString),
 			discountName = pm.references.discountInstance.get.map(_.references.discount.get.values.discountName.get),
 			isDiscountFrozen = false, // TODO
-			hasGuestPrivs = pm.references.guestPriv.get.nonEmpty
+			hasGuestPrivs = pm.references.guestPriv.get.nonEmpty,
+			programId = pm.references.membershipType.get.values.programId.get
 		))
 	}
 
@@ -112,7 +113,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			.from(ApClassSignup)
 			.innerJoin(ApClassSession, ApClassSession.fields.instanceId.alias.equalsField(ApClassSignup.fields.instanceId))
 			.where(List(
-				ApClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate),
+				ApClassSession.fields.sessionDatetime.alias.isDateConstant(rc.PA.now().toLocalDate),
 				ApClassSignup.fields.personId.alias.equalsConstant(personId)
 			))
 			.select(List(
@@ -198,8 +199,8 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		Right(new StaffDockhouseScanCardGetResponseSuccessDto(
 			personId = pc.values.personId.get,
 			cardNumber = pc.values.cardNum.get,
-			nameFirst = person.values.nameFirst.get.getOrElse(""),
-			nameLast = person.values.nameLast.get.getOrElse(""),
+			nameFirst = person.values.nameFirst.get,
+			nameLast = person.values.nameLast.get,
 			bannerComment = person.values.memberComment.get,
 			specialNeeds = person.values.specialNeeds.get,
 			signoutBlockReason = person.values.signoutBlockReason.get,

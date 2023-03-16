@@ -28,7 +28,7 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 						sailNumber = s.values.sailNumber.get,
 						hullNumber = s.values.hullNumber.get,
 						testRatingId = s.values.testRatingId.get,
-						testResult = s.values.testResult.get,
+						testResult = None,
 						isQueued = s.values.isQueued.get,
 						signoutDatetime = s.values.signoutDatetime.get.map(_.toString),
 						$$crew = s.references.crew.get.toList.map(c => new StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew(
@@ -37,11 +37,11 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 							cardNum = c.values.cardNum.get,
 							startActive = c.values.startActive.get.map(_.toString)
 						)),
-						$$tests = s.references.tests.get.toList.map(t => new StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests(
+						$$tests = s.references.tests.peek.map(_.toList.map(t => new StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests(
 							signoutId = t.values.signoutId.get,
 							personId = t.values.personId.get,
 							ratingId = t.values.ratingId.get
-						))
+						))).getOrElse(List.empty)
 					))))
 				)
 			})

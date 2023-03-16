@@ -18,10 +18,10 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val currentSeason = PA.currentSeason()
 
-			val sessions = rc.getObjectsByFilters(ApClassSession, List(ApClassSession.fields.sessionDateTime.alias.isYearConstant(currentSeason)), Set(
+			val sessions = rc.getObjectsByFilters(ApClassSession, List(ApClassSession.fields.sessionDatetime.alias.isYearConstant(currentSeason)), Set(
 				ApClassSession.fields.sessionId,
 				ApClassSession.fields.instanceId,
-				ApClassSession.fields.sessionDateTime,
+				ApClassSession.fields.sessionDatetime,
 				ApClassSession.fields.headcount,
 				ApClassSession.fields.cancelledDateTime,
 				ApClassSession.fields.sessionLength,
@@ -48,7 +48,7 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 				val instanceId = i.values.instanceId.get
 				i.references.apClassSessions.set(sessions
 					.filter(_.values.instanceId.get == instanceId)
-					.sortBy(s => DateUtil.toBostonTime(s.values.sessionDateTime.get))
+					.sortBy(s => DateUtil.toBostonTime(s.values.sessionDatetime.get))
 				)
 			})
 

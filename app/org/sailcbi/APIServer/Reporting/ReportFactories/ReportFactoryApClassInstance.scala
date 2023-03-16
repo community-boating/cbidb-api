@@ -61,7 +61,7 @@ class ReportFactoryApClassInstance extends ReportFactory[ApClassInstance] {
 			(i: ApClassInstance) =>
 				apClassSessions
 						.filter(_.values.instanceId.get == i.getID)
-						.map(_.values.sessionDateTime.get)
+						.map(_.values.sessionDatetime.get)
 						.min
 						.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
 			"First Session Datetime",

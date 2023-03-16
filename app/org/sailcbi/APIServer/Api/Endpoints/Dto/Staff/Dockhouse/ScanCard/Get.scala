@@ -11,8 +11,8 @@ import play.api.libs.json.{JsValue, Json}
 case class StaffDockhouseScanCardGetResponseSuccessDto (
 	personId: Int,
 	cardNumber: String,
-	nameFirst: String,
-	nameLast: String,
+	nameFirst: Option[String],
+	nameLast: Option[String],
 	bannerComment: Option[String],
 	specialNeeds: Option[String],
 	signoutBlockReason: Option[String],
@@ -31,6 +31,7 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships (
 	discountName: Option[String],
 	isDiscountFrozen: Boolean,
 	hasGuestPrivs: Boolean,
+	programId: Int,
 )
 
 object StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships {

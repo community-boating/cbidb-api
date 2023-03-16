@@ -38,6 +38,7 @@ object GetPersonMembership {
 				PersonMembership.fields.startDate,
 				PersonMembership.fields.expirationDate,
 				MembershipType.fields.membershipTypeName,
+				MembershipType.fields.programId,
 				DiscountInstance.fields.instanceId,
 				Discount.fields.discountId,
 				Discount.fields.discountName,

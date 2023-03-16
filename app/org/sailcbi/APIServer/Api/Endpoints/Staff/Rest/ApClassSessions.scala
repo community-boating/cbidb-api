@@ -25,11 +25,11 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 		val qb = QueryBuilder
 			.from(ApClassSession)
 			.innerJoin(ApClassInstance, ApClassSession.fields.instanceId.alias.equalsField(ApClassInstance.fields.instanceId.alias))
-			.where(ApClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate))
+			.where(ApClassSession.fields.sessionDatetime.alias.isDateConstant(rc.PA.now().toLocalDate))
 			.select(List(
 				ApClassSession.fields.sessionId,
 				ApClassSession.fields.instanceId,
-				ApClassSession.fields.sessionDateTime,
+				ApClassSession.fields.sessionDatetime,
 				ApClassSession.fields.headcount,
 				ApClassSession.fields.cancelledDateTime,
 				ApClassSession.fields.sessionLength,
@@ -110,7 +110,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			instanceId = session.values.instanceId.get,
 			headcount = session.values.headcount.get,
 			cancelledDatetime = session.values.cancelledDateTime.get.map(_.toString),
-			sessionDatetime = session.values.sessionDateTime.get.toString,
+			sessionDatetime = session.values.sessionDatetime.get.toString,
 			sessionLength = session.values.sessionLength.get,
 			$$apClassInstance = {
 				val instance = session.references.apClassInstance.get

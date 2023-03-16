@@ -65,11 +65,11 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 			.innerJoin(ApClassInstance, ApClassInstance.fields.instanceId.alias equalsField  ApClassSession.fields.instanceId.alias)
 			.innerJoin(ApClassFormat, ApClassFormat.fields.formatId.alias equalsField ApClassInstance.fields.formatId.alias)
 			.innerJoin(ApClassType, ApClassType.fields.typeId.alias equalsField ApClassFormat.fields.typeId.alias)
-			.where(ApClassSession.fields.sessionDateTime.alias isDateConstant LocalDate.now())
+			.where(ApClassSession.fields.sessionDatetime.alias isDateConstant LocalDate.now())
 			.select(List(
 				ApClassType.fields.typeName.alias,
 				ApClassInstance.fields.instanceId.alias,
-				ApClassSession.fields.sessionDateTime.alias
+				ApClassSession.fields.sessionDatetime.alias
 			))
 
 		val apClassesQbrrs = rc.executeQueryBuilder(apClassesQb)
@@ -78,7 +78,7 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 			val dockRptClass = new DockReportApClass
 			dockRptClass.values.dockReportId.update(newDockReport.values.dockReportId.get)
 			dockRptClass.values.className.update(qbrr.getValue(ApClassType.alias)(_.typeName))
-			dockRptClass.values.classDatetime.update(qbrr.getValue(ApClassSession.alias)(_.sessionDateTime))
+			dockRptClass.values.classDatetime.update(qbrr.getValue(ApClassSession.alias)(_.sessionDatetime))
 			dockRptClass.values.apInstanceId.update(Some(qbrr.getValue(ApClassInstance.alias)(_.instanceId)))
 			rc.commitObjectToDatabase(dockRptClass)
 			dockRptClass.defaultAllUnsetNullableFields()
