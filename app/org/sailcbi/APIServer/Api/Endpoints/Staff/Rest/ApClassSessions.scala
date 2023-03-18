@@ -112,6 +112,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			cancelledDatetime = session.values.cancelledDateTime.get.map(_.toString),
 			sessionDatetime = session.values.sessionDatetime.get.toString,
 			sessionLength = session.values.sessionLength.get,
+			isMakeup = session.values.isMakeup.get,
 			$$apClassInstance = {
 				val instance = session.references.apClassInstance.get
 				new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance(
@@ -125,6 +126,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 					hideOnline = instance.values.hideOnline.get,
 					cancelByOverride = instance.values.cancelByOverride.get.map(_.toString),
 					locationString = instance.values.locationString.get,
+					doNotAutoCancel = instance.values.doNotAutoCancel.get,
 					$$apClassSignups = instance.references.apClassSignups.get.map(s =>
 						new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups(
 							instanceId = s.values.instanceId.get,
@@ -158,7 +160,8 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 										foVmDatetime = wlr.values.foVmDatetime.get.map(_.toString),
 										offerExpDatetime = wlr.values.offerExpDatetime.get.map(_.toString),
 										signupId = wlr.values.signupId.get,
-										foAlertDatetime = wlr.values.foAlertDatetime.get.map(_.toString)
+										foAlertDatetime = wlr.values.foAlertDatetime.get.map(_.toString),
+										permitOvercrowd = wlr.values.permitOvercrowd.get
 									)
 								)
 							}

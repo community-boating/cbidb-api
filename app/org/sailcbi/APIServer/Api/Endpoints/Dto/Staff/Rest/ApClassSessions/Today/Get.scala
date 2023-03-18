@@ -15,6 +15,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
 	cancelledDatetime: Option[String],
 	sessionDatetime: String,
 	sessionLength: Double,
+	isMakeup: Boolean,
 	$$apClassInstance: StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance,
 )
 
@@ -29,6 +30,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
 	hideOnline: Boolean,
 	cancelByOverride: Option[String],
 	locationString: Option[String],
+	doNotAutoCancel: Boolean,
 	$$apClassSignups: List[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups],
 )
 
@@ -71,6 +73,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	offerExpDatetime: Option[String],
 	signupId: Int,
 	foAlertDatetime: Option[String],
+	permitOvercrowd: Boolean,
 )
 
 object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult {

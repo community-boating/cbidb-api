@@ -6,16 +6,16 @@ import play.api.libs.json.Json
 
 import java.time.Duration
 
-object ApClassTypes extends CacheableFactory[Null, String] {
+object ApClassTypes extends CacheableFactory[Null, IndexedSeq[ApClassType]] {
 	override protected val lifetime: Duration = Duration.ofMinutes(1)
 
 	override protected def calculateKey(config: Null): String = CacheKeys.apClassTypes
 
-	override protected def generateResult(rc: RequestCache, config: Null): String = {
-		Json.toJson(getObjects(rc.assertUnlocked)).toString()
+	override protected def generateResult(rc: RequestCache, config: Null): IndexedSeq[ApClassType] = {
+		getObjects(rc.assertUnlocked)
 	}
 
-	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): List[ApClassType] = {
+	def getObjects(rc: UnlockedRequestCache)(implicit PA: PermissionsAuthority): IndexedSeq[ApClassType] = {
 		val types = rc.getAllObjectsOfClass(ApClassType, Set(
 			ApClassType.fields.typeId,
 			ApClassType.fields.typeName,
@@ -46,9 +46,9 @@ object ApClassTypes extends CacheableFactory[Null, String] {
 
 		types.foreach(t => {
 			val matchingFormats = formats.filter(f => f.values.typeId.get == t.values.typeId.get)
-			t.references.apClassFormats.set(matchingFormats)
+			t.references.apClassFormats.set(matchingFormats.toIndexedSeq)
 		})
 
-		types
+		types.toIndexedSeq
 	}
 }

@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.Initializable
 
 class ApClassType extends StorableClass(ApClassType) {
 	override object references extends ReferencesObject {
-		val apClassFormats = new Initializable[List[ApClassFormat]]
+		val apClassFormats = new Initializable[IndexedSeq[ApClassFormat]]
 	}
 
 	object values extends ValuesObject {

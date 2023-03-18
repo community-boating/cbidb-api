@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableDateTimeFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableDateTimeDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableDateTimeFieldValue, StringFieldValue}
+import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableDateTimeDatabaseField, StringDatabaseField}
 import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
 
 class ApClassWaitlistResult extends StorableClass(ApClassWaitlistResult) {
@@ -11,6 +11,7 @@ class ApClassWaitlistResult extends StorableClass(ApClassWaitlistResult) {
 		val wlResult = new StringFieldValue(self, ApClassWaitlistResult.fields.wlResult)
 		val offerExpDatetime = new NullableDateTimeFieldValue(self, ApClassWaitlistResult.fields.offerExpDatetime)
 		val foAlertDatetime = new NullableDateTimeFieldValue(self, ApClassWaitlistResult.fields.foAlertDatetime)
+		val permitOvercrowd = new BooleanFieldValue(self, ApClassWaitlistResult.fields.permitOvercrowd)
 	}
 }
 
@@ -25,6 +26,7 @@ object ApClassWaitlistResult extends StorableObject[ApClassWaitlistResult] {
 		val wlResult = new StringDatabaseField(self, "WL_RESULT", 1)
 		val offerExpDatetime = new NullableDateTimeDatabaseField(self, "OFFER_EXP_DATETIME")
 		val foAlertDatetime = new NullableDateTimeDatabaseField(self, "FO_ALERT_DATETIME")
+		val permitOvercrowd = new BooleanDatabaseField(self, "PERMIT_OVERCROWD", true)
 	}
 
 	def primaryKey: IntDatabaseField = fields.signupId
