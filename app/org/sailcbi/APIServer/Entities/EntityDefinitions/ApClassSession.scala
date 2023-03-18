@@ -16,7 +16,7 @@ class ApClassSession extends StorableClass(ApClassSession) {
 		val sessionDatetime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDatetime)
 		val isMakeup = new BooleanFieldValue(self, ApClassSession.fields.isMakeup)
 		val headcount = new NullableIntFieldValue(self, ApClassSession.fields.headcount)
-		val cancelledDateTime = new NullableDateTimeFieldValue(self, ApClassSession.fields.cancelledDateTime)
+		val cancelledDatetime = new NullableDateTimeFieldValue(self, ApClassSession.fields.cancelledDatetime)
 		val sessionLength = new DoubleFieldValue(self, ApClassSession.fields.sessionLength)
 	}
 }
@@ -32,7 +32,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
 		val sessionDatetime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
 		val isMakeup = new BooleanDatabaseField(self, "IS_MAKEUP", true)
 		val headcount = new NullableIntDatabaseField(self, "HEADCOUNT")
-		val cancelledDateTime = new NullableDateTimeDatabaseField(self, "CANCELLED_DATETIME")
+		val cancelledDatetime = new NullableDateTimeDatabaseField(self, "CANCELLED_DATETIME")
 		val sessionLength = new DoubleDatabaseField(self, "SESSION_LENGTH")
 	}
 

@@ -4,7 +4,9 @@ import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.DateUtil
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{StaffRestApClassInstancesThisSeasonGetResponseSuccessDto, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions}
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.cacheable.ApClassInstancesThisSeason
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -16,43 +18,32 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def getThisSeason()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
-			val currentSeason = PA.currentSeason()
-
-			val sessions = rc.getObjectsByFilters(ApClassSession, List(ApClassSession.fields.sessionDatetime.alias.isYearConstant(currentSeason)), Set(
-				ApClassSession.fields.sessionId,
-				ApClassSession.fields.instanceId,
-				ApClassSession.fields.sessionDatetime,
-				ApClassSession.fields.headcount,
-				ApClassSession.fields.cancelledDateTime,
-				ApClassSession.fields.sessionLength,
-			), 1200)
-
-			val instanceIds = sessions.map(_.values.instanceId.get).distinct
-
-			val instances = rc.getObjectsByFilters(ApClassInstance, List(ApClassInstance.fields.instanceId.alias.inList(instanceIds)), Set(
-				ApClassInstance.fields.instanceId,
-				ApClassInstance.fields.signupsStartOverride,
-				ApClassInstance.fields.signupMin,
-				ApClassInstance.fields.signupMax,
-				ApClassInstance.fields.formatId,
-				ApClassInstance.fields.cancelByOverride,
-				ApClassInstance.fields.price,
-				ApClassInstance.fields.cancelledDatetime,
-				ApClassInstance.fields.hideOnline,
-				ApClassInstance.fields.locationString,
-			), 1200)
-
-			implicit val ordering: Ordering[ZonedDateTime] = Ordering.by(_.toEpochSecond)
-
-			instances.foreach(i => {
-				val instanceId = i.values.instanceId.get
-				i.references.apClassSessions.set(sessions
-					.filter(_.values.instanceId.get == instanceId)
-					.sortBy(s => DateUtil.toBostonTime(s.values.sessionDatetime.get))
-				)
-			})
-
-			Future(Ok(Json.toJson(instances)))
+			Future(Ok(Json.toJson(toDto(ApClassInstancesThisSeason.get(rc, null)._1.toList))))
 		})
 	})
+
+	def toDto(instances: List[ApClassInstance]): List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto] = {
+		instances.map(i => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto(
+			instanceId = i.values.instanceId.get,
+			cancelledDatetime = i.values.cancelledDatetime.get.map(_.toString),
+			signupsStartOverride = i.values.signupsStartOverride.get.map(_.toString),
+			signupMin = i.values.signupMin.get,
+			price = i.values.price.get,
+			signupMax = i.values.signupMax.get,
+			formatId = i.values.formatId.get,
+			hideOnline = i.values.hideOnline.get,
+			cancelByOverride = i.values.cancelByOverride.get.map(_.toString),
+			locationString = i.values.locationString.get,
+			doNotAutoCancel = i.values.doNotAutoCancel.get,
+			$$apClassSessions = i.references.apClassSessions.peek.map(ss => ss.map(s => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions(
+				sessionId = s.values.sessionId.get,
+				instanceId = s.values.instanceId.get,
+				headcount = s.values.headcount.get,
+				cancelledDatetime = s.values.cancelledDatetime.get.map(_.toString),
+				sessionDatetime = s.values.sessionDatetime.get.toString,
+				sessionLength = s.values.sessionLength.get,
+				isMakeup = s.values.isMakeup.get
+			))).getOrElse(List.empty).toList
+		))
+	}
 }

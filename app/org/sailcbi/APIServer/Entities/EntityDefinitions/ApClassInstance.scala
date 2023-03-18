@@ -8,8 +8,8 @@ import com.coleji.neptune.Util.Initializable
 class ApClassInstance extends StorableClass(ApClassInstance) {
 	override object references extends ReferencesObject {
 		val apClassFormat = new Initializable[ApClassFormat]
-		val apClassSessions = new Initializable[List[ApClassSession]]
-		val apClassSignups = new Initializable[List[ApClassSignup]]
+		val apClassSessions = new Initializable[IndexedSeq[ApClassSession]]
+		val apClassSignups = new Initializable[IndexedSeq[ApClassSignup]]
 	}
 
 	object values extends ValuesObject {

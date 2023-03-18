@@ -31,7 +31,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 				ApClassSession.fields.instanceId,
 				ApClassSession.fields.sessionDatetime,
 				ApClassSession.fields.headcount,
-				ApClassSession.fields.cancelledDateTime,
+				ApClassSession.fields.cancelledDatetime,
 				ApClassSession.fields.sessionLength,
 
 				ApClassInstance.fields.instanceId,
@@ -99,7 +99,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 		})
 
 		sessions.foreach(_.references.apClassInstance.forEach(
-			i => i.references.apClassSignups.set(signups.filter(s => s.values.instanceId.get == i.values.instanceId.get))
+			i => i.references.apClassSignups.set(signups.filter(s => s.values.instanceId.get == i.values.instanceId.get).toIndexedSeq)
 		))
 		sessions
 	}
@@ -109,7 +109,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			sessionId = session.values.sessionId.get,
 			instanceId = session.values.instanceId.get,
 			headcount = session.values.headcount.get,
-			cancelledDatetime = session.values.cancelledDateTime.get.map(_.toString),
+			cancelledDatetime = session.values.cancelledDatetime.get.map(_.toString),
 			sessionDatetime = session.values.sessionDatetime.get.toString,
 			sessionLength = session.values.sessionLength.get,
 			isMakeup = session.values.isMakeup.get,
@@ -166,7 +166,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 								)
 							}
 						)
-					)
+					).toList
 				)
 			}
 		))
