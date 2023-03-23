@@ -33,6 +33,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 				ApClassSession.fields.headcount,
 				ApClassSession.fields.cancelledDatetime,
 				ApClassSession.fields.sessionLength,
+				ApClassSession.fields.isMakeup,
 
 				ApClassInstance.fields.instanceId,
 				ApClassInstance.fields.signupsStartOverride,
