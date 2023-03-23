@@ -1940,7 +1940,7 @@ object PortalLogic {
 				  |where i.format_id = f.format_id and f.type_id = t.type_id
 				  |and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
 				  |and fs.session_datetime > (add_months(util_pkg.get_sysdate, -18))
-				  |and fs.session_datetime < (add_months(util_pkg.get_sysdate, 6))
+				  |and fs.session_datetime < (add_months(util_pkg.get_sysdate, 8))
 				  |and i.cancelled_datetime is null
 				  |and nvl(i.hide_online,'N') <> 'Y'
 				  |order by fs.session_datetime
