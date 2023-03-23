@@ -45,6 +45,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 				ApClassInstance.fields.cancelledDatetime,
 				ApClassInstance.fields.hideOnline,
 				ApClassInstance.fields.locationString,
+				ApClassInstance.fields.doNotAutoCancel
 			))
 
 		val sessions = rc.executeQueryBuilder(qb).map(qbrr => {
@@ -85,6 +86,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 				ApClassWaitlistResult.fields.wlResult.alias(ApClassWaitlistResult.aliasOuter),
 				ApClassWaitlistResult.fields.offerExpDatetime.alias(ApClassWaitlistResult.aliasOuter),
 				ApClassWaitlistResult.fields.foAlertDatetime.alias(ApClassWaitlistResult.aliasOuter),
+				ApClassWaitlistResult.fields.permitOvercrowd.alias(ApClassWaitlistResult.aliasOuter),
 
 				Person.fields.personId.alias,
 				Person.fields.nameFirst.alias,
