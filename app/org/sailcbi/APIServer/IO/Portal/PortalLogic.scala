@@ -626,6 +626,104 @@ object PortalLogic {
 		}
 	}
 
+	def allowWaitList(rc: RequestCache, personId: Int, instanceId: Int): ValidationResult = {
+		val error = rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Option[String]](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Option[String] = rs.getString(1) match {
+				case "" | null => None
+				case s => Some(s)
+			}
+
+			override def getQuery: String =
+				s"""
+				   |select jp_class_pkg.allow_wl(?, ?) from dual
+				   |""".stripMargin
+
+			override val params: List[String] = List(personId.toString, instanceId.toString)
+		}).head
+
+		error match {
+			case None => ValidationOk
+			case Some(s) => ValidationResult.from(s)
+		}
+	}
+
+	def getTypeIdForInstanceId(rc: RequestCache, instanceId: Int): Int = {
+		val typeIdQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String = "select type_id from jp_class_instances where instance_id = ?"
+
+			override val params: List[String] = List(instanceId.toString)
+		}
+
+		rc.executePreparedQueryForSelect(typeIdQ).head
+	}
+
+	def getConflictingSignups(rc: RequestCache, personId: Int, instanceId: Int, enrollment: Boolean): List[Int] = {
+		val typeId = getTypeIdForInstanceId(rc, instanceId)
+
+		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(typeId.toString, instanceId.toString, personId.toString)
+
+			override def getQuery: String =
+				s"""
+				  |select s.instance_id from jp_class_signups s, jp_class_instances i, jp_class_bookends bk, jp_class_sessions fs
+				  |    where s.instance_id = i.instance_id and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
+				  |    and to_char(fs.session_datetime, 'YYYY') = util_pkg.get_current_season
+				  |    and i.type_id = ?
+				  |    and i.instance_id <> ?
+				  |    and s.person_id = ?
+				  |    and signup_type = '${if (enrollment) "E" else "W"}'
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForSelect(q)
+	}
+
+	def deleteConflictingSignups(rc: RequestCache, juniorId: Int, instanceId: Int, instanceIdToKeep: Int, enrollment: Boolean): Unit = {
+		val instanceIdsToDelete = getConflictingSignups(rc, juniorId, instanceId, enrollment).filter(_ != instanceIdToKeep)
+
+		val signupsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				s"""
+				   |select signup_id from jp_class_signups
+				   |where person_id = ${juniorId}
+				   |and instance_id in (${instanceIdsToDelete.mkString(", ")})
+				   |
+				   |""".stripMargin
+
+		}
+
+		val signupIds = rc.executePreparedQueryForSelect(signupsQ)
+
+		val wlQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				   |delete from jp_class_wl_results
+				   |where signup_id in (${signupIds.mkString(", ")})
+				   |
+				   |""".stripMargin
+		}
+
+		rc.executePreparedQueryForUpdateOrDelete(wlQ)
+
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override def getQuery: String =
+				s"""
+				  |delete from jp_class_signups
+				  |where signup_id in (${signupIds.mkString(", ")})
+				  |
+				  |""".stripMargin
+		}
+
+		val deletedCt = rc.executePreparedQueryForUpdateOrDelete(q)
+		println("deleted " + deletedCt)
+	}
+
 	def canWaitListJoin(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
 		rc.executePreparedQueryForSelect(new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
 			override def mapResultSetRowToCaseObject(rs: ResultSetWrapper): Int = rs.getInt(1)
