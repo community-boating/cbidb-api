@@ -73,7 +73,7 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 						val signupId = PortalLogic.actuallyEnroll(rc, parsed.instanceId, parsed.juniorId, None, doEnroll = doEnroll, fullEnroll = true, None).orNull
 						Future(Ok(new JsObject(Map("signupId" -> JsNumber(signupId.toInt)))))
 					}
-					case Left(e: ValidationError) => Future(Ok(e.toResultError.asJsObject()))
+					case Left(e: ValidationError) => Future(Ok(e.toResultError.asJsObject))
 				}
 			})
 		})
