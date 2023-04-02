@@ -168,6 +168,11 @@ GET     /member/recurring-donation-history  org.sailcbi.APIServer.Api.Endpoints.
 GET    /member/alerts             org.sailcbi.APIServer.Api.Endpoints.Member.Alerts.get()
 POST    /member/alerts             org.sailcbi.APIServer.Api.Endpoints.Member.Alerts.post()
 
+GET     /member/ap-class-instances-instructor-info      org.sailcbi.APIServer.Api.Endpoints.Member.ApClassInstancesInstructorInfo.get()
+
+POST    /member/ap-teach-instance           org.sailcbi.APIServer.Api.Endpoints.Member.SignupTeachApInstance.post()
+POST    /member/ap-cancel-teach-instance           org.sailcbi.APIServer.Api.Endpoints.Member.UnenrollTeachApInstance.post()
+
 POST    /auth/forgot-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ForgotPassword.post()
 POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoints.Security.ResetPassword.post()
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()
