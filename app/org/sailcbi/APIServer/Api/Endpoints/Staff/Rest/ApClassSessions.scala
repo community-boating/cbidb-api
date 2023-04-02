@@ -2,8 +2,8 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassSessions.Today.{StaffRestApClassSessionsTodayGetResponseSuccessDto, StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance, StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups, StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult, StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassSession, ApClassSignup, ApClassType, ApClassWaitlistResult, Person}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassSessions.Today._
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}

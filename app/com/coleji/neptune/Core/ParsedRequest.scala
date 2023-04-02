@@ -3,7 +3,7 @@ package com.coleji.neptune.Core
 import io.sentry.Sentry
 import play.api.libs.Files
 import play.api.libs.json.JsValue
-import play.api.mvc.{AnyContent, Cookies, Headers, MultipartFormData, Request}
+import play.api.mvc._
 
 case class ParsedRequest(
 	headers: Headers,

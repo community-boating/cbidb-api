@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic.IO
 
 import com.coleji.neptune.Core.UnlockedRequestCache
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange, Signout, SignoutCrew, SignoutTest}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 
 private[Logic] object DockhouseIo {
 	def putFlagChange(rc: UnlockedRequestCache, flagColor: String): FlagChange = {

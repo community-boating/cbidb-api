@@ -4,13 +4,11 @@ import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestC
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.{DateUtil, Profiler}
 import io.sentry.Sentry
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, Person, PersonRating, ProgramType, Signout, SignoutCrew, SignoutTest}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.Logic.RatingLogic
-import play.api.libs.json.Json
 
 import java.time.{Duration, LocalDate}
-import scala.collection.mutable
 
 object SignoutsToday extends CacheableFactory[Null, IndexedSeq[Signout]]{
 	val MAX_RECORDS_TO_RETURN = 600

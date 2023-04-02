@@ -1,8 +1,8 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.{StaffDockhouseCreateSignoutPostRequestDto, StaffDockhouseCreateSignoutPostRequestDto_SignoutCrew, StaffDockhouseCreateSignoutPostResponseSuccessDto, StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew, StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests}
-import org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic.{CreateSignoutLogic, CreateSignoutRequest}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.{StaffDockhouseCreateSignoutPostRequestDto, StaffDockhouseCreateSignoutPostResponseSuccessDto, StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew, StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests}
+import org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic.CreateSignoutLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}

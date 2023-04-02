@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 
 import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
 import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
-import com.coleji.neptune.Storable.{FieldsObject, ReferencesObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
 
 class SignoutTest extends StorableClass(SignoutTest) {

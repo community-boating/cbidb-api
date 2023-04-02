@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
-import org.sailcbi.APIServer.Api.Endpoints.Staff.slacksyncusers.{SlackSyncResponse, SlackUserDto, SlackUserStatusDto}
+import org.sailcbi.APIServer.Api.Endpoints.Staff.slacksyncusers.{SlackSyncResponse, SlackUserDto}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Person
 
 object SlackSyncLogic {

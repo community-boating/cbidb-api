@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Entities.entitycalculations
 
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 case class MaxBoatFlag(
 	boatId: Int,

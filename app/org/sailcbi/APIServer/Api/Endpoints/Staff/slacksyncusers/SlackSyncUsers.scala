@@ -1,14 +1,14 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.slacksyncusers
 
 import com.coleji.neptune.API.ValidationResult
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.apache.commons.csv.CSVFormat
-import org.sailcbi.APIServer.Logic.{MembershipLogic, SlackSyncLogic}
+import org.sailcbi.APIServer.Logic.SlackSyncLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.InjectedController
 
-import java.io.{FileInputStream, FileReader}
+import java.io.FileReader
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

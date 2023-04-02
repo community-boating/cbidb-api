@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.cacheable
 
 import com.coleji.neptune.Core.{CacheableFactory, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import com.coleji.neptune.Util.DateUtil
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassFormat, ApClassInstance, ApClassSession, ApClassType}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassInstance, ApClassSession}
 
 import java.time.{Duration, ZonedDateTime}
 

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.neptune.Util.ListUtil
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatRating, BoatType, PersonRating, ProgramType, Rating, RatingProgram}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, PersonRating, ProgramType, Rating}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache

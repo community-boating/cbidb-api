@@ -3,15 +3,13 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.ScanCard
 import com.coleji.neptune.API.ResultError
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.StaffDockhouseCreateSignoutPostResponseSuccessDto
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.ScanCard.{StaffDockhouseScanCardGetResponseSuccessDto, StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships, StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday, StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday, StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat, StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.ScanCard._
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSession, ApClassSignup, BoatType, JpClassSession, JpClassSignup, Person, PersonCard, PersonRating, ProgramType, Rating}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.cacheable.{BoatTypes, Programs, Ratings}
-import org.sailcbi.APIServer.Entities.entitycalculations.MaxBoatFlag
 import org.sailcbi.APIServer.Logic.RatingLogic
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import java.time.LocalDate

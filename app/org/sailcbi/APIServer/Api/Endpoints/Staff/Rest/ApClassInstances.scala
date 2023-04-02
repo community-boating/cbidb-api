@@ -1,9 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
-import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{StaffRestApClassInstancesThisSeasonGetResponseSuccessDto, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions}
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstancesThisSeason
@@ -11,7 +8,6 @@ import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import java.time.ZonedDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

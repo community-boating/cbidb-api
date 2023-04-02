@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassInstance, JpClassSession, JpClassSignup, JpClassWlResult, Person}
+import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
