@@ -6,6 +6,7 @@ import com.coleji.neptune.IO.PreparedQueries._
 import com.coleji.neptune.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
 import com.coleji.neptune.Util._
 import com.coleji.neptune.{API, Storable}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.MemberApClassInstancesInstructorInfoGetResponseSuccessDto
 import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -1965,10 +1966,11 @@ object PortalLogic {
 				displayOrder = rsw.getDouble(3),
 				noSignup = rsw.getOptionBooleanFromChar(5).getOrElse(false),
 				seeTypeError = rsw.getOptionString(6),
-				description = rsw.getString(7)
+				description = rsw.getString(7),
+				canTeach = rsw.getBooleanFromChar(8)
 			)
 
-			override val params: List[String] = List(personId.toString, personId.toString)
+			override val params: List[String] = List(personId.toString, personId.toString, personId.toString)
 
 			override def getQuery: String =
 				"""
@@ -1979,7 +1981,8 @@ object PortalLogic {
 				  |ap_class_pkg.get_type_visibility(?, type_id),
 				  |t.no_signup,
 				  |ap_class_pkg.see_type(?, t.type_id),
-				  |t.desc_long
+				  |t.desc_long,
+				  |ap_class_pkg.can_teach_type(?, t.type_id)
 				  |from ap_class_types t
 				  |order by t.display_order
 				  |""".stripMargin
@@ -1993,13 +1996,112 @@ object PortalLogic {
 		displayOrder: Double,
 		noSignup: Boolean,
 		seeTypeError: Option[String],
-		description: String
+		description: String,
+		canTeach: Boolean
 	)
 
 	object ApClassAvailability {
 		implicit val format = Json.format[ApClassAvailability]
 
 		def apply(v: JsValue): ApClassAvailability = v.as[ApClassAvailability]
+	}
+
+	def getApClassesInstructorInfo(rc: RequestCache, personId: Int): List[MemberApClassInstancesInstructorInfoGetResponseSuccessDto] = {
+		val instancesQ: PreparedQueryForSelect[MemberApClassInstancesInstructorInfoGetResponseSuccessDto] = new PreparedQueryForSelect[MemberApClassInstancesInstructorInfoGetResponseSuccessDto](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): MemberApClassInstancesInstructorInfoGetResponseSuccessDto = new MemberApClassInstancesInstructorInfoGetResponseSuccessDto(
+				instanceId = rsw.getInt(1),
+				instructorName = rsw.getOptionString(2),
+				signupCt = rsw.getInt(3),
+				signupMin = rsw.getOptionInt(4),
+				signupMax = rsw.getOptionInt(5),
+			)
+
+			override val params: List[String] = List()
+
+			override def getQuery: String =
+				"""
+				  |select
+				  |i.instance_id,
+				  |(case when p.person_id is null then null else p.name_first || ' ' || substr(nvl(p.name_last,' '),0,1) end),
+				  |(select count(*) from ap_class_signups where instance_id = i.instance_id and signup_type = 'E'),
+				  |i.signup_min,
+				  |i.signup_max
+				  |from ap_class_bookends bk, ap_class_sessions fs, ap_class_instances i
+				  |left outer join persons p
+				  |on i.instructor_id = p.person_id
+				  |where i.instance_id = bk.instance_id and bk.first_session = fs.session_id
+				  |and fs.session_datetime > (add_months(util_pkg.get_sysdate, -18))
+				  |and fs.session_datetime < (add_months(util_pkg.get_sysdate, 8))
+				  |and i.cancelled_datetime is null
+				  |and nvl(i.hide_online,'N') <> 'Y'
+				  |order by fs.session_datetime
+				  |
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForSelect(instancesQ, 2000)
+	}
+
+	def attemptUnenrollTeachApClass(rc: RequestCache, personId: Int, instanceId: Int): Option[String] = {
+		val ppc = new PreparedProcedureCall[String](Set(MemberRequestCache)) {
+			//				procedure attempt_set_ap_class_instructor(
+			//					i_person_id in number,
+			//					i_instance_id in number,
+			//					i_override in char,
+			//					o_error out varchar2
+			//				);
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_error" -> java.sql.Types.CHAR
+			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> personId,
+				"i_instance_id" -> instanceId,
+
+			)
+
+			override def getOutResults(cs: CallableStatement): String = cs.getString("o_error")
+
+			override def getQuery: String = "ap_class_pkg.attempt_unenroll_ap_class_instructor(?, ?, ?)"
+		}
+
+		rc.executeProcedure(ppc) match {
+			case null => None
+			case s: String => Some(s)
+		}
+	}
+
+	def attemptSignupTeachApClass(rc: RequestCache, personId: Int, instanceId: Int): Option[String] = {
+		val ppc = new PreparedProcedureCall[String](Set(MemberRequestCache)) {
+//				procedure attempt_set_ap_class_instructor(
+//					i_person_id in number,
+//					i_instance_id in number,
+//					i_override in char,
+//					o_error out varchar2
+//				);
+			override def registerOutParameters: Map[String, Int] = Map(
+				"o_error" -> java.sql.Types.CHAR
+			)
+
+			override def setInParametersInt: Map[String, Int] = Map(
+				"i_person_id" -> personId,
+				"i_instance_id" -> instanceId,
+
+			)
+
+			override def setInParametersVarchar: Map[String, String] = Map(
+				"i_override" -> "N"
+			)
+
+			override def getOutResults(cs: CallableStatement): String = cs.getString("o_error")
+
+			override def getQuery: String = "ap_class_pkg.attempt_set_ap_class_instructor(?, ?, ?, ?)"
+		}
+
+		rc.executeProcedure(ppc) match {
+			case null => None
+			case s: String => Some(s)
+		}
 	}
 
 	def getApClassesForCalendar(rc: RequestCache, personId: Int): List[ApClassInstanceForCalendar] = {
@@ -2014,6 +2116,7 @@ object PortalLogic {
 				seeInstanceError = rsw.getOptionString(6),
 				spotsLeft = rsw.getInt(7),
 				price = rsw.getOptionDouble(8).getOrElse(0),
+				instructorId = rsw.getOptionInt(9)
 			)
 
 			override val params: List[String] = List(personId.toString, personId.toString)
@@ -2028,7 +2131,8 @@ object PortalLogic {
 				  |t.type_id,
 				  |ap_class_pkg.see_instance(?, i.instance_id),
 				  |ap_class_pkg.spots_left(i.instance_id),
-				  |i.price
+				  |i.price,
+				  |i.instructor_id
 				  |from ap_class_types t, ap_class_formats f, ap_class_bookends bk, ap_class_sessions fs, ap_class_instances i
 				  |left outer join ap_class_signups si
 				  |on si.instance_id = i.instance_id and si.person_id = ?
@@ -2102,7 +2206,8 @@ object PortalLogic {
 		waitlistResult: Option[String],
 		seeInstanceError: Option[String],
 		spotsLeft: Int,
-		price: Double
+		price: Double,
+		instructorId: Option[Int]
 	)
 
 	object ApClassInstanceForCalendar{

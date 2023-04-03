@@ -28,10 +28,21 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val orderId = PortalLogic.getOrderIdAP(rc, personId)
 			PortalLogic.assessDiscounts(rc, orderId)
 			type ResultUntyped = (
-				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String]
+				String, String, LocalDateTime, Int, String, Int, String, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Option[String], Boolean, Boolean, String
 			)
 			val nameQ = new PreparedQueryForSelect[ResultUntyped](Set(MemberRequestCache)) {
-				override val params: List[String] = List(personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString, personId.toString)
+				override val params: List[String] = List(
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString,
+					personId.toString
+				)
 
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): ResultUntyped = (
 					rsw.getString(1),
@@ -51,7 +62,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					rsw.getBooleanFromChar(15),
 					rsw.getBooleanFromChar(16),
 					rsw.getBooleanFromChar(17),
-					rsw.getOptionString(18)
+					rsw.getOptionString(18),
+					rsw.getBooleanFromChar(19),
+					rsw.getString(20).equals("Y"),
+					rsw.getString(21)
 				)
 
 				override def getQuery: String =
@@ -83,7 +97,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 					  |person_pkg.can_renew(?),
 					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) >= ${MagicIds.MIN_AGE_FOR_SENIOR} then 'Y' else 'N' end) as senior_available,
 					  |(case when dob is not null and util_pkg.age(dob,util_pkg.get_sysdate) between 18 and ${MagicIds.MAX_AGE_FOR_YOUTH} then 'Y' else 'N' end) as youth_available,
-					  |stripe_customer_id
+					  |stripe_customer_id,
+					  |person_pkg.ap_volunteer_good_standing(?),
+					  |person_pkg.has_rating_direct(?,1,1221),
+					  |ratings_pkg.ap_vol_ratings(person_id)
 					  |from persons where person_id = ?
 					  |""".stripMargin
 			}
@@ -105,7 +122,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				canRenew,
 				seniorAvailable,
 				youthAvailable,
-				stripeCustomerIdOption
+				stripeCustomerIdOption,
+				volunteerGoodStanding,
+				hasBasicVolunteerRating,
+				volRatings
 			) = rc.executePreparedQueryForSelect(nameQ).head
 
 			// do this async, user doesnt need to wait for it.
@@ -173,7 +193,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				expirationDate = expirationDate,
 				show4thLink = show4thLink,
 				discountsResult = discountsResult,
-				openStaggeredOrderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, personId)
+				openStaggeredOrderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, personId),
+				volunteerGoodStanding = volunteerGoodStanding,
+				hasBasicVolunteerRating = hasBasicVolunteerRating,
+				volRatings = volRatings
 			)
 			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
@@ -197,7 +220,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		expirationDate: Option[LocalDate],
 		show4thLink: Boolean,
 		discountsResult: DiscountsResult,
-		openStaggeredOrderId: Option[Int]
+		openStaggeredOrderId: Option[Int],
+		volunteerGoodStanding: Boolean,
+		hasBasicVolunteerRating: Boolean,
+		volRatings: String
 	)
 
 	object APWelcomePackageResult {
