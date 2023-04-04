@@ -201,6 +201,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
 			profiler.lap("finishing welcome pkg")
+			println(result)
 			Future(Ok(Json.toJson(result)))
 		})
 	})
