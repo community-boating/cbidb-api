@@ -2119,7 +2119,7 @@ object PortalLogic {
 				instructorId = rsw.getOptionInt(9)
 			)
 
-			override val params: List[String] = List(personId.toString, personId.toString)
+			override val params: List[String] = List(personId.toString, personId.toString, personId.toString)
 
 			override def getQuery: String =
 				"""
@@ -2145,6 +2145,7 @@ object PortalLogic {
 				  |and fs.session_datetime < (add_months(util_pkg.get_sysdate, 6))
 				  |and i.cancelled_datetime is null
 				  |and nvl(i.hide_online,'N') <> 'Y'
+				  |and ap_class_pkg.actually_see_instance(?, i.instance_id) is null
 				  |order by fs.session_datetime
 				  |
 				  |""".stripMargin
