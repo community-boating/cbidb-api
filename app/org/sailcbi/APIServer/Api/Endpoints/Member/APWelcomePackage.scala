@@ -150,7 +150,10 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			val expirationDate = {
 				if (BitVector.testBit(actions, 4) || BitVector.testBit(actions, 7)) {
 					val (_, expirationDate) = PortalLogic.getFYExpirationDate(rc, personId)
-					Some(expirationDate)
+					expirationDate match {
+						case null => None
+						case d => Some(d)
+					}
 				} else {
 					None
 				}
