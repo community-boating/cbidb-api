@@ -11,6 +11,7 @@ object DockhouseLogic {
 			case MagicIds.FLAG_COLORS.FLAG_GREEN => true
 			case MagicIds.FLAG_COLORS.FLAG_YELLOW => true
 			case MagicIds.FLAG_COLORS.FLAG_RED => true
+			case MagicIds.FLAG_COLORS.FLAG_CLOSED => true
 			case _ => false
 		}
 
