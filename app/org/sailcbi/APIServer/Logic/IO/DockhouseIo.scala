@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Logic.IO
 
 import com.coleji.neptune.Core.UnlockedRequestCache
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.MagicIds
 
 private[Logic] object DockhouseIo {
 	def putFlagChange(rc: UnlockedRequestCache, flagColor: String): FlagChange = {
@@ -12,7 +13,48 @@ private[Logic] object DockhouseIo {
 		fc
 	}
 
-	def addPersonToApClass(rc: UnlockedRequestCache, personId: Int, instanceId: Int): Either[String, ApClassSignup] = null
+	def addPersonToApClass(rc: UnlockedRequestCache, personId: Int, instanceId: Int): Either[String, ApClassSignup] = {
+		val existingSignup = rc.getObjectsByFilters(ApClassSignup, List(
+			ApClassSignup.fields.personId.alias.equalsConstant(personId),
+			ApClassSignup.fields.instanceId.alias.equalsConstant(instanceId)
+		), Set(
+			ApClassSignup.fields.signupId,
+			ApClassSignup.fields.signupType,
+		)).headOption
+
+		existingSignup match {
+			case Some(s) => {
+				if (!s.values.signupType.get.equals(MagicIds.CLASS_SIGNUP_TYPES.ENROLLED)) {
+					s.values.signupType.update(MagicIds.CLASS_SIGNUP_TYPES.ENROLLED)
+					rc.commitObjectToDatabase(s)
+				}
+				Right(s)
+			}
+			case None => {
+				val otherSignups = rc.getObjectsByFilters(ApClassSignup, List(
+					ApClassSignup.fields.instanceId.alias.equalsConstant(instanceId)
+				), Set(
+					ApClassSignup.fields.signupId,
+					ApClassSignup.fields.sequence
+				))
+
+				val maxSequence = otherSignups.foldRight(0)((signup, max) => {
+					val seq = signup.values.sequence.get
+					if (seq > max) seq
+					else max
+				})
+
+				val s = new ApClassSignup
+				s.values.instanceId.update(instanceId)
+				s.values.personId.update(personId)
+				s.values.signupType.update(MagicIds.CLASS_SIGNUP_TYPES.ENROLLED)
+				s.values.signupDatetime.update(rc.PA.now())
+				s.values.sequence.update(maxSequence+1)
+				rc.commitObjectToDatabase(s)
+				Right(s)
+			}
+		}
+	}
 
 	def createSignout(
 		rc: UnlockedRequestCache,

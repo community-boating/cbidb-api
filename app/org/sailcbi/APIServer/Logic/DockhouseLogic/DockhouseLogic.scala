@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Logic.DockhouseLogic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSignup, FlagChange, PersonRating}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassSession, ApClassSignup, FlagChange, PersonRating}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.IO.{DockhouseIo, RatingIo}
 
@@ -23,7 +23,13 @@ object DockhouseLogic {
 	}
 
 	def addPersonToApClass(rc: UnlockedRequestCache, personId: Int, instanceId: Int): Either[String, ApClassSignup] = {
-		// TODO: for DH, confirm the instance has a session today
+		val sessions = rc.getObjectsByFilters(ApClassSession, List(ApClassSession.fields.instanceId.alias.equalsConstant(instanceId)), Set(
+			ApClassSession.fields.sessionId,
+			ApClassSession.fields.sessionDatetime
+		))
+
+		// TODO: validate that the class hasnt ended?
+
 		DockhouseIo.addPersonToApClass(rc, personId, instanceId)
 	}
 

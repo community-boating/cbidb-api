@@ -76,4 +76,10 @@ object MagicIds {
 		val RIGGING = "G"
 		val RENTAL = "N"
 	}
+
+	object CLASS_SIGNUP_TYPES {
+		val ENROLLED = "E"
+		val WAIT_LIST = "W"
+		val PURCHASE_HOLD = "P"
+	}
 }
