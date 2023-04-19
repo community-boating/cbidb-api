@@ -10,6 +10,7 @@ class ApClassInstance extends StorableClass(ApClassInstance) {
 		val apClassFormat = new Initializable[ApClassFormat]
 		val apClassSessions = new Initializable[IndexedSeq[ApClassSession]]
 		val apClassSignups = new Initializable[IndexedSeq[ApClassSignup]]
+		val instructor = new Initializable[Option[Person]]
 	}
 
 	object values extends ValuesObject {
@@ -24,6 +25,7 @@ class ApClassInstance extends StorableClass(ApClassInstance) {
 		val cancelledDatetime = new NullableDateTimeFieldValue(self, ApClassInstance.fields.cancelledDatetime)
 		val hideOnline = new BooleanFieldValue(self, ApClassInstance.fields.hideOnline)
 		val locationString = new NullableStringFieldValue(self, ApClassInstance.fields.locationString)
+		val instructorId = new NullableIntFieldValue(self, ApClassInstance.fields.instructorId)
 	}
 }
 
@@ -44,6 +46,7 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
 		val cancelledDatetime = new NullableDateTimeDatabaseField(self, "CANCELLED_DATETIME")
 		val hideOnline = new BooleanDatabaseField(self, "HIDE_ONLINE", true)
 		val locationString = new NullableStringDatabaseField(self, "LOCATION_STRING", 100)
+		val instructorId = new NullableIntDatabaseField(self, "INSTRUCTOR_ID")
 	}
 
 	def primaryKey: IntDatabaseField = fields.instanceId
