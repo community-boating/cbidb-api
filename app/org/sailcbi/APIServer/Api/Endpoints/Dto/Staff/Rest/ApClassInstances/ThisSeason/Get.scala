@@ -20,7 +20,9 @@ case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
 	cancelByOverride: Option[String],
 	locationString: Option[String],
 	doNotAutoCancel: Boolean,
+	instructorId: Option[Int],
 	$$apClassSessions: List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions],
+	$$instructor: Option[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor],
 )
 
 case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions (
@@ -39,9 +41,23 @@ object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions 
 		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions]
 }
 
+case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor (
+	personId: Int,
+	nameFirst: Option[String],
+	nameLast: Option[String],
+)
+
+object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor {
+	implicit val format = Json.format[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor]
+	def apply(v: JsValue): StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor
+		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor]
+}
+
 object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto {
 	implicit val StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessionsFormat
 		= StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions.format
+	implicit val StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_InstructorFormat
+		= StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor.format
 	implicit val format = Json.format[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto]
 	def apply(v: JsValue): StaffRestApClassInstancesThisSeasonGetResponseSuccessDto
 		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto]

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{StaffRestApClassInstancesThisSeasonGetResponseSuccessDto, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{StaffRestApClassInstancesThisSeasonGetResponseSuccessDto, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor}
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstancesThisSeason
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -31,6 +31,12 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 			cancelByOverride = i.values.cancelByOverride.get.map(_.toString),
 			locationString = i.values.locationString.get,
 			doNotAutoCancel = i.values.doNotAutoCancel.get,
+			instructorId = i.values.instructorId.get,
+			$$instructor = i.references.instructor.peek.flatMap(_.map(ii => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor(
+				personId = ii.values.personId.get,
+				nameFirst = ii.values.nameFirst.get,
+				nameLast = ii.values.nameLast.get
+			))),
 			$$apClassSessions = i.references.apClassSessions.peek.map(ss => ss.map(s => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions(
 				sessionId = s.values.sessionId.get,
 				instanceId = s.values.instanceId.get,
