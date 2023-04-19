@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassInstance, ApClas
 import java.time.{Duration, ZonedDateTime}
 
 object ApClassInstancesThisSeason extends CacheableFactory[Null, IndexedSeq[ApClassInstance]] {
-	override protected val lifetime: Duration = Duration.ofMinutes(3)
+	override protected val lifetime: Duration = Duration.ofSeconds(10)
 
 	override protected def calculateKey(config: Null): String = CacheKeys.apClassInstancesThisSeason
 
