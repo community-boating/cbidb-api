@@ -73,6 +73,7 @@ object MagicIds {
 		val RACING = "R"
 		val CLASS = "C"
 		val TESTING = "T"
+		val INSTRUCTION = "I"
 		val RIGGING = "G"
 		val RENTAL = "N"
 	}
