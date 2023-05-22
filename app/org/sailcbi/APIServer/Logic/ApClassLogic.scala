@@ -1,7 +1,11 @@
 package org.sailcbi.APIServer.Logic
 
-import com.coleji.neptune.Core.UnlockedRequestCache
+import com.coleji.neptune.Core.{RequestCache, UnlockedRequestCache}
+import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{DatetimeRange, SunsetTime}
+import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 
 import java.time.{DayOfWeek, Duration, LocalDate, LocalDateTime}
 
@@ -10,28 +14,14 @@ object ApClassLogic {
 	val AP_GUIDED_SAIL_INCREMENT = Duration.ofMinutes(15)
 	val DATETIME_RANGE_TYPE = "guided-sail-blackout"
 
-	def getApGuidedSailTimeslots(rc: UnlockedRequestCache, forDate: LocalDate): List[LocalDateTime] = {
+	def getApGuidedSailTimeslots(rc: RequestCache, forDate: LocalDate): List[LocalDateTime] = {
 		if (!programOpen(forDate)) List.empty
 		else {
-			val sunsetTime = rc.getObjectsByFilters(SunsetTime, List(
-				SunsetTime.fields.forDate.alias.isDateConstant(forDate)
-			), Set(
-				SunsetTime.fields.rowId,
-				SunsetTime.fields.forDate,
-				SunsetTime.fields.sunset
-			)).headOption.map(_.values.sunset.get)
+			val sunsetTime = getSunsetTime(rc, forDate)
 
 			val startTime = if (forDate.getDayOfWeek.getValue > DayOfWeek.FRIDAY.getValue) 9 else 13
 
-			val blackoutRanges = rc.getObjectsByFilters(DatetimeRange, List(
-				DatetimeRange.fields.rangeType.alias.equalsConstant(DATETIME_RANGE_TYPE),
-				DatetimeRange.fields.startDatetime.alias.isDateConstant(forDate)
-			), Set(
-				DatetimeRange.fields.rangeId,
-				DatetimeRange.fields.rangeType,
-				DatetimeRange.fields.startDatetime,
-				DatetimeRange.fields.endDatetime
-			))
+			val blackoutRanges = getBlackoutRanges(rc, forDate)
 
 			forDate.atTime(startTime, 0)
 
@@ -40,9 +30,37 @@ object ApClassLogic {
 				sunset,
 				AP_GUIDED_SAIL_DURATION,
 				AP_GUIDED_SAIL_INCREMENT,
-				blackoutRanges.map(b => (b.values.startDatetime.get, b.values.endDatetime.get))
+				blackoutRanges
 			)).getOrElse(List.empty)
 		}
+	}
+
+	private def getSunsetTime(rc: RequestCache, forDate: LocalDate): Option[LocalDateTime] = {
+		val q = new PreparedQueryForSelect[LocalDateTime](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): LocalDateTime = rsw.getLocalDateTime(1)
+
+			override def getQuery: String =
+				s"""
+				  |select SUNSET from SUNSET_TIMES where FOR_DATE = to_date('${forDate.format(DateUtil.DATE_FORMATTER)}','MM/DD/YYYY')
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForSelect(q).headOption
+	}
+
+	private def getBlackoutRanges(rc: RequestCache, forDate: LocalDate): List[(LocalDateTime, LocalDateTime)] = {
+		val q = new PreparedQueryForSelect[(LocalDateTime, LocalDateTime)](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDateTime, LocalDateTime) = (rsw.getLocalDateTime(1), rsw.getLocalDateTime(2))
+
+			override def getQuery: String =
+				s"""
+				  |select START_DATETIME, END_DATETIME
+				  |from DATETIME_RANGES where RANGE_TYPE = $DATETIME_RANGE_TYPE
+				  |and trunc(START_DATETIME) = to_date('${forDate.format(DateUtil.DATE_FORMATTER)}','MM/DD/YYYY')
+				  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForSelect(q)
 	}
 
 	private def createDateRanges(
