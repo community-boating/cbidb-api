@@ -11,7 +11,7 @@ import org.sailcbi.APIServer.Entities.dto.MembershipSale
 import java.time.Duration
 
 object MembershipSalesCache extends CacheableFactory[MembershipSalesCacheKey, List[MembershipSale]] {
-	override protected val lifetime: Duration = Duration.ofHours(24)
+	override protected val lifetime: Duration = Duration.ofHours(1)
 
 	override protected def calculateKey(config: MembershipSalesCacheKey): String = CacheKeys.membershipSales(config)
 
