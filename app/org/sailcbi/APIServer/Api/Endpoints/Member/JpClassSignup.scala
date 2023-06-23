@@ -44,7 +44,10 @@ class JpClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 						else PortalLogic.allowWaitList(rc, parsed.juniorId, parsed.instanceId)
 					}
 					lazy val hasSeats = {
-						if (doEnroll && !wlJoin) PortalLogic.hasSpotsLeft(rc, parsed.instanceId, Some("The class is full."))
+						if (doEnroll) {
+							if (wlJoin) PortalLogic.hasActualSpotsLeft(rc, parsed.instanceId, Some("The class is full."))
+							else PortalLogic.hasSpotsLeft(rc, parsed.instanceId, Some("The class is full."))
+						}
 						else ValidationOk
 					}
 					lazy val allowEnroll = {

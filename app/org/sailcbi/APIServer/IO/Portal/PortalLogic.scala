@@ -268,8 +268,27 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
+	def actualSpotsLeft(rc: RequestCache, instanceId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache, MemberRequestCache)) {
+			override val params: List[String] = List(instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.actual_spots_left(?) from dual
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q).headOption.getOrElse(0)
+	}
+
 	def hasSpotsLeft(rc: RequestCache, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
 		if (spotsLeft(rc, instanceId) > 0) ValidationOk
+		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
+	}
+
+	def hasActualSpotsLeft(rc: RequestCache, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
+		if (actualSpotsLeft(rc, instanceId) > 0) ValidationOk
 		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
 	}
 
