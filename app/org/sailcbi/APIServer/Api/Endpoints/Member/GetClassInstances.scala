@@ -6,7 +6,7 @@ import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetClassInstancesQuery, GetClassInstancesQueryResult}
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsNull, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
@@ -35,9 +35,13 @@ class GetClassInstances @Inject()(implicit val exec: ExecutionContext) extends I
 					  |select type_name, session_length, session_ct from jp_class_types where type_id = ?
 					  |""".stripMargin
 			}
-			val classInfo = rc.executePreparedQueryForSelect(classInfoQuery).head
-			implicit val format = ClassTypeInfo.format
-			Future(Ok(Json.toJson(classInfo)))
+			rc.executePreparedQueryForSelect(classInfoQuery).headOption match {
+				case Some(i) => {
+					implicit val format = ClassTypeInfo.format
+					Future(Ok(Json.toJson(i)))
+				}
+				case None => Future(BadRequest(JsNull))
+			}
 		})
 	})
 

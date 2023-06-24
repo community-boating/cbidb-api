@@ -268,8 +268,27 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).headOption.getOrElse(0)
 	}
 
+	def actualSpotsLeft(rc: RequestCache, instanceId: Int): Int = {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache, MemberRequestCache)) {
+			override val params: List[String] = List(instanceId.toString)
+
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override def getQuery: String =
+				"""
+				  |select jp_class_pkg.actual_spots_left(?) from dual
+				  |""".stripMargin
+		}
+		rc.executePreparedQueryForSelect(q).headOption.getOrElse(0)
+	}
+
 	def hasSpotsLeft(rc: RequestCache, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
 		if (spotsLeft(rc, instanceId) > 0) ValidationOk
+		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
+	}
+
+	def hasActualSpotsLeft(rc: RequestCache, instanceId: Int, messageOverride: Option[String]): ValidationResult = {
+		if (actualSpotsLeft(rc, instanceId) > 0) ValidationOk
 		else ValidationResult.from(messageOverride.getOrElse("This class is full."))
 	}
 
@@ -672,7 +691,7 @@ object PortalLogic {
 				s"""
 				  |select s.instance_id from jp_class_signups s, jp_class_instances i, jp_class_bookends bk, jp_class_sessions fs
 				  |    where s.instance_id = i.instance_id and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
-				  |    and to_char(fs.session_datetime, 'YYYY') = util_pkg.get_current_season
+				  |    fs.session_datetime > util_pkg.get_sysdate
 				  |    and i.type_id = ?
 				  |    and i.instance_id <> ?
 				  |    and s.person_id = ?
