@@ -691,7 +691,7 @@ object PortalLogic {
 				s"""
 				  |select s.instance_id from jp_class_signups s, jp_class_instances i, jp_class_bookends bk, jp_class_sessions fs
 				  |    where s.instance_id = i.instance_id and i.instance_id = bk.instance_id and bk.first_session = fs.session_id
-				  |    fs.session_datetime > util_pkg.get_sysdate
+				  |    and fs.session_datetime > util_pkg.get_sysdate
 				  |    and i.type_id = ?
 				  |    and i.instance_id <> ?
 				  |    and s.person_id = ?

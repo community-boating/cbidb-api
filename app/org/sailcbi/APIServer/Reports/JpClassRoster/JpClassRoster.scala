@@ -55,7 +55,6 @@ class JpClassRoster(data: JpClassRosterModel) extends PDFReport(data) {
 			}
 			val fullWidthTables = List(
 				new JpClassRosterView(data, sectionRosterData, defaultBoldFont, defaultFont, defaultFontSize, titleText + " - Attendance"),
-				new JpClassRosterView(data, sectionRosterData, defaultBoldFont, defaultFont, defaultFontSize, titleText + " - Symptom Screening Check"),
 				new JpSpecialNeedsView(sectionRosterData.filter(specNeedsFilter).map(rosterdataToSpecialNeedsData), defaultBoldFont, defaultFont, defaultFontSize),
 				new JpSignupNotesView(sectionRosterData.filter(signupNotesFilter).map(rosterdataToSignupNotesData), defaultBoldFont, defaultFont, defaultFontSize)
 			)
