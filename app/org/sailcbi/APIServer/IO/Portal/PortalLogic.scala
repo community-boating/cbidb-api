@@ -705,43 +705,45 @@ object PortalLogic {
 	def deleteConflictingSignups(rc: RequestCache, juniorId: Int, instanceId: Int, instanceIdToKeep: Int, enrollment: Boolean): Unit = {
 		val instanceIdsToDelete = getConflictingSignups(rc, juniorId, instanceId, enrollment).filter(_ != instanceIdToKeep)
 
-		val signupsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+		if (instanceIdsToDelete.nonEmpty) {
+			val signupsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
-			override def getQuery: String =
-				s"""
-				   |select signup_id from jp_class_signups
-				   |where person_id = ${juniorId}
-				   |and instance_id in (${instanceIdsToDelete.mkString(", ")})
-				   |
-				   |""".stripMargin
+				override def getQuery: String =
+					s"""
+					   |select signup_id from jp_class_signups
+					   |where person_id = ${juniorId}
+					   |and instance_id in (${instanceIdsToDelete.mkString(", ")})
+					   |
+					   |""".stripMargin
 
+			}
+
+			val signupIds = rc.executePreparedQueryForSelect(signupsQ)
+
+			val wlQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_wl_results
+					   |where signup_id in (${signupIds.mkString(", ")})
+					   |
+					   |""".stripMargin
+			}
+
+			rc.executePreparedQueryForUpdateOrDelete(wlQ)
+
+			val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_signups
+					   |where signup_id in (${signupIds.mkString(", ")})
+					   |
+					   |""".stripMargin
+			}
+
+			val deletedCt = rc.executePreparedQueryForUpdateOrDelete(q)
+			println("deleted " + deletedCt)
 		}
-
-		val signupIds = rc.executePreparedQueryForSelect(signupsQ)
-
-		val wlQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String =
-				s"""
-				   |delete from jp_class_wl_results
-				   |where signup_id in (${signupIds.mkString(", ")})
-				   |
-				   |""".stripMargin
-		}
-
-		rc.executePreparedQueryForUpdateOrDelete(wlQ)
-
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String =
-				s"""
-				  |delete from jp_class_signups
-				  |where signup_id in (${signupIds.mkString(", ")})
-				  |
-				  |""".stripMargin
-		}
-
-		val deletedCt = rc.executePreparedQueryForUpdateOrDelete(q)
-		println("deleted " + deletedCt)
 	}
 
 	def canWaitListJoin(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
