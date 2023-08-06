@@ -3262,7 +3262,11 @@ object PortalLogic {
 				  |select nonce from persons_cards where card_num = ?
 				  |""".stripMargin
 		}
-		rc.executePreparedQueryForSelect(q).head.flatMap(n => {
+		val results = rc.executePreparedQueryForSelect(q)
+		if (results.isEmpty) {
+			throw new RuntimeException("No cards for cardnumber " + cardNumber)
+		}
+		results.head.flatMap(n => {
 			if (n == nonce) Some(BarcodeFactory.getImage(cardNumber.toString))
 			else None
 		})
