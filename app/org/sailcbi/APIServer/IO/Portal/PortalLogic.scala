@@ -705,43 +705,45 @@ object PortalLogic {
 	def deleteConflictingSignups(rc: RequestCache, juniorId: Int, instanceId: Int, instanceIdToKeep: Int, enrollment: Boolean): Unit = {
 		val instanceIdsToDelete = getConflictingSignups(rc, juniorId, instanceId, enrollment).filter(_ != instanceIdToKeep)
 
-		val signupsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+		if (instanceIdsToDelete.nonEmpty) {
+			val signupsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
-			override def getQuery: String =
-				s"""
-				   |select signup_id from jp_class_signups
-				   |where person_id = ${juniorId}
-				   |and instance_id in (${instanceIdsToDelete.mkString(", ")})
-				   |
-				   |""".stripMargin
+				override def getQuery: String =
+					s"""
+					   |select signup_id from jp_class_signups
+					   |where person_id = ${juniorId}
+					   |and instance_id in (${instanceIdsToDelete.mkString(", ")})
+					   |
+					   |""".stripMargin
 
+			}
+
+			val signupIds = rc.executePreparedQueryForSelect(signupsQ)
+
+			val wlQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_wl_results
+					   |where signup_id in (${signupIds.mkString(", ")})
+					   |
+					   |""".stripMargin
+			}
+
+			rc.executePreparedQueryForUpdateOrDelete(wlQ)
+
+			val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+				override def getQuery: String =
+					s"""
+					   |delete from jp_class_signups
+					   |where signup_id in (${signupIds.mkString(", ")})
+					   |
+					   |""".stripMargin
+			}
+
+			val deletedCt = rc.executePreparedQueryForUpdateOrDelete(q)
+			println("deleted " + deletedCt)
 		}
-
-		val signupIds = rc.executePreparedQueryForSelect(signupsQ)
-
-		val wlQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String =
-				s"""
-				   |delete from jp_class_wl_results
-				   |where signup_id in (${signupIds.mkString(", ")})
-				   |
-				   |""".stripMargin
-		}
-
-		rc.executePreparedQueryForUpdateOrDelete(wlQ)
-
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String =
-				s"""
-				  |delete from jp_class_signups
-				  |where signup_id in (${signupIds.mkString(", ")})
-				  |
-				  |""".stripMargin
-		}
-
-		val deletedCt = rc.executePreparedQueryForUpdateOrDelete(q)
-		println("deleted " + deletedCt)
 	}
 
 	def canWaitListJoin(rc: RequestCache, juniorId: Int, instanceId: Int): Boolean = {
@@ -2676,9 +2678,11 @@ object PortalLogic {
 		val cartQ = new PreparedQueryForSelect[Currency](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Currency = Currency.dollars(rsw.getOptionDouble(1).getOrElse(0d))
 
+			// optimizer feature is to fix the bug where all aggregate functions against full_cart crash in Oracle 21c
+			// if `select count(*) from full_cart` works then this can be removed (at time of writing it works on all nonprod systems but doesnt work on prod)
 			override def getQuery: String =
 				s"""
-				   |select nvl(sum(nvl(price,0)),0) from full_cart
+				   |select /*+ optimizer_features_enable('11.2.0.4') */ nvl(sum(nvl(price,0)),0) from full_cart
 				   |where order_id = $orderId
 				   |and item_type not in ('Membership', 'Damage Waiver', 'Discount', 'Gift Certificate Redeemed', 'Guest Privileges')
 				   |""".stripMargin
@@ -3260,7 +3264,11 @@ object PortalLogic {
 				  |select nonce from persons_cards where card_num = ?
 				  |""".stripMargin
 		}
-		rc.executePreparedQueryForSelect(q).head.flatMap(n => {
+		val results = rc.executePreparedQueryForSelect(q)
+		if (results.isEmpty) {
+			throw new RuntimeException("No cards for cardnumber " + cardNumber)
+		}
+		results.head.flatMap(n => {
 			if (n == nonce) Some(BarcodeFactory.getImage(cardNumber.toString))
 			else None
 		})
