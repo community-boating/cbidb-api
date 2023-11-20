@@ -1,9 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{BooleanFieldValue, IntFieldValue, NullableIntFieldValue}
-import com.coleji.neptune.Storable.Fields.{BooleanDatabaseField, IntDatabaseField, NullableIntDatabaseField}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.{Initializable, InitializableFromCollectionSubset}
+import com.coleji.neptune.Util.Initializable
 
 class JpClassInstance extends StorableClass(JpClassInstance) {
 	override object references extends ReferencesObject {
@@ -14,36 +14,52 @@ class JpClassInstance extends StorableClass(JpClassInstance) {
 		val jpClassSignups = new Initializable[IndexedSeq[JpClassSignup]]
 	}
 
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val instanceId = new IntFieldValue(self, JpClassInstance.fields.instanceId)
+		val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
+		val limitOverride = new NullableDoubleFieldValue(self, JpClassInstance.fields.limitOverride)
+		val nameOverride = new NullableStringFieldValue(self, JpClassInstance.fields.nameOverride)
+		val maxAge = new NullableDoubleFieldValue(self, JpClassInstance.fields.maxAge)
+		val createdOn = new DateTimeFieldValue(self, JpClassInstance.fields.createdOn)
+		val createdBy = new NullableStringFieldValue(self, JpClassInstance.fields.createdBy)
+		val updatedOn = new DateTimeFieldValue(self, JpClassInstance.fields.updatedOn)
+		val updatedBy = new NullableStringFieldValue(self, JpClassInstance.fields.updatedBy)
+		val minAge = new NullableDoubleFieldValue(self, JpClassInstance.fields.minAge)
+		val price = new NullableDoubleFieldValue(self, JpClassInstance.fields.price)
+		val regCodeRowId = new NullableIntFieldValue(self, JpClassInstance.fields.regCodeRowId)
+		val confirmTemplate = new NullableStringFieldValue(self, JpClassInstance.fields.confirmTemplate)
+		val adminHold = new NullableBooleanFieldValue(self, JpClassInstance.fields.adminHold)
 		val instructorId = new NullableIntFieldValue(self, JpClassInstance.fields.instructorId)
 		val locationId = new NullableIntFieldValue(self, JpClassInstance.fields.locationId)
-		val typeId = new IntFieldValue(self, JpClassInstance.fields.typeId)
-		val adminHold = new BooleanFieldValue(self, JpClassInstance.fields.adminHold)
+		val reservedForGroup = new NullableBooleanFieldValue(self, JpClassInstance.fields.reservedForGroup)
+		val overrideNoLimit = new NullableBooleanFieldValue(self, JpClassInstance.fields.overrideNoLimit)
 	}
-
-	object calculatedValues extends CalculatedValuesObject {
-		val sessions = new InitializableFromCollectionSubset[List[JpClassSession], JpClassSession]((s: JpClassSession) => {
-			s.values.instanceId.get == values.instanceId.get
-		})
-
-		// TODO: is there a way to make this not compile if you call it unsafely?  Better way to structure this?
-		lazy val firstSession: JpClassSession = sessions.get.sortWith((a: JpClassSession, b: JpClassSession) => {
-			a.values.sessionDateTime.get.isBefore(b.values.sessionDateTime.get)
-		}).head
-	}
-
 }
 
 object JpClassInstance extends StorableObject[JpClassInstance] {
-	val entityName: String = "JP_CLASS_INSTANCES"
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
+	override val entityName: String = "JP_CLASS_INSTANCES"
 
 	object fields extends FieldsObject {
 		val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
+		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		val limitOverride = new NullableDoubleDatabaseField(self, "LIMIT_OVERRIDE")
+		val nameOverride = new NullableStringDatabaseField(self, "NAME_OVERRIDE", 200)
+		val maxAge = new NullableDoubleDatabaseField(self, "MAX_AGE")
+		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+		val minAge = new NullableDoubleDatabaseField(self, "MIN_AGE")
+		val price = new NullableDoubleDatabaseField(self, "PRICE")
+		val regCodeRowId = new NullableIntDatabaseField(self, "REG_CODE_ROW_ID")
+		val confirmTemplate = new NullableStringDatabaseField(self, "CONFIRM_TEMPLATE", 100)
+		val adminHold = new NullableBooleanDatabaseField(self, "ADMIN_HOLD")
 		val instructorId = new NullableIntDatabaseField(self, "INSTRUCTOR_ID")
 		val locationId = new NullableIntDatabaseField(self, "LOCATION_ID")
-		val typeId = new IntDatabaseField(self, "TYPE_ID")
-		val adminHold =  new BooleanDatabaseField(self, "ADMIN_HOLD", true)
+		val reservedForGroup = new NullableBooleanDatabaseField(self, "RESERVED_FOR_GROUP")
+		val overrideNoLimit = new NullableBooleanDatabaseField(self, "OVERRIDE_NO_LIMIT")
 	}
 
 	def primaryKey: IntDatabaseField = fields.instanceId

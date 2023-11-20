@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.IntFieldValue
-import com.coleji.neptune.Storable.Fields.IntDatabaseField
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
-import org.sailcbi.APIServer.Entities.NullableInDatabase
 
 class PersonRelationship extends StorableClass(PersonRelationship) {
 	override object references extends ReferencesObject {
@@ -12,29 +11,32 @@ class PersonRelationship extends StorableClass(PersonRelationship) {
 		val b = new Initializable[Person]
 	}
 
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val relationId = new IntFieldValue(self, PersonRelationship.fields.relationId)
-		val a = new IntFieldValue(self, PersonRelationship.fields.a)
-		val b = new IntFieldValue(self, PersonRelationship.fields.b)
+		val a = new DoubleFieldValue(self, PersonRelationship.fields.a)
+		val b = new DoubleFieldValue(self, PersonRelationship.fields.b)
 		val typeId = new IntFieldValue(self, PersonRelationship.fields.typeId)
+		val createdOn = new DateTimeFieldValue(self, PersonRelationship.fields.createdOn)
+		val createdBy = new NullableStringFieldValue(self, PersonRelationship.fields.createdBy)
+		val updatedOn = new DateTimeFieldValue(self, PersonRelationship.fields.updatedOn)
+		val updatedBy = new NullableStringFieldValue(self, PersonRelationship.fields.updatedBy)
 	}
 }
 
 object PersonRelationship extends StorableObject[PersonRelationship] {
-	val entityName: String = "PERSON_RELATIONSHIPS"
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
+	override val entityName: String = "PERSON_RELATIONSHIPS"
 
 	object fields extends FieldsObject {
 		val relationId = new IntDatabaseField(self, "RELATION_ID")
-		@NullableInDatabase
-		val a = new IntDatabaseField(self, "A")
-		@NullableInDatabase
-		val b = new IntDatabaseField(self, "B")
-		@NullableInDatabase
+		val a = new DoubleDatabaseField(self, "A")
+		val b = new DoubleDatabaseField(self, "B")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
-	}
-
-	object specialIDs {
-		val TYPE_ID_PARENT_CHILD_ACCT_LINKED: Int = 2
+		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}
 
 	def primaryKey: IntDatabaseField = fields.relationId

@@ -15,14 +15,14 @@ case class StaffRestApClassTypesGetResponseSuccessDto (
 	classPrereq: Option[Int],
 	ratingOverkill: Option[Int],
 	displayOrder: Int,
-	descLong: Option[String],
+	descLong: String,
 	descShort: Option[String],
 	classOverkill: Option[Int],
-	noSignup: Boolean,
+	noSignup: Option[Boolean],
 	priceDefault: Option[Double],
 	signupMaxDefault: Option[Int],
 	signupMinDefault: Option[Int],
-	disallowIfOverkill: Boolean,
+	disallowIfOverkill: Option[Boolean],
 	$$apClassFormats: List[StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats],
 )
 

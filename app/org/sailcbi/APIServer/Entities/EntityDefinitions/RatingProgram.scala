@@ -3,24 +3,33 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class RatingProgram extends StorableClass(RatingProgram) {
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val assignId = new IntFieldValue(self, RatingProgram.fields.assignId)
 		val ratingId = new IntFieldValue(self, RatingProgram.fields.ratingId)
 		val programId = new IntFieldValue(self, RatingProgram.fields.programId)
+		val createdOn = new DateTimeFieldValue(self, RatingProgram.fields.createdOn)
+		val createdBy = new StringFieldValue(self, RatingProgram.fields.createdBy)
+		val updatedOn = new DateTimeFieldValue(self, RatingProgram.fields.updatedOn)
+		val updatedBy = new StringFieldValue(self, RatingProgram.fields.updatedBy)
 	}
 }
 
 object RatingProgram extends StorableObject[RatingProgram] {
 	override val useRuntimeFieldnamesForJson: Boolean = true
 
-	val entityName: String = "RATINGS_PROGRAMS"
+	override val entityName: String = "RATINGS_PROGRAMS"
 
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
 		val programId = new IntDatabaseField(self, "PROGRAM_ID")
+		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 
 	def primaryKey: IntDatabaseField = fields.assignId

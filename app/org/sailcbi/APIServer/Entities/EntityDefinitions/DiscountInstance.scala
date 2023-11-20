@@ -10,14 +10,18 @@ class DiscountInstance extends StorableClass(DiscountInstance) {
 		val discount = new Initializable[Discount]
 	}
 
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val instanceId = new IntFieldValue(self, DiscountInstance.fields.instanceId)
 		val discountId = new IntFieldValue(self, DiscountInstance.fields.discountId)
 		val nameOverride = new NullableStringFieldValue(self, DiscountInstance.fields.nameOverride)
 		val startActive = new NullableDateTimeFieldValue(self, DiscountInstance.fields.startActive)
 		val endActive = new NullableDateTimeFieldValue(self, DiscountInstance.fields.endActive)
 		val universalCode = new NullableStringFieldValue(self, DiscountInstance.fields.universalCode)
-		val isCaseSensitive = new BooleanFieldValue(self, DiscountInstance.fields.isCaseSensitive)
+		val isCaseSensitive = new NullableBooleanFieldValue(self, DiscountInstance.fields.isCaseSensitive)
+		val createdOn = new NullableDateTimeFieldValue(self, DiscountInstance.fields.createdOn)
+		val createdBy = new NullableStringFieldValue(self, DiscountInstance.fields.createdBy)
+		val updatedOn = new NullableDateTimeFieldValue(self, DiscountInstance.fields.updatedOn)
+		val updatedBy = new NullableStringFieldValue(self, DiscountInstance.fields.updatedBy)
 		val emailRegexp = new NullableStringFieldValue(self, DiscountInstance.fields.emailRegexp)
 	}
 }
@@ -34,7 +38,11 @@ object DiscountInstance extends StorableObject[DiscountInstance] {
 		val startActive = new NullableDateTimeDatabaseField(self, "START_ACTIVE")
 		val endActive = new NullableDateTimeDatabaseField(self, "END_ACTIVE")
 		val universalCode = new NullableStringDatabaseField(self, "UNIVERSAL_CODE", 100)
-		val isCaseSensitive = new BooleanDatabaseField(self, "IS_CASE_SENSITIVE", true)
+		val isCaseSensitive = new NullableBooleanDatabaseField(self, "IS_CASE_SENSITIVE")
+		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val emailRegexp = new NullableStringDatabaseField(self, "EMAIL_REGEXP", 500)
 	}
 

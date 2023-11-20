@@ -1,11 +1,12 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.IntFieldValue
-import com.coleji.neptune.Storable.Fields.IntDatabaseField
-import com.coleji.neptune.Storable.{FieldsObject, StorableClass, StorableObject, ValuesObject}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
+import com.coleji.neptune.Storable._
+import com.coleji.neptune.Util.Initializable
 
 class AccessProfileRelationship extends StorableClass(AccessProfileRelationship) {
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val rowId = new IntFieldValue(self, AccessProfileRelationship.fields.rowId)
 		val managingProfileId = new IntFieldValue(self, AccessProfileRelationship.fields.managingProfileId)
 		val subordinateProfileId = new IntFieldValue(self, AccessProfileRelationship.fields.subordinateProfileId)
@@ -15,7 +16,7 @@ class AccessProfileRelationship extends StorableClass(AccessProfileRelationship)
 object AccessProfileRelationship extends StorableObject[AccessProfileRelationship] {
 	override val useRuntimeFieldnamesForJson: Boolean = true
 
-	val entityName: String = "ACCESS_PROFILES_RELATIONSHIPS"
+	override val entityName: String = "ACCESS_PROFILES_RELATIONSHIPS"
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")

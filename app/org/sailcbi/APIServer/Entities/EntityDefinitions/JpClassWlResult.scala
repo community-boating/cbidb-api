@@ -1,59 +1,43 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{DateTimeFieldValue, IntFieldValue, StringFieldValue}
-import com.coleji.neptune.Storable.Fields.{DateTimeDatabaseField, IntDatabaseField, StringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.DateUtil
-import play.api.libs.json.{JsString, JsValue}
-
-import java.time.LocalDateTime
+import com.coleji.neptune.Util.Initializable
 
 class JpClassWlResult extends StorableClass(JpClassWlResult) {
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val signupId = new IntFieldValue(self, JpClassWlResult.fields.signupId)
+		val foVmDatetime = new NullableDateTimeFieldValue(self, JpClassWlResult.fields.foVmDatetime)
 		val wlResult = new StringFieldValue(self, JpClassWlResult.fields.wlResult)
+		val createdOn = new DateTimeFieldValue(self, JpClassWlResult.fields.createdOn)
+		val createdBy = new NullableStringFieldValue(self, JpClassWlResult.fields.createdBy)
+		val updatedOn = new DateTimeFieldValue(self, JpClassWlResult.fields.updatedOn)
+		val updatedBy = new NullableStringFieldValue(self, JpClassWlResult.fields.updatedBy)
+		val foAlertDatetime = new DateTimeFieldValue(self, JpClassWlResult.fields.foAlertDatetime)
 		val offerExpDatetime = new DateTimeFieldValue(self, JpClassWlResult.fields.offerExpDatetime)
+		val permitOvercrowd = new NullableBooleanFieldValue(self, JpClassWlResult.fields.permitOvercrowd)
+		val preapprovedExp = new NullableDateTimeFieldValue(self, JpClassWlResult.fields.preapprovedExp)
 	}
-
-	def getDisplayStatus: String = {
-//		(case
-//		when wl_result = 'F' then 'No Longer Eligible'
-//		when wl_result = 'E' then 'Enrolled from Wait List'
-//		when (wl_result = 'P' and offer_exp_datetime >= util_pkg.get_sysdate) then 'Offer Pending (expires '||to_char(wlr.offer_exp_datetime,'MM/DD/YYYY HH:MIPM')||')'
-//		when (wl_result = 'P' and offer_exp_datetime < util_pkg.get_sysdate) then 'Offer Expired'
-//		when (wl_result = 'A' and preapproved_exp >= util_pkg.get_sysdate) then 'Preapproved through '||to_char(preapproved_exp,'MM/DD/YYYY')
-//		when (wl_result = 'A' and preapproved_exp < util_pkg.get_sysdate) then 'Preapproved (Expired)'
-//		else ''
-//		end) as wait_list_status,
-		val result = this.values.wlResult.get
-		if (result == "F") {
-			"No Longer Eligible"
-		} else if (result == "E") {
-			"Enrolled from Wait List"
-		} else if (result == "P" ) {
-			val offerExp = this.values.offerExpDatetime.get
-			if (offerExp.isBefore(LocalDateTime.now)) {
-				"Offer Expired"
-			} else {
-				s"Offer Pending (expires ${offerExp.format(DateUtil.DATE_TIME_FORMATTER)})"
-			}
-		} else {
-			result
-		}
-	}
-
-	override def extraFieldsForJSValue: Map[String, JsValue] = Map(
-		"statusString" -> JsString(this.getDisplayStatus)
-	)
 }
 
 object JpClassWlResult extends StorableObject[JpClassWlResult] {
-	val entityName: String = "JP_CLASS_WL_RESULTS"
+	override val useRuntimeFieldnamesForJson: Boolean = true
+
+	override val entityName: String = "JP_CLASS_WL_RESULTS"
 
 	object fields extends FieldsObject {
 		val signupId = new IntDatabaseField(self, "SIGNUP_ID")
+		val foVmDatetime = new NullableDateTimeDatabaseField(self, "FO_VM_DATETIME")
 		val wlResult = new StringDatabaseField(self, "WL_RESULT", 1)
+		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+		val foAlertDatetime = new DateTimeDatabaseField(self, "FO_ALERT_DATETIME")
 		val offerExpDatetime = new DateTimeDatabaseField(self, "OFFER_EXP_DATETIME")
+		val permitOvercrowd = new NullableBooleanDatabaseField(self, "PERMIT_OVERCROWD")
+		val preapprovedExp = new NullableDateTimeDatabaseField(self, "PREAPPROVED_EXP")
 	}
 
 	def primaryKey: IntDatabaseField = fields.signupId

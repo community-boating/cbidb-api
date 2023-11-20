@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Entities.EntityDefinitions
 
-import com.coleji.neptune.Storable.FieldValues.{IntFieldValue, NullableStringFieldValue}
-import com.coleji.neptune.Storable.Fields.{IntDatabaseField, NullableStringDatabaseField}
+import com.coleji.neptune.Storable.FieldValues._
+import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util.Initializable
 
@@ -11,20 +11,24 @@ class SignoutTest extends StorableClass(SignoutTest) {
 		val person = new Initializable[Person]
 	}
 
-	object values extends ValuesObject {
+	override object values extends ValuesObject {
 		val testId = new IntFieldValue(self, SignoutTest.fields.testId)
 		val signoutId = new IntFieldValue(self, SignoutTest.fields.signoutId)
 		val personId = new IntFieldValue(self, SignoutTest.fields.personId)
 		val ratingId = new IntFieldValue(self, SignoutTest.fields.ratingId)
 		val testResult = new NullableStringFieldValue(self, SignoutTest.fields.testResult)
 		val instructorString = new NullableStringFieldValue(self, SignoutTest.fields.instructorString)
+		val createdOn = new DateTimeFieldValue(self, SignoutTest.fields.createdOn)
+		val createdBy = new StringFieldValue(self, SignoutTest.fields.createdBy)
+		val updatedOn = new DateTimeFieldValue(self, SignoutTest.fields.updatedOn)
+		val updatedBy = new StringFieldValue(self, SignoutTest.fields.updatedBy)
 	}
 }
 
 object SignoutTest extends StorableObject[SignoutTest] {
 	override val useRuntimeFieldnamesForJson: Boolean = true
 
-	val entityName: String = "SIGNOUTS_TESTS"
+	override val entityName: String = "SIGNOUTS_TESTS"
 
 	object fields extends FieldsObject {
 		val testId = new IntDatabaseField(self, "TEST_ID")
@@ -33,6 +37,10 @@ object SignoutTest extends StorableObject[SignoutTest] {
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
 		val testResult = new NullableStringDatabaseField(self, "TEST_RESULT", 1)
 		val instructorString = new NullableStringDatabaseField(self, "INSTRUCTOR_STRING", 100)
+		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		val createdBy = new StringDatabaseField(self, "CREATED_BY", 100)
+		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 100)
 	}
 
 	def primaryKey: IntDatabaseField = fields.testId
