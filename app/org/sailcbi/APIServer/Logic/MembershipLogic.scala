@@ -1,6 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
 import com.coleji.neptune.Util.Currency
+import org.sailcbi.APIServer.Entities.EntityDefinitions.PersonMembership
 import org.sailcbi.APIServer.Entities.MagicIds
 
 import java.time.format.DateTimeFormatter
@@ -54,5 +55,13 @@ object MembershipLogic {
 			case Month.JANUARY | Month.FEBRUARY | Month.MARCH => purchaseDate.withDayOfMonth(1).plusMonths(4 - purchaseMonth)
 			case _ => purchaseDate
 		}
+	}
+
+	def isActive(pm: PersonMembership, now: LocalDate): Boolean = {
+		val start = pm.values.startDate.get
+		val exp = pm.values.expirationDate.get
+
+		(start.isEmpty || !start.get.isAfter(now)) &&
+			(exp.isEmpty || !exp.get.isBefore(now))
 	}
 }

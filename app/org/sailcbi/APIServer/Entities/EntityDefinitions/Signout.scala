@@ -9,7 +9,7 @@ class Signout extends StorableClass(Signout) {
 	override object references extends ReferencesObject {
 		val skipper = new Initializable[Person]
 		val crew = new Initializable[List[SignoutCrew]]
-		val tests = new Initializable[IndexedSeq[SignoutsTest]]
+		val tests = new Initializable[IndexedSeq[SignoutTest]]
 	}
 
 	override object values extends ValuesObject {

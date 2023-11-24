@@ -7,7 +7,7 @@ import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.ScanCard._
 import org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership.GetPersonMembership
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.cacheable.{BoatTypes, Programs, Ratings}
-import org.sailcbi.APIServer.Logic.RatingLogic
+import org.sailcbi.APIServer.Logic.{MembershipLogic, RatingLogic}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -64,7 +64,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 	private def constructMemberships(rc: UnlockedRequestCache, personId: Int): List[StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships] = {
 		GetPersonMembership.getAllForPerson(rc, personId)
-		.filter(_.isActive(LocalDate.now))
+		.filter(MembershipLogic.isActive(_, LocalDate.now))
 		.map(pm => new StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships(
 			assignId = pm.values.assignId.get,
 			membershipTypeId = pm.values.membershipTypeId.get,
@@ -137,7 +137,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 			.from(JpClassSignup)
 			.innerJoin(JpClassSession, JpClassSession.fields.instanceId.alias.equalsField(JpClassSignup.fields.instanceId))
 			.where(List(
-				JpClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate),
+				JpClassSession.fields.sessionDatetime.alias.isDateConstant(rc.PA.now().toLocalDate),
 				JpClassSignup.fields.personId.alias.equalsConstant(personId)
 			))
 			.select(List(

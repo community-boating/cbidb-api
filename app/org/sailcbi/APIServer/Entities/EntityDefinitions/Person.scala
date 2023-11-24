@@ -7,7 +7,7 @@ import com.coleji.neptune.Util.Initializable
 
 class Person extends StorableClass(Person) {
 	override object references extends ReferencesObject {
-		val personRatings = new Initializable[IndexedSeq[Personrating]]
+		val personRatings = new Initializable[IndexedSeq[PersonRating]]
 	}
 
 	override object values extends ValuesObject {
@@ -92,7 +92,7 @@ class Person extends StorableClass(Person) {
 		val incomeAmt = new NullableDoubleFieldValue(self, Person.fields.incomeAmt)
 		val incomeAmtRaw = new NullableStringFieldValue(self, Person.fields.incomeAmtRaw)
 		val specNeedsVerified = new NullableBooleanFieldValue(self, Person.fields.specNeedsVerified)
-		val memberComment = new NullableUnknownFieldType(self, Person.fields.memberComment)
+		val memberComment = new NullableStringFieldValue(self, Person.fields.memberComment)
 		val verifiedEmail = new NullableStringFieldValue(self, Person.fields.verifiedEmail)
 		val uapBoat = new NullableDoubleFieldValue(self, Person.fields.uapBoat)
 		val ignoreJpMinAge = new NullableBooleanFieldValue(self, Person.fields.ignoreJpMinAge)
@@ -101,7 +101,7 @@ class Person extends StorableClass(Person) {
 		val entityType = new NullableBooleanFieldValue(self, Person.fields.entityType)
 		val jpTeamId = new NullableIntFieldValue(self, Person.fields.jpTeamId)
 		val guestPortalReg = new NullableStringFieldValue(self, Person.fields.guestPortalReg)
-		val signoutBlockReason = new NullableUnknownFieldType(self, Person.fields.signoutBlockReason)
+		val signoutBlockReason = new NullableStringFieldValue(self, Person.fields.signoutBlockReason)
 		val campFair = new NullableStringFieldValue(self, Person.fields.campFair)
 		val previousMember = new NullableBooleanFieldValue(self, Person.fields.previousMember)
 		val dataUnconfirmed = new NullableBooleanFieldValue(self, Person.fields.dataUnconfirmed)
@@ -203,7 +203,7 @@ object Person extends StorableObject[Person] {
 		val incomeAmt = new NullableDoubleDatabaseField(self, "INCOME_AMT")
 		val incomeAmtRaw = new NullableStringDatabaseField(self, "INCOME_AMT_RAW", 50)
 		val specNeedsVerified = new NullableBooleanDatabaseField(self, "SPEC_NEEDS_VERIFIED")
-		val memberComment = new NullableUnknownFieldType(self, "MEMBER_COMMENT")
+		val memberComment = new NullableStringDatabaseField(self, "MEMBER_COMMENT", -1)
 		val verifiedEmail = new NullableStringDatabaseField(self, "VERIFIED_EMAIL", 1000)
 		val uapBoat = new NullableDoubleDatabaseField(self, "UAP_BOAT")
 		val ignoreJpMinAge = new NullableBooleanDatabaseField(self, "IGNORE_JP_MIN_AGE")
@@ -212,7 +212,7 @@ object Person extends StorableObject[Person] {
 		val entityType = new NullableBooleanDatabaseField(self, "ENTITY_TYPE")
 		val jpTeamId = new NullableIntDatabaseField(self, "JP_TEAM_ID")
 		val guestPortalReg = new NullableStringDatabaseField(self, "GUEST_PORTAL_REG", 1)
-		val signoutBlockReason = new NullableUnknownFieldType(self, "SIGNOUT_BLOCK_REASON")
+		val signoutBlockReason = new NullableStringDatabaseField(self, "SIGNOUT_BLOCK_REASON", -1)
 		val campFair = new NullableStringDatabaseField(self, "CAMP_FAIR", 50)
 		val previousMember = new NullableBooleanDatabaseField(self, "PREVIOUS_MEMBER")
 		val dataUnconfirmed = new NullableBooleanDatabaseField(self, "DATA_UNCONFIRMED")

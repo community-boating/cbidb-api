@@ -18,7 +18,7 @@ class SpecialNeed extends StorableClass(SpecialNeed) {
 		val createdBy = new StringFieldValue(self, SpecialNeed.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, SpecialNeed.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, SpecialNeed.fields.updatedBy)
-		val description = new NullableUnknownFieldType(self, SpecialNeed.fields.description)
+		val description = new NullableStringFieldValue(self, SpecialNeed.fields.description)
 		val contactMethod = new NullableStringFieldValue(self, SpecialNeed.fields.contactMethod)
 		val phone = new NullableStringFieldValue(self, SpecialNeed.fields.phone)
 	}
@@ -41,7 +41,7 @@ object SpecialNeed extends StorableObject[SpecialNeed] {
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
-		val description = new NullableUnknownFieldType(self, "DESCRIPTION")
+		val description = new NullableStringDatabaseField(self, "DESCRIPTION", -1)
 		val contactMethod = new NullableStringDatabaseField(self, "CONTACT_METHOD", 50)
 		val phone = new NullableStringDatabaseField(self, "PHONE", 20)
 	}

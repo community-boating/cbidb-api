@@ -9,9 +9,9 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
-	sessionId: Int,
-	instanceId: Int,
-	headcount: Option[Int],
+	sessionId: Double,
+	instanceId: Double,
+	headcount: Option[Double],
 	cancelledDatetime: Option[String],
 	sessionDatetime: String,
 	sessionLength: Double,
@@ -20,13 +20,13 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
-	instanceId: Int,
+	instanceId: Double,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
-	signupMin: Option[Int],
+	signupMin: Option[Double],
 	price: Option[Double],
-	signupMax: Option[Int],
-	formatId: Int,
+	signupMax: Option[Double],
+	formatId: Double,
 	hideOnline: Option[Boolean],
 	cancelByOverride: Option[String],
 	locationString: Option[String],
@@ -35,19 +35,19 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups (
-	instanceId: Int,
-	discountInstanceId: Option[Int],
+	instanceId: Double,
+	discountInstanceId: Option[Double],
 	voidedOnline: Option[Boolean],
-	personId: Int,
-	orderId: Option[Int],
+	personId: Double,
+	orderId: Option[Double],
 	price: Option[Double],
-	signupId: Int,
-	closeId: Option[Int],
-	sequence: Int,
+	signupId: Double,
+	closeId: Option[Double],
+	sequence: Double,
 	paymentMedium: Option[String],
 	ccTransNum: Option[String],
 	paymentLocation: Option[String],
-	voidCloseId: Option[Int],
+	voidCloseId: Option[Double],
 	signupType: String,
 	signupNote: Option[String],
 	signupDatetime: String,
@@ -56,7 +56,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person (
-	personId: Int,
+	personId: Double,
 	nameFirst: Option[String],
 	nameLast: Option[String],
 )
@@ -71,7 +71,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	wlResult: String,
 	foVmDatetime: Option[String],
 	offerExpDatetime: String,
-	signupId: Int,
+	signupId: Double,
 	foAlertDatetime: String,
 	permitOvercrowd: Option[Boolean],
 )

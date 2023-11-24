@@ -9,7 +9,7 @@ class CommentsTable extends StorableClass(CommentsTable) {
 	override object values extends ValuesObject {
 		val tableId = new IntFieldValue(self, CommentsTable.fields.tableId)
 		val tableName = new StringFieldValue(self, CommentsTable.fields.tableName)
-		val commentText = new NullableUnknownFieldType(self, CommentsTable.fields.commentText)
+		val commentText = new NullableStringFieldValue(self, CommentsTable.fields.commentText)
 	}
 }
 
@@ -21,7 +21,7 @@ object CommentsTable extends StorableObject[CommentsTable] {
 	object fields extends FieldsObject {
 		val tableId = new IntDatabaseField(self, "TABLE_ID")
 		val tableName = new StringDatabaseField(self, "TABLE_NAME", 50)
-		val commentText = new NullableUnknownFieldType(self, "COMMENT_TEXT")
+		val commentText = new NullableStringDatabaseField(self, "COMMENT_TEXT", -1)
 	}
 
 	def primaryKey: IntDatabaseField = fields.tableId

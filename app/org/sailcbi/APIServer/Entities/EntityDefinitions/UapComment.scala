@@ -8,7 +8,7 @@ import com.coleji.neptune.Util.Initializable
 class UapComment extends StorableClass(UapComment) {
 	override object values extends ValuesObject {
 		val personId = new IntFieldValue(self, UapComment.fields.personId)
-		val uapComment = new UnknownFieldType(self, UapComment.fields.uapComment)
+		val uapComment = new StringFieldValue(self, UapComment.fields.uapComment)
 		val createdOn = new DateTimeFieldValue(self, UapComment.fields.createdOn)
 		val createdBy = new StringFieldValue(self, UapComment.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, UapComment.fields.updatedOn)
@@ -23,7 +23,7 @@ object UapComment extends StorableObject[UapComment] {
 
 	object fields extends FieldsObject {
 		val personId = new IntDatabaseField(self, "PERSON_ID")
-		val uapComment = new UnknownFieldType(self, "UAP_COMMENT")
+		val uapComment = new StringDatabaseField(self, "UAP_COMMENT", -1)
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")

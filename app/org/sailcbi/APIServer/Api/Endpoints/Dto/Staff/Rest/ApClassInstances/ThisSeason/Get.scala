@@ -9,26 +9,26 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
-	instanceId: Int,
+	instanceId: Double,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
-	signupMin: Option[Int],
+	signupMin: Option[Double],
 	price: Option[Double],
-	signupMax: Option[Int],
-	formatId: Int,
+	signupMax: Option[Double],
+	formatId: Double,
 	hideOnline: Option[Boolean],
 	cancelByOverride: Option[String],
 	locationString: Option[String],
 	doNotAutoCancel: Option[Boolean],
-	instructorId: Option[Int],
+	instructorId: Option[Double],
 	$$apClassSessions: List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions],
 	$$instructor: Option[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor],
 )
 
 case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions (
-	sessionId: Int,
-	instanceId: Int,
-	headcount: Option[Int],
+	sessionId: Double,
+	instanceId: Double,
+	headcount: Option[Double],
 	cancelledDatetime: Option[String],
 	sessionDatetime: String,
 	sessionLength: Double,
@@ -42,7 +42,7 @@ object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions 
 }
 
 case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor (
-	personId: Int,
+	personId: Double,
 	nameFirst: Option[String],
 	nameLast: Option[String],
 )

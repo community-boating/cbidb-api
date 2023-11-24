@@ -9,32 +9,32 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffRestApClassTypesGetResponseSuccessDto (
-	typeId: Int,
+	typeId: Double,
 	typeName: String,
-	ratingPrereq: Option[Int],
-	classPrereq: Option[Int],
-	ratingOverkill: Option[Int],
-	displayOrder: Int,
+	ratingPrereq: Option[Double],
+	classPrereq: Option[Double],
+	ratingOverkill: Option[Double],
+	displayOrder: Double,
 	descLong: String,
 	descShort: Option[String],
-	classOverkill: Option[Int],
+	classOverkill: Option[Double],
 	noSignup: Option[Boolean],
 	priceDefault: Option[Double],
-	signupMaxDefault: Option[Int],
-	signupMinDefault: Option[Int],
+	signupMaxDefault: Option[Double],
+	signupMinDefault: Option[Double],
 	disallowIfOverkill: Option[Boolean],
 	$$apClassFormats: List[StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats],
 )
 
 case class StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats (
-	formatId: Int,
-	typeId: Int,
+	formatId: Double,
+	typeId: Double,
 	description: Option[String],
 	priceDefaultOverride: Option[Double],
-	sessionCtDefault: Int,
+	sessionCtDefault: Double,
 	sessionLengthDefault: Double,
-	signupMaxDefaultOverride: Option[Int],
-	signupMinDefaultOverride: Option[Int],
+	signupMaxDefaultOverride: Option[Double],
+	signupMinDefaultOverride: Option[Double],
 )
 
 object StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats {
