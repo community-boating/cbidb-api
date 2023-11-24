@@ -35,5 +35,18 @@ class Initializable[T] extends Serializable {
 	def forEach(f: T => Unit): Unit = {
 		if (isInitialized) f(this.get)
 	}
+
+	def findOneInCollection(collection: Traversable[T], find: T => Boolean): T = value match {
+		case None => {
+			collection.find(find) match {
+				case Some(t) => {
+					value = Some(t)
+					t
+				}
+				case None => throw new Exception("No match found in collection")
+			}
+		}
+		case Some(t) => t
+	}
 }
 

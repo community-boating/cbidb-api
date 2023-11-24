@@ -15,7 +15,7 @@ class Person extends StorableClass(Person) {
 	}
 	
 	override object references extends ReferencesObject {
-		val personRatings = new Initializable[IndexedSeq[PersonRating]]
+		val personRatings = new InitializableSeq[PersonRating, IndexedSeq[PersonRating]]
 	}
 
 	override object values extends ValuesObject {

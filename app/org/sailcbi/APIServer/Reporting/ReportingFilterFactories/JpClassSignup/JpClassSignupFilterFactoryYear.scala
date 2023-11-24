@@ -16,7 +16,7 @@ class JpClassSignupFilterFactoryYear extends ReportingFilterFactory[JpClassSignu
 		implicit val rc: UnlockedRequestCache = _rc
 		val sessions = rc.getObjectsByFilters(
 			JpClassSession,
-			List(JpClassSession.fields.sessionDateTime.alias.isYearConstant(year)),
+			List(JpClassSession.fields.sessionDatetime.alias.isYearConstant(year)),
 			Set(JpClassSession.primaryKey),
 			100
 		)

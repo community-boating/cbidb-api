@@ -32,7 +32,7 @@ class PersonFilterFactoryJpParentSeason extends ReportingFilterFactory[Person] w
 		val parentIds = rc.getObjectsByFilters(
 			PersonRelationship,
 			List(
-				PersonRelationship.fields.typeId.alias.equalsConstant(PersonRelationship.specialIDs.TYPE_ID_PARENT_CHILD_ACCT_LINKED),
+				PersonRelationship.fields.typeId.alias.equalsConstant(MagicIds.PERSON_RELATIONSHIP_TYPE_PARENT_WITH_ACCT_LINK),
 				PersonRelationship.fields.b.alias.inList(juniorsThatYear)
 			),
 			Set(PersonRelationship.primaryKey)

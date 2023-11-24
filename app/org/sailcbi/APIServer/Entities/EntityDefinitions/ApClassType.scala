@@ -10,7 +10,7 @@ import play.api.libs.json._
 
 class ApClassType extends StorableClass(ApClassType) {
 	override object references extends ReferencesObject {
-		val apClassFormats = new Initializable[IndexedSeq[ApClassFormat]]
+		val apClassFormats = new InitializableSeq[ApClassFormat, IndexedSeq[ApClassFormat]]
 	}
 
 	override object values extends ValuesObject {

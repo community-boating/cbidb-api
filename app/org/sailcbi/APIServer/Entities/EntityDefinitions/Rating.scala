@@ -10,8 +10,8 @@ import play.api.libs.json._
 
 class Rating extends StorableClass(Rating) {
 	override object references extends ReferencesObject {
-		val boats = new Initializable[IndexedSeq[BoatRating]]
-		val programs = new Initializable[IndexedSeq[RatingProgram]]
+		val boats = new InitializableSeq[BoatRating, IndexedSeq[BoatRating]]
+		val programs = new InitializableSeq[RatingProgram, IndexedSeq[RatingProgram]]
 	}
 
 	override object values extends ValuesObject {
@@ -23,7 +23,7 @@ class Rating extends StorableClass(Rating) {
 		val updatedBy = new StringFieldValue(self, Rating.fields.updatedBy)
 		val displayOrder = new DoubleFieldValue(self, Rating.fields.displayOrder)
 		val active = new NullableBooleanFieldValue(self, Rating.fields.active)
-		val overriddenBy = new NullableDoubleFieldValue(self, Rating.fields.overriddenBy)
+		val overriddenBy = new NullableIntFieldValue(self, Rating.fields.overriddenBy)
 		val testMinCrew = new NullableDoubleFieldValue(self, Rating.fields.testMinCrew)
 		val testMaxCrew = new NullableDoubleFieldValue(self, Rating.fields.testMaxCrew)
 		val testable = new NullableBooleanFieldValue(self, Rating.fields.testable)
@@ -51,7 +51,7 @@ object Rating extends StorableObject[Rating] {
 		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
-		val overriddenBy = new NullableDoubleDatabaseField(self, "OVERRIDDEN_BY")
+		val overriddenBy = new NullableIntDatabaseField(self, "OVERRIDDEN_BY")
 		val testMinCrew = new NullableDoubleDatabaseField(self, "TEST_MIN_CREW")
 		val testMaxCrew = new NullableDoubleDatabaseField(self, "TEST_MAX_CREW")
 		val testable = new NullableBooleanDatabaseField(self, "TESTABLE")

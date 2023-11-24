@@ -11,8 +11,8 @@ import play.api.libs.json._
 class Signout extends StorableClass(Signout) {
 	override object references extends ReferencesObject {
 		val skipper = new Initializable[Person]
-		val crew = new Initializable[IndexedSeq[SignoutCrew]]
-		val tests = new Initializable[IndexedSeq[SignoutTest]]
+		val crew = new InitializableSeq[SignoutCrew, IndexedSeq[SignoutCrew]]
+		val tests = new InitializableSeq[SignoutTest, IndexedSeq[SignoutTest]]
 	}
 
 	override object values extends ValuesObject {

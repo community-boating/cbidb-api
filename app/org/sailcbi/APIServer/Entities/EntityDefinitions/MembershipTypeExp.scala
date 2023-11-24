@@ -16,7 +16,7 @@ class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
 	override object values extends ValuesObject {
 		val expirationId = new IntFieldValue(self, MembershipTypeExp.fields.expirationId)
 		val membershipTypeId = new IntFieldValue(self, MembershipTypeExp.fields.membershipTypeId)
-		val season = new DoubleFieldValue(self, MembershipTypeExp.fields.season)
+		val season = new IntFieldValue(self, MembershipTypeExp.fields.season)
 		val expirationDate = new DateTimeFieldValue(self, MembershipTypeExp.fields.expirationDate)
 		val createdOn = new DateTimeFieldValue(self, MembershipTypeExp.fields.createdOn)
 		val createdBy = new StringFieldValue(self, MembershipTypeExp.fields.createdBy)
@@ -34,7 +34,7 @@ object MembershipTypeExp extends StorableObject[MembershipTypeExp] {
 	object fields extends FieldsObject {
 		val expirationId = new IntDatabaseField(self, "EXPIRATION_ID")
 		val membershipTypeId = new IntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 		val expirationDate = new DateTimeDatabaseField(self, "EXPIRATION_DATE")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")

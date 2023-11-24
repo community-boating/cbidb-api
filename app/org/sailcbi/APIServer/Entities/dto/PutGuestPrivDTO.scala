@@ -11,7 +11,7 @@ case class PutGuestPrivDTO (
 	override def getId: Option[Int] = MEMBERSHIP_ID
 
 	override def mutateStorableForUpdate(s: GuestPriv): GuestPriv = {
-		s.update(_.price, PRICE)
+		s.update(_.price, PRICE.get)
 		s
 	}
 

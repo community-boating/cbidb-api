@@ -85,4 +85,12 @@ object RatingLogic {
 			}
 		}
 	}
+
+	def getAllHigherRatingsThanRating(ratings: List[Rating], targetRatingId: Int): List[Rating] = {
+		val targetRating: Rating = ratings.filter(_.values.ratingId.get == targetRatingId).head
+		targetRating.values.overriddenBy.get match {
+			case Some(i: Int) => targetRating :: getAllHigherRatingsThanRating(ratings, i)
+			case None => targetRating :: Nil
+		}
+	}
 }

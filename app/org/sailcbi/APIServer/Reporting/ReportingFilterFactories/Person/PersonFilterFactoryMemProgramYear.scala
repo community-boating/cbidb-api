@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.DateLogic
 
 // First arg is program
@@ -10,7 +11,7 @@ import org.sailcbi.APIServer.Logic.DateLogic
 class PersonFilterFactoryMemProgramYear extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Had mem in prog X, year Y"
 	val argDefinitions = List(
-		(ARG_DROPDOWN, ProgramType.specialIDs.PROGRAM_TYPE_ID_AP.toString),
+		(ARG_DROPDOWN, MagicIds.PROGRAM_TYPES.ADULT_PROGRAM_ID.toString),
 		(ARG_INT, DateLogic.currentSeason().toString)
 	)
 

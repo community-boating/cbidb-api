@@ -11,8 +11,8 @@ import play.api.libs.json._
 class ApClassInstance extends StorableClass(ApClassInstance) {
 	override object references extends ReferencesObject {
 		val apClassFormat = new Initializable[ApClassFormat]
-		val apClassSessions = new Initializable[IndexedSeq[ApClassSession]]
-		val apClassSignups = new Initializable[IndexedSeq[ApClassSignup]]
+		val apClassSessions = new InitializableSeq[ApClassSession, IndexedSeq[ApClassSession]]
+		val apClassSignups = new InitializableSeq[ApClassSignup, IndexedSeq[ApClassSignup]]
 		val instructor = new Initializable[Option[Person]]
 	}
 

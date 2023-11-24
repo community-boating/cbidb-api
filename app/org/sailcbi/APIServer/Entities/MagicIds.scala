@@ -77,4 +77,7 @@ object MagicIds {
 		val RIGGING = "G"
 		val RENTAL = "N"
 	}
+	object TAG_IDS {
+		val CORPORATION = 5
+	}
 }

@@ -9,6 +9,11 @@ import org.sailcbi.APIServer.Entities.entitycalculations._
 import play.api.libs.json._
 
 class JpClassSession extends StorableClass(JpClassSession) {
+
+	override object calculations extends CalculationsObject {
+		val weekAlias = new Initializable[Option[String]]
+	}
+	
 	override object references extends ReferencesObject {
 		val jpClassInstance = new Initializable[JpClassInstance]
 	}

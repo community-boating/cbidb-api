@@ -16,11 +16,11 @@ class DonationFund extends StorableClass(DonationFund) {
 		val createdBy = new StringFieldValue(self, DonationFund.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, DonationFund.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, DonationFund.fields.updatedBy)
-		val active = new NullableBooleanFieldValue(self, DonationFund.fields.active)
+		val active = new BooleanFieldValue(self, DonationFund.fields.active)
 		val displayOrder = new NullableDoubleFieldValue(self, DonationFund.fields.displayOrder)
 		val letterText = new NullableStringFieldValue(self, DonationFund.fields.letterText)
-		val showInCheckout = new NullableBooleanFieldValue(self, DonationFund.fields.showInCheckout)
-		val isEndowment = new NullableBooleanFieldValue(self, DonationFund.fields.isEndowment)
+		val showInCheckout = new BooleanFieldValue(self, DonationFund.fields.showInCheckout)
+		val isEndowment = new BooleanFieldValue(self, DonationFund.fields.isEndowment)
 		val portalDescription = new NullableStringFieldValue(self, DonationFund.fields.portalDescription)
 	}
 }
@@ -42,11 +42,14 @@ object DonationFund extends StorableObject[DonationFund] {
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
-		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
+		val active = new BooleanDatabaseField(self, "ACTIVE", true)
 		val displayOrder = new NullableDoubleDatabaseField(self, "DISPLAY_ORDER")
 		val letterText = new NullableStringDatabaseField(self, "LETTER_TEXT", 500)
-		val showInCheckout = new NullableBooleanDatabaseField(self, "SHOW_IN_CHECKOUT")
-		val isEndowment = new NullableBooleanDatabaseField(self, "IS_ENDOWMENT")
+		@NullableInDatabase
+		val showInCheckout = new BooleanDatabaseField(self, "SHOW_IN_CHECKOUT", true)
+		@NullableInDatabase
+		val isEndowment = new BooleanDatabaseField(self, "IS_ENDOWMENT", true)
 		val portalDescription = new NullableStringDatabaseField(self, "PORTAL_DESCRIPTION", 2000)
 	}
 

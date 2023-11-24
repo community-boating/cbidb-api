@@ -43,7 +43,7 @@ class ReportFactoryJpClassInstance extends ReportFactory[JpClassInstance] {
 			(i: JpClassInstance) =>
 				jpClassSessions
 						.filter(_.values.instanceId.get == i.getID)
-						.map(_.values.sessionDateTime.get)
+						.map(_.values.sessionDatetime.get)
 						.min
 						.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
 			"First Session Datetime",

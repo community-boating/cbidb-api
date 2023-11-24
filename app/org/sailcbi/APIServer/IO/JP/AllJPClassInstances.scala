@@ -35,12 +35,12 @@ object AllJPClassInstances {
 
 		val groupedSessions = allSessions.groupBy(_.references.jpClassInstance.get)
 		groupedSessions.map(Function.tupled((instance, sessions) => {
-			val sorted = sessions.sortWith((a, b) => a.values.sessionDateTime.get.isBefore(b.values.sessionDateTime.get))
-			val min = sorted.head.values.sessionDateTime.get
-			val max = sorted.last.values.sessionDateTime.get
+			val sorted = sessions.sortWith((a, b) => a.values.sessionDatetime.get.isBefore(b.values.sessionDatetime.get))
+			val min = sorted.head.values.sessionDatetime.get
+			val max = sorted.last.values.sessionDatetime.get
 			val sessionLength = sorted.head.values.lengthOverride.get match {
 				case Some(d) => d
-				case None => instance.references.jpClassType.get.values.sessionlength.get
+				case None => instance.references.jpClassType.get.values.sessionLength.get
 			}
 			(instance, min, max, sessionLength)
 		})).toList

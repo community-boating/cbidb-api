@@ -16,7 +16,7 @@ class HighSchool extends StorableClass(HighSchool) {
 		val createdBy = new StringFieldValue(self, HighSchool.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, HighSchool.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, HighSchool.fields.updatedBy)
-		val active = new NullableBooleanFieldValue(self, HighSchool.fields.active)
+		val active = new BooleanFieldValue(self, HighSchool.fields.active)
 		val displayOrder = new NullableDoubleFieldValue(self, HighSchool.fields.displayOrder)
 	}
 }
@@ -38,7 +38,8 @@ object HighSchool extends StorableObject[HighSchool] {
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
-		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
+		val active = new BooleanDatabaseField(self, "ACTIVE", true)
 		val displayOrder = new NullableDoubleDatabaseField(self, "DISPLAY_ORDER")
 	}
 

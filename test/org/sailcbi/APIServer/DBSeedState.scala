@@ -35,8 +35,8 @@ class DBSeedState @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 			val seedState = List(
 				new User()
 					.update(_.active, true)
-					.update(_.nameFirst, Some("Bob"))
-					.update(_.nameLast, Some("Smith"))
+					.update(_.nameFirst, "Bob")
+					.update(_.nameLast, "Smith")
 					.update(_.userName, "bsmith")
 					.update(_.email, "bsmith@sdfg.com")
 					.withPK(9998)
@@ -48,7 +48,7 @@ class DBSeedState @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
 				val user = users.head
 				println("Seed user has id " + user.getID)
 				val startingValue = user.values.nameLast.get
-				user.values.nameLast.initialize(Some(user.values.nameLast.get.get + "!"))
+				user.values.nameLast.initialize(user.values.nameLast.get + "!")
 				rc.commitObjectToDatabase(user)
 
 				val usersAgain = rc.getAllObjectsOfClass(User, Set(User.fields.userId, User.fields.nameFirst, User.fields.nameLast, User.fields.active))

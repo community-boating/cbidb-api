@@ -9,12 +9,19 @@ import org.sailcbi.APIServer.Entities.entitycalculations._
 import play.api.libs.json._
 
 class JpClassInstance extends StorableClass(JpClassInstance) {
+
+	override object calculations extends CalculationsObject {
+		lazy val firstSession: JpClassSession = references.jpClassSessions.get.sortWith((a: JpClassSession, b: JpClassSession) => {
+			a.values.sessionDatetime.get.isBefore(b.values.sessionDatetime.get)
+		}).head
+	}
+	
 	override object references extends ReferencesObject {
 		val classLocation = new Initializable[Option[ClassLocation]]
 		val classInstructor = new Initializable[Option[ClassInstructor]]
 		val jpClassType = new Initializable[JpClassType]
-		val jpClassSessions = new Initializable[IndexedSeq[JpClassSession]]
-		val jpClassSignups = new Initializable[IndexedSeq[JpClassSignup]]
+		val jpClassSessions = new InitializableSeq[JpClassSession, IndexedSeq[JpClassSession]]
+		val jpClassSignups = new InitializableSeq[JpClassSignup, IndexedSeq[JpClassSignup]]
 	}
 
 	override object values extends ValuesObject {

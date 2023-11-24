@@ -10,7 +10,7 @@ import play.api.libs.json._
 
 class User extends StorableClass(User) {
 	override object references extends ReferencesObject {
-		val extraRoles = new Initializable[List[UserRole]]
+		val extraRoles = new InitializableSeq[UserRole, List[UserRole]]
 	}
 
 	override object values extends ValuesObject {

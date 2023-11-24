@@ -16,8 +16,8 @@ class PersonRelationship extends StorableClass(PersonRelationship) {
 
 	override object values extends ValuesObject {
 		val relationId = new IntFieldValue(self, PersonRelationship.fields.relationId)
-		val a = new DoubleFieldValue(self, PersonRelationship.fields.a)
-		val b = new DoubleFieldValue(self, PersonRelationship.fields.b)
+		val a = new IntFieldValue(self, PersonRelationship.fields.a)
+		val b = new IntFieldValue(self, PersonRelationship.fields.b)
 		val typeId = new IntFieldValue(self, PersonRelationship.fields.typeId)
 		val createdOn = new DateTimeFieldValue(self, PersonRelationship.fields.createdOn)
 		val createdBy = new NullableStringFieldValue(self, PersonRelationship.fields.createdBy)
@@ -34,9 +34,9 @@ object PersonRelationship extends StorableObject[PersonRelationship] {
 	object fields extends FieldsObject {
 		val relationId = new IntDatabaseField(self, "RELATION_ID")
 		@NullableInDatabase
-		val a = new DoubleDatabaseField(self, "A")
+		val a = new IntDatabaseField(self, "A")
 		@NullableInDatabase
-		val b = new DoubleDatabaseField(self, "B")
+		val b = new IntDatabaseField(self, "B")
 		@NullableInDatabase
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
 		@NullableInDatabase

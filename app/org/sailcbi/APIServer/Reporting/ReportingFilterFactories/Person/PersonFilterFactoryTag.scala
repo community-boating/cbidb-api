@@ -3,11 +3,12 @@ package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.MagicIds
 
 class PersonFilterFactoryTag extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Has Tag"
-	val argDefinitions = List(
-		(ARG_DROPDOWN, Tag.specialIDs.TAG_ID_CORPORATION.toString),
+	override val argDefinitions = List(
+		(ARG_DROPDOWN, MagicIds.TAG_IDS.CORPORATION.toString),
 	)
 
 	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {

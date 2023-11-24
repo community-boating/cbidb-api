@@ -3,6 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportFactories
 import com.coleji.neptune.Export.{ReportFactory, ReportingField, ReportingFilterFactory}
 import com.coleji.neptune.Storable.StorableObject
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Logic.JpClassLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
 
 import java.time.format.DateTimeFormatter
@@ -36,7 +37,7 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 		signups.foreach(s => {
 			val instance = jpClassInstances.find(_.values.instanceId.get == s.values.instanceId.get)
 			s.references.jpClassInstance.set(instance.get)
-			instance.get.calculatedValues.sessions.findAllInCollection(jpClassSessions)
+			instance.get.references.jpClassSessions.findAllInCollection(jpClassSessions.toIndexedSeq, _.values.instanceId.get == instance.get.values.instanceId.get)
 		})
 	}
 
@@ -56,18 +57,18 @@ class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 			"Type Name",
 			isDefault = true
 		)),
-		("WeekAlias", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
-			(session: JpClassSession) => session.calculatedValues.jpWeekAlias.getWithInput(rc).getOrElse(""),
-			(signup: JpClassSignup) => signup.references.jpClassInstance.get.calculatedValues.firstSession,
-			"Week",
-			isDefault = true
-		)),
-		("FirstSessionDatetime", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
-			(session: JpClassSession) => session.values.sessionDateTime.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-			(signup: JpClassSignup) => signup.references.jpClassInstance.get.calculatedValues.firstSession,
-			"First Session Datetime",
-			isDefault = true
-		)),
+//		("WeekAlias", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
+//			(session: JpClassSession) => session.calculations.weekAlias.set(JpClassLogic.setWeekAlias(session, rc)).getOrElse(""),
+//			(signup: JpClassSignup) => signup.references.jpClassInstance.get.calculatedValues.firstSession,
+//			"Week",
+//			isDefault = true
+//		)),
+//		("FirstSessionDatetime", ReportingField.getReportingFieldFromCalculatedValue[JpClassSignup, JpClassSession](
+//			(session: JpClassSession) => session.values.sessionDatetime.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+//			(signup: JpClassSignup) => signup.references.jpClassInstance.get.calculatedValues.firstSession,
+//			"First Session Datetime",
+//			isDefault = true
+//		)),
 		("SignupType", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupType, "Signup Type", isDefault = true)),
 		("SignupDatetime", ReportingField.getReportingFieldFromDatabaseField(JpClassSignup.fields.signupDatetime, "Signup Datetime", isDefault = true))
 	)

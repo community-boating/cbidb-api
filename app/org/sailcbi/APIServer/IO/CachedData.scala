@@ -68,7 +68,7 @@ class CachedData(rc: UnlockedRequestCache) {
 			MembershipType.fields.programId,
 			MembershipType.fields.price,
 		)).map(m => {
-			m.references.program.findOneInCollection(programTypes)
+			m.references.program.findOneInCollection(programTypes, _.values.programId.get == m.values.programId.get)
 			m
 		})
 	}
@@ -80,7 +80,7 @@ class CachedData(rc: UnlockedRequestCache) {
 			MembershipTypeExp.fields.startDate,
 			MembershipTypeExp.fields.expirationDate,
 		)).map(me => {
-			me.references.membershipType.findOneInCollection(membershipTypes)
+			me.references.membershipType.findOneInCollection(membershipTypes, _.values.membershipTypeId.get == me.values.membershipTypeId.get)
 			me
 		})
 	}

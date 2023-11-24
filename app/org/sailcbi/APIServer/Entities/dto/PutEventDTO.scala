@@ -15,7 +15,7 @@ case class PutEventDTO (
 
 	override def mutateStorableForUpdate(s: Event): Event = {
 		s.update(_.eventName, EVENT_NAME)
-		s.update(_.eventDateTime, EVENT_DATE)
+		s.update(_.eventDate, EVENT_DATE)
 		s
 	}
 

@@ -4,11 +4,13 @@ package org.sailcbi.APIServer.Reporting.ReportingFilterFactories.Person
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Export._
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Entities.MagicIds
+import org.sailcbi.APIServer.Logic.RatingLogic
 
 class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with ReportingFilterFactoryDropdown {
 	val displayName: String = "Has Rating"
 	val argDefinitions = List(
-		(ARG_DROPDOWN, Rating.specialIDs.RATING_ID_MERC_GREEN.toString),
+		(ARG_DROPDOWN, MagicIds.RATING_IDS.MERCURY_GREEN.toString),
 	)
 
 	def getFilter(rc: UnlockedRequestCache, arg: String): ReportingFilter[Person] = new ReportingFilterFunction(rc, (_rc: UnlockedRequestCache) => {
@@ -24,7 +26,7 @@ class PersonFilterFactoryRating extends ReportingFilterFactory[Person] with Repo
 			Rating.fields.overriddenBy,
 		))
 
-		val ratingsToHave: List[Int] = Rating.getAllHigherRatingsThanRating(allRatings, ratingId).map(_.values.ratingId.get)
+		val ratingsToHave: List[Int] = RatingLogic.getAllHigherRatingsThanRating(allRatings, ratingId).map(_.values.ratingId.get)
 
 		val personIDs: List[Int] = rc.getObjectsByFilters(
 			PersonRating,
