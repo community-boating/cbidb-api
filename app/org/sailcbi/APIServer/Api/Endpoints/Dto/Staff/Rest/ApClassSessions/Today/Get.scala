@@ -9,8 +9,8 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
-	sessionId: Double,
-	instanceId: Double,
+	sessionId: Int,
+	instanceId: Int,
 	headcount: Option[Double],
 	cancelledDatetime: Option[String],
 	sessionDatetime: String,
@@ -20,13 +20,13 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
-	instanceId: Double,
+	instanceId: Int,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
 	signupMin: Option[Double],
 	price: Option[Double],
 	signupMax: Option[Double],
-	formatId: Double,
+	formatId: Int,
 	hideOnline: Option[Boolean],
 	cancelByOverride: Option[String],
 	locationString: Option[String],
@@ -35,19 +35,19 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups (
-	instanceId: Double,
-	discountInstanceId: Option[Double],
+	instanceId: Int,
+	discountInstanceId: Option[Int],
 	voidedOnline: Option[Boolean],
-	personId: Double,
-	orderId: Option[Double],
+	personId: Int,
+	orderId: Option[Int],
 	price: Option[Double],
-	signupId: Double,
-	closeId: Option[Double],
+	signupId: Int,
+	closeId: Option[Int],
 	sequence: Double,
 	paymentMedium: Option[String],
 	ccTransNum: Option[String],
 	paymentLocation: Option[String],
-	voidCloseId: Option[Double],
+	voidCloseId: Option[Int],
 	signupType: String,
 	signupNote: Option[String],
 	signupDatetime: String,
@@ -56,7 +56,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 )
 
 case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person (
-	personId: Double,
+	personId: Int,
 	nameFirst: Option[String],
 	nameLast: Option[String],
 )
@@ -71,7 +71,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	wlResult: String,
 	foVmDatetime: Option[String],
 	offerExpDatetime: String,
-	signupId: Double,
+	signupId: Int,
 	foAlertDatetime: String,
 	permitOvercrowd: Option[Boolean],
 )

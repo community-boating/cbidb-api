@@ -19,7 +19,7 @@ object AccessState extends CacheableFactory[Null, String]{
 			AccessProfileRelationship.fields.subordinateProfileId
 		))
 
-		val users = rc.assertUnlocked.getObjectsByFilters(User, List(User.fields.active.alias.equals(true)), Set(
+		val users = rc.assertUnlocked.getObjectsByFilters(User, List(User.fields.active.alias.equalsConstant(true)), Set(
 			User.fields.userId,
 			User.fields.userName,
 			User.fields.accessProfileId

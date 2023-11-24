@@ -9,15 +9,15 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffDockhouseCreateSignoutPostResponseSuccessDto (
-	signoutId: Double,
-	personId: Option[Double],
-	programId: Double,
-	boatId: Double,
+	signoutId: Int,
+	personId: Option[Int],
+	programId: Int,
+	boatId: Int,
 	signoutType: String,
 	cardNum: Option[String],
 	sailNumber: Option[String],
 	hullNumber: Option[String],
-	testRatingId: Option[Double],
+	testRatingId: Option[Int],
 	testResult: Option[String],
 	isQueued: Boolean,
 	signoutDatetime: Option[String],
@@ -26,8 +26,8 @@ case class StaffDockhouseCreateSignoutPostResponseSuccessDto (
 )
 
 case class StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew (
-	signoutId: Double,
-	personId: Option[Double],
+	signoutId: Int,
+	personId: Option[Int],
 	cardNum: Option[String],
 	startActive: Option[String],
 )
@@ -39,9 +39,9 @@ object StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew {
 }
 
 case class StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests (
-	signoutId: Double,
-	personId: Double,
-	ratingId: Double,
+	signoutId: Int,
+	personId: Int,
+	ratingId: Int,
 )
 
 object StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests {

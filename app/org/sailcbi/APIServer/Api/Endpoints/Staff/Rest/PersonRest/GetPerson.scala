@@ -42,7 +42,7 @@ class GetPerson @Inject()(implicit val exec: ExecutionContext) extends RestContr
 				.innerJoin(PersonCard, PersonCard.fields.personId.alias.equalsField(Person.fields.personId.alias))
 				.where(List(
 					PersonCard.fields.cardNum.alias.equalsConstant(cardNumber),
-					PersonCard.fields.active.alias.equals(true)
+					PersonCard.fields.active.alias.equalsConstant(true)
 				))
 				.select(List(
 					Person.fields.personId.alias,

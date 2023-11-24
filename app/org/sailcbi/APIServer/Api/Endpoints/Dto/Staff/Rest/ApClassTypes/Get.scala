@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
  * !!!!!!!!!!!!
  */
 case class StaffRestApClassTypesGetResponseSuccessDto (
-	typeId: Double,
+	typeId: Int,
 	typeName: String,
 	ratingPrereq: Option[Double],
 	classPrereq: Option[Double],
@@ -27,8 +27,8 @@ case class StaffRestApClassTypesGetResponseSuccessDto (
 )
 
 case class StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats (
-	formatId: Double,
-	typeId: Double,
+	formatId: Int,
+	typeId: Int,
 	description: Option[String],
 	priceDefaultOverride: Option[Double],
 	sessionCtDefault: Double,

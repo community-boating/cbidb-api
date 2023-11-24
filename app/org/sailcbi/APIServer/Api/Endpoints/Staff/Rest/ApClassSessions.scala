@@ -161,9 +161,9 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 									new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult(
 										wlResult = wlr.values.wlResult.get,
 										foVmDatetime = wlr.values.foVmDatetime.get.map(_.toString),
-										offerExpDatetime = wlr.values.offerExpDatetime.get.map(_.toString),
+										offerExpDatetime = wlr.values.offerExpDatetime.get.toString,
 										signupId = wlr.values.signupId.get,
-										foAlertDatetime = wlr.values.foAlertDatetime.get.map(_.toString),
+										foAlertDatetime = wlr.values.foAlertDatetime.get.toString,
 										permitOvercrowd = wlr.values.permitOvercrowd.get
 									)
 								)

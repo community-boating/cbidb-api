@@ -19,11 +19,11 @@ class JpClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			val qb = QueryBuilder
 				.from(JpClassSession)
 				.innerJoin(JpClassInstance, JpClassSession.fields.instanceId.alias.equalsField(JpClassInstance.fields.instanceId.alias))
-				.where(JpClassSession.fields.sessionDateTime.alias.isDateConstant(rc.PA.now().toLocalDate))
+				.where(JpClassSession.fields.sessionDatetime.alias.isDateConstant(rc.PA.now().toLocalDate))
 				.select(List(
 					JpClassSession.fields.sessionId,
 					JpClassSession.fields.instanceId,
-					JpClassSession.fields.sessionDateTime,
+					JpClassSession.fields.sessionDatetime,
 					JpClassSession.fields.lengthOverride,
 
 					JpClassInstance.fields.instanceId,

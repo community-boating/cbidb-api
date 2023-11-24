@@ -79,7 +79,7 @@ class GetDockReport @Inject()(implicit val exec: ExecutionContext) extends RestC
 			dockRptClass.values.dockReportId.update(newDockReport.values.dockReportId.get)
 			dockRptClass.values.className.update(qbrr.getValue(ApClassType.alias)(_.typeName))
 			dockRptClass.values.classDatetime.update(qbrr.getValue(ApClassSession.alias)(_.sessionDatetime))
-			dockRptClass.values.apInstanceId.update(Some(qbrr.getValue(ApClassInstance.alias)(_.instanceId)))
+			dockRptClass.values.apInstanceId.update(qbrr.getValue(ApClassInstance.alias)(_.instanceId))
 			rc.commitObjectToDatabase(dockRptClass)
 			dockRptClass.defaultAllUnsetNullableFields()
 			PutDockReportApClassDto(dockRptClass)

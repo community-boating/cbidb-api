@@ -16,7 +16,7 @@ class GetEvent @Inject()(implicit val exec: ExecutionContext) extends RestContro
 			val events = getByFilters(rc, List.empty, Set(
 				Event.fields.eventId,
 				Event.fields.eventName,
-				Event.fields.eventDateTime,
+				Event.fields.eventDate,
 			))
 			Future(Ok(Json.toJson(events)))
 		})
