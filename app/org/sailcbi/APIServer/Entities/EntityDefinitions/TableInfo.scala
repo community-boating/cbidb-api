@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class TableInfo extends StorableClass(TableInfo) {
 	override object values extends ValuesObject {
@@ -24,6 +27,7 @@ object TableInfo extends StorableObject[TableInfo] {
 
 	object fields extends FieldsObject {
 		val tableId = new IntDatabaseField(self, "TABLE_ID")
+		@NullableInDatabase
 		val tableName = new StringDatabaseField(self, "TABLE_NAME", 100)
 		val biTriggerName = new NullableStringDatabaseField(self, "BI_TRIGGER_NAME", 100)
 		val sequenceName = new NullableStringDatabaseField(self, "SEQUENCE_NAME", 100)

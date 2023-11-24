@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class PersonsNotificationPreference extends StorableClass(PersonsNotificationPreference) {
 	override object values extends ValuesObject {
@@ -25,8 +28,11 @@ object PersonsNotificationPreference extends StorableObject[PersonsNotificationP
 
 	object fields extends FieldsObject {
 		val prefId = new IntDatabaseField(self, "PREF_ID")
+		@NullableInDatabase
 		val personId = new IntDatabaseField(self, "PERSON_ID")
+		@NullableInDatabase
 		val notificationEvent = new StringDatabaseField(self, "NOTIFICATION_EVENT", 25)
+		@NullableInDatabase
 		val notificationMethod = new StringDatabaseField(self, "NOTIFICATION_METHOD", 25)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

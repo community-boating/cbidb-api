@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ApClassFormat extends StorableClass(ApClassFormat) {
 	override object references extends ReferencesObject {
@@ -35,9 +38,13 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
 		val formatId = new IntDatabaseField(self, "FORMAT_ID")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
 		val description = new NullableStringDatabaseField(self, "DESCRIPTION", 1000)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val priceDefaultOverride = new NullableDoubleDatabaseField(self, "PRICE_DEFAULT_OVERRIDE")
 		val sessionCtDefault = new DoubleDatabaseField(self, "SESSION_CT_DEFAULT")

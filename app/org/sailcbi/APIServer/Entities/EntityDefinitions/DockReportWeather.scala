@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DockReportWeather extends StorableClass(DockReportWeather) {
 	override object values extends ValuesObject {
@@ -31,6 +34,7 @@ object DockReportWeather extends StorableObject[DockReportWeather] {
 	object fields extends FieldsObject {
 		val weatherId = new IntDatabaseField(self, "WEATHER_ID")
 		val dockReportId = new IntDatabaseField(self, "DOCK_REPORT_ID")
+		@NullableInDatabase
 		val weatherDatetime = new DateTimeDatabaseField(self, "WEATHER_DATETIME")
 		val temp = new NullableDoubleDatabaseField(self, "TEMP")
 		val weatherSummary = new NullableStringDatabaseField(self, "WEATHER_SUMMARY", 50)

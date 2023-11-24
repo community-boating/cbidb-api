@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class GiftCertState extends StorableClass(GiftCertState) {
 	override object values extends ValuesObject {
@@ -27,13 +30,17 @@ object GiftCertState extends StorableObject[GiftCertState] {
 
 	object fields extends FieldsObject {
 		val stateId = new IntDatabaseField(self, "STATE_ID")
+		@NullableInDatabase
 		val certId = new IntDatabaseField(self, "CERT_ID")
+		@NullableInDatabase
 		val stateDate = new DateTimeDatabaseField(self, "STATE_DATE")
 		val ownerPersonId = new NullableIntDatabaseField(self, "OWNER_PERSON_ID")
 		val membershipTypeId = new NullableIntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
 		val value = new NullableDoubleDatabaseField(self, "VALUE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}

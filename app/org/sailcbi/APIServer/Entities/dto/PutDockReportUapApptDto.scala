@@ -20,9 +20,9 @@ case class PutDockReportUapApptDto (
 
 	override def mutateStorableForUpdate(s: DockReportUapAppt): DockReportUapAppt = {
 		s.update(_.dockReportId, DOCK_REPORT_ID.get)
-		s.update(_.apptDatetime, APPT_DATETIME)
-		s.update(_.apptType, APPT_TYPE)
-		s.update(_.participantName, PARTICIPANT_NAME)
+		s.update(_.apptDatetime, APPT_DATETIME.get)
+		s.update(_.apptType, APPT_TYPE.get)
+		s.update(_.participantName, Some(PARTICIPANT_NAME))
 		s.update(_.boatTypeId, BOAT_TYPE_ID)
 		s.update(_.instructorName, INSTRUCTOR_NAME)
 		s.update(_.hoyer, HOYER)
@@ -40,9 +40,9 @@ object PutDockReportUapApptDto {
 	def apply(u: DockReportUapAppt): PutDockReportUapApptDto = new PutDockReportUapApptDto(
 		DOCK_REPORT_APPT_ID=Some(u.values.dockReportApptId.get),
 		DOCK_REPORT_ID=Some(u.values.dockReportId.get),
-		APPT_DATETIME=u.values.apptDatetime.get,
-		APPT_TYPE=u.values.apptType.get,
-		PARTICIPANT_NAME=u.values.participantName.get,
+		APPT_DATETIME=Some(u.values.apptDatetime.get),
+		APPT_TYPE=Some(u.values.apptType.get),
+		PARTICIPANT_NAME=u.values.participantName.get.get,
 		BOAT_TYPE_ID=u.values.boatTypeId.get,
 		INSTRUCTOR_NAME=u.values.instructorName.get,
 		HOYER=u.values.hoyer.get

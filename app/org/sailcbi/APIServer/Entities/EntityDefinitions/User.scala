@@ -3,11 +3,14 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class User extends StorableClass(User) {
 	override object references extends ReferencesObject {
-		val extraRoles = new Initializable[List[Userrole]]
+		val extraRoles = new Initializable[List[UserRole]]
 	}
 
 	override object values extends ValuesObject {
@@ -44,16 +47,21 @@ object User extends StorableObject[User] {
 	object fields extends FieldsObject {
 		val userId = new IntDatabaseField(self, "USER_ID")
 		val userName = new StringDatabaseField(self, "USER_NAME", 50)
+		@NullableInDatabase
 		val pwHash = new StringDatabaseField(self, "PW_HASH", 500)
 		val email = new StringDatabaseField(self, "EMAIL", 100)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val locked = new NullableBooleanDatabaseField(self, "LOCKED")
 		val pwChangeReqd = new NullableBooleanDatabaseField(self, "PW_CHANGE_REQD")
 		val badAttempts = new NullableDoubleDatabaseField(self, "BAD_ATTEMPTS")
+		@NullableInDatabase
 		val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
+		@NullableInDatabase
 		val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
 		val sagePwCipher = new NullableStringDatabaseField(self, "SAGE_PW_CIPHER", 4000)
 		val sageToAdd = new NullableStringDatabaseField(self, "SAGE_TO_ADD", 4000)

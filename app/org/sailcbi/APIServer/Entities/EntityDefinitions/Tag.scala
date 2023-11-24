@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Tag extends StorableClass(Tag) {
 	override object values extends ValuesObject {
@@ -25,11 +28,15 @@ object Tag extends StorableObject[Tag] {
 
 	object fields extends FieldsObject {
 		val tagId = new IntDatabaseField(self, "TAG_ID")
+		@NullableInDatabase
 		val tagName = new StringDatabaseField(self, "TAG_NAME", 100)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
 		val displayOrder = new NullableDoubleDatabaseField(self, "DISPLAY_ORDER")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}

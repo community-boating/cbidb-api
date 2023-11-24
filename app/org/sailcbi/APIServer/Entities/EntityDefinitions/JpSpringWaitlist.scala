@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpSpringWaitlist extends StorableClass(JpSpringWaitlist) {
 	override object values extends ValuesObject {
@@ -27,9 +30,13 @@ object JpSpringWaitlist extends StorableObject[JpSpringWaitlist] {
 		val regId = new IntDatabaseField(self, "REG_ID")
 		val membershipTypeId = new NullableIntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
 		val personId = new NullableIntDatabaseField(self, "PERSON_ID")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val waitBegin = new NullableDateTimeDatabaseField(self, "WAIT_BEGIN")
 	}

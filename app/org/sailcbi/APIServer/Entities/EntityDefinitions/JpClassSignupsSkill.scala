@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpClassSignupsSkill extends StorableClass(JpClassSignupsSkill) {
 	override object values extends ValuesObject {
@@ -28,15 +31,22 @@ object JpClassSignupsSkill extends StorableObject[JpClassSignupsSkill] {
 
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
+		@NullableInDatabase
 		val signupId = new IntDatabaseField(self, "SIGNUP_ID")
+		@NullableInDatabase
 		val skillId = new IntDatabaseField(self, "SKILL_ID")
 		val ratingId = new NullableIntDatabaseField(self, "RATING_ID")
+		@NullableInDatabase
 		val changedDatetime = new DateTimeDatabaseField(self, "CHANGED_DATETIME")
 		val instructor = new NullableStringDatabaseField(self, "INSTRUCTOR", 500)
 		val comments = new NullableStringDatabaseField(self, "COMMENTS", -1)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

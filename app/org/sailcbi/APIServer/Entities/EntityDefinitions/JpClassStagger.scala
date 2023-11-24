@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpClassStagger extends StorableClass(JpClassStagger) {
 	override object references extends ReferencesObject {
@@ -34,8 +37,10 @@ object JpClassStagger extends StorableObject[JpClassStagger] {
 		val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
 		val staggerDate = new DateTimeDatabaseField(self, "STAGGER_DATE")
 		val occupancy = new DoubleDatabaseField(self, "OCCUPANCY")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val reserveOnly = new NullableBooleanDatabaseField(self, "RESERVE_ONLY")

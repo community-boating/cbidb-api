@@ -18,7 +18,7 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 			PA.withRequestCache(StaffRequestCache, CbiPermissions.PERM_MANAGE_USERS_SCREEN)(None, parsedRequest, rc => {
 				// If the password is set as blank, unset
 				parsed.values.pwHash.peek match {
-					case Some(None) => parsed.values.pwHash.unset()
+					case None => parsed.values.pwHash.unset()
 					case _ =>
 				}
 
@@ -52,8 +52,8 @@ class PutUser @Inject()(implicit exec: ExecutionContext) extends InjectedControl
 
 	def runUnifiedValidations(rc: UnlockedRequestCache, newRecord: User): ValidationResult = {
 		ValidationResult.combine(List(
-			ValidationResult.checkBlank(newRecord.values.nameFirst.get, "First Name"),
-			ValidationResult.checkBlank(newRecord.values.nameLast.get, "Last Name"),
+			ValidationResult.checkBlank(newRecord.values.nameFirst.peek, "First Name"),
+			ValidationResult.checkBlank(newRecord.values.nameLast.peek, "Last Name"),
 		))
 	}
 

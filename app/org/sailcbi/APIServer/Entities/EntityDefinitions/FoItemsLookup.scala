@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoItemsLookup extends StorableClass(FoItemsLookup) {
 	override object values extends ValuesObject {
@@ -29,13 +32,18 @@ object FoItemsLookup extends StorableObject[FoItemsLookup] {
 
 	object fields extends FieldsObject {
 		val itemId = new IntDatabaseField(self, "ITEM_ID")
+		@NullableInDatabase
 		val categoryId = new IntDatabaseField(self, "CATEGORY_ID")
+		@NullableInDatabase
 		val itemName = new StringDatabaseField(self, "ITEM_NAME", 200)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 		val currentPrice = new DoubleDatabaseField(self, "CURRENT_PRICE")
 		val regCodeRowId = new NullableIntDatabaseField(self, "REG_CODE_ROW_ID")

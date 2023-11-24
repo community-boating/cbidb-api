@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class SignoutTest extends StorableClass(SignoutTest) {
 	override object references extends ReferencesObject {
@@ -37,9 +40,13 @@ object SignoutTest extends StorableObject[SignoutTest] {
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
 		val testResult = new NullableStringDatabaseField(self, "TEST_RESULT", 1)
 		val instructorString = new NullableStringDatabaseField(self, "INSTRUCTOR_STRING", 100)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 100)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 100)
 	}
 

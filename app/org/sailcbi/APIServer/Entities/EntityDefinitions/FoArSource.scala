@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoArSource extends StorableClass(FoArSource) {
 	override object values extends ValuesObject {
@@ -29,6 +32,7 @@ object FoArSource extends StorableObject[FoArSource] {
 		val sourceId = new IntDatabaseField(self, "SOURCE_ID")
 		val sourceName = new StringDatabaseField(self, "SOURCE_NAME", 100)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

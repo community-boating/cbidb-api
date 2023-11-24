@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoItemTypesLookup extends StorableClass(FoItemTypesLookup) {
 	override object values extends ValuesObject {
@@ -26,13 +29,16 @@ object FoItemTypesLookup extends StorableObject[FoItemTypesLookup] {
 
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val itemId = new IntDatabaseField(self, "ITEM_ID")
+		@NullableInDatabase
 		val description = new StringDatabaseField(self, "DESCRIPTION", 100)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 	}
 

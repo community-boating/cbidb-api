@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FlagsGlobal extends StorableClass(FlagsGlobal) {
 	override object values extends ValuesObject {
@@ -25,6 +28,7 @@ object FlagsGlobal extends StorableObject[FlagsGlobal] {
 	object fields extends FieldsObject {
 		val flagId = new IntDatabaseField(self, "FLAG_ID")
 		val globalId = new IntDatabaseField(self, "GLOBAL_ID")
+		@NullableInDatabase
 		val globalValue = new StringDatabaseField(self, "GLOBAL_VALUE", 1)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

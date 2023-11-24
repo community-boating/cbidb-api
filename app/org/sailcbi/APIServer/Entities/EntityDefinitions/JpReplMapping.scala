@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpReplMapping extends StorableClass(JpReplMapping) {
 	override object values extends ValuesObject {
@@ -26,8 +29,10 @@ object JpReplMapping extends StorableObject[JpReplMapping] {
 		val mapId = new IntDatabaseField(self, "MAP_ID")
 		val originalNum = new NullableStringDatabaseField(self, "ORIGINAL_NUM", 15)
 		val replNum = new NullableStringDatabaseField(self, "REPL_NUM", 15)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}

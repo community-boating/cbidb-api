@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DiscountCategorie extends StorableClass(DiscountCategorie) {
 	override object values extends ValuesObject {
@@ -23,6 +26,7 @@ object DiscountCategorie extends StorableObject[DiscountCategorie] {
 
 	object fields extends FieldsObject {
 		val categoryId = new IntDatabaseField(self, "CATEGORY_ID")
+		@NullableInDatabase
 		val categoryName = new StringDatabaseField(self, "CATEGORY_NAME", 100)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

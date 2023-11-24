@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DamageWaiver extends StorableClass(DamageWaiver) {
 	override object values extends ValuesObject {
@@ -36,11 +39,15 @@ object DamageWaiver extends StorableObject[DamageWaiver] {
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
+		@NullableInDatabase
 		val purchaseDate = new DateTimeDatabaseField(self, "PURCHASE_DATE")
+		@NullableInDatabase
 		val startDate = new DateTimeDatabaseField(self, "START_DATE")
 		val expirationDate = new NullableDateTimeDatabaseField(self, "EXPIRATION_DATE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val closeId = new NullableIntDatabaseField(self, "CLOSE_ID")

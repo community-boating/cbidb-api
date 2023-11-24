@@ -20,7 +20,7 @@ case class PutDockReportApClassDto (
 
 	override def mutateStorableForUpdate(s: DockReportApClass): DockReportApClass = {
 		s.update(_.dockReportId, DOCK_REPORT_ID.get)
-		s.update(_.apInstanceId, AP_INSTANCE_ID)
+		s.update(_.apInstanceId, AP_INSTANCE_ID.get)
 		s.update(_.className, CLASS_NAME)
 		s.update(_.classDatetime, CLASS_DATETIME)
 		s.update(_.location, LOCATION)
@@ -42,7 +42,7 @@ object PutDockReportApClassDto {
 	def apply(c: DockReportApClass): PutDockReportApClassDto = new PutDockReportApClassDto(
 		DOCK_REPORT_AP_CLASS_ID=Some(c.values.dockReportApClassId.get),
 		DOCK_REPORT_ID=Some(c.values.dockReportId.get),
-		AP_INSTANCE_ID=c.values.apInstanceId.get,
+		AP_INSTANCE_ID=Some(c.values.apInstanceId.get),
 		CLASS_NAME=c.values.className.get,
 		CLASS_DATETIME=c.values.classDatetime.get,
 		LOCATION=c.values.location.get,

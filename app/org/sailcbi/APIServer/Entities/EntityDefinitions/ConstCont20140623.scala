@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ConstCont20140623 extends StorableClass(ConstCont20140623) {
 	override object values extends ValuesObject {
@@ -62,7 +65,9 @@ object ConstCont20140623 extends StorableObject[ConstCont20140623] {
 		val customField3 = new NullableStringDatabaseField(self, "CUSTOM_FIELD_3", 50)
 		val emailLists = new NullableStringDatabaseField(self, "EMAIL_LISTS", 500)
 		val sourceName = new NullableStringDatabaseField(self, "SOURCE_NAME", 100)
+		@NullableInDatabase
 		val createdAt = new StringDatabaseField(self, "CREATED_AT", 30)
+		@NullableInDatabase
 		val updatedAt = new StringDatabaseField(self, "UPDATED_AT", 30)
 	}
 

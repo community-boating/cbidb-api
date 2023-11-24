@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class MembershipTypeExp extends StorableClass(MembershipTypeExp) {
 	override object references extends ReferencesObject {
@@ -33,9 +36,13 @@ object MembershipTypeExp extends StorableObject[MembershipTypeExp] {
 		val membershipTypeId = new IntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
 		val season = new DoubleDatabaseField(self, "SEASON")
 		val expirationDate = new DateTimeDatabaseField(self, "EXPIRATION_DATE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val startDate = new DateTimeDatabaseField(self, "START_DATE")
 	}

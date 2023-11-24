@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class EmailContent extends StorableClass(EmailContent) {
 	override object values extends ValuesObject {
@@ -38,18 +41,24 @@ object EmailContent extends StorableObject[EmailContent] {
 
 	object fields extends FieldsObject {
 		val contentId = new IntDatabaseField(self, "CONTENT_ID")
+		@NullableInDatabase
 		val fromAddr = new StringDatabaseField(self, "FROM_ADDR", 100)
 		val ccAddr = new NullableStringDatabaseField(self, "CC_ADDR", 500)
 		val bccAddr = new NullableStringDatabaseField(self, "BCC_ADDR", 500)
+		@NullableInDatabase
 		val subject = new StringDatabaseField(self, "SUBJECT", 200)
 		val plainBody = new NullableStringDatabaseField(self, "PLAIN_BODY", 4000)
 		val htmlBody = new NullableStringDatabaseField(self, "HTML_BODY", 4000)
 		val description = new NullableStringDatabaseField(self, "DESCRIPTION", 4000)
 		val title = new StringDatabaseField(self, "TITLE", 50)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val emailGroupId = new IntDatabaseField(self, "EMAIL_GROUP_ID")
 		val recGroupId = new NullableIntDatabaseField(self, "REC_GROUP_ID")
 		val htmlBodyClob = new NullableStringDatabaseField(self, "HTML_BODY_CLOB", -1)

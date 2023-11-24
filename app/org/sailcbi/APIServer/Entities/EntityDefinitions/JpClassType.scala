@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpClassType extends StorableClass(JpClassType) {
 	override object values extends ValuesObject {
@@ -35,19 +38,27 @@ object JpClassType extends StorableObject[JpClassType] {
 
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val typeName = new StringDatabaseField(self, "TYPE_NAME", 100)
+		@NullableInDatabase
 		val signupMax = new DoubleDatabaseField(self, "SIGNUP_MAX")
 		val allowMultiple = new NullableBooleanDatabaseField(self, "ALLOW_MULTIPLE")
 		val ratingPrereq = new NullableDoubleDatabaseField(self, "RATING_PREREQ")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val sessionLength = new DoubleDatabaseField(self, "SESSION_LENGTH")
+		@NullableInDatabase
 		val sessionCt = new DoubleDatabaseField(self, "SESSION_CT")
 		val ratingOverkill = new NullableDoubleDatabaseField(self, "RATING_OVERKILL")
 		val minAge = new NullableDoubleDatabaseField(self, "MIN_AGE")
 		val maxAge = new NullableDoubleDatabaseField(self, "MAX_AGE")
+		@NullableInDatabase
 		val minSessionsForAttended = new DoubleDatabaseField(self, "MIN_SESSIONS_FOR_ATTENDED")
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
 		val displayOrder = new NullableDoubleDatabaseField(self, "DISPLAY_ORDER")

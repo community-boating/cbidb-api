@@ -20,7 +20,7 @@ class GetUsers @Inject()(implicit val exec: ExecutionContext) extends RestContro
 		User.fields.nameFirst,
 		User.fields.email,
 		User.fields.locked,
-		User.fields.pwChangeRequired,
+		User.fields.pwChangeReqd,
 		User.fields.active,
 		User.fields.hideFromClose,
 		User.fields.accessProfileId

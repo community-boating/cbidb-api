@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class SendgridSuppressionActivity extends StorableClass(SendgridSuppressionActivity) {
 	override object values extends ValuesObject {
@@ -25,11 +28,16 @@ object SendgridSuppressionActivity extends StorableObject[SendgridSuppressionAct
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
+		@NullableInDatabase
 		val occurredDatetime = new DateTimeDatabaseField(self, "OCCURRED_DATETIME")
+		@NullableInDatabase
 		val email = new StringDatabaseField(self, "EMAIL", 500)
+		@NullableInDatabase
 		val reason = new StringDatabaseField(self, "REASON", 4000)
+		@NullableInDatabase
 		val status = new StringDatabaseField(self, "STATUS", 50)
 		val ip = new NullableStringDatabaseField(self, "IP", 30)
+		@NullableInDatabase
 		val `type` = new StringDatabaseField(self, "TYPE", 15)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 	}

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Eii extends StorableClass(Eii) {
 	override object values extends ValuesObject {
@@ -55,30 +58,55 @@ object Eii extends StorableObject[Eii] {
 		val desc4 = new NullableStringDatabaseField(self, "DESC_4", 30)
 		val desc3 = new NullableStringDatabaseField(self, "DESC_3", 30)
 		val desc2 = new NullableStringDatabaseField(self, "DESC_2", 30)
+		@NullableInDatabase
 		val desc1 = new StringDatabaseField(self, "DESC_1", 30)
+		@NullableInDatabase
 		val housing = new DoubleDatabaseField(self, "HOUSING")
+		@NullableInDatabase
 		val utilities = new DoubleDatabaseField(self, "UTILITIES")
+		@NullableInDatabase
 		val food = new DoubleDatabaseField(self, "FOOD")
+		@NullableInDatabase
 		val transportation = new DoubleDatabaseField(self, "TRANSPORTATION")
+		@NullableInDatabase
 		val childCare = new DoubleDatabaseField(self, "CHILD_CARE")
+		@NullableInDatabase
 		val personalHouseholdNeeds = new DoubleDatabaseField(self, "PERSONAL_HOUSEHOLD_NEEDS")
+		@NullableInDatabase
 		val healthcare = new DoubleDatabaseField(self, "HEALTHCARE")
+		@NullableInDatabase
 		val taxes = new DoubleDatabaseField(self, "TAXES")
+		@NullableInDatabase
 		val taxCredits = new DoubleDatabaseField(self, "TAX_CREDITS")
+		@NullableInDatabase
 		val monthlyTotal = new DoubleDatabaseField(self, "MONTHLY_TOTAL")
+		@NullableInDatabase
 		val annualTotal = new DoubleDatabaseField(self, "ANNUAL_TOTAL")
+		@NullableInDatabase
 		val hourlyWage = new DoubleDatabaseField(self, "HOURLY_WAGE")
+		@NullableInDatabase
 		val precautionary = new DoubleDatabaseField(self, "PRECAUTIONARY")
+		@NullableInDatabase
 		val retirement = new DoubleDatabaseField(self, "RETIREMENT")
+		@NullableInDatabase
 		val childrensEducationTraining = new DoubleDatabaseField(self, "CHILDRENS_EDUCATION_TRAINING")
+		@NullableInDatabase
 		val homeownership = new DoubleDatabaseField(self, "HOMEOWNERSHIP")
+		@NullableInDatabase
 		val benefits = new StringDatabaseField(self, "BENEFITS", 30)
+		@NullableInDatabase
 		val monthlyTotalTemp = new StringDatabaseField(self, "MONTHLY_TOTAL_TEMP", 50)
+		@NullableInDatabase
 		val annualTotalTemp = new StringDatabaseField(self, "ANNUAL_TOTAL_TEMP", 50)
+		@NullableInDatabase
 		val workerCt = new DoubleDatabaseField(self, "WORKER_CT")
+		@NullableInDatabase
 		val infantCt = new DoubleDatabaseField(self, "INFANT_CT")
+		@NullableInDatabase
 		val preschoolerCt = new DoubleDatabaseField(self, "PRESCHOOLER_CT")
+		@NullableInDatabase
 		val schoolageCt = new DoubleDatabaseField(self, "SCHOOLAGE_CT")
+		@NullableInDatabase
 		val teenageCt = new DoubleDatabaseField(self, "TEENAGE_CT")
 	}
 

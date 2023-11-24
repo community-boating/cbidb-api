@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class BoatType extends StorableClass(BoatType) {
 	override object values extends ValuesObject {
@@ -28,14 +31,22 @@ object BoatType extends StorableObject[BoatType] {
 
 	object fields extends FieldsObject {
 		val boatId = new IntDatabaseField(self, "BOAT_ID")
+		@NullableInDatabase
 		val boatName = new StringDatabaseField(self, "BOAT_NAME", 50)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val minCrew = new DoubleDatabaseField(self, "MIN_CREW")
+		@NullableInDatabase
 		val maxCrew = new DoubleDatabaseField(self, "MAX_CREW")
 		val imageFilename = new NullableStringDatabaseField(self, "IMAGE_FILENAME", 50)
 	}

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ApClassSignup extends StorableClass(ApClassSignup) {
 	override object references extends ReferencesObject {
@@ -48,8 +51,10 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")
 		val signupDatetime = new DateTimeDatabaseField(self, "SIGNUP_DATETIME")
 		val signupType = new StringDatabaseField(self, "SIGNUP_TYPE", 1)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val ccTransNum = new NullableStringDatabaseField(self, "CC_TRANS_NUM", 50)

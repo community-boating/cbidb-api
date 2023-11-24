@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class CcLog extends StorableClass(CcLog) {
 	override object values extends ValuesObject {
@@ -70,9 +73,13 @@ object CcLog extends StorableObject[CcLog] {
 		val rRisk = new NullableStringDatabaseField(self, "R_RISK", 50)
 		val rReference = new NullableStringDatabaseField(self, "R_REFERENCE", 100)
 		val rOrdernumber = new NullableStringDatabaseField(self, "R_ORDERNUMBER", 100)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

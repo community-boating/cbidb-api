@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class IncomeLevel extends StorableClass(IncomeLevel) {
 	override object values extends ValuesObject {
@@ -26,9 +29,13 @@ object IncomeLevel extends StorableObject[IncomeLevel] {
 		val levelId = new IntDatabaseField(self, "LEVEL_ID")
 		val levelFloor = new NullableDoubleDatabaseField(self, "LEVEL_FLOOR")
 		val levelCeiling = new NullableDoubleDatabaseField(self, "LEVEL_CEILING")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

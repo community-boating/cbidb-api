@@ -16,7 +16,7 @@ class UpdateUserPassword @Inject()(implicit exec: ExecutionContext) extends Inje
 			PA.withRequestCache(BouncerRequestCache)(None, parsedRequest, rc => {
 				rc.getUserByUsername(parsed.username) match {
 					case Some(user) => {
-						user.values.pwHash.update(Some(parsed.pwHash))
+						user.values.pwHash.update(parsed.pwHash)
 						user.values.pwHashScheme.update(Some(MagicIds.PW_HASH_SCHEME.STAFF_2))
 						rc.updateUser(user)
 					}

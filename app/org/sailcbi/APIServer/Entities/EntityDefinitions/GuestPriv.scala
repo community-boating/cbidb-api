@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class GuestPriv extends StorableClass(GuestPriv) {
 	override object values extends ValuesObject {
@@ -31,16 +34,21 @@ object GuestPriv extends StorableObject[GuestPriv] {
 
 	object fields extends FieldsObject {
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")
+		@NullableInDatabase
 		val price = new DoubleDatabaseField(self, "PRICE")
+		@NullableInDatabase
 		val purchaseDate = new DateTimeDatabaseField(self, "PURCHASE_DATE")
+		@NullableInDatabase
 		val startDate = new DateTimeDatabaseField(self, "START_DATE")
 		val closeId = new NullableIntDatabaseField(self, "CLOSE_ID")
 		val voidCloseId = new NullableIntDatabaseField(self, "VOID_CLOSE_ID")
 		val paymentLocation = new NullableStringDatabaseField(self, "PAYMENT_LOCATION", 50)
 		val paymentMedium = new NullableStringDatabaseField(self, "PAYMENT_MEDIUM", 50)
 		val ccTransNum = new NullableDoubleDatabaseField(self, "CC_TRANS_NUM")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val membershipId = new IntDatabaseField(self, "MEMBERSHIP_ID")

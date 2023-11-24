@@ -5,6 +5,7 @@ import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Storable.DTOClass
 import com.coleji.neptune.Util.GenerateSetDelta
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
+import org.sailcbi.APIServer.Logic.DockhouseLogic.DockReportLogic
 import play.api.libs.json.{JsValue, Json}
 
 import java.time.{LocalDate, LocalDateTime}
@@ -38,9 +39,9 @@ case class PutDockReportDto (
 
 	override def mutateStorableForInsert(s: DockReport):  DockReport = mutateStorableForUpdate(s)
 
-	override def recurse(rc: UnlockedRequestCache, s: DockReport): ValidationResult = {
+	override def recurse(rc: UnlockedRequestCache, dockReport: DockReport): ValidationResult = {
 		// Get existing subobjects
-		val (weatherExisting, dockstaffExisting, uapApptsExisting, hullCountsExisting, apClassesExisting) = s.getSubobjects(rc)
+		val (weatherExisting, dockstaffExisting, uapApptsExisting, hullCountsExisting, apClassesExisting) = DockReportLogic.getSubobjects(dockReport, rc)
 		val (weatherExistingDto, dockstaffExistingDto, uapApptsExistingDto, hullCountsExistingDto, apClassesExistingDto) = (
 			weatherExisting.map(PutDockReportWeatherDto.apply),
 			dockstaffExisting.map(PutDockReportStaffDto.apply),
@@ -122,7 +123,7 @@ object PutDockReportDto {
 	)
 
 	def applyWithSubObjects(rc: UnlockedRequestCache)(dr: DockReport): PutDockReportDto = {
-		val (weather, dockstaff, uapAppts, hullCounts, apClasses) = dr.getSubobjects(rc)
+		val (weather, dockstaff, uapAppts, hullCounts, apClasses) = DockReportLogic.getSubobjects(dr, rc)
 		new PutDockReportDto(
 			DOCK_REPORT_ID=Some(dr.values.dockReportId.get),
 			REPORT_DATE=dr.values.reportDate.get,

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoItemType extends StorableClass(FoItemType) {
 	override object values extends ValuesObject {
@@ -29,15 +32,25 @@ object FoItemType extends StorableObject[FoItemType] {
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
+		@NullableInDatabase
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
+		@NullableInDatabase
 		val discountsTotal = new DoubleDatabaseField(self, "DISCOUNTS_TOTAL")
+		@NullableInDatabase
 		val qtySold = new DoubleDatabaseField(self, "QTY_SOLD")
+		@NullableInDatabase
 		val qtyComped = new DoubleDatabaseField(self, "QTY_COMPED")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val unitPrice = new DoubleDatabaseField(self, "UNIT_PRICE")
 		val taxRate = new NullableDoubleDatabaseField(self, "TAX_RATE")
 	}

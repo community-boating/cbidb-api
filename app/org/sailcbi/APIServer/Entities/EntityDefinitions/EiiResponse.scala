@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class EiiResponse extends StorableClass(EiiResponse) {
 	override object values extends ValuesObject {
@@ -50,11 +53,15 @@ object EiiResponse extends StorableObject[EiiResponse] {
 		val teenagers = new NullableDoubleDatabaseField(self, "TEENAGERS")
 		val income = new NullableDoubleDatabaseField(self, "INCOME")
 		val computedEii = new NullableDoubleDatabaseField(self, "COMPUTED_EII")
+		@NullableInDatabase
 		val computedPrice = new DoubleDatabaseField(self, "COMPUTED_PRICE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val isApplying = new BooleanDatabaseField(self, "IS_APPLYING", false)
 		val isCurrent = new BooleanDatabaseField(self, "IS_CURRENT", false)
 		val pdComment = new NullableStringDatabaseField(self, "PD_COMMENT", -1)

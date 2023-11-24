@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Feedback extends StorableClass(Feedback) {
 	override object values extends ValuesObject {
@@ -27,14 +30,22 @@ object Feedback extends StorableObject[Feedback] {
 
 	object fields extends FieldsObject {
 		val feedbackId = new IntDatabaseField(self, "FEEDBACK_ID")
+		@NullableInDatabase
 		val appAlias = new StringDatabaseField(self, "APP_ALIAS", 100)
+		@NullableInDatabase
 		val appPageId = new IntDatabaseField(self, "APP_PAGE_ID")
 		val description = new NullableStringDatabaseField(self, "DESCRIPTION", -1)
+		@NullableInDatabase
 		val userName = new StringDatabaseField(self, "USER_NAME", 20)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val appId = new IntDatabaseField(self, "APP_ID")
 	}
 

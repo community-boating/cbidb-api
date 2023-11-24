@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoCash extends StorableClass(FoCash) {
 	override object values extends ValuesObject {
@@ -29,9 +32,13 @@ object FoCash extends StorableObject[FoCash] {
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
 		val locationIndex = new DoubleDatabaseField(self, "LOCATION_INDEX")
 		val value = new DoubleDatabaseField(self, "VALUE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val denomIndex = new DoubleDatabaseField(self, "DENOM_INDEX")
 	}

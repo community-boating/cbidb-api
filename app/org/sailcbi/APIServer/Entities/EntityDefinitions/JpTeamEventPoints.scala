@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpTeamEventPoints extends StorableClass(JpTeamEventPoints) {
 	override object references extends ReferencesObject {
@@ -25,8 +28,11 @@ object JpTeamEventPoints extends StorableObject[JpTeamEventPoints] {
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
+		@NullableInDatabase
 		val eventId = new IntDatabaseField(self, "EVENT_ID")
+		@NullableInDatabase
 		val teamId = new IntDatabaseField(self, "TEAM_ID")
+		@NullableInDatabase
 		val points = new DoubleDatabaseField(self, "POINTS")
 	}
 

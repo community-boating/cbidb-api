@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class UserRole extends StorableClass(UserRole) {
 	override object values extends ValuesObject {
@@ -20,7 +23,9 @@ object UserRole extends StorableObject[UserRole] {
 
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
+		@NullableInDatabase
 		val userId = new IntDatabaseField(self, "USER_ID")
+		@NullableInDatabase
 		val roleId = new IntDatabaseField(self, "ROLE_ID")
 	}
 

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class GlobalConstantsValue extends StorableClass(GlobalConstantsValue) {
 	override object values extends ValuesObject {
@@ -26,7 +29,9 @@ object GlobalConstantsValue extends StorableObject[GlobalConstantsValue] {
 
 	object fields extends FieldsObject {
 		val valueId = new IntDatabaseField(self, "VALUE_ID")
+		@NullableInDatabase
 		val constantId = new IntDatabaseField(self, "CONSTANT_ID")
+		@NullableInDatabase
 		val effectiveDatetime = new DateTimeDatabaseField(self, "EFFECTIVE_DATETIME")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

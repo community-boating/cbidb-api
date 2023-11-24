@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class CardDefinitionType extends StorableClass(CardDefinitionType) {
 	override object values extends ValuesObject {
@@ -20,6 +23,7 @@ object CardDefinitionType extends StorableObject[CardDefinitionType] {
 
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val typeName = new StringDatabaseField(self, "TYPE_NAME", 100)
 		val warnAt = new NullableDoubleDatabaseField(self, "WARN_AT")
 	}

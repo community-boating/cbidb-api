@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class OrderNumber extends StorableClass(OrderNumber) {
 	override object values extends ValuesObject {
@@ -33,13 +36,16 @@ object OrderNumber extends StorableObject[OrderNumber] {
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val orderNum = new StringDatabaseField(self, "ORDER_NUM", 25)
 		val approvedTransId = new NullableIntDatabaseField(self, "APPROVED_TRANS_ID")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val processedDate = new NullableDateTimeDatabaseField(self, "PROCESSED_DATE")
 		val approvedStripeChargeAtt = new NullableDoubleDatabaseField(self, "APPROVED_STRIPE_CHARGE_ATT")
 		val addlStaggeredPayments = new NullableDoubleDatabaseField(self, "ADDL_STAGGERED_PAYMENTS")
+		@NullableInDatabase
 		val appAlias = new StringDatabaseField(self, "APP_ALIAS", 20)
 		val usePaymentIntent = new NullableBooleanDatabaseField(self, "USE_PAYMENT_INTENT")
 	}

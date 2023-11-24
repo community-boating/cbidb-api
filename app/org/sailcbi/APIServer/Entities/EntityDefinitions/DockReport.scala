@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DockReport extends StorableClass(DockReport) {
 	override object values extends ValuesObject {
@@ -17,7 +20,7 @@ class DockReport extends StorableClass(DockReport) {
 		val createdBy = new NullableStringFieldValue(self, DockReport.fields.createdBy)
 		val updatedOn = new NullableDateTimeFieldValue(self, DockReport.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, DockReport.fields.updatedBy)
-		val signedBy = new NullableDoubleFieldValue(self, DockReport.fields.signedBy)
+		val signedBy = new NullableIntFieldValue(self, DockReport.fields.signedBy)
 	}
 }
 
@@ -28,6 +31,7 @@ object DockReport extends StorableObject[DockReport] {
 
 	object fields extends FieldsObject {
 		val dockReportId = new IntDatabaseField(self, "DOCK_REPORT_ID")
+		@NullableInDatabase
 		val reportDate = new DateDatabaseField(self, "REPORT_DATE")
 		val sunsetDatetime = new NullableDateTimeDatabaseField(self, "SUNSET_DATETIME")
 		val incidentsNotes = new NullableStringDatabaseField(self, "INCIDENTS_NOTES", 4000)
@@ -37,7 +41,7 @@ object DockReport extends StorableObject[DockReport] {
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 100)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 100)
-		val signedBy = new NullableDoubleDatabaseField(self, "SIGNED_BY")
+		val signedBy = new NullableIntDatabaseField(self, "SIGNED_BY")
 	}
 
 	def primaryKey: IntDatabaseField = fields.dockReportId

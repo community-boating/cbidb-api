@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Rating extends StorableClass(Rating) {
 	override object references extends ReferencesObject {
@@ -35,17 +38,24 @@ object Rating extends StorableObject[Rating] {
 
 	object fields extends FieldsObject {
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
+		@NullableInDatabase
 		val ratingName = new StringDatabaseField(self, "RATING_NAME", 100)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
 		val overriddenBy = new NullableDoubleDatabaseField(self, "OVERRIDDEN_BY")
 		val testMinCrew = new NullableDoubleDatabaseField(self, "TEST_MIN_CREW")
 		val testMaxCrew = new NullableDoubleDatabaseField(self, "TEST_MAX_CREW")
 		val testable = new NullableBooleanDatabaseField(self, "TESTABLE")
+		@NullableInDatabase
 		val ratingCategory = new StringDatabaseField(self, "RATING_CATEGORY", 1)
 	}
 

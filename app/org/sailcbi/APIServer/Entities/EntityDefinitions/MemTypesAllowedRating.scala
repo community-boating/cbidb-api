@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class MemTypesAllowedRating extends StorableClass(MemTypesAllowedRating) {
 	override object values extends ValuesObject {
@@ -20,7 +23,9 @@ object MemTypesAllowedRating extends StorableObject[MemTypesAllowedRating] {
 
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
+		@NullableInDatabase
 		val membershipTypeId = new IntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
+		@NullableInDatabase
 		val ratingId = new IntDatabaseField(self, "RATING_ID")
 	}
 

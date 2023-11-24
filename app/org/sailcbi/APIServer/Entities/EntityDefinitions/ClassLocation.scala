@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ClassLocation extends StorableClass(ClassLocation) {
 	override object values extends ValuesObject {
@@ -24,7 +27,9 @@ object ClassLocation extends StorableObject[ClassLocation] {
 
 	object fields extends FieldsObject {
 		val locationId = new IntDatabaseField(self, "LOCATION_ID")
+		@NullableInDatabase
 		val locationName = new StringDatabaseField(self, "LOCATION_NAME", 100)
+		@NullableInDatabase
 		val active = new BooleanDatabaseField(self, "ACTIVE", false)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

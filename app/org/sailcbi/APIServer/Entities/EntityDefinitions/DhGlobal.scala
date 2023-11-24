@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DhGlobal extends StorableClass(DhGlobal) {
 	override object values extends ValuesObject {
@@ -24,11 +27,13 @@ object DhGlobal extends StorableObject[DhGlobal] {
 
 	object fields extends FieldsObject {
 		val globalId = new IntDatabaseField(self, "GLOBAL_ID")
+		@NullableInDatabase
 		val description = new StringDatabaseField(self, "DESCRIPTION", 4000)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val alias = new StringDatabaseField(self, "ALIAS", 20)
 	}
 

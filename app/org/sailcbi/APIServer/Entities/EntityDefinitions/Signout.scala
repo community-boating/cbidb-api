@@ -3,12 +3,15 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Signout extends StorableClass(Signout) {
 	override object references extends ReferencesObject {
 		val skipper = new Initializable[Person]
-		val crew = new Initializable[List[SignoutCrew]]
+		val crew = new Initializable[IndexedSeq[SignoutCrew]]
 		val tests = new Initializable[IndexedSeq[SignoutTest]]
 	}
 
@@ -61,7 +64,9 @@ object Signout extends StorableObject[Signout] {
 		val testResult = new NullableStringDatabaseField(self, "TEST_RESULT", 10)
 		val signoutType = new StringDatabaseField(self, "SIGNOUT_TYPE", 1)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val didCapsize = new NullableBooleanDatabaseField(self, "DID_CAPSIZE")

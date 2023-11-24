@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class StripeToken extends StorableClass(StripeToken) {
 	override object values extends ValuesObject {
@@ -26,8 +29,10 @@ object StripeToken extends StorableObject[StripeToken] {
 
 	object fields extends FieldsObject {
 		val tokenId = new IntDatabaseField(self, "TOKEN_ID")
+		@NullableInDatabase
 		val token = new StringDatabaseField(self, "TOKEN", 50)
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")
+		@NullableInDatabase
 		val createdDatetime = new DateTimeDatabaseField(self, "CREATED_DATETIME")
 		val cardLastDigits = new NullableStringDatabaseField(self, "CARD_LAST_DIGITS", 10)
 		val cardExpMonth = new NullableDoubleDatabaseField(self, "CARD_EXP_MONTH")

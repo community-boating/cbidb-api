@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpTeam extends StorableClass(JpTeam) {
 	override object values extends ValuesObject {
@@ -25,12 +28,14 @@ object JpTeam extends StorableObject[JpTeam] {
 
 	object fields extends FieldsObject {
 		val teamId = new IntDatabaseField(self, "TEAM_ID")
+		@NullableInDatabase
 		val teamName = new StringDatabaseField(self, "TEAM_NAME", 100)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val imageFilename = new StringDatabaseField(self, "IMAGE_FILENAME", 50)
 	}
 

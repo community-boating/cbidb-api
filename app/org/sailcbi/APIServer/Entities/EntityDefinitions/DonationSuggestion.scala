@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DonationSuggestion extends StorableClass(DonationSuggestion) {
 	override object values extends ValuesObject {
@@ -23,10 +26,15 @@ object DonationSuggestion extends StorableObject[DonationSuggestion] {
 
 	object fields extends FieldsObject {
 		val suggId = new IntDatabaseField(self, "SUGG_ID")
+		@NullableInDatabase
 		val amount = new DoubleDatabaseField(self, "AMOUNT")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

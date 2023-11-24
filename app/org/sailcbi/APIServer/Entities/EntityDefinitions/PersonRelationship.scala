@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class PersonRelationship extends StorableClass(PersonRelationship) {
 	override object references extends ReferencesObject {
@@ -30,11 +33,16 @@ object PersonRelationship extends StorableObject[PersonRelationship] {
 
 	object fields extends FieldsObject {
 		val relationId = new IntDatabaseField(self, "RELATION_ID")
+		@NullableInDatabase
 		val a = new DoubleDatabaseField(self, "A")
+		@NullableInDatabase
 		val b = new DoubleDatabaseField(self, "B")
+		@NullableInDatabase
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 	}

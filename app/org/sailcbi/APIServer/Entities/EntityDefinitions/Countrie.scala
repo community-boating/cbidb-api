@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Countrie extends StorableClass(Countrie) {
 	override object values extends ValuesObject {
@@ -20,7 +23,9 @@ object Countrie extends StorableObject[Countrie] {
 
 	object fields extends FieldsObject {
 		val countryId = new IntDatabaseField(self, "COUNTRY_ID")
+		@NullableInDatabase
 		val abbrev = new StringDatabaseField(self, "ABBREV", 30)
+		@NullableInDatabase
 		val countryName = new StringDatabaseField(self, "COUNTRY_NAME", 500)
 	}
 

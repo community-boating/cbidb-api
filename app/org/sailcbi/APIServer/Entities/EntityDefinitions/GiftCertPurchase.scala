@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class GiftCertPurchase extends StorableClass(GiftCertPurchase) {
 	override object values extends ValuesObject {
@@ -49,12 +52,16 @@ object GiftCertPurchase extends StorableObject[GiftCertPurchase] {
 
 	object fields extends FieldsObject {
 		val certId = new NullableIntDatabaseField(self, "CERT_ID")
+		@NullableInDatabase
 		val purchaseDate = new DateTimeDatabaseField(self, "PURCHASE_DATE")
+		@NullableInDatabase
 		val purchasePrice = new DoubleDatabaseField(self, "PURCHASE_PRICE")
 		val purchaseCloseId = new NullableIntDatabaseField(self, "PURCHASE_CLOSE_ID")
 		val purchaseOrderId = new NullableIntDatabaseField(self, "PURCHASE_ORDER_ID")
 		val purchaseMemTypeId = new NullableIntDatabaseField(self, "PURCHASE_MEM_TYPE_ID")
+		@NullableInDatabase
 		val recipientNameFirst = new StringDatabaseField(self, "RECIPIENT_NAME_FIRST", 100)
+		@NullableInDatabase
 		val recipientNameLast = new StringDatabaseField(self, "RECIPIENT_NAME_LAST", 100)
 		val recipientEmail = new NullableStringDatabaseField(self, "RECIPIENT_EMAIL", 500)
 		val recipientAddr1 = new NullableStringDatabaseField(self, "RECIPIENT_ADDR_1", 100)
@@ -62,11 +69,14 @@ object GiftCertPurchase extends StorableObject[GiftCertPurchase] {
 		val recipientCity = new NullableStringDatabaseField(self, "RECIPIENT_CITY", 50)
 		val recipientState = new NullableStringDatabaseField(self, "RECIPIENT_STATE", 5)
 		val recipientZip = new NullableStringDatabaseField(self, "RECIPIENT_ZIP", 20)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val foMadeDatetime = new NullableDateTimeDatabaseField(self, "FO_MADE_DATETIME")
+		@NullableInDatabase
 		val purchaserId = new IntDatabaseField(self, "PURCHASER_ID")
 		val deliveryMethod = new StringDatabaseField(self, "DELIVERY_METHOD", 1)
 		val message = new NullableStringDatabaseField(self, "MESSAGE", -1)

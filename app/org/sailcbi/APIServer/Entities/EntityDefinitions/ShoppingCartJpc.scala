@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ShoppingCartJpc extends StorableClass(ShoppingCartJpc) {
 	override object values extends ValuesObject {
@@ -33,9 +36,13 @@ object ShoppingCartJpc extends StorableObject[ShoppingCartJpc] {
 		val orderId = new NullableIntDatabaseField(self, "ORDER_ID")
 		val instanceId = new NullableIntDatabaseField(self, "INSTANCE_ID")
 		val readyToBuy = new NullableStringDatabaseField(self, "READY_TO_BUY", 1)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
 		val discountInstanceId = new NullableIntDatabaseField(self, "DISCOUNT_INSTANCE_ID")

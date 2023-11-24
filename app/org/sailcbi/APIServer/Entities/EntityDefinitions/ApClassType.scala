@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ApClassType extends StorableClass(ApClassType) {
 	override object references extends ReferencesObject {
@@ -45,11 +48,16 @@ object ApClassType extends StorableObject[ApClassType] {
 		val ratingPrereq = new NullableDoubleDatabaseField(self, "RATING_PREREQ")
 		val classPrereq = new NullableDoubleDatabaseField(self, "CLASS_PREREQ")
 		val ratingOverkill = new NullableDoubleDatabaseField(self, "RATING_OVERKILL")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
+		@NullableInDatabase
 		val descLong = new StringDatabaseField(self, "DESC_LONG", -1)
 		val descShort = new NullableStringDatabaseField(self, "DESC_SHORT", -1)
 		val classOverkill = new NullableDoubleDatabaseField(self, "CLASS_OVERKILL")

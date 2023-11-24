@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class MembershipTypeDiscount extends StorableClass(MembershipTypeDiscount) {
 	override object values extends ValuesObject {
@@ -28,10 +31,15 @@ object MembershipTypeDiscount extends StorableObject[MembershipTypeDiscount] {
 		val discountId = new IntDatabaseField(self, "DISCOUNT_ID")
 		val membershipTypeId = new NullableIntDatabaseField(self, "MEMBERSHIP_TYPE_ID")
 		val discountAmt = new NullableDoubleDatabaseField(self, "DISCOUNT_AMT")
+		@NullableInDatabase
 		val description = new StringDatabaseField(self, "DESCRIPTION", 100)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val regCodeRowId = new NullableIntDatabaseField(self, "REG_CODE_ROW_ID")
 	}

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class DockReportStaff extends StorableClass(DockReportStaff) {
 	override object values extends ValuesObject {
@@ -28,7 +31,9 @@ object DockReportStaff extends StorableObject[DockReportStaff] {
 	object fields extends FieldsObject {
 		val dockReportStaffId = new IntDatabaseField(self, "DOCK_REPORT_STAFF_ID")
 		val dockReportId = new IntDatabaseField(self, "DOCK_REPORT_ID")
+		@NullableInDatabase
 		val dockmasterOnDuty = new BooleanDatabaseField(self, "DOCKMASTER_ON_DUTY", false)
+		@NullableInDatabase
 		val staffName = new StringDatabaseField(self, "STAFF_NAME", 100)
 		val timeIn = new NullableDateTimeDatabaseField(self, "TIME_IN")
 		val timeOut = new NullableDateTimeDatabaseField(self, "TIME_OUT")

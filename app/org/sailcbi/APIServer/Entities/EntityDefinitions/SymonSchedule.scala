@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class SymonSchedule extends StorableClass(SymonSchedule) {
 	override object values extends ValuesObject {
@@ -28,14 +31,18 @@ object SymonSchedule extends StorableObject[SymonSchedule] {
 
 	object fields extends FieldsObject {
 		val scheduleId = new IntDatabaseField(self, "SCHEDULE_ID")
+		@NullableInDatabase
 		val hostName = new StringDatabaseField(self, "HOST_NAME", 50)
+		@NullableInDatabase
 		val programName = new StringDatabaseField(self, "PROGRAM_NAME", 50)
 		val argString = new NullableStringDatabaseField(self, "ARG_STRING", 250)
+		@NullableInDatabase
 		val freqDays = new DoubleDatabaseField(self, "FREQ_DAYS")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+		@NullableInDatabase
 		val symonVersion = new StringDatabaseField(self, "SYMON_VERSION", 5)
 		val disabled = new NullableBooleanDatabaseField(self, "DISABLED")
 	}

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class CommentsTable extends StorableClass(CommentsTable) {
 	override object values extends ValuesObject {
@@ -20,6 +23,7 @@ object CommentsTable extends StorableObject[CommentsTable] {
 
 	object fields extends FieldsObject {
 		val tableId = new IntDatabaseField(self, "TABLE_ID")
+		@NullableInDatabase
 		val tableName = new StringDatabaseField(self, "TABLE_NAME", 50)
 		val commentText = new NullableStringDatabaseField(self, "COMMENT_TEXT", -1)
 	}

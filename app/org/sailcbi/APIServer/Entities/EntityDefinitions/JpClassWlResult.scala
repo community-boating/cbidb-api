@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class JpClassWlResult extends StorableClass(JpClassWlResult) {
 	override object values extends ValuesObject {
@@ -30,8 +33,10 @@ object JpClassWlResult extends StorableObject[JpClassWlResult] {
 		val signupId = new IntDatabaseField(self, "SIGNUP_ID")
 		val foVmDatetime = new NullableDateTimeDatabaseField(self, "FO_VM_DATETIME")
 		val wlResult = new StringDatabaseField(self, "WL_RESULT", 1)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val foAlertDatetime = new DateTimeDatabaseField(self, "FO_ALERT_DATETIME")

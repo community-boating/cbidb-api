@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoCheck extends StorableClass(FoCheck) {
 	override object values extends ValuesObject {
@@ -31,9 +34,13 @@ object FoCheck extends StorableObject[FoCheck] {
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
 		val value = new DoubleDatabaseField(self, "VALUE")
 		val checkNum = new NullableStringDatabaseField(self, "CHECK_NUM", 50)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val checkName = new NullableStringDatabaseField(self, "CHECK_NAME", 500)
 		val voidCloseId = new NullableIntDatabaseField(self, "VOID_CLOSE_ID")

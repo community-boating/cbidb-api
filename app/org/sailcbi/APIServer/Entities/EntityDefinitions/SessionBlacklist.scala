@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class SessionBlacklist extends StorableClass(SessionBlacklist) {
 	override object values extends ValuesObject {
@@ -24,7 +27,9 @@ object SessionBlacklist extends StorableObject[SessionBlacklist] {
 
 	object fields extends FieldsObject {
 		val blacklistId = new IntDatabaseField(self, "BLACKLIST_ID")
+		@NullableInDatabase
 		val sessionId = new StringDatabaseField(self, "SESSION_ID", 50)
+		@NullableInDatabase
 		val blacklistDatetime = new DateTimeDatabaseField(self, "BLACKLIST_DATETIME")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

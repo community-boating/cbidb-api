@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class OrderStaggeredPayment extends StorableClass(OrderStaggeredPayment) {
 	override object values extends ValuesObject {
@@ -36,7 +39,9 @@ object OrderStaggeredPayment extends StorableObject[OrderStaggeredPayment] {
 		val approvedStripeChargeAtt = new NullableDoubleDatabaseField(self, "APPROVED_STRIPE_CHARGE_ATT")
 		val paidCloseId = new NullableIntDatabaseField(self, "PAID_CLOSE_ID")
 		val redeemedCloseId = new NullableIntDatabaseField(self, "REDEEMED_CLOSE_ID")
+		@NullableInDatabase
 		val rawAmountInCents = new DoubleDatabaseField(self, "RAW_AMOUNT_IN_CENTS")
+		@NullableInDatabase
 		val addlAmountInCents = new DoubleDatabaseField(self, "ADDL_AMOUNT_IN_CENTS")
 		val paymentIntentRowId = new NullableIntDatabaseField(self, "PAYMENT_INTENT_ROW_ID")
 		val failedCron = new NullableBooleanDatabaseField(self, "FAILED_CRON")

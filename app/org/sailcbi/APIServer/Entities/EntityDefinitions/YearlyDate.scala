@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class YearlyDate extends StorableClass(YearlyDate) {
 	override object values extends ValuesObject {
@@ -26,12 +29,17 @@ object YearlyDate extends StorableObject[YearlyDate] {
 
 	object fields extends FieldsObject {
 		val dateId = new IntDatabaseField(self, "DATE_ID")
+		@NullableInDatabase
 		val year = new DoubleDatabaseField(self, "YEAR")
+		@NullableInDatabase
 		val itemId = new IntDatabaseField(self, "ITEM_ID")
+		@NullableInDatabase
 		val startDate = new DateTimeDatabaseField(self, "START_DATE")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val endDate = new NullableDateTimeDatabaseField(self, "END_DATE")
 	}

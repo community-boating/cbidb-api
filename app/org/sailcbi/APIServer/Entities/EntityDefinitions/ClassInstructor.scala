@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ClassInstructor extends StorableClass(ClassInstructor) {
 	override object values extends ValuesObject {
@@ -25,7 +28,9 @@ object ClassInstructor extends StorableObject[ClassInstructor] {
 
 	object fields extends FieldsObject {
 		val instructorId = new IntDatabaseField(self, "INSTRUCTOR_ID")
+		@NullableInDatabase
 		val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
+		@NullableInDatabase
 		val nameLast = new StringDatabaseField(self, "NAME_LAST", 100)
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class CardDismissal extends StorableClass(CardDismissal) {
 	override object values extends ValuesObject {
@@ -24,11 +27,17 @@ object CardDismissal extends StorableObject[CardDismissal] {
 
 	object fields extends FieldsObject {
 		val dismissalId = new IntDatabaseField(self, "DISMISSAL_ID")
+		@NullableInDatabase
 		val cardAssignId = new IntDatabaseField(self, "CARD_ASSIGN_ID")
+		@NullableInDatabase
 		val season = new DoubleDatabaseField(self, "SEASON")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

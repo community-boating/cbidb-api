@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class ApClassAttendance extends StorableClass(ApClassAttendance) {
 	override object values extends ValuesObject {
@@ -25,12 +28,18 @@ object ApClassAttendance extends StorableObject[ApClassAttendance] {
 
 	object fields extends FieldsObject {
 		val attendId = new IntDatabaseField(self, "ATTEND_ID")
+		@NullableInDatabase
 		val sessionId = new IntDatabaseField(self, "SESSION_ID")
+		@NullableInDatabase
 		val signupId = new IntDatabaseField(self, "SIGNUP_ID")
 		val attend = new NullableStringDatabaseField(self, "ATTEND", 1)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+		@NullableInDatabase
 		val createdBy = new StringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 	}
 

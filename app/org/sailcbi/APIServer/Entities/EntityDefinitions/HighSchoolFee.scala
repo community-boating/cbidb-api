@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class HighSchoolFee extends StorableClass(HighSchoolFee) {
 	override object values extends ValuesObject {
@@ -31,7 +34,9 @@ object HighSchoolFee extends StorableObject[HighSchoolFee] {
 		val schoolId = new IntDatabaseField(self, "SCHOOL_ID")
 		val year = new DoubleDatabaseField(self, "YEAR")
 		val springFall = new StringDatabaseField(self, "SPRING_FALL", 1)
+		@NullableInDatabase
 		val amount = new DoubleDatabaseField(self, "AMOUNT")
+		@NullableInDatabase
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
 		val voidCloseId = new NullableIntDatabaseField(self, "VOID_CLOSE_ID")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")

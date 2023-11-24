@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class FoAppliedGc extends StorableClass(FoAppliedGc) {
 	override object values extends ValuesObject {
@@ -28,11 +31,16 @@ object FoAppliedGc extends StorableObject[FoAppliedGc] {
 
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
+		@NullableInDatabase
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
+		@NullableInDatabase
 		val certId = new IntDatabaseField(self, "CERT_ID")
+		@NullableInDatabase
 		val value = new DoubleDatabaseField(self, "VALUE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val pmAssignId = new NullableIntDatabaseField(self, "PM_ASSIGN_ID")

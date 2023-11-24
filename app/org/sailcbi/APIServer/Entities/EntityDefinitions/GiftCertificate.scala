@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class GiftCertificate extends StorableClass(GiftCertificate) {
 	override object values extends ValuesObject {
@@ -26,8 +29,10 @@ object GiftCertificate extends StorableObject[GiftCertificate] {
 	object fields extends FieldsObject {
 		val certId = new IntDatabaseField(self, "CERT_ID")
 		val certNumber = new StringDatabaseField(self, "CERT_NUMBER", 50)
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val redemptionHash = new NullableStringDatabaseField(self, "REDEMPTION_HASH", 50)

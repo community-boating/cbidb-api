@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class Event extends StorableClass(Event) {
 	override object values extends ValuesObject {
@@ -26,11 +29,14 @@ object Event extends StorableObject[Event] {
 
 	object fields extends FieldsObject {
 		val eventId = new IntDatabaseField(self, "EVENT_ID")
+		@NullableInDatabase
 		val eventName = new StringDatabaseField(self, "EVENT_NAME", 200)
 		val eventDate = new NullableDateTimeDatabaseField(self, "EVENT_DATE")
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
+		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val displayOrder = new NullableDoubleDatabaseField(self, "DISPLAY_ORDER")

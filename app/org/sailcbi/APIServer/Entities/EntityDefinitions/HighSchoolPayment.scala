@@ -3,7 +3,10 @@ package org.sailcbi.APIServer.Entities.EntityDefinitions
 import com.coleji.neptune.Storable.FieldValues._
 import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
-import com.coleji.neptune.Util.Initializable
+import com.coleji.neptune.Util._
+import org.sailcbi.APIServer.Entities.NullableInDatabase
+import org.sailcbi.APIServer.Entities.entitycalculations._
+import play.api.libs.json._
 
 class HighSchoolPayment extends StorableClass(HighSchoolPayment) {
 	override object values extends ValuesObject {
@@ -41,6 +44,7 @@ object HighSchoolPayment extends StorableObject[HighSchoolPayment] {
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 50)
 		val paymentMedium = new NullableStringDatabaseField(self, "PAYMENT_MEDIUM", 50)
 		val ccTransNum = new NullableDoubleDatabaseField(self, "CC_TRANS_NUM")
+		@NullableInDatabase
 		val checkId = new IntDatabaseField(self, "CHECK_ID")
 		val springFall = new StringDatabaseField(self, "SPRING_FALL", 1)
 		val year = new DoubleDatabaseField(self, "YEAR")
