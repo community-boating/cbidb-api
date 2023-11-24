@@ -1,13 +1,22 @@
 package com.coleji.neptune.Core
 
-import com.redis.RedisClientPool
+import redis.clients.jedis.{Jedis, JedisPool}
 
-class RedisBroker private[Core](val clientPool: RedisClientPool)  extends CacheBroker {
-	override def set(key: String, value: String): Unit = clientPool.withClient(c => c.set(key, value))
+import scala.util.Using
 
-	override def get(key: String): Option[String] = clientPool.withClient(c => c.get(key))
+class RedisBroker private[Core](val clientPool: JedisPool)  extends CacheBroker {
+	override def set(key: String, value: String): Unit = withResource(c => c.set(key, value))
 
-	override def peek(key: String): Boolean = clientPool.withClient(c => c.strlen(key).exists(_ > 0))
+	override def get(key: String): Option[String] = withResource(c => Option(c.get(key)))
 
-	override def delete(key: String): Unit = clientPool.withClient(c => c.del(key))
+	override def peek(key: String): Boolean = withResource(c => Option(c.strlen(key)).exists(_ > 0))
+
+	override def delete(key: String): Unit = withResource(c => c.del(key))
+
+	private def withResource[T](cmd: Jedis => T): T = {
+		val t = Using (clientPool.getResource) { jedis =>
+			cmd(jedis)
+		}
+		t.get
+	}
 }

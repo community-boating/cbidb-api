@@ -5,10 +5,10 @@ import com.coleji.neptune.Core.access.Permission
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.access.CbiUserPermissionsAuthority
+import redis.clients.jedis.JedisPool
 
-class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+class StaffRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends UnlockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[StaffRequestCache] = StaffRequestCache
 
@@ -20,7 +20,7 @@ extends UnlockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 }
 
 object StaffRequestCache extends RequestCacheObject[StaffRequestCache] {
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): StaffRequestCache =
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): StaffRequestCache =
 		new StaffRequestCache(userName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(

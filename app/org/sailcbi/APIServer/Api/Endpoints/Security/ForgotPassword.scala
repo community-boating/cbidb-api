@@ -61,7 +61,7 @@ class ForgotPassword @Inject()(implicit exec: ExecutionContext) extends Injected
 						)
 						override def registerOutParameters: Map[String, Int] = Map.empty
 
-						override def getOutResults(cs: CallableStatement): Unit = Unit
+						override def getOutResults(cs: CallableStatement): Unit = ()
 
 						override def getQuery: String = "email_pkg.public_reset_pw(?, ?)"
 					}

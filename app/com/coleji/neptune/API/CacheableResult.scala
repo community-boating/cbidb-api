@@ -102,12 +102,10 @@ trait CacheableResult[T <: ParamsObject, U] {
 						CacheableResult.resultMap.remove(cacheKey)
 					}
 				})
-				p.future.onFailure({
-					case _: Throwable => {
-						CacheableResult.waiting(cacheKey) -= p
-						if (CacheableResult.waiting(cacheKey).isEmpty) {
-							CacheableResult.resultMap.remove(cacheKey)
-						}
+				p.future.failed.foreach(e => {
+					CacheableResult.waiting(cacheKey) -= p
+					if (CacheableResult.waiting(cacheKey).isEmpty) {
+						CacheableResult.resultMap.remove(cacheKey)
 					}
 				})
 				p.future
@@ -129,11 +127,9 @@ trait CacheableResult[T <: ParamsObject, U] {
 					println("done son; completing all queued")
 					result
 				}))
-				p.future.onFailure({
-					case _: Throwable => {
-						println("Failure detected; cleaning up")
-						CacheableResult.inUse.remove(cacheKey)
-					}
+				p.future.failed.foreach(e => {
+					println("Failure detected; cleaning up")
+					CacheableResult.inUse.remove(cacheKey)
 				})
 				p.future
 			}

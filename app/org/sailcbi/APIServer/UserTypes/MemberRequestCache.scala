@@ -5,14 +5,14 @@ import com.coleji.neptune.Exception.MuteEmailException
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Entities.MagicIds
 import play.api.mvc.Result
+import redis.clients.jedis.JedisPool
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
@@ -50,7 +50,7 @@ extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway
 }
 
 object MemberRequestCache extends RequestCacheObject[MemberRequestCache] {
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): MemberRequestCache =
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): MemberRequestCache =
 		new MemberRequestCache(userName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(

@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.UserTypes
 
 import com.coleji.neptune.Core._
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
+import redis.clients.jedis.JedisPool
 
-class PublicRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+class PublicRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[PublicRequestCache] = PublicRequestCache
 }
@@ -14,10 +14,10 @@ object PublicRequestCache extends RequestCacheObject[PublicRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): PublicRequestCache =
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): PublicRequestCache =
 		new PublicRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): PublicRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): PublicRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

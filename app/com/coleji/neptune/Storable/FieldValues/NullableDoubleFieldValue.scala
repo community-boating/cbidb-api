@@ -14,7 +14,7 @@ class NullableDoubleFieldValue(instance: StorableClass, @transient fieldInner: N
 	}
 
 	override def updateFromJsValue(v: JsValue): Boolean = v match {
-		case n: JsNumber => update(Some(n.value.doubleValue()))
+		case n: JsNumber => update(Some(n.value.doubleValue))
 		case JsNull => update(None)
 		case _ => false
 	}

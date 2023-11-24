@@ -1,13 +1,13 @@
 package org.sailcbi.APIServer.Logic
 
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.JUnitRunner
 
 import java.time.LocalDate
 
 @RunWith(classOf[JUnitRunner])
-class MembershipLogicTest extends FunSuite {
+class MembershipLogicTest extends AnyFunSuite {
 	test("start dates from purchase dates") {
 		val year = 2021
 

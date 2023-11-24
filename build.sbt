@@ -4,7 +4,7 @@ version := "0.1.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.13.12"
 
 maintainer in Linux := "Jonathan Cole <jon@community-boating.org>"
 
@@ -20,15 +20,29 @@ libraryDependencies += filters
 libraryDependencies += guice
 //libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+// https://mvnrepository.com/artifact/org.scalactic/scalactic
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.9"
 
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
+// https://mvnrepository.com/artifact/org.scalatest/scalatest
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test
 
-libraryDependencies +="net.debasishg" %% "redisclient" % "3.4"
-libraryDependencies +="com.zaxxer" % "HikariCP" % "3.3.1"
+// https://mvnrepository.com/artifact/org.scalatestplus/junit-4-13
+libraryDependencies += "org.scalatestplus" %% "junit-4-13" % "3.2.17.0" % Test
 
-libraryDependencies += "io.sentry" % "sentry" % "1.7.27"
+// https://mvnrepository.com/artifact/org.scalaj/scalaj-http
+libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
+
+
+// https://mvnrepository.com/artifact/redis.clients/jedis
+libraryDependencies += "redis.clients" % "jedis" % "5.1.0"
+
+// https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+libraryDependencies += "com.zaxxer" % "HikariCP" % "5.1.0"
+
+
+// https://mvnrepository.com/artifact/io.sentry/sentry
+libraryDependencies += "io.sentry" % "sentry" % "6.34.0"
+
 
 libraryDependencies += "net.sf.barcode4j" % "barcode4j" % "2.1"
 
@@ -37,6 +51,12 @@ libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
 
 // https://mvnrepository.com/artifact/org.apache.commons/commons-csv
 libraryDependencies += "org.apache.commons" % "commons-csv" % "1.10.0"
+
+// https://mvnrepository.com/artifact/org.apache.pdfbox/fontbox
+libraryDependencies += "org.apache.pdfbox" % "fontbox" % "3.0.0"
+
+// https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox
+libraryDependencies += "org.apache.pdfbox" % "pdfbox" % "3.0.0"
 
 
 /*

@@ -4,7 +4,7 @@ import com.coleji.neptune.PDFBox.{ContentStreamDecorator, PDFReport}
 import com.coleji.neptune.Util.Currency
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font, Standard14Fonts}
 import org.sailcbi.APIServer.Reports.DailyCloseReport.Model.DailyCloseReportModel
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.ChecksARPage.ChecksARPage
 import org.sailcbi.APIServer.Reports.DailyCloseReport.View.FirstPage.FirstPage
@@ -14,8 +14,8 @@ import org.sailcbi.APIServer.Reports.DailyCloseReport.View.ReceiptsPage.Receipts
 import java.awt.Color
 
 class DailyCloseReport(data: DailyCloseReportModel) extends PDFReport(data) {
-	val defaultFont: PDFont = PDType1Font.HELVETICA
-	val defaultBoldFont: PDFont = PDType1Font.HELVETICA_BOLD
+	val defaultFont: PDFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA)
+	val defaultBoldFont: PDFont =new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
 	val defaultFontSize: Float = 13f
 	val defaultColor: Color = Color.BLACK
 

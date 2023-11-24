@@ -2,8 +2,8 @@ package com.coleji.neptune.Core.Boot
 
 import com.coleji.neptune.Core._
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import play.api.inject.ApplicationLifecycle
+import redis.clients.jedis.JedisPool
 
 import scala.concurrent.Future
 
@@ -62,7 +62,7 @@ object ServerBootLoader {
 			println("Using DB Driver: " + dbDriver)
 
 			val dbConnection = getDBPools(dbDriver)
-			val redisPool = new RedisClientPool(paramFile.getOptionalString("RedisHost").getOrElse("localhost"), 6379)
+			val redisPool = new JedisPool(paramFile.getOptionalString("RedisHost").getOrElse("localhost"), 6379)
 			lifecycle match {
 				case Some(lc) => lc.addStopHook(() => Future.successful({
 					println("****************************    Stop hook: closing pools  **********************")

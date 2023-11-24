@@ -184,7 +184,7 @@ object SignoutsToday extends CacheableFactory[Null, IndexedSeq[Signout]]{
 		).reverse.take(MAX_RECORDS_TO_RETURN)
 
 		if (signouts.size > MAX_RECORDS_TO_RETURN) {
-			Sentry.capture("Today's signouts had " + signouts.size + " results, sending an abridged list to client")
+			Sentry.captureMessage("Today's signouts had " + signouts.size + " results, sending an abridged list to client")
 		}
 
 		val ret = signoutsToReturn

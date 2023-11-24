@@ -81,6 +81,8 @@ object Currency {
 		override def toDouble(x: Currency): Double = x.cents.toDouble
 
 		override def compare(x: Currency, y: Currency): Int = if (x.cents > y.cents) 1 else if (x.cents < y.cents) -1 else 0
+
+		override def parseString(str: String): Option[Currency] = None
 	}
 
 }

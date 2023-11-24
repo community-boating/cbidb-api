@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.font.{PDType1Font, Standard14Fonts}
 import org.sailcbi.APIServer.Reports.ApClassRoster.ApClassRoster
 import org.sailcbi.APIServer.Reports.ApClassRoster.Loader.{ApClassRosterLiveLoader, ApClassRosterLiveParameter}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -24,7 +24,7 @@ class RunApClassRoster @Inject() (implicit exec: ExecutionContext) extends Injec
 			val output = new ByteArrayOutputStream()
 			val document: PDDocument = new PDDocument()
 
-			val pdfFont = PDType1Font.HELVETICA
+			val pdfFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA)
 			val fontSize = 13
 
 			val model = ApClassRosterLiveLoader(ApClassRosterLiveParameter(instanceId), rc)

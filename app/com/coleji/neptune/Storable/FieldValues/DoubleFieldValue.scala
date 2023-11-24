@@ -11,7 +11,7 @@ class DoubleFieldValue(instance: StorableClass, @transient fieldInner: DoubleDat
 	override def asJSValue: JsValue = JsNumber(super.get)
 
 	override def updateFromJsValue(v: JsValue): Boolean = v match {
-		case n: JsNumber => update(n.value.doubleValue())
+		case n: JsNumber => update(n.value.doubleValue)
 		case JsNull => throw new Exception("JsNull provided to nonnull field " + field.getRuntimeFieldName)
 		case _ => false
 	}

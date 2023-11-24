@@ -65,7 +65,7 @@ class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			// do this async, user doesnt need to wait for it.
 			if (stripeCustomerIdOption.isEmpty) {
 				stripe.createStripeCustomerFromPerson(rc, personId).map({
-					case f: NetFailure[_, _] => Sentry.capture("Failed to create stripe customerId for person " + personId)
+					case f: NetFailure[_, _] => Sentry.captureMessage("Failed to create stripe customerId for person " + personId)
 					case s: NetSuccess[_, _] =>
 				})
 			}

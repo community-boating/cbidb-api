@@ -5,13 +5,13 @@ import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQu
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{JpClassType, MembershipType}
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.JUnitRunner
 
 import javax.inject.Inject
 
 @RunWith(classOf[JUnitRunner])
-class DBTest @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
+class DBTest @Inject()(loader: CBIBootLoaderTest) extends AnyFunSuite {
 	test("dbaccess") {
 		loader.withPA(pa => {
 			val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)

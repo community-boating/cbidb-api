@@ -7,15 +7,15 @@ import com.coleji.neptune.Util.DateUtil
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest
 import org.scalatest
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.JUnitRunner
 
 import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime, ZonedDateTime}
 import javax.inject.Inject
 
 @RunWith(classOf[JUnitRunner])
-class Temp @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
+class Temp @Inject()(loader: CBIBootLoaderTest) extends AnyFunSuite {
 	def testPreparedDate[T](d: T, prepare: T => PreparedValue, getFromRSW: ResultSetWrapper => T)(pa: PermissionsAuthority): scalatest.Assertion = {
 		val rc = loader.assertRC(pa)(RootRequestCache, RootRequestCache.uniqueUserName)
 

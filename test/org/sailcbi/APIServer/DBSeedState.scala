@@ -4,13 +4,13 @@ import com.coleji.neptune.Core.RootRequestCache
 import org.junit.runner.RunWith
 import org.sailcbi.APIServer.Entities.EntityDefinitions.User
 import org.sailcbi.APIServer.Server.CBIBootLoaderTest
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.JUnitRunner
 
 import javax.inject.Inject
 
 @RunWith(classOf[JUnitRunner])
-class DBSeedState @Inject()(loader: CBIBootLoaderTest) extends FunSuite {
+class DBSeedState @Inject()(loader: CBIBootLoaderTest) extends AnyFunSuite {
 //
 //
 //	test("nuke") {

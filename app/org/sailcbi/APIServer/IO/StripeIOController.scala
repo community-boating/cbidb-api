@@ -76,7 +76,7 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 
 		apiIO.getOrPostStripeSingleton(
 			"payment_intents/" + intentId,
-			_ => Unit,
+			_ => (),
 			POST,
 			Some(Map(
 				"amount" -> totalInCents.toString,

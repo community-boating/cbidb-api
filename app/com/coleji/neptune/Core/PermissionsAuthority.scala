@@ -9,10 +9,10 @@ import com.coleji.neptune.Exception.{CORSException, MuteEmailException, PostBody
 import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete}
 import com.coleji.neptune.Storable.{ResultSetWrapper, StorableClass, StorableObject}
 import com.coleji.neptune.Util.{Initializable, PropertiesWrapper}
-import com.redis.RedisClientPool
 import io.sentry.Sentry
 import play.api.libs.json.{JsResultException, JsValue}
 import play.api.mvc.{Result, Results}
+import redis.clients.jedis.JedisPool
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -25,7 +25,7 @@ class PermissionsAuthority private[Core] (
 	val systemParams: SystemServerParameters,
 	val customParams: PropertiesWrapper,
 	dbGateway: DatabaseGateway,
-	redisPool: RedisClientPool,
+	redisPool: JedisPool,
 	paPostBoot: PropertiesWrapper => Unit,
 )  {
 	println(s"inside PermissionsAuthority constructor: test mode: ${systemParams.isTestMode}, readOnlyDatabase: ${systemParams.readOnlyDatabase}")
@@ -88,7 +88,7 @@ class PermissionsAuthority private[Core] (
 				case Success(r: Result) => Success(r)
 				case Failure(e: Throwable) => {
 					logger.error(e.getMessage, e)
-					Sentry.capture(e)
+					Sentry.captureException(e)
 					Success(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 				}
 			})
@@ -96,20 +96,20 @@ class PermissionsAuthority private[Core] (
 			case _: UnauthorizedAccessException => Future(Results.Status(400)(ResultError.UNAUTHORIZED.asJsObject))
 			case _: CORSException => Future(Results.Status(400)(ResultError.UNAUTHORIZED.asJsObject))
 			case e: PostBodyNotJSONException => {
-				Sentry.capture(e)
+				Sentry.captureException(e)
 				Future(Results.Status(400)(ResultError.NOT_JSON.asJsObject))
 			}
 			case e: JsResultException => {
-				Sentry.capture(e)
+				Sentry.captureException(e)
 				Future(Results.Status(400)(ResultError.PARSE_FAILURE(e.errors)))
 			}
 			case e: MuteEmailException => {
-				Sentry.capture(e)
+				Sentry.captureException(e)
 				Future(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 			}
 			case e: Throwable => {
 				logger.error(e.getMessage, e)
-				Sentry.capture(e)
+				Sentry.captureException(e)
 				Future(Results.Status(400)(ResultError.UNKNOWN.asJsObject))
 			}
 		}

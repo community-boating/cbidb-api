@@ -13,7 +13,7 @@ case class ResultError (
 case class ParseError(
 	code: String,
 	message: String,
-	parseErrors: Seq[(String, Seq[String])]
+	parseErrors: collection.Seq[(String, collection.Seq[String])]
 ) {
 	implicit val format = Json.format[ParseError]
 	def asJsObject: JsObject = JsObject(Map("error" -> Json.toJson(this)))
@@ -37,7 +37,7 @@ object ResultError {
 		message="JSON parameters were not correct."
 	)
 
-	val PARSE_FAILURE: Seq[(JsPath, Seq[JsonValidationError])] => JsObject = (errors: Seq[(JsPath, Seq[JsonValidationError])]) => ParseError(
+	val PARSE_FAILURE: collection.Seq[(JsPath, collection.Seq[JsonValidationError])] => JsObject = (errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]) => ParseError(
 		code="parse_failure",
 		message="Request was not valid.",
 		parseErrors=errors.map(t => (t._1.toString(), t._2.flatMap(errs => errs.messages)))

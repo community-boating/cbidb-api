@@ -3,16 +3,16 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.neptune.Core.{DatabaseGateway, LockedRequestCache}
 import com.coleji.neptune.IO.HTTP.FromWSClient
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 import play.api.libs.ws.WSClient
+import redis.clients.jedis.JedisPool
 
 import scala.concurrent.ExecutionContext
 
-abstract class LockedRequestCacheWithStripeController(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+abstract class LockedRequestCacheWithStripeController(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	private def getStripeAPIIOMechanism(ws: WSClient)(implicit exec: ExecutionContext): StripeAPIIOMechanism = new StripeAPIIOLiveService(
 		"https://api.stripe.com/v1/",

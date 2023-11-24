@@ -2,11 +2,11 @@ package org.sailcbi.APIServer.CbiUtil
 
 import com.coleji.neptune.Util.CurrencyFormat
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CurrencyFormatTest extends FunSuite {
+class CurrencyFormatTest extends AnyFunSuite {
   test("DoubleCents") {
     assert(CurrencyFormat.withCents(123.45) == "$123.45")
   }

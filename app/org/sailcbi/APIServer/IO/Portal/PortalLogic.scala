@@ -1224,7 +1224,7 @@ object PortalLogic {
 //			);
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
-			override def getOutResults(cs: CallableStatement): Unit = Unit
+			override def getOutResults(cs: CallableStatement): Unit = ()
 
 			override def setInParametersInt: Map[String, Int] = Map(
 				"p_order_id" -> orderId
@@ -1816,7 +1816,7 @@ object PortalLogic {
 
 					override def registerOutParameters: Map[String, Int] = Map.empty
 
-					override def getOutResults(cs: CallableStatement): Unit = Unit
+					override def getOutResults(cs: CallableStatement): Unit = ()
 				}
 				rc.executeProcedure(proc)
 				ValidationOk
@@ -1897,7 +1897,7 @@ object PortalLogic {
 
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
-			override def getOutResults(cs: CallableStatement): Unit = Unit
+			override def getOutResults(cs: CallableStatement): Unit = ()
 		}
 		rc.executeProcedure(proc)
 	}
@@ -2302,7 +2302,7 @@ object PortalLogic {
 
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
-			override def getOutResults(cs: CallableStatement): Unit = Unit
+			override def getOutResults(cs: CallableStatement): Unit = ()
 		}
 
 		rc.executeProcedure(ppc)
@@ -3195,7 +3195,7 @@ object PortalLogic {
 			)
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
-			override def getOutResults(cs: CallableStatement): Unit = Unit
+			override def getOutResults(cs: CallableStatement): Unit = ()
 
 			override def getQuery: String = "merge_records(?, ?)"
 		}
@@ -3303,7 +3303,7 @@ object PortalLogic {
 
 			override def registerOutParameters: Map[String, Int] = Map.empty
 
-			override def getOutResults(cs: CallableStatement): Unit = Unit
+			override def getOutResults(cs: CallableStatement): Unit = ()
 
 			override def getQuery: String = "email_pkg.ap_guest_ticket(?, ?, ?)"
 		}

@@ -2,14 +2,14 @@ package com.coleji.neptune.Core
 
 import com.coleji.neptune.Exception.UserTypeMismatchException
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
+import redis.clients.jedis.JedisPool
 
 abstract class RequestCacheObject[T <: RequestCache] {
 	val EMPTY_NONCE = "$EMPTY_AUTH_NONCE$"
 	val SEC_COOKIE_NAME_PUBLIC = "CBIDB-SEC"
 	val SEC_COOKIE_NAME_STAFF = "CBIDB-SEC-STAFF"
 
-	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): T
+	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): T
 
 	def test(allowed: Set[RequestCacheObject[_]]): Unit = {
 		if (!allowed.contains(this)) throw new UserTypeMismatchException()

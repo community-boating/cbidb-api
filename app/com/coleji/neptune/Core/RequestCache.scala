@@ -7,7 +7,7 @@ import com.coleji.neptune.Storable.Fields.DatabaseField
 import com.coleji.neptune.Storable.StorableQuery.{QueryBuilder, QueryBuilderResultRow}
 import com.coleji.neptune.Storable.{Filter, StorableClass, StorableObject}
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
+import redis.clients.jedis.JedisPool
 
 // TODO: Some sort of security on the CacheBroker so arbitrary requests can't see the authentication tokens
 // TODO: mirror all PB methods on RC so the RC can either pull from redis or dispatch to oracle etc
@@ -15,7 +15,7 @@ sealed abstract class RequestCache private[Core](
 	val userName: String,
 	serverParams: PropertiesWrapper,
 	dbGateway: DatabaseGateway,
-	redisPool: RedisClientPool
+	redisPool: JedisPool
 )(implicit val PA: PermissionsAuthority) {
 	def companion: RequestCacheObject[_]
 
@@ -94,7 +94,7 @@ abstract class LockedRequestCache(
 	override val userName: String,
 	serverParams: PropertiesWrapper,
 	dbGateway: DatabaseGateway,
-	redisPool: RedisClientPool,
+	redisPool: JedisPool,
 ) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
 
 }
@@ -103,7 +103,7 @@ abstract class UnlockedRequestCache(
 	override val userName: String,
 	serverParams: PropertiesWrapper,
 	dbGateway: DatabaseGateway,
-	redisPool: RedisClientPool,
+	redisPool: JedisPool,
 ) extends RequestCache(userName, serverParams, dbGateway, redisPool) {
 	def getObjectById[T <: StorableClass](obj: StorableObject[T], id: Int, fieldShutter: Set[DatabaseField[_]]): Option[T] =
 		pb.getObjectById(obj, id, fieldShutter)

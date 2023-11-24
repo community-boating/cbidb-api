@@ -39,7 +39,7 @@ abstract class CacheableFactory[T_KeyConfig, T_Result] {
 				} catch {
 					case e: InvalidClassException => {
 						val rte = new RuntimeException("****** Deserialization failed for cache key " + key, e)
-						Sentry.capture(rte)
+						Sentry.captureException(rte)
 						rte.printStackTrace()
 						populate(rc, config)
 					}

@@ -4,10 +4,10 @@ import com.coleji.neptune.Core._
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
+import redis.clients.jedis.JedisPool
 
-class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
@@ -17,10 +17,10 @@ object ApexRequestCache extends RequestCacheObject[ApexRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): ApexRequestCache =
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): ApexRequestCache =
 		new ApexRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): ApexRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): ApexRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 	override def getAuthenticatedUsernameInRequest(
 		request: ParsedRequest,

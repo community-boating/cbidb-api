@@ -3,15 +3,15 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.neptune.Core._
 import com.coleji.neptune.Util.DateUtil.HOME_TIME_ZONE
 import com.coleji.neptune.Util.PropertiesWrapper
-import com.redis.RedisClientPool
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
+import redis.clients.jedis.JedisPool
 
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool)
+class SymonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
 extends LockedRequestCache(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[SymonRequestCache] = SymonRequestCache
 }
@@ -21,10 +21,11 @@ object SymonRequestCache extends RequestCacheObject[SymonRequestCache] {
 
 	override val requireCORSPass: Boolean = false
 
-	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): SymonRequestCache =
+	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool
+					   ): SymonRequestCache =
 		new SymonRequestCache(userName, serverParams, dbGateway, redisPool)
 
-	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: RedisClientPool): SymonRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
+	def create(serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): SymonRequestCache = create(uniqueUserName, serverParams, dbGateway, redisPool)
 
 
 	private def validateSymonHash(

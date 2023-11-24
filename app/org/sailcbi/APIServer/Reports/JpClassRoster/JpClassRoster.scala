@@ -4,15 +4,15 @@ import com.coleji.neptune.PDFBox.Abstract.AbstractTable
 import com.coleji.neptune.PDFBox.PDFReport
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font}
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType1Font, Standard14Fonts}
 import org.sailcbi.APIServer.Reports.JpClassRoster.Model.{JpClassRosterModel, JpRosterData, JpSignupNotesData, JpSpecialNeedsData}
 import org.sailcbi.APIServer.Reports.JpClassRoster.View.{JpClassRosterView, JpRosterTitle, JpSignupNotesView, JpSpecialNeedsView}
 
 import java.awt.Color
 
 class JpClassRoster(data: JpClassRosterModel) extends PDFReport(data) {
-	val defaultFont: PDFont = PDType1Font.HELVETICA
-	val defaultBoldFont: PDFont = PDType1Font.HELVETICA_BOLD
+	val defaultFont: PDFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA)
+	val defaultBoldFont: PDFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
 	val defaultFontSize: Float = 10f
 	val defaultColor: Color = Color.BLACK
 
