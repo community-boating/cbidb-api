@@ -20,15 +20,15 @@ class User extends StorableClass(User) {
 		val createdBy = new NullableStringFieldValue(self, User.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, User.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, User.fields.updatedBy)
-		val locked = new NullableBooleanFieldValue(self, User.fields.locked)
-		val pwChangeReqd = new NullableBooleanFieldValue(self, User.fields.pwChangeReqd)
+		val locked = new BooleanFieldValue(self, User.fields.locked)
+		val pwChangeReqd = new BooleanFieldValue(self, User.fields.pwChangeReqd)
 		val badAttempts = new NullableIntFieldValue(self, User.fields.badAttempts)
 		val nameFirst = new StringFieldValue(self, User.fields.nameFirst)
 		val nameLast = new StringFieldValue(self, User.fields.nameLast)
 		val sagePwCipher = new NullableStringFieldValue(self, User.fields.sagePwCipher)
 		val sageToAdd = new NullableStringFieldValue(self, User.fields.sageToAdd)
 		val active = new BooleanFieldValue(self, User.fields.active)
-		val hideFromClose = new NullableBooleanFieldValue(self, User.fields.hideFromClose)
+		val hideFromClose = new BooleanFieldValue(self, User.fields.hideFromClose)
 		val pwHashScheme = new NullableStringFieldValue(self, User.fields.pwHashScheme)
 		val authNonce = new NullableStringFieldValue(self, User.fields.authNonce)
 		val userType = new NullableStringFieldValue(self, User.fields.userType)
@@ -54,8 +54,10 @@ object User extends StorableObject[User] {
 		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
-		val locked = new NullableBooleanDatabaseField(self, "LOCKED")
-		val pwChangeReqd = new NullableBooleanDatabaseField(self, "PW_CHANGE_REQD")
+		@NullableInDatabase
+		val locked = new BooleanDatabaseField(self, "LOCKED", true)
+		@NullableInDatabase
+		val pwChangeReqd = new BooleanDatabaseField(self, "PW_CHANGE_REQD", true)
 		val badAttempts = new NullableIntDatabaseField(self, "BAD_ATTEMPTS")
 		@NullableInDatabase
 		val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
@@ -64,7 +66,8 @@ object User extends StorableObject[User] {
 		val sagePwCipher = new NullableStringDatabaseField(self, "SAGE_PW_CIPHER", 4000)
 		val sageToAdd = new NullableStringDatabaseField(self, "SAGE_TO_ADD", 4000)
 		val active = new BooleanDatabaseField(self, "ACTIVE", false)
-		val hideFromClose = new NullableBooleanDatabaseField(self, "HIDE_FROM_CLOSE")
+		@NullableInDatabase
+		val hideFromClose = new BooleanDatabaseField(self, "HIDE_FROM_CLOSE", true)
 		val pwHashScheme = new NullableStringDatabaseField(self, "PW_HASH_SCHEME", 20)
 		val authNonce = new NullableStringDatabaseField(self, "AUTH_NONCE", 20)
 		val userType = new NullableStringDatabaseField(self, "USER_TYPE", 1)
