@@ -27,10 +27,10 @@ class ApClassInstance extends StorableClass(ApClassInstance) {
 		val signupsStartOverride = new NullableDateTimeFieldValue(self, ApClassInstance.fields.signupsStartOverride)
 		val cancelledDatetime = new NullableDateTimeFieldValue(self, ApClassInstance.fields.cancelledDatetime)
 		val price = new NullableDoubleFieldValue(self, ApClassInstance.fields.price)
-		val signupMax = new NullableDoubleFieldValue(self, ApClassInstance.fields.signupMax)
-		val signupMin = new NullableDoubleFieldValue(self, ApClassInstance.fields.signupMin)
-		val doNotAutoCancel = new NullableBooleanFieldValue(self, ApClassInstance.fields.doNotAutoCancel)
-		val hideOnline = new NullableBooleanFieldValue(self, ApClassInstance.fields.hideOnline)
+		val signupMax = new NullableIntFieldValue(self, ApClassInstance.fields.signupMax)
+		val signupMin = new NullableIntFieldValue(self, ApClassInstance.fields.signupMin)
+		val doNotAutoCancel = new BooleanFieldValue(self, ApClassInstance.fields.doNotAutoCancel)
+		val hideOnline = new BooleanFieldValue(self, ApClassInstance.fields.hideOnline)
 		val locationString = new NullableStringFieldValue(self, ApClassInstance.fields.locationString)
 		val instructorId = new NullableIntFieldValue(self, ApClassInstance.fields.instructorId)
 	}
@@ -54,10 +54,12 @@ object ApClassInstance extends StorableObject[ApClassInstance] {
 		val signupsStartOverride = new NullableDateTimeDatabaseField(self, "SIGNUPS_START_OVERRIDE")
 		val cancelledDatetime = new NullableDateTimeDatabaseField(self, "CANCELLED_DATETIME")
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
-		val signupMax = new NullableDoubleDatabaseField(self, "SIGNUP_MAX")
-		val signupMin = new NullableDoubleDatabaseField(self, "SIGNUP_MIN")
-		val doNotAutoCancel = new NullableBooleanDatabaseField(self, "DO_NOT_AUTO_CANCEL")
-		val hideOnline = new NullableBooleanDatabaseField(self, "HIDE_ONLINE")
+		val signupMax = new NullableIntDatabaseField(self, "SIGNUP_MAX")
+		val signupMin = new NullableIntDatabaseField(self, "SIGNUP_MIN")
+		@NullableInDatabase
+		val doNotAutoCancel = new BooleanDatabaseField(self, "DO_NOT_AUTO_CANCEL", true)
+		@NullableInDatabase
+		val hideOnline = new BooleanDatabaseField(self, "HIDE_ONLINE", true)
 		val locationString = new NullableStringDatabaseField(self, "LOCATION_STRING", 100)
 		val instructorId = new NullableIntDatabaseField(self, "INSTRUCTOR_ID")
 	}

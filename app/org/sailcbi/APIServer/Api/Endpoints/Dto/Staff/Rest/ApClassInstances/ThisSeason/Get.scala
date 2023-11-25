@@ -12,14 +12,14 @@ case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
 	instanceId: Int,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
-	signupMin: Option[Double],
+	signupMin: Option[Int],
 	price: Option[Double],
-	signupMax: Option[Double],
+	signupMax: Option[Int],
 	formatId: Int,
-	hideOnline: Option[Boolean],
+	hideOnline: Boolean,
 	cancelByOverride: Option[String],
 	locationString: Option[String],
-	doNotAutoCancel: Option[Boolean],
+	doNotAutoCancel: Boolean,
 	instructorId: Option[Int],
 	$$apClassSessions: List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions],
 	$$instructor: Option[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor],
@@ -28,11 +28,11 @@ case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
 case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions (
 	sessionId: Int,
 	instanceId: Int,
-	headcount: Option[Double],
+	headcount: Option[Int],
 	cancelledDatetime: Option[String],
 	sessionDatetime: String,
 	sessionLength: Double,
-	isMakeup: Option[Boolean],
+	isMakeup: Boolean,
 )
 
 object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions {

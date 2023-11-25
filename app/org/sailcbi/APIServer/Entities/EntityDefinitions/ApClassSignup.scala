@@ -31,11 +31,11 @@ class ApClassSignup extends StorableClass(ApClassSignup) {
 		val discountInstanceId = new NullableIntFieldValue(self, ApClassSignup.fields.discountInstanceId)
 		val paymentMedium = new NullableStringFieldValue(self, ApClassSignup.fields.paymentMedium)
 		val price = new NullableDoubleFieldValue(self, ApClassSignup.fields.price)
-		val sequence = new DoubleFieldValue(self, ApClassSignup.fields.sequence)
+		val sequence = new IntFieldValue(self, ApClassSignup.fields.sequence)
 		val voidCloseId = new NullableIntFieldValue(self, ApClassSignup.fields.voidCloseId)
 		val paymentLocation = new NullableStringFieldValue(self, ApClassSignup.fields.paymentLocation)
 		val signupNote = new NullableStringFieldValue(self, ApClassSignup.fields.signupNote)
-		val voidedOnline = new NullableBooleanFieldValue(self, ApClassSignup.fields.voidedOnline)
+		val voidedOnline = new BooleanFieldValue(self, ApClassSignup.fields.voidedOnline)
 	}
 }
 
@@ -62,11 +62,12 @@ object ApClassSignup extends StorableObject[ApClassSignup] {
 		val discountInstanceId = new NullableIntDatabaseField(self, "DISCOUNT_INSTANCE_ID")
 		val paymentMedium = new NullableStringDatabaseField(self, "PAYMENT_MEDIUM", 50)
 		val price = new NullableDoubleDatabaseField(self, "PRICE")
-		val sequence = new DoubleDatabaseField(self, "SEQUENCE")
+		val sequence = new IntDatabaseField(self, "SEQUENCE")
 		val voidCloseId = new NullableIntDatabaseField(self, "VOID_CLOSE_ID")
 		val paymentLocation = new NullableStringDatabaseField(self, "PAYMENT_LOCATION", 50)
 		val signupNote = new NullableStringDatabaseField(self, "SIGNUP_NOTE", 4000)
-		val voidedOnline = new NullableBooleanDatabaseField(self, "VOIDED_ONLINE")
+		@NullableInDatabase
+		val voidedOnline = new BooleanDatabaseField(self, "VOIDED_ONLINE", true)
 	}
 
 	def primaryKey: IntDatabaseField = fields.signupId

@@ -17,13 +17,13 @@ class ApClassSession extends StorableClass(ApClassSession) {
 		val sessionId = new IntFieldValue(self, ApClassSession.fields.sessionId)
 		val instanceId = new IntFieldValue(self, ApClassSession.fields.instanceId)
 		val sessionDatetime = new DateTimeFieldValue(self, ApClassSession.fields.sessionDatetime)
-		val isMakeup = new NullableBooleanFieldValue(self, ApClassSession.fields.isMakeup)
+		val isMakeup = new BooleanFieldValue(self, ApClassSession.fields.isMakeup)
 		val createdOn = new DateTimeFieldValue(self, ApClassSession.fields.createdOn)
 		val createdBy = new NullableStringFieldValue(self, ApClassSession.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, ApClassSession.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, ApClassSession.fields.updatedBy)
 		val cancelledDatetime = new NullableDateTimeFieldValue(self, ApClassSession.fields.cancelledDatetime)
-		val headcount = new NullableDoubleFieldValue(self, ApClassSession.fields.headcount)
+		val headcount = new NullableIntFieldValue(self, ApClassSession.fields.headcount)
 		val sessionLength = new DoubleFieldValue(self, ApClassSession.fields.sessionLength)
 	}
 }
@@ -37,7 +37,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
 		val sessionId = new IntDatabaseField(self, "SESSION_ID")
 		val instanceId = new IntDatabaseField(self, "INSTANCE_ID")
 		val sessionDatetime = new DateTimeDatabaseField(self, "SESSION_DATETIME")
-		val isMakeup = new NullableBooleanDatabaseField(self, "IS_MAKEUP")
+		val isMakeup = new BooleanDatabaseField(self, "IS_MAKEUP")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
@@ -45,7 +45,7 @@ object ApClassSession extends StorableObject[ApClassSession] {
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val cancelledDatetime = new NullableDateTimeDatabaseField(self, "CANCELLED_DATETIME")
-		val headcount = new NullableDoubleDatabaseField(self, "HEADCOUNT")
+		val headcount = new NullableIntDatabaseField(self, "HEADCOUNT")
 		val sessionLength = new DoubleDatabaseField(self, "SESSION_LENGTH")
 	}
 
