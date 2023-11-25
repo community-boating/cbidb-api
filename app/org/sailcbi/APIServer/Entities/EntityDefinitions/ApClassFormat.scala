@@ -22,10 +22,10 @@ class ApClassFormat extends StorableClass(ApClassFormat) {
 		val updatedOn = new DateTimeFieldValue(self, ApClassFormat.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, ApClassFormat.fields.updatedBy)
 		val priceDefaultOverride = new NullableDoubleFieldValue(self, ApClassFormat.fields.priceDefaultOverride)
-		val sessionCtDefault = new DoubleFieldValue(self, ApClassFormat.fields.sessionCtDefault)
+		val sessionCtDefault = new IntFieldValue(self, ApClassFormat.fields.sessionCtDefault)
 		val sessionLengthDefault = new DoubleFieldValue(self, ApClassFormat.fields.sessionLengthDefault)
-		val signupMaxDefaultOverride = new NullableDoubleFieldValue(self, ApClassFormat.fields.signupMaxDefaultOverride)
-		val signupMinDefaultOverride = new NullableDoubleFieldValue(self, ApClassFormat.fields.signupMinDefaultOverride)
+		val signupMaxDefaultOverride = new NullableIntFieldValue(self, ApClassFormat.fields.signupMaxDefaultOverride)
+		val signupMinDefaultOverride = new NullableIntFieldValue(self, ApClassFormat.fields.signupMinDefaultOverride)
 	}
 }
 
@@ -47,10 +47,10 @@ object ApClassFormat extends StorableObject[ApClassFormat] {
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val priceDefaultOverride = new NullableDoubleDatabaseField(self, "PRICE_DEFAULT_OVERRIDE")
-		val sessionCtDefault = new DoubleDatabaseField(self, "SESSION_CT_DEFAULT")
+		val sessionCtDefault = new IntDatabaseField(self, "SESSION_CT_DEFAULT")
 		val sessionLengthDefault = new DoubleDatabaseField(self, "SESSION_LENGTH_DEFAULT")
-		val signupMaxDefaultOverride = new NullableDoubleDatabaseField(self, "SIGNUP_MAX_DEFAULT_OVERRIDE")
-		val signupMinDefaultOverride = new NullableDoubleDatabaseField(self, "SIGNUP_MIN_DEFAULT_OVERRIDE")
+		val signupMaxDefaultOverride = new NullableIntDatabaseField(self, "SIGNUP_MAX_DEFAULT_OVERRIDE")
+		val signupMinDefaultOverride = new NullableIntDatabaseField(self, "SIGNUP_MIN_DEFAULT_OVERRIDE")
 	}
 
 	def primaryKey: IntDatabaseField = fields.formatId

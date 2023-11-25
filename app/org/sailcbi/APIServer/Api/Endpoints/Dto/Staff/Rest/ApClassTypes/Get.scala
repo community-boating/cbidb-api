@@ -31,10 +31,10 @@ case class StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats (
 	typeId: Int,
 	description: Option[String],
 	priceDefaultOverride: Option[Double],
-	sessionCtDefault: Double,
+	sessionCtDefault: Int,
 	sessionLengthDefault: Double,
-	signupMaxDefaultOverride: Option[Double],
-	signupMinDefaultOverride: Option[Double],
+	signupMaxDefaultOverride: Option[Int],
+	signupMinDefaultOverride: Option[Int],
 )
 
 object StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats {
