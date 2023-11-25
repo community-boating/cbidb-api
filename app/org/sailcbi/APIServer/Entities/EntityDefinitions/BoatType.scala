@@ -18,8 +18,8 @@ class BoatType extends StorableClass(BoatType) {
 		val createdBy = new StringFieldValue(self, BoatType.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, BoatType.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, BoatType.fields.updatedBy)
-		val minCrew = new DoubleFieldValue(self, BoatType.fields.minCrew)
-		val maxCrew = new DoubleFieldValue(self, BoatType.fields.maxCrew)
+		val minCrew = new IntFieldValue(self, BoatType.fields.minCrew)
+		val maxCrew = new IntFieldValue(self, BoatType.fields.maxCrew)
 		val imageFilename = new NullableStringFieldValue(self, BoatType.fields.imageFilename)
 	}
 }
@@ -45,9 +45,9 @@ object BoatType extends StorableObject[BoatType] {
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		@NullableInDatabase
-		val minCrew = new DoubleDatabaseField(self, "MIN_CREW")
+		val minCrew = new IntDatabaseField(self, "MIN_CREW")
 		@NullableInDatabase
-		val maxCrew = new DoubleDatabaseField(self, "MAX_CREW")
+		val maxCrew = new IntDatabaseField(self, "MAX_CREW")
 		val imageFilename = new NullableStringDatabaseField(self, "IMAGE_FILENAME", 50)
 	}
 

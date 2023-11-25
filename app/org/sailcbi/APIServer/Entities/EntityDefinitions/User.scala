@@ -24,7 +24,7 @@ class User extends StorableClass(User) {
 		val updatedBy = new NullableStringFieldValue(self, User.fields.updatedBy)
 		val locked = new NullableBooleanFieldValue(self, User.fields.locked)
 		val pwChangeReqd = new NullableBooleanFieldValue(self, User.fields.pwChangeReqd)
-		val badAttempts = new NullableDoubleFieldValue(self, User.fields.badAttempts)
+		val badAttempts = new NullableIntFieldValue(self, User.fields.badAttempts)
 		val nameFirst = new StringFieldValue(self, User.fields.nameFirst)
 		val nameLast = new StringFieldValue(self, User.fields.nameLast)
 		val sagePwCipher = new NullableStringFieldValue(self, User.fields.sagePwCipher)
@@ -58,7 +58,7 @@ object User extends StorableObject[User] {
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val locked = new NullableBooleanDatabaseField(self, "LOCKED")
 		val pwChangeReqd = new NullableBooleanDatabaseField(self, "PW_CHANGE_REQD")
-		val badAttempts = new NullableDoubleDatabaseField(self, "BAD_ATTEMPTS")
+		val badAttempts = new NullableIntDatabaseField(self, "BAD_ATTEMPTS")
 		@NullableInDatabase
 		val nameFirst = new StringDatabaseField(self, "NAME_FIRST", 100)
 		@NullableInDatabase

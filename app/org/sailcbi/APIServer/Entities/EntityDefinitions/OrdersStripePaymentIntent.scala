@@ -13,7 +13,7 @@ class OrdersStripePaymentIntent extends StorableClass(OrdersStripePaymentIntent)
 		val rowId = new IntFieldValue(self, OrdersStripePaymentIntent.fields.rowId)
 		val orderId = new IntFieldValue(self, OrdersStripePaymentIntent.fields.orderId)
 		val paymentIntentId = new StringFieldValue(self, OrdersStripePaymentIntent.fields.paymentIntentId)
-		val amountInCents = new DoubleFieldValue(self, OrdersStripePaymentIntent.fields.amountInCents)
+		val amountInCents = new IntFieldValue(self, OrdersStripePaymentIntent.fields.amountInCents)
 		val paid = new BooleanFieldValue(self, OrdersStripePaymentIntent.fields.paid)
 		val paidCloseId = new IntFieldValue(self, OrdersStripePaymentIntent.fields.paidCloseId)
 	}
@@ -28,7 +28,7 @@ object OrdersStripePaymentIntent extends StorableObject[OrdersStripePaymentInten
 		val rowId = new IntDatabaseField(self, "ROW_ID")
 		val orderId = new IntDatabaseField(self, "ORDER_ID")
 		val paymentIntentId = new StringDatabaseField(self, "PAYMENT_INTENT_ID", 50)
-		val amountInCents = new DoubleDatabaseField(self, "AMOUNT_IN_CENTS")
+		val amountInCents = new IntDatabaseField(self, "AMOUNT_IN_CENTS")
 		val paid = new BooleanDatabaseField(self, "PAID", false)
 		val paidCloseId = new IntDatabaseField(self, "PAID_CLOSE_ID")
 	}

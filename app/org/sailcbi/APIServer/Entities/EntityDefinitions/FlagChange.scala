@@ -17,7 +17,7 @@ class FlagChange extends StorableClass(FlagChange) {
 		val createdBy = new NullableStringFieldValue(self, FlagChange.fields.createdBy)
 		val updatedOn = new NullableDateTimeFieldValue(self, FlagChange.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, FlagChange.fields.updatedBy)
-		val notificationsSent = new NullableDoubleFieldValue(self, FlagChange.fields.notificationsSent)
+		val notificationsSent = new NullableIntFieldValue(self, FlagChange.fields.notificationsSent)
 	}
 }
 
@@ -34,7 +34,7 @@ object FlagChange extends StorableObject[FlagChange] {
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
-		val notificationsSent = new NullableDoubleDatabaseField(self, "NOTIFICATIONS_SENT")
+		val notificationsSent = new NullableIntDatabaseField(self, "NOTIFICATIONS_SENT")
 	}
 
 	def primaryKey: IntDatabaseField = fields.changeId

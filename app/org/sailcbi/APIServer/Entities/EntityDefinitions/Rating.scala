@@ -24,8 +24,8 @@ class Rating extends StorableClass(Rating) {
 		val displayOrder = new DoubleFieldValue(self, Rating.fields.displayOrder)
 		val active = new NullableBooleanFieldValue(self, Rating.fields.active)
 		val overriddenBy = new NullableIntFieldValue(self, Rating.fields.overriddenBy)
-		val testMinCrew = new NullableDoubleFieldValue(self, Rating.fields.testMinCrew)
-		val testMaxCrew = new NullableDoubleFieldValue(self, Rating.fields.testMaxCrew)
+		val testMinCrew = new NullableIntFieldValue(self, Rating.fields.testMinCrew)
+		val testMaxCrew = new NullableIntFieldValue(self, Rating.fields.testMaxCrew)
 		val testable = new NullableBooleanFieldValue(self, Rating.fields.testable)
 		val ratingCategory = new StringFieldValue(self, Rating.fields.ratingCategory)
 	}
@@ -52,8 +52,8 @@ object Rating extends StorableObject[Rating] {
 		val displayOrder = new DoubleDatabaseField(self, "DISPLAY_ORDER")
 		val active = new NullableBooleanDatabaseField(self, "ACTIVE")
 		val overriddenBy = new NullableIntDatabaseField(self, "OVERRIDDEN_BY")
-		val testMinCrew = new NullableDoubleDatabaseField(self, "TEST_MIN_CREW")
-		val testMaxCrew = new NullableDoubleDatabaseField(self, "TEST_MAX_CREW")
+		val testMinCrew = new NullableIntDatabaseField(self, "TEST_MIN_CREW")
+		val testMaxCrew = new NullableIntDatabaseField(self, "TEST_MAX_CREW")
 		val testable = new NullableBooleanDatabaseField(self, "TESTABLE")
 		@NullableInDatabase
 		val ratingCategory = new StringDatabaseField(self, "RATING_CATEGORY", 1)

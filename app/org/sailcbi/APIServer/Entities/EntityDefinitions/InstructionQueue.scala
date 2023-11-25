@@ -19,7 +19,7 @@ class InstructionQueue extends StorableClass(InstructionQueue) {
 		val updatedOn = new DateTimeFieldValue(self, InstructionQueue.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, InstructionQueue.fields.updatedBy)
 		val programId = new IntFieldValue(self, InstructionQueue.fields.programId)
-		val queueOrder = new DoubleFieldValue(self, InstructionQueue.fields.queueOrder)
+		val queueOrder = new IntFieldValue(self, InstructionQueue.fields.queueOrder)
 		val personId = new IntFieldValue(self, InstructionQueue.fields.personId)
 		val startActive = new NullableDateTimeFieldValue(self, InstructionQueue.fields.startActive)
 		val endActive = new NullableDateTimeFieldValue(self, InstructionQueue.fields.endActive)
@@ -47,7 +47,7 @@ object InstructionQueue extends StorableObject[InstructionQueue] {
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		val programId = new IntDatabaseField(self, "PROGRAM_ID")
 		@NullableInDatabase
-		val queueOrder = new DoubleDatabaseField(self, "QUEUE_ORDER")
+		val queueOrder = new IntDatabaseField(self, "QUEUE_ORDER")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val startActive = new NullableDateTimeDatabaseField(self, "START_ACTIVE")
 		val endActive = new NullableDateTimeDatabaseField(self, "END_ACTIVE")

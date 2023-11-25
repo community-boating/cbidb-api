@@ -13,7 +13,7 @@ class PersonsDiscountsEligible extends StorableClass(PersonsDiscountsEligible) {
 		val rowId = new IntFieldValue(self, PersonsDiscountsEligible.fields.rowId)
 		val personId = new IntFieldValue(self, PersonsDiscountsEligible.fields.personId)
 		val discountId = new IntFieldValue(self, PersonsDiscountsEligible.fields.discountId)
-		val season = new DoubleFieldValue(self, PersonsDiscountsEligible.fields.season)
+		val season = new IntFieldValue(self, PersonsDiscountsEligible.fields.season)
 		val createdOn = new DateTimeFieldValue(self, PersonsDiscountsEligible.fields.createdOn)
 		val createdBy = new StringFieldValue(self, PersonsDiscountsEligible.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, PersonsDiscountsEligible.fields.updatedOn)
@@ -33,7 +33,7 @@ object PersonsDiscountsEligible extends StorableObject[PersonsDiscountsEligible]
 		@NullableInDatabase
 		val discountId = new IntDatabaseField(self, "DISCOUNT_ID")
 		@NullableInDatabase
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		@NullableInDatabase

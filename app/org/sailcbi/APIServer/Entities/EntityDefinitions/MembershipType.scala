@@ -23,7 +23,7 @@ class MembershipType extends StorableClass(MembershipType) {
 		val createdBy = new StringFieldValue(self, MembershipType.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, MembershipType.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, MembershipType.fields.updatedBy)
-		val duration = new NullableDoubleFieldValue(self, MembershipType.fields.duration)
+		val duration = new NullableIntFieldValue(self, MembershipType.fields.duration)
 		val expirationType = new StringFieldValue(self, MembershipType.fields.expirationType)
 		val price = new NullableDoubleFieldValue(self, MembershipType.fields.price)
 		val oldDiscountType = new NullableDoubleFieldValue(self, MembershipType.fields.oldDiscountType)
@@ -62,7 +62,7 @@ object MembershipType extends StorableObject[MembershipType] {
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
-		val duration = new NullableDoubleDatabaseField(self, "DURATION")
+		val duration = new NullableIntDatabaseField(self, "DURATION")
 		@NullableInDatabase
 		val expirationType = new StringDatabaseField(self, "EXPIRATION_TYPE", 50)
 		val price = new NullableDoubleDatabaseField(self, "PRICE")

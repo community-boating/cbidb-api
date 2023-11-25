@@ -14,8 +14,8 @@ class FoItemType extends StorableClass(FoItemType) {
 		val typeId = new IntFieldValue(self, FoItemType.fields.typeId)
 		val closeId = new IntFieldValue(self, FoItemType.fields.closeId)
 		val discountsTotal = new DoubleFieldValue(self, FoItemType.fields.discountsTotal)
-		val qtySold = new DoubleFieldValue(self, FoItemType.fields.qtySold)
-		val qtyComped = new DoubleFieldValue(self, FoItemType.fields.qtyComped)
+		val qtySold = new IntFieldValue(self, FoItemType.fields.qtySold)
+		val qtyComped = new IntFieldValue(self, FoItemType.fields.qtyComped)
 		val createdOn = new DateTimeFieldValue(self, FoItemType.fields.createdOn)
 		val createdBy = new StringFieldValue(self, FoItemType.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, FoItemType.fields.updatedOn)
@@ -39,9 +39,9 @@ object FoItemType extends StorableObject[FoItemType] {
 		@NullableInDatabase
 		val discountsTotal = new DoubleDatabaseField(self, "DISCOUNTS_TOTAL")
 		@NullableInDatabase
-		val qtySold = new DoubleDatabaseField(self, "QTY_SOLD")
+		val qtySold = new IntDatabaseField(self, "QTY_SOLD")
 		@NullableInDatabase
-		val qtyComped = new DoubleDatabaseField(self, "QTY_COMPED")
+		val qtyComped = new IntDatabaseField(self, "QTY_COMPED")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		@NullableInDatabase

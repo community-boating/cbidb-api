@@ -19,8 +19,8 @@ class OrderNumber extends StorableClass(OrderNumber) {
 		val updatedOn = new DateTimeFieldValue(self, OrderNumber.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, OrderNumber.fields.updatedBy)
 		val processedDate = new NullableDateTimeFieldValue(self, OrderNumber.fields.processedDate)
-		val approvedStripeChargeAtt = new NullableDoubleFieldValue(self, OrderNumber.fields.approvedStripeChargeAtt)
-		val addlStaggeredPayments = new NullableDoubleFieldValue(self, OrderNumber.fields.addlStaggeredPayments)
+		val approvedStripeChargeAtt = new NullableIntFieldValue(self, OrderNumber.fields.approvedStripeChargeAtt)
+		val addlStaggeredPayments = new NullableIntFieldValue(self, OrderNumber.fields.addlStaggeredPayments)
 		val appAlias = new StringFieldValue(self, OrderNumber.fields.appAlias)
 		val usePaymentIntent = new NullableBooleanFieldValue(self, OrderNumber.fields.usePaymentIntent)
 	}
@@ -43,8 +43,8 @@ object OrderNumber extends StorableObject[OrderNumber] {
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		val processedDate = new NullableDateTimeDatabaseField(self, "PROCESSED_DATE")
-		val approvedStripeChargeAtt = new NullableDoubleDatabaseField(self, "APPROVED_STRIPE_CHARGE_ATT")
-		val addlStaggeredPayments = new NullableDoubleDatabaseField(self, "ADDL_STAGGERED_PAYMENTS")
+		val approvedStripeChargeAtt = new NullableIntDatabaseField(self, "APPROVED_STRIPE_CHARGE_ATT")
+		val addlStaggeredPayments = new NullableIntDatabaseField(self, "ADDL_STAGGERED_PAYMENTS")
 		@NullableInDatabase
 		val appAlias = new StringDatabaseField(self, "APP_ALIAS", 20)
 		val usePaymentIntent = new NullableBooleanDatabaseField(self, "USE_PAYMENT_INTENT")

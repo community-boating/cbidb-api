@@ -12,7 +12,7 @@ class HighSchoolFee extends StorableClass(HighSchoolFee) {
 	override object values extends ValuesObject {
 		val rowId = new IntFieldValue(self, HighSchoolFee.fields.rowId)
 		val schoolId = new IntFieldValue(self, HighSchoolFee.fields.schoolId)
-		val year = new DoubleFieldValue(self, HighSchoolFee.fields.year)
+		val year = new IntFieldValue(self, HighSchoolFee.fields.year)
 		val springFall = new StringFieldValue(self, HighSchoolFee.fields.springFall)
 		val amount = new DoubleFieldValue(self, HighSchoolFee.fields.amount)
 		val closeId = new IntFieldValue(self, HighSchoolFee.fields.closeId)
@@ -32,7 +32,7 @@ object HighSchoolFee extends StorableObject[HighSchoolFee] {
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
 		val schoolId = new IntDatabaseField(self, "SCHOOL_ID")
-		val year = new DoubleDatabaseField(self, "YEAR")
+		val year = new IntDatabaseField(self, "YEAR")
 		val springFall = new StringDatabaseField(self, "SPRING_FALL", 1)
 		@NullableInDatabase
 		val amount = new DoubleDatabaseField(self, "AMOUNT")

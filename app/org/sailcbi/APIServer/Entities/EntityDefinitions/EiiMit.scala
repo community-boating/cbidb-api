@@ -11,11 +11,11 @@ import play.api.libs.json._
 class EiiMit extends StorableClass(EiiMit) {
 	override object values extends ValuesObject {
 		val rowId = new IntFieldValue(self, EiiMit.fields.rowId)
-		val adults = new DoubleFieldValue(self, EiiMit.fields.adults)
-		val children = new DoubleFieldValue(self, EiiMit.fields.children)
+		val adults = new IntFieldValue(self, EiiMit.fields.adults)
+		val children = new IntFieldValue(self, EiiMit.fields.children)
 		val eii = new DoubleFieldValue(self, EiiMit.fields.eii)
-		val generation = new DoubleFieldValue(self, EiiMit.fields.generation)
-		val nonworkingAdults = new DoubleFieldValue(self, EiiMit.fields.nonworkingAdults)
+		val generation = new IntFieldValue(self, EiiMit.fields.generation)
+		val nonworkingAdults = new IntFieldValue(self, EiiMit.fields.nonworkingAdults)
 	}
 }
 
@@ -27,15 +27,15 @@ object EiiMit extends StorableObject[EiiMit] {
 	object fields extends FieldsObject {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
 		@NullableInDatabase
-		val adults = new DoubleDatabaseField(self, "ADULTS")
+		val adults = new IntDatabaseField(self, "ADULTS")
 		@NullableInDatabase
-		val children = new DoubleDatabaseField(self, "CHILDREN")
+		val children = new IntDatabaseField(self, "CHILDREN")
 		@NullableInDatabase
 		val eii = new DoubleDatabaseField(self, "EII")
 		@NullableInDatabase
-		val generation = new DoubleDatabaseField(self, "GENERATION")
+		val generation = new IntDatabaseField(self, "GENERATION")
 		@NullableInDatabase
-		val nonworkingAdults = new DoubleDatabaseField(self, "NONWORKING_ADULTS")
+		val nonworkingAdults = new IntDatabaseField(self, "NONWORKING_ADULTS")
 	}
 
 	def primaryKey: IntDatabaseField = fields.rowId

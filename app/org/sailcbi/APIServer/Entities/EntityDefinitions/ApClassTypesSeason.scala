@@ -12,7 +12,7 @@ class ApClassTypesSeason extends StorableClass(ApClassTypesSeason) {
 	override object values extends ValuesObject {
 		val assignId = new IntFieldValue(self, ApClassTypesSeason.fields.assignId)
 		val typeId = new IntFieldValue(self, ApClassTypesSeason.fields.typeId)
-		val season = new DoubleFieldValue(self, ApClassTypesSeason.fields.season)
+		val season = new IntFieldValue(self, ApClassTypesSeason.fields.season)
 	}
 }
 
@@ -24,7 +24,7 @@ object ApClassTypesSeason extends StorableObject[ApClassTypesSeason] {
 	object fields extends FieldsObject {
 		val assignId = new IntDatabaseField(self, "ASSIGN_ID")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 	}
 
 	def primaryKey: IntDatabaseField = fields.assignId

@@ -23,7 +23,7 @@ class HighSchoolPayment extends StorableClass(HighSchoolPayment) {
 		val ccTransNum = new NullableDoubleFieldValue(self, HighSchoolPayment.fields.ccTransNum)
 		val checkId = new IntFieldValue(self, HighSchoolPayment.fields.checkId)
 		val springFall = new StringFieldValue(self, HighSchoolPayment.fields.springFall)
-		val year = new DoubleFieldValue(self, HighSchoolPayment.fields.year)
+		val year = new IntFieldValue(self, HighSchoolPayment.fields.year)
 	}
 }
 
@@ -47,7 +47,7 @@ object HighSchoolPayment extends StorableObject[HighSchoolPayment] {
 		@NullableInDatabase
 		val checkId = new IntDatabaseField(self, "CHECK_ID")
 		val springFall = new StringDatabaseField(self, "SPRING_FALL", 1)
-		val year = new DoubleDatabaseField(self, "YEAR")
+		val year = new IntDatabaseField(self, "YEAR")
 	}
 
 	def primaryKey: IntDatabaseField = fields.paymentId

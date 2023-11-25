@@ -13,7 +13,7 @@ class PersonsRecurringDonation extends StorableClass(PersonsRecurringDonation) {
 		val rowId = new IntFieldValue(self, PersonsRecurringDonation.fields.rowId)
 		val personId = new IntFieldValue(self, PersonsRecurringDonation.fields.personId)
 		val fundId = new IntFieldValue(self, PersonsRecurringDonation.fields.fundId)
-		val amountInCents = new DoubleFieldValue(self, PersonsRecurringDonation.fields.amountInCents)
+		val amountInCents = new IntFieldValue(self, PersonsRecurringDonation.fields.amountInCents)
 		val createdOn = new NullableDateTimeFieldValue(self, PersonsRecurringDonation.fields.createdOn)
 		val embryonic = new NullableBooleanFieldValue(self, PersonsRecurringDonation.fields.embryonic)
 	}
@@ -28,7 +28,7 @@ object PersonsRecurringDonation extends StorableObject[PersonsRecurringDonation]
 		val rowId = new IntDatabaseField(self, "ROW_ID")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val fundId = new IntDatabaseField(self, "FUND_ID")
-		val amountInCents = new DoubleDatabaseField(self, "AMOUNT_IN_CENTS")
+		val amountInCents = new IntDatabaseField(self, "AMOUNT_IN_CENTS")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val embryonic = new NullableBooleanDatabaseField(self, "EMBRYONIC")
 	}

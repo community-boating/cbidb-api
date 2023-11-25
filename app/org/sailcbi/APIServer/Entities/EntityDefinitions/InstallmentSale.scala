@@ -11,7 +11,7 @@ import play.api.libs.json._
 class InstallmentSale extends StorableClass(InstallmentSale) {
 	override object values extends ValuesObject {
 		val saleId = new IntFieldValue(self, InstallmentSale.fields.saleId)
-		val amountInCents = new DoubleFieldValue(self, InstallmentSale.fields.amountInCents)
+		val amountInCents = new IntFieldValue(self, InstallmentSale.fields.amountInCents)
 		val staggerId = new IntFieldValue(self, InstallmentSale.fields.staggerId)
 		val closeId = new IntFieldValue(self, InstallmentSale.fields.closeId)
 		val voidCloseId = new NullableIntFieldValue(self, InstallmentSale.fields.voidCloseId)
@@ -25,7 +25,7 @@ object InstallmentSale extends StorableObject[InstallmentSale] {
 
 	object fields extends FieldsObject {
 		val saleId = new IntDatabaseField(self, "SALE_ID")
-		val amountInCents = new DoubleDatabaseField(self, "AMOUNT_IN_CENTS")
+		val amountInCents = new IntDatabaseField(self, "AMOUNT_IN_CENTS")
 		val staggerId = new IntDatabaseField(self, "STAGGER_ID")
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
 		val voidCloseId = new NullableIntDatabaseField(self, "VOID_CLOSE_ID")

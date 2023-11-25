@@ -11,7 +11,7 @@ import play.api.libs.json._
 class EiiOverride extends StorableClass(EiiOverride) {
 	override object values extends ValuesObject {
 		val personId = new IntFieldValue(self, EiiOverride.fields.personId)
-		val season = new DoubleFieldValue(self, EiiOverride.fields.season)
+		val season = new IntFieldValue(self, EiiOverride.fields.season)
 		val price = new DoubleFieldValue(self, EiiOverride.fields.price)
 		val createdOn = new DateTimeFieldValue(self, EiiOverride.fields.createdOn)
 		val createdBy = new StringFieldValue(self, EiiOverride.fields.createdBy)
@@ -30,7 +30,7 @@ object EiiOverride extends StorableObject[EiiOverride] {
 		@NullableInDatabase
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		@NullableInDatabase
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 		@NullableInDatabase
 		val price = new DoubleDatabaseField(self, "PRICE")
 		@NullableInDatabase

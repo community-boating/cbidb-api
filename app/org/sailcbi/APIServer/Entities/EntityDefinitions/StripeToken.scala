@@ -15,8 +15,8 @@ class StripeToken extends StorableClass(StripeToken) {
 		val orderId = new NullableIntFieldValue(self, StripeToken.fields.orderId)
 		val createdDatetime = new DateTimeFieldValue(self, StripeToken.fields.createdDatetime)
 		val cardLastDigits = new NullableStringFieldValue(self, StripeToken.fields.cardLastDigits)
-		val cardExpMonth = new NullableDoubleFieldValue(self, StripeToken.fields.cardExpMonth)
-		val cardExpYear = new NullableDoubleFieldValue(self, StripeToken.fields.cardExpYear)
+		val cardExpMonth = new NullableIntFieldValue(self, StripeToken.fields.cardExpMonth)
+		val cardExpYear = new NullableIntFieldValue(self, StripeToken.fields.cardExpYear)
 		val cardZip = new NullableStringFieldValue(self, StripeToken.fields.cardZip)
 		val active = new BooleanFieldValue(self, StripeToken.fields.active)
 	}
@@ -35,8 +35,8 @@ object StripeToken extends StorableObject[StripeToken] {
 		@NullableInDatabase
 		val createdDatetime = new DateTimeDatabaseField(self, "CREATED_DATETIME")
 		val cardLastDigits = new NullableStringDatabaseField(self, "CARD_LAST_DIGITS", 10)
-		val cardExpMonth = new NullableDoubleDatabaseField(self, "CARD_EXP_MONTH")
-		val cardExpYear = new NullableDoubleDatabaseField(self, "CARD_EXP_YEAR")
+		val cardExpMonth = new NullableIntDatabaseField(self, "CARD_EXP_MONTH")
+		val cardExpYear = new NullableIntDatabaseField(self, "CARD_EXP_YEAR")
 		val cardZip = new NullableStringDatabaseField(self, "CARD_ZIP", 20)
 		val active = new BooleanDatabaseField(self, "ACTIVE", false)
 	}

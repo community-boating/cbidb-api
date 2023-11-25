@@ -11,8 +11,8 @@ import play.api.libs.json._
 class WikiEntrie extends StorableClass(WikiEntrie) {
 	override object values extends ValuesObject {
 		val entryId = new IntFieldValue(self, WikiEntrie.fields.entryId)
-		val app = new DoubleFieldValue(self, WikiEntrie.fields.app)
-		val page = new DoubleFieldValue(self, WikiEntrie.fields.page)
+		val app = new IntFieldValue(self, WikiEntrie.fields.app)
+		val page = new IntFieldValue(self, WikiEntrie.fields.page)
 		val content = new NullableStringFieldValue(self, WikiEntrie.fields.content)
 		val createdOn = new DateTimeFieldValue(self, WikiEntrie.fields.createdOn)
 		val createdBy = new StringFieldValue(self, WikiEntrie.fields.createdBy)
@@ -29,9 +29,9 @@ object WikiEntrie extends StorableObject[WikiEntrie] {
 	object fields extends FieldsObject {
 		val entryId = new IntDatabaseField(self, "ENTRY_ID")
 		@NullableInDatabase
-		val app = new DoubleDatabaseField(self, "APP")
+		val app = new IntDatabaseField(self, "APP")
 		@NullableInDatabase
-		val page = new DoubleDatabaseField(self, "PAGE")
+		val page = new IntDatabaseField(self, "PAGE")
 		val content = new NullableStringDatabaseField(self, "CONTENT", -1)
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")

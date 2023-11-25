@@ -14,7 +14,7 @@ class SymonSchedule extends StorableClass(SymonSchedule) {
 		val hostName = new StringFieldValue(self, SymonSchedule.fields.hostName)
 		val programName = new StringFieldValue(self, SymonSchedule.fields.programName)
 		val argString = new NullableStringFieldValue(self, SymonSchedule.fields.argString)
-		val freqDays = new DoubleFieldValue(self, SymonSchedule.fields.freqDays)
+		val freqDays = new IntFieldValue(self, SymonSchedule.fields.freqDays)
 		val createdOn = new NullableDateTimeFieldValue(self, SymonSchedule.fields.createdOn)
 		val createdBy = new NullableStringFieldValue(self, SymonSchedule.fields.createdBy)
 		val updatedOn = new NullableDateTimeFieldValue(self, SymonSchedule.fields.updatedOn)
@@ -37,7 +37,7 @@ object SymonSchedule extends StorableObject[SymonSchedule] {
 		val programName = new StringDatabaseField(self, "PROGRAM_NAME", 50)
 		val argString = new NullableStringDatabaseField(self, "ARG_STRING", 250)
 		@NullableInDatabase
-		val freqDays = new DoubleDatabaseField(self, "FREQ_DAYS")
+		val freqDays = new IntDatabaseField(self, "FREQ_DAYS")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
 		val updatedOn = new NullableDateTimeDatabaseField(self, "UPDATED_ON")

@@ -12,7 +12,7 @@ class ErrorType extends StorableClass(ErrorType) {
 	override object values extends ValuesObject {
 		val typeId = new IntFieldValue(self, ErrorType.fields.typeId)
 		val errorMessage = new NullableStringFieldValue(self, ErrorType.fields.errorMessage)
-		val throwCount = new NullableDoubleFieldValue(self, ErrorType.fields.throwCount)
+		val throwCount = new NullableIntFieldValue(self, ErrorType.fields.throwCount)
 		val lastInstance = new NullableDateTimeFieldValue(self, ErrorType.fields.lastInstance)
 	}
 }
@@ -25,7 +25,7 @@ object ErrorType extends StorableObject[ErrorType] {
 	object fields extends FieldsObject {
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
 		val errorMessage = new NullableStringDatabaseField(self, "ERROR_MESSAGE", 4000)
-		val throwCount = new NullableDoubleDatabaseField(self, "THROW_COUNT")
+		val throwCount = new NullableIntDatabaseField(self, "THROW_COUNT")
 		val lastInstance = new NullableDateTimeDatabaseField(self, "LAST_INSTANCE")
 	}
 

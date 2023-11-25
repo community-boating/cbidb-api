@@ -14,7 +14,7 @@ class UsersIp extends StorableClass(UsersIp) {
 		val ipAddress = new StringFieldValue(self, UsersIp.fields.ipAddress)
 		val firstDatetime = new NullableDateTimeFieldValue(self, UsersIp.fields.firstDatetime)
 		val lastDatetime = new NullableDateTimeFieldValue(self, UsersIp.fields.lastDatetime)
-		val useCount = new NullableDoubleFieldValue(self, UsersIp.fields.useCount)
+		val useCount = new NullableIntFieldValue(self, UsersIp.fields.useCount)
 	}
 }
 
@@ -28,7 +28,7 @@ object UsersIp extends StorableObject[UsersIp] {
 		val ipAddress = new StringDatabaseField(self, "IP_ADDRESS", 50)
 		val firstDatetime = new NullableDateTimeDatabaseField(self, "FIRST_DATETIME")
 		val lastDatetime = new NullableDateTimeDatabaseField(self, "LAST_DATETIME")
-		val useCount = new NullableDoubleDatabaseField(self, "USE_COUNT")
+		val useCount = new NullableIntDatabaseField(self, "USE_COUNT")
 	}
 
 	def primaryKey: IntDatabaseField = fields.userId

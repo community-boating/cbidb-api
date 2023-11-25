@@ -12,7 +12,7 @@ class PersonsToDelete extends StorableClass(PersonsToDelete) {
 	override object values extends ValuesObject {
 		val rowId = new IntFieldValue(self, PersonsToDelete.fields.rowId)
 		val personId = new IntFieldValue(self, PersonsToDelete.fields.personId)
-		val mergedInto = new DoubleFieldValue(self, PersonsToDelete.fields.mergedInto)
+		val mergedInto = new IntFieldValue(self, PersonsToDelete.fields.mergedInto)
 	}
 }
 
@@ -26,7 +26,7 @@ object PersonsToDelete extends StorableObject[PersonsToDelete] {
 		@NullableInDatabase
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		@NullableInDatabase
-		val mergedInto = new DoubleDatabaseField(self, "MERGED_INTO")
+		val mergedInto = new IntDatabaseField(self, "MERGED_INTO")
 	}
 
 	def primaryKey: IntDatabaseField = fields.rowId

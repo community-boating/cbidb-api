@@ -12,7 +12,7 @@ class CardDismissal extends StorableClass(CardDismissal) {
 	override object values extends ValuesObject {
 		val dismissalId = new IntFieldValue(self, CardDismissal.fields.dismissalId)
 		val cardAssignId = new IntFieldValue(self, CardDismissal.fields.cardAssignId)
-		val season = new DoubleFieldValue(self, CardDismissal.fields.season)
+		val season = new IntFieldValue(self, CardDismissal.fields.season)
 		val createdOn = new DateTimeFieldValue(self, CardDismissal.fields.createdOn)
 		val createdBy = new StringFieldValue(self, CardDismissal.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, CardDismissal.fields.updatedOn)
@@ -30,7 +30,7 @@ object CardDismissal extends StorableObject[CardDismissal] {
 		@NullableInDatabase
 		val cardAssignId = new IntDatabaseField(self, "CARD_ASSIGN_ID")
 		@NullableInDatabase
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		@NullableInDatabase

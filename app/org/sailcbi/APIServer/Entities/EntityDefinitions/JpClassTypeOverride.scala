@@ -13,7 +13,7 @@ class JpClassTypeOverride extends StorableClass(JpClassTypeOverride) {
 		val rowId = new IntFieldValue(self, JpClassTypeOverride.fields.rowId)
 		val personId = new IntFieldValue(self, JpClassTypeOverride.fields.personId)
 		val typeId = new IntFieldValue(self, JpClassTypeOverride.fields.typeId)
-		val season = new NullableDoubleFieldValue(self, JpClassTypeOverride.fields.season)
+		val season = new NullableIntFieldValue(self, JpClassTypeOverride.fields.season)
 		val isForOverkill = new BooleanFieldValue(self, JpClassTypeOverride.fields.isForOverkill)
 		val createdOn = new DateTimeFieldValue(self, JpClassTypeOverride.fields.createdOn)
 		val createdBy = new StringFieldValue(self, JpClassTypeOverride.fields.createdBy)
@@ -31,7 +31,7 @@ object JpClassTypeOverride extends StorableObject[JpClassTypeOverride] {
 		val rowId = new IntDatabaseField(self, "ROW_ID")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
 		val typeId = new IntDatabaseField(self, "TYPE_ID")
-		val season = new NullableDoubleDatabaseField(self, "SEASON")
+		val season = new NullableIntDatabaseField(self, "SEASON")
 		val isForOverkill = new BooleanDatabaseField(self, "IS_FOR_OVERKILL", false)
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")

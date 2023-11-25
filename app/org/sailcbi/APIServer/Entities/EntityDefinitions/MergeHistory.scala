@@ -19,7 +19,7 @@ class MergeHistory extends StorableClass(MergeHistory) {
 		val createdBy = new NullableStringFieldValue(self, MergeHistory.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, MergeHistory.fields.updatedOn)
 		val updatedBy = new NullableStringFieldValue(self, MergeHistory.fields.updatedBy)
-		val tablePk = new NullableDoubleFieldValue(self, MergeHistory.fields.tablePk)
+		val tablePk = new NullableIntFieldValue(self, MergeHistory.fields.tablePk)
 	}
 }
 
@@ -44,7 +44,7 @@ object MergeHistory extends StorableObject[MergeHistory] {
 		@NullableInDatabase
 		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
 		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
-		val tablePk = new NullableDoubleDatabaseField(self, "TABLE_PK")
+		val tablePk = new NullableIntDatabaseField(self, "TABLE_PK")
 	}
 
 	def primaryKey: IntDatabaseField = fields.actionId

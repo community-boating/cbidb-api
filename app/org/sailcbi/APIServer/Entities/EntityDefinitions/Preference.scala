@@ -11,7 +11,7 @@ import play.api.libs.json._
 class Preference extends StorableClass(Preference) {
 	override object values extends ValuesObject {
 		val prefId = new IntFieldValue(self, Preference.fields.prefId)
-		val dataType = new DoubleFieldValue(self, Preference.fields.dataType)
+		val dataType = new IntFieldValue(self, Preference.fields.dataType)
 		val createdOn = new DateTimeFieldValue(self, Preference.fields.createdOn)
 		val createdBy = new StringFieldValue(self, Preference.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, Preference.fields.updatedOn)
@@ -29,7 +29,7 @@ object Preference extends StorableObject[Preference] {
 	object fields extends FieldsObject {
 		val prefId = new IntDatabaseField(self, "PREF_ID")
 		@NullableInDatabase
-		val dataType = new DoubleDatabaseField(self, "DATA_TYPE")
+		val dataType = new IntDatabaseField(self, "DATA_TYPE")
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		@NullableInDatabase

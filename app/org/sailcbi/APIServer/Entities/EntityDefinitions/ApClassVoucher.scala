@@ -12,7 +12,7 @@ class ApClassVoucher extends StorableClass(ApClassVoucher) {
 	override object values extends ValuesObject {
 		val voucherId = new IntFieldValue(self, ApClassVoucher.fields.voucherId)
 		val personId = new IntFieldValue(self, ApClassVoucher.fields.personId)
-		val season = new DoubleFieldValue(self, ApClassVoucher.fields.season)
+		val season = new IntFieldValue(self, ApClassVoucher.fields.season)
 		val value = new DoubleFieldValue(self, ApClassVoucher.fields.value)
 		val createdOn = new NullableDateTimeFieldValue(self, ApClassVoucher.fields.createdOn)
 		val createdBy = new NullableStringFieldValue(self, ApClassVoucher.fields.createdBy)
@@ -33,7 +33,7 @@ object ApClassVoucher extends StorableObject[ApClassVoucher] {
 	object fields extends FieldsObject {
 		val voucherId = new IntDatabaseField(self, "VOUCHER_ID")
 		val personId = new IntDatabaseField(self, "PERSON_ID")
-		val season = new DoubleDatabaseField(self, "SEASON")
+		val season = new IntDatabaseField(self, "SEASON")
 		val value = new DoubleDatabaseField(self, "VALUE")
 		val createdOn = new NullableDateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)

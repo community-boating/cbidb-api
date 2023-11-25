@@ -13,13 +13,13 @@ class FoMisc extends StorableClass(FoMisc) {
 		val rowId = new IntFieldValue(self, FoMisc.fields.rowId)
 		val itemId = new IntFieldValue(self, FoMisc.fields.itemId)
 		val closeId = new IntFieldValue(self, FoMisc.fields.closeId)
-		val qtySold = new DoubleFieldValue(self, FoMisc.fields.qtySold)
+		val qtySold = new IntFieldValue(self, FoMisc.fields.qtySold)
 		val totalPrice = new DoubleFieldValue(self, FoMisc.fields.totalPrice)
 		val createdOn = new DateTimeFieldValue(self, FoMisc.fields.createdOn)
 		val createdBy = new StringFieldValue(self, FoMisc.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, FoMisc.fields.updatedOn)
 		val updatedBy = new StringFieldValue(self, FoMisc.fields.updatedBy)
-		val qtyComped = new DoubleFieldValue(self, FoMisc.fields.qtyComped)
+		val qtyComped = new IntFieldValue(self, FoMisc.fields.qtyComped)
 		val totalComp = new DoubleFieldValue(self, FoMisc.fields.totalComp)
 		val taxRate = new NullableDoubleFieldValue(self, FoMisc.fields.taxRate)
 		val totalPretax = new NullableDoubleFieldValue(self, FoMisc.fields.totalPretax)
@@ -38,7 +38,7 @@ object FoMisc extends StorableObject[FoMisc] {
 		@NullableInDatabase
 		val closeId = new IntDatabaseField(self, "CLOSE_ID")
 		@NullableInDatabase
-		val qtySold = new DoubleDatabaseField(self, "QTY_SOLD")
+		val qtySold = new IntDatabaseField(self, "QTY_SOLD")
 		@NullableInDatabase
 		val totalPrice = new DoubleDatabaseField(self, "TOTAL_PRICE")
 		@NullableInDatabase
@@ -50,7 +50,7 @@ object FoMisc extends StorableObject[FoMisc] {
 		@NullableInDatabase
 		val updatedBy = new StringDatabaseField(self, "UPDATED_BY", 500)
 		@NullableInDatabase
-		val qtyComped = new DoubleDatabaseField(self, "QTY_COMPED")
+		val qtyComped = new IntDatabaseField(self, "QTY_COMPED")
 		@NullableInDatabase
 		val totalComp = new DoubleDatabaseField(self, "TOTAL_COMP")
 		val taxRate = new NullableDoubleDatabaseField(self, "TAX_RATE")

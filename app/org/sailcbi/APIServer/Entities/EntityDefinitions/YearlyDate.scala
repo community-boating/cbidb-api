@@ -11,7 +11,7 @@ import play.api.libs.json._
 class YearlyDate extends StorableClass(YearlyDate) {
 	override object values extends ValuesObject {
 		val dateId = new IntFieldValue(self, YearlyDate.fields.dateId)
-		val year = new DoubleFieldValue(self, YearlyDate.fields.year)
+		val year = new IntFieldValue(self, YearlyDate.fields.year)
 		val itemId = new IntFieldValue(self, YearlyDate.fields.itemId)
 		val startDate = new DateTimeFieldValue(self, YearlyDate.fields.startDate)
 		val createdOn = new NullableDateTimeFieldValue(self, YearlyDate.fields.createdOn)
@@ -30,7 +30,7 @@ object YearlyDate extends StorableObject[YearlyDate] {
 	object fields extends FieldsObject {
 		val dateId = new IntDatabaseField(self, "DATE_ID")
 		@NullableInDatabase
-		val year = new DoubleDatabaseField(self, "YEAR")
+		val year = new IntDatabaseField(self, "YEAR")
 		@NullableInDatabase
 		val itemId = new IntDatabaseField(self, "ITEM_ID")
 		@NullableInDatabase
