@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.{StaffDockhouseCreateSignoutPostRequestDto, StaffDockhouseCreateSignoutPostRequestDto_SignoutCrew, StaffDockhouseCreateSignoutPostResponseSuccessDto, StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew, StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout._
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignoutMultiple.{StaffDockhouseCreateSignoutMultiplePostRequestDto, StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts, StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts_SignoutCrew}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Signout
 import org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic.{CreateSignoutError, CreateSignoutLogic}

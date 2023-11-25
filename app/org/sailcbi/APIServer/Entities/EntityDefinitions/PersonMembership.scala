@@ -5,7 +5,6 @@ import com.coleji.neptune.Storable.Fields._
 import com.coleji.neptune.Storable._
 import com.coleji.neptune.Util._
 import org.sailcbi.APIServer.Entities.NullableInDatabase
-import org.sailcbi.APIServer.Entities.entitycalculations._
 import play.api.libs.json._
 
 class PersonMembership extends StorableClass(PersonMembership) {

@@ -3,10 +3,7 @@ package org.sailcbi.APIServer.Reporting.ReportFactories
 import com.coleji.neptune.Export.{ReportFactory, ReportingField, ReportingFilterFactory}
 import com.coleji.neptune.Storable.StorableObject
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
-import org.sailcbi.APIServer.Logic.JpClassLogic
 import org.sailcbi.APIServer.Reporting.ReportingFilterFactories.JpClassSignup.JpClassSignupFilterFactoryYear
-
-import java.time.format.DateTimeFormatter
 
 class ReportFactoryJpClassSignup extends ReportFactory[JpClassSignup] {
 	val entityCompanion: StorableObject[JpClassSignup] = JpClassSignup

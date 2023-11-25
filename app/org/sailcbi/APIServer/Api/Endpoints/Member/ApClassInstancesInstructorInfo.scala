@@ -1,11 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
-import com.coleji.neptune.API.ValidationResult
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.MemberApClassInstancesInstructorInfoGetResponseSuccessDto
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
-import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject
