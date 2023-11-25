@@ -59,7 +59,7 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday (
 	personId: Int,
 	signupType: String,
 	signupDatetime: String,
-	sequence: Double,
+	sequence: Int,
 )
 
 object StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday {
@@ -74,7 +74,7 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday (
 	personId: Int,
 	signupType: String,
 	signupDatetime: String,
-	sequence: Double,
+	sequence: Int,
 )
 
 object StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday {
