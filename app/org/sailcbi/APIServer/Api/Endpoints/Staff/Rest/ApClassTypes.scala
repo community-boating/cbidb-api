@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.API.RestController
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassTypes.{StaffRestApClassTypesGetResponseSuccessDto, StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassTypes.{DtoStaffRestApClassTypesGetResponseSuccess, DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.BoatType
 import org.sailcbi.APIServer.Entities.cacheable.ApClassTypes
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -16,8 +16,8 @@ class ApClassTypes @Inject()(implicit val exec: ExecutionContext) extends RestCo
 	def getAll()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		PA.withRequestCache(StaffRequestCache)(None, ParsedRequest(req), rc => {
 			val types = ApClassTypes.get(rc, null)._1
-			implicit val writes: OFormat[StaffRestApClassTypesGetResponseSuccessDto] = StaffRestApClassTypesGetResponseSuccessDto.format
-			val ret = types.map(t => new StaffRestApClassTypesGetResponseSuccessDto(
+			implicit val writes: OFormat[DtoStaffRestApClassTypesGetResponseSuccess] = DtoStaffRestApClassTypesGetResponseSuccess.format
+			val ret = types.map(t => new DtoStaffRestApClassTypesGetResponseSuccess(
 				typeId = t.values.typeId.get,
 				typeName = t.values.typeName.get,
 				ratingPrereq = t.values.ratingPrereq.get,
@@ -32,7 +32,7 @@ class ApClassTypes @Inject()(implicit val exec: ExecutionContext) extends RestCo
 				signupMaxDefault = t.values.signupMaxDefault.get,
 				signupMinDefault = t.values.signupMinDefault.get,
 				disallowIfOverkill = t.values.disallowIfOverkill.get,
-				$$apClassFormats = t.references.apClassFormats.peek.map(fs => fs.map(f => new StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats(
+				$$apClassFormats = t.references.apClassFormats.peek.map(fs => fs.map(f => new DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats(
 					formatId = f.values.formatId.get,
 					typeId = f.values.typeId.get,
 					description = f.values.description.get,

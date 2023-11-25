@@ -10,13 +10,13 @@ import play.api.libs.json.{JsValue, Json}
  */
 
 
-case class MemberApTeachInstancePostRequestDto (
+case class DtoMemberApTeachInstancePostRequest (
 	instanceId: Int,
 )
 
-object MemberApTeachInstancePostRequestDto {
-	implicit val format = Json.format[MemberApTeachInstancePostRequestDto]
-	def apply(v: JsValue): MemberApTeachInstancePostRequestDto
-		= v.as[MemberApTeachInstancePostRequestDto]
+object DtoMemberApTeachInstancePostRequest {
+	implicit val format = Json.format[DtoMemberApTeachInstancePostRequest]
+	def apply(v: JsValue): DtoMemberApTeachInstancePostRequest
+		= v.as[DtoMemberApTeachInstancePostRequest]
 }
 

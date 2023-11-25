@@ -31,7 +31,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		})
 	})
 
-	private def scanCard(rc: UnlockedRequestCache, cardNumber: String): Either[ResultError, StaffDockhouseScanCardGetResponseSuccessDto] = {
+	private def scanCard(rc: UnlockedRequestCache, cardNumber: String): Either[ResultError, DtoStaffDockhouseScanCardGetResponseSuccess] = {
 		for(
 			_ <- validateCardNumber(cardNumber);
 			pc <- lookupCard(rc, cardNumber);
@@ -62,10 +62,10 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		}
 	}
 
-	private def constructMemberships(rc: UnlockedRequestCache, personId: Int): List[StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships] = {
+	private def constructMemberships(rc: UnlockedRequestCache, personId: Int): List[DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships] = {
 		GetPersonMembership.getAllForPerson(rc, personId)
 		.filter(MembershipLogic.isActive(_, LocalDate.now))
-		.map(pm => new StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships(
+		.map(pm => new DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships(
 			assignId = pm.values.assignId.get,
 			membershipTypeId = pm.values.membershipTypeId.get,
 			startDate = pm.values.startDate.get.map(_.toString),
@@ -77,7 +77,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		))
 	}
 
-	private def constructRatings(rc: UnlockedRequestCache, personId: Int): List[StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings] = {
+	private def constructRatings(rc: UnlockedRequestCache, personId: Int): List[DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings] = {
 		val ratingsQb = QueryBuilder
 			.from(PersonRating)
 			.innerJoin(Rating, Rating.fields.ratingId.alias.equalsField(PersonRating.fields.ratingId.alias))
@@ -91,7 +91,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		rc.executeQueryBuilder(ratingsQb).map(qbrr => {
 			val pr = PersonRating.construct(qbrr)
 
-			new StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings(
+			new DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings(
 				ratingId = pr.values.ratingId.get,
 				programId = pr.values.programId.get,
 				ratingName = Rating.construct(qbrr).values.ratingName.get,
@@ -106,7 +106,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		})
 	}
 
-	private def constructApClassSignups(rc: UnlockedRequestCache, personId: Int): List[StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday] = {
+	private def constructApClassSignups(rc: UnlockedRequestCache, personId: Int): List[DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday] = {
 		val qb = QueryBuilder
 			.from(ApClassSignup)
 			.innerJoin(ApClassSession, ApClassSession.fields.instanceId.alias.equalsField(ApClassSignup.fields.instanceId))
@@ -122,7 +122,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 				ApClassSignup.fields.signupDatetime,
 				ApClassSignup.fields.sequence,
 			))
-		rc.executeQueryBuilder(qb).map(ApClassSignup.construct).map(s => new StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday(
+		rc.executeQueryBuilder(qb).map(ApClassSignup.construct).map(s => new DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday(
 			signupId = s.values.signupId.get,
 			instanceId = s.values.instanceId.get,
 			personId = s.values.personId.get,
@@ -132,7 +132,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		))
 	}
 
-	private def constructJpClassSignups(rc: UnlockedRequestCache, personId: Int): List[StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday] = {
+	private def constructJpClassSignups(rc: UnlockedRequestCache, personId: Int): List[DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday] = {
 		val qb = QueryBuilder
 			.from(JpClassSignup)
 			.innerJoin(JpClassSession, JpClassSession.fields.instanceId.alias.equalsField(JpClassSignup.fields.instanceId))
@@ -148,7 +148,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 				JpClassSignup.fields.signupDatetime,
 				JpClassSignup.fields.sequence,
 			))
-		rc.executeQueryBuilder(qb).map(JpClassSignup.construct).map(s => new StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday(
+		rc.executeQueryBuilder(qb).map(JpClassSignup.construct).map(s => new DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday(
 			signupId = s.values.signupId.get,
 			instanceId = s.values.instanceId.get,
 			personId = s.values.personId.get,
@@ -158,7 +158,7 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 		))
 	}
 
-	private def constructResult(rc: UnlockedRequestCache, pc: PersonCard): Either[ResultError, StaffDockhouseScanCardGetResponseSuccessDto] = {
+	private def constructResult(rc: UnlockedRequestCache, pc: PersonCard): Either[ResultError, DtoStaffDockhouseScanCardGetResponseSuccess] = {
 		val person = rc.getObjectById(Person, pc.values.personId.get, Set(
 			Person.fields.personId,
 			Person.fields.nameFirst,
@@ -187,14 +187,14 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 
 		val prs = rc.executeQueryBuilder(prsQb).map(PersonRating.construct)
 
-		val maxFlags: List[StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat] = RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, prs, ratings._1.toList)
-			.map(mbf => new StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat(
+		val maxFlags: List[DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat] = RatingLogic.maxFlags(boatTypes._1.toList, programs._1.toList, prs, ratings._1.toList)
+			.map(mbf => new DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat(
 				boatId = mbf.boatId,
 				programId = mbf.programId,
 				maxFlag = mbf.maxFlag
 			))
 
-		Right(new StaffDockhouseScanCardGetResponseSuccessDto(
+		Right(new DtoStaffDockhouseScanCardGetResponseSuccess(
 			personId = pc.values.personId.get,
 			cardNumber = pc.values.cardNum.get,
 			nameFirst = person.values.nameFirst.get,

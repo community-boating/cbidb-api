@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
  * Do not manually alter this file, or your changes will be lost
  * !!!!!!!!!!!!
  */
-case class StaffRestApClassTypesGetResponseSuccessDto (
+case class DtoStaffRestApClassTypesGetResponseSuccess (
 	typeId: Int,
 	typeName: String,
 	ratingPrereq: Option[Int],
@@ -23,10 +23,10 @@ case class StaffRestApClassTypesGetResponseSuccessDto (
 	signupMaxDefault: Option[Int],
 	signupMinDefault: Option[Int],
 	disallowIfOverkill: Boolean,
-	$$apClassFormats: List[StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats],
+	$$apClassFormats: List[DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats],
 )
 
-case class StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats (
+case class DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats (
 	formatId: Int,
 	typeId: Int,
 	description: Option[String],
@@ -37,17 +37,17 @@ case class StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats (
 	signupMinDefaultOverride: Option[Int],
 )
 
-object StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats {
-	implicit val format = Json.format[StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats]
-	def apply(v: JsValue): StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats
-		= v.as[StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats]
+object DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats {
+	implicit val format = Json.format[DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats]
+	def apply(v: JsValue): DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats
+		= v.as[DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats]
 }
 
-object StaffRestApClassTypesGetResponseSuccessDto {
-	implicit val StaffRestApClassTypesGetResponseSuccessDto_ApClassFormatsFormat
-		= StaffRestApClassTypesGetResponseSuccessDto_ApClassFormats.format
-	implicit val format = Json.format[StaffRestApClassTypesGetResponseSuccessDto]
-	def apply(v: JsValue): StaffRestApClassTypesGetResponseSuccessDto
-		= v.as[StaffRestApClassTypesGetResponseSuccessDto]
+object DtoStaffRestApClassTypesGetResponseSuccess {
+	implicit val DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormatsFormat
+		= DtoStaffRestApClassTypesGetResponseSuccess_ApClassFormats.format
+	implicit val format = Json.format[DtoStaffRestApClassTypesGetResponseSuccess]
+	def apply(v: JsValue): DtoStaffRestApClassTypesGetResponseSuccess
+		= v.as[DtoStaffRestApClassTypesGetResponseSuccess]
 }
 

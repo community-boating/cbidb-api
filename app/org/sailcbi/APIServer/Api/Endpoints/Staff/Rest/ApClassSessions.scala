@@ -107,8 +107,8 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 		sessions
 	}
 
-	private def mapToDto(result: List[ApClassSession]): List[StaffRestApClassSessionsTodayGetResponseSuccessDto] = {
-		result.map(session => new StaffRestApClassSessionsTodayGetResponseSuccessDto(
+	private def mapToDto(result: List[ApClassSession]): List[DtoStaffRestApClassSessionsTodayGetResponseSuccess] = {
+		result.map(session => new DtoStaffRestApClassSessionsTodayGetResponseSuccess(
 			sessionId = session.values.sessionId.get,
 			instanceId = session.values.instanceId.get,
 			headcount = session.values.headcount.get,
@@ -118,7 +118,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 			isMakeup = session.values.isMakeup.get,
 			$$apClassInstance = {
 				val instance = session.references.apClassInstance.get
-				new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance(
+				new DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance(
 					instanceId = instance.values.instanceId.get,
 					cancelledDatetime = instance.values.cancelledDatetime.get.map(_.toString),
 					signupsStartOverride = instance.values.signupsStartOverride.get.map(_.toString),
@@ -131,7 +131,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 					locationString = instance.values.locationString.get,
 					doNotAutoCancel = instance.values.doNotAutoCancel.get,
 					$$apClassSignups = instance.references.apClassSignups.get.map(s =>
-						new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups(
+						new DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups(
 							instanceId = s.values.instanceId.get,
 							discountInstanceId = s.values.discountInstanceId.get,
 							voidedOnline = s.values.voidedOnline.get,
@@ -150,7 +150,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 							signupDatetime = s.values.signupDatetime.get.toString,
 							$$person = {
 								val person = s.references.person.get
-								new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person(
+								new DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person(
 									personId = person.values.personId.get,
 									nameFirst = person.values.nameFirst.get,
 									nameLast = person.values.nameLast.get
@@ -158,7 +158,7 @@ class ApClassSessions @Inject()(implicit val exec: ExecutionContext) extends Inj
 							},
 							$$apClassWaitlistResult = {
 								s.references.apClassWaitlistResult.get.map(wlr =>
-									new StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult(
+									new DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult(
 										wlResult = wlr.values.wlResult.get,
 										foVmDatetime = wlr.values.foVmDatetime.get.map(_.toString),
 										offerExpDatetime = wlr.values.offerExpDatetime.get.toString,

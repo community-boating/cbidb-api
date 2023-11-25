@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.CreateSignout
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout._
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignoutMultiple.{StaffDockhouseCreateSignoutMultiplePostRequestDto, StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts, StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts_SignoutCrew}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignoutMultiple.{DtoStaffDockhouseCreateSignoutMultiplePostRequest, DtoStaffDockhouseCreateSignoutMultiplePostRequest_Signouts, DtoStaffDockhouseCreateSignoutMultiplePostRequest_Signouts_SignoutCrew}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.Signout
 import org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic.{CreateSignoutError, CreateSignoutLogic}
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -16,7 +16,7 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
-			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StaffDockhouseCreateSignoutPostRequestDto.apply)(parsed => {
+			PA.withParsedPostBodyJSON(parsedRequest.postJSON, DtoStaffDockhouseCreateSignoutPostRequest.apply)(parsed => {
 				CreateSignoutLogic.attemptSignout(rc, parsed).fold(
 					e => Future(BadRequest(e.asJsObject)),
 					s => Future(Ok(Json.toJson(mapSignoutToOutputDto(s))))
@@ -28,7 +28,7 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 	def postMany()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val parsedRequest = ParsedRequest(req)
 		PA.withRequestCache(StaffRequestCache)(None, parsedRequest, rc => {
-			PA.withParsedPostBodyJSON(parsedRequest.postJSON, StaffDockhouseCreateSignoutMultiplePostRequestDto.apply)(parsed => {
+			PA.withParsedPostBodyJSON(parsedRequest.postJSON, DtoStaffDockhouseCreateSignoutMultiplePostRequest.apply)(parsed => {
 				// try each signout, rollback if any return an error
 				val result = rc.withTransaction(() => {
 					parsed.signouts.foldLeft(Right(List.empty).asInstanceOf[Either[CreateSignoutError, List[Signout]]])((e, s) => e match {
@@ -48,7 +48,7 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 		})
 	})
 
-	private def mapSignoutToOutputDto(s: Signout): StaffDockhouseCreateSignoutPostResponseSuccessDto = new StaffDockhouseCreateSignoutPostResponseSuccessDto(
+	private def mapSignoutToOutputDto(s: Signout): DtoStaffDockhouseCreateSignoutPostResponseSuccess = new DtoStaffDockhouseCreateSignoutPostResponseSuccess(
 		signoutId = s.values.signoutId.get,
 		personId = s.values.personId.get,
 		programId = s.values.programId.get,
@@ -61,21 +61,21 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 		testResult = None,
 		isQueued = s.values.isQueued.get,
 		signoutDatetime = s.values.signoutDatetime.get.map(_.toString),
-		$$crew = s.references.crew.get.toList.map(c => new StaffDockhouseCreateSignoutPostResponseSuccessDto_Crew(
+		$$crew = s.references.crew.get.toList.map(c => new DtoStaffDockhouseCreateSignoutPostResponseSuccess_Crew(
 			signoutId = c.values.signoutId.get,
 			personId = c.values.personId.get,
 			cardNum = c.values.cardNum.get,
 			startActive = c.values.startActive.get.map(_.toString)
 		)),
-		$$tests = s.references.tests.peek.map(_.toList.map(t => new StaffDockhouseCreateSignoutPostResponseSuccessDto_Tests(
+		$$tests = s.references.tests.peek.map(_.toList.map(t => new DtoStaffDockhouseCreateSignoutPostResponseSuccess_Tests(
 			signoutId = t.values.signoutId.get,
 			personId = t.values.personId.get,
 			ratingId = t.values.ratingId.get
 		))).getOrElse(List.empty)
 	)
 
-	private def multipleDtoToSingleDtoSignout(s: StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts): StaffDockhouseCreateSignoutPostRequestDto
-		= new StaffDockhouseCreateSignoutPostRequestDto(
+	private def multipleDtoToSingleDtoSignout(s: DtoStaffDockhouseCreateSignoutMultiplePostRequest_Signouts): DtoStaffDockhouseCreateSignoutPostRequest
+		= new DtoStaffDockhouseCreateSignoutPostRequest(
 			skipperPersonId = s.skipperPersonId,
 			programId = s.programId,
 			skipperCardNumber = s.skipperCardNumber,
@@ -90,8 +90,8 @@ class CreateSignout @Inject()(implicit val exec: ExecutionContext) extends Injec
 			signoutCrew = s.signoutCrew.map(multipleDtoToSingleDtoCrew)
 		)
 
-	private def multipleDtoToSingleDtoCrew(c: StaffDockhouseCreateSignoutMultiplePostRequestDto_Signouts_SignoutCrew): StaffDockhouseCreateSignoutPostRequestDto_SignoutCrew
-		= new StaffDockhouseCreateSignoutPostRequestDto_SignoutCrew(
+	private def multipleDtoToSingleDtoCrew(c: DtoStaffDockhouseCreateSignoutMultiplePostRequest_Signouts_SignoutCrew): DtoStaffDockhouseCreateSignoutPostRequest_SignoutCrew
+		= new DtoStaffDockhouseCreateSignoutPostRequest_SignoutCrew(
 			personId = c.personId,
 			cardNumber = c.cardNumber,
 			testRatingId = c.testRatingId

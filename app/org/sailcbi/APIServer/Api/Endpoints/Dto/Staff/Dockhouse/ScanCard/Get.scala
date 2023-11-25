@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
  * Do not manually alter this file, or your changes will be lost
  * !!!!!!!!!!!!
  */
-case class StaffDockhouseScanCardGetResponseSuccessDto (
+case class DtoStaffDockhouseScanCardGetResponseSuccess (
 	personId: Int,
 	cardNumber: String,
 	nameFirst: Option[String],
@@ -16,14 +16,14 @@ case class StaffDockhouseScanCardGetResponseSuccessDto (
 	bannerComment: Option[String],
 	specialNeeds: Option[String],
 	signoutBlockReason: Option[String],
-	activeMemberships: List[StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships],
-	personRatings: List[StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings],
-	apClassSignupsToday: List[StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday],
-	jpClassSignupsToday: List[StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday],
-	maxFlagsPerBoat: List[StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat],
+	activeMemberships: List[DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships],
+	personRatings: List[DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings],
+	apClassSignupsToday: List[DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday],
+	jpClassSignupsToday: List[DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday],
+	maxFlagsPerBoat: List[DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat],
 )
 
-case class StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships (
+case class DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships (
 	assignId: Int,
 	membershipTypeId: Int,
 	startDate: Option[String],
@@ -34,26 +34,26 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships (
 	programId: Int,
 )
 
-object StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships {
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships]
+object DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships {
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships]
 }
 
-case class StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings (
+case class DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings (
 	ratingId: Int,
 	programId: Int,
 	ratingName: String,
 	status: String,
 )
 
-object StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings {
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings]
+object DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings {
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings]
 }
 
-case class StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday (
+case class DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday (
 	signupId: Int,
 	instanceId: Int,
 	personId: Int,
@@ -62,13 +62,13 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday (
 	sequence: Int,
 )
 
-object StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday {
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday]
+object DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday {
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday]
 }
 
-case class StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday (
+case class DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday (
 	signupId: Int,
 	instanceId: Int,
 	personId: Int,
@@ -77,37 +77,37 @@ case class StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday (
 	sequence: Double,
 )
 
-object StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday {
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday]
+object DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday {
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday]
 }
 
-case class StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat (
+case class DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat (
 	boatId: Int,
 	programId: Int,
 	maxFlag: String,
 )
 
-object StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat {
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat]
+object DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat {
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat]
 }
 
-object StaffDockhouseScanCardGetResponseSuccessDto {
-	implicit val StaffDockhouseScanCardGetResponseSuccessDto_ActiveMembershipsFormat
-		= StaffDockhouseScanCardGetResponseSuccessDto_ActiveMemberships.format
-	implicit val StaffDockhouseScanCardGetResponseSuccessDto_PersonRatingsFormat
-		= StaffDockhouseScanCardGetResponseSuccessDto_PersonRatings.format
-	implicit val StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsTodayFormat
-		= StaffDockhouseScanCardGetResponseSuccessDto_ApClassSignupsToday.format
-	implicit val StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsTodayFormat
-		= StaffDockhouseScanCardGetResponseSuccessDto_JpClassSignupsToday.format
-	implicit val StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoatFormat
-		= StaffDockhouseScanCardGetResponseSuccessDto_MaxFlagsPerBoat.format
-	implicit val format = Json.format[StaffDockhouseScanCardGetResponseSuccessDto]
-	def apply(v: JsValue): StaffDockhouseScanCardGetResponseSuccessDto
-		= v.as[StaffDockhouseScanCardGetResponseSuccessDto]
+object DtoStaffDockhouseScanCardGetResponseSuccess {
+	implicit val DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMembershipsFormat
+		= DtoStaffDockhouseScanCardGetResponseSuccess_ActiveMemberships.format
+	implicit val DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatingsFormat
+		= DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings.format
+	implicit val DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsTodayFormat
+		= DtoStaffDockhouseScanCardGetResponseSuccess_ApClassSignupsToday.format
+	implicit val DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsTodayFormat
+		= DtoStaffDockhouseScanCardGetResponseSuccess_JpClassSignupsToday.format
+	implicit val DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoatFormat
+		= DtoStaffDockhouseScanCardGetResponseSuccess_MaxFlagsPerBoat.format
+	implicit val format = Json.format[DtoStaffDockhouseScanCardGetResponseSuccess]
+	def apply(v: JsValue): DtoStaffDockhouseScanCardGetResponseSuccess
+		= v.as[DtoStaffDockhouseScanCardGetResponseSuccess]
 }
 

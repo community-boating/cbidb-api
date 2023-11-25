@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
  * Do not manually alter this file, or your changes will be lost
  * !!!!!!!!!!!!
  */
-case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
+case class DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess (
 	instanceId: Int,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
@@ -21,11 +21,11 @@ case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto (
 	locationString: Option[String],
 	doNotAutoCancel: Boolean,
 	instructorId: Option[Int],
-	$$apClassSessions: List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions],
-	$$instructor: Option[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor],
+	$$apClassSessions: List[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions],
+	$$instructor: Option[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor],
 )
 
-case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions (
+case class DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions (
 	sessionId: Int,
 	instanceId: Int,
 	headcount: Option[Int],
@@ -35,31 +35,31 @@ case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessi
 	isMakeup: Boolean,
 )
 
-object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions {
-	implicit val format = Json.format[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions]
-	def apply(v: JsValue): StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions
-		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions]
+object DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions {
+	implicit val format = Json.format[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions]
+	def apply(v: JsValue): DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions
+		= v.as[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions]
 }
 
-case class StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor (
+case class DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor (
 	personId: Int,
 	nameFirst: Option[String],
 	nameLast: Option[String],
 )
 
-object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor {
-	implicit val format = Json.format[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor]
-	def apply(v: JsValue): StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor
-		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor]
+object DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor {
+	implicit val format = Json.format[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor]
+	def apply(v: JsValue): DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor
+		= v.as[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor]
 }
 
-object StaffRestApClassInstancesThisSeasonGetResponseSuccessDto {
-	implicit val StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessionsFormat
-		= StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions.format
-	implicit val StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_InstructorFormat
-		= StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor.format
-	implicit val format = Json.format[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto]
-	def apply(v: JsValue): StaffRestApClassInstancesThisSeasonGetResponseSuccessDto
-		= v.as[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto]
+object DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess {
+	implicit val DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessionsFormat
+		= DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions.format
+	implicit val DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_InstructorFormat
+		= DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor.format
+	implicit val format = Json.format[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess]
+	def apply(v: JsValue): DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess
+		= v.as[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess]
 }
 

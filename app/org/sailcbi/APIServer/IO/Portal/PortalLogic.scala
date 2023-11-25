@@ -6,7 +6,7 @@ import com.coleji.neptune.IO.PreparedQueries._
 import com.coleji.neptune.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
 import com.coleji.neptune.Util._
 import com.coleji.neptune.{API, Storable}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.MemberApClassInstancesInstructorInfoGetResponseSuccessDto
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.DtoMemberApClassInstancesInstructorInfoGetResponseSuccess
 import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -2027,9 +2027,9 @@ object PortalLogic {
 		def apply(v: JsValue): ApClassAvailability = v.as[ApClassAvailability]
 	}
 
-	def getApClassesInstructorInfo(rc: RequestCache, personId: Int): List[MemberApClassInstancesInstructorInfoGetResponseSuccessDto] = {
-		val instancesQ: PreparedQueryForSelect[MemberApClassInstancesInstructorInfoGetResponseSuccessDto] = new PreparedQueryForSelect[MemberApClassInstancesInstructorInfoGetResponseSuccessDto](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): MemberApClassInstancesInstructorInfoGetResponseSuccessDto = new MemberApClassInstancesInstructorInfoGetResponseSuccessDto(
+	def getApClassesInstructorInfo(rc: RequestCache, personId: Int): List[DtoMemberApClassInstancesInstructorInfoGetResponseSuccess] = {
+		val instancesQ: PreparedQueryForSelect[DtoMemberApClassInstancesInstructorInfoGetResponseSuccess] = new PreparedQueryForSelect[DtoMemberApClassInstancesInstructorInfoGetResponseSuccess](Set(MemberRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DtoMemberApClassInstancesInstructorInfoGetResponseSuccess = new DtoMemberApClassInstancesInstructorInfoGetResponseSuccess(
 				instanceId = rsw.getInt(1),
 				instructorName = rsw.getOptionString(2),
 				signupCt = rsw.getInt(3),

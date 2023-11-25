@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
  * Do not manually alter this file, or your changes will be lost
  * !!!!!!!!!!!!
  */
-case class MemberApClassInstancesInstructorInfoGetResponseSuccessDto (
+case class DtoMemberApClassInstancesInstructorInfoGetResponseSuccess (
 	instanceId: Int,
 	instructorName: Option[String],
 	signupCt: Int,
@@ -16,9 +16,9 @@ case class MemberApClassInstancesInstructorInfoGetResponseSuccessDto (
 	signupMax: Option[Int],
 )
 
-object MemberApClassInstancesInstructorInfoGetResponseSuccessDto {
-	implicit val format = Json.format[MemberApClassInstancesInstructorInfoGetResponseSuccessDto]
-	def apply(v: JsValue): MemberApClassInstancesInstructorInfoGetResponseSuccessDto
-		= v.as[MemberApClassInstancesInstructorInfoGetResponseSuccessDto]
+object DtoMemberApClassInstancesInstructorInfoGetResponseSuccess {
+	implicit val format = Json.format[DtoMemberApClassInstancesInstructorInfoGetResponseSuccess]
+	def apply(v: JsValue): DtoMemberApClassInstancesInstructorInfoGetResponseSuccess
+		= v.as[DtoMemberApClassInstancesInstructorInfoGetResponseSuccess]
 }
 

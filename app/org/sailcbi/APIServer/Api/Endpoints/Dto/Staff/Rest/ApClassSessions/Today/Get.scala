@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
  * Do not manually alter this file, or your changes will be lost
  * !!!!!!!!!!!!
  */
-case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
+case class DtoStaffRestApClassSessionsTodayGetResponseSuccess (
 	sessionId: Int,
 	instanceId: Int,
 	headcount: Option[Int],
@@ -16,10 +16,10 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto (
 	sessionDatetime: String,
 	sessionLength: Double,
 	isMakeup: Boolean,
-	$$apClassInstance: StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance,
+	$$apClassInstance: DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance,
 )
 
-case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
+case class DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance (
 	instanceId: Int,
 	cancelledDatetime: Option[String],
 	signupsStartOverride: Option[String],
@@ -31,10 +31,10 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance (
 	cancelByOverride: Option[String],
 	locationString: Option[String],
 	doNotAutoCancel: Boolean,
-	$$apClassSignups: List[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups],
+	$$apClassSignups: List[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups],
 )
 
-case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups (
+case class DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups (
 	instanceId: Int,
 	discountInstanceId: Option[Int],
 	voidedOnline: Boolean,
@@ -51,23 +51,23 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	signupType: String,
 	signupNote: Option[String],
 	signupDatetime: String,
-	$$person: StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person,
-	$$apClassWaitlistResult: Option[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult],
+	$$person: DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person,
+	$$apClassWaitlistResult: Option[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult],
 )
 
-case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person (
+case class DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person (
 	personId: Int,
 	nameFirst: Option[String],
 	nameLast: Option[String],
 )
 
-object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person {
-	implicit val format = Json.format[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person]
-	def apply(v: JsValue): StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person
-		= v.as[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person]
+object DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person {
+	implicit val format = Json.format[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person]
+	def apply(v: JsValue): DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person
+		= v.as[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person]
 }
 
-case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult (
+case class DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult (
 	wlResult: String,
 	foVmDatetime: Option[String],
 	offerExpDatetime: String,
@@ -76,35 +76,35 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	permitOvercrowd: Boolean,
 )
 
-object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult {
-	implicit val format = Json.format[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult]
-	def apply(v: JsValue): StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult
-		= v.as[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult]
+object DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult {
+	implicit val format = Json.format[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult]
+	def apply(v: JsValue): DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult
+		= v.as[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult]
 }
 
-object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups {
-	implicit val StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_PersonFormat
-		= StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_Person.format
-	implicit val StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResultFormat
-		= StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult.format
-	implicit val format = Json.format[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups]
-	def apply(v: JsValue): StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups
-		= v.as[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups]
+object DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups {
+	implicit val DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_PersonFormat
+		= DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_Person.format
+	implicit val DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResultFormat
+		= DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups_ApClassWaitlistResult.format
+	implicit val format = Json.format[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups]
+	def apply(v: JsValue): DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups
+		= v.as[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups]
 }
 
-object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance {
-	implicit val StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignupsFormat
-		= StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups.format
-	implicit val format = Json.format[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance]
-	def apply(v: JsValue): StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance
-		= v.as[StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance]
+object DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance {
+	implicit val DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignupsFormat
+		= DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance_ApClassSignups.format
+	implicit val format = Json.format[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance]
+	def apply(v: JsValue): DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance
+		= v.as[DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance]
 }
 
-object StaffRestApClassSessionsTodayGetResponseSuccessDto {
-	implicit val StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstanceFormat
-		= StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance.format
-	implicit val format = Json.format[StaffRestApClassSessionsTodayGetResponseSuccessDto]
-	def apply(v: JsValue): StaffRestApClassSessionsTodayGetResponseSuccessDto
-		= v.as[StaffRestApClassSessionsTodayGetResponseSuccessDto]
+object DtoStaffRestApClassSessionsTodayGetResponseSuccess {
+	implicit val DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstanceFormat
+		= DtoStaffRestApClassSessionsTodayGetResponseSuccess_ApClassInstance.format
+	implicit val format = Json.format[DtoStaffRestApClassSessionsTodayGetResponseSuccess]
+	def apply(v: JsValue): DtoStaffRestApClassSessionsTodayGetResponseSuccess
+		= v.as[DtoStaffRestApClassSessionsTodayGetResponseSuccess]
 }
 

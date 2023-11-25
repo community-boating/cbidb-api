@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{StaffRestApClassInstancesThisSeasonGetResponseSuccessDto, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions, StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Rest.ApClassInstances.ThisSeason.{DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess, DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions, DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor}
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstancesThisSeason
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -18,8 +18,8 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 		})
 	})
 
-	def toDto(instances: List[ApClassInstance]): List[StaffRestApClassInstancesThisSeasonGetResponseSuccessDto] = {
-		instances.map(i => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto(
+	def toDto(instances: List[ApClassInstance]): List[DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess] = {
+		instances.map(i => new DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess(
 			instanceId = i.values.instanceId.get,
 			cancelledDatetime = i.values.cancelledDatetime.get.map(_.toString),
 			signupsStartOverride = i.values.signupsStartOverride.get.map(_.toString),
@@ -32,12 +32,12 @@ class ApClassInstances @Inject()(implicit val exec: ExecutionContext) extends In
 			locationString = i.values.locationString.get,
 			doNotAutoCancel = i.values.doNotAutoCancel.get,
 			instructorId = i.values.instructorId.get,
-			$$instructor = i.references.instructor.peek.flatMap(_.map(ii => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_Instructor(
+			$$instructor = i.references.instructor.peek.flatMap(_.map(ii => new DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_Instructor(
 				personId = ii.values.personId.get,
 				nameFirst = ii.values.nameFirst.get,
 				nameLast = ii.values.nameLast.get
 			))),
-			$$apClassSessions = i.references.apClassSessions.peek.map(ss => ss.map(s => new StaffRestApClassInstancesThisSeasonGetResponseSuccessDto_ApClassSessions(
+			$$apClassSessions = i.references.apClassSessions.peek.map(ss => ss.map(s => new DtoStaffRestApClassInstancesThisSeasonGetResponseSuccess_ApClassSessions(
 				sessionId = s.values.sessionId.get,
 				instanceId = s.values.instanceId.get,
 				headcount = s.values.headcount.get,
