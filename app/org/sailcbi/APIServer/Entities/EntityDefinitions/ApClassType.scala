@@ -28,11 +28,11 @@ class ApClassType extends StorableClass(ApClassType) {
 		val descShort = new NullableStringFieldValue(self, ApClassType.fields.descShort)
 		val classOverkill = new NullableIntFieldValue(self, ApClassType.fields.classOverkill)
 		val colorCode = new NullableStringFieldValue(self, ApClassType.fields.colorCode)
-		val noSignup = new NullableBooleanFieldValue(self, ApClassType.fields.noSignup)
+		val noSignup = new BooleanFieldValue(self, ApClassType.fields.noSignup)
 		val priceDefault = new NullableDoubleFieldValue(self, ApClassType.fields.priceDefault)
 		val signupMaxDefault = new NullableIntFieldValue(self, ApClassType.fields.signupMaxDefault)
 		val signupMinDefault = new NullableIntFieldValue(self, ApClassType.fields.signupMinDefault)
-		val disallowIfOverkill = new NullableBooleanFieldValue(self, ApClassType.fields.disallowIfOverkill)
+		val disallowIfOverkill = new BooleanFieldValue(self, ApClassType.fields.disallowIfOverkill)
 		val teachUrl = new NullableStringFieldValue(self, ApClassType.fields.teachUrl)
 	}
 }
@@ -62,11 +62,13 @@ object ApClassType extends StorableObject[ApClassType] {
 		val descShort = new NullableStringDatabaseField(self, "DESC_SHORT", -1)
 		val classOverkill = new NullableIntDatabaseField(self, "CLASS_OVERKILL")
 		val colorCode = new NullableStringDatabaseField(self, "COLOR_CODE", 6)
-		val noSignup = new NullableBooleanDatabaseField(self, "NO_SIGNUP")
+		@NullableInDatabase
+		val noSignup = new BooleanDatabaseField(self, "NO_SIGNUP", true)
 		val priceDefault = new NullableDoubleDatabaseField(self, "PRICE_DEFAULT")
 		val signupMaxDefault = new NullableIntDatabaseField(self, "SIGNUP_MAX_DEFAULT")
 		val signupMinDefault = new NullableIntDatabaseField(self, "SIGNUP_MIN_DEFAULT")
-		val disallowIfOverkill = new NullableBooleanDatabaseField(self, "DISALLOW_IF_OVERKILL")
+		@NullableInDatabase
+		val disallowIfOverkill = new BooleanDatabaseField(self, "DISALLOW_IF_OVERKILL", true)
 		val teachUrl = new NullableStringDatabaseField(self, "TEACH_URL", 100)
 	}
 
