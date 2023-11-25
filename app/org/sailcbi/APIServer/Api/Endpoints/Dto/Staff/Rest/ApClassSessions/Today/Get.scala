@@ -73,7 +73,7 @@ case class StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_Ap
 	offerExpDatetime: String,
 	signupId: Int,
 	foAlertDatetime: String,
-	permitOvercrowd: Option[Boolean],
+	permitOvercrowd: Boolean,
 )
 
 object StaffRestApClassSessionsTodayGetResponseSuccessDto_ApClassInstance_ApClassSignups_ApClassWaitlistResult {

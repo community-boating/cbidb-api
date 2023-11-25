@@ -15,7 +15,7 @@ class ApClassWaitlistResult extends StorableClass(ApClassWaitlistResult) {
 		val wlResult = new StringFieldValue(self, ApClassWaitlistResult.fields.wlResult)
 		val offerExpDatetime = new DateTimeFieldValue(self, ApClassWaitlistResult.fields.offerExpDatetime)
 		val foAlertDatetime = new DateTimeFieldValue(self, ApClassWaitlistResult.fields.foAlertDatetime)
-		val permitOvercrowd = new NullableBooleanFieldValue(self, ApClassWaitlistResult.fields.permitOvercrowd)
+		val permitOvercrowd = new BooleanFieldValue(self, ApClassWaitlistResult.fields.permitOvercrowd)
 		val createdOn = new DateTimeFieldValue(self, ApClassWaitlistResult.fields.createdOn)
 		val createdBy = new NullableStringFieldValue(self, ApClassWaitlistResult.fields.createdBy)
 		val updatedOn = new DateTimeFieldValue(self, ApClassWaitlistResult.fields.updatedOn)
@@ -36,7 +36,8 @@ object ApClassWaitlistResult extends StorableObject[ApClassWaitlistResult] {
 		val offerExpDatetime = new DateTimeDatabaseField(self, "OFFER_EXP_DATETIME")
 		@NullableInDatabase
 		val foAlertDatetime = new DateTimeDatabaseField(self, "FO_ALERT_DATETIME")
-		val permitOvercrowd = new NullableBooleanDatabaseField(self, "PERMIT_OVERCROWD")
+		@NullableInDatabase
+		val permitOvercrowd = new BooleanDatabaseField(self, "PERMIT_OVERCROWD", true)
 		@NullableInDatabase
 		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
 		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
