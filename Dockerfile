@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM eclipse-temurin:17-jdk-focal
 RUN apt-get update
 RUN apt-get install ssmtp -y
 RUN mkdir /app

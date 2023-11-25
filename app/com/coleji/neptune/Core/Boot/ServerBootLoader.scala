@@ -43,6 +43,8 @@ object ServerBootLoader {
 		if (PermissionsAuthority.isBooted) PermissionsAuthority.PA
 		else {
 			println(" ***************     BOOTING UP SERVER   ***************  ")
+			println(System.getProperty("java.vendor") + " - " + System.getProperty("java.version"))
+			println(System.getProperty("java.home"))
 
 			// Get server instance properties
 			val paramFile = new PropertiesWrapper("conf/private/server-properties", requiredProperties)
