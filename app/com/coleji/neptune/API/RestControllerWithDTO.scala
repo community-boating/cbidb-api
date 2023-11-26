@@ -3,6 +3,7 @@ package com.coleji.neptune.API
 import com.coleji.neptune.Core.{PermissionsAuthority, UnlockedRequestCache}
 import com.coleji.neptune.Storable.{DTOClass, StorableClass, StorableObject}
 
+@deprecated
 abstract class RestControllerWithDTO[S <: StorableClass, D <: DTOClass[S]](obj: StorableObject[S]) {
 	protected def runValidationsForUpdate(rc: UnlockedRequestCache, d: D): ValidationResult
 	protected def runValidationsForInsert(rc: UnlockedRequestCache, d: D): ValidationResult
