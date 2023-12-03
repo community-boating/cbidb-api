@@ -2,6 +2,7 @@ package org.sailcbi.APIServer.Entities.cacheable
 
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstances.ApClassInstancesCacheKey
 import org.sailcbi.APIServer.Entities.cacheable.MembershipSales.MembershipSalesCacheKey
+import org.sailcbi.APIServer.Entities.cacheable.sunset.SunsetCacheKey
 
 import java.time.format.DateTimeFormatter
 
@@ -18,4 +19,5 @@ object CacheKeys {
 	def apClassTypes = "ap-class-types"
 	def programTypes = "program-types"
 	def apClassInstancesThisSeason = "apClassInstancesThisSeason"
+	def sunset(config: SunsetCacheKey): String = s"sunset-${config.year}-${config.month}"
 }

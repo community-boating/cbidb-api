@@ -6,6 +6,8 @@ POST    /stripe/create-charge-from-token    org.sailcbi.APIServer.Api.Endpoints.
 GET     /stripe/token-details               org.sailcbi.APIServer.Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
 POST    /stripe/sync-db                     org.sailcbi.APIServer.Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
 
+GET     /sunset                           org.sailcbi.APIServer.Api.Endpoints.Public.Sunset.get(year: Int, month: Int, day: Int)
+
 GET     /efuse/cbidb-public-web             org.sailcbi.APIServer.Api.Endpoints.Public.CheckEFusePublicWeb.get()
 
 GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.get()
