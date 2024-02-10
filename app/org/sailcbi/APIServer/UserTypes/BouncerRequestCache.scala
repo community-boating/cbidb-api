@@ -37,6 +37,18 @@ object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 		}).flatten
 	}
 
+	def getPwNonceForUser(parsedRequest: ParsedRequest, email: String, userType: RequestCacheObject[_])(implicit PA: PermissionsAuthority): Option[String] = {
+		PA.withRequestCacheNoFuture(BouncerRequestCache)(None, parsedRequest, rc => {
+			if (PA.systemParams.allowableUserTypes.contains(userType)) {
+				userType match {
+					case StaffRequestCache => StaffRequestCache.getPwNonceForEmail(rc, email)
+					case MemberRequestCache => None
+					case _ => None
+				}
+			} else None
+		}).flatten
+	}
+
 	override def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): BouncerRequestCache =
 		new BouncerRequestCache(userName, serverParams, dbGateway, redisPool)
 

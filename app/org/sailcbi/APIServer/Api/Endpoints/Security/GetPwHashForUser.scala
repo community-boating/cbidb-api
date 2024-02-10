@@ -42,4 +42,38 @@ class GetPwHashForUser @Inject()(implicit exec: ExecutionContext) extends Inject
 			}
 		}
 	}
+
+	def getNonce(email: String, userType: String = "staff"): Action[AnyContent] = Action.async { request =>
+		Future {
+			println("userType is " + userType)
+			println("email is " + email)
+			val userTypeObj: Option[RequestCacheObject[_]] = userType match {
+				case "staff" => {
+					println("looking up staff")
+					Some(StaffRequestCache)
+				}
+				case "member" => {
+					println("looking up member")
+					Some(MemberRequestCache)
+				}
+				case _ => None
+			}
+			println("headers: " + request.headers)
+			if (userTypeObj.isEmpty) Ok("BAD USER TYPE")
+			else {
+				try {
+					BouncerRequestCache.getPwNonceForUser(ParsedRequest(request), email, userTypeObj.get) match {
+						case None => Ok("NO DATA")
+						case Some(t: String) => Ok(t)
+					}
+				} catch {
+					case e: Exception => {
+						println(e)
+						Ok("NO DATA")
+					}
+				}
+
+			}
+		}
+	}
 }
