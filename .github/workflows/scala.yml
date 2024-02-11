@@ -3,7 +3,7 @@ name: Scala CI
 on:
   push:
     branches:
-      - master
+      - main
       - release/*
       - dev/*
       - cluster/*

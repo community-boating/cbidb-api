@@ -14,4 +14,4 @@ npm-debug.log
 
 start.sh
 
-.bsp/sbt.json
+.bsp/
