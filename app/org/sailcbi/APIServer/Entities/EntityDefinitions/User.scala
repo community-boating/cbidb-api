@@ -18,10 +18,10 @@ class User extends StorableClass(User) {
 		val userName = new StringFieldValue(self, User.fields.userName)
 		val pwHash = new StringFieldValue(self, User.fields.pwHash)
 		val email = new StringFieldValue(self, User.fields.email)
-		val createdOn = new DateTimeFieldValue(self, User.fields.createdOn)
-		val createdBy = new NullableStringFieldValue(self, User.fields.createdBy)
-		val updatedOn = new DateTimeFieldValue(self, User.fields.updatedOn)
-		val updatedBy = new NullableStringFieldValue(self, User.fields.updatedBy)
+//		val createdOn = new DateTimeFieldValue(self, User.fields.createdOn)
+//		val createdBy = new NullableStringFieldValue(self, User.fields.createdBy)
+//		val updatedOn = new DateTimeFieldValue(self, User.fields.updatedOn)
+//		val updatedBy = new NullableStringFieldValue(self, User.fields.updatedBy)
 		val locked = new BooleanFieldValue(self, User.fields.locked)
 		val pwChangeReqd = new BooleanFieldValue(self, User.fields.pwChangeReqd)
 		val badAttempts = new NullableIntFieldValue(self, User.fields.badAttempts)
@@ -50,12 +50,12 @@ object User extends StorableObject[User] {
 		@NullableInDatabase
 		val pwHash = new StringDatabaseField(self, "PW_HASH", 500)
 		val email = new StringDatabaseField(self, "EMAIL", 100)
-		@NullableInDatabase
-		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
-		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
-		@NullableInDatabase
-		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
-		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
+//		@NullableInDatabase
+//		val createdOn = new DateTimeDatabaseField(self, "CREATED_ON")
+//		val createdBy = new NullableStringDatabaseField(self, "CREATED_BY", 500)
+//		@NullableInDatabase
+//		val updatedOn = new DateTimeDatabaseField(self, "UPDATED_ON")
+//		val updatedBy = new NullableStringDatabaseField(self, "UPDATED_BY", 500)
 		@NullableInDatabase
 		val locked = new BooleanDatabaseField(self, "LOCKED", true)
 		@NullableInDatabase
