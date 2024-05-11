@@ -12,6 +12,10 @@ GET     /efuse/cbidb-public-web             org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.get()
 
+GET     /ap/get-time-slots-for-day        org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.getTimeSlotsForDay(forDate: String)
+
+GET     /ap/get-time-slot-ranges-and-current        org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.getTimeSlotsAndCurrent(forYear: Int, forMonth: Int)
+
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
 POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
 

@@ -5,19 +5,35 @@ import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.Logic.ApClassLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
-import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, InjectedController}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, InjectedController, Results}
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 class ApGuidedSailController @Inject()(implicit exec: ExecutionContext) extends InjectedController {
-	def getTimeSlotsForDay(forDate: LocalDate)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	def getTimeSlotsForDay(forDate: String)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
+		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, block = rc => {
 			val personId = rc.getAuthedPersonId
-			ApClassLogic.getApGuidedSailTimeslots(rc, forDate)
+      val forDateLocalTry = Try(LocalDate.parse(forDate))
+      forDateLocalTry match {
+        case Success(forDateLocal) =>
+          val slots = ApClassLogic.getApGuidedSailTimeSlotsForDay(rc, forDateLocal)
+          Future(Ok(Json.toJson(slots)))
+        case Failure(exception) =>
+          Future(BadRequest(Json.obj("error" -> "Failed to parse date")))
+      }
 		})
 	}
+  def getTimeSlotsAndCurrent(forYear: Int, forMonth: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+    val parsedRequest = ParsedRequest(request)
+    PA.withRequestCache(MemberRequestCache)(None, parsedRequest, block = rc => {
+      val currentMonthDatetime = LocalDate.now().withYear(forYear).withMonth(forMonth)
+      ApClassLogic.getApGuidedSailTimeSlots(rc, currentMonthDatetime)
+      Future(Ok("OK"))
+    })
+  }
 }

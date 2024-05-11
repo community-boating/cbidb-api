@@ -12,6 +12,10 @@ object DateUtil {
 	val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT)
 	val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
 
+	def toDateSQL(startDate: LocalDate): String = {
+		s"""to_date('${startDate.format(DateUtil.DATE_FORMATTER)}','MM/DD/YYYY')"""
+	}
+
 	def parse(dateLiteral: String, formatString: String = DATE_FORMAT): LocalDate =
 		LocalDate.parse(dateLiteral, DateTimeFormatter.ofPattern(formatString))
 

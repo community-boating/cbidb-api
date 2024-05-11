@@ -3,6 +3,8 @@ package org.sailcbi.APIServer.Entities.cacheable
 import org.sailcbi.APIServer.Entities.cacheable.ApClassInstances.ApClassInstancesCacheKey
 import org.sailcbi.APIServer.Entities.cacheable.MembershipSales.MembershipSalesCacheKey
 import org.sailcbi.APIServer.Entities.cacheable.sunset.SunsetCacheKey
+import org.sailcbi.APIServer.Entities.cacheable.DatetimeRange.DatetimeRangeCacheKey
+import org.sailcbi.APIServer.Entities.cacheable.yearlydate.{YearlyDateAndItemCacheKey, YearlyDateCacheKey, YearlyDateItemCacheKey}
 
 import java.time.format.DateTimeFormatter
 
@@ -20,4 +22,8 @@ object CacheKeys {
 	def programTypes = "program-types"
 	def apClassInstancesThisSeason = "apClassInstancesThisSeason"
 	def sunset(config: SunsetCacheKey): String = s"sunset-${config.year}-${config.month}"
+	def datetimeRange(config: DatetimeRangeCacheKey): String = s"datetime-range-${config.startDate.format(DateTimeFormatter.ISO_DATE)}-${config.endDate.format(DateTimeFormatter.ISO_DATE)}-${config.rangeType}"
+	def yearlyDate(config: YearlyDateCacheKey): String = s"yearly-date-${config.year}"
+	def yearlyDateItem(config: YearlyDateItemCacheKey): String = s"yearly-date-${config.itemAlias}"
+	def yearlyDateAndItem(config: YearlyDateAndItemCacheKey): String = s"yearly-date-${config.year}-${config.itemAlias}"
 }
