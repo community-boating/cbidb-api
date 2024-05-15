@@ -21,7 +21,7 @@ object CacheKeys {
 	def apClassTypes = "ap-class-types"
 	def programTypes = "program-types"
 	def apClassInstancesThisSeason = "apClassInstancesThisSeason"
-	def sunset(config: SunsetCacheKey): String = s"sunset-${config.year}-${config.month}"
+	def sunset(config: SunsetCacheKey): String = s"sunset-${config.year}-${config.month}-${config.day.getOrElse("none")}"
 	def datetimeRange(config: DatetimeRangeCacheKey): String = s"datetime-range-${config.startDate.format(DateTimeFormatter.ISO_DATE)}-${config.endDate.format(DateTimeFormatter.ISO_DATE)}-${config.rangeType}"
 	def yearlyDate(config: YearlyDateCacheKey): String = s"yearly-date-${config.year}"
 	def yearlyDateItem(config: YearlyDateItemCacheKey): String = s"yearly-date-${config.itemAlias}"

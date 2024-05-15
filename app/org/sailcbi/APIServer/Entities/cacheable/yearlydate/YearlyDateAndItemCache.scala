@@ -15,7 +15,10 @@ object YearlyDateAndItemCache extends CacheableFactory[YearlyDateAndItemCacheKey
   override protected def deseralize(resultString: String): List[(YearlyDateItem, YearlyDate)] = Serde.deserializeList(resultString)
   override protected def generateResult(rc: RequestCache, config: YearlyDateAndItemCacheKey): List[(YearlyDateItem, YearlyDate)] = {
     val qb = QueryBuilder.from(YearlyDateItem).innerJoin(YearlyDate, YearlyDate.fields.itemId.alias.equalsField(YearlyDateItem.fields.itemId.alias))
-      .where(YearlyDate.fields.year.alias equalsConstant config.year)
+      .where(List(
+        YearlyDate.fields.year.alias equalsConstant config.year,
+        YearlyDateItem.fields.itemAlias.alias equalsConstant config.itemAlias
+      ))
       .select(List(
         YearlyDate.fields.year.alias,
         YearlyDate.fields.startDate.alias,
@@ -23,8 +26,7 @@ object YearlyDateAndItemCache extends CacheableFactory[YearlyDateAndItemCacheKey
         YearlyDateItem.fields.itemAlias.alias,
         YearlyDateItem.fields.itemDescription.alias,
       ))
-    val test = rc.executeQueryBuilder(qb).map(qbrr => (YearlyDateItem.construct(qbrr), YearlyDate.construct(qbrr)))//.sortWith((a, b) => a.values.startDatetime.get.isBefore(b.values.startDatetime.get))
-    println(s"testingitnow$test")
-    null
+    val qbrrs = rc.executeQueryBuilder(qb)//.sortWith((a, b) => a.values.startDatetime.get.isBefore(b.values.startDatetime.get))
+    qbrrs.map(qbrr => (YearlyDateItem.construct(qbrr), YearlyDate.construct(qbrr)))
   }
 }

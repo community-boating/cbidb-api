@@ -1,19 +1,66 @@
 package org.sailcbi.APIServer.Logic
 
-import com.coleji.neptune.Core.{RequestCache, UnlockedRequestCache}
-import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
+import com.coleji.neptune.Core.RequestCache
+import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForInsert, PreparedQueryForSelect}
 import com.coleji.neptune.Storable.ResultSetWrapper
+import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.DateUtil
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DatetimeRange, SunsetTime}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.ApClassSession
 import org.sailcbi.APIServer.Entities.cacheable.DatetimeRange.{DatetimeRangeCache, DatetimeRangeCacheKey}
 import org.sailcbi.APIServer.Entities.cacheable.sunset.{SunsetCache, SunsetCacheKey}
 import org.sailcbi.APIServer.Entities.cacheable.yearlydate.{YearlyDateAndItemCache, YearlyDateAndItemCacheKey, YearlyDateItemCache, YearlyDateItemCacheKey}
+import org.sailcbi.APIServer.Entities.dto.GuidedSailTimeSlotRangeDTO
+import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
+import play.api.libs.json.{JsValue, Json}
 
+import java.io.{ByteArrayOutputStream, PrintWriter}
 import java.time.format.DateTimeFormatter
-import java.time.{DayOfWeek, Duration, LocalDate, LocalDateTime}
+import java.time.{DayOfWeek, Duration, LocalDate, LocalDateTime, LocalTime}
+import scala.sys.process.{ProcessLogger, stringSeqToProcess}
 
-class GuidedSailSlotDTO(day: String, start: String, end: String)
+case class SunsetAPIItem(date: String, sunrise: String, sunset: String, first_light: String, last_light: String, dawn: String, dusk: String, solar_noon: String, golden_hour: String, day_length: String, timezone: String, utc_offset: Int) {
+}
+object SunsetAPIItem {
+	implicit val format = Json.format[SunsetAPIItem]
+	def apply(v: JsValue): SunsetAPIItem = {
+		v.as[SunsetAPIItem]
+	}
+}
+
+case class SunsetAPIResults(results: Array[SunsetAPIItem]) {
+}
+
+object SunsetAPIResults {
+	implicit val format = Json.format[SunsetAPIResults]
+	def apply(v: JsValue): SunsetAPIResults = {
+		v.as[SunsetAPIResults]
+	}
+}
+
+case class SunsetTime(for_date: LocalDateTime, twilight_start: LocalDateTime, twilight_end: LocalDateTime, sunrise: LocalDateTime, sunset: LocalDateTime, sonar_noon: LocalDateTime, nautical_twilight_start: LocalDateTime, nautical_twilight_end: LocalDateTime, astronomical_twilight_start: LocalDateTime, astronomical_twilight_end: LocalDateTime, day_length_seconds: Int){
+}
+object SunsetStuff {
+	private val formatter = DateTimeFormatter.ofPattern("h:mm:ss a")
+	def mapSunsetItem(item: SunsetAPIItem): SunsetTime = {
+		println("trying")
+		val date = LocalDate.parse(item.date)
+		println("Dateer", date)
+		val sunrise = LocalTime.parse(item.sunrise, formatter)
+		val sunset = LocalTime.parse(item.sunset, formatter)
+		val last_light = LocalTime.parse(item.last_light, formatter)
+		val dusk = LocalTime.parse(item.dusk, formatter)
+		val dawn = LocalTime.parse(item.dawn, formatter)
+		val solar_noon = LocalTime.parse(item.solar_noon, formatter)
+		val twilight_start = date.atTime(dusk)
+		val twilight_end = date.atTime(last_light)
+		val day_length_seconds = Duration.between(dawn, dusk).toSeconds.intValue
+		SunsetTime(date.atTime(LocalTime.MIDNIGHT), twilight_start, twilight_end, date.atTime(sunrise), date.atTime(sunset), date.atTime(solar_noon), twilight_start, twilight_end, twilight_start, twilight_end, day_length_seconds)
+	}
+	def mapToSQL(time: SunsetTime): String = {
+		s"""insert into sunset_times (for_date, sunrise, sunset, sonar_noon, twilight_start, twilight_end, nautical_twilight_start, nautical_twilight_end, astronomical_twilight_start, astronomical_twilight_end, day_length_seconds) values (${DateUtil.toDateSQL(time.for_date)},${DateUtil.toDateSQL(time.sunrise)},${DateUtil.toDateSQL(time.sunset)},${DateUtil.toDateSQL(time.sonar_noon)},${DateUtil.toDateSQL(time.twilight_start)},${DateUtil.toDateSQL(time.twilight_end)},${DateUtil.toDateSQL(time.nautical_twilight_start)},${DateUtil.toDateSQL(time.nautical_twilight_end)},${DateUtil.toDateSQL(time.astronomical_twilight_start)},${DateUtil.toDateSQL(time.astronomical_twilight_end)},${time.day_length_seconds})"""
+	}
+}
 
 object ApClassLogic {
 	val AP_GUIDED_SAIL_DURATION = Duration.ofMinutes(90)
@@ -27,103 +74,91 @@ object ApClassLogic {
 
 	val ONE_DAY = Duration.ofDays(1)
 
-	def getApGuidedSailTimeSlots(rc: RequestCache, forMonth: LocalDate): List[LocalDateTime] = {
+	def getApGuidedSailTimeSlots(rc: RequestCache, forMonth: LocalDate): List[GuidedSailTimeSlotRangeDTO] = {
+		println("ForMonth", forMonth)
 		val forMonthStart = forMonth.withDayOfMonth(1)
 		val forMonthEnd = forMonth.plusMonths(1).minusDays(1)
-		//val sunsetTimes = getSunsetTimes(rc, forMonthStart, forMonthEnd)
-		//val dateRanges = DatetimeRangeCache.get(rc, DatetimeRangeCacheKey(forMonthStart, forMonthEnd, DATETIME_RANGE_TYPE))
-		//println("Date Ranges", dateRanges)
-		//val sunsetsCached = SunsetCache.get(rc, SunsetCacheKey(2023, 10))
+		val blackoutDateRanges = getBlackoutRanges(rc, forMonthStart, forMonthEnd)
+		val sunsetsCached = SunsetCache.get(rc, SunsetCacheKey(forMonth.getYear, forMonth.getMonthValue, Option.empty))
 		//println("Sunset Cached" + sunsetsCached)
-		YearlyDateAndItemCache.nuke(rc, YearlyDateAndItemCacheKey(2020, "JP_CLASS_SCHEDULE"))
-		val yearlyDates = YearlyDateAndItemCache.get(rc, YearlyDateAndItemCacheKey(2020, "JP_CLASS_SCHEDULE"))
-		println("Yearly", yearlyDates)
-		//val startTimes = sunsetTimes.map(a => getStartTime(a.toLocalDate))
-		//val blackoutRanges = getBlackoutRanges(rc, forMonthStart, forMonthEnd)
+		val sunsetTimes = sunsetsCached._1.map(sunset => sunset.values.sunset.get)
+		//YearlyDateAndItemCache.nuke(rc, YearlyDateAndItemCacheKey(2020, "JP_CLASS_SCHEDULE"))
+		val startAndSunsetTimes = sunsetTimes.map(a => (a, getStartTime(a.toLocalDate)))
+		startAndSunsetTimes.map(times => findStartAndEndTime(createDateRangesWithBlackouts(times._1.toLocalDate.atTime(times._2), times._1, AP_GUIDED_SAIL_DURATION, AP_GUIDED_SAIL_INCREMENT, blackoutDateRanges), AP_GUIDED_SAIL_DURATION))
 		//val times = sunsetTimes.map(sunset => createDateRangesWithBlackouts(sunset.withHour(getStartTime(sunset.toLocalDate)), sunset, AP_GUIDED_SAIL_DURATION, AP_GUIDED_SAIL_INCREMENT, blackoutRanges))
-		List.empty
-	}
-
-	def getApGuidedSailTimeSlotsForDay(rc: RequestCache, forDate: LocalDate): List[LocalDateTime] = {
-		if (!programOpen(forDate)) List.empty
-		else {
-			val sunsetTime = Option(LocalDateTime.now())//getSunsetTime(rc, forDate)
-			val startTime = getStartTime(forDate)
-			val blackoutRanges = getBlackoutRanges(rc, forDate, forDate)
-			forDate.atTime(startTime / 60, 0)
-			sunsetTime.map(sunset => createDateRangesWithBlackouts(
-				forDate.atTime(startTime / 60, 0),
-				sunset,
-				AP_GUIDED_SAIL_DURATION,
-				AP_GUIDED_SAIL_INCREMENT,
-				blackoutRanges
-			)).getOrElse(List.empty)
-		}
-	}
-
-	def getCurrentProgramStarts(rc: RequestCache, yearStart: LocalDate, yearEnd: LocalDate): Unit = {
-		val q = new PreparedQueryForSelect[(LocalDateTime, LocalDateTime)](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDateTime, LocalDateTime) = (rsw.getLocalDateTime(1), rsw.getLocalDateTime(2))
-			override def getQuery: String =
-				s"""
-				  |select a.item_alias, b.start_date, b.end_date
-					|from yearly_date_items a inner join yearly_dates b
-					|on a.item_id = b.item_id
-					|and a.item_alias = "butt"
-				  |from DATETIME_RANGES where RANGE_TYPE = \'$DATETIME_RANGE_TYPE\'
-				  |""".stripMargin
-		}
-		rc.executePreparedQueryForSelect(q)
-	}
-
-	private def getStartTime(forDate: LocalDate): Int = if (forDate.getDayOfWeek.getValue > DayOfWeek.FRIDAY.getValue) 9*60 else 13*60
-
-	private def getSunsetTimes(rc: RequestCache, startDate: LocalDate, endDate: LocalDate): List[LocalDateTime] = {
-		val q = new PreparedQueryForSelect[LocalDateTime](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): LocalDateTime = rsw.getLocalDateTime(1)
-
-			override def getQuery: String =
-				s"""
-				  |select SUNSET from SUNSET_TIMES where FOR_DATE >= ${DateUtil.toDateSQL(startDate)}
-					|and FOR_DATE <= ${DateUtil.toDateSQL(endDate)}
-				  |""".stripMargin
-		}
-
-		rc.executePreparedQueryForSelect(q)
-	}
-
-	private def getSunsetTime(rc: RequestCache, forDate: LocalDate): Option[LocalDateTime] = {
-		val q = new PreparedQueryForSelect[LocalDateTime](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): LocalDateTime = rsw.getLocalDateTime(1)
-
-			override def getQuery: String =
-				s"""
-				  |select SUNSET from SUNSET_TIMES where FOR_DATE = ${DateUtil.toDateSQL(forDate)}
-				  |""".stripMargin
-		}
-
-		rc.executePreparedQueryForSelect(q).headOption
 	}
 
 	private def getBlackoutRanges(rc: RequestCache, startDate: LocalDate, endDate: LocalDate): List[(LocalDateTime, LocalDateTime)] = {
-		val startDateSQL = DateUtil.toDateSQL(startDate)
-		val endDateSQL = DateUtil.toDateSQL(endDate)
-		val q = new PreparedQueryForSelect[(LocalDateTime, LocalDateTime)](Set(MemberRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): (LocalDateTime, LocalDateTime) = (rsw.getLocalDateTime(1), rsw.getLocalDateTime(2))
-			override def getQuery: String =
-				s"""
-				  |select START_DATETIME, END_DATETIME
-				  |from DATETIME_RANGES where RANGE_TYPE = \'$DATETIME_RANGE_TYPE\'
-				  |and ((START_DATETIME >= $startDateSQL
-					|and START_DATETIME <= $endDateSQL)
-					|or (END_DATETIME >= $startDateSQL
-					|and END_DATETIME <= $endDateSQL)
-					|or (START_DATETIME <= $startDateSQL
-					|and END_DATETIME >= $endDateSQL))
-				  |""".stripMargin
-		}
-		rc.executePreparedQueryForSelect(q)
+		val blackoutDateRanges = DatetimeRangeCache.get(rc, DatetimeRangeCacheKey(startDate, endDate, DATETIME_RANGE_TYPE))
+		blackoutDateRanges._1.map(range => (range.values.startDatetime.get, range.values.endDatetime.get))
 	}
+
+	private def findStartAndEndTime(slots: List[LocalDateTime], slotDuration: Duration): GuidedSailTimeSlotRangeDTO = {
+		GuidedSailTimeSlotRangeDTO(slots.head.format(DateUtil.DATE_TIME_FORMATTER), slots.last.plus(slotDuration).format(DateUtil.DATE_TIME_FORMATTER))
+	}
+
+	def getApGuidedSailTimeSlotsForDay(rc: RequestCache, forDate: LocalDate): List[(LocalTime, LocalTime)] = {
+		if (!programOpen(forDate)) List.empty
+		else {
+			SunsetCache.nuke(rc, SunsetCacheKey(forDate.getYear, forDate.getMonthValue, Option(forDate.getDayOfMonth)))
+			val sunsetTime = SunsetCache.get(rc, SunsetCacheKey(forDate.getYear, forDate.getMonthValue, Option(forDate.getDayOfMonth)))._1.headOption
+			val startTime = getStartTime(forDate)
+			println("For Date", forDate)
+			println("Sunset Time", sunsetTime)
+			println("Start Time", startTime)
+			val blackoutRanges = getBlackoutRanges(rc, forDate, forDate)
+			println("Blackout Ranges", blackoutRanges)
+			sunsetTime.map(sunset => createDateRangesWithBlackouts(
+				forDate.atTime(startTime),
+				sunset.values.sunset.get,
+				AP_GUIDED_SAIL_DURATION,
+				AP_GUIDED_SAIL_INCREMENT,
+				blackoutRanges
+			)).getOrElse(List.empty).map(startTime => (startTime.toLocalTime, startTime.toLocalTime.plus(AP_GUIDED_SAIL_DURATION)))
+		}
+	}
+
+	def getApGuidedSailSessionsCurrent(rc: RequestCache, forMonth: String): Unit = {
+		//TODO get current guided sail class sessions
+		/*val q = QueryBuilder.from(ApClassSession).where(List(
+			ApClassSession.fields.
+		))*/
+	}
+
+	def apGuidedSailRegisterForSession(rc: RequestCache, timeslot: String): Unit = {
+		//TODO
+	}
+
+	def apGuidedSailCancelSession(rc: RequestCache, sessionId: Int): Unit = {
+		//TODO
+	}
+/*
+	def updateSunsetTimesFromAPI(rc: RequestCache): Unit = {
+		val stdoutStream = new ByteArrayOutputStream
+		val stderrStream = new ByteArrayOutputStream
+		val stdoutWriter = new PrintWriter(stdoutStream)
+		val stderrWriter = new PrintWriter(stderrStream)
+		val cmd: Seq[String] = Seq("/usr/bin/curl", "-s", "https://api.sunrisesunset.io/json?lat=42.36056983460875&lng=-71.07341215992227&timezone=UTC-5&date_start=2024-01-01&date_end=2024-12-31")
+		val exitValue = cmd.!(ProcessLogger(stdoutWriter.println, stderrWriter.println))
+		stdoutWriter.close()
+		stderrWriter.close()
+		println("Items", exitValue)
+		println("Output", stdoutStream.toString)
+		println("Errors", stderrStream.toString)
+		val dateNode = Json.parse(stdoutStream.toString)
+		val dates = SunsetAPIResults.apply(dateNode)
+		val sunsetTimes = dates.results.map(SunsetStuff.mapSunsetItem)
+		sunsetTimes.foreach(sunsetTime => {
+			val q = new PreparedQueryForInsert(Set(MemberRequestCache)) {
+				override val pkName: Option[String] = Some("ROW_ID")
+
+				override def getQuery: String = SunsetStuff.mapToSQL(sunsetTime)
+			}
+			rc.executePreparedQueryForInsert(q)
+		})
+	}
+*/
+	private def getStartTime(forDate: LocalDate): LocalTime = if (forDate.getDayOfWeek.getValue > DayOfWeek.FRIDAY.getValue) LocalTime.of(9, 0, 0) else LocalTime.of(13, 0, 0)
 
 	private def createDateRanges(start: LocalDateTime, end: LocalDateTime, duration: Duration, increment: Duration): List[LocalDateTime] = {
 		val count = Duration.between(start, end.minus(duration)).dividedBy(increment).floor.intValue

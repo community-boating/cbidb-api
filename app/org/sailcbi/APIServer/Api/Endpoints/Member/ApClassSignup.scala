@@ -22,8 +22,6 @@ class ApClassSignup @Inject()(implicit exec: ExecutionContext) extends InjectedC
 					))))
 					case Some(err: String) => Future(Ok(ValidationResult.from(err).toResultError.asJsObject))
 				}
-
-
 			})
 		})
 	}
