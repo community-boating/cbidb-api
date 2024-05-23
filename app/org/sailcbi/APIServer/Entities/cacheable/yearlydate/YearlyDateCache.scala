@@ -1,13 +1,12 @@
 package org.sailcbi.APIServer.Entities.cacheable.yearlydate
 
 import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
-import com.coleji.neptune.Storable.Filter
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.Serde
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{DatetimeRange, YearlyDate}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.YearlyDate
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
 
-import java.time.{Duration, LocalDate}
+import java.time.Duration
 
 object YearlyDateCache extends CacheableFactory[YearlyDateCacheKey, List[YearlyDate]] {
   override protected val lifetime: Duration = Duration.ofHours(24)

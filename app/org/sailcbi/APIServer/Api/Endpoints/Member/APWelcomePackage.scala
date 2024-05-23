@@ -199,7 +199,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 				openStaggeredOrderId = PortalLogic.getOpenStaggeredOrderForPerson(rc, personId),
 				volunteerGoodStanding = volunteerGoodStanding,
 				hasBasicVolunteerRating = hasBasicVolunteerRating,
-				volRatings = volRatings
+				volRatings = volRatings,
 			)
 			implicit val discountsFormat = DiscountsResult.format
 			implicit val format = APWelcomePackageResult.format
@@ -226,7 +226,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		openStaggeredOrderId: Option[Int],
 		volunteerGoodStanding: Boolean,
 		hasBasicVolunteerRating: Boolean,
-		volRatings: String
+		volRatings: String,
 	)
 
 	object APWelcomePackageResult {

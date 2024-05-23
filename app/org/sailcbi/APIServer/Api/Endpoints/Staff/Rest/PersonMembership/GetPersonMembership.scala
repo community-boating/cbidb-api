@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership
 
 import com.coleji.neptune.API.RestController
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache, UnlockedRequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache
@@ -20,7 +20,7 @@ class GetPersonMembership @Inject()(implicit val exec: ExecutionContext) extends
 }
 
 object GetPersonMembership {
-	def getAllForPerson(rc: UnlockedRequestCache, personId: Int): List[PersonMembership] = {
+	def getAllForPerson(rc: RequestCache, personId: Int): List[PersonMembership] = {
 		val qb = QueryBuilder
 			.from(PersonMembership)
 			.innerJoin(MembershipType, PersonMembership.fields.membershipTypeId.alias equalsField MembershipType.fields.membershipTypeId.alias)

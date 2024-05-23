@@ -2189,7 +2189,8 @@ object PortalLogic {
 				  |s.session_id,
 				  |s.instance_id,
 				  |s.session_Datetime,
-				  |s.session_length
+				  |s.session_length,
+					|i.cancelled_datetime
 				  |from ap_class_sessions s, ap_class_instances i
 				  |where s.instance_id = i.instance_id
 				  |and s.session_datetime > (add_months(util_pkg.get_sysdate, -18))

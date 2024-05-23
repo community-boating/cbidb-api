@@ -5,12 +5,14 @@ import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 
 object DateUtil {
 	val HOME_TIME_ZONE: ZoneId = ZoneId.of("America/New_York")
+	val TIME_FORMAT = "HH:mm:ss"
 	val DATE_FORMAT = "MM/dd/yyyy"
 	val DATE_TIME_FORMAT = "MM/dd/yyyy  HH:mm:ss"
 	val DATE_FORMAT_SQL = "MM/DD/YYYY"
 	val DATE_TIME_FORMAT_SQL = "MM/DD/YYYY HH24:MI:SS"
 	val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT)
 	val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
+	val TIME_FORMATTER: DateTimeFormatter  = DateTimeFormatter.ofPattern(TIME_FORMAT)
 
 	def toDateSQL(startDate: LocalDate): String = {
 		s"""to_date('${startDate.format(DateUtil.DATE_FORMATTER)}','$DATE_FORMAT_SQL')"""
