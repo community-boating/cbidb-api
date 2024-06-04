@@ -6,8 +6,7 @@ import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.Serde
 import org.sailcbi.APIServer.Entities.EntityDefinitions.DatetimeRange
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
-
-import java.time.{Duration, LocalDate}
+import java.time.Duration
 
 object DatetimeRangeCache extends CacheableFactory[DatetimeRangeCacheKey, List[DatetimeRange]] {
   override protected val lifetime: Duration = Duration.ofHours(24)

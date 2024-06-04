@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Entities.cacheable.yearlydate
 
 import com.coleji.neptune.Core.{CacheableFactory, RequestCache}
-import com.coleji.neptune.Storable.Filter
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.Serde
-import org.sailcbi.APIServer.Entities.EntityDefinitions.{YearlyDate, YearlyDateItem}
+import org.sailcbi.APIServer.Entities.EntityDefinitions.YearlyDateItem
 import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
 
 import java.time.Duration

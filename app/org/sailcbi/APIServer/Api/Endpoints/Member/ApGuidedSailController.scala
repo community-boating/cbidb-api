@@ -17,7 +17,7 @@ class ApGuidedSailController @Inject()(implicit exec: ExecutionContext) extends 
     val parsedRequest = ParsedRequest(request)
     PA.withRequestCache(MemberRequestCache)(None, parsedRequest, block = rc => {
       val currentMonthDatetime = LocalDate.now().withYear(forYear).withMonth(forMonth)
-      val slots = ApClassLogic.getApGuidedSailTimeSlots(rc, currentMonthDatetime)
+      val slots = ApClassLogic.getApGuidedSailTimeSlots(rc, currentMonthDatetime, PA.now())
       Future(Ok(Json.toJson(slots)))
     })
   }

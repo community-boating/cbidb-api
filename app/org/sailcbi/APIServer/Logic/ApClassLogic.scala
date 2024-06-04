@@ -24,15 +24,15 @@ object ApClassLogic {
 	/*Returns a list of guided sailing time slots for a specified month
 	* */
 
-	def getApGuidedSailTimeSlots(rc: RequestCache, forMonth: LocalDate): List[GuidedSailTimeSlotsForDayDTO] = {
+	def getApGuidedSailTimeSlots(rc: RequestCache, forMonth: LocalDate, now: LocalDateTime): List[GuidedSailTimeSlotsForDayDTO] = {
 		val forMonthStart = forMonth.withDayOfMonth(1)
 		val forMonthEnd = forMonth.plusMonths(1).minusDays(1)
 		val jpClassSchedule = YearlyDateAndItemCache.get(rc, YearlyDateAndItemCacheKey(forMonth.getYear, JP_SEASON_YEARLY_ITEM_ALIAS))._1.headOption.map(a => a._2)
 		val blackoutDateRanges = getBlackoutRanges(rc, forMonthStart, forMonthEnd)
 		val sunsetsCached = SunsetCache.get(rc, SunsetCacheKey(forMonth.getYear, forMonth.getMonthValue, Option.empty))
 		val sunsetTimes = sunsetsCached._1.map(sunset => sunset.values.sunset.get).filter(p => programOpen(p.toLocalDate))
-		val startAndSunsetTimes = sunsetTimes.map(a => (a, getStartTime(a.toLocalDate, jpClassSchedule))).filter(a => a._1.isAfter(LocalDateTime.now()))
-		startAndSunsetTimes.map(times => toDTO(createDateRangesWithBlackouts(times._1.toLocalDate.atTime(times._2), times._1, AP_GUIDED_SAIL_DURATION, AP_GUIDED_SAIL_INCREMENT, blackoutDateRanges).filter(a => a.isAfter(LocalDateTime.now()))))
+		val startAndSunsetTimes = sunsetTimes.map(a => (a, getStartTime(a.toLocalDate, jpClassSchedule, now))).filter(a => a._1.isAfter(now))
+		startAndSunsetTimes.map(times => toDTO(createDateRangesWithBlackouts(times._1.toLocalDate.atTime(times._2), times._1, AP_GUIDED_SAIL_DURATION, AP_GUIDED_SAIL_INCREMENT, blackoutDateRanges).filter(a => a.isAfter(now)), now))
 	}
 
 	private def getBlackoutRanges(rc: RequestCache, startDate: LocalDate, endDate: LocalDate): List[(LocalDateTime, LocalDateTime)] = {
@@ -40,8 +40,8 @@ object ApClassLogic {
 		blackoutDateRanges._1.map(range => (range.values.startDatetime.get, range.values.endDatetime.get))
 	}
 
-	private def toDTO(slots: List[LocalDateTime]): GuidedSailTimeSlotsForDayDTO = {
-		GuidedSailTimeSlotsForDayDTO(slots.headOption.getOrElse(LocalDateTime.now()).format(DateUtil.DATE_FORMATTER), slots.map(slot => (slot.format(DateUtil.TIME_FORMATTER), slot.plus(AP_GUIDED_SAIL_DURATION).format(DateUtil.TIME_FORMATTER))))
+	private def toDTO(slots: List[LocalDateTime], now: LocalDateTime): GuidedSailTimeSlotsForDayDTO = {
+		GuidedSailTimeSlotsForDayDTO(slots.headOption.getOrElse(now).format(DateUtil.DATE_FORMATTER), slots.map(slot => (slot.format(DateUtil.TIME_FORMATTER), slot.plus(AP_GUIDED_SAIL_DURATION).format(DateUtil.TIME_FORMATTER))))
 	}
 
 	/*
@@ -231,8 +231,8 @@ object ApClassLogic {
 		val errors = setClassInstructor(rc, currentInstanceId, personId)
 		val hasErrors = !(errors == null || errors.isEmpty)
 		if(hasErrors){
-			updateApClassCancelled(rc, "ap_class_instances", "sysdate", currentInstanceId)
-			updateApClassCancelled(rc, "ap_class_sessions", "sysdate", currentInstanceId)
+			updateApClassCancelled(rc, "ap_class_instances", "util_pkg.get_sysdate", currentInstanceId)
+			updateApClassCancelled(rc, "ap_class_sessions", "util_pkg.get_sysdate", currentInstanceId)
 		}
 		if(hasErrors)
 			(None, Some(errors))
@@ -273,10 +273,10 @@ object ApClassLogic {
 	/*
 	Returns the start time for a given day, depending on if it is summertime or the weekend.
 	 */
-	private def getStartTime(forDate: LocalDate, jpClassSchedule: Option[YearlyDate]): LocalTime = {
+	private def getStartTime(forDate: LocalDate, jpClassSchedule: Option[YearlyDate], now: LocalDateTime): LocalTime = {
 		if (forDate.getDayOfWeek.getValue > DayOfWeek.FRIDAY.getValue) {
 			LocalTime.of(9, 0, 0) //Weekends
-		}else if(jpClassSchedule.isDefined && rangesOverlap(tangentCounts = true, (forDate.atTime(LocalTime.MIN), forDate.atTime(LocalTime.MAX)), (jpClassSchedule.get.values.startDate.get, jpClassSchedule.get.values.endDate.get.getOrElse(LocalDateTime.now())))){
+		}else if(jpClassSchedule.isDefined && rangesOverlap(tangentCounts = true, (forDate.atTime(LocalTime.MIN), forDate.atTime(LocalTime.MAX)), (jpClassSchedule.get.values.startDate.get, jpClassSchedule.get.values.endDate.get.getOrElse(now)))){
 			LocalTime.of(15, 0, 0) //Summer Weekdays (JP Yearly Date)
 		}else{
 			LocalTime.of(13, 0, 0) //Spring/Fall Weekdays

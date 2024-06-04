@@ -9,8 +9,6 @@ import org.sailcbi.APIServer.Entities.cacheable.CacheKeys
 
 import java.time.{Duration, LocalDate}
 
-
-
 object SunsetCache extends CacheableFactory[SunsetCacheKey, List[SunsetTime]] {
 	override protected val lifetime: Duration = Duration.ofHours(24)
 	override protected def calculateKey(config: SunsetCacheKey): String = CacheKeys.sunset(config)
