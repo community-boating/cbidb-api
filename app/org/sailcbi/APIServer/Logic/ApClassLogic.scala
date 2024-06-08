@@ -6,6 +6,7 @@ import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Storable.StorableQuery.TableAlias.apply
 import com.coleji.neptune.Util.DateUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{ApClassInstance, ApClassSession, ApClassSignup, YearlyDate}
+import org.sailcbi.APIServer.Entities.MagicIds.GUIDED_SAIL_CLASS_FORMAT
 import org.sailcbi.APIServer.Entities.cacheable.DatetimeRange.{DatetimeRangeCache, DatetimeRangeCacheKey}
 import org.sailcbi.APIServer.Entities.cacheable.sunset.{SunsetCache, SunsetCacheKey}
 import org.sailcbi.APIServer.Entities.cacheable.yearlydate.{YearlyDateAndItemCache, YearlyDateAndItemCacheKey}
@@ -26,7 +27,7 @@ object ApClassLogic {
 
 	def getApGuidedSailTimeSlots(rc: RequestCache, forMonth: LocalDate, now: LocalDateTime): List[GuidedSailTimeSlotsForDayDTO] = {
 		val forMonthStart = forMonth.withDayOfMonth(1)
-		val forMonthEnd = forMonth.plusMonths(1).minusDays(1)
+		val forMonthEnd = forMonth.plusMonths(1).withDayOfMonth(1).minusDays(1)
 		val jpClassSchedule = YearlyDateAndItemCache.get(rc, YearlyDateAndItemCacheKey(forMonth.getYear, JP_SEASON_YEARLY_ITEM_ALIAS))._1.headOption.map(a => a._2)
 		val blackoutDateRanges = getBlackoutRanges(rc, forMonthStart, forMonthEnd)
 		val sunsetsCached = SunsetCache.get(rc, SunsetCacheKey(forMonth.getYear, forMonth.getMonthValue, Option.empty))
@@ -141,7 +142,7 @@ object ApClassLogic {
 		}
 		rc.executeProcedure(proc)
 		val queryUpdateInstructorId = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-			override def getQuery: String = "update ap_class_instances set instructor_id = null where instance_id = ?"
+			override def getQuery: String = s"update ${ApClassInstance.entityName} set instructor_id = null where instance_id = ?"
 
 			override def getParams: List[PreparedValue] = List(instanceId)
 		}
@@ -198,8 +199,6 @@ object ApClassLogic {
 		))
 	}
 
-	private val GUIDED_SAIL_CLASS_FORMAT = 1101
-
 	/*
 	Get current AP class instances returns instance id if successful or error if failure
 	 */
@@ -225,14 +224,14 @@ object ApClassLogic {
 		}
 		//If there's a session at the timeslot with this person's Id then we will reuse it and just un cancel it
 		if(currentSession.isDefined && currentSession.get.values.cancelledDatetime.get.isDefined){
-			updateApClassCancelled(rc, "ap_class_instances", "null", currentInstanceId)
-			updateApClassCancelled(rc, "ap_class_sessions", "null", currentInstanceId)
+			updateApClassCancelled(rc, ApClassInstance.entityName, "null", currentInstanceId)
+			updateApClassCancelled(rc, ApClassSession.entityName, "null", currentInstanceId)
 		}
 		val errors = setClassInstructor(rc, currentInstanceId, personId)
 		val hasErrors = !(errors == null || errors.isEmpty)
 		if(hasErrors){
-			updateApClassCancelled(rc, "ap_class_instances", "util_pkg.get_sysdate", currentInstanceId)
-			updateApClassCancelled(rc, "ap_class_sessions", "util_pkg.get_sysdate", currentInstanceId)
+			updateApClassCancelled(rc, ApClassInstance.entityName, "util_pkg.get_sysdate", currentInstanceId)
+			updateApClassCancelled(rc, ApClassSession.entityName, "util_pkg.get_sysdate", currentInstanceId)
 		}
 		if(hasErrors)
 			(None, Some(errors))

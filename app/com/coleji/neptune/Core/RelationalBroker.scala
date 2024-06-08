@@ -563,7 +563,6 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		withConnection(pool)(conn => {
 			println("STARTING PROCEDURE CALL: " + pc.getQuery)
 			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
-			println("CALLABLE", callable)
 			// register outs and inouts
 			pc.registerOutParameters.foreach(Function.tupled((paramName: String, dataType: Int) => {
 				callable.registerOutParameter(paramName, dataType)

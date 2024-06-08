@@ -17,9 +17,9 @@ object SunsetCache extends CacheableFactory[SunsetCacheKey, List[SunsetTime]] {
 	def makeWhere(config: SunsetCacheKey): List[Filter] = {
 		if(config.day.isEmpty) {
 			List(
-			SunsetTime.fields.forDate.alias.greaterEqualConstant(LocalDate.of(config.year, config.month, 1)),
-			SunsetTime.fields.forDate.alias.lessThanConstant(LocalDate.of(config.year, config.month, 1).plusMonths(1)),
-		)
+				SunsetTime.fields.forDate.alias.greaterEqualConstant(LocalDate.of(config.year, config.month, 1)),
+				SunsetTime.fields.forDate.alias.lessThanConstant(LocalDate.of(config.year, config.month, 1).plusMonths(1)),
+			)
 		} else {
 			List(
 				SunsetTime.fields.forDate.alias.isDateConstant(LocalDate.of(config.year, config.month, config.day.get))

@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,8 +16,8 @@ class ApGuidedSailController @Inject()(implicit exec: ExecutionContext) extends 
   def getTimeSlots(forYear: Int, forMonth: Int)(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
     val parsedRequest = ParsedRequest(request)
     PA.withRequestCache(MemberRequestCache)(None, parsedRequest, block = rc => {
-      val currentMonthDatetime = LocalDate.now().withYear(forYear).withMonth(forMonth)
-      val slots = ApClassLogic.getApGuidedSailTimeSlots(rc, currentMonthDatetime, PA.now())
+      val currentMonthDate = PA.now().toLocalDate.withYear(forYear).withMonth(forMonth)
+      val slots = ApClassLogic.getApGuidedSailTimeSlots(rc, currentMonthDate, PA.now())
       Future(Ok(Json.toJson(slots)))
     })
   }

@@ -80,4 +80,5 @@ object MagicIds {
 	object TAG_IDS {
 		val CORPORATION = 5
 	}
+	val GUIDED_SAIL_CLASS_FORMAT = 1101
 }
