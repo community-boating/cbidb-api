@@ -78,15 +78,8 @@ class ScanCard @Inject()(implicit val exec: ExecutionContext) extends InjectedCo
 	}
 
 	private def constructRatings(rc: UnlockedRequestCache, personId: Int): List[DtoStaffDockhouseScanCardGetResponseSuccess_PersonRatings] = {
-		val ratingsQb = QueryBuilder
-			.from(PersonRating)
-			.innerJoin(Rating, Rating.fields.ratingId.alias.equalsField(PersonRating.fields.ratingId.alias))
-			.where(PersonRating.fields.personId.alias.equalsConstant(personId))
-			.select(List(
-				PersonRating.fields.ratingId,
-				PersonRating.fields.programId,
-				Rating.fields.ratingName
-			))
+
+		val ratingsQb = RatingLogic.getPersonRatingsQB(personId)
 
 		rc.executeQueryBuilder(ratingsQb).map(qbrr => {
 			val pr = PersonRating.construct(qbrr)

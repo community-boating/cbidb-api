@@ -1,5 +1,7 @@
 package org.sailcbi.APIServer.Logic
 
+import com.coleji.neptune.Core.RequestCache
+import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.ListUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, PersonRating, ProgramType, Rating}
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -38,11 +40,27 @@ object RatingLogic {
 		)))
 	}
 
+	def getPersonRatingsQB(personId: Int): QueryBuilder = {
+		QueryBuilder
+			.from(PersonRating)
+			.innerJoin(Rating, Rating.fields.ratingId.alias.equalsField(PersonRating.fields.ratingId.alias))
+			.where(PersonRating.fields.personId.alias.equalsConstant(personId))
+			.select(List(
+				PersonRating.fields.ratingId,
+				PersonRating.fields.programId,
+				Rating.fields.ratingName
+			))
+	}
+
 	/**
 	 * MUST pass Ratings list from the ratings cache (with BRs populated)
 	 */
 	def maxFlagForBoat(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int): Option[(String, PersonRating)] = {
 		ListUtil.findAndReturn(FLAG_ORDER)(f => canSailBoatProgram(prs, rs, boatId, programId, f).map(pr => (f, pr)))
+	}
+
+	def ratingsHash(rs: List[Rating]): Map[Int, Rating] = {
+		rs.map(r => (r.values.ratingId.get, r)).toMap
 	}
 
 	/**
@@ -54,7 +72,7 @@ object RatingLogic {
 	 * @return
 	 */
 	def canSailBoatProgram(prs: List[PersonRating], rs: List[Rating], boatId: Int, programId: Int, flag: String): Option[PersonRating] = {
-		val ratingHash = rs.map(r => (r.values.ratingId.get, r)).toMap
+		val ratingHash = ratingsHash(rs)
 		val brs = rs.flatMap(_.references.boats.get)
 
 		val neededRatings = brs.filter(br =>

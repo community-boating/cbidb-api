@@ -12,6 +12,15 @@ GET     /efuse/cbidb-public-web             org.sailcbi.APIServer.Api.Endpoints.
 
 GET     /static-yearly-data                 org.sailcbi.APIServer.Api.Endpoints.Public.StaticYearlyData.get()
 
+GET     /ap/get-guided-sail-instances        org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.getCurrentInstances()
+
+GET     /ap/get-guided-sail-time-slots        org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.getTimeSlots(forYear: Int, forMonth: Int)
+
+POST     /ap/create-guided-sail-instance     org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.createInstance(timeslot: String)
+
+POST     /ap/cancel-guided-sail-instance     org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.cancelInstance(instanceId: Int)
+
+
 POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
 POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
 
