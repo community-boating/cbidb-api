@@ -1,7 +1,7 @@
 package com.coleji.neptune.API
 
 import com.coleji.neptune.Core.{PermissionsAuthority, UnlockedRequestCache}
-import com.coleji.neptune.Storable.{DTOClass, StorableClass, StorableObject}
+import com.coleji.neptune.Storable.{StorableClass, StorableObject}
 
 import scala.reflect.runtime.universe
 

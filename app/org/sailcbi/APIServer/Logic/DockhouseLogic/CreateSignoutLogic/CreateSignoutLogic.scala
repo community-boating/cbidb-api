@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Logic.DockhouseLogic.CreateSignoutLogic
 
 import com.coleji.neptune.Core.UnlockedRequestCache
 import com.coleji.neptune.Util.BitVector
-import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.{DtoStaffDockhouseCreateSignoutPostRequest}
+import org.sailcbi.APIServer.Api.Endpoints.Dto.Staff.Dockhouse.CreateSignout.DtoStaffDockhouseCreateSignoutPostRequest
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{Signout, SignoutTest}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Logic.IO.DockhouseIo

@@ -1,7 +1,7 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.PersonMembership
 
 import com.coleji.neptune.API.RestController
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache, UnlockedRequestCache}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import org.sailcbi.APIServer.Entities.EntityDefinitions._
 import org.sailcbi.APIServer.UserTypes.StaffRequestCache

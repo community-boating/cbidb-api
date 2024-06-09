@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.ClassInstructor
 
-import com.coleji.neptune.API.{RestControllerWithDTO, RestControllerWithDTO2, ValidationError, ValidationOk, ValidationResult}
+import com.coleji.neptune.API.{RestControllerWithDTO2, ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, UnlockedRequestCache}
 import org.sailcbi.APIServer.Entities.EntityDefinitions.ClassInstructor
 import org.sailcbi.APIServer.Entities.access.CbiPermissions

@@ -1,6 +1,5 @@
 package org.sailcbi.APIServer.Logic
 
-import com.coleji.neptune.Core.RequestCache
 import com.coleji.neptune.Storable.StorableQuery.QueryBuilder
 import com.coleji.neptune.Util.ListUtil
 import org.sailcbi.APIServer.Entities.EntityDefinitions.{BoatType, PersonRating, ProgramType, Rating}

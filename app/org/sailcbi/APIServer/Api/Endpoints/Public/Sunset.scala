@@ -1,10 +1,9 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Entities.EntityDefinitions.SunsetTime
 import org.sailcbi.APIServer.Entities.cacheable.sunset.{SunsetCache, SunsetCacheKey}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import javax.inject.Inject

@@ -563,6 +563,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 		withConnection(pool)(conn => {
 			println("STARTING PROCEDURE CALL: " + pc.getQuery)
 			val callable: CallableStatement = conn.prepareCall(s"{call ${pc.getQuery}}")
+
 			// register outs and inouts
 			pc.registerOutParameters.foreach(Function.tupled((paramName: String, dataType: Int) => {
 				callable.registerOutParameter(paramName, dataType)
@@ -582,7 +583,6 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 				println(s"$paramName = $value")
 				callable.setDouble(paramName, value)
 			}))
-			println("DONE WITH PARAM SETTING")
 
 			// Date params DO NOT WORK
 			// Everything will appear to work and then it will act as though the transaction was not committed
@@ -605,7 +605,7 @@ abstract class RelationalBroker private[Core](dbGateway: DatabaseGateway, prepar
 
 			val hadResults: Boolean = callable.execute()
 //			conn.commit()
-			println("DONE EXECUTING")
+
 			pc.getOutResults(callable)
 		})
 	}

@@ -14,7 +14,7 @@ import org.sailcbi.APIServer.Entities.dto.{GuidedSailCurrentSessionDTO, GuidedSa
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
 
 import java.sql.CallableStatement
-import java.time.{DayOfWeek, Duration, LocalDate, LocalDateTime, LocalTime}
+import java.time._
 
 object ApClassLogic {
 	private val AP_GUIDED_SAIL_DURATION = Duration.ofMinutes(90)
