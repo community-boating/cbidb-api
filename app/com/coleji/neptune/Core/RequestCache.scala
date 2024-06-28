@@ -27,7 +27,7 @@ sealed abstract class RequestCache private[Core](
 			}
 			case _ => {
 				if (this.isInstanceOf[RootRequestCache]) new OracleBroker(dbGateway, false, PA.systemParams.readOnlyDatabase)
-				else new OracleBroker(dbGateway, PA.systemParams.preparedQueriesOnly, PA.systemParams.readOnlyDatabase)
+				else new OracleBroker(dbGateway, /*PA.systemParams.preparedQueriesOnly*/true, PA.systemParams.readOnlyDatabase)
 			}
 		}
 	}
