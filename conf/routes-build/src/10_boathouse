@@ -60,6 +60,8 @@ DELETE  /rest/signout-crew    org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.Sig
 GET     /rest/dock-report              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport.GetDockReport.get()
 POST     /rest/dock-report              org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.DockReport.PutDockReport.post()
 
+POST    /staff/dockhouse/dock-report/refresh-classes  org.sailcbi.APIServer.Api.Endpoints.Staff.Dockhouse.DockReport.RefreshDockReportClasses.post()
+
 GET     /rest/membership-sale       org.sailcbi.APIServer.Api.Endpoints.Staff.Rest.MembershipSale.GetMembershipSale.get(calendarYear: Int)
 
 GET     /staff/user-permissions                  org.sailcbi.APIServer.Api.Endpoints.Staff.UserPermissions.get()
@@ -70,7 +72,6 @@ POST    /auth/validate-apex-session-key      org.sailcbi.APIServer.Api.Endpoints
 POST    /auth/set-staff-pw              org.sailcbi.APIServer.Api.Endpoints.Security.SetStaffPassword.post()
 
 # POST    /staff/slack-sync-users     org.sailcbi.APIServer.Api.Endpoints.Staff.slacksyncusers.SlackSyncUsers.post()
-
 
 ### DOCKHOUSE
 
