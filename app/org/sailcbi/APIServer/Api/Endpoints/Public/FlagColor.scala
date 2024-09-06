@@ -1,43 +1,22 @@
 package org.sailcbi.APIServer.Api.Endpoints.Public
 
-import com.coleji.neptune.API.{CacheableResultFromPreparedQuery, ParamsObject}
-import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority}
-import org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.FlagColorParamsObject
-import org.sailcbi.APIServer.IO.PreparedQueries.Public.{GetFlagColor, GetFlagColorResult}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import org.sailcbi.APIServer.UserTypes.PublicRequestCache
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
-import java.time.LocalDateTime
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class FlagColor @Inject()(implicit val exec: ExecutionContext)
-		extends CacheableResultFromPreparedQuery[FlagColorParamsObject, GetFlagColorResult] {
+class FlagColor @Inject()(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		PA.withRequestCache(PublicRequestCache)(None, ParsedRequest(request), rc => {
-			val cb: CacheBroker = rc.cb
-
-			getFuture(cb, rc, new FlagColorParamsObject, new GetFlagColor).map(s => {
-				val r = ".*\\[\\[\"([A-Z])\"\\]\\].*".r
-				val f = s.toString match {
-					case r(flag: String) => flag
-					case _ => "C"
-				}
-
-				Ok("var FLAG_COLOR = \"" + f + "\"")
-			})
+			val flagColor = org.sailcbi.APIServer.Entities.cacheable.FlagColor.get(rc, null)._1 match {
+				case "G" => "G"
+				case "Y" => "Y"
+				case "R" => "R"
+				case _ => "C"
+			}
+			Future(Ok("var FLAG_COLOR = \"" + flagColor + "\""))
 		})
 	}
-
-	def getCacheBrokerKey(params: FlagColorParamsObject): CacheKey = "flag-color"
-
-	def getExpirationTime: LocalDateTime = {
-		LocalDateTime.now.plusSeconds(5)
-	}
-}
-
-object FlagColor {
-
-	class FlagColorParamsObject extends ParamsObject
-
 }

@@ -24,4 +24,5 @@ object CacheKeys {
 	def sunset(config: SunsetCacheKey): String = s"sunset-${config.year}-${config.month}-${config.day.getOrElse("none")}"
 	def datetimeRange(config: DatetimeRangeCacheKey): String = s"datetime-range-${config.startDate.format(DateTimeFormatter.ISO_DATE)}-${config.endDate.format(DateTimeFormatter.ISO_DATE)}-${config.rangeType}"
 	def yearlyDateAndItem(config: YearlyDateAndItemCacheKey): String = s"yearly-date-${config.year}-${config.itemAlias}"
+	def flagColor = "flag-color"
 }

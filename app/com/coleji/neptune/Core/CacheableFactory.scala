@@ -29,7 +29,7 @@ abstract class CacheableFactory[T_KeyConfig, T_Result] {
 		val cb = rc.cb
 		val key = calculateKey(config)
 		// TODO: some way to sync per cache key
-		synchronized {
+		this.synchronized {
 			val cacheMetadata = getMetaData(cb, key)
 			if (isExpired(cacheMetadata) || !cb.peek(key)) {
 				populate(rc, config)
