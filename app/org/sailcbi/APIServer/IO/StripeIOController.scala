@@ -9,14 +9,13 @@ import com.coleji.neptune.Storable.{CastableToStorableClass, ResultSetWrapper}
 import com.coleji.neptune.Util._
 import org.sailcbi.APIServer.Entities.JsFacades.Stripe._
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTransactions, GetLocalStripeCharges, GetLocalStripePayouts}
-import org.sailcbi.APIServer.IO.StripeAPIIO.StripeAPIIOMechanism
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache, PublicRequestCache}
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
+/*
 class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: StripeDatabaseIOMechanism, logger: Logger)(implicit PA: PermissionsAuthority) {
 	def getTokenDetails(token: String): Future[ServiceRequestResult[Token, StripeError]] = {
 		rc.companion.test(Set(ApexRequestCache, PublicRequestCache, MemberRequestCache))
@@ -391,3 +390,4 @@ class StripeIOController(rc: RequestCache, apiIO: StripeAPIIOMechanism, dbIO: St
 		}
 	}
 }
+*/

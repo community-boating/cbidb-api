@@ -14,7 +14,6 @@ import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.Entities.dto.PersonNotification
 import org.sailcbi.APIServer.Entities.dto.PersonNotification.{PersonAllNotificationsDto, PersonNotificationDbRecord}
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.{JsValue, Json}
@@ -2708,7 +2707,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
+	/*def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
@@ -2762,7 +2761,7 @@ object PortalLogic {
 		} else {
 			throw new Exception("Multiple unpaid paymentIntents found for order " + orderId)
 		}
-	}
+	}*/
 
 	private def getStaggeredPaymentsReady(rc: RequestCache, orderId: Int): List[(Int, Currency)] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberRequestCache, ApexRequestCache)) {
@@ -2780,7 +2779,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(getStaggeredPaymentsQ)
 	}
 
-	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
+	/*private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
 		val appAlias = getAppAliasForOrderId(rc, orderId)
 		val staggeredPayments = if (appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE || appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE) {
 			List.empty
@@ -2844,7 +2843,7 @@ object PortalLogic {
 				case _ => throw new Exception("Failed to create PaymentIntent")
 			})
 		}
-	}
+	}*/
 
 	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate, addOneTimes: Boolean): List[(LocalDate, Currency)] = {
 		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
@@ -2974,7 +2973,7 @@ object PortalLogic {
 		} else ValidationOk
 	}
 
-	def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
+	/*def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
 		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
 
@@ -2990,7 +2989,7 @@ object PortalLogic {
 		Future.sequence(intents.map(i => {
 			stripe.updatePaymentIntentWithPaymentMethod(i, methodId)
 		}))
-	}
+	}*/
 
 	case class PurchaseGiftCertShape(
 		valueInCents: Int,
@@ -3444,7 +3443,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def setUsePaymentIntentDonationStandalone(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, doRecurring: Boolean): Future[Unit] = {
+	/*def setUsePaymentIntentDonationStandalone(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, doRecurring: Boolean): Future[Unit] = {
 		val createCustomerIdFuture = {
 			if (doRecurring) {
 				PortalLogic.getStripeCustomerId(rc, personId) match {
@@ -3459,7 +3458,7 @@ object PortalLogic {
 		createCustomerIdFuture.map(_ => {
 			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
 		})
-	}
+	}*/
 
 	def getNotifications(rc: RequestCache, personid: Int): PersonAllNotificationsDto = {
 		val q = new PreparedQueryForSelect[PersonNotificationDbRecord](Set(MemberRequestCache)) {

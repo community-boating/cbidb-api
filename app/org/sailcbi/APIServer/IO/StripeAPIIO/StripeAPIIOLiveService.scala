@@ -8,6 +8,8 @@ import play.api.libs.json.{JsArray, JsObject, JsValue}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
+/*
+
 class StripeAPIIOLiveService (baseURL: String, secretKey: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends StripeAPIIOMechanism {
 	def getOrPostStripeSingleton[T](
 		url: String,
@@ -139,3 +141,4 @@ class StripeAPIIOLiveService (baseURL: String, secretKey: String, http: HTTPMech
 		makeRequest(baseURL + url, ("limit=" + fetchSize) :: params, None, List.empty)
 	}
 }
+ */

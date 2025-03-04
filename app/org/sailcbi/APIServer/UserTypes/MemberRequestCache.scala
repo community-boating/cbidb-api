@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 class MemberRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
+extends LockedRequestCacheWithSquareController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
 	lazy val getAuthedPersonId: Int = {

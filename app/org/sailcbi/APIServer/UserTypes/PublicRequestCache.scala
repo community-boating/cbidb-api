@@ -5,7 +5,7 @@ import com.coleji.neptune.Util.PropertiesWrapper
 import redis.clients.jedis.JedisPool
 
 class PublicRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
+extends LockedRequestCacheWithSquareController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[PublicRequestCache] = PublicRequestCache
 }
 

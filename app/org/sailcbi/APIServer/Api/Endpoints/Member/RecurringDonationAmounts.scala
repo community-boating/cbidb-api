@@ -21,11 +21,18 @@ class RecurringDonationAmounts @Inject()(ws: WSClient)(implicit exec: ExecutionC
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId
-			val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
-			val stripe = rc.getStripeIOController(ws)
+			//val customerId = PortalLogic.getStripeCustomerId(rc, personId).get
+			//val stripe = rc.getStripeIOController(ws)
 			val donations = PortalLogic.getRecurringDonations(rc, personId)
+			implicit val format = GetRecurringDonationsShape.format
+			val resultJson: JsValue = Json.toJson(GetRecurringDonationsShape(
+				recurringDonations=donations,
+				paymentMethod=None
+			))
 
-			stripe.getCustomerDefaultPaymentMethod(customerId).map({
+			Future(Ok(resultJson))
+
+			/*stripe.getCustomerDefaultPaymentMethod(customerId).map({
 				case s: NetSuccess[Option[PaymentMethod], StripeError] => {
 					val cardDataMaybe = s.successObject.map(pm => SavedCardOrPaymentMethodData(
 						last4 = pm.card.last4,
@@ -50,7 +57,7 @@ class RecurringDonationAmounts @Inject()(ws: WSClient)(implicit exec: ExecutionC
 
 					Ok(resultJson)
 				}
-			})
+			})*/
 		})
 	}
 

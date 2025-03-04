@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 import redis.clients.jedis.JedisPool
 
 class ApexRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
+extends LockedRequestCacheWithSquareController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[ApexRequestCache] = ApexRequestCache
 }
 

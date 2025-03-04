@@ -7,6 +7,8 @@ import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
+/*
+
 abstract class StripeAPIIOMechanism {
 	def getOrPostStripeSingleton[T](
 		url: String,
@@ -24,3 +26,4 @@ abstract class StripeAPIIOMechanism {
 		fetchSize: Int
 	): Future[ServiceRequestResult[List[T], StripeError]]
 }
+ */

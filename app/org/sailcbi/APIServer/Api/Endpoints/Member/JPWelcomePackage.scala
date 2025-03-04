@@ -3,8 +3,7 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
 import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
 import com.coleji.neptune.Storable.ResultSetWrapper
-import com.coleji.neptune.Util.{NetFailure, NetSuccess, Profiler}
-import io.sentry.Sentry
+import com.coleji.neptune.Util.Profiler
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.{GetChildDataQuery, GetChildDataQueryResult}
 import org.sailcbi.APIServer.UserTypes.MemberRequestCache
@@ -19,9 +18,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
-		val logger = PA.logger
 		PA.withRequestCache(MemberRequestCache)(None, ParsedRequest(req), rc => {
-			val stripe = rc.getStripeIOController(ws)
+			//val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId
 			profiler.lap("got person id")
@@ -62,13 +60,12 @@ class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 
 			val canCheckout = PortalLogic.canCheckout(rc, personId, orderId)
 
-			// do this async, user doesnt need to wait for it.
-			if (stripeCustomerIdOption.isEmpty) {
+			/*if (stripeCustomerIdOption.isEmpty) {
 				stripe.createStripeCustomerFromPerson(rc, personId).map({
 					case f: NetFailure[_, _] => Sentry.captureMessage("Failed to create stripe customerId for person " + personId)
 					case s: NetSuccess[_, _] =>
 				})
-			}
+			}*/
 
 			val result = JPWelcomePackageResult(
 				personId,

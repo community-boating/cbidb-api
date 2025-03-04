@@ -3,14 +3,12 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 import com.coleji.neptune.API.{ResultError, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.neptune.IO.PreparedQueries.{PreparedProcedureCall, PreparedQueryForUpdateOrDelete}
-import com.coleji.neptune.Util._
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{Charge, PaymentIntent, PaymentMethod, StripeError}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.getRecurringDonations
 import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, LockedRequestCacheWithSquareController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -128,7 +126,7 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 		})
 	}
 
-	private def doAutoDonateOrder(rc: LockedRequestCacheWithStripeController, personId: Int) = {
+	private def doAutoDonateOrder(rc: LockedRequestCacheWithSquareController, personId: Int) = {
 		val orderId = PortalLogic.getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE)
 		PortalLogic.reconstituteAutoDonateOrder(rc, personId, orderId)
 		SubmitPayment.startChargeProcess(rc, ws, personId, orderId, true).map(parseError => parseError._2 match {
@@ -194,13 +192,13 @@ object SubmitPayment {
 		rc.executeProcedure(ppc)
 	}
 
-	private def startChargeProcess(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, isAutoDonate: Boolean = false)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
+	private def startChargeProcess(rc: LockedRequestCacheWithSquareController, ws: WSClient, personId: Int, orderId: Int, isAutoDonate: Boolean = false)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 		val orderTotalInCents = PortalLogic.getOrderTotalCents(rc, orderId)
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 		val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
 
-		val stripe = rc.getStripeIOController(ws)
+		/*val stripe = rc.getStripeIOController(ws)
 
 		if (isStaggered || isAutoDonate || usePaymentIntent) {
 			val pm = for (
@@ -229,9 +227,11 @@ object SubmitPayment {
 		} else {
 			postPaymentIntent(rc, ws, personId, orderId, closeId, orderTotalInCents, isAutoDonate)
 		}
+		 */
+		Future(Some(0), Some(""))
 	}
-
-	private def postPaymentIntent(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int, isAutoDonate: Boolean)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
+/*
+	private def postPaymentIntent(rc: LockedRequestCacheWithSquareController, ws: WSClient, personId: Int, orderId: Int, closeId: Int, orderTotalInCents: Int, isAutoDonate: Boolean)(implicit PA: PermissionsAuthority, exec: ExecutionContext): Future[(Option[Int], Option[String])] = {
 		val logger = PA.logger
 
 		val preflight = new PreparedProcedureCall[(Int, Option[String])](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
@@ -357,7 +357,7 @@ object SubmitPayment {
 		})
 	}
 
-	private def doCharge(rc: LockedRequestCacheWithStripeController, ws: WSClient, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int, isAutoDonate: Boolean)(implicit exec: ExecutionContext): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
+	private def doCharge(rc: LockedRequestCacheWithSquareController, ws: WSClient, personId: Int, orderId: Int, orderTotalInCents: Int, closeId: Int, isAutoDonate: Boolean)(implicit exec: ExecutionContext): Failover[Future[ServiceRequestResult[Charge, StripeError]], _] = {
 		val isStaggered = PortalLogic.getPaymentAdditionalMonths(rc, orderId) > 0
 		val stripeController = rc.getStripeIOController(ws)
 		val usePaymentIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId).getOrElse(false)
@@ -386,4 +386,6 @@ object SubmitPayment {
 			Failover(stripeController.createCharge(orderTotalInCents, cardData.token, orderId, closeId))
 		}
 	}
+
+ */
 }
