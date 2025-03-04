@@ -3,9 +3,7 @@ package org.sailcbi.APIServer.UserTypes
 import com.coleji.neptune.Core.{DatabaseGateway, LockedRequestCache}
 import com.coleji.neptune.IO.HTTP.FromWSClient
 import com.coleji.neptune.Util.PropertiesWrapper
-import org.sailcbi.APIServer.IO.StripeAPIIO.{StripeAPIIOLiveService, StripeAPIIOMechanism}
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Server.CBIBootLoaderLive
 import play.api.libs.ws.WSClient
 import redis.clients.jedis.JedisPool
