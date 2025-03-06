@@ -57,7 +57,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		val now = PA.now().toLocalDate
 
-		val staggeredPayments = if (staggeredPaymentAdditionalMonths == 0) {
+		/*val staggeredPayments = if (staggeredPaymentAdditionalMonths == 0) {
 			List.empty
 		} else if (program == "JP") {
 			PortalLogic.writeOrderStaggeredPaymentsJP(rc, now, orderId, staggeredPaymentAdditionalMonths > 0).map(destructurePaymentPlan)
@@ -68,68 +68,24 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		val jpPotentialStaggeredPayments =
 			if (program == "JP") PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now, true).map(destructurePaymentPlan)
 			else List.empty
-
+		*/
 		implicit val format = OrderStatusResult.format
 
-		val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
-
-		/*if (staggeredPaymentAdditionalMonths > 0 || (usePaymentIntentFromOrderTable.getOrElse(false) && customerIdOption.isDefined)) {
-			val customerId = customerIdOption.get
-
-			val (nameFirst, nameLast, email, authedAsRealPerson) = {
-				if (usePaymentIntentFromOrderTable.getOrElse(false)) {
-					PortalLogic.getAuthedPersonInfo(rc, personId)
-				} else {
-					(None, None, None, None)
-				}
-			}
-
-			stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-				case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).map(pi => {
-					Ok(Json.toJson(OrderStatusResult(
-						orderId = orderId,
-						total = orderTotal,
-						paymentMethodRequired = true,
-						cardData = (methodSuccess.successObject.asInstanceOf[Option[PaymentMethod]]).map(pm => SavedCardOrPaymentMethodData(
-							last4 = pm.card.last4,
-							expMonth = pm.card.exp_month,
-							expYear = pm.card.exp_year,
-							zip = pm.billing_details.address.postal_code
-						)),
-						staggeredPayments = staggeredPayments,
-						paymentIntentId = pi.map(_.id),
-						jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
-						nameFirst = nameFirst,
-						nameLast = nameLast,
-						email = email,
-						authedAsRealPerson = authedAsRealPerson.isDefined,
-					)))
-				})
-				case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
-			})
-		} else {
-			val cardData = PortalLogic.getCardData(rc, orderId)
-			val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
+		val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
 			Future(Ok(Json.toJson(OrderStatusResult(
-				orderId = orderId,
-				total = orderTotal,
-				paymentMethodRequired = usePaymentIntentFromOrderTable.getOrElse(false),
-				cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
-					last4 = cd.last4,
-					expMonth = cd.expMonth.toInt,
-					expYear = cd.expYear.toInt,
-					zip = cd.zip
-				)),
-				staggeredPayments = List.empty,
-				paymentIntentId = None,
-				jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
-				nameFirst = nameFirst,
-				nameLast = nameLast,
-				email = email,
-				authedAsRealPerson = authedAsRealPerson.isDefined
-			))))
-		}*/
-		Future(Gone)
+			orderId = orderId,
+			total = orderTotal,
+			paymentMethodRequired = true,
+			cardData = None,
+			staggeredPayments = List.empty,
+			paymentIntentId = None,
+			jpAvailablePaymentSchedule = List.empty,
+			nameFirst = nameFirst,
+			nameLast = nameLast,
+			email = email,
+			authedAsRealPerson = authedAsRealPerson.isDefined
+		))))
+
 	}
 
 	case class StaggeredPayment(
