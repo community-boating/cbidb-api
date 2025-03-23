@@ -14,12 +14,14 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class JPWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async(req => {
 		val profiler = new Profiler
 		PA.withRequestCache(MemberRequestCache)(None, ParsedRequest(req), rc => {
 			//val stripe = rc.getStripeIOController(ws)
+			val square = rc.getCompassIOController(ws)
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId
 			profiler.lap("got person id")

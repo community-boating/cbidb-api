@@ -12,7 +12,6 @@ import org.sailcbi.APIServer.IO.PreparedQueries.Apex.{GetLocalStripeBalanceTrans
 import org.sailcbi.APIServer.IO.StripeDatabaseIO.StripeDatabaseIOMechanism
 import org.sailcbi.APIServer.UserTypes.{ApexRequestCache, MemberRequestCache, ProtoPersonRequestCache, PublicRequestCache}
 import play.api.libs.json.{JsObject, JsString, JsValue}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 /*

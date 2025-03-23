@@ -8,12 +8,10 @@ import com.coleji.neptune.Util._
 import com.coleji.neptune.{API, Storable}
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.DtoMemberApClassInstancesInstructorInfoGetResponseSuccess
 import org.sailcbi.APIServer.BarcodeFactory
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.Entities.dto.PersonNotification
 import org.sailcbi.APIServer.Entities.dto.PersonNotification.{PersonAllNotificationsDto, PersonNotificationDbRecord}
-import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.{JsValue, Json}
@@ -22,8 +20,6 @@ import java.awt.image.BufferedImage
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object PortalLogic {
 	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
@@ -1752,7 +1748,7 @@ object PortalLogic {
 			}
 			if (rc.executePreparedQueryForSelect(existsQ).isEmpty) {
 				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
-					override val pkName: Option[String] =Some("ASSIGN_ID")
+					override val pkName: Option[String] = Some("ASSIGN_ID")
 
 					override val params: List[String] = List(orderId.toString, instanceId.toString)
 

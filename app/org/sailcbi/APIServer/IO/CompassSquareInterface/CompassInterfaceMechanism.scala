@@ -1,9 +1,12 @@
 package org.sailcbi.APIServer.IO.CompassSquareInterface
 
-import com.coleji.neptune.Util.ServiceRequestResult
-
 import scala.concurrent.Future
 
 abstract class CompassInterfaceMechanism {
-  def createCompassOrder(legacyOrderId: Int): Future[ServiceRequestResult[Int, String]]
+  def upsertSquareCustomer(personId: Int): Future[String]
+  def upsertCompassOrder(legacyOrderId: Int): Future[String]
+  def payCompassOrderViaGiftCard(legacyOrderId: Int, GAN: String): Future[String]
+  def payCompassOrderViaPaymentSource(legacyOrderId: Int, paymentSourceId: String): Future[String]
+  def pollCompassOrderStatus(legacyOrderId: Int): Future[String]
+  def fetchAPIConstants(): Future[String]
 }

@@ -74,6 +74,8 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 					override val params: List[String] = List(adults.toString, nonWorkingAdults.toString, children.toString)
 				}
 				val eiis = rc.executePreparedQueryForSelect(eiiQ)
+				println(eiis)
+				println("what")
 				if (eiis.length == 1) {
 					val myJpPrice = Scholarship.getMyJpPrice(rc, eiis.head, parsed.income, children)
 					val insertQuery = new PreparedQueryForInsert(Set(MemberRequestCache)) {
@@ -107,7 +109,6 @@ class Scholarship @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 							   |  )
 					 """.stripMargin
 					}
-
 					rc.executePreparedQueryForInsert(insertQuery)
 				} else logger.error("Unable to find eii for response: " + parsed.toString)
 				Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))

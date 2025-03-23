@@ -67,9 +67,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
-					/*case ValidationOk => PortalLogic.setUsePaymentIntentDonationStandalone(rc, stripe, personId, orderId, parsed.doRecurring.getOrElse(false)).map(_ => {
-						Ok(JsObject(Map("success" -> JsBoolean(true))))
-					})*/
+					case ValidationOk => Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 				}
 			})
 		})

@@ -10,7 +10,8 @@ abstract class HTTPMechanism {
 						 method: HTTPMethod,
 						 body: Option[Map[String, String]],
 						 basicAuthUsername: Option[String],
-						 basicAuthPassword: Option[String]
+						 basicAuthPassword: Option[String],
+						 bearerToken: Option[String] = None
 				 ): Future[String]
 
 	def getJSON(
@@ -18,6 +19,7 @@ abstract class HTTPMechanism {
 					   method: HTTPMethod,
 					   body: Option[Map[String, String]],
 					   basicAuthUsername: Option[String],
-					   basicAuthPassword: Option[String]
+					   basicAuthPassword: Option[String],
+						 bearerToken: Option[String] = None
 			   ): Future[JsValue]
 }
