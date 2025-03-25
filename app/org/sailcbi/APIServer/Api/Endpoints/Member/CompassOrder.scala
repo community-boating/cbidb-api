@@ -87,7 +87,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
     PA.withParsedPostBodyJSON(request.body.asJson, PostPayOrderViaPaymentSourceShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
-        rc.getCompassIOController(ws).payCompassOrderViaPaymentSource(orderId, request.body.asJson.map(a => a.toString).orNull).transform({
+        rc.getCompassIOController(ws).payCompassOrderViaPaymentSource(Some(authedPersonId), orderId, request.body.asJson.map(a => a.toString).orNull).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })

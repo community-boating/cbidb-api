@@ -2,7 +2,7 @@ package org.sailcbi.APIServer.Entities.dto.Square
 
 import play.api.libs.json.{JsValue, Json}
 
-case class PostPayOrderViaPaymentSourceShape (paymentSourceId: String, partialPayment: Boolean, verificationToken: String, orderAppAlias: String)
+case class PostPayOrderViaPaymentSourceShape (paymentSourceId: String, partialPayment: Boolean, orderAppAlias: String, verificationToken: Option[String])
 
 object PostPayOrderViaPaymentSourceShape {
     implicit val format = Json.format[PostPayOrderViaPaymentSourceShape]
