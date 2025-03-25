@@ -3416,20 +3416,6 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def setUsePaymentIntent(rc: RequestCache, orderId: Int, usePaymentIntent: Boolean): Unit = {
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
-			override val params: List[String] = List(
-				if(usePaymentIntent) "Y" else "N",
-				orderId.toString
-			)
-			override def getQuery: String =
-				"""
-				  |update order_numbers set use_payment_intent = ? where order_id = ?
-				  |""".stripMargin
-		}
-		rc.executePreparedQueryForUpdateOrDelete(updateQ)
-	}
-
 	def getUsePaymentIntentFromOrderTable(rc: RequestCache, orderId: Int): Option[Boolean] = {
 		val q = new PreparedQueryForSelect[Option[Boolean]](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Boolean] = rsw.getOptionBooleanFromChar(1)
@@ -3438,23 +3424,6 @@ object PortalLogic {
 		}
 		rc.executePreparedQueryForSelect(q).head
 	}
-
-	/*def setUsePaymentIntentDonationStandalone(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, doRecurring: Boolean): Future[Unit] = {
-		val createCustomerIdFuture = {
-			if (doRecurring) {
-				PortalLogic.getStripeCustomerId(rc, personId) match {
-					case None => stripe.createStripeCustomerFromPerson(rc, personId)
-					case Some(_) => Future()
-				}
-			} else {
-				Future()
-			}
-		}
-
-		createCustomerIdFuture.map(_ => {
-			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
-		})
-	}*/
 
 	def getNotifications(rc: RequestCache, personid: Int): PersonAllNotificationsDto = {
 		val q = new PreparedQueryForSelect[PersonNotificationDbRecord](Set(MemberRequestCache)) {

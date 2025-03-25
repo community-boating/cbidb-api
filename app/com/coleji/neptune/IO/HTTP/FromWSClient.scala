@@ -13,7 +13,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
 	def getString(
 		url: String,
 		method: HTTPMethod,
-		body: Option[Map[String, String]],
+		body: Option[String],
 		basicAuthUsername: Option[String],
 		basicAuthPassword: Option[String],
 		bearerToken: Option[String]
@@ -22,7 +22,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
 	def getJSON(
 		url: String,
 		method: HTTPMethod,
-		body: Option[Map[String, String]],
+		body: Option[String],
 		basicAuthUsername: Option[String],
 		basicAuthPassword: Option[String],
 		bearerToken: Option[String]
@@ -31,7 +31,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
 	private def getResponse(
 		url: String,
 		method: HTTPMethod,
-		body: Option[Map[String, String]],
+		body: Option[String],
 		basicAuthUsername: Option[String],
 		basicAuthPassword: Option[String],
 		bearerToken: Option[String],
@@ -49,7 +49,7 @@ class FromWSClient(ws: WSClient)(implicit exec: ExecutionContext) extends HTTPMe
 		}
 		(method match {
 			case GET => request.get
-			case POST => request.post(body.getOrElse(Map.empty))
+			case POST => request.post(body.getOrElse(""))
 		}).transform({
 			case Success(s) => if (s.status == OK) Success(s) else Failure(HTTPError(s.status))
 			case Failure(f) => Failure(f)

@@ -107,7 +107,17 @@ POST    /member/pay-order-by-payment-source         org.sailcbi.APIServer.Api.En
 
 POST    /member/pay-order-by-gift-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaGiftCard()
 
-GET    /member/fetch-api-constants                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getFetchAPIConstants()
+POST    /member/pay-order-by-gift-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaGiftCard()
+
+POST    /member/store-square-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postStoreCard()
+
+POST    /member/clear-stored-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postClearStoredCard()
+
+POST    /member/get-square-gift-card-info       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postGetGiftCardInfo()
+
+POST    /member/fetch-api-constants                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getFetchAPIConstants()
+
+POST    /member/poll-order-status                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getOrderStatus()
 
 GET    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.get(juniorId: Int, instanceId: Int)
 POST    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.post()

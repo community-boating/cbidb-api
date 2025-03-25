@@ -6,8 +6,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechanism)(implicit exec: ExecutionContext) extends CompassInterfaceMechanism {
 
-  private def getString(url: String): Future[String] =
-    http.getString(url, POST, None, None, None, Some(key))
+  private def getString(url: String, body: Option[String] = None): Future[String] =
+    http.getString(url, POST, body, None, None, Some(key))
 
 
   override def upsertSquareCustomer(personId: Int): Future[String] =
@@ -16,16 +16,24 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
   override def upsertCompassOrder(legacyOrderId: Int): Future[String] =
     getString(baseURL + "/upsertOrder/" + legacyOrderId)
 
-  override def payCompassOrderViaGiftCard(compassOrderId: Int, GAN: String): Future[String] =
-    getString(baseURL + "/payOrderViaGiftCard/" + compassOrderId + "/" + GAN)
+  override def payCompassOrderViaGiftCard(compassOrderId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/payOrderViaGiftCard/" + compassOrderId, Some(requestBodyJson))
 
-  override def payCompassOrderViaPaymentSource(compassOrderId: Int, paymentSourceId: String): Future[String] =
-    getString(baseURL + "/payOrderViaPaymentSource/" + compassOrderId + "/" + paymentSourceId)
+  override def payCompassOrderViaPaymentSource(compassOrderId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/payOrderViaPaymentSource/" + compassOrderId, Some(requestBodyJson))
 
-  override def pollCompassOrderStatus(compassOrderId: Int): Future[String] =
-    getString(baseURL + "/pollOrderStatus/" + compassOrderId)
+  override def pollCompassOrderStatus(legacyOrderId: Int): Future[String] =
+    getString(baseURL + "/pollOrderStatus/" + legacyOrderId)
 
   override def fetchAPIConstants(): Future[String] =
     getString(baseURL + "/fetchAPIConstants")
 
+  override def storeSquareCard(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/createCard/" + personId, Some(requestBodyJson))
+
+  override def getSquareGiftCardInfo(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/getGiftCardInfo/" + personId, Some(requestBodyJson))
+
+  override def clearSquareCard(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/deleteStoredCard/" + personId, Some(requestBodyJson))
 }

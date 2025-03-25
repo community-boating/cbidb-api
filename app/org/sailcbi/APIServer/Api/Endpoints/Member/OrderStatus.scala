@@ -56,7 +56,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		val now = PA.now().toLocalDate
 
-		/*val staggeredPayments = if (staggeredPaymentAdditionalMonths == 0) {
+		val staggeredPayments = if (staggeredPaymentAdditionalMonths == 0) {
 			List.empty
 		} else if (program == "JP") {
 			PortalLogic.writeOrderStaggeredPaymentsJP(rc, now, orderId, staggeredPaymentAdditionalMonths > 0).map(destructurePaymentPlan)
@@ -67,7 +67,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		val jpPotentialStaggeredPayments =
 			if (program == "JP") PortalLogic.getJPAvailablePaymentSchedule(rc, orderId, now, true).map(destructurePaymentPlan)
 			else List.empty
-		*/
+
 		implicit val format = OrderStatusResult.format
 
 		val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
@@ -76,9 +76,9 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			total = orderTotal,
 			paymentMethodRequired = true,
 			cardData = None,
-			staggeredPayments = List.empty,
+			staggeredPayments = staggeredPayments,
 			paymentIntentId = None,
-			jpAvailablePaymentSchedule = List.empty,
+			jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
 			nameFirst = nameFirst,
 			nameLast = nameLast,
 			email = email,
