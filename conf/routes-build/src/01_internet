@@ -103,11 +103,9 @@ POST    /member/upsert-square-customer                org.sailcbi.APIServer.Api.
 
 POST    /member/upsert-compass-order                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertOrder()
 
+POST    /member/pay-order-free        org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderFree()
+
 POST    /member/pay-order-by-payment-source         org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaPaymentSource()
-
-POST    /member/pay-order-by-gift-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaGiftCard()
-
-POST    /member/pay-order-by-gift-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaGiftCard()
 
 POST    /member/store-square-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postStoreCard()
 

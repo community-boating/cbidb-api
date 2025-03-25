@@ -16,14 +16,14 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
   override def upsertCompassOrder(legacyOrderId: Int): Future[String] =
     getString(baseURL + "/upsertOrder/" + legacyOrderId)
 
-  override def payCompassOrderViaGiftCard(compassOrderId: Int, requestBodyJson: String): Future[String] =
-    getString(baseURL + "/payOrderViaGiftCard/" + compassOrderId, Some(requestBodyJson))
+  override def payCompassOrderFree(legacyOrderId: Int): Future[String] =
+    getString(baseURL + "/payOrderFree/" + legacyOrderId)
 
-  override def payCompassOrderViaPaymentSource(personId: Option[Int], compassOrderId: Int, requestBodyJson: String): Future[String] =
-    getString(baseURL + "/payOrderViaPaymentSource/" + compassOrderId + personId.map(a => "/" + a).getOrElse(""), Some(requestBodyJson))
+  override def payCompassOrderViaPaymentSource(personId: Option[Int], legacyOrderId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/payOrderViaPaymentSource/" + legacyOrderId + personId.map(a => "/" + a).getOrElse(""), Some(requestBodyJson))
 
-  override def pollCompassOrderStatus(legacyOrderId: Int): Future[String] =
-    getString(baseURL + "/pollOrderStatus/" + legacyOrderId)
+  override def pollCompassOrderStatus(requestBodyJson: String): Future[String] =
+    getString(baseURL + "/pollOrderStatus", Some(requestBodyJson))
 
   override def fetchAPIConstants(): Future[String] =
     getString(baseURL + "/fetchAPIConstants")

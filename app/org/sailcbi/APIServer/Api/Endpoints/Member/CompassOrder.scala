@@ -65,13 +65,13 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
 
 
-  def postPayOrderViaGiftCard()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+  def postPayOrderFree()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
     PA.withParsedPostBodyJSON(request.body.asJson, PostPayOrderViaGiftCardShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
-        rc.getCompassIOController(ws).payCompassOrderViaGiftCard(orderId, request.body.asJson.map(a => a.toString).orNull).transform({
+        rc.getCompassIOController(ws).payCompassOrderFree(orderId).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })
@@ -134,10 +134,9 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def postClearStoredCard()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
-    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
     PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
-        rc.getCompassIOController(ws).clearSquareCard(authedPersonId, requestBodyJson).transform({
+        rc.getCompassIOController(ws).clearSquareCard(authedPersonId, request.body.asJson.map(a => a.toString).orNull).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })
@@ -151,10 +150,10 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def getOrderStatus()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
     PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
-        val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
-        rc.getCompassIOController(ws).pollCompassOrderStatus(orderId).transform({
+        rc.getCompassIOController(ws).pollCompassOrderStatus(requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })
@@ -172,7 +171,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
     PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
       rc.getCompassIOController(ws).getSquareGiftCardInfo(rc.getAuthedPersonId, requestBodyJson).transform({
         case Success(s) => Success(Ok(s))
-        case Failure(f) => Success(NotFound)
+        case Failure(f) => Failure(f)
       })
     })
 
