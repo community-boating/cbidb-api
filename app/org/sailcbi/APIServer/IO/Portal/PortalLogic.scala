@@ -8,13 +8,10 @@ import com.coleji.neptune.Util._
 import com.coleji.neptune.{API, Storable}
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.DtoMemberApClassInstancesInstructorInfoGetResponseSuccess
 import org.sailcbi.APIServer.BarcodeFactory
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentIntent, PaymentMethod}
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
 import org.sailcbi.APIServer.Entities.dto.PersonNotification
 import org.sailcbi.APIServer.Entities.dto.PersonNotification.{PersonAllNotificationsDto, PersonNotificationDbRecord}
-import org.sailcbi.APIServer.IO.PreparedQueries.Apex.GetCurrentOnlineClose
-import org.sailcbi.APIServer.IO.StripeIOController
 import org.sailcbi.APIServer.Logic.MembershipLogic
 import org.sailcbi.APIServer.UserTypes._
 import play.api.libs.json.{JsValue, Json}
@@ -23,8 +20,6 @@ import java.awt.image.BufferedImage
 import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object PortalLogic {
 	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
@@ -1753,7 +1748,7 @@ object PortalLogic {
 			}
 			if (rc.executePreparedQueryForSelect(existsQ).isEmpty) {
 				val insertQ = new PreparedQueryForInsert(Set(MemberRequestCache)) {
-					override val pkName: Option[String] =Some("ASSIGN_ID")
+					override val pkName: Option[String] = Some("ASSIGN_ID")
 
 					override val params: List[String] = List(orderId.toString, instanceId.toString)
 
@@ -2708,7 +2703,7 @@ object PortalLogic {
 		oneTimePrice
 	}
 
-	def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
+	/*def getOrCreatePaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, totalInCents: Int): Future[Option[PaymentIntent]] = {
 		val closeId = rc.executePreparedQueryForSelect(new GetCurrentOnlineClose).head.closeId
 
 		val q = new PreparedQueryForSelect[(String, Int, Int)](Set(MemberRequestCache, ApexRequestCache, ProtoPersonRequestCache)) {
@@ -2762,7 +2757,7 @@ object PortalLogic {
 		} else {
 			throw new Exception("Multiple unpaid paymentIntents found for order " + orderId)
 		}
-	}
+	}*/
 
 	private def getStaggeredPaymentsReady(rc: RequestCache, orderId: Int): List[(Int, Currency)] = {
 		val getStaggeredPaymentsQ = new PreparedQueryForSelect[(Int, Currency)](Set(MemberRequestCache, ApexRequestCache)) {
@@ -2780,7 +2775,7 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(getStaggeredPaymentsQ)
 	}
 
-	private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
+	/*private def createPaymentIntent(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, closeId: Int): Future[Option[PaymentIntent]] = {
 		val appAlias = getAppAliasForOrderId(rc, orderId)
 		val staggeredPayments = if (appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.AUTO_DONATE || appAlias == MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE) {
 			List.empty
@@ -2844,7 +2839,7 @@ object PortalLogic {
 				case _ => throw new Exception("Failed to create PaymentIntent")
 			})
 		}
-	}
+	}*/
 
 	def getJPAvailablePaymentSchedule(rc: RequestCache, orderId: Int, now: LocalDate, addOneTimes: Boolean): List[(LocalDate, Currency)] = {
 		val month = now.format(DateTimeFormatter.ofPattern("MM")).toInt
@@ -2974,7 +2969,7 @@ object PortalLogic {
 		} else ValidationOk
 	}
 
-	def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
+	/*def updateAllPaymentIntentsWithNewMethod(rc: RequestCache, personId: Int, methodId: String, stripe: StripeIOController): Future[List[ServiceRequestResult[_, _]]] = {
 		val q = new PreparedQueryForSelect[String](Set(MemberRequestCache, ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): String = rsw.getString(1)
 
@@ -2990,7 +2985,7 @@ object PortalLogic {
 		Future.sequence(intents.map(i => {
 			stripe.updatePaymentIntentWithPaymentMethod(i, methodId)
 		}))
-	}
+	}*/
 
 	case class PurchaseGiftCertShape(
 		valueInCents: Int,
@@ -3421,20 +3416,6 @@ object PortalLogic {
 		rc.executePreparedQueryForSelect(q).head
 	}
 
-	def setUsePaymentIntent(rc: RequestCache, orderId: Int, usePaymentIntent: Boolean): Unit = {
-		val updateQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
-			override val params: List[String] = List(
-				if(usePaymentIntent) "Y" else "N",
-				orderId.toString
-			)
-			override def getQuery: String =
-				"""
-				  |update order_numbers set use_payment_intent = ? where order_id = ?
-				  |""".stripMargin
-		}
-		rc.executePreparedQueryForUpdateOrDelete(updateQ)
-	}
-
 	def getUsePaymentIntentFromOrderTable(rc: RequestCache, orderId: Int): Option[Boolean] = {
 		val q = new PreparedQueryForSelect[Option[Boolean]](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Option[Boolean] = rsw.getOptionBooleanFromChar(1)
@@ -3442,23 +3423,6 @@ object PortalLogic {
 			override def getQuery: String = s"select use_payment_intent from order_numbers where order_id = $orderId"
 		}
 		rc.executePreparedQueryForSelect(q).head
-	}
-
-	def setUsePaymentIntentDonationStandalone(rc: RequestCache, stripe: StripeIOController, personId: Int, orderId: Int, doRecurring: Boolean): Future[Unit] = {
-		val createCustomerIdFuture = {
-			if (doRecurring) {
-				PortalLogic.getStripeCustomerId(rc, personId) match {
-					case None => stripe.createStripeCustomerFromPerson(rc, personId)
-					case Some(_) => Future()
-				}
-			} else {
-				Future()
-			}
-		}
-
-		createCustomerIdFuture.map(_ => {
-			PortalLogic.setUsePaymentIntent(rc, orderId, doRecurring)
-		})
 	}
 
 	def getNotifications(rc: RequestCache, personid: Int): PersonAllNotificationsDto = {

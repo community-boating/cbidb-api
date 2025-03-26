@@ -8,7 +8,7 @@ import org.sailcbi.APIServer.Entities.MagicIds
 import redis.clients.jedis.JedisPool
 
 class ProtoPersonRequestCache(override val userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool)
-extends LockedRequestCacheWithStripeController(userName, serverParams, dbGateway, redisPool) {
+extends LockedRequestCacheWithSquareController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[ProtoPersonRequestCache] = ProtoPersonRequestCache
 
 	def getAuthedPersonId: Option[Int] = {

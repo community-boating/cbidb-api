@@ -17,8 +17,9 @@ class GetRecurringDonationInfo @Inject()(implicit exec: ExecutionContext, ws: WS
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId
+			Future(Ok("Error"))
 
-			PortalLogic.getStripeCustomerId(rc, personId) match {
+			/*PortalLogic.getStripeCustomerId(rc, personId) match {
 				case None => Future(Ok("Error"))
 				case Some(customerId) => {
 					rc.getStripeIOController(ws).getCustomerObject(customerId).map({
@@ -41,7 +42,7 @@ class GetRecurringDonationInfo @Inject()(implicit exec: ExecutionContext, ws: WS
 						}
 					})
 				}
-			}
+			}*/
 		})
 	}
 

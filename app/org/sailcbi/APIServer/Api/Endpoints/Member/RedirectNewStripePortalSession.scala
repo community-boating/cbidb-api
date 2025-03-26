@@ -13,7 +13,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionContext, ws: WSClient) extends InjectedController {
-	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+	/*def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 			val personId = rc.getAuthedPersonId
@@ -27,5 +27,5 @@ class RedirectNewStripePortalSession @Inject()(implicit val exec: ExecutionConte
 				})
 			}
 		})
-	}
+	}*/
 }

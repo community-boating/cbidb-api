@@ -99,6 +99,23 @@ POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.End
 
 POST    /junior/offseason-wl-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteOffseasonWaitlist.post()
 
+POST    /member/upsert-square-customer                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertSquareCustomer()
+
+POST    /member/upsert-compass-order                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertOrder()
+
+POST    /member/pay-order-free        org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderFree()
+
+POST    /member/pay-order-by-payment-source         org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderViaPaymentSource()
+
+POST    /member/store-square-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postStoreCard()
+
+POST    /member/clear-stored-card       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postClearStoredCard()
+
+POST    /member/get-square-gift-card-info       org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postGetGiftCardInfo()
+
+POST    /member/fetch-api-constants                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getFetchAPIConstants()
+
+POST    /member/poll-order-status                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getOrderStatus()
 
 GET    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.get(juniorId: Int, instanceId: Int)
 POST    /junior/signup-note                               org.sailcbi.APIServer.Api.Endpoints.Member.SignupNote.post()

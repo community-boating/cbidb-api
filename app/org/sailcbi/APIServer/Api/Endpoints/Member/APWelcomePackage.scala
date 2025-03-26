@@ -21,7 +21,7 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 		val profiler = new Profiler
 		val logger = PA.logger
 		PA.withRequestCache(MemberRequestCache)(None, ParsedRequest(req), rc => {
-			val stripe = rc.getStripeIOController(ws)
+			//val stripe = rc.getStripeIOController(ws)
 			profiler.lap("about to do first query")
 			val personId = rc.getAuthedPersonId
 			profiler.lap("got person id")
@@ -129,12 +129,12 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 			) = rc.executePreparedQueryForSelect(nameQ).head
 
 			// do this async, user doesnt need to wait for it.
-			if (stripeCustomerIdOption.isEmpty) {
+			/*if (stripeCustomerIdOption.isEmpty) {
 				stripe.createStripeCustomerFromPerson(rc, personId).map({
 					case f: NetFailure[_, _] => Sentry.captureMessage("Failed to create stripe customerId for person " + personId)
 					case s: NetSuccess[_, _] =>
 				})
-			}
+			}*/
 
 			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(rc)
 			val fullYearDiscounts = discountsWithAmounts.filter(_.membershipTypeId == MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID)

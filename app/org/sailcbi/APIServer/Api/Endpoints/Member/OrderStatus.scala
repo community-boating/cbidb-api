@@ -1,12 +1,11 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
-import com.coleji.neptune.Util.{Currency, NetFailure, NetSuccess}
-import org.sailcbi.APIServer.Entities.JsFacades.Stripe.{PaymentMethod, StripeError}
+import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.SavedCardOrPaymentMethodData
-import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithStripeController, MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithSquareController, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -40,8 +39,8 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 	}
 
-	private def getInner(rc: LockedRequestCacheWithStripeController, program: String, personId: Int)(implicit PA: PermissionsAuthority): Future[Result] = {
-		val stripe = rc.getStripeIOController(ws)
+	private def getInner(rc: LockedRequestCacheWithSquareController, program: String, personId: Int)(implicit PA: PermissionsAuthority): Future[Result] = {
+		//val stripe = rc.getStripeIOController(ws)
 
 		val orderId = PortalLogic.getOrderId(rc, personId, program)
 		val usePaymentIntentFromOrderTable = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId)
@@ -71,64 +70,21 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		implicit val format = OrderStatusResult.format
 
-		val customerIdOption = PortalLogic.getStripeCustomerId(rc, personId)
-
-		if (staggeredPaymentAdditionalMonths > 0 || (usePaymentIntentFromOrderTable.getOrElse(false) && customerIdOption.isDefined)) {
-			val customerId = customerIdOption.get
-
-			val (nameFirst, nameLast, email, authedAsRealPerson) = {
-				if (usePaymentIntentFromOrderTable.getOrElse(false)) {
-					PortalLogic.getAuthedPersonInfo(rc, personId)
-				} else {
-					(None, None, None, None)
-				}
-			}
-
-			stripe.getCustomerDefaultPaymentMethod(customerId).flatMap({
-				case methodSuccess: NetSuccess[Option[PaymentMethod], StripeError] => PortalLogic.getOrCreatePaymentIntent(rc, stripe, personId, orderId, orderTotalInCents).map(pi => {
-					Ok(Json.toJson(OrderStatusResult(
-						orderId = orderId,
-						total = orderTotal,
-						paymentMethodRequired = true,
-						cardData = (methodSuccess.successObject.asInstanceOf[Option[PaymentMethod]]).map(pm => SavedCardOrPaymentMethodData(
-							last4 = pm.card.last4,
-							expMonth = pm.card.exp_month,
-							expYear = pm.card.exp_year,
-							zip = pm.billing_details.address.postal_code
-						)),
-						staggeredPayments = staggeredPayments,
-						paymentIntentId = pi.map(_.id),
-						jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
-						nameFirst = nameFirst,
-						nameLast = nameLast,
-						email = email,
-						authedAsRealPerson = authedAsRealPerson.isDefined,
-					)))
-				})
-				case _: NetFailure[_, StripeError] => throw new Exception("Failed to get default payment method for customer " + customerId)
-			})
-		} else {
-			val cardData = PortalLogic.getCardData(rc, orderId)
-			val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
+		val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
 			Future(Ok(Json.toJson(OrderStatusResult(
-				orderId = orderId,
-				total = orderTotal,
-				paymentMethodRequired = usePaymentIntentFromOrderTable.getOrElse(false),
-				cardData = cardData.map(cd => SavedCardOrPaymentMethodData(
-					last4 = cd.last4,
-					expMonth = cd.expMonth.toInt,
-					expYear = cd.expYear.toInt,
-					zip = cd.zip
-				)),
-				staggeredPayments = List.empty,
-				paymentIntentId = None,
-				jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
-				nameFirst = nameFirst,
-				nameLast = nameLast,
-				email = email,
-				authedAsRealPerson = authedAsRealPerson.isDefined
-			))))
-		}
+			orderId = orderId,
+			total = orderTotal,
+			paymentMethodRequired = true,
+			cardData = None,
+			staggeredPayments = staggeredPayments,
+			paymentIntentId = None,
+			jpAvailablePaymentSchedule = jpPotentialStaggeredPayments,
+			nameFirst = nameFirst,
+			nameLast = nameLast,
+			email = email,
+			authedAsRealPerson = authedAsRealPerson.isDefined
+		))))
+
 	}
 
 	case class StaggeredPayment(

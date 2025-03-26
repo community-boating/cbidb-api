@@ -73,6 +73,8 @@ object CBIBootLoaderLive {
 		val APEX_TOKEN = "ApexToken"
 		val APEX_DEBUG_SIGNET = "ApexDebugSignet"
 		val STRIPE_API_KEY = "StripeAPIKey"
+		val COMPASS_API_KEY = "ScalaSquareAccessKey"
+		val COMPASS_API_URL = "ScalaSquareURL"
 		val PREPARED_QUERIES_ONLY = "PreparedQueriesOnly"
 		val ROUTES_SECURITY_LEVEL = "RoutesSecurityLevel"
 		val SYMON_SALT = "SymonSalt"
