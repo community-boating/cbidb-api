@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Fetch artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: src.tar
 
@@ -112,7 +112,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Fetch artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: CBI-DB-API_0.1.0_all-pub.deb
       - name: rename image
@@ -183,7 +183,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Fetch artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: CBI-DB-API_0.1.0_all-staff.deb
       - name: rename image
