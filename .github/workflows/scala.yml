@@ -31,7 +31,7 @@ jobs:
       - name: tar all
         run: tar -zcf src.tar app conf lib project public sbt-dist script seed test build.sbt sbt sbt.bat sbt-debug
       - name: save tar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: src.tar
           path: src.tar
@@ -101,7 +101,7 @@ jobs:
     - name: rename deb
       run: mv target/CBI-DB-API_0.1.0_all.deb target/CBI-DB-API_0.1.0_all-pub.deb
     - name: save deb
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: CBI-DB-API_0.1.0_all-pub.deb
         path: target/CBI-DB-API_0.1.0_all-pub.deb
@@ -172,7 +172,7 @@ jobs:
       - name: rename deb
         run: mv target/CBI-DB-API_0.1.0_all.deb target/CBI-DB-API_0.1.0_all-staff.deb
       - name: save artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: CBI-DB-API_0.1.0_all-staff.deb
           path: target/CBI-DB-API_0.1.0_all-staff.deb
