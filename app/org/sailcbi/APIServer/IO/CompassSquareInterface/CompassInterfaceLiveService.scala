@@ -13,8 +13,8 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
   override def upsertSquareCustomer(personId: Int): Future[String] =
     getString(baseURL + "/upsertSquareCustomer/" + personId)
 
-  override def upsertCompassOrder(legacyOrderId: Int): Future[String] =
-    getString(baseURL + "/upsertOrder/" + legacyOrderId)
+  override def upsertCompassOrder(orderAppAlias: String, legacyOrderId: Int): Future[String] =
+    getString(baseURL + "/upsertOrder/" +orderAppAlias + "/" + legacyOrderId)
 
   override def payCompassOrderFree(legacyOrderId: Int): Future[String] =
     getString(baseURL + "/payOrderFree/" + legacyOrderId)
