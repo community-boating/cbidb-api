@@ -4,7 +4,7 @@ import scala.concurrent.Future
 
 abstract class CompassInterfaceMechanism {
   def upsertSquareCustomer(personId: Int): Future[String]
-  def upsertCompassOrder(legacyOrderId: Int): Future[String]
+  def upsertCompassOrder(orderAppAlias: String, legacyOrderId: Int): Future[String]
   def payCompassOrderFree(legacyOrderId: Int): Future[String]
   def payCompassOrderViaPaymentSource(personId: Option[Int], legacyOrderId: Int, requestBodyJson: String): Future[String]
   def pollCompassOrderStatus(requestBodyJson: String): Future[String]

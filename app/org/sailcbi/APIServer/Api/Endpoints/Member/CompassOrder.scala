@@ -54,7 +54,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
     PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
-          rc.getCompassIOController(ws).upsertCompassOrder(orderId).transform({
+          rc.getCompassIOController(ws).upsertCompassOrder(parsed.orderAppAlias, orderId).transform({
             case Success(s) => Success(Ok(s))
             case Failure(f) => Failure(f)
           })
