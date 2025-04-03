@@ -168,10 +168,12 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
     val parsedRequest = ParsedRequest(request)
     val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
-    PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
-      rc.getCompassIOController(ws).getSquareGiftCardInfo(rc.getAuthedPersonId, requestBodyJson).transform({
-        case Success(s) => Success(Ok(s))
-        case Failure(f) => Failure(f)
+    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).getSquareGiftCardInfo(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
       })
     })
 
