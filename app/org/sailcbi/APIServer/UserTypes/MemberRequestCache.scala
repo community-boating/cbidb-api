@@ -16,7 +16,9 @@ class MemberRequestCache(override val userName: String, serverParams: Properties
 extends LockedRequestCacheWithSquareController(userName, serverParams, dbGateway, redisPool) {
 	override def companion: RequestCacheObject[MemberRequestCache] = MemberRequestCache
 
+
 	lazy val getAuthedPersonId: Int = {
+		println("CALLING NORMAL M")
 		val q = new PreparedQueryForSelect[Int](Set(MemberRequestCache, RootRequestCache)) {
 			override def getQuery: String =
 				"""

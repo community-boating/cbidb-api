@@ -12,4 +12,6 @@ abstract class CompassInterfaceMechanism {
   def storeSquareCard(personId: Int, requestBodyJson: String): Future[String]
   def getSquareGiftCardInfo(personId: Int, requestBodyJson: String): Future[String]
   def clearSquareCard(personId: Int, requestBodyJson: String): Future[String]
+  def getStaggeredPaymentInvoices(personId: Int): Future[String]
+  def publishStaggeredPaymentInvoice(personId: Int, requestBodyJson: String): Future[String]
 }

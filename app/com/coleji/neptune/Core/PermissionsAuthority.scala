@@ -193,15 +193,22 @@ class PermissionsAuthority private[Core] (
 		println("Path: " + parsedRequest.path)
 		println("Request received: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 		println("Headers: " + parsedRequest.headers)
-
 		val authentication: Option[T] = requiredUserType.getAuthenticatedUsernameInRequest(
 			parsedRequest,
 			rootCB,
 			customParams
 		) match {
-			case None => None
+			case None => {
+				if(!requiredUserType.requiresAuthedUsername){
+					return Some(requiredUserType.create(null, customParams, dbGateway, redisPool))
+				}
+				None
+			}
 			case Some(x: String) => {
 				println("AUTHENTICATION:  Request is authenticated as " + requiredUserType.getClass.getName)
+				if(requiredUserName.isDefined && x != requiredUserName.get){
+					return None
+				}
 				Some(requiredUserType.create(x, customParams, dbGateway, redisPool))
 			}
 		}

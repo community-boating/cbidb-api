@@ -2,9 +2,9 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
-import org.sailcbi.APIServer.Entities.dto.Square.{PostPayOrderViaGiftCardShape, PostPayOrderViaPaymentSourceShape, PostUpsertOrderShape}
+import org.sailcbi.APIServer.Entities.dto.Square.{GenericPostWithOrderAppAliasShape, PostPayOrderViaGiftCardShape, PostPayOrderViaPaymentSourceShape}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithSquareController, MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithSquareController, MemberMaybeOrProtoPersonRequestCache, MemberMaybeRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
 
@@ -26,7 +26,9 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
       ORDER_NUMBER_APP_ALIAS.GC,
       ORDER_NUMBER_APP_ALIAS.DONATE
     ).contains(orderAppAlias)) {
-      PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => block(rc, rc.getAuthedPersonId.getOrElse(-1)))
+      MemberMaybeOrProtoPersonRequestCache.getRC(PA, parsedRequest, rc => {
+          block(rc, rc.getAuthedPersonId.get)
+      })
     }else{
       Future(BadRequest)
     }
@@ -35,7 +37,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def postUpsertSquareCustomer()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).upsertSquareCustomer(authedPersonId).transform({
           case Success(s) => Success(Ok(s))
@@ -51,7 +53,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def postUpsertOrder()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
           rc.getCompassIOController(ws).upsertCompassOrder(parsed.orderAppAlias, orderId).transform({
@@ -101,9 +103,42 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def getFetchAPIConstants()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).fetchAPIConstants().transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def getStaggeredPaymentInvoices()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).getStaggeredPaymentInvoices(authedPersonId).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def postPublishStaggeredPaymentInvoice()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).publishStaggeredPaymentInvoice(authedPersonId, requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })
@@ -118,7 +153,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
     val parsedRequest = ParsedRequest(request)
     val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).storeSquareCard(authedPersonId, requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
@@ -134,7 +169,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def postClearStoredCard()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).clearSquareCard(authedPersonId, request.body.asJson.map(a => a.toString).orNull).transform({
           case Success(s) => Success(Ok(s))
@@ -151,7 +186,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
     val parsedRequest = ParsedRequest(request)
     val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).pollCompassOrderStatus(requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
@@ -168,7 +203,7 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
     val parsedRequest = ParsedRequest(request)
     val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
-    PA.withParsedPostBodyJSON(request.body.asJson, PostUpsertOrderShape.apply)(parsed => {
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
         rc.getCompassIOController(ws).getSquareGiftCardInfo(authedPersonId, requestBodyJson).transform({
           case Success(s) => Success(Ok(s))

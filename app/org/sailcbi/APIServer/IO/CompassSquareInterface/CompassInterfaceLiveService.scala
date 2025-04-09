@@ -36,4 +36,10 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
 
   override def clearSquareCard(personId: Int, requestBodyJson: String): Future[String] =
     getString(baseURL + "/deleteStoredCard/" + personId, Some(requestBodyJson))
+
+  override def getStaggeredPaymentInvoices(personId: Int): Future[String] =
+    getString(baseURL + "/getStaggeredPaymentInvoices/" + personId)
+
+  override def publishStaggeredPaymentInvoice(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/publishStaggeredPaymentInvoice/" + personId, Some(requestBodyJson))
 }

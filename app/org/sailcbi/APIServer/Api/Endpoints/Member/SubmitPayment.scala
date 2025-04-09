@@ -16,6 +16,7 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import java.sql.CallableStatement
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Failure
 
 class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) extends InjectedController {
 	def postAP()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
@@ -53,15 +54,17 @@ class SubmitPayment @Inject()(ws: WSClient)(implicit val exec: ExecutionContext)
 	def postApex()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withRequestCache(ApexRequestCache)(None, parsedRequest, rc => {
-			val params = parsedRequest.postParams
+			Future(Gone)
+			/*val params = parsedRequest.postParams
 			val personId = params("personId").toInt
 			val orderId: Int = params("orderId").toInt
 
 			SubmitPayment.startChargeProcess(rc, ws, personId, orderId).map(parseError => parseError._2 match {
 				case None => Ok("success")
 				case Some(err: String) => Ok(err)
-			})
+			})*/
 		})
+
 	}
 
 	def postStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>

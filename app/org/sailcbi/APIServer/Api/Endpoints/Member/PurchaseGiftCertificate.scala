@@ -1,12 +1,12 @@
 package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.neptune.Util.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
-import org.sailcbi.APIServer.IO.Portal.PortalLogic
+import org.sailcbi.APIServer.IO.Portal.{PersonExistsException, PortalLogic}
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.{PurchaseGiftCertShape, dummyEmptyPurchaseGC}
-import org.sailcbi.APIServer.UserTypes.ProtoPersonRequestCache
+import org.sailcbi.APIServer.UserTypes.{MemberMaybeOrProtoPersonRequestCache, MemberMaybeRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -16,42 +16,41 @@ import scala.concurrent.{ExecutionContext, Future}
 class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def set()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
-		println("here we go")
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PurchaseGiftCertShape.apply)(parsed => {
-			println("successfully parsed post body")
-			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				println("got RC")
-				runValidations(parsed) match {
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+				runValidations(rc, parsed) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
-						val personId = PortalLogic.persistStandalonePurchaser(
-							rc,
-							rc.userName,
-							rc.getAuthedPersonId,
-							parsed.purchaserNameFirst,
-							parsed.purchaserNameLast,
-							parsed.purchaserEmail
-						)
 
-						val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.GC)
+						try {
+							val personId = PortalLogic.persistStandalonePurchaser(
+								rc,
+								rc.userName,
+								protoPersonId,
+								parsed.purchaserNameFirst,
+								parsed.purchaserNameLast,
+								parsed.purchaserEmail
+							)
+							val orderId = PortalLogic.getOrderId(rc, rc.getAuthedPersonId.getOrElse(personId), ORDER_NUMBER_APP_ALIAS.GC)
 
-						println(personId)
-						println(orderId)
-						println(parsed)
+							PortalLogic.setGiftCertPurchase(rc, personId, orderId, parsed)
 
-						PortalLogic.setGiftCertPurchase(rc, personId, orderId, parsed)
-
-						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+							Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+						}catch {
+							case e: PersonExistsException => {
+								Future(Ok(e.result.toResultError.asJsObject))
+							}
+						}
 					}
 				}
-			})
+		})
 		})
 	}
 
 	def get()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
-			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+			MemberMaybeOrProtoPersonRequestCache.getRC(PA, parsedRequest, rc => {
 				rc.getAuthedPersonId match {
 					case None => Future(Ok(Json.toJson(dummyEmptyPurchaseGC)))
 					case Some(personId) => {
@@ -66,7 +65,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 		}
 	}
 
-	private def runValidations(parsed: PurchaseGiftCertShape): ValidationResult = {
+	private def runValidations(rc: RequestCache, parsed: PurchaseGiftCertShape): ValidationResult = {
 		val unconditionals = List(
 			ValidationResult.checkBlank(parsed.purchaserNameFirst, "Purchaser First Name"),
 			ValidationResult.checkBlank(parsed.purchaserNameLast, "Purchaser Last Name"),

@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import com.coleji.neptune.API.{ValidationOk, ValidationResult}
+import com.coleji.neptune.API.{ValidationOk, ValidationResult, ValidationError}
 import com.coleji.neptune.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.neptune.IO.PreparedQueries._
 import com.coleji.neptune.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
@@ -21,15 +21,64 @@ import java.sql.CallableStatement
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
+class PersonExistsException(val result: ValidationError) extends Exception
+
 object PortalLogic {
-	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String]): Int = {
+	def confirmNoAccount(rc: RequestCache, email: String): ValidationResult = {
+		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
+			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
+
+			override val params: List[String] = List(
+				email.toLowerCase()
+			)
+
+			override def getQuery: String =
+				"""
+				  |select person_id from persons where lower(email) = ? and pw_hash is not null
+				  |""".stripMargin
+		}
+		val personId = rc.executePreparedQueryForSelect(q).headOption
+		if (personId.isDefined) {
+			ValidationResult.from("ACCOUNT_EXISTS")
+		} else {
+			ValidationOk
+		}
+	}
+
+	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String], authedAsOverride: Option[Int] = None): Int = {
 		maybePersonId match {
 			case Some(personId) => {
+				val (nameFirstAuthed, nameLastAuthed, emailAuthed, personIdAuthed) = this.getAuthedPersonInfo(rc, personId)
+				val authedVsUpdate = List(
+					(nameFirstAuthed, nameFirst),
+					(nameLastAuthed, nameLast),
+					(emailAuthed, email)
+				)
+				val authedAsChanged = authedVsUpdate.exists(a => a._1.isDefined && a._2.isDefined && !a._1.equals(a._2))
+				println("WHAT WHAT asdflkjdsfkljsdafljsdlkfjslkdfjslkdfjslkdfjslkdfjslkdfjsdfsdf")
+				println(authedAsOverride)
+				println(personIdAuthed)
+				println(authedAsChanged)
+				val newAuthedAs =
+					if(authedAsOverride.isDefined) authedAsOverride
+					else if(authedAsChanged) None
+					else personIdAuthed
+				if(newAuthedAs.isEmpty && email.isDefined){
+					val accountValidation = confirmNoAccount(rc, email.get)
+					println(accountValidation)
+					println(accountValidation.isInstanceOf[ValidationError])
+					accountValidation match {
+						case error: ValidationError =>
+							throw new PersonExistsException(error)
+						case _ =>
+					}
+				}
 				val pq = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
 					override val params: List[String] = List(
 						nameFirst.orNull,
 						nameLast.orNull,
-						email.orNull
+						email.orNull,
+						newAuthedAs.map(a => if(a != null)a.toString else null).orNull
 					)
 
 					override def getQuery: String =
@@ -37,7 +86,8 @@ object PortalLogic {
 						  |update persons set
 						  |name_first = ?,
 						  |name_last = ?,
-						  |email = ?
+						  |email = ?,
+							|has_authed_as = ?
 						  |where person_id = $personId
 						  |
 						  |""".stripMargin
@@ -1641,7 +1691,7 @@ object PortalLogic {
 		if (amount <= 0) {
 			ValidationResult.from("Donation amount must be >= $0.")
 		} else {
-			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
+			val existsQ = new PreparedQueryForSelect[Int](Set(MemberRequestCache, MemberMaybeRequestCache, ProtoPersonRequestCache, ApexRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
 
 				override val params: List[String] = List(orderId.toString, fundId.toString)
@@ -1702,7 +1752,7 @@ object PortalLogic {
 	}
 
 	def deleteDonationFromOrder(rc: RequestCache, orderId: Int, fundId: Int): Unit = {
-		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, ProtoPersonRequestCache)) {
+		val q = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache, MemberMaybeRequestCache, ProtoPersonRequestCache)) {
 			override val params: List[String] = List(orderId.toString, fundId.toString)
 			override def getQuery: String =
 				"""

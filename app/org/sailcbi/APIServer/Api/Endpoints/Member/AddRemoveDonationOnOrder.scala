@@ -2,12 +2,10 @@ package org.sailcbi.APIServer.Api.Endpoints.Member
 
 import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
-import com.coleji.neptune.IO.PreparedQueries.PreparedQueryForSelect
-import com.coleji.neptune.Storable.ResultSetWrapper
 import com.coleji.neptune.Util.EmailUtil
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
-import org.sailcbi.APIServer.IO.Portal.PortalLogic
-import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.IO.Portal.{PersonExistsException, PortalLogic}
+import org.sailcbi.APIServer.UserTypes.{MemberMaybeOrProtoPersonRequestCache, MemberMaybeRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -35,14 +33,14 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			if (parsed.program.contains(ORDER_NUMBER_APP_ALIAS.DONATE)) {
-				PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-					val personId = rc.getAuthedPersonId.get
-					val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
+				PA.withRequestCache(MemberMaybeRequestCache)(None, parsedRequest, rc => {
+          val personId = rc.getAuthedPersonId.get
+          val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
-					PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
+          PortalLogic.deleteDonationFromOrder(rc, orderId, parsed.fundId)
 
-					Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
-				})
+          Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
+        })
 			} else {
 				PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 					val personId = rc.getAuthedPersonId
@@ -59,15 +57,21 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 	def addStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
-			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				//val stripe = rc.getStripeIOController(ws)
-				val personId = PortalLogic.persistStandalonePurchaser(rc, rc.userName, rc.getAuthedPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+				try {
+					val personId = PortalLogic.persistStandalonePurchaser(rc, rc.userName, protoPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
 
-				val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
+					val orderId = PortalLogic.getOrderId(rc, rc.getAuthedPersonId.getOrElse(personId), ORDER_NUMBER_APP_ALIAS.DONATE)
 
-				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match{
-					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
-					case ValidationOk => Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+					PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match {
+						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
+						case ValidationOk => Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+					}
+
+				}catch {
+					case e: PersonExistsException => {
+						Future(Ok(e.result.toResultError.asJsObject))
+					}
 				}
 			})
 		})
@@ -76,19 +80,25 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 	def setStandalonePersonInfo()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, SetStandalonePersonShape.apply)(parsed => {
-			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
-				runValidationstandalonePersonInfo(rc, parsed) match {
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+				runValidationstandalonePersonInfo(rc, parsed, protoPersonId) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
-						PortalLogic.persistStandalonePurchaser(rc, rc.userName, rc.getAuthedPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
-						Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+						try {
+							PortalLogic.persistStandalonePurchaser(rc, rc.userName, protoPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
+							Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
+						}catch {
+							case e: PersonExistsException => {
+								Future(Ok(e.result.toResultError.asJsObject))
+							}
+						}
 					}
 				}
 			})
 		})
 	}
 
-	private def runValidationstandalonePersonInfo(rc: RequestCache, parsed: SetStandalonePersonShape): ValidationResult = {
+	private def runValidationstandalonePersonInfo(rc: RequestCache, parsed: SetStandalonePersonShape, protoPersonId: Option[Int]): ValidationResult = {
 		val unconditionals = List(
 			ValidationResult.checkBlank(parsed.nameFirst, "First Name"),
 			ValidationResult.checkBlank(parsed.nameLast, "Last Name"),
@@ -99,37 +109,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 			),
 		)
 
-		val ifRecurring = List((
-			parsed.doRecurring && parsed.email.isDefined,
-			() => confirmNoAccount(rc, parsed.email.get)
-		)).filter(_._1).map(_._2())
-
-		ValidationResult.combine(unconditionals ::: ifRecurring)
-	}
-
-	private def confirmNoAccount(rc: RequestCache, email: String): ValidationResult = {
-		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
-			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
-
-			override val params: List[String] = List(
-				email.toLowerCase()
-			)
-
-			override def getQuery: String =
-				"""
-				  |select 1 from persons where lower(email) = ? and pw_hash is not null
-				  |""".stripMargin
-		}
-		val exists = rc.executePreparedQueryForSelect(q).nonEmpty
-		if (exists) {
-			ValidationResult.from(
-				"""
-				  |An account for that email address already exists.  To set up a recurring donation, please <a target="_blank" href="/ap/donate">log in</a>.  If you are having trouble logging in,
-				  |<a target="_blank" href="/ap/forgot-pw">click here</a> to reset your password.
-				  |""".stripMargin)
-		} else {
-			ValidationOk
-		}
+		ValidationResult.combine(unconditionals)
 	}
 
 	case class SetStandalonePersonShape(

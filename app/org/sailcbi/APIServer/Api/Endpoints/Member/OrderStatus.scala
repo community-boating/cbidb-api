@@ -5,7 +5,7 @@ import com.coleji.neptune.Util.Currency
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.Portal.PortalLogic.SavedCardOrPaymentMethodData
-import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithSquareController, MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{LockedRequestCacheWithSquareController, MemberMaybeOrProtoPersonRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, InjectedController, Result}
@@ -21,13 +21,13 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 		program match {
 			case ORDER_NUMBER_APP_ALIAS.AP | ORDER_NUMBER_APP_ALIAS.JP => PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
 				val personId = rc.getAuthedPersonId
-				getInner(rc, program, personId)
+				getInner(rc, program, personId, None)
 			})
 			case _ => {
 				if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
-					PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+					MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
 						rc.getAuthedPersonId match {
-							case Some(personId) => getInner(rc, program, personId)
+							case Some(personId) => getInner(rc, program, personId, protoPersonId)
 							case None => Future(Ok(Json.toJson(orderStatusEmpty)))
 						}
 					})
@@ -39,14 +39,11 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 	}
 
-	private def getInner(rc: LockedRequestCacheWithSquareController, program: String, personId: Int)(implicit PA: PermissionsAuthority): Future[Result] = {
-		//val stripe = rc.getStripeIOController(ws)
+	private def getInner(rc: LockedRequestCacheWithSquareController, program: String, personId: Int, protoPersonId: Option[Int])(implicit PA: PermissionsAuthority): Future[Result] = {
 
 		val orderId = PortalLogic.getOrderId(rc, personId, program)
-		val usePaymentIntentFromOrderTable = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId)
 
 		val orderTotal = PortalLogic.getOrderTotalDollars(rc, orderId)
-		val orderTotalInCents = Currency.toCents(orderTotal)
 
 		val staggeredPaymentAdditionalMonths = PortalLogic.getPaymentAdditionalMonths(rc, orderId)
 
@@ -70,7 +67,7 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		implicit val format = OrderStatusResult.format
 
-		val (nameFirst, nameLast, email, authedAsRealPerson) = PortalLogic.getAuthedPersonInfo(rc, personId)
+		val (nameFirst, nameLast, email, authedAsRealPerson) = if(protoPersonId.isDefined) PortalLogic.getAuthedPersonInfo(rc, protoPersonId.get) else (None, None, None, None)
 			Future(Ok(Json.toJson(OrderStatusResult(
 			orderId = orderId,
 			total = orderTotal,

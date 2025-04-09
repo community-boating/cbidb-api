@@ -99,6 +99,9 @@ POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.End
 
 POST    /junior/offseason-wl-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteOffseasonWaitlist.post()
 
+POST    /member/publish-staggered-payment-invoice               org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPublishStaggeredPaymentInvoice()
+POST    /member/get-staggered-payment-invoices                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getStaggeredPaymentInvoices()
+
 POST    /member/upsert-square-customer                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertSquareCustomer()
 
 POST    /member/upsert-compass-order                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertOrder()
@@ -206,7 +209,7 @@ POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoin
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()
 POST    /auth/do-claim-acct                        org.sailcbi.APIServer.Api.Endpoints.Security.ApDoClaimAccount.post()
 POST    /auth/update-acct               org.sailcbi.APIServer.Api.Endpoints.Security.UpdateAccount.post()
-POST    /auth/prove-member              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
+POST    /member/prove-member              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
 
 POST    /auth/crash                     org.sailcbi.APIServer.Api.Endpoints.Crash.crash()
 

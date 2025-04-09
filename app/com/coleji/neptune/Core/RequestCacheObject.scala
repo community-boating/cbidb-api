@@ -12,10 +12,14 @@ abstract class RequestCacheObject[T <: RequestCache] {
 	def create(userName: String, serverParams: PropertiesWrapper, dbGateway: DatabaseGateway, redisPool: JedisPool): T
 
 	def test(allowed: Set[RequestCacheObject[_]]): Unit = {
+		println(allowed)
+		println(this)
 		if (!allowed.contains(this)) throw new UserTypeMismatchException()
 	}
 
 	val requireCORSPass: Boolean = true
+
+	val requiresAuthedUsername: Boolean = true
 
 	// Given a request (and an unrestricted CacheBroker), determine if the request is authenticated against this mechanism.
 	// Return Some(authenticated username) if so, None otherwise

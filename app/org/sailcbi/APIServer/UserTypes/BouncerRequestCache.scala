@@ -30,6 +30,7 @@ object BouncerRequestCache extends RequestCacheObject[BouncerRequestCache] {
 			if (PA.systemParams.allowableUserTypes.contains(userType)) {
 				userType match {
 					case MemberRequestCache => MemberRequestCache.getPwHashForUser(rc, userName)
+					case MemberMaybeRequestCache => MemberRequestCache.getPwHashForUser(rc, userName)
 					case StaffRequestCache => StaffRequestCache.getPwHashForUser(rc, userName)
 					case _ => None
 				}

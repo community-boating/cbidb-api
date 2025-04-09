@@ -4,7 +4,7 @@ import com.coleji.neptune.Core.{CacheBroker, ParsedRequest, PermissionsAuthority
 import org.sailcbi.APIServer.Entities.MagicIds.ORDER_NUMBER_APP_ALIAS
 import org.sailcbi.APIServer.IO.Portal.PortalLogic
 import org.sailcbi.APIServer.IO.PreparedQueries.Member.FullCart
-import org.sailcbi.APIServer.UserTypes.{MemberRequestCache, ProtoPersonRequestCache}
+import org.sailcbi.APIServer.UserTypes.{MemberMaybeOrProtoPersonRequestCache, MemberRequestCache, ProtoPersonRequestCache}
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.{Action, AnyContent, InjectedController}
 
@@ -30,7 +30,7 @@ class GetFullCartItems @Inject()(implicit exec: ExecutionContext) extends Inject
 		val parsedRequest = ParsedRequest(request)
 
 		if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
-			PA.withRequestCache(ProtoPersonRequestCache)(None, parsedRequest, rc => {
+			MemberMaybeOrProtoPersonRequestCache.getRC(PA, parsedRequest, rc => {
 				val cb: CacheBroker = rc.cb
 				rc.getAuthedPersonId match {
 					case None => Future(Ok(JsArray()))
