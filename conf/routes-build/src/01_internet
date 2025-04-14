@@ -99,12 +99,16 @@ POST    /junior/class-signup-delete                org.sailcbi.APIServer.Api.End
 
 POST    /junior/offseason-wl-delete                org.sailcbi.APIServer.Api.Endpoints.Member.DeleteOffseasonWaitlist.post()
 
-POST    /member/publish-staggered-payment-invoice               org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPublishStaggeredPaymentInvoice()
+POST    /member/update-default-payment-method               org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpdateDefaultPaymentMethod()
+
+POST    /member/create-staggered-payment-invoice               org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postCreateStaggeredPaymentInvoice()
 POST    /member/get-staggered-payment-invoices                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.getStaggeredPaymentInvoices()
 
 POST    /member/upsert-square-customer                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertSquareCustomer()
 
 POST    /member/upsert-compass-order                org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postUpsertOrder()
+
+POST    /member/pay-invoice-now        org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayInvoiceNow()
 
 POST    /member/pay-order-free        org.sailcbi.APIServer.Api.Endpoints.Member.CompassOrder.postPayOrderFree()
 

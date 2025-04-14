@@ -119,9 +119,10 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   def getStaggeredPaymentInvoices()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
     PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
-        rc.getCompassIOController(ws).getStaggeredPaymentInvoices(authedPersonId).transform({
+        rc.getCompassIOController(ws).getStaggeredPaymentInvoices(authedPersonId, requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })
@@ -132,13 +133,47 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
 
 
-  def postPublishStaggeredPaymentInvoice()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+  def postPayInvoiceNow()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)
     val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
     PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
       getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
-        rc.getCompassIOController(ws).publishStaggeredPaymentInvoice(authedPersonId, requestBodyJson).transform({
+        rc.getCompassIOController(ws).payInvoiceNow(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def postUpdateDefaultPaymentMethod()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).saveDefaultPaymentMethod(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def postCreateStaggeredPaymentInvoice()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).createStaggeredPaymentInvoice(authedPersonId, requestBodyJson).transform({
           case Success(s) => Success(Ok(s))
           case Failure(f) => Failure(f)
         })

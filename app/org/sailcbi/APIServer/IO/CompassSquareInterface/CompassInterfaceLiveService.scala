@@ -34,12 +34,19 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
   override def getSquareGiftCardInfo(personId: Int, requestBodyJson: String): Future[String] =
     getString(baseURL + "/getGiftCardInfo/" + personId, Some(requestBodyJson))
 
+  override def saveDefaultPaymentMethod(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/saveDefaultPaymentMethod/" + personId, Some(requestBodyJson))
+
   override def clearSquareCard(personId: Int, requestBodyJson: String): Future[String] =
     getString(baseURL + "/deleteStoredCard/" + personId, Some(requestBodyJson))
 
-  override def getStaggeredPaymentInvoices(personId: Int): Future[String] =
-    getString(baseURL + "/getStaggeredPaymentInvoices/" + personId)
+  override def getStaggeredPaymentInvoices(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/getStaggeredPaymentInvoices/" + personId, Some(requestBodyJson))
 
-  override def publishStaggeredPaymentInvoice(personId: Int, requestBodyJson: String): Future[String] =
-    getString(baseURL + "/publishStaggeredPaymentInvoice/" + personId, Some(requestBodyJson))
+  override def createStaggeredPaymentInvoice(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/createStaggeredPaymentInvoice/" + personId, Some(requestBodyJson))
+
+  override def payInvoiceNow(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/payInvoiceNow/" + personId, Some(requestBodyJson))
+
 }
