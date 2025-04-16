@@ -1,12 +1,13 @@
 package org.sailcbi.APIServer.IO.Portal
 
-import com.coleji.neptune.API.{ValidationOk, ValidationResult, ValidationError}
+import com.coleji.neptune.API.{ValidationError, ValidationOk, ValidationResult}
 import com.coleji.neptune.Core.{PermissionsAuthority, RequestCache}
 import com.coleji.neptune.IO.PreparedQueries._
 import com.coleji.neptune.Storable.{GetSQLLiteral, GetSQLLiteralPrepared, ResultSetWrapper}
 import com.coleji.neptune.Util._
 import com.coleji.neptune.{API, Storable}
 import org.sailcbi.APIServer.Api.Endpoints.Dto.Member.ApClassInstancesInstructorInfo.DtoMemberApClassInstancesInstructorInfoGetResponseSuccess
+import org.sailcbi.APIServer.Api.Endpoints.Security.TransferOrderOwnership
 import org.sailcbi.APIServer.BarcodeFactory
 import org.sailcbi.APIServer.Entities.MagicIds
 import org.sailcbi.APIServer.Entities.Misc.StripeTokenSavedShape
@@ -24,6 +25,39 @@ import java.time.{LocalDate, LocalDateTime}
 class PersonExistsException(val result: ValidationError) extends Exception
 
 object PortalLogic {
+
+	def setUsePaymentIntent(rc: RequestCache, orderId: Int, useIntent: Boolean): Unit = {
+		val pq = new PreparedQueryForUpdateOrDelete(Set(ProtoPersonRequestCache)) {
+			override val params: List[String] = List(if(useIntent) "Y" else "N")
+
+			override def getQuery: String =
+				s"""
+						  |update order_numbers set
+						  |use_payment_intent = ?
+						  |where order_id = $orderId
+						  |""".stripMargin
+		}
+
+		rc.executePreparedQueryForUpdateOrDelete(pq)
+	}
+
+	def mergeOrders(mmRC: MemberMaybeRequestCache, ppRC: ProtoPersonRequestCache, previousMemberId: Option[Int]): Unit = {
+		val memberPersonId = mmRC.getAuthedPersonId
+		val protoPersonId = ppRC.getAuthedPersonId
+		if(memberPersonId.isDefined && protoPersonId.isDefined){
+			val orderIdDonateMember = PortalLogic.getOrderId(mmRC, memberPersonId.get, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
+			val orderIdDonateProto = PortalLogic.getOrderId(mmRC, protoPersonId.get, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
+			TransferOrderOwnership.transferOrder(mmRC, orderIdDonateProto, orderIdDonateMember)
+		}else if(protoPersonId.isDefined && previousMemberId.isDefined){
+			val orderIdDonateProto = PortalLogic.getOrderId(ppRC, protoPersonId.get, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
+			val orderIdDonateMember = PortalLogic.getOrderId(ppRC, previousMemberId.get, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
+			TransferOrderOwnership.transferOrder(mmRC, orderIdDonateMember, orderIdDonateProto)
+		}else{
+			println("Couldn't merge orders")
+		}
+
+	}
+
 	def confirmNoAccount(rc: RequestCache, email: String): ValidationResult = {
 		val q = new PreparedQueryForSelect[Int](Set(ProtoPersonRequestCache)) {
 			override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): Int = rsw.getInt(1)
@@ -48,6 +82,7 @@ object PortalLogic {
 	def persistStandalonePurchaser(rc: RequestCache, cookieValue: String, maybePersonId: Option[Int], nameFirst: Option[String], nameLast: Option[String], email: Option[String], authedAsOverride: Option[Int] = None): Int = {
 		maybePersonId match {
 			case Some(personId) => {
+
 				val (nameFirstAuthed, nameLastAuthed, emailAuthed, personIdAuthed) = this.getAuthedPersonInfo(rc, personId)
 				val authedVsUpdate = List(
 					(nameFirstAuthed, nameFirst),
@@ -55,18 +90,12 @@ object PortalLogic {
 					(emailAuthed, email)
 				)
 				val authedAsChanged = authedVsUpdate.exists(a => a._1.isDefined && a._2.isDefined && !a._1.equals(a._2))
-				println("WHAT WHAT asdflkjdsfkljsdafljsdlkfjslkdfjslkdfjslkdfjslkdfjslkdfjsdfsdf")
-				println(authedAsOverride)
-				println(personIdAuthed)
-				println(authedAsChanged)
 				val newAuthedAs =
 					if(authedAsOverride.isDefined) authedAsOverride
 					else if(authedAsChanged) None
 					else personIdAuthed
 				if(newAuthedAs.isEmpty && email.isDefined){
 					val accountValidation = confirmNoAccount(rc, email.get)
-					println(accountValidation)
-					println(accountValidation.isInstanceOf[ValidationError])
 					accountValidation match {
 						case error: ValidationError =>
 							throw new PersonExistsException(error)

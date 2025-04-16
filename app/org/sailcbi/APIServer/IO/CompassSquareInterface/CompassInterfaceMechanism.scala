@@ -29,4 +29,11 @@ abstract class CompassInterfaceMechanism {
 
   def payInvoiceNow(personId: Int, requestBodyJson: String): Future[String]
 
+  def getRecurringDonations(personId: Int, requestBodyJson: String): Future[String]
+
+  def payRecurringDonations(personId: Int, legacyOrderId: Int, requestBodyJson: String): Future[String]
+
+  def updateRecurringDonation(personId: Int, requestBodyJson: String): Future[String]
+
+  def deleteRecurringDonation(personId: Int, requestBodyJson: String): Future[String]
 }

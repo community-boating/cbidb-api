@@ -17,10 +17,10 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 	def add()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
-			PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => {
-				val personId = rc.getAuthedPersonId
+			MemberMaybeOrProtoPersonRequestCache.getRC(PA, parsedRequest, rc => {
+				val personId = rc.getAuthedPersonId.get
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
-
+				PortalLogic.setUsePaymentIntent(rc, orderId, parsed.doRecurring.getOrElse(false))
 				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
@@ -33,7 +33,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
 			if (parsed.program.contains(ORDER_NUMBER_APP_ALIAS.DONATE)) {
-				PA.withRequestCache(MemberMaybeRequestCache)(None, parsedRequest, rc => {
+				MemberMaybeOrProtoPersonRequestCache.getRC(PA, parsedRequest, rc => {
           val personId = rc.getAuthedPersonId.get
           val orderId = PortalLogic.getOrderId(rc, personId, ORDER_NUMBER_APP_ALIAS.DONATE)
 
@@ -57,11 +57,13 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 	def addStandalone()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, AddRemoveDonationShape.apply)(parsed => {
-			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonRC(PA, parsedRequest, (rc, ppRC) => {
 				try {
-					val personId = PortalLogic.persistStandalonePurchaser(rc, rc.userName, protoPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
+					val personId = PortalLogic.persistStandalonePurchaser(rc, ppRC.userName, ppRC.getAuthedPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
 
 					val orderId = PortalLogic.getOrderId(rc, rc.getAuthedPersonId.getOrElse(personId), ORDER_NUMBER_APP_ALIAS.DONATE)
+
+					PortalLogic.setUsePaymentIntent(rc, orderId, parsed.doRecurring.getOrElse(false))
 
 					PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match {
 						case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
@@ -80,12 +82,14 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 	def setStandalonePersonInfo()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, SetStandalonePersonShape.apply)(parsed => {
-			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
-				runValidationstandalonePersonInfo(rc, parsed, protoPersonId) match {
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonRC(PA, parsedRequest, (rc, ppRC) => {
+				runValidationstandalonePersonInfo(rc, parsed, ppRC.getAuthedPersonId) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
 						try {
-							PortalLogic.persistStandalonePurchaser(rc, rc.userName, protoPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
+							val personId = PortalLogic.persistStandalonePurchaser(rc, ppRC.userName, ppRC.getAuthedPersonId, parsed.nameFirst, parsed.nameLast, parsed.email)
+							val orderId = PortalLogic.getOrderId(rc, rc.getAuthedPersonId.getOrElse(personId), ORDER_NUMBER_APP_ALIAS.DONATE)
+							PortalLogic.setUsePaymentIntent(rc, orderId, parsed.doRecurring)
 							Future(Ok(JsObject(Map("success" -> JsBoolean(true)))))
 						}catch {
 							case e: PersonExistsException => {

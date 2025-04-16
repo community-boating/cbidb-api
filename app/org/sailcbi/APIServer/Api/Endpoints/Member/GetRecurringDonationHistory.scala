@@ -26,6 +26,29 @@ class GetRecurringDonationHistory @Inject()(implicit exec: ExecutionContext, ws:
 			}
 			val nextDonation = rc.executePreparedQueryForSelect(q).head
 
+			val newHistoryQ = new PreparedQueryForSelect[DonationRecord](Set(MemberRequestCache)) {
+				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DonationRecord = DonationRecord(
+					orderId = rsw.getInt(1),
+					donatedDate = rsw.getLocalDate(2),
+					fundId = rsw.getInt(3),
+					amount = rsw.getDouble(4)
+				)
+
+				override val params: List[String] = List(
+					personId.toString,
+					"DONATE_REC"
+				)
+
+				override def getQuery: String =
+					s"""
+					  |select d.compass_order_id, d.donation_date, d.fund_id, d.amount from donations d, compass_order o
+					  |where d.compass_order_id = o.compass_order_id and d.person_id = ?
+					  |and o.order_type = ?
+					  |""".stripMargin
+			}
+
+			val newHistory = rc.executePreparedQueryForSelect(newHistoryQ)
+
 			val historyQ = new PreparedQueryForSelect[DonationRecord](Set(MemberRequestCache)) {
 				override def mapResultSetRowToCaseObject(rsw: ResultSetWrapper): DonationRecord = DonationRecord(
 					orderId = rsw.getInt(1),
@@ -47,11 +70,12 @@ class GetRecurringDonationHistory @Inject()(implicit exec: ExecutionContext, ws:
 					  | order by donation_date, fund_id
 					  |""".stripMargin
 			}
+
 			val history = rc.executePreparedQueryForSelect(historyQ)
 			implicit val historyFormat = DonationRecord.format
 			implicit val format = RecurringDonationHistoryShape.format
 
-			Future(Ok(Json.toJson(RecurringDonationHistoryShape(nextChargeDate = nextDonation, donationHistory = history))))
+			Future(Ok(Json.toJson(RecurringDonationHistoryShape(nextChargeDate = nextDonation, donationHistory = history ::: newHistory))))
 		})
 	}
 

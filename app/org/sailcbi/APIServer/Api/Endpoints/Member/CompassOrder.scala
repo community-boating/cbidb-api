@@ -116,6 +116,76 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
 
 
 
+  def postPayRecurringDonations()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
+        rc.getCompassIOController(ws).payRecurringDonations(authedPersonId, orderId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def getRecurringDonations()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).getRecurringDonations(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def postUpdateRecurringDonation()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        rc.getCompassIOController(ws).updateRecurringDonation(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
+  def deleteRecurringDonation()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
+
+    val parsedRequest = ParsedRequest(request)
+    val requestBodyJson = request.body.asJson.map(a => a.toString()).getOrElse("")
+    PA.withParsedPostBodyJSON(request.body.asJson, GenericPostWithOrderAppAliasShape.apply)(parsed => {
+      getRequestCacheByOrderType(parsed.orderAppAlias, parsedRequest, (rc, authedPersonId) => {
+        val orderId = getOrderIdByOrderType(parsed.orderAppAlias, rc, authedPersonId)
+        rc.getCompassIOController(ws).deleteRecurringDonation(authedPersonId, requestBodyJson).transform({
+          case Success(s) => Success(Ok(s))
+          case Failure(f) => Failure(f)
+        })
+      })
+    })
+
+  }
+
+
+
   def getStaggeredPaymentInvoices()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 
     val parsedRequest = ParsedRequest(request)

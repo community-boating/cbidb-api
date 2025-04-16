@@ -7,11 +7,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object MemberMaybeOrProtoPersonRequestCache {
 
-	def getRCWithProtoPersonId(pa: PermissionsAuthority, parsed: ParsedRequest, block: (PersonRequestBaseCache, Option[Int]) => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
+	def getRCWithProtoPersonRC(pa: PermissionsAuthority, parsed: ParsedRequest, block: (PersonRequestBaseCache, ProtoPersonRequestCache) => Future[Result])(implicit exec: ExecutionContext): Future[Result] = {
 		pa.withRequestCache(MemberMaybeRequestCache)(None, parsed, rcMM => {
 			pa.withRequestCache(ProtoPersonRequestCache)(None, parsed, rcPP => {
 				val rc = if(rcMM.getAuthedPersonId.isDefined) rcMM else rcPP
-				block(rc, rcPP.getAuthedPersonId)
+				block(rc, rcPP)
 			})
 		})
 	}

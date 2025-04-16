@@ -1,6 +1,6 @@
 package org.sailcbi.APIServer.Api.Endpoints.Security
 
-import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority}
+import com.coleji.neptune.Core.{ParsedRequest, PermissionsAuthority, RequestCache}
 import com.coleji.neptune.IO.PreparedQueries.{PreparedQueryForSelect, PreparedQueryForUpdateOrDelete, PreparedValue}
 import com.coleji.neptune.Storable.ResultSetWrapper
 import org.sailcbi.APIServer.Entities.MagicIds
@@ -12,7 +12,47 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+object TransferOrderOwnership {
 
+	def transferOrderDonations(rc: RequestCache, orderId: Int, personId: Option[Int]): Unit = {
+		rc.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override val params: List[String] = List()
+
+			override def getQuery: String =
+				s"""
+							|update shopping_cart_donations
+							|set person_id = ${personId.getOrElse("null")}
+							|where orderId = $orderId
+							|""".stripMargin
+		})
+	}
+
+	def transferOrder(rc: RequestCache, orderId: Int, newOrderId: Int): Unit = {
+
+		rc.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override val params: List[String] = List()
+
+			override def getQuery: String =
+				s"""
+							|update shopping_cart_donations
+							|set order_id = $newOrderId
+							|where orderId = $orderId
+							|""".stripMargin
+		})
+
+		rc.executePreparedQueryForUpdateOrDelete(new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
+			override val params: List[String] = List()
+
+			override def getQuery: String =
+				s"""
+							|update shopping_cart_gcs
+							|set order_id = $newOrderId
+							|where orderId = $orderId
+							|""".stripMargin
+		})
+
+	}
+}
 
 class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedController {
 	def post()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
@@ -40,23 +80,8 @@ class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 				}
 				val (nameFirst, nameLast, email) = memberRC.executePreparedQueryForSelect(personQ).head
 				val protoPersonId = PortalLogic.persistStandalonePurchaser(protoRC, protoRC.userName, protoRC.getAuthedPersonId, nameFirst, nameLast, email, authedAsOverride = Some(authedPersonId))
-				val orderIdDonateMember = PortalLogic.getOrderId(memberRC, memberRC.getAuthedPersonId, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
 				val orderIdDonateProto = PortalLogic.getOrderId(protoRC, protoPersonId, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
-				val orderIdGCMember = PortalLogic.getOrderId(memberRC, memberRC.getAuthedPersonId, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
-				val orderIdGCProto = PortalLogic.getOrderId(protoRC, protoPersonId, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
-
-				val updateSCDonationsQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
-					override val params: List[String] = List(
-						orderIdDonateMember.toString,
-					)
-
-					override def getQuery: String =
-						s"""
-							|update shopping_cart_donations
-							|set order_id = ?
-							|where orderId = $orderIdDonateProto
-							|""".stripMargin
-				}
+				TransferOrderOwnership.transferOrderDonations(memberRC, orderIdDonateProto, Some(memberRC.getAuthedPersonId))
 
 				val updateProtoQ = new PreparedQueryForUpdateOrDelete(Set(MemberRequestCache)) {
 					override val params: List[String] = List(
@@ -97,6 +122,8 @@ class ProveMember @Inject()(implicit exec: ExecutionContext) extends InjectedCon
 							  |""".stripMargin
 					}
 					rc.executePreparedQueryForUpdateOrDelete(q)
+					val orderIdDonateMember = PortalLogic.getOrderId(rc, personId, MagicIds.ORDER_NUMBER_APP_ALIAS.DONATE)
+					TransferOrderOwnership.transferOrderDonations(rc, orderIdDonateMember, Some(personId))
 				}
 				case None =>
 			}

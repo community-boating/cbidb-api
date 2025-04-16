@@ -25,9 +25,9 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 			})
 			case _ => {
 				if (parsedRequest.cookies.get(ProtoPersonRequestCache.COOKIE_NAME).isDefined) {
-					MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+					MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonRC(PA, parsedRequest, (rc, ppRC) => {
 						rc.getAuthedPersonId match {
-							case Some(personId) => getInner(rc, program, personId, protoPersonId)
+							case Some(personId) => getInner(rc, program, personId, ppRC.getAuthedPersonId)
 							case None => Future(Ok(Json.toJson(orderStatusEmpty)))
 						}
 					})
@@ -67,11 +67,13 @@ class OrderStatus @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) e
 
 		implicit val format = OrderStatusResult.format
 
+		val useIntent = PortalLogic.getUsePaymentIntentFromOrderTable(rc, orderId)
+
 		val (nameFirst, nameLast, email, authedAsRealPerson) = if(protoPersonId.isDefined) PortalLogic.getAuthedPersonInfo(rc, protoPersonId.get) else (None, None, None, None)
 			Future(Ok(Json.toJson(OrderStatusResult(
 			orderId = orderId,
 			total = orderTotal,
-			paymentMethodRequired = true,
+			paymentMethodRequired = useIntent.getOrElse(false),
 			cardData = None,
 			staggeredPayments = staggeredPayments,
 			paymentIntentId = None,

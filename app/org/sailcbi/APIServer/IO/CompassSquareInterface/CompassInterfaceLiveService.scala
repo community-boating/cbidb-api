@@ -49,4 +49,16 @@ class CompassInterfaceLiveService(baseURL: String, key: String, http: HTTPMechan
   override def payInvoiceNow(personId: Int, requestBodyJson: String): Future[String] =
     getString(baseURL + "/payInvoiceNow/" + personId, Some(requestBodyJson))
 
+  override def getRecurringDonations(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/getRecurringDonations/" + personId, Some(requestBodyJson))
+
+  override def payRecurringDonations(personId: Int, legacyOrderId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/payRecurringDonations/" + personId + "/" + legacyOrderId, Some(requestBodyJson))
+
+  override def updateRecurringDonation(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/updateRecurringDonation/" + personId, Some(requestBodyJson))
+
+  override def deleteRecurringDonation(personId: Int, requestBodyJson: String): Future[String] =
+    getString(baseURL + "/deleteRecurringDonation/" + personId, Some(requestBodyJson))
+
 }

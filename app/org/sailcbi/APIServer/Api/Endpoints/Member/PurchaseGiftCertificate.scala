@@ -17,7 +17,7 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 	def set()(implicit PA: PermissionsAuthority): Action[AnyContent] = Action.async { request =>
 		val parsedRequest = ParsedRequest(request)
 		PA.withParsedPostBodyJSON(parsedRequest.postJSON, PurchaseGiftCertShape.apply)(parsed => {
-			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonId(PA, parsedRequest, (rc, protoPersonId) => {
+			MemberMaybeOrProtoPersonRequestCache.getRCWithProtoPersonRC(PA, parsedRequest, (rc, ppRC) => {
 				runValidations(rc, parsed) match {
 					case ve: ValidationError => Future(Ok(ve.toResultError.asJsObject))
 					case ValidationOk => {
@@ -25,8 +25,8 @@ class PurchaseGiftCertificate @Inject()(implicit exec: ExecutionContext) extends
 						try {
 							val personId = PortalLogic.persistStandalonePurchaser(
 								rc,
-								rc.userName,
-								protoPersonId,
+								ppRC.userName,
+								ppRC.getAuthedPersonId,
 								parsed.purchaserNameFirst,
 								parsed.purchaserNameLast,
 								parsed.purchaserEmail
