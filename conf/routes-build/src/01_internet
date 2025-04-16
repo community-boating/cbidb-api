@@ -215,7 +215,7 @@ POST    /auth/reset-pw                         org.sailcbi.APIServer.Api.Endpoin
 POST    /auth/start-claim-acct            org.sailcbi.APIServer.Api.Endpoints.Security.ApInitiateClaimAccount.post()
 POST    /auth/do-claim-acct                        org.sailcbi.APIServer.Api.Endpoints.Security.ApDoClaimAccount.post()
 POST    /auth/update-acct               org.sailcbi.APIServer.Api.Endpoints.Security.UpdateAccount.post()
-POST    /member/prove-member              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
+POST    /member/prove-member-scala              org.sailcbi.APIServer.Api.Endpoints.Security.ProveMember.post()
 
 POST    /auth/crash                     org.sailcbi.APIServer.Api.Endpoints.Crash.crash()
 
