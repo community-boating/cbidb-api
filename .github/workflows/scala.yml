@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 jobs:
   tarsrc:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 11
@@ -36,7 +36,7 @@ jobs:
           name: src.tar
           path: src.tar
   imagedev:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     needs: tarsrc
     steps:
@@ -84,7 +84,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildpub:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 11
@@ -106,7 +106,7 @@ jobs:
         name: CBI-DB-API_0.1.0_all-pub.deb
         path: target/CBI-DB-API_0.1.0_all-pub.deb
   imagepub:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: buildpub
     if: github.event_name != 'pull_request'
     steps:
@@ -155,7 +155,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   buildstaff:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
@@ -177,7 +177,7 @@ jobs:
           name: CBI-DB-API_0.1.0_all-staff.deb
           path: target/CBI-DB-API_0.1.0_all-staff.deb
   imagestaff:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: buildstaff
     if: github.event_name != 'pull_request'
     steps:
