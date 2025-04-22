@@ -21,7 +21,7 @@ class AddRemoveDonationOnOrder @Inject()(ws: WSClient)(implicit exec: ExecutionC
 				val personId = rc.getAuthedPersonId.get
 				val orderId = PortalLogic.getOrderId(rc, personId, parsed.program.get)
 				PortalLogic.setUsePaymentIntent(rc, orderId, parsed.doRecurring.getOrElse(false))
-				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount) match{
+				PortalLogic.addDonationToOrder(rc, orderId, parsed.fundId, parsed.amount, parsed.inMemoryOf) match{
 					case e: ValidationError => Future(Ok(e.toResultError.asJsObject))
 					case ValidationOk => Future(Ok(JsObject(Map("Success" -> JsBoolean(true)))))
 				}

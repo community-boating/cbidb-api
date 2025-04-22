@@ -2,9 +2,9 @@ GET     /ping                               org.sailcbi.APIServer.Api.Endpoints.
 GET     /ping-db                               org.sailcbi.APIServer.Api.Endpoints.Public.PingDB.get()
 GET     /flag                           org.sailcbi.APIServer.Api.Endpoints.Public.FlagColor.get()
 GET     /flag-history-recent            org.sailcbi.APIServer.Api.Endpoints.Public.FlagColorHistory.get48Hours()
-POST    /stripe/create-charge-from-token    org.sailcbi.APIServer.Api.Endpoints.Stripe.CreateChargeFromToken.post()
-GET     /stripe/token-details               org.sailcbi.APIServer.Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
-POST    /stripe/sync-db                     org.sailcbi.APIServer.Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
+#POST    /stripe/create-charge-from-token    org.sailcbi.APIServer.Api.Endpoints.Stripe.CreateChargeFromToken.post()
+#GET     /stripe/token-details               org.sailcbi.APIServer.Api.Endpoints.Stripe.GetTokenDetails.get(token: String)
+#POST    /stripe/sync-db                     org.sailcbi.APIServer.Api.Endpoints.Stripe.SyncLocalDBWithStripe.post()
 
 GET     /sunset                           org.sailcbi.APIServer.Api.Endpoints.Public.Sunset.get(year: Int, month: Int, day: Int)
 
@@ -21,26 +21,26 @@ POST     /ap/create-guided-sail-instance     org.sailcbi.APIServer.Api.Endpoints
 POST     /ap/cancel-guided-sail-instance     org.sailcbi.APIServer.Api.Endpoints.Member.ApGuidedSailController.cancelInstance(instanceId: Int)
 
 
-POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
-POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
+#POST     /stripe/store-token               org.sailcbi.APIServer.Api.Endpoints.Stripe.SaveTokenDetails.post()
+#POST     /stripe/clear-card               org.sailcbi.APIServer.Api.Endpoints.Stripe.ClearCard.post()
 
-POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAP()
-POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
-POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
-POST     /stripe/submit-payment-standalone               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postStandalone()
-POST    /stripe/submit-payment-autodonate       org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAutoDonateCreation()
+#POST     /stripe/submit-payment-ap               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAP()
+#POST     /stripe/submit-payment-jp               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postJP()
+#POST     /stripe/submit-payment-apex               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postApex()
+#POST     /stripe/submit-payment-standalone               org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postStandalone()
+#POST    /stripe/submit-payment-autodonate       org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.postAutoDonateCreation()
 
 POST    /stripe/apex-do-auto-donate             org.sailcbi.APIServer.Api.Endpoints.Member.SubmitPayment.apexDoAutoDonate(personId: Int)
 
 # Stripe customer-facing portal.  Currently not useful.
 # POST     /stripe/portal-redirect               org.sailcbi.APIServer.Api.Endpoints.Member.RedirectNewStripePortalSession.post()
 
-POST     /stripe/store-payment-method-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAP()
-POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP(juniorId: Option[Int])
-POST    /stripe/store-payment-method-autodonate         org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAutoDonate()
-POST    /stripe/store-payment-method-donate           org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postDonate()
+#POST     /stripe/store-payment-method-ap               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAP()
+#POST     /stripe/store-payment-method-jp               org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postJP(juniorId: Option[Int])
+#POST    /stripe/store-payment-method-autodonate         org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postAutoDonate()
+#POST    /stripe/store-payment-method-donate           org.sailcbi.APIServer.Api.Endpoints.Stripe.StorePaymentMethod.postDonate()
 
-GET     /stripe/get-recurring-info               org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationInfo.get()
+#GET     /stripe/get-recurring-info               org.sailcbi.APIServer.Api.Endpoints.Member.GetRecurringDonationInfo.get()
 
 POST 	/symon				org.sailcbi.APIServer.Api.Endpoints.Symon.PostSymonRun.post()
 GET     /ip                                     org.sailcbi.APIServer.Api.Endpoints.GetIP.get()

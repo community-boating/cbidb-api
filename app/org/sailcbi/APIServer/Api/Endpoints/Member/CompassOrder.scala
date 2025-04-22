@@ -19,7 +19,8 @@ class CompassOrder @Inject()(ws: WSClient)(implicit val exec: ExecutionContext) 
   private def getRequestCacheByOrderType(orderAppAlias: String, parsedRequest: ParsedRequest, block: (LockedRequestCacheWithSquareController, Int) => Future[Result])(implicit PA: PermissionsAuthority): Future[Result] = {
     if(List(
       ORDER_NUMBER_APP_ALIAS.AP,
-      ORDER_NUMBER_APP_ALIAS.JP
+      ORDER_NUMBER_APP_ALIAS.JP,
+      ORDER_NUMBER_APP_ALIAS.AUTO_DONATE
     ).contains(orderAppAlias)) {
       PA.withRequestCache(MemberRequestCache)(None, parsedRequest, rc => block(rc, rc.getAuthedPersonId))
     }else if(List(
