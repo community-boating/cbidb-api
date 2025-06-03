@@ -138,13 +138,13 @@ class APWelcomePackage @Inject()(ws: WSClient)(implicit val exec: ExecutionConte
 
 			val discountsWithAmounts = PortalLogic.getDiscountsWithAmounts(rc)
 			val fullYearDiscounts = discountsWithAmounts.filter(_.membershipTypeId == MagicIds.MEMBERSHIP_TYPES.FULL_YEAR_TYPE_ID)
-			val renewalDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID ).get.discountAmount
-			val seniorDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.SENIOR_DISCOUNT_ID ).get.discountAmount
-			val youthDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.YOUTH_DISCOUNT_ID ).get.discountAmount
-			val studentDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID ).get.discountAmount
-			val veteranDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.VETERAN_DISCOUNT_ID ).get.discountAmount
-			val mghDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MGH_DISCOUNT_ID ).get.discountAmount
-			val maTeachersAssnAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MA_TEACHERS_ASSN_DISCOUNT_ID ).get.discountAmount
+			val renewalDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.RENEWAL_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val seniorDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.SENIOR_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val youthDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.YOUTH_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val studentDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.STUDENT_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val veteranDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.VETERAN_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val mghDiscountAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MGH_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
+			val maTeachersAssnAmt = fullYearDiscounts.find(_.discountId == MagicIds.DISCOUNTS.MA_TEACHERS_ASSN_DISCOUNT_ID ).map(_.discountAmount).getOrElse(0.0)
 			val fyBasePrice = fullYearDiscounts.head.fullPrice
 
 			val expirationDate = {
